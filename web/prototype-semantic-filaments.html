@@ -71,8 +71,14 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.06;
 controls.minDistance = 12;
-controls.maxDistance = 42;
+controls.maxDistance = 70;
 controls.target.set(0, 0, 0);
+function fitCloudOverviewToViewport() {
+  // The overview is a wide constellation. On a portrait viewport, move the
+  // camera back instead of clipping clouds or their labels at the side edges.
+  camera.position.z = innerWidth < 700 ? 58 : 25;
+}
+fitCloudOverviewToViewport();
 
 scene.add(new THREE.AmbientLight('#8aa8d8', 1.35));
 const rimLight = new THREE.PointLight('#b8d8ff', 24, 40); rimLight.position.set(-4, 8, 8); scene.add(rimLight);
@@ -81,29 +87,87 @@ const warmLight = new THREE.PointLight('#ffca8a', 14, 35); warmLight.position.se
 const cloudById = new Map();
 const cloudObjects = [];
 function seeded(seed) { let state = seed >>> 0; return () => ((state = (state * 1664525 + 1013904223) >>> 0) / 4294967296); }
+
+const NEBULA_NOISE = `
+  float hash21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+  float noise2(vec2 p) {
+    vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash21(i), hash21(i + vec2(1., 0.)), f.x), mix(hash21(i + vec2(0., 1.)), hash21(i + vec2(1., 1.)), f.x), f.y);
+  }
+  float fbm(vec2 p) {
+    float value = 0., amplitude = .54;
+    for (int i = 0; i < 5; i++) { value += noise2(p) * amplitude; p = p * 2.04 + vec2(3.7, 1.9); amplitude *= .5; }
+    return value;
+  }
+`;
+
+function createNebulaVeil(color, seedValue, size, opacity, stretch, zOffset) {
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: color }, uSeed: { value: seedValue }, uOpacity: { value: opacity },
+      uStretch: { value: stretch }, uTime: { value: 0 }
+    },
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+      varying vec2 vUv; uniform vec3 uColor; uniform float uSeed, uOpacity, uStretch, uTime;
+      ${NEBULA_NOISE}
+      void main() {
+        vec2 p = (vUv - .5) * 2.; p.x *= uStretch;
+        vec2 q = p * 1.42 + vec2(uSeed * 2.1, uSeed * .71);
+        vec2 warp = vec2(fbm(q + uTime * .004), fbm(q + vec2(7.1, 2.3) - uTime * .003));
+        float mass = fbm(q + warp * 1.35);
+        float detail = fbm(q * 2.8 - warp * .62 + 4.4);
+        float radius = length(p + (warp - .5) * .42);
+        float body = smoothstep(.14, .68, mass) * smoothstep(1.16, .16, radius);
+        float wisps = smoothstep(.54, .78, detail) * smoothstep(1.08, .28, radius);
+        float dust = smoothstep(.58, .78, fbm(q * 4.3 + 9.7));
+        float alpha = (body * .82 + wisps * .48) * (1. - dust * .44) * uOpacity;
+        vec3 color = uColor * (.36 + mass * 1.55 + detail * .24);
+        // Additive blending applies source alpha itself. Do not premultiply here,
+        // otherwise the diffuse gas is unintentionally dimmed a second time.
+        gl_FragColor = vec4(color, alpha);
+        if (alpha < .008) discard;
+      }
+    `
+  });
+  const veil = new THREE.Mesh(new THREE.PlaneGeometry(size * 2.55, size * 2.55, 1, 1), material);
+  veil.position.z = zOffset;
+  veil.userData.baseOpacity = opacity;
+  return veil;
+}
+
 function createCloud(cloud, index) {
   const random = seeded(320 + index);
   const group = new THREE.Group();
   const color = new THREE.Color(cloud.color);
-  const core = new THREE.Mesh(
-    new THREE.SphereGeometry(cloud.size * 0.28, 32, 32),
-    new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: .65, transparent: true, opacity: .9, roughness: .35, metalness: .15 })
-  );
-  core.userData.cloudId = cloud.id;
-  group.add(core);
-  const points = new Float32Array(220 * 3);
-  for (let i = 0; i < 220; i++) {
-    const radius = cloud.size * (.23 + Math.pow(random(), .55) * .78);
-    const theta = random() * Math.PI * 2, phi = Math.acos(1 - random() * 2);
-    points[i * 3] = Math.sin(phi) * Math.cos(theta) * radius;
-    points[i * 3 + 1] = Math.cos(phi) * radius * .66;
-    points[i * 3 + 2] = Math.sin(phi) * Math.sin(theta) * radius;
+  const veils = [
+    createNebulaVeil(color, index * 1.71 + .3, cloud.size, .44, .76 + random() * .56, -.12),
+    createNebulaVeil(color.clone().lerp(new THREE.Color('#d3e7ff'), .22), index * 2.37 + 3.9, cloud.size * .86, .27, 1.04 + random() * .42, .05),
+    createNebulaVeil(color.clone().lerp(new THREE.Color('#6b7fc1'), .20), index * 4.11 + 1.2, cloud.size * 1.08, .19, .64 + random() * .48, .17)
+  ];
+  veils.forEach(veil => group.add(veil));
+
+  // Stars follow an ellipsoidal density, not a geometric ring. The densest area
+  // remains near the cloud's irregular luminous core and fades naturally outward.
+  const points = new Float32Array(300 * 3);
+  for (let i = 0; i < 300; i++) {
+    const angle = random() * Math.PI * 2;
+    const radius = Math.sqrt(-2 * Math.log(Math.max(.001, random()))) * cloud.size * .24;
+    points[i * 3] = Math.cos(angle) * radius * (1.05 + random() * .32);
+    points[i * 3 + 1] = Math.sin(angle) * radius * (.52 + random() * .25);
+    points[i * 3 + 2] = (random() - .5) * cloud.size * (.20 + random() * .16);
   }
   const stars = new THREE.BufferGeometry();
   stars.setAttribute('position', new THREE.BufferAttribute(points, 3));
-  group.add(new THREE.Points(stars, new THREE.PointsMaterial({ color, size: .075, transparent: true, opacity: .76, depthWrite: false, blending: THREE.AdditiveBlending })));
-  const halo = new THREE.Mesh(new THREE.SphereGeometry(cloud.size * .72, 24, 24), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: .08, depthWrite: false, blending: THREE.AdditiveBlending }));
-  group.add(halo);
+  const starField = new THREE.Points(stars, new THREE.PointsMaterial({ color: color.clone().lerp(new THREE.Color('#ffffff'), .34), size: .038, transparent: true, opacity: .56, depthWrite: false, blending: THREE.AdditiveBlending }));
+  group.add(starField);
+  const core = new THREE.Mesh(new THREE.SphereGeometry(cloud.size * .052, 20, 20), new THREE.MeshBasicMaterial({ color: color.clone().lerp(new THREE.Color('#ffffff'), .36), transparent: true, opacity: .64, blending: THREE.AdditiveBlending, depthWrite: false }));
+  core.userData.cloudId = cloud.id;
+  group.add(core);
+  const hitArea = new THREE.Mesh(new THREE.SphereGeometry(cloud.size * .72, 18, 18), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+  hitArea.userData.cloudId = cloud.id;
+  group.add(hitArea);
   group.position.fromArray(cloud.position);
 
   const label = document.createElement('div');
@@ -111,17 +175,160 @@ function createCloud(cloud, index) {
   label.innerHTML = `<b>${cloud.name}</b><small>${cloud.entityCount} entities</small>`;
   const labelObject = new CSS2DObject(label);
   labelObject.position.set(0, cloud.size * .92, 0);
+  labelObject.userData.mobileX = cloud.position[0] < 0 ? cloud.size * .72 : cloud.position[0] > 0 ? -cloud.size * .72 : 0;
   group.add(labelObject);
 
   scene.add(group);
-  const item = { cloud, group, core, halo, label };
+  const item = { cloud, group, core, hitArea, veils, starField, label, labelObject };
   cloudById.set(cloud.id, item);
   cloudObjects.push(item);
 }
 clouds.forEach(createCloud);
+function updateLabelAnchors() {
+  cloudObjects.forEach(({ labelObject }) => {
+    labelObject.position.x = innerWidth < 700 ? labelObject.userData.mobileX : 0;
+  });
+}
+updateLabelAnchors();
+
+// Each object below represents an aggregate of many real cross-topic edges.
+// There is deliberately one path per cloud pair, never a visual edge per entity.
+const filamentObjects = [];
+function filamentProfile(strength) {
+  if (strength === 'strong') return { radius: .012, opacity: .18, dustOpacity: .56, count: 340, spread: .22, color: '#abc9ff', bend: 2.0 };
+  if (strength === 'medium') return { radius: .007, opacity: .10, dustOpacity: .34, count: 170, spread: .14, color: '#829bd2', bend: 1.25 };
+  return { radius: .004, opacity: .07, dustOpacity: .20, count: 80, spread: .09, color: '#637eae', bend: .85 };
+}
+
+function createFilamentDust(curve, profile, seedValue) {
+  const random = seeded(seedValue);
+  const positions = new Float32Array(profile.count * 3);
+  const data = new Float32Array(profile.count * 2);
+  for (let i = 0; i < profile.count; i++) {
+    const t = random();
+    const point = curve.getPoint(t);
+    const tangent = curve.getTangent(t).normalize();
+    const normal = new THREE.Vector3(-tangent.y, tangent.x, 0).normalize();
+    const binormal = new THREE.Vector3().crossVectors(tangent, normal).normalize();
+    const endpointDensity = .34 + .66 * Math.pow(Math.abs(t - .5) * 2, .68);
+    const radius = Math.sqrt(random()) * profile.spread * (.35 + Math.sin(Math.PI * t) * .65);
+    const angle = random() * Math.PI * 2;
+    point.addScaledVector(normal, Math.cos(angle) * radius);
+    point.addScaledVector(binormal, Math.sin(angle) * radius);
+    positions.set(point.toArray(), i * 3);
+    data[i * 2] = .45 + random() * 1.15;
+    data[i * 2 + 1] = endpointDensity * (.52 + random() * .48);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('aData', new THREE.BufferAttribute(data, 2));
+  return new THREE.Points(geometry, new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(profile.color) }, uOpacity: { value: profile.dustOpacity } },
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `attribute vec2 aData; varying float vAlpha; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.); vAlpha=aData.y; gl_PointSize=aData.x*(108./-mv.z); gl_Position=projectionMatrix*mv; }`,
+    fragmentShader: `uniform vec3 uColor; uniform float uOpacity; varying float vAlpha; void main(){ float d=length(gl_PointCoord-.5); float a=exp(-d*d*13.)*vAlpha*uOpacity; gl_FragColor=vec4(uColor,a); if(a<.01) discard; }`
+  }));
+}
+
+function createFilament(link, index) {
+  const source = cloudById.get(link.source), target = cloudById.get(link.target);
+  const start = source.group.position.clone(), end = target.group.position.clone();
+  const direction = end.clone().sub(start).normalize();
+  start.addScaledVector(direction, source.cloud.size * .36);
+  end.addScaledVector(direction, -target.cloud.size * .36);
+  const midpoint = start.clone().lerp(end, .5);
+  const perpendicular = new THREE.Vector3(-direction.y, direction.x, 0).normalize();
+  const profile = filamentProfile(link.strength);
+  midpoint.addScaledVector(perpendicular, (index % 2 ? 1 : -1) * profile.bend);
+  midpoint.z += link.strength === 'strong' ? 1.05 : .52;
+  const curve = new THREE.QuadraticBezierCurve3(start, midpoint, end);
+  const group = new THREE.Group();
+  const spine = new THREE.Mesh(
+    new THREE.TubeGeometry(curve, 56, profile.radius, 8, false),
+    new THREE.MeshBasicMaterial({ color: profile.color, transparent: true, opacity: profile.opacity, depthWrite: false, blending: THREE.AdditiveBlending })
+  );
+  const dust = createFilamentDust(curve, profile, 790 + index * 31);
+  group.add(dust, spine);
+  group.visible = link.strength !== 'weak';
+  scene.add(group);
+  return { link, group, spine, dust, curve, profile };
+}
+links.forEach((link, index) => filamentObjects.push(createFilament(link, index)));
+
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const status = document.getElementById('status');
+const flowParticles = new Map();
+let activeCloudId = null;
+
+filamentObjects.forEach((item, index) => {
+  const particle = new THREE.Mesh(
+    new THREE.SphereGeometry(.055, 12, 12),
+    new THREE.MeshBasicMaterial({ color: '#dceaff', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })
+  );
+  particle.userData.offset = index * .173;
+  particle.visible = false;
+  scene.add(particle);
+  flowParticles.set(item, particle);
+});
+
+function isConnected(link, cloudId) {
+  return link.source === cloudId || link.target === cloudId;
+}
+function updateHoverState() {
+  cloudObjects.forEach((item) => {
+    const active = item.cloud.id === activeCloudId;
+    const related = activeCloudId && links.some(link => isConnected(link, activeCloudId) && isConnected(link, item.cloud.id));
+    const factor = !activeCloudId ? 1 : active ? 1.24 : related ? .76 : .30;
+    item.veils.forEach(veil => veil.material.uniforms.uOpacity.value = veil.userData.baseOpacity * factor);
+    item.starField.material.opacity = .56 * factor;
+    item.core.material.opacity = .64 * (active ? 1.25 : factor);
+    item.label.style.opacity = factor > .5 ? '1' : '.34';
+  });
+  filamentObjects.forEach((item) => {
+    const connected = activeCloudId && isConnected(item.link, activeCloudId);
+    const factor = !activeCloudId ? 1 : connected ? 1.62 : .16;
+    item.group.visible = item.link.strength !== 'weak' || Boolean(connected);
+    item.spine.material.opacity = item.profile.opacity * factor;
+    item.dust.material.uniforms.uOpacity.value = item.profile.dustOpacity * factor;
+    const particle = flowParticles.get(item);
+    particle.visible = Boolean(connected);
+    particle.material.opacity = connected ? .92 : 0;
+  });
+}
+renderer.domElement.addEventListener('pointermove', (event) => {
+  pointer.x = (event.clientX / innerWidth) * 2 - 1;
+  pointer.y = -(event.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hit = raycaster.intersectObjects(cloudObjects.map(item => item.hitArea), false)[0];
+  const nextId = hit?.object.userData.cloudId ?? null;
+  if (nextId !== activeCloudId) { activeCloudId = nextId; updateHoverState(); }
+});
+renderer.domElement.addEventListener('pointerleave', () => {
+  if (activeCloudId !== null) { activeCloudId = null; updateHoverState(); }
+});
+renderer.domElement.addEventListener('click', () => {
+  if (!activeCloudId) return;
+  const cloud = cloudById.get(activeCloudId).cloud;
+  status.textContent = `进入「${cloud.name}」的局部知识图`;
+  status.classList.add('visible');
+  clearTimeout(status.userData?.timer);
+  status.userData = { timer: setTimeout(() => status.classList.remove('visible'), 2200) };
+});
 
 function animate() {
   requestAnimationFrame(animate);
+  const elapsed = performance.now() * .001;
+  cloudObjects.forEach(({ veils }, index) => {
+    veils.forEach((veil, layer) => {
+      veil.quaternion.copy(camera.quaternion);
+      veil.material.uniforms.uTime.value = elapsed + index * 3.1 + layer * 1.4;
+    });
+  });
+  filamentObjects.forEach((item) => {
+    const particle = flowParticles.get(item);
+    if (particle.visible) particle.position.copy(item.curve.getPoint((elapsed * .035 + particle.userData.offset) % 1));
+  });
   controls.update();
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
@@ -130,6 +337,8 @@ animate();
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
+  fitCloudOverviewToViewport();
+  updateLabelAnchors();
   renderer.setSize(innerWidth, innerHeight);
   labelRenderer.setSize(innerWidth, innerHeight);
 });
