@@ -76,7 +76,7 @@ controls.target.set(0, 0, 0);
 function fitCloudOverviewToViewport() {
   // The overview is a wide constellation. On a portrait viewport, move the
   // camera back instead of clipping clouds or their labels at the side edges.
-  camera.position.z = innerWidth < 700 ? 58 : 25;
+  camera.position.z = innerWidth < 700 ? 76 : 25;
 }
 fitCloudOverviewToViewport();
 
@@ -113,16 +113,21 @@ function createNebulaVeil(color, seedValue, size, opacity, stretch, zOffset) {
       varying vec2 vUv; uniform vec3 uColor; uniform float uSeed, uOpacity, uStretch, uTime;
       ${NEBULA_NOISE}
       void main() {
-        vec2 p = (vUv - .5) * 2.; p.x *= uStretch;
+        vec2 frame = (vUv - .5) * 2.;
+        vec2 p = frame; p.x *= uStretch;
         vec2 q = p * 1.42 + vec2(uSeed * 2.1, uSeed * .71);
         vec2 warp = vec2(fbm(q + uTime * .004), fbm(q + vec2(7.1, 2.3) - uTime * .003));
         float mass = fbm(q + warp * 1.35);
         float detail = fbm(q * 2.8 - warp * .62 + 4.4);
         float radius = length(p + (warp - .5) * .42);
+        // The veil is rendered on a rectangle, but the gas must never reveal that
+        // carrier. This independent noisy radial mask removes every hard canvas edge.
+        float edgeNoise = (fbm(frame * 2.2 + vec2(uSeed * 4.6, 3.2)) - .5) * .16;
+        float frameMask = smoothstep(1.02, .66, length(frame) + edgeNoise);
         float body = smoothstep(.14, .68, mass) * smoothstep(1.16, .16, radius);
         float wisps = smoothstep(.54, .78, detail) * smoothstep(1.08, .28, radius);
         float dust = smoothstep(.58, .78, fbm(q * 4.3 + 9.7));
-        float alpha = (body * .82 + wisps * .48) * (1. - dust * .44) * uOpacity;
+        float alpha = (body * .82 + wisps * .48) * (1. - dust * .44) * frameMask * uOpacity;
         vec3 color = uColor * (.36 + mass * 1.55 + detail * .24);
         // Additive blending applies source alpha itself. Do not premultiply here,
         // otherwise the diffuse gas is unintentionally dimmed a second time.
