@@ -195,9 +195,9 @@ updateLabelAnchors();
 // There is deliberately one path per cloud pair, never a visual edge per entity.
 const filamentObjects = [];
 function filamentProfile(strength) {
-  if (strength === 'strong') return { radius: .012, opacity: .18, dustOpacity: .56, count: 340, spread: .22, color: '#abc9ff', bend: 2.0 };
-  if (strength === 'medium') return { radius: .007, opacity: .10, dustOpacity: .34, count: 170, spread: .14, color: '#829bd2', bend: 1.25 };
-  return { radius: .004, opacity: .07, dustOpacity: .20, count: 80, spread: .09, color: '#637eae', bend: .85 };
+  if (strength === 'strong') return { radius: .012, opacity: .18, dustOpacity: 1.05, count: 520, spread: .22, color: '#abc9ff', bend: 2.0 };
+  if (strength === 'medium') return { radius: .007, opacity: .10, dustOpacity: .62, count: 260, spread: .14, color: '#829bd2', bend: 1.25 };
+  return { radius: .004, opacity: .07, dustOpacity: .30, count: 100, spread: .09, color: '#637eae', bend: .85 };
 }
 
 function createFilamentDust(curve, profile, seedValue) {
@@ -225,9 +225,32 @@ function createFilamentDust(curve, profile, seedValue) {
   return new THREE.Points(geometry, new THREE.ShaderMaterial({
     uniforms: { uColor: { value: new THREE.Color(profile.color) }, uOpacity: { value: profile.dustOpacity } },
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    vertexShader: `attribute vec2 aData; varying float vAlpha; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.); vAlpha=aData.y; gl_PointSize=aData.x*(108./-mv.z); gl_Position=projectionMatrix*mv; }`,
+    vertexShader: `attribute vec2 aData; varying float vAlpha; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.); vAlpha=aData.y; gl_PointSize=aData.x*(138./-mv.z); gl_Position=projectionMatrix*mv; }`,
     fragmentShader: `uniform vec3 uColor; uniform float uOpacity; varying float vAlpha; void main(){ float d=length(gl_PointCoord-.5); float a=exp(-d*d*13.)*vAlpha*uOpacity; gl_FragColor=vec4(uColor,a); if(a<.01) discard; }`
   }));
+}
+
+function createWovenCurve(baseCurve, profile, seedValue) {
+  const random = seeded(seedValue);
+  const phaseA = random() * Math.PI * 2, phaseB = random() * Math.PI * 2;
+  const frequencyA = 1.2 + random() * 1.8, frequencyB = 1.7 + random() * 2.1;
+  const points = [];
+  for (let step = 0; step <= 12; step++) {
+    const t = step / 12;
+    const point = baseCurve.getPoint(t);
+    const tangent = baseCurve.getTangent(t).normalize();
+    const sideways = new THREE.Vector3(-tangent.y, tangent.x, 0).normalize();
+    const depth = new THREE.Vector3().crossVectors(tangent, sideways).normalize();
+    // The offset collapses at both ends. It lets a filament branch out inside
+    // one nebula and dissolve back into the other rather than meeting at ports.
+    const envelope = Math.pow(Math.sin(Math.PI * t), .72);
+    const driftA = Math.sin(t * Math.PI * 2 * frequencyA + phaseA) * profile.spread * 1.7 * envelope;
+    const driftB = Math.sin(t * Math.PI * 2 * frequencyB + phaseB) * profile.spread * 1.25 * envelope;
+    point.addScaledVector(sideways, driftA);
+    point.addScaledVector(depth, driftB);
+    points.push(point);
+  }
+  return new THREE.CatmullRomCurve3(points, false, 'centripetal', .42);
 }
 
 function createFilament(link, index) {
@@ -241,17 +264,21 @@ function createFilament(link, index) {
   const profile = filamentProfile(link.strength);
   midpoint.addScaledVector(perpendicular, (index % 2 ? 1 : -1) * profile.bend);
   midpoint.z += link.strength === 'strong' ? 1.05 : .52;
-  const curve = new THREE.QuadraticBezierCurve3(start, midpoint, end);
+  const baseCurve = new THREE.QuadraticBezierCurve3(start, midpoint, end);
   const group = new THREE.Group();
-  const spine = new THREE.Mesh(
-    new THREE.TubeGeometry(curve, 56, profile.radius, 8, false),
-    new THREE.MeshBasicMaterial({ color: profile.color, transparent: true, opacity: profile.opacity, depthWrite: false, blending: THREE.AdditiveBlending })
-  );
-  const dust = createFilamentDust(curve, profile, 790 + index * 31);
-  group.add(dust, spine);
+  const dustMaterials = [];
+  const threadCount = link.strength === 'strong' ? 4 : 3;
+  for (let thread = 0; thread < threadCount; thread++) {
+    const curve = createWovenCurve(baseCurve, profile, 790 + index * 47 + thread * 13);
+    const threadProfile = { ...profile, count: Math.ceil(profile.count / threadCount), spread: profile.spread * .58, dustOpacity: profile.dustOpacity / threadCount * 2.15 };
+    const dust = createFilamentDust(curve, threadProfile, 1100 + index * 53 + thread * 17);
+    dust.material.uniforms.uOpacity.value *= .72 + thread * .09;
+    dustMaterials.push(dust.material);
+    group.add(dust);
+  }
   group.visible = link.strength !== 'weak';
   scene.add(group);
-  return { link, group, spine, dust, curve, profile };
+  return { link, group, dustMaterials, curve: baseCurve, profile };
 }
 links.forEach((link, index) => filamentObjects.push(createFilament(link, index)));
 
@@ -289,8 +316,9 @@ function updateHoverState() {
     const connected = activeCloudId && isConnected(item.link, activeCloudId);
     const factor = !activeCloudId ? 1 : connected ? 1.62 : .16;
     item.group.visible = item.link.strength !== 'weak' || Boolean(connected);
-    item.spine.material.opacity = item.profile.opacity * factor;
-    item.dust.material.uniforms.uOpacity.value = item.profile.dustOpacity * factor;
+    item.dustMaterials.forEach((material, thread) => {
+      material.uniforms.uOpacity.value = item.profile.dustOpacity / item.dustMaterials.length * 2.15 * (.72 + thread * .09) * factor;
+    });
     const particle = flowParticles.get(item);
     particle.visible = Boolean(connected);
     particle.material.opacity = connected ? .92 : 0;
