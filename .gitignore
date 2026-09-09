@@ -17,3 +17,7 @@ venv/
 
 # Standalone visual reference project; maintained in its own Git repository.
 /isgalaxias/
+
+# Local scratch and test artifacts
+/tmp/
+/test-results/
