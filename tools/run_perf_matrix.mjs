@@ -168,6 +168,7 @@ async function runIteration(ctx, cell, iteration) {
 // ── main ─────────────────────────────────────────────────
 mkdirSync(path.join(ROOT, 'output/perf'), { recursive: true });
 const records = [];
+const gates = [];
 
 for (const cell of cells) {
   const gateBefore = envSnapshot(`before ${cell.profile}:${cell.scenario}:dpr${cell.dpr}`);
@@ -202,9 +203,10 @@ for (const cell of cells) {
   }
   await ctx.close();
   const gateAfter = envSnapshot(`after ${cell.profile}:${cell.scenario}:dpr${cell.dpr}`);
+  gates.push({ cell: `${cell.profile}:${cell.scenario}:dpr${cell.dpr}`, gateBefore, gateAfter });
   writeFileSync(
     path.join(ROOT, 'output/perf/raw.json'),
-    JSON.stringify({ browserVersion, adapterSample: adapter, gateBefore, gateAfter, records }, null, 1),
+    JSON.stringify({ browserVersion, adapterSample: adapter, gates, records }, null, 1),
   );
 }
 
