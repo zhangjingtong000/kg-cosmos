@@ -102,4 +102,8 @@ def test_neo4j_edge_evidence_and_neighbors(neo_store):
 @requires_neo4j
 def test_neo4j_dangling_edges_skipped(neo_store):
     neo_store.import_data(_nodes(f"{PREFIX} C", []), _edges(f"{PREFIX} C", "ghost", []))
-    assert neo_store.stats()["edges"] == 0
+    with neo_store.driver.session() as s:
+        dangling = s.run(
+            f"MATCH (:{{name: '{PREFIX} C'}})-[r]->() RETURN count(r) AS n"
+        ).single()["n"]
+    assert dangling == 0
