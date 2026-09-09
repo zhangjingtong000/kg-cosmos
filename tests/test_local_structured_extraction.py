@@ -1,3 +1,4 @@
+import json
 import unittest
 
 from kg_extractor import (
@@ -38,7 +39,7 @@ class LocalStructuredExtractionTests(unittest.TestCase):
         self.assertEqual(payload["model"], "qwen3.5:9b")
         self.assertEqual(payload["format"]["type"], "object")
         self.assertEqual(payload["options"]["temperature"], 0)
-        self.assertLessEqual(payload["options"]["num_predict"], 512)
+        self.assertEqual(payload["options"]["num_predict"], 2048)
         self.assertFalse(payload["think"])
 
     def test_local_payload_can_omit_schema_for_compatible_json_mode(self):
@@ -47,6 +48,27 @@ class LocalStructuredExtractionTests(unittest.TestCase):
         )
 
         self.assertNotIn("format", payload)
+
+    def test_decoder_repairs_truncated_structured_output(self):
+        truncated = '{"entities": [{"name": "Encoder", "type": "Component", "description": "A'
+        raw = decode_local_json_response(truncated)
+        # salvage keeps the longest parseable prefix: name/type survive,
+        # the unterminated description string is dropped
+        self.assertEqual(raw["entities"], [{"name": "Encoder", "type": "Component"}])
+
+        partially_complete = (
+            '{"entities": ['
+            '{"name": "Encoder", "type": "Component", "description": "A component."}, '
+            '{"name": "Decoder", "type'
+        )
+        raw = decode_local_json_response(partially_complete)
+        # complete entity intact; the truncated one keeps its finished fields
+        self.assertEqual(raw["entities"][0], {"name": "Encoder", "type": "Component", "description": "A component."})
+        self.assertEqual(raw["entities"][1], {"name": "Decoder"})
+
+    def test_decoder_raises_when_nothing_can_be_salvaged(self):
+        with self.assertRaises(json.JSONDecodeError):
+            decode_local_json_response("not json at all {[")
 
     def test_decoder_accepts_json_wrapped_in_a_markdown_fence(self):
         raw = '```json\n{"entities": [{"name": "Encoder"}]}\n```'

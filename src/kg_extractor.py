@@ -87,7 +87,7 @@ def build_local_json_payload(model: str, prompt: str, schema: Optional[dict],
         "stream": False,
         "think": False,
         "keep_alive": "5m",
-        "options": {"temperature": 0, "num_predict": 512},
+        "options": {"temperature": 0, "num_predict": 2048},
     }
     if schema is not None:
         payload["format"] = schema
@@ -96,14 +96,70 @@ def build_local_json_payload(model: str, prompt: str, schema: Optional[dict],
     return payload
 
 
+def _repair_truncated_json(text: str) -> Optional[str]:
+    """Close an output truncated by num_predict instead of losing the chunk.
+
+    Structured output stops mid-token when the prediction budget runs out.
+    The longest balanced prefix is salvaged: open containers are closed so
+    already-complete records survive, while the partial trailing element is
+    dropped.  Returns None when no balanced prefix exists.
+    """
+    closers = {"{": "}", "[": "]"}
+    for cut in range(len(text), 0, -1):
+        prefix = text[:cut]
+        stack: list[str] = []
+        in_string = escaped = False
+        balanced = True
+        for ch in prefix:
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif ch == "\\":
+                    escaped = True
+                elif ch == '"':
+                    in_string = False
+                continue
+            if ch == '"':
+                in_string = True
+            elif ch in "{[":
+                stack.append(ch)
+            elif ch in "}]":
+                if not stack or closers[stack[-1]] != ch:
+                    balanced = False
+                    break
+                stack.pop()
+        if not balanced or in_string or not stack:
+            continue
+        repaired = prefix + "".join(closers[c] for c in reversed(stack))
+        try:
+            json.loads(repaired)
+            return repaired
+        except json.JSONDecodeError:
+            continue
+    return None
+
+
 def decode_local_json_response(raw: str) -> dict:
-    """Decode a local JSON response, accepting a Markdown JSON fence if present."""
+    """Decode a local JSON response, accepting a Markdown JSON fence if present.
+
+    Truncated structured output (prediction budget exhausted) is repaired to
+    its longest balanced prefix: complete records are kept, the partial tail
+    element is discarded.
+    """
     text = raw.strip()
     if text.startswith("```"):
         text = text.split("\n", 1)[1] if "\n" in text else ""
         if text.endswith("```"):
             text = text[:-3].strip()
-    return json.loads(text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        repaired = _repair_truncated_json(text)
+        if repaired is None:
+            raise
+        print(f"[extract] recovered truncated JSON ({len(text)} -> {len(repaired)} chars)",
+              flush=True)
+        return json.loads(repaired)
 
 
 def parse_structured_entities(raw: dict) -> list[dict]:
