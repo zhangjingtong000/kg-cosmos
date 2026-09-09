@@ -1,5 +1,7 @@
 import json
+import os
 import unittest
+from pathlib import Path
 
 from kg_extractor import (
     ENTITY_TYPES,
@@ -184,6 +186,41 @@ class LocalStructuredExtractionTests(unittest.TestCase):
                 "description": "They form the architecture.",
             }],
         )
+
+
+class DistillationRecordingTests(unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        self._tmp = tempfile.TemporaryDirectory()
+        self._old = os.environ.get("KG_RECORD_DIR", "")
+        os.environ["KG_RECORD_DIR"] = self._tmp.name
+        import importlib
+        import kg_extractor
+        importlib.reload(kg_extractor)
+        self.kg = kg_extractor
+
+    def tearDown(self):
+        if self._old:
+            os.environ["KG_RECORD_DIR"] = self._old
+        else:
+            os.environ.pop("KG_RECORD_DIR", None)
+        import importlib
+        importlib.reload(self.kg)
+        self._tmp.cleanup()
+
+    def test_record_pair_writes_jsonl_when_enabled(self):
+        self.kg.record_pair("entities", "prompt-x", "response-x", {"model": "m"})
+        lines = Path(self._tmp.name, "entities.jsonl").read_text(encoding="utf-8").splitlines()
+        record = json.loads(lines[-1])
+        self.assertEqual(record["task"], "entities")
+        self.assertEqual(record["response"], "response-x")
+
+    def test_recording_disabled_without_env(self):
+        os.environ.pop("KG_RECORD_DIR", None)
+        import importlib
+        importlib.reload(self.kg)
+        self.kg.record_pair("entities", "p", "r")
+        self.assertFalse(list(Path(self._tmp.name).glob("*.jsonl")))
 
 
 if __name__ == "__main__":

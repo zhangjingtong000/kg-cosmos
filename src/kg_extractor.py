@@ -40,6 +40,28 @@ MODELS = {
     },
 }
 
+# ── SFT recording (distillation dataset) ─────────────────
+# When KG_RECORD_DIR points at a directory, every extraction call appends its
+# (prompt, raw response) pair to per-task JSONL files.  Cloud-channel runs then
+# double as the teacher dataset for QLoRA distillation; no extra annotation.
+
+RECORD_DIR = os.environ.get("KG_RECORD_DIR", "")
+
+
+def record_pair(task: str, prompt: str, response: str, meta: Optional[dict] = None) -> None:
+    """Append one extraction call to the distillation JSONL when recording is on."""
+    if not RECORD_DIR:
+        return
+    record = {
+        "task": task,
+        "prompt": prompt,
+        "response": response,
+        "meta": meta or {},
+        "ts": time.time(),
+    }
+    with open(Path(RECORD_DIR) / f"{task}.jsonl", "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+
 # ── Prompt Templates ─────────────────────────────────────
 ENTITY_TYPES = [
     "Concept", "Method", "System", "Component", "Process",
@@ -642,12 +664,14 @@ def extract_chunk(chunk_text: str, model_text: str, mode: str, model_vis: str = 
     t1 = time.time()
     if mode == "local":
         ep = build_local_entity_prompt(full_text, content_kind)
-        entities = parse_structured_entities(
-            call_ollama_json(model_text, ep)
-        )
+        raw_entities = call_ollama_json(model_text, ep)
+        record_pair("entities", ep, raw_entities, {"model": model_text, "mode": mode, "kind": content_kind})
+        entities = parse_structured_entities(raw_entities)
     else:
         ep = ENTITY_PROMPT.format(entity_types=", ".join(ENTITY_TYPES), text=full_text)
-        entities = parse_entities(call_deepseek(model_text, ep))
+        raw_entities = call_deepseek(model_text, ep)
+        record_pair("entities", ep, raw_entities, {"model": model_text, "mode": mode, "kind": content_kind})
+        entities = parse_entities(raw_entities)
     if content_kind == "table":
         entities = retain_semantic_table_entities(entities)
     dt1 = time.time() - t1
@@ -665,16 +689,18 @@ def extract_chunk(chunk_text: str, model_text: str, mode: str, model_vis: str = 
             relation_types=", ".join(RELATION_TYPES),
             text=full_text,
         )
-        relations = parse_structured_relations(
-            call_ollama_json(model_text, rp)
-        )
+        raw_relations = call_ollama_json(model_text, rp)
+        record_pair("relations", rp, raw_relations, {"model": model_text, "mode": mode, "kind": content_kind})
+        relations = parse_structured_relations(raw_relations)
     else:
         rp = RELATION_PROMPT.format(
             entity_list="\n".join(f"- {n}" for n in entity_names),
             relation_types=", ".join(RELATION_TYPES),
             text=full_text,
         )
-        relations = parse_relations(call_deepseek(model_text, rp))
+        raw_relations = call_deepseek(model_text, rp)
+        record_pair("relations", rp, raw_relations, {"model": model_text, "mode": mode, "kind": content_kind})
+        relations = parse_relations(raw_relations)
     relations = retain_relations_with_known_endpoints(relations, entity_names)
     dt2 = time.time() - t2
     print(f"    [relations] {len(relations)} relations ({dt2:.1f}s)")
