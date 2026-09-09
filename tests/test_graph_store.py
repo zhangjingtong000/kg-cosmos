@@ -104,6 +104,7 @@ def test_neo4j_dangling_edges_skipped(neo_store):
     neo_store.import_data(_nodes(f"{PREFIX} C", []), _edges(f"{PREFIX} C", "ghost", []))
     with neo_store.driver.session() as s:
         dangling = s.run(
-            f"MATCH (:{{name: '{PREFIX} C'}})-[r]->() RETURN count(r) AS n"
+            "MATCH (n {name: $name})-[r]->() RETURN count(r) AS n",
+            name=f"{PREFIX} C",
         ).single()["n"]
     assert dangling == 0
