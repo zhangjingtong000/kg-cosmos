@@ -92,12 +92,13 @@ lines.push('|---|---|---|---:|---:|---:|---:|---:|---:|---:|');
 for (const r of rows) {
   const [profile, scenario, dpr] = r.cell.split(':');
   lines.push(
-    `| ${profile} | ${scenario} (dpr${dpr}) | ${r.valid}/${r.valid + r.invalid.length} | ${r.mean} | ${r.p50} | ${r.p95} | ${r.p99} | ${r.max} | ${(r.over16).toFixed(1)}% | ${(r.over33).toFixed(1)}% |`,
+    `| ${profile} | ${scenario} (dpr${dpr.replace('dpr', '')}) | ${r.valid}/${r.valid + r.invalid.length} | ${r.mean} | ${r.p50} | ${r.p95} | ${r.p99} | ${r.max} | ${(r.over16).toFixed(1)}% | ${(r.over33).toFixed(1)}% |`,
   );
 }
 lines.push('');
 lines.push(`browser: ${raw.browserVersion}`);
 lines.push(`adapter: ${raw.adapterSample}`);
+for (const g of gateRows) lines.push(g);
 for (const r of rows) {
   if (r.invalid.length) lines.push(`INVALID ${r.cell}: ${JSON.stringify(r.invalid)}`);
 }
