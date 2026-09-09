@@ -23,9 +23,9 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import uvicorn
 
-from pdf_parser import parse_pdf, chunk_document
-from kg_extractor import extract_chunk, deduplicate_entities, MODELS
-from graph_store import GraphStore, merge_evidence
+from pdf_parser import parse_pdf  # noqa: F401  (kept for direct API consumers)
+from pipeline import extract_graph
+from graph_store import GraphStore
 from explorer_models import build_detail_window, build_source_summary
 
 # ── App Setup ────────────────────────────────────────────
@@ -37,6 +37,21 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
 graphs: dict[str, dict] = {}  # id → graph data
+
+
+def build_store() -> GraphStore:
+    """Neo4j when configured and reachable; NetworkX keeps /upload usable offline."""
+    if os.environ.get("KG_BACKEND", "neo4j") == "neo4j":
+        try:
+            return GraphStore(
+                backend="neo4j",
+                uri=os.environ.get("KG_NEO4J_URI", "bolt://localhost:7687"),
+                user=os.environ.get("KG_NEO4J_USER", "neo4j"),
+                password=os.environ.get("KG_NEO4J_PASSWORD", "kgdemo2026"),
+            )
+        except Exception as exc:
+            print(f"[store] Neo4j unavailable ({exc}); falling back to networkx")
+    return GraphStore(backend="networkx")
 
 
 # ── Models ───────────────────────────────────────────────
@@ -78,56 +93,17 @@ async def upload_pdf(
         shutil.copyfileobj(file.file, f)
 
     try:
-        # Step 1-2: Parse + chunk
-        parsed = parse_pdf(str(pdf_path), str(upload_dir))
-        chunked = chunk_document(parsed, max_chars=max_chars)
+        # Steps 1-5: parse, chunk, extract, dedup (shared with batch ingestion)
+        result_core = extract_graph(
+            str(pdf_path), str(upload_dir), gid, file.filename,
+            mode=mode, max_chars=max_chars,
+        )
+        all_nodes, all_edges = result_core["nodes"], result_core["edges"]
+        parsed, chunked = result_core["parsed"], result_core["chunked"]
 
-        # Step 3-4: Extract from each chunk
-        model_text = MODELS[mode]["text"]
-        model_vis = MODELS[mode]["vision"]
-        all_nodes, all_edges = [], []
-        total_e_s, total_r_s = 0, 0
-
-        for ch in chunked["chunks"]:
-            img_path = ch["images"][0]["path"] if ch["images"] else None
-            res = extract_chunk(
-                ch["text"], model_text, mode, model_vis, img_path,
-                content_kind=ch.get("kind", "text"),
-            )
-            evidence = {
-                "source_id": gid,
-                "source_name": file.filename,
-                "page": ch["page"],
-                "chunk_idx": ch["chunk_idx"],
-                "text": ch["text"],
-            }
-            for node in res["nodes"]:
-                node["evidence"] = merge_evidence(node.get("evidence", []), [evidence])
-            for edge in res["edges"]:
-                edge["evidence"] = merge_evidence(edge.get("evidence", []), [evidence])
-            all_nodes.extend(res["nodes"])
-            all_edges.extend(res["edges"])
-            total_e_s += res["timing"]["entities_s"]
-            total_r_s += res["timing"]["relations_s"]
-
-        # Step 5: Dedup
-        all_nodes = deduplicate_entities(all_nodes, mode)
-        deduped_edges_by_key = {}
-        for e in all_edges:
-            key = (e["source"].lower(), e["target"].lower(), e["type"].lower())
-            if key in deduped_edges_by_key:
-                existing = deduped_edges_by_key[key]
-                existing["evidence"] = merge_evidence(
-                    existing.get("evidence", []),
-                    e.get("evidence", []),
-                )
-            else:
-                e["evidence"] = merge_evidence(e.get("evidence", []))
-                deduped_edges_by_key[key] = e
-        all_edges = list(deduped_edges_by_key.values())
-
-        # Step 6: Store in Neo4j + NetworkX
-        store = GraphStore(backend="networkx")
+        # Step 6: Store — write through to the persistent store; the per-graph
+        # JSON snapshot below keeps the single-document view restart-safe.
+        store = build_store()
         store.store.import_data(all_nodes, all_edges)
         graph_3d = store.get_3d_data()
 
@@ -143,8 +119,8 @@ async def upload_pdf(
                 "nodes": len(all_nodes),
                 "edges": len(all_edges),
                 "tables": len(chunked.get("tables", [])),
-                "extraction_time_s": round(total_e_s + total_r_s, 1),
-                "images_found": sum(len(p["images"]) for p in parsed["pages"]),
+                "extraction_time_s": result_core["extraction_time_s"],
+                "images_found": result_core["images_found"],
             },
             "created_at": datetime.now().isoformat(),
         }

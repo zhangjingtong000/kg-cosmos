@@ -183,9 +183,24 @@ class NetworkXStore:
 # ── Neo4j Backend (when server is available) ─────────────
 
 class Neo4jStore:
+    # Evidence records are stored as a list of JSON strings.  Re-uploads are
+    # merged atomically in Cypher by list dedup (identical records are exact
+    # duplicates of the same source location), so no read-modify-write exists.
     def __init__(self, uri="bolt://localhost:7687", user="neo4j", password="password"):
         from neo4j import GraphDatabase
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
+        self.driver.verify_connectivity()
+
+    @staticmethod
+    def _evidence_items(record: dict) -> list[str]:
+        return [
+            json.dumps(ev, ensure_ascii=False)
+            for ev in (record.get("evidence") or [])
+        ]
+
+    @staticmethod
+    def _parse_evidence(raw) -> list[dict]:
+        return [json.loads(item) for item in (raw or [])]
 
     def import_data(self, nodes: list[dict], edges: list[dict]):
         def esc(s):
@@ -193,54 +208,84 @@ class Neo4jStore:
             return f"`{s}`" if any(c in s for c in ' -/()[]{}:') else s
 
         with self.driver.session() as s:
-            # Create nodes
             for n in nodes:
                 s.run(
-                    f"MERGE (x:{esc(n['type'])} {{name: $name}}) SET x.description = $desc",
+                    f"MERGE (x:{esc(n['type'])} {{name: $name}}) "
+                    "SET x.description = $desc, "
+                    "x.evidence = coalesce(x.evidence, []) "
+                    "+ [item IN $items WHERE NOT item IN coalesce(x.evidence, [])]",
                     name=n["name"], desc=n.get("description", ""),
+                    items=self._evidence_items(n),
                 )
-            # Create edges
+            # Endpoints must exist, so dangling edges are silently skipped
             for e in edges:
                 s.run(
                     f"MATCH (a {{name: $src}}), (b {{name: $tgt}}) "
-                    f"MERGE (a)-[:{esc(e['type'])} {{description: $desc}}]->(b)",
+                    f"MERGE (a)-[r:{esc(e['type'])}]->(b) "
+                    "ON CREATE SET r.description = $desc, r.evidence = [] "
+                    "SET r.evidence = r.evidence "
+                    "+ [item IN $items WHERE NOT item IN r.evidence]",
                     src=e["source"], tgt=e["target"], desc=e.get("description", ""),
+                    items=self._evidence_items(e),
                 )
 
     def query_nodes(self, label: str = None) -> list[dict]:
         with self.driver.session() as s:
             if label:
-                result = s.run(f"MATCH (n:{label}) RETURN n.name, labels(n), n.description")
+                result = s.run(
+                    f"MATCH (n:{esc(label)}) "
+                    "RETURN n.name AS name, labels(n) AS labels, "
+                    "n.description AS description, n.evidence AS evidence"
+                )
             else:
-                result = s.run("MATCH (n) RETURN n.name, labels(n), n.description")
-            return [{"name": r["n.name"], "type": r["labels(n)"][0],
-                     "description": r.get("n.description", "")} for r in result]
+                result = s.run(
+                    "MATCH (n) RETURN n.name AS name, labels(n) AS labels, "
+                    "n.description AS description, n.evidence AS evidence"
+                )
+            return [{
+                "name": r["name"],
+                "type": r["labels"][0] if r["labels"] else "Entity",
+                "description": r["description"] or "",
+                "evidence": self._parse_evidence(r["evidence"]),
+            } for r in result]
 
     def query_edges(self, rel_type: str = None) -> list[dict]:
         with self.driver.session() as s:
-            q = "MATCH (a)-[r]->(b)" + (f" WHERE type(r) = '{rel_type}'" if rel_type else "") + " RETURN a.name, b.name, type(r), r.description"
-            result = s.run(q)
-            return [{"source": r["a.name"], "target": r["b.name"],
-                     "type": r["type(r)"], "description": r.get("r.description", "")} for r in result]
+            q = (
+                "MATCH (a)-[r]->(b) "
+                + ("WHERE type(r) = $rel_type " if rel_type else "")
+                + "RETURN a.name AS source, b.name AS target, type(r) AS type, "
+                "r.description AS description, r.evidence AS evidence"
+            )
+            result = s.run(q, rel_type=rel_type) if rel_type else s.run(q)
+            return [{
+                "source": r["source"], "target": r["target"], "type": r["type"],
+                "description": r["description"] or "",
+                "evidence": self._parse_evidence(r["evidence"]),
+            } for r in result]
 
     def get_neighbors(self, node_name: str, depth: int = 1) -> dict:
+        """Get a node and its N-hop neighborhood (for subgraph queries)."""
+        depth = max(1, int(depth))
         with self.driver.session() as s:
             result = s.run(
                 f"MATCH (a {{name: $name}})-[r*1..{depth}]-(b) "
-                "RETURN a, r, b", name=node_name
+                "UNWIND r AS rel "
+                "WITH DISTINCT startNode(rel) AS sn, rel, endNode(rel) AS en "
+                "RETURN sn.name AS source, en.name AS target, type(rel) AS type, "
+                "rel.evidence AS evidence",
+                name=node_name,
             )
-            # Simplified: collect unique nodes and edges
-            nodes_set, edges_list = set(), []
-            for record in result:
-                nodes_set.add(record["a"]["name"])
-                nodes_set.add(record["b"]["name"])
-                for rel in record["r"]:
-                    edges_list.append({
-                        "source": record["a"]["name"],
-                        "target": record["b"]["name"],
-                        "type": rel.type,
-                    })
-            return {"nodes": list(nodes_set), "edges": edges_list}
+            edges_list, names = [], set()
+            for r in result:
+                edges_list.append({
+                    "source": r["source"], "target": r["target"], "type": r["type"],
+                    "evidence": self._parse_evidence(r["evidence"]),
+                })
+                names.update((r["source"], r["target"]))
+            node_data = {n["name"]: n for n in self.query_nodes()}
+            nodes_list = [node_data[n] for n in names if n in node_data]
+            return {"nodes": nodes_list, "edges": edges_list}
 
     def stats(self) -> dict:
         with self.driver.session() as s:
