@@ -108,3 +108,25 @@ def test_neo4j_dangling_edges_skipped(neo_store):
             name=f"{PREFIX} C",
         ).single()["n"]
     assert dangling == 0
+
+
+@requires_neo4j
+def test_neo4j_case_variant_parity_with_networkx(neo_store):
+    nodes = [
+        {"name": f"{PREFIX} Transformer", "type": "Concept", "description": "d", "evidence": []},
+        {"name": f"{PREFIX} transformer", "type": "Concept", "description": "dd", "evidence": []},
+        {"name": f"{PREFIX} Attention", "type": "Method", "description": "", "evidence": []},
+    ]
+    edges = [{"source": f"{PREFIX} transformer", "target": f"{PREFIX} Attention", "type": "USES",
+              "description": "", "evidence": []}]
+    neo_store.import_data(nodes, edges)
+
+    with neo_store.driver.session() as s:
+        variants = s.run(
+            "MATCH (n {name: $name}) RETURN count(n) AS n",
+            name=f"{PREFIX} Transformer").single()["n"]
+        edges_found = s.run(
+            "MATCH ({name: $name})-[r:USES]->() RETURN count(r) AS n",
+            name=f"{PREFIX} Transformer").single()["n"]
+    assert variants == 1
+    assert edges_found == 1

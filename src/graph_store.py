@@ -207,25 +207,38 @@ class Neo4jStore:
             """Escape Neo4j label/type with spaces or special chars."""
             return f"`{s}`" if any(c in s for c in ' -/()[]{}:') else s
 
+        # Case-insensitive endpoint matching, on parity with NetworkXStore:
+        # entity dedup keeps one canonical casing, so edges naming case
+        # variants must resolve to the merged node instead of dangling.
+        name_map = {}
+        for n in nodes:
+            canonical = n["name"].strip()
+            key = canonical.lower()
+            if key not in name_map or (canonical[:1].isupper() and not name_map[key][:1].isupper()):
+                name_map[key] = canonical
+
         with self.driver.session() as s:
             for n in nodes:
+                canonical = name_map[n["name"].strip().lower()]
                 s.run(
                     f"MERGE (x:{esc(n['type'])} {{name: $name}}) "
                     "SET x.description = $desc, "
                     "x.evidence = coalesce(x.evidence, []) "
                     "+ [item IN $items WHERE NOT item IN coalesce(x.evidence, [])]",
-                    name=n["name"], desc=n.get("description", ""),
+                    name=canonical, desc=n.get("description", ""),
                     items=self._evidence_items(n),
                 )
             # Endpoints must exist, so dangling edges are silently skipped
             for e in edges:
+                src = name_map.get(e["source"].strip().lower(), e["source"].strip())
+                tgt = name_map.get(e["target"].strip().lower(), e["target"].strip())
                 s.run(
                     f"MATCH (a {{name: $src}}), (b {{name: $tgt}}) "
                     f"MERGE (a)-[r:{esc(e['type'])}]->(b) "
                     "ON CREATE SET r.description = $desc, r.evidence = [] "
                     "SET r.evidence = r.evidence "
                     "+ [item IN $items WHERE NOT item IN r.evidence]",
-                    src=e["source"], tgt=e["target"], desc=e.get("description", ""),
+                    src=src, tgt=tgt, desc=e.get("description", ""),
                     items=self._evidence_items(e),
                 )
 
