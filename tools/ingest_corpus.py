@@ -1,10 +1,16 @@
 """Batch-ingest the arXiv corpus into Neo4j and per-document JSON snapshots.
 
 Usage: python tools/ingest_corpus.py [corpus_dir] [mode]
-Resume-safe: papers with an existing snapshot JSON are skipped, so the job
-can be interrupted and relaunched.  Default mode is "local" (Ollama); pair
-with KG_EXTRACT_WORKERS>1 and an Ollama server started with
-OLLAMA_NUM_PARALLEL matching it to keep the GPU saturated.
+
+Resume-safe: a paper is skipped only when its snapshot contains real content.
+Empty snapshots (0 nodes) are treated as poisoned residue -- they are deleted
+and the paper is re-processed, because a zero-yield result on a real PDF means
+the extraction failed (quota/limit degradation), not that the document is
+entity-free.  Snapshots are written only when nodes exist, and each batch
+records a batch id so a re-ingest stays traceable.
+
+Default mode is "local" (Ollama); pair with KG_EXTRACT_WORKERS>1 and an Ollama
+server started with OLLAMA_NUM_PARALLEL matching it to keep the GPU saturated.
 """
 
 import json
@@ -18,13 +24,37 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 os.environ.setdefault("KG_RECORD_DIR", "data/distill")
 
-from pipeline import extract_graph  # noqa: E402
+from pipeline import ExtractionFailed, extract_graph  # noqa: E402
 from graph_store import GraphStore  # noqa: E402
 
 CORPUS = Path(sys.argv[1] if len(sys.argv) > 1 else "data/corpus")
 MODE = sys.argv[2] if len(sys.argv) > 2 else os.environ.get("KG_INGEST_MODE", "local")
+MAX_CHARS = int(os.environ.get("KG_CHUNK_CHARS", "500"))
+# KG_ONLY="1703.08098v9,2012.00456v1" 只处理指定文献（逗号分隔的 stem），用于单篇验证。
+ONLY = [s.strip() for s in os.environ.get("KG_ONLY", "").split(",") if s.strip()]
 SNAPSHOTS = CORPUS / "graphs"
 SNAPSHOTS.mkdir(parents=True, exist_ok=True)
+BATCH_ID = os.environ.get("KG_BATCH_ID") or time.strftime("ingest-%Y%m%d-%H%M%S")
+
+
+def is_usable_snapshot(path: Path) -> bool:
+    """快照只有含实体才算"已完成"；空快照是失败残留，不能挡住重跑。"""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return bool(data.get("nodes"))
+
+
+def purge_poisoned_snapshots() -> int:
+    """删除历史遗留的空/损坏快照，让它们不再被当作已完成。"""
+    purged = 0
+    for snap in sorted(SNAPSHOTS.glob("*.json")):
+        if not is_usable_snapshot(snap):
+            print(f"[cleanup] 删除空/损坏快照: {snap.name}", flush=True)
+            snap.unlink()
+            purged += 1
+    return purged
 
 
 def main() -> None:
@@ -35,13 +65,21 @@ def main() -> None:
         password="kgdemo2026",
     )
     pdfs = sorted(CORPUS.glob("*.pdf"))
-    print(f"ingesting {len(pdfs)} papers from {CORPUS} (mode={MODE})", flush=True)
+    if ONLY:
+        pdfs = [p for p in pdfs if p.stem in ONLY]
+        print(f"[filter] KG_ONLY 生效，仅处理 {len(pdfs)} 篇: {[p.stem for p in pdfs]}",
+              flush=True)
+    print(f"ingesting {len(pdfs)} papers from {CORPUS} "
+          f"(mode={MODE}, max_chars={MAX_CHARS}, batch={BATCH_ID})", flush=True)
+    print(f"[cleanup] 清理空/损坏快照 {purge_poisoned_snapshots()} 个", flush=True)
 
+    done, failed = 0, 0
     for idx, pdf in enumerate(pdfs, 1):
         paper_id = pdf.stem
         snapshot = SNAPSHOTS / f"{paper_id}.json"
         if snapshot.exists():
             print(f"[{idx}/{len(pdfs)}] skip (done): {paper_id}", flush=True)
+            done += 1
             continue
 
         started = time.time()
@@ -49,21 +87,28 @@ def main() -> None:
             core = extract_graph(
                 str(pdf), str(SNAPSHOTS / f"work-{paper_id}"),
                 source_id=paper_id, source_name=pdf.name, mode=MODE,
+                max_chars=MAX_CHARS,
             )
-            store.store.import_data(core["nodes"], core["edges"])
+            nodes, edges = core["nodes"], core["edges"]
+            if not nodes:
+                # extract_graph 已保证不为空；这里是第二道闸，防止未来回归。
+                raise ExtractionFailed(f"{paper_id}: 抽取产出为空，拒绝写入快照")
 
+            # 先写快照（"这篇已完成"的唯一凭据）再入库；空结果绝不落盘。
             snapshot.write_text(
                 json.dumps(
                     {
                         "id": paper_id,
                         "source": {"id": paper_id, "name": pdf.name, "kind": "pdf"},
-                        "nodes": core["nodes"],
-                        "edges": core["edges"],
+                        "batch_id": BATCH_ID,
+                        "nodes": nodes,
+                        "edges": edges,
                         "stats": {
                             "pdf_pages": core["parsed"]["total_pages"],
                             "chunks": core["chunked"]["total_chunks"],
-                            "nodes": len(core["nodes"]),
-                            "edges": len(core["edges"]),
+                            "chunk_failures": core.get("chunk_failures", 0),
+                            "nodes": len(nodes),
+                            "edges": len(edges),
                             "extraction_time_s": core["extraction_time_s"],
                         },
                     },
@@ -72,18 +117,25 @@ def main() -> None:
                 ),
                 encoding="utf-8",
             )
+            store.store.import_data(nodes, edges)
+            done += 1
             print(
                 f"[{idx}/{len(pdfs)}] ok: {paper_id} "
-                f"({len(core['nodes'])} nodes, {len(core['edges'])} edges, "
+                f"({len(nodes)} nodes, {len(edges)} edges, "
                 f"{time.time() - started:.0f}s) total={store.stats()}",
                 flush=True,
             )
         except Exception:
+            failed += 1
             print(f"[{idx}/{len(pdfs)}] FAILED: {paper_id}", flush=True)
             traceback.print_exc()
 
-    print(f"corpus ingest complete: {store.stats()}", flush=True)
-    store.close()
+    print(f"corpus ingest complete: ok={done} failed={failed} stats={store.stats()}",
+          flush=True)
+    if hasattr(store.store, "close"):
+        store.store.close()
+    else:
+        print("[warn] 后端无 close()，跳过显式关闭", flush=True)
 
 
 if __name__ == "__main__":

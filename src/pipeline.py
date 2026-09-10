@@ -17,6 +17,15 @@ from kg_extractor import MODELS, extract_chunk, deduplicate_entities
 from graph_store import merge_evidence
 
 
+class ExtractionFailed(RuntimeError):
+    """整篇文档没有产出任何实体 —— 这不是"图谱为空"，而是抽取失败。
+
+    失败模式（2026-09-10 实测）：云端网关达到配额上限后以 200 返回 error 体，
+    旧代码把它解析成空结果，于是 111 个 chunk 全部产生 0 实体、却写出空快照
+    并被记为完成。任何"零产出"都必须冒泡给调用方，不能静默落盘。
+    """
+
+
 def extract_graph(
     pdf_path: str,
     work_dir: str,
@@ -31,13 +40,17 @@ def extract_graph(
     model_text = MODELS[mode]["text"]
     model_vis = MODELS[mode]["vision"]
     total_e_s, total_r_s = 0.0, 0.0
+    failures: list[tuple[int, str]] = []
 
     def extract_one(chunk):
         img_path = chunk["images"][0]["path"] if chunk["images"] else None
-        return chunk, extract_chunk(
-            chunk["text"], model_text, mode, model_vis, img_path,
-            content_kind=chunk.get("kind", "text"),
-        )
+        try:
+            return chunk, extract_chunk(
+                chunk["text"], model_text, mode, model_vis, img_path,
+                content_kind=chunk.get("kind", "text"),
+            ), None
+        except Exception as exc:  # 单个 chunk 失败不拖垮全篇，但要留痕
+            return chunk, None, exc
 
     workers = max(1, int(os.environ.get("KG_EXTRACT_WORKERS", "1")))
     if workers > 1:
@@ -47,7 +60,10 @@ def extract_graph(
         results = [extract_one(ch) for ch in chunked["chunks"]]
 
     all_nodes, all_edges = [], []
-    for chunk, res in results:
+    for chunk, res, exc in results:
+        if res is None:
+            failures.append((chunk["chunk_idx"], f"{type(exc).__name__}: {exc}"))
+            continue
         evidence = {
             "source_id": source_id,
             "source_name": source_name,
@@ -63,6 +79,17 @@ def extract_graph(
         all_edges.extend(res["edges"])
         total_e_s += res["timing"]["entities_s"]
         total_r_s += res["timing"]["relations_s"]
+
+    total_chunks = len(chunked["chunks"])
+    if failures:
+        head = "; ".join(f"chunk#{i} {msg}" for i, msg in failures[:3])
+        print(f"    [warn] {len(failures)}/{total_chunks} chunks failed: {head}", flush=True)
+
+    if total_chunks and not all_nodes:
+        raise ExtractionFailed(
+            f"{source_id}: {total_chunks} chunks 全部零产出"
+            f"（失败 {len(failures)} 个；首因：{failures[0][1] if failures else '模型对每个 chunk 都返回 0 实体'}）"
+        )
 
     all_nodes = deduplicate_entities(all_nodes, mode)
     deduped_edges = {}
@@ -84,4 +111,6 @@ def extract_graph(
         "chunked": chunked,
         "extraction_time_s": round(total_e_s + total_r_s, 1),
         "images_found": sum(len(p["images"]) for p in parsed["pages"]),
+        "chunk_failures": len(failures),
+        "total_chunks": total_chunks,
     }

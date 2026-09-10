@@ -18,6 +18,40 @@ from typing import Optional
 
 from graph_store import merge_evidence
 
+
+def _load_registry_env() -> None:
+    """补齐进程内可能缺失的机器级环境变量。
+
+    批量脚本经常从非交互 shell 启动，未必继承到注册表里的密钥；这里做一次
+    兜底读取，避免"本地有 key、脚本却报 401"的假故障。必须在读取配置常量
+    之前调用。
+    """
+    try:
+        import winreg
+    except ImportError:
+        return
+    locations = [
+        (winreg.HKEY_LOCAL_MACHINE,
+         r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
+        (winreg.HKEY_CURRENT_USER, r"Environment"),
+    ]
+    for hive, path in locations:
+        try:
+            with winreg.OpenKey(hive, path) as key:
+                index = 0
+                while True:
+                    try:
+                        name, value, _ = winreg.EnumValue(key, index)
+                    except OSError:
+                        break
+                    os.environ.setdefault(name, str(value))
+                    index += 1
+        except OSError:
+            continue
+
+
+_load_registry_env()
+
 # ── Config ──────────────────────────────────────────────
 SF_API_KEY = os.environ.get("SF_API_KEY", "")
 SF_BASE   = "https://api.siliconflow.cn/v1"
@@ -26,6 +60,12 @@ DS_BASE   = os.environ.get("DS_BASE", "https://api.deepseek.com/v1")
 # "deepseek-chat" is the official alias (2026-09: resolves to DeepSeek-V4-Flash);
 # point DS_MODEL at any OpenAI-compatible chat model to swap endpoints.
 DS_MODEL  = os.environ.get("DS_MODEL", "deepseek-chat")
+# 兼容不同网关的路由/会话头，形如 "x-opencode-session:ses_abc,k: v"。
+DS_EXTRA_HEADERS = os.environ.get("DS_EXTRA_HEADERS", "")
+# V4-Flash 是推理模型：思维链与正文共享输出预算。预算给太小会出现
+# "HTTP 200 + finish_reason=length + content 为空"——这正是 2026-09-10
+# 那次 111 chunk 全部零产出的真实机制，必须留足预算。
+DS_MAX_TOKENS = int(os.environ.get("DS_MAX_TOKENS", "8192"))
 OLLAMA    = "http://localhost:11434"
 
 MODELS = {
@@ -49,6 +89,8 @@ MODELS = {
 # double as the teacher dataset for QLoRA distillation; no extra annotation.
 
 RECORD_DIR = os.environ.get("KG_RECORD_DIR", "")
+DS_API_KEY = DS_API_KEY or os.environ.get("ANTHROPIC_AUTH_TOKEN", "") \
+    or os.environ.get("COMMAND_API_KEY", "")
 
 
 def record_pair(task: str, prompt: str, response: str, meta: Optional[dict] = None) -> None:
@@ -412,16 +454,92 @@ def call_siliconflow(model: str, prompt: str, image_path: Optional[str] = None) 
 
 
 def call_deepseek(model: str, prompt: str) -> str:
-    """Call DeepSeek chat model (endpoint/model overridable via env)."""
-    return call_openai_compat(DS_BASE, DS_API_KEY, DS_MODEL, prompt, None)
+    """Call DeepSeek chat model.
+
+    注意：endpoint 与 model 的切换靠环境变量 DS_BASE / DS_MODEL，但**必须使用
+    传入的 model 参数**——此前这里忽略了参数、硬用模块级 DS_MODEL，导致
+    "换通道却仍打旧模型"的静默错配。
+    """
+    return call_openai_compat(DS_BASE, DS_API_KEY, model or DS_MODEL, prompt, None)
+
+
+class EmptyExtractionResponse(RuntimeError):
+    """服务端返回了结构合法但没有内容的响应（限流/降级/预算耗尽）。
+
+    这类响应绝不能被当作"抽取结果为空"继续向下游传播：它会让流水线
+    写出空快照、把失败记成完成，并静默烧掉配额。必须显式失败。
+    """
+
+
+def _extract_message_content(body: object) -> str:
+    """从 OpenAI 兼容响应体中取出正文，结构异常一律抛错而不是返回空串。
+
+    覆盖四种真实故障形态：
+      1. 网关限流/降级返回 200 + {"error": {...}}（无 choices）；
+      2. choices 为空或缺 message；
+      3. 正文为空但思维链非空（推理模型的预算全被 reasoning 吃掉）；
+      4. 正文与思维链都为空（预算耗尽/空转）。
+    """
+    if not isinstance(body, dict):
+        raise EmptyExtractionResponse(f"响应不是 JSON 对象: {type(body).__name__}")
+    if body.get("error"):
+        raise EmptyExtractionResponse(f"服务端 error 字段: {str(body['error'])[:300]}")
+    choices = body.get("choices")
+    if not isinstance(choices, list) or not choices:
+        raise EmptyExtractionResponse(f"响应缺少 choices: {str(body)[:300]}")
+    choice = choices[0] if isinstance(choices[0], dict) else {}
+    finish = choice.get("finish_reason")
+    message = choice.get("message")
+    if not isinstance(message, dict):
+        raise EmptyExtractionResponse(f"choices[0].message 缺失: {str(choice)[:300]}")
+
+    content = message.get("content")
+    if not isinstance(content, str):
+        content = ""
+    reasoning = message.get("reasoning_content") or message.get("reasoning") or ""
+    if not isinstance(reasoning, str):
+        reasoning = ""
+
+    # 预算耗尽时正文可能被截断；截断的 JSON 由 decoder 的最长平衡前缀修复，
+    # 所以这里只要正文非空就交给下游，不因为 finish_reason=length 而丢掉结果。
+    if content.strip():
+        return content
+
+    # 正文为空但思维链里有内容：说明预算几乎全被推理吃掉。把思维链交回下游，
+    # 由 decode 层尝试抢救其中的 JSON；抢救不出来就是显式失败，绝不静默成空。
+    if reasoning.strip():
+        raise EmptyExtractionResponse(
+            f"正文为空、思维链占满预算（finish_reason={finish}, "
+            f"reasoning 长度 {len(reasoning)}）：请提高 DS_MAX_TOKENS"
+        )
+
+    raise EmptyExtractionResponse(f"正文与思维链均为空（finish_reason={finish}）")
+
+
+def _parse_extra_headers(raw: str) -> dict:
+    """解析 "k1:v1,k2:v2" 形式的附加请求头。"""
+    headers = {}
+    for item in raw.split(","):
+        if ":" not in item:
+            continue
+        key, value = item.split(":", 1)
+        key, value = key.strip(), value.strip()
+        if key and value:
+            headers[key] = value
+    return headers
 
 
 def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
                        image_path: Optional[str] = None,
                        timeout: int = 300, retries: int = 2) -> str:
-    """Call any OpenAI-compatible API, retrying transient gateway failures."""
+    """Call any OpenAI-compatible API, retrying transient gateway failures.
+
+    返回的正文经过结构校验：限流降级、缺 choices、正文为空一律抛
+    EmptyExtractionResponse，不返回空串。
+    """
     import requests
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    headers.update(_parse_extra_headers(DS_EXTRA_HEADERS))
     if image_path:
         with open(image_path, "rb") as f:
             img_b64 = base64.b64encode(f.read()).decode()
@@ -431,7 +549,8 @@ def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
         ]}]
     else:
         messages = [{"role": "user", "content": prompt}]
-    payload = {"model": model, "messages": messages, "temperature": 0.1, "max_tokens": 2048}
+    payload = {"model": model, "messages": messages, "temperature": 0.1,
+               "max_tokens": DS_MAX_TOKENS}
 
     attempt = 0
     while True:
@@ -439,8 +558,13 @@ def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
             r = requests.post(f"{base_url}/chat/completions", json=payload,
                               headers=headers, timeout=timeout)
             r.raise_for_status()
-            msg = r.json()["choices"][0]["message"]
-            return msg.get("content", "")
+            try:
+                body = r.json()
+            except ValueError as exc:
+                raise EmptyExtractionResponse(
+                    f"响应不是合法 JSON（HTTP {r.status_code}）: {r.text[:200]}"
+                ) from exc
+            return _extract_message_content(body)
         except (requests.Timeout, requests.ConnectionError) as exc:
             attempt += 1
             if attempt > retries:
@@ -459,53 +583,62 @@ def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
             wait = 15 * attempt
             print(f"[api] HTTP {status}, retry {attempt}/{retries} in {wait}s", flush=True)
             time.sleep(wait)
-
-
-def call_openai_compatible(base_url: str, api_key: str, model: str, prompt: str) -> str:
-    """Call any OpenAI-compatible API (DeepSeek, etc.)."""
-    import requests
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    payload = {"model": model, "messages": [{"role": "user", "content": prompt}],
-               "temperature": 0.1, "max_tokens": 2048}
-    r = requests.post(f"{base_url}/chat/completions", json=payload, headers=headers, timeout=120)
-    r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"]
-
-
-def call_openai_compatible(base_url: str, api_key: str, model: str, prompt: str) -> str:
-    """Call any OpenAI-compatible API (DeepSeek, etc.)."""
-    import requests
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    payload = {"model": model, "messages": [{"role": "user", "content": prompt}],
-               "temperature": 0.1, "max_tokens": 2048}
-    r = requests.post(f"{base_url}/chat/completions", json=payload, headers=headers, timeout=120)
-    r.raise_for_status()
-    return r.json()["choices"][0]["message"]["content"]
+        except EmptyExtractionResponse as exc:
+            # 网关限流时可能以 200 返回 error 体；这类"软失败"同样值得退避重试。
+            attempt += 1
+            if attempt > retries:
+                raise
+            wait = 20 * attempt
+            print(f"[api] 空响应（{str(exc)[:120]}），retry {attempt}/{retries} in {wait}s",
+                  flush=True)
+            time.sleep(wait)
 
 
 # ── Parsing ──────────────────────────────────────────────
 
 def parse_entities(raw: str) -> list[dict]:
-    """Parse entity lines into structured list. Handles both:
-    'entity<|>Name<|>Type<|>Desc' and 'Name<|>Type<|>Desc'."""
+    """Parse entity lines into structured list.
+
+    真实观测到的云端输出形态（2026-09-10 实测，DeepSeek V4-Flash 按
+    ENTITY_PROMPT 的样例输出）是四段：
+        Name<|>Name<|>Type<|>Description
+    而旧解析器假定三段（Name<|>Type<|>Desc），把第二段当类型做白名单校验，
+    于是**每一个实体都被丢弃**——这正是那次"111 个 chunk 全部 0 实体"的
+    真正原因（限流只是让另外 25 篇直接 429）。
+
+    这里不再假定位置，而是按"哪一段是类型"来定位，同时兼容：
+      - 'entity<|>' 前缀（本地提示词的旧格式）
+      - 三段与四段的两种排布
+      - 类型写在第 1 或第 3 段
+    """
     known_types = {t.lower() for t in ENTITY_TYPES}
     entities = []
     for line in raw.strip().split("\n"):
-        line = line.strip()
-        if not line or "<|COMPLETE|>" in line:
+        line = line.strip().lstrip("-").strip()
+        if not line or "<|COMPLETE|>" in line or "<|>" not in line:
             continue
-        # Strip optional entity prefix
-        if line.startswith("entity<|>"):
+        if line.lower().startswith("entity<|>"):
             line = line[len("entity<|>"):]
-        parts = line.split("<|>")
-        # Type whitelist on parity with parse_structured_entities: entities
-        # outside the ontology are dropped, never passed through downstream.
-        if len(parts) >= 3 and parts[1].strip().lower() in known_types:
-            entities.append({
-                "name": parts[0].strip(),
-                "type": parts[1].strip(),
-                "description": parts[2].strip() if len(parts) >= 3 else "",
-            })
+        parts = [p.strip() for p in line.split("<|>")]
+
+        type_idx = next(
+            (i for i, p in enumerate(parts) if p.lower() in known_types), None
+        )
+        if type_idx is None:
+            continue  # 类型不在本体里：明确丢弃，绝不透传到下游
+
+        name = next((p for i, p in enumerate(parts) if i != type_idx and p), "")
+        if not name:
+            continue
+        description = next(
+            (p for i, p in enumerate(parts)
+             if i != type_idx and p and p != name), ""
+        )
+        entities.append({
+            "name": name,
+            "type": parts[type_idx],
+            "description": description,
+        })
     return entities
 
 
@@ -708,7 +841,7 @@ def extract_chunk(chunk_text: str, model_text: str, mode: str, model_vis: str = 
     else:
         ep = ENTITY_PROMPT.format(entity_types=", ".join(ENTITY_TYPES), text=full_text)
         raw_entities = call_deepseek(model_text, ep)
-        record_pair("entities", ep, raw_entities, {"model": DS_MODEL, "mode": mode, "kind": content_kind})
+        record_pair("entities", ep, raw_entities, {"model": model_text, "mode": mode, "kind": content_kind})
         entities = parse_entities(raw_entities)
     if content_kind == "table":
         entities = retain_semantic_table_entities(entities)
@@ -737,7 +870,7 @@ def extract_chunk(chunk_text: str, model_text: str, mode: str, model_vis: str = 
             text=full_text,
         )
         raw_relations = call_deepseek(model_text, rp)
-        record_pair("relations", rp, raw_relations, {"model": DS_MODEL, "mode": mode, "kind": content_kind})
+        record_pair("relations", rp, raw_relations, {"model": model_text, "mode": mode, "kind": content_kind})
         relations = parse_relations(raw_relations)
     relations = retain_relations_with_known_endpoints(relations, entity_names)
     dt2 = time.time() - t2
