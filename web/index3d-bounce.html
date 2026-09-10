@@ -270,49 +270,64 @@ function createEdgeMeshes(p1, p2, c1, c2) {
   return { main, core };
 }
 
-function updateEdgeGeometry(mesh, p1, p2, c1, c2, radiusMid, segments) {
-  const dir = new THREE.Vector3().subVectors(p2, p1); const len = dir.length(); dir.normalize();
-  const up = new THREE.Vector3(0,1,0); if (Math.abs(dir.dot(up))>0.999) up.set(1,0,0);
-  const right = new THREE.Vector3().crossVectors(dir, up).normalize();
-  const forward = new THREE.Vector3().crossVectors(right, dir).normalize();
+// Scratch objects: the edge refresh loop runs up to hundreds of times per
+// frame; allocating temporaries inside it starves the GC during drags.
+const _edgeDir = new THREE.Vector3(), _edgeUp = new THREE.Vector3();
+const _edgeRight = new THREE.Vector3(), _edgeFwd = new THREE.Vector3(), _edgeCenter = new THREE.Vector3();
+const _edgeTint = new THREE.Color();
+
+function updateEdgeGeometry(mesh, p1, p2, c1, c2, radiusMid, segments, writeColor = true) {
+  _edgeDir.subVectors(p2, p1); const len = _edgeDir.length(); _edgeDir.normalize();
+  _edgeUp.set(0,1,0); if (Math.abs(_edgeDir.dot(_edgeUp))>0.999) _edgeUp.set(1,0,0);
+  _edgeRight.crossVectors(_edgeDir, _edgeUp).normalize();
+  _edgeFwd.crossVectors(_edgeRight, _edgeDir).normalize();
   const rings = 6;
   const posArr = mesh.geometry.attributes.position.array;
   const colArr = mesh.geometry.attributes.color.array;
   for (let i=0;i<=segments;i++) {
-    const t=i/segments, center=p1.clone().add(dir.clone().multiplyScalar(t*len));
+    const t=i/segments;
+    _edgeCenter.copy(p1).addScaledVector(_edgeDir, t*len);
     const r=radiusMid*(0.78+0.22*Math.sin(t*Math.PI));
-    const mc=c1.clone().lerp(c2,t), b=Math.sin(t*Math.PI);
+    _edgeTint.copy(c1).lerp(c2,t); const b=Math.sin(t*Math.PI);
     for (let j=0;j<rings;j++) {
       const a=(j/rings)*Math.PI*2;
       const vi = (i*rings+j)*3;
-      posArr[vi]=center.x+right.x*Math.cos(a)*r+forward.x*Math.sin(a)*r;
-      posArr[vi+1]=center.y+right.y*Math.cos(a)*r+forward.y*Math.sin(a)*r;
-      posArr[vi+2]=center.z+right.z*Math.cos(a)*r+forward.z*Math.sin(a)*r;
-      colArr[vi]=mc.r*b; colArr[vi+1]=mc.g*b; colArr[vi+2]=mc.b*b;
+      posArr[vi]=_edgeCenter.x+_edgeRight.x*Math.cos(a)*r+_edgeFwd.x*Math.sin(a)*r;
+      posArr[vi+1]=_edgeCenter.y+_edgeRight.y*Math.cos(a)*r+_edgeFwd.y*Math.sin(a)*r;
+      posArr[vi+2]=_edgeCenter.z+_edgeRight.z*Math.cos(a)*r+_edgeFwd.z*Math.sin(a)*r;
+      if (writeColor) { colArr[vi]=_edgeTint.r*b; colArr[vi+1]=_edgeTint.g*b; colArr[vi+2]=_edgeTint.b*b; }
     }
   }
   mesh.geometry.attributes.position.needsUpdate = true;
-  mesh.geometry.attributes.color.needsUpdate = true;
+  if (writeColor) mesh.geometry.attributes.color.needsUpdate = true;
 }
 
 // Build once
+const nodeColors = graphData.map(d => new THREE.Color(d.color));
+const incidentEdges = graphData.map(() => []);
 edges.forEach(([from, to]) => {
   const p1 = nodeMeshes[from].mesh.position.clone(), p2 = nodeMeshes[to].mesh.position.clone();
-  const c1 = new THREE.Color(graphData[from].color), c2 = new THREE.Color(graphData[to].color);
-  const objs = createEdgeMeshes(p1, p2, c1, c2);
+  const objs = createEdgeMeshes(p1, p2, nodeColors[from], nodeColors[to]);
   connectionsGroup.add(objs.main); connectionsGroup.add(objs.core);
+  const k = edgeObjects.length;
   edgeObjects.push({ ...objs, from, to });
+  incidentEdges[from].push(k); incidentEdges[to].push(k);
 });
 scene.add(connectionsGroup);
 
-function refreshEdgePositions() {
-  edgeObjects.forEach(eo => {
-    const p1 = nodeMeshes[eo.from].mesh.position, p2 = nodeMeshes[eo.to].mesh.position;
-    const c1 = new THREE.Color(graphData[eo.from].color), c2 = new THREE.Color(graphData[eo.to].color);
-    updateEdgeGeometry(eo.main, p1, p2, c1, c2, 0.016, 40);
-    updateEdgeGeometry(eo.core, p1, p2, c1, c2, 0.034, 30);
-  });
+// Endpoint colors are baked into vertex colors at build time and never change
+// (hover/focus dimming works at the material level), so motion refreshes skip
+// the color channel entirely.
+function refreshEdges(indices) {
+  for (const k of indices) {
+    const eo = edgeObjects[k];
+    updateEdgeGeometry(eo.main, nodeMeshes[eo.from].mesh.position, nodeMeshes[eo.to].mesh.position,
+      nodeColors[eo.from], nodeColors[eo.to], 0.016, 40, false);
+    updateEdgeGeometry(eo.core, nodeMeshes[eo.from].mesh.position, nodeMeshes[eo.to].mesh.position,
+      nodeColors[eo.from], nodeColors[eo.to], 0.034, 30, false);
+  }
 }
+function refreshEdgePositions() { refreshEdges(edgeObjects.keys()); }
 
 function setEdgeHighlight(hoveredIdx) {
   edgeObjects.forEach(eo => {
@@ -409,13 +424,20 @@ function setFocusDiffusion(fi) {
   });
 }
 let dirty = false;
+const dirtyEdges = new Set();
 let didDrag = false;
 let frameSkip = 0;
 const focusCam = new THREE.Vector3(0, 22, 30);
 
+// Graph topology is static, so BFS distances are computed once per node.
+const bfsCache = new Map();
 function bfs(startIdx) {
-  const dist = new Map(), q = [startIdx]; dist.set(startIdx, 0);
-  while (q.length) { const u=q.shift(); for(const v of(adjMap.get(u)||[])) if(!dist.has(v)){ dist.set(v,dist.get(u)+1); q.push(v); } }
+  let dist = bfsCache.get(startIdx);
+  if (!dist) {
+    dist = new Map(); const q = [startIdx]; dist.set(startIdx, 0);
+    while (q.length) { const u=q.shift(); for(const v of(adjMap.get(u)||[])) if(!dist.has(v)){ dist.set(v,dist.get(u)+1); q.push(v); } }
+    bfsCache.set(startIdx, dist);
+  }
   return dist;
 }
 
@@ -431,12 +453,15 @@ function radialLayout(focusIdx) {
   return t;
 }
 
+let focusedLabelShown = null;
 function updateLabels() {
+  const focusedChanged = focusedLabelShown !== focusedIdx;
   nodeLabels.forEach((lbl,i) => {
     const m=nodeMeshes[i].mesh, r=graphData[i].r;
     lbl.position.set(m.position.x, m.position.y+r+0.45, m.position.z);
-    lbl.element.classList.toggle('focused', i===focusedIdx);
+    if (focusedChanged) lbl.element.classList.toggle('focused', i===focusedIdx);
   });
+  focusedLabelShown = focusedIdx;
 }
 
 if (graphSelection.benchmark) {
@@ -487,6 +512,9 @@ renderer.domElement.addEventListener('mousemove', (e) => {
       targets[idx].copy(newPos);
       didDrag = true; // actual movement → suppress click
 
+      // Only edges incident to actually-moved nodes need geometry refresh
+      for (const k of incidentEdges[idx]) dirtyEdges.add(k);
+
       // Nudge connected nodes (only targets, not origPos)
       const dist = bfs(idx);
       nodeMeshes.forEach(({ mesh }, i) => {
@@ -498,8 +526,8 @@ renderer.domElement.addEventListener('mousemove', (e) => {
         mesh.position.y += delta.y * decay;
         mesh.position.z += delta.z * decay;
         targets[i].copy(mesh.position);
+        for (const k of incidentEdges[i]) dirtyEdges.add(k);
       });
-      dirty = true;
     }
   } else {
     // --- Hover highlight (debounced) ---
@@ -668,7 +696,14 @@ function animate() {
     }
   }
 
-  if (moving||dirty) {
+  if (dragNode && dirtyEdges.size) {
+    // Drag: only incident edges of moved nodes change geometry — refresh the
+    // subset every frame instead of the whole graph.
+    refreshEdges(dirtyEdges); dirtyEdges.clear();
+    updateLabels();
+  } else if (moving||dirty) {
+    // Whole-graph motion (focus relayout / spring-back): full refresh with
+    // per-frame subsampling as before.
     frameSkip = (frameSkip + 1) % 2;
     if (frameSkip === 0 || dirty) refreshEdgePositions();
     updateLabels(); dirty=false;
