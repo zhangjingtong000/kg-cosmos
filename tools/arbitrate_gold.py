@@ -60,7 +60,7 @@ DECISIONS = {
 
 
 def main():
-    path = GOLD_DIR / f"gold-{PAPER}.json"
+    path = GOLD_DIR / f"merged-{PAPER}.json"
     gold = json.loads(path.read_text(encoding="utf-8"))
 
     disputed = gold.get("disputed_entities", [])

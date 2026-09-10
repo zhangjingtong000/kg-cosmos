@@ -52,53 +52,83 @@ log(f"通道 {MODE} / {PAPER}: {len(chunks)} chunks")
 
 model_text = MODELS[MODE]["text"]
 
+# 断点续跑：每块处理完即追加到 JSONL，进程被杀也不丢已完成的工作。
+# （2026-09-10 教训：原实现只在结束时写结果，一次卡死导致 90/111 块全废。）
+PARTIAL = OUT_DIR / f"channel-{MODE}-{PAPER}.partial.jsonl"
+done_idx = set()
+if PARTIAL.exists() and "--fresh" not in sys.argv:
+    for line in PARTIAL.read_text(encoding="utf-8").splitlines():
+        try:
+            rec = json.loads(line)
+            done_idx.add(rec["i"])
+        except Exception:
+            continue
+    log(f"[resume] 已完成 {len(done_idx)} 块，跳过")
+
 nodes, edges, failures = [], [], []
 t_all = time.time()
-for i, ch in enumerate(chunks, 1):
-    text = ch["text"]
-    kind = ch.get("kind", "text")
-    try:
-        if MODE == "local":
-            ep = build_local_entity_prompt(text, kind)
-            raw_e = call_ollama_json(model_text, ep)
-            ents = parse_structured_entities(raw_e)
-            if ents:
-                rp = LOCAL_RELATION_PROMPT.format(
-                    entity_list="\n".join(f"- {e['name']}" for e in ents),
-                    relation_types=", ".join(RELATION_TYPES), text=text)
-                raw_r = call_ollama_json(model_text, rp)
-                rels = retain_relations_with_known_endpoints(
-                    parse_structured_relations(raw_r), [e["name"] for e in ents])
+with open(PARTIAL, "a", encoding="utf-8") as fh:
+    for i, ch in enumerate(chunks, 1):
+        if i in done_idx:
+            continue
+        text = ch["text"]
+        kind = ch.get("kind", "text")
+        ents, rels = [], []
+        try:
+            if MODE == "local":
+                ep = build_local_entity_prompt(text, kind)
+                raw_e = call_ollama_json(model_text, ep)
+                ents = parse_structured_entities(raw_e)
+                if ents:
+                    rp = LOCAL_RELATION_PROMPT.format(
+                        entity_list="\n".join(f"- {e['name']}" for e in ents),
+                        relation_types=", ".join(RELATION_TYPES), text=text)
+                    raw_r = call_ollama_json(model_text, rp)
+                    rels = retain_relations_with_known_endpoints(
+                        parse_structured_relations(raw_r), [e["name"] for e in ents])
             else:
-                rels = []
-        else:
-            ep = ENTITY_PROMPT.format(entity_types=", ".join(ENTITY_TYPES), text=text)
-            raw_e = call_deepseek(model_text, ep)
-            ents = parse_entities(raw_e)
-            if ents:
-                rp = RELATION_PROMPT.format(
-                    entity_list="\n".join(f"- {e['name']}" for e in ents),
-                    relation_types=", ".join(RELATION_TYPES), text=text)
-                raw_r = call_deepseek(model_text, rp)
-                rels = retain_relations_with_known_endpoints(
-                    parse_relations(raw_r), [e["name"] for e in ents])
-            else:
-                rels = []
-        ev = {"source_id": PAPER, "source_name": f"{PAPER}.pdf",
-              "page": ch["page"], "chunk_idx": ch["chunk_idx"], "text": text}
-        for e in ents:
-            e["evidence"] = [ev]
-        for r in rels:
-            r["evidence"] = [ev]
+                ep = ENTITY_PROMPT.format(entity_types=", ".join(ENTITY_TYPES), text=text)
+                raw_e = call_deepseek(model_text, ep)
+                ents = parse_entities(raw_e)
+                if ents:
+                    rp = RELATION_PROMPT.format(
+                        entity_list="\n".join(f"- {e['name']}" for e in ents),
+                        relation_types=", ".join(RELATION_TYPES), text=text)
+                    raw_r = call_deepseek(model_text, rp)
+                    rels = retain_relations_with_known_endpoints(
+                        parse_relations(raw_r), [e["name"] for e in ents])
+            ev = {"source_id": PAPER, "source_name": f"{PAPER}.pdf",
+                  "page": ch["page"], "chunk_idx": ch["chunk_idx"], "text": text}
+            for e in ents:
+                e["evidence"] = [ev]
+            for r in rels:
+                r["evidence"] = [ev]
+        except Exception as exc:
+            failures.append({"chunk": i, "page": ch["page"],
+                             "error": f"{type(exc).__name__}: {exc}"[:200]})
+            if len(failures) <= 3:
+                log(f"  [{i}] 失败: {type(exc).__name__}: {str(exc)[:150]}")
+
+        # 立即落盘该块结果（含失败标记，避免重跑失败块时死循环）
+        fh.write(json.dumps({"i": i, "page": ch["page"], "nodes": ents, "edges": rels},
+                            ensure_ascii=False) + "\n")
+        fh.flush()
         nodes.extend(ents)
         edges.extend(rels)
         if i % 10 == 0 or i == len(chunks):
             log(f"  [{i}/{len(chunks)}] 累计 {len(nodes)} 实体 {len(edges)} 关系 "
                 f"({time.time()-t_all:.0f}s)")
-    except Exception as exc:
-        failures.append({"chunk": i, "page": ch["page"], "error": f"{type(exc).__name__}: {exc}"[:200]})
-        if len(failures) <= 3:
-            log(f"  [{i}] 失败: {type(exc).__name__}: {str(exc)[:150]}")
+
+# 断点续跑时，从 partial 汇总全部结果
+if done_idx:
+    nodes, edges, failures = [], [], []
+    for line in PARTIAL.read_text(encoding="utf-8").splitlines():
+        try:
+            rec = json.loads(line)
+        except Exception:
+            continue
+        nodes.extend(rec.get("nodes", []))
+        edges.extend(rec.get("edges", []))
 
 dedup_nodes = deduplicate_entities(list(nodes), MODE)
 dedup_edges = {}

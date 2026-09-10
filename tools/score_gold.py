@@ -16,6 +16,7 @@
   python tools/score_gold.py                # 只评云端（已入库快照）
   python tools/score_gold.py local cloud    # 对比两个通道
 """
+import argparse
 import json
 import re
 import sys
@@ -26,8 +27,23 @@ from kg_extractor import _names_are_duplicates  # noqa: E402
 
 GOLD_DIR = Path(r"D:\kg-demo\data\gold")
 GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
-PAPER = "2012.00456v1"
-PAGES = 12
+
+
+def parse_args():
+    ap = argparse.ArgumentParser(description="多通道金标评分")
+    ap.add_argument("modes", nargs="*", default=["cloud"],
+                    help="要评分的通道（cloud / local / distilled ...）")
+    ap.add_argument("--paper", default="2012.00456v1")
+    ap.add_argument("--pages", type=int, default=12)
+    ap.add_argument("--exclude-from", type=int, default=0,
+                    help="从该页起排除（如参考文献起始页）；0 表示不排除")
+    return ap.parse_args()
+
+
+ARGS = parse_args()
+PAPER = ARGS.paper
+PAGES = ARGS.pages
+EXCLUDE_FROM = ARGS.exclude_from
 
 # ── 显著性指标用的噪声判据（论文结构/元语言/泛指/编号）──
 NOISE_EXACT = {
@@ -69,8 +85,17 @@ def norm(name: str) -> str:
 
 
 def in_scope(item) -> bool:
-    return any(ev.get("page") is not None and ev["page"] <= PAGES
-               for ev in item.get("evidence", []) if isinstance(ev, dict))
+    for ev in item.get("evidence", []):
+        if not isinstance(ev, dict):
+            continue
+        page = ev.get("page")
+        if page is None:
+            continue
+        if EXCLUDE_FROM and page >= EXCLUDE_FROM:
+            continue
+        if page <= PAGES:
+            return True
+    return False
 
 
 def load_channel(mode: str):
@@ -176,7 +201,7 @@ def score(mode: str, gold: dict):
 
 
 def main():
-    modes = sys.argv[1:] or ["cloud"]
+    modes = ARGS.modes or ["cloud"]
     gold_path = GOLD_DIR / f"gold-{PAPER}.json"
     if not gold_path.exists():
         raise SystemExit(f"缺少金标 {gold_path}")

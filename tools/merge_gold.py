@@ -16,6 +16,7 @@
   data/gold/gold-<paper>.json        最终金标（含 provenance 与分歧清单）
   data/gold/merge-report-<paper>.md  人工可读报告（一致率、分歧、可疑引文）
 """
+import argparse
 import json
 import re
 import sys
@@ -26,16 +27,33 @@ sys.path.insert(0, r"D:\kg-demo\src")
 from kg_extractor import _names_are_duplicates, ENTITY_TYPES, RELATION_TYPES  # noqa: E402
 
 GOLD = Path(r"D:\kg-demo\data\gold")
-PAPER = "2012.00456v1"
-SOURCE = GOLD / f"SOURCE-{PAPER}-p1-12.txt"
+
+
+def parse_args():
+    ap = argparse.ArgumentParser(description="合并多标注者金标并输出一致率报告")
+    ap.add_argument("paper", nargs="?", default="2012.00456v1", help="论文 id")
+    ap.add_argument("--pages", type=int, default=12,
+                    help="SOURCE 覆盖到的最后一页（用于定位源文本与记录范围）")
+    ap.add_argument("--exclude-from", type=int, default=0,
+                    help="从该页起排除（如参考文献起始页）；0 表示不排除")
+    return ap.parse_args()
+
+
+ARGS = parse_args()
+PAPER = ARGS.paper
+PAGES = ARGS.pages
+EXCLUDE_FROM = ARGS.exclude_from
+SUFFIX = "" if PAPER.startswith("2012") else "2"
+SOURCE = GOLD / f"SOURCE-{PAPER}-p1-{PAGES}.txt"
 
 
 def load_annotations():
+    """读取 annotation[-N]-*.json（按论文序号后缀区分）。"""
     out = []
-    for path in sorted(GOLD.glob("annotation-*.json")):
+    for path in sorted(GOLD.glob(f"annotation{SUFFIX}-*.json")):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
-            out.append((path.stem.replace("annotation-", ""), data))
+            out.append((path.stem.replace(f"annotation{SUFFIX}-", ""), data))
         except Exception as exc:
             print(f"[warn] 读取失败 {path.name}: {exc}")
     return out
@@ -83,10 +101,44 @@ def main():
               f"当前: {[a for a, _ in anns]}")
         return
     names = [a for a, _ in anns]
+    print(f"论文 {PAPER}（源文本 {SOURCE.name}）")
     print(f"标注者: {names}")
 
+    # ── 标注范围对齐 ──
+    # 不同标注者可能覆盖不同页范围（实测第二篇：A 只标正文 1-8 页，C 标到 10 页
+    # 含参考文献）。只出现在被排除页（如参考文献）的条目必须剔除，否则金标会
+    # 混入"仅见于文献列表"的对象，与第一篇的处理原则不一致。
+    out_of_range = []
+    malformed = []
+
+    def in_range(item):
+        if not isinstance(item, dict):
+            return False
+        page = item.get("page")
+        if not isinstance(page, int):
+            return True
+        if EXCLUDE_FROM and page >= EXCLUDE_FROM:
+            return False
+        return page <= PAGES
+
+    def keep(rows):
+        kept, dropped = [], []
+        for annotator, item in rows:
+            if not isinstance(item, dict):
+                # 实测 GLM 第二篇末项为字符串 "__PART_B__"（分批输出的分片标记残留）
+                malformed.append((annotator, repr(item)[:60]))
+                continue
+            (kept if in_range(item) else dropped).append((annotator, item))
+        out_of_range.extend(dropped)
+        return kept
+
     # ── 实体聚类与投票 ──
-    ent_rows = [(a, e) for a, d in anns for e in d.get("entities", [])]
+    ent_rows = keep([(a, e) for a, d in anns for e in d.get("entities", [])])
+    if EXCLUDE_FROM:
+        print(f"[range] 排除 page >= {EXCLUDE_FROM} 的标注项："
+              f"{len(out_of_range)} 条（参考文献区）")
+    if malformed:
+        print(f"[warn] 跳过 {len(malformed)} 个畸形标注项: {malformed[:3]}")
     clusters = cluster_entities(ent_rows)
 
     accepted, disputed, suspicious = [], [], []
@@ -115,7 +167,7 @@ def main():
             suspicious.append(record)
 
     # ── 关系 ──
-    rel_rows = [(a, r) for a, d in anns for r in d.get("relations", [])]
+    rel_rows = keep([(a, r) for a, d in anns for r in d.get("relations", [])])
     rel_map = {}
     for annotator, rel in rel_rows:
         src = norm_name(rel.get("source", ""))
@@ -157,7 +209,9 @@ def main():
     # ── 输出 ──
     gold = {
         "paper_id": PAPER,
-        "source_pages": [1, 12],
+        "source_pages": [1, PAGES],
+        "excluded_from_page": EXCLUDE_FROM or None,
+        "out_of_range_dropped": len(out_of_range),
         "annotators": names,
         "method": "multi-annotator independent labeling + majority vote + quote verification",
         "entities": accepted,
@@ -185,7 +239,7 @@ def main():
             "majority_agreement_rate": round(p_agree_obs, 4),
         },
     }
-    (GOLD / f"gold-{PAPER}.json").write_text(
+    (GOLD / f"merged-{PAPER}.json").write_text(
         json.dumps(gold, ensure_ascii=False, indent=2), encoding="utf-8")
 
     lines = [f"# 金标合并报告：{PAPER}\n",
@@ -213,7 +267,7 @@ def main():
             lines.append(f"- **{r['name']}** ({r['type']}, p{r['page']}) 由 {r['voters'][0]} 标注")
     (GOLD / f"merge-report-{PAPER}.md").write_text("\n".join(lines), encoding="utf-8")
 
-    print(f"\n已写出 gold-{PAPER}.json 与 merge-report-{PAPER}.md")
+    print(f"\n已写出 merged-{PAPER}.json（中间产物，待仲裁）与 merge-report-{PAPER}.md")
     print(f"  实体候选 {len(clusters)} -> 采纳 {len(accepted)} / 分歧 {len(disputed)}")
     print(f"  关系采纳 {len(rel_accepted)} / 分歧 {len(rel_disputed)}")
     print(f"  平均成对一致率 {mean_jaccard*100:.1f}%  引文未核验 {len(suspicious)}")
