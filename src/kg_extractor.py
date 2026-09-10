@@ -117,7 +117,7 @@ def build_local_json_payload(model: str, prompt: str, schema: Optional[dict],
         "stream": False,
         "think": False,
         "keep_alive": "5m",
-        "options": {"temperature": 0, "num_predict": 2048},
+        "options": {"temperature": 0, "num_predict": 2048, "num_ctx": 4096},
     }
     if schema is not None:
         payload["format"] = schema
@@ -375,7 +375,7 @@ def call_ollama(model: str, prompt: str, image_path: Optional[str] = None) -> st
     """Call local Ollama model."""
     import requests
     payload = {"model": model, "prompt": prompt, "stream": False,
-               "options": {"temperature": 0.1, "num_predict": 2048, "enable_thinking": False}}
+               "options": {"temperature": 0.1, "num_predict": 2048, "num_ctx": 4096, "enable_thinking": False}}
     if image_path:
         with open(image_path, "rb") as f:
             img_b64 = base64.b64encode(f.read()).decode()
@@ -461,6 +461,7 @@ def call_openai_compatible(base_url: str, api_key: str, model: str, prompt: str)
 def parse_entities(raw: str) -> list[dict]:
     """Parse entity lines into structured list. Handles both:
     'entity<|>Name<|>Type<|>Desc' and 'Name<|>Type<|>Desc'."""
+    known_types = {t.lower() for t in ENTITY_TYPES}
     entities = []
     for line in raw.strip().split("\n"):
         line = line.strip()
@@ -470,7 +471,9 @@ def parse_entities(raw: str) -> list[dict]:
         if line.startswith("entity<|>"):
             line = line[len("entity<|>"):]
         parts = line.split("<|>")
-        if len(parts) >= 3:
+        # Type whitelist on parity with parse_structured_entities: entities
+        # outside the ontology are dropped, never passed through downstream.
+        if len(parts) >= 3 and parts[1].strip().lower() in known_types:
             entities.append({
                 "name": parts[0].strip(),
                 "type": parts[1].strip(),

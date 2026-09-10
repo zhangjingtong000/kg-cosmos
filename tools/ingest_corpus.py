@@ -2,10 +2,9 @@
 
 Usage: python tools/ingest_corpus.py [corpus_dir] [mode]
 Resume-safe: papers with an existing snapshot JSON are skipped, so the job
-can be interrupted and relaunched.  Default mode is "cloud" (DeepSeek): fast
-enough to finish the corpus in hours, and with KG_RECORD_DIR set the same
-run doubles as the distillation teacher dataset.  mode="local" remains for
-offline runs.
+can be interrupted and relaunched.  Default mode is "local" (Ollama); pair
+with KG_EXTRACT_WORKERS>1 and an Ollama server started with
+OLLAMA_NUM_PARALLEL matching it to keep the GPU saturated.
 """
 
 import json
@@ -17,15 +16,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-# Record teacher outputs before importing the extractor so the same run
-# yields both the corpus graph and the QLoRA distillation dataset.
 os.environ.setdefault("KG_RECORD_DIR", "data/distill")
 
 from pipeline import extract_graph  # noqa: E402
 from graph_store import GraphStore  # noqa: E402
 
 CORPUS = Path(sys.argv[1] if len(sys.argv) > 1 else "data/corpus")
-MODE = sys.argv[2] if len(sys.argv) > 2 else os.environ.get("KG_INGEST_MODE", "cloud")
+MODE = sys.argv[2] if len(sys.argv) > 2 else os.environ.get("KG_INGEST_MODE", "local")
 SNAPSHOTS = CORPUS / "graphs"
 SNAPSHOTS.mkdir(parents=True, exist_ok=True)
 

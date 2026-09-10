@@ -3,7 +3,14 @@
 Steps: parse → chunk → per-chunk LLM extraction (text + optional vision) →
 dedup entities/edges → evidence merge.  Returns plain dicts so callers choose
 their own storage and response shapes.
+
+Chunk extraction is independent per chunk and runs through a thread pool
+sized by KG_EXTRACT_WORKERS (default 1) so a locally hosted model server can
+be kept busy with parallel sequences instead of one request at a time.
 """
+
+import os
+from concurrent.futures import ThreadPoolExecutor
 
 from pdf_parser import parse_pdf, chunk_document
 from kg_extractor import MODELS, extract_chunk, deduplicate_entities
@@ -23,21 +30,30 @@ def extract_graph(
 
     model_text = MODELS[mode]["text"]
     model_vis = MODELS[mode]["vision"]
-    all_nodes, all_edges = [], []
     total_e_s, total_r_s = 0.0, 0.0
 
-    for ch in chunked["chunks"]:
-        img_path = ch["images"][0]["path"] if ch["images"] else None
-        res = extract_chunk(
-            ch["text"], model_text, mode, model_vis, img_path,
-            content_kind=ch.get("kind", "text"),
+    def extract_one(chunk):
+        img_path = chunk["images"][0]["path"] if chunk["images"] else None
+        return chunk, extract_chunk(
+            chunk["text"], model_text, mode, model_vis, img_path,
+            content_kind=chunk.get("kind", "text"),
         )
+
+    workers = max(1, int(os.environ.get("KG_EXTRACT_WORKERS", "1")))
+    if workers > 1:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            results = list(pool.map(extract_one, chunked["chunks"]))
+    else:
+        results = [extract_one(ch) for ch in chunked["chunks"]]
+
+    all_nodes, all_edges = [], []
+    for chunk, res in results:
         evidence = {
             "source_id": source_id,
             "source_name": source_name,
-            "page": ch["page"],
-            "chunk_idx": ch["chunk_idx"],
-            "text": ch["text"],
+            "page": chunk["page"],
+            "chunk_idx": chunk["chunk_idx"],
+            "text": chunk["text"],
         }
         for node in res["nodes"]:
             node["evidence"] = merge_evidence(node.get("evidence", []), [evidence])

@@ -12,6 +12,7 @@ Usage:
 """
 
 import json
+import re
 from math import cos, pi, sin, sqrt
 from pathlib import Path
 
@@ -207,6 +208,12 @@ class Neo4jStore:
             """Escape Neo4j label/type with spaces or special chars."""
             return f"`{s}`" if any(c in s for c in ' -/()[]{}:') else s
 
+        def safe_label(s):
+            """Any non-identifier label falls back to Entity: a hallucinated
+            type must never reach Cypher as a broken label."""
+            t = (s or "").strip()
+            return esc(t) if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", t) else "Entity"
+
         # Case-insensitive endpoint matching, on parity with NetworkXStore:
         # entity dedup keeps one canonical casing, so edges naming case
         # variants must resolve to the merged node instead of dangling.
@@ -221,7 +228,7 @@ class Neo4jStore:
             for n in nodes:
                 canonical = name_map[n["name"].strip().lower()]
                 s.run(
-                    f"MERGE (x:{esc(n['type'])} {{name: $name}}) "
+                    f"MERGE (x:{safe_label(n['type'])} {{name: $name}}) "
                     "SET x.description = $desc, "
                     "x.evidence = coalesce(x.evidence, []) "
                     "+ [item IN $items WHERE NOT item IN coalesce(x.evidence, [])]",
@@ -234,7 +241,7 @@ class Neo4jStore:
                 tgt = name_map.get(e["target"].strip().lower(), e["target"].strip())
                 s.run(
                     f"MATCH (a {{name: $src}}), (b {{name: $tgt}}) "
-                    f"MERGE (a)-[r:{esc(e['type'])}]->(b) "
+                    f"MERGE (a)-[r:{safe_label(e['type'])}]->(b) "
                     "ON CREATE SET r.description = $desc, r.evidence = [] "
                     "SET r.evidence = r.evidence "
                     "+ [item IN $items WHERE NOT item IN r.evidence]",
