@@ -684,7 +684,7 @@ def extract_chunk(chunk_text: str, model_text: str, mode: str, model_vis: str = 
     else:
         ep = ENTITY_PROMPT.format(entity_types=", ".join(ENTITY_TYPES), text=full_text)
         raw_entities = call_deepseek(model_text, ep)
-        record_pair("entities", ep, raw_entities, {"model": model_text, "mode": mode, "kind": content_kind})
+        record_pair("entities", ep, raw_entities, {"model": DS_MODEL, "mode": mode, "kind": content_kind})
         entities = parse_entities(raw_entities)
     if content_kind == "table":
         entities = retain_semantic_table_entities(entities)
@@ -713,7 +713,7 @@ def extract_chunk(chunk_text: str, model_text: str, mode: str, model_vis: str = 
             text=full_text,
         )
         raw_relations = call_deepseek(model_text, rp)
-        record_pair("relations", rp, raw_relations, {"model": model_text, "mode": mode, "kind": content_kind})
+        record_pair("relations", rp, raw_relations, {"model": DS_MODEL, "mode": mode, "kind": content_kind})
         relations = parse_relations(raw_relations)
     relations = retain_relations_with_known_endpoints(relations, entity_names)
     dt2 = time.time() - t2
