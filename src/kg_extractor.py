@@ -22,7 +22,10 @@ from graph_store import merge_evidence
 SF_API_KEY = os.environ.get("SF_API_KEY", "")
 SF_BASE   = "https://api.siliconflow.cn/v1"
 DS_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
-DS_BASE   = "https://api.deepseek.com/v1"
+DS_BASE   = os.environ.get("DS_BASE", "https://api.deepseek.com/v1")
+# "deepseek-chat" is the official alias (2026-09: resolves to DeepSeek-V4-Flash);
+# point DS_MODEL at any OpenAI-compatible chat model to swap endpoints.
+DS_MODEL  = os.environ.get("DS_MODEL", "deepseek-chat")
 OLLAMA    = "http://localhost:11434"
 
 MODELS = {
@@ -409,8 +412,8 @@ def call_siliconflow(model: str, prompt: str, image_path: Optional[str] = None) 
 
 
 def call_deepseek(model: str, prompt: str) -> str:
-    """Call DeepSeek official API."""
-    return call_openai_compat(DS_BASE, DS_API_KEY, model, prompt, None)
+    """Call DeepSeek chat model (endpoint/model overridable via env)."""
+    return call_openai_compat(DS_BASE, DS_API_KEY, DS_MODEL, prompt, None)
 
 
 def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
