@@ -1,12 +1,15 @@
 """Batch-ingest the arXiv corpus into Neo4j and per-document JSON snapshots.
 
-Usage: python tools/ingest_corpus.py [corpus_dir]
+Usage: python tools/ingest_corpus.py [corpus_dir] [mode]
 Resume-safe: papers with an existing snapshot JSON are skipped, so the job
-can be interrupted and relaunched.  Each paper's extraction runs through the
-same pipeline as POST /upload (mode=local, Ollama).
+can be interrupted and relaunched.  Default mode is "cloud" (DeepSeek): fast
+enough to finish the corpus in hours, and with KG_RECORD_DIR set the same
+run doubles as the distillation teacher dataset.  mode="local" remains for
+offline runs.
 """
 
 import json
+import os
 import sys
 import time
 import traceback
@@ -14,10 +17,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
+# Record teacher outputs before importing the extractor so the same run
+# yields both the corpus graph and the QLoRA distillation dataset.
+os.environ.setdefault("KG_RECORD_DIR", "data/distill")
+
 from pipeline import extract_graph  # noqa: E402
 from graph_store import GraphStore  # noqa: E402
 
 CORPUS = Path(sys.argv[1] if len(sys.argv) > 1 else "data/corpus")
+MODE = sys.argv[2] if len(sys.argv) > 2 else os.environ.get("KG_INGEST_MODE", "cloud")
 SNAPSHOTS = CORPUS / "graphs"
 SNAPSHOTS.mkdir(parents=True, exist_ok=True)
 
@@ -30,7 +38,7 @@ def main() -> None:
         password="kgdemo2026",
     )
     pdfs = sorted(CORPUS.glob("*.pdf"))
-    print(f"ingesting {len(pdfs)} papers from {CORPUS}", flush=True)
+    print(f"ingesting {len(pdfs)} papers from {CORPUS} (mode={MODE})", flush=True)
 
     for idx, pdf in enumerate(pdfs, 1):
         paper_id = pdf.stem
@@ -43,7 +51,7 @@ def main() -> None:
         try:
             core = extract_graph(
                 str(pdf), str(SNAPSHOTS / f"work-{paper_id}"),
-                source_id=paper_id, source_name=pdf.name, mode="local",
+                source_id=paper_id, source_name=pdf.name, mode=MODE,
             )
             store.store.import_data(core["nodes"], core["edges"])
 
