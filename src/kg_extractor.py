@@ -417,8 +417,9 @@ def call_deepseek(model: str, prompt: str) -> str:
 
 
 def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
-                       image_path: Optional[str] = None) -> str:
-    """Call any OpenAI-compatible API."""
+                       image_path: Optional[str] = None,
+                       timeout: int = 300, retries: int = 2) -> str:
+    """Call any OpenAI-compatible API, retrying transient gateway failures."""
     import requests
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     if image_path:
@@ -431,10 +432,33 @@ def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
     else:
         messages = [{"role": "user", "content": prompt}]
     payload = {"model": model, "messages": messages, "temperature": 0.1, "max_tokens": 2048}
-    r = requests.post(f"{base_url}/chat/completions", json=payload, headers=headers, timeout=120)
-    r.raise_for_status()
-    msg = r.json()["choices"][0]["message"]
-    return msg.get("content", "")
+
+    attempt = 0
+    while True:
+        try:
+            r = requests.post(f"{base_url}/chat/completions", json=payload,
+                              headers=headers, timeout=timeout)
+            r.raise_for_status()
+            msg = r.json()["choices"][0]["message"]
+            return msg.get("content", "")
+        except (requests.Timeout, requests.ConnectionError) as exc:
+            attempt += 1
+            if attempt > retries:
+                raise
+            wait = 10 * attempt
+            print(f"[api] {type(exc).__name__}, retry {attempt}/{retries} in {wait}s",
+                  flush=True)
+            time.sleep(wait)
+        except requests.HTTPError as exc:
+            status = exc.response.status_code if exc.response is not None else 0
+            if status not in (429, 500, 502, 503, 504):
+                raise
+            attempt += 1
+            if attempt > retries:
+                raise
+            wait = 15 * attempt
+            print(f"[api] HTTP {status}, retry {attempt}/{retries} in {wait}s", flush=True)
+            time.sleep(wait)
 
 
 def call_openai_compatible(base_url: str, api_key: str, model: str, prompt: str) -> str:
