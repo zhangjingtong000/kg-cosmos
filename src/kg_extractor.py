@@ -344,9 +344,90 @@ Use ONLY these types: {entity_types}
 ---Output---
 Output all entities, then <|COMPLETE|> on the final line."""
 
+# 变体 B（2026-09-10）：只收紧 Concept 的边界，其余规则不动。
+# 依据：ENTITY_PROMPT_V2 的教训是"全面收紧"会砍掉论文自己命名的流程步骤
+# （Five-Step Methodology 等金标实体）。而实际噪声集中在 Concept 类——
+# Input / Output / Scope / Explanation / Field / Criterion / Rule / Related Work
+# 这些论文的结构与元语言名词，全被塞进了 Concept。
+# 对标微软 GraphRAG：它的类型集窄（ORGANIZATION/PERSON/GEO），因此不产生这类噪声。
+ENTITY_PROMPT_V3 = """---Role---
+You are a Knowledge Graph Specialist. Extract all entities from the text.
+
+---Rules---
+1. Only extract entities EXPLICITLY mentioned. Do not infer or imagine.
+2. Entity names in Title Case, consistent across the text.
+3. Use third person only.
+4. Output format (one per line, NO markdown, NO JSON):
+   entity<|>EntityName<|>EntityType<|>Brief description
+
+---Entity Types---
+Use ONLY these types: {entity_types}
+
+---Concept: strict boundary---
+Use Concept ONLY for a named idea, paradigm, problem, or principle that the paper
+treats as a subject in its own right — e.g. "Crowdsourcing", "Scholarly Communication",
+"Human-in-the-Loop".
+Do NOT use Concept for:
+- the paper's own structure or meta-language: "Related Work", "Future Work",
+  "Introduction", "Results", "Scope", "Explanation", "Input", "Output", "Field";
+- enumerated labels: "Criterion 2", "Rule 3", "Step 4", "Table Number";
+- generic noun phrases with no specific referent: "the approach", "domain experts",
+  "research problem", "bibliographic data", "high-quality knowledge".
+If a name is only the paper's scaffolding rather than something the paper discusses,
+leave it out entirely — do not fall back to Concept.
+
+---Text---
+{text}
+
+---Output---
+Output all entities, then <|COMPLETE|> on the final line."""
+
+# 动机：金标评分显示 Recall 0.97 但 Precision 0.26，且 230 个 FP **零幻觉**——
+# 它们全部有原文依据，只是抽取器把论文的结构元素（Criterion 2 / Rule 3 /
+# Input / Output / Related Work / Table Number）和泛指短语也当成了实体。
+# 这属于任务定义缺口，用排除规则比事后字符串黑名单更准（黑名单会误杀
+# "Tables"、"Inclusion Criteria" 这类真正被阐述的对象）。
+ENTITY_PROMPT_V2 = """---Role---
+You are a Knowledge Graph Specialist building a knowledge graph of THIS PAPER'S SUBJECT MATTER. Extract the named entities that the paper actually discusses, studies, proposes, or compares.
+
+---Rules---
+1. Only extract entities EXPLICITLY named in the text. Do not infer or imagine.
+2. Entity names in Title Case, consistent across the text.
+3. Use third person only.
+4. Output format (one per line, NO markdown, NO JSON):
+   entity<|>EntityName<|>EntityType<|>Brief description
+
+---What to extract---
+Objects the paper is ABOUT: named systems, tools, platforms, methods, algorithms,
+datasets, benchmarks, metrics, organizations, people, locations, documents, and
+the paper's own named workflow steps and produced artifacts.
+
+---What NOT to extract (important)---
+- Generic noun phrases with no specific referent: "the approach", "domain experts",
+  "research problem", "bibliographic data", "structured data", "high-quality knowledge".
+- The paper's own structure and meta-language: "Related Work", "Future Work",
+  "Input", "Output", "Results", "Scope", "Explanation", "Section 3", "Table Number",
+  "Table Title", "Column", "Row", "Cell", "Abbreviation", "Citation Style".
+- Enumerated labels: "Criterion 2", "Rule 3", "Step 4", "Figure 1", "Table 2".
+- Statistics and placeholders: "95% CI", "R0", single letters or symbols.
+- Names appearing ONLY in the reference list or in a DOI/citation string.
+- Example/dummy values used purely to illustrate a figure or table.
+
+---Test---
+Before outputting a name, ask: "if a reader asked what this paper is about,
+would this name be part of the answer?" If no, leave it out.
+
+---Entity Types---
+Use ONLY these types: {entity_types}
+
+---Text---
+{text}
+
+---Output---
+Output all entities, then <|COMPLETE|> on the final line."""
+
 RELATION_PROMPT = """---Role---
 You are a Knowledge Graph Specialist. Now extract relationships between the given entities.
-
 ---Entities---
 {entity_list}
 
@@ -938,13 +1019,36 @@ def deduplicate_entities(entities: list[dict], mode: str = "local") -> list[dict
 
 
 def _names_are_duplicates(a: str, b: str) -> bool:
-    """Conservatively detect name variants without collapsing related terms."""
+    """Conservatively detect name variants without collapsing related terms.
+
+    2026-09-10 修复：子串规则原本没有任何长度保护，导致短缩写与任意包含
+    其字母序列的长名字被判为同一实体——实测 `norm('UI')='ui'` 是
+    `norm('build graph.py')='buildgraphpy'` 的子串（bUIldgraphpy），于是
+    "UI" 被当成 "build graph.py" 的变体。这类误合并同时污染抽取去重与
+    金标聚类，且越短的缩写（UI/RDF/AI/LLM）越容易中招。
+
+    现要求子串匹配同时满足以下任一条件：
+      - 短名足够长（≥5 字符，足以排除缩写）；
+      - 两者共享的前缀占长名的比例 ≥0.4（即"全称 = 简称 + 后缀"的形态，
+        如 BERT / BERTLarge 共享前缀 bert 占 4/9）。
+    实测反例 UI / build graph.py：前缀仅 'b'，占比 0.08，正确拒绝。
+    """
     normalized_a = re.sub(r"[^a-z0-9]+", "", a.lower())
     normalized_b = re.sub(r"[^a-z0-9]+", "", b.lower())
     if not normalized_a or not normalized_b:
         return False
+
     if normalized_a in normalized_b or normalized_b in normalized_a:
-        return True
+        shorter, longer = sorted((normalized_a, normalized_b), key=len)
+        if len(shorter) >= 5:
+            return True
+        common = 0
+        for x, y in zip(shorter, longer):
+            if x != y:
+                break
+            common += 1
+        return common / len(longer) >= 0.4
+
     return SequenceMatcher(None, normalized_a, normalized_b).ratio() >= 0.93
 
 
