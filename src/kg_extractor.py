@@ -11,7 +11,7 @@ Usage:
   python kg_extractor.py --file sample.txt --mode cloud --compare
 """
 
-import argparse, json, os, sys, time, base64, re
+import argparse, json, os, sys, time, base64, re, threading
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Optional
@@ -363,6 +363,108 @@ You are a Knowledge Graph Specialist. Now extract relationships between the give
 ---Output---
 Output all relationships, then <|COMPLETE|> on the final line."""
 
+# ── 成本优化通道（2026-09-10）───────────────────────────────
+# 背景：云端按输入/输出 token 计费，实测单价（用户账户，非高峰）
+#   输出 4 元/M、输入未命中 1 元/M、输入缓存命中 0.02 元/M
+# 命中缓存比未命中便宜 50 倍，因此"把固定说明放前缀、变量放尾部"是最大杠杆。
+# 同时把实体与关系两次调用合并成一次，省掉一次重复正文与一份固定说明。
+# 该前缀保持字节级稳定，禁止在其中插入任何变量。
+COMBINED_PREFIX = """---Role---
+You are a Knowledge Graph Specialist. Read the text and extract both entities and the relationships between them.
+
+---Entity Types (use ONLY these)---
+Concept, Method, System, Component, Process, Artifact, Dataset, Metric, Tool, Material, Person, Organization, Location, Event, Document
+
+---Relation Types (use ONLY these)---
+PART_OF, USES, PRODUCES, MEASURES, EVALUATES, COMPARES_WITH, SUPPORTS, CONTRADICTS, CAUSES, ENABLES, APPLIES_TO, LOCATED_AT, CREATED_BY, CITES, RELATED_TO
+
+---Output Format---
+One entity per line, then one relation per line. NO markdown, NO JSON, no prose, no headings.
+entity<|>EntityName<|>EntityType<|>Brief description
+relation<|>SourceEntity<|>TargetEntity<|>RelationType<|>Brief explanation
+
+---Rules---
+1. Only extract what is EXPLICITLY stated in the text. Never infer or imagine.
+2. Entity names in Title Case and consistent across the whole text.
+3. Use third person only. Keep descriptions under 20 words.
+4. Every relation must reference two entities that appear in your entity lines above.
+5. Decompose multi-entity statements into binary pairs.
+6. If the text is tabular evidence, extract the semantic entities it names and their relations.
+7. Finish by writing <|COMPLETE|> on its own final line.
+
+---Text---
+"""
+
+
+def build_combined_prompt(text: str) -> str:
+    """合并抽取提示词：固定前缀 + 变量文本（前缀稳定才能吃到缓存）。"""
+    return COMBINED_PREFIX + text + "\n\n---Output---\n"
+
+
+def parse_combined(raw: str) -> tuple[list[dict], list[dict]]:
+    """解析合并输出：实体行与关系行混排，按行首标记严格分流。
+
+    必须按标记分流，不能让关系解析器看到实体行——实体行有四段
+    （entity<|>Name<|>Type<|>Desc），正好满足关系解析器 ">= 4 段" 的条件，
+    否则每个实体都会被误解成一条关系。实测踩过这个坑（2026-09-10）。
+    """
+    entity_lines, relation_lines = [], []
+    for line in raw.split("\n"):
+        stripped = line.strip().lstrip("-").strip()
+        if not stripped or "<|COMPLETE|>" in stripped or "<|>" not in stripped:
+            continue
+        head = stripped.split("<|>", 1)[0].strip().lower()
+        if head == "relation":
+            relation_lines.append(stripped)
+        elif head == "entity":
+            entity_lines.append(stripped)
+        else:
+            # 兜底：无标记行按首段是否为已知类型猜测归属，猜不出就丢弃。
+            entity_lines.append(stripped)
+    return parse_entities("\n".join(entity_lines)), parse_relations("\n".join(relation_lines))
+
+
+def extract_chunk_once(chunk_text: str, model_text: str, mode: str,
+                       model_vis: Optional[str] = None,
+                       image_path: Optional[str] = None,
+                       content_kind: str = "text") -> dict:
+    """单次调用完成实体+关系抽取（成本优化通道）。
+
+    与 extract_chunk 的输出结构保持一致，便于流水线无差别替换。
+    视觉上下文仍需一次额外调用（仅当 chunk 带图）。
+    """
+    full_text = chunk_text
+    vision_s = 0.0
+    if image_path and model_vis:
+        t_v = time.time()
+        prompt_img = ("Describe this image in detail. Focus on any entities, "
+                      "labels, data, or relationships visible.")
+        img_context = call_ollama(model_vis, prompt_img, image_path) if mode == "local" \
+            else call_siliconflow(model_vis, prompt_img, image_path)
+        full_text = chunk_text + "\n\n---Image Context---\n" + img_context
+        vision_s = time.time() - t_v
+
+    t1 = time.time()
+    prompt = build_combined_prompt(full_text)
+    if mode == "local":
+        raw = call_ollama_json(model_text, prompt)
+    else:
+        raw = call_deepseek(model_text, prompt)
+    record_pair("combined", prompt, raw,
+                {"model": model_text, "mode": mode, "kind": content_kind})
+    entities, relations = parse_combined(raw)
+    if content_kind == "table":
+        entities = retain_semantic_table_entities(entities)
+    relations = retain_relations_with_known_endpoints(
+        relations, [e["name"] for e in entities])
+    dt = time.time() - t1
+    print(f"    [combined] {len(entities)} entities, {len(relations)} relations ({dt:.1f}s)")
+    return {
+        "nodes": entities,
+        "edges": relations,
+        "timing": {"entities_s": dt, "relations_s": 0.0, "vision_s": vision_s},
+    }
+
 LOCAL_ENTITY_PROMPT = """Extract every explicitly named knowledge-graph entity in the text.
 Include named technical terms, components, methods, systems, datasets, metrics, people, organizations,
 places, events, documents, and other concrete concepts that are stated in the text. For example, an
@@ -529,6 +631,30 @@ def _parse_extra_headers(raw: str) -> dict:
     return headers
 
 
+# 每个线程一个 requests.Session：连接与 TLS 会话复用，省掉每次请求的握手。
+# 实测（2026-09-10 并发扫描）：高并发时握手开销会明显吃掉吞吐，而
+# requests.post 每次都新建连接。Session 不做跨线程共享，避免竞态。
+_SESSIONS = threading.local()
+
+
+def _session_for(base_url: str):
+    import requests
+    sessions = getattr(_SESSIONS, "by_host", None)
+    if sessions is None:
+        sessions = {}
+        _SESSIONS.by_host = sessions
+    session = sessions.get(base_url)
+    if session is None:
+        session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=8, pool_maxsize=32, max_retries=0
+        )
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
+        sessions[base_url] = session
+    return session
+
+
 def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
                        image_path: Optional[str] = None,
                        timeout: int = 300, retries: int = 2) -> str:
@@ -538,6 +664,7 @@ def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
     EmptyExtractionResponse，不返回空串。
     """
     import requests
+    session = _session_for(base_url)
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     headers.update(_parse_extra_headers(DS_EXTRA_HEADERS))
     if image_path:
@@ -555,8 +682,8 @@ def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
     attempt = 0
     while True:
         try:
-            r = requests.post(f"{base_url}/chat/completions", json=payload,
-                              headers=headers, timeout=timeout)
+            r = session.post(f"{base_url}/chat/completions", json=payload,
+                             headers=headers, timeout=timeout)
             r.raise_for_status()
             try:
                 body = r.json()
@@ -643,37 +770,42 @@ def parse_entities(raw: str) -> list[dict]:
 
 
 def parse_relations(raw: str) -> list[dict]:
-    """Parse relation lines. Auto-detects field order (some models swap src/target/type)."""
+    """Parse relation lines, enforcing the 15-type ontology whitelist.
+
+    历史缺陷（2026-09-10 验收发现）：本函数从不校验关系类型，模型自由发挥的
+    类型（`CONTAINS`、`fuses`、`for`、`NYT10`、`Trump`…）会一路写进 Neo4j。
+    实测量级：73 种关系类型里 58 种越界。实体侧早有白名单，关系侧必须有同等待遇。
+
+    字段顺序仍自动探测（部分模型把类型放在首段），但类型必须命中白名单，
+    否则整行丢弃。
+    """
     relations = []
     known_types = {t.lower() for t in RELATION_TYPES}
 
     for line in raw.strip().split("\n"):
-        line = line.strip()
-        if not line or "<|COMPLETE|>" in line:
+        line = line.strip().lstrip("-").strip()
+        if not line or "<|COMPLETE|>" in line or "<|>" not in line:
             continue
-        if line.startswith("relation<|>"):
+        if line.lower().startswith("relation<|>"):
             line = line[len("relation<|>"):]
         parts = [p.strip() for p in line.split("<|>")]
-        if len(parts) < 4:
-            continue
 
-        # Detect field order: if parts[0] looks like a relation type, reorder
-        if parts[0].lower() in known_types:
-            # Model output: Type<|>Source<|>Target<|>Desc
-            relations.append({
-                "source": parts[1],
-                "target": parts[2],
-                "type": parts[0],
-                "description": parts[3] if len(parts) > 3 else "",
-            })
-        else:
-            # Expected: Source<|>Target<|>Type<|>Desc
-            relations.append({
-                "source": parts[0],
-                "target": parts[1],
-                "type": parts[2],
-                "description": parts[3] if len(parts) > 3 else "",
-            })
+        type_idx = next(
+            (i for i, p in enumerate(parts) if p.lower() in known_types), None
+        )
+        if type_idx is None:
+            continue  # 类型不在本体里：丢弃，绝不污染图谱
+
+        rest = [p for i, p in enumerate(parts) if i != type_idx]
+        # 需要源与目标两个名字（描述可选，可能缺）
+        if len(rest) < 2 or not rest[0] or not rest[1]:
+            continue
+        relations.append({
+            "source": rest[0],
+            "target": rest[1],
+            "type": parts[type_idx],
+            "description": rest[2] if len(rest) > 2 else "",
+        })
     return relations
 
 

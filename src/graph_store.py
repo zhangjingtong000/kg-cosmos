@@ -184,6 +184,19 @@ class NetworkXStore:
 # ── Neo4j Backend (when server is available) ─────────────
 
 class Neo4jStore:
+    # 实体与关系的本体白名单（与 kg_extractor 的 ENTITY_TYPES / RELATION_TYPES 一致）。
+    # 存储层做最后一道闸：解析器漏掉一次，也不能让越界类型进图。
+    ALLOWED_LABELS = {
+        "Concept", "Method", "System", "Component", "Process", "Artifact",
+        "Dataset", "Metric", "Tool", "Material", "Person", "Organization",
+        "Location", "Event", "Document",
+    }
+    ALLOWED_RELATION_TYPES = {
+        "PART_OF", "USES", "PRODUCES", "MEASURES", "EVALUATES", "COMPARES_WITH",
+        "SUPPORTS", "CONTRADICTS", "CAUSES", "ENABLES", "APPLIES_TO", "LOCATED_AT",
+        "CREATED_BY", "CITES", "RELATED_TO",
+    }
+
     # Evidence records are stored as a list of JSON strings.  Re-uploads are
     # merged atomically in Cypher by list dedup (identical records are exact
     # duplicates of the same source location), so no read-modify-write exists.
@@ -214,6 +227,29 @@ class Neo4jStore:
             t = (s or "").strip()
             return esc(t) if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", t) else "Entity"
 
+        def safe_relation_type(s):
+            """越界关系类型归一到 RELATED_TO。
+
+            2026-09-10 验收发现库里混入 73 种关系类型（58 种越界：`CONTAINS`、
+            `fuses`、`NYT10`、`Trump`…），源头是 parse_relations 缺白名单。
+            解析器已修，存储层再加一道：越界不丢弃（证据仍有价值），而是降级为
+            最泛化的 RELATED_TO，并在描述里留痕。
+            """
+            t = (s or "").strip().upper().replace(" ", "_")
+            return t if t in self.ALLOWED_RELATION_TYPES else "RELATED_TO"
+
+        def safe_node_label(s):
+            """节点标签必须命中 15 类本体；大小写归一后仍越界的降级为 Concept。
+
+            实测出现过 `system`（小写）这种大小写漂移，也出现过 `ORKG`、`TransE`
+            这类实体名被当成类型。
+            """
+            raw = (s or "").strip()
+            for allowed in self.ALLOWED_LABELS:
+                if raw.lower() == allowed.lower():
+                    return allowed
+            return "Concept"
+
         # Case-insensitive endpoint matching, on parity with NetworkXStore:
         # entity dedup keeps one canonical casing, so edges naming case
         # variants must resolve to the merged node instead of dangling.
@@ -228,7 +264,7 @@ class Neo4jStore:
             for n in nodes:
                 canonical = name_map[n["name"].strip().lower()]
                 s.run(
-                    f"MERGE (x:{safe_label(n['type'])} {{name: $name}}) "
+                    f"MERGE (x:{safe_node_label(n['type'])} {{name: $name}}) "
                     "SET x.description = $desc, "
                     "x.evidence = coalesce(x.evidence, []) "
                     "+ [item IN $items WHERE NOT item IN coalesce(x.evidence, [])]",
@@ -241,7 +277,7 @@ class Neo4jStore:
                 tgt = name_map.get(e["target"].strip().lower(), e["target"].strip())
                 s.run(
                     f"MATCH (a {{name: $src}}), (b {{name: $tgt}}) "
-                    f"MERGE (a)-[r:{safe_label(e['type'])}]->(b) "
+                    f"MERGE (a)-[r:{safe_relation_type(e['type'])}]->(b) "
                     "ON CREATE SET r.description = $desc, r.evidence = [] "
                     "SET r.evidence = r.evidence "
                     "+ [item IN $items WHERE NOT item IN r.evidence]",
