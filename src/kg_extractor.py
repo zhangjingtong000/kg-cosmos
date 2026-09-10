@@ -49,18 +49,26 @@ RECORD_DIR = os.environ.get("KG_RECORD_DIR", "")
 
 
 def record_pair(task: str, prompt: str, response: str, meta: Optional[dict] = None) -> None:
-    """Append one extraction call to the distillation JSONL when recording is on."""
+    """Append one extraction call to the distillation JSONL when recording is on.
+
+    Recording is auxiliary: any failure is logged and never breaks extraction.
+    """
     if not RECORD_DIR:
         return
-    record = {
-        "task": task,
-        "prompt": prompt,
-        "response": response,
-        "meta": meta or {},
-        "ts": time.time(),
-    }
-    with open(Path(RECORD_DIR) / f"{task}.jsonl", "a", encoding="utf-8") as fh:
-        fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+    try:
+        record = {
+            "task": task,
+            "prompt": prompt,
+            "response": response,
+            "meta": meta or {},
+            "ts": time.time(),
+        }
+        target = Path(RECORD_DIR)
+        target.mkdir(parents=True, exist_ok=True)
+        with open(target / f"{task}.jsonl", "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except OSError as exc:
+        print(f"[record] failed to write {task} pair: {exc}", flush=True)
 
 # ── Prompt Templates ─────────────────────────────────────
 ENTITY_TYPES = [
