@@ -7,6 +7,7 @@
 检查：进入社区后列表有内容；点击列表项后高亮环出现、右侧关系面板打开、
 列表项标记为选中；搜索能过滤列表。
 """
+import base64
 import json
 import subprocess
 import sys
@@ -84,6 +85,15 @@ def main():
         res['点击后面板'] = ev(ws, 'window.KGNebula.panelOpen()')
         res['选中项'] = ev(ws, "document.querySelector('#list .item.sel')?.textContent?.trim()")
         res['面板标题'] = ev(ws, "document.querySelector('#dbody h2')?.textContent")
+        res['证据条数'] = ev(ws, "document.querySelectorAll('#dbody .ev').length")
+        res['证据出处'] = ev(ws, "document.querySelector('#dbody .evsrc')?.textContent")
+        res['证据原文'] = ev(ws, "(document.querySelector('#dbody .evtext')?.textContent||'').slice(0,60)")
+
+        # 截图留档（此时高亮环已定位、右侧面板显示证据）
+        shot = cdp(ws, 'Page.captureScreenshot', {'format': 'png'})
+        with open(r'D:\kg-demo\output\shots\evidence-panel.png', 'wb') as f:
+            f.write(base64.b64decode(shot['result']['data']))
+        print('截图已保存 output/shots/evidence-panel.png')
 
         set_search(ws, 'temporal')
         time.sleep(0.3)

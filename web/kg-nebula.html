@@ -56,6 +56,11 @@
                  font-variant-numeric: tabular-nums; }
   #detail .cta { margin-top: 12px; font-size: 11px; color: rgba(150, 190, 255, .85);
                  border-top: 1px solid rgba(140, 170, 255, .12); padding-top: 9px; }
+  /* 证据出处：论文 + 页码 + 原文片段 */
+  #detail .ev { margin: 7px 0 10px; padding-left: 9px;
+                border-left: 2px solid rgba(120, 160, 255, .28); }
+  #detail .evsrc { font-size: 11px; color: rgba(150, 190, 255, .82); margin-bottom: 3px; }
+  #detail .evtext { font-size: 11.5px; line-height: 1.62; color: rgba(196, 214, 240, .74); }
   #stat { margin-top: 7px; font-size: 11px; color: rgba(181, 203, 235, .58); }
 
   /* ── 内部视图 HUD ── */
@@ -562,14 +567,24 @@ function renderInnerPreview(nodeIdx) {
     if (!byType.has(r.type)) byType.set(r.type, []);
     byType.get(r.type).push(r.other);
   });
+  const evs = evidenceTable && evidenceTable[n.id];
+  const evHtml = evs && evs.length
+    ? '<div class="sec">证据出处</div>' + evs.map(e =>
+        `<div class="ev"><div class="evsrc">${escHtml(e.src)} · 第 ${e.page} 页</div>` +
+        `<div class="evtext">${escHtml(e.text)}</div></div>`).join('')
+    : '<div class="sec">证据出处</div>' +
+      '<div class="row"><span class="nm" style="color:rgba(160,190,235,.55)">' +
+      '该实体没有直接证据</span></div>';
+
   dbody.innerHTML =
-    `<h2 style="color:${cloud ? cloud.color : '#cfe0ff'}">${n.id}</h2>
-     <div class="sub">${n.t || '实体'} · 社区内关联 ${rels.length} 条<br>
-       ${cloud ? cloud.name : ''}</div>
-     ${[...byType.entries()].slice(0, 6).map(([t, list]) =>
-        `<div class="sec">${t} · ${list.length}</div>
-         ${list.slice(0, 8).map(o => `<div class="row"><span class="nm">${o}</span></div>`).join('')}`
-      ).join('')}`;
+    `<h2 style="color:${cloud ? cloud.color : '#cfe0ff'}">${escHtml(n.id)}</h2>
+     <div class="sub">${escHtml(n.t || '实体')} · 社区内关联 ${rels.length} 条<br>
+       ${escHtml(cloud ? cloud.name : '')}</div>
+     ${[...byType.entries()].slice(0, 5).map(([t, list]) =>
+        `<div class="sec">${escHtml(t)} · ${list.length}</div>
+         ${list.slice(0, 6).map(o => `<div class="row"><span class="nm">${escHtml(o)}</span></div>`).join('')}`
+      ).join('')}
+     ${evHtml}`;
   detail.classList.add('open');
 }
 
@@ -641,6 +656,7 @@ const sideEl = document.getElementById('side');
 const searchEl = document.getElementById('search');
 const listEl = document.getElementById('list');
 let selectedNodeIdx = -1;
+let evidenceTable = null;   // 当前社区的证据索引（实体名 → 出处列表）
 
 function escHtml(s) {
   return String(s).replace(/[&<>"]/g, c =>
@@ -849,6 +865,14 @@ async function enterCommunity(ci, preloaded) {
   selectedNodeIdx = -1;
   searchEl.value = '';
   refreshInnerList();
+
+  // 证据表放在最后加载：它带 await，若放在相机落位之前，会重新引入
+  // "概览已隐藏、相机未落位"的中间态。加载失败只是少一段证据，不影响主流程。
+  evidenceTable = null;
+  try {
+    const er = await fetch(new URL(`./kg-data/evidence-${ci}.json`, location.href).href);
+    if (er.ok) evidenceTable = await er.json();
+  } catch (e) { /* 没有证据表时面板少一段 */ }
 }
 
 function exitCommunity() {
