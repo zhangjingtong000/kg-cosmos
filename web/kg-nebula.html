@@ -496,6 +496,51 @@ renderer.domElement.addEventListener('pointermove', (event) => {
   }
 });
 
+// ── 内部视图：悬浮实体 → 显示它的关系 ──
+// 数据里 edges 的端点是实体 id（不是索引），所以下面按 id 过滤。
+renderer.domElement.addEventListener('pointermove', (event) => {
+  if (inside === null || flying) return;
+  pointer.x = (event.clientX / innerWidth) * 2 - 1;
+  pointer.y = -(event.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  raycaster.params.Points.threshold = 3.5;   // 世界单位下的拾取半径
+  const target = overlay.userData && overlay.userData.pts;
+  const hit = target ? raycaster.intersectObject(target, false)[0] : null;
+  const next = (hit && hit.index !== undefined) ? hit.index : -1;
+  if (next !== hoverNodeIdx) {
+    hoverNodeIdx = next;
+    if (next >= 0) renderInnerPreview(next); else hidePreview();
+  }
+});
+
+/**
+ * 悬浮实体时显示它的关系。
+ */
+function renderInnerPreview(nodeIdx) {
+  const ud = overlay.userData;
+  const data = ud && ud.data;
+  if (!data) return;
+  const n = data.nodes[nodeIdx];
+  if (!n) return;
+  const cloud = clouds[inside];
+  const rels = data.edges.filter(e => e[0] === n.id || e[1] === n.id)
+    .map(e => ({ other: e[0] === n.id ? e[1] : e[0], type: e[2] || '—' }));
+  const byType = new Map();
+  rels.forEach(r => {
+    if (!byType.has(r.type)) byType.set(r.type, []);
+    byType.get(r.type).push(r.other);
+  });
+  dbody.innerHTML =
+    `<h2 style="color:${cloud ? cloud.color : '#cfe0ff'}">${n.id}</h2>
+     <div class="sub">${n.t || '实体'} · 社区内关联 ${rels.length} 条<br>
+       ${cloud ? cloud.name : ''}</div>
+     ${[...byType.entries()].slice(0, 6).map(([t, list]) =>
+        `<div class="sec">${t} · ${list.length}</div>
+         ${list.slice(0, 8).map(o => `<div class="row"><span class="nm">${o}</span></div>`).join('')}`
+      ).join('')}`;
+  detail.classList.add('open');
+}
+
 // ── 清空内部图层 ──
 function clearOverlay() {
   while (overlay.children.length) {
@@ -508,6 +553,44 @@ function clearOverlay() {
       }
     });
     overlay.remove(o);
+  }
+  overlay.userData = {};
+}
+
+/**
+ * 内部视图的标签避让。
+ *
+ * CSS2D 标签在 3D 里是屏幕空间的 DOM，互相重叠时没有深度遮挡可言（实测
+ * 22 个标签在社区中心会挤成一团）。这里每隔几帧做一次矩形碰撞检测：
+ * labels 已按社区内度数降序排列，重要实体先占位，与之重叠的后来者隐藏。
+ */
+const _labelVec = new THREE.Vector3();
+function layoutInnerLabels() {
+  const labels = overlay.userData && overlay.userData.labels;
+  if (!labels || !labels.length || inside === null) return;
+  const placed = [];
+  // 悬浮中的实体优先占位，保证它的标签不会因为避让而消失
+  const ordered = hoverNodeIdx >= 0
+    ? [...labels].sort((a, b) =>
+        (b.nodeIdx === hoverNodeIdx ? 1 : 0) - (a.nodeIdx === hoverNodeIdx ? 1 : 0))
+    : labels;
+  for (const item of ordered) {
+    const el = item.object.element;
+    _labelVec.copy(item.object.position).project(camera);
+    if (_labelVec.z > 1 || _labelVec.z < -1) { el.style.visibility = 'hidden'; continue; }
+    const x = (_labelVec.x * .5 + .5) * innerWidth;
+    const y = (-_labelVec.y * .5 + .5) * innerHeight;
+    // 先置为可见才能量到尺寸（visibility 不影响 offsetWidth）
+    el.style.visibility = 'visible';
+    const w = el.offsetWidth || 90, h = el.offsetHeight || 16;
+    const box = { x: x - w / 2, y: y - h / 2, w, h };
+    let hit = false;
+    for (const q of placed) {
+      if (box.x < q.x + q.w && box.x + box.w > q.x &&
+          box.y < q.y + q.h && box.y + box.h > q.y) { hit = true; break; }
+    }
+    if (hit) el.style.visibility = 'hidden';
+    else placed.push(box);
   }
 }
 
@@ -528,6 +611,7 @@ async function enterCommunity(ci, preloaded, instant) {
     }
   }
   clearOverlay();
+  inside = ci;      // 供标签避让与 hover 判断；?c=N 直入时原本没人设置它
 
   const center = new THREE.Vector3().fromArray(cloud.position);
   const base = new THREE.Color(cloud.color);
@@ -592,8 +676,10 @@ async function enterCommunity(ci, preloaded, instant) {
   lines.frustumCulled = false;
   overlay.add(lines);
 
-  // 核心实体标签（只标少量，避免拥挤）
+  // 核心实体标签：只标度数最高的一批，并交给 layoutInnerLabels 做屏幕空间
+  // 避让——22 个标签在社区中心会挤成一团（实测）。
   const top = [...data.nodes].sort((a, b) => (b.d || 0) - (a.d || 0)).slice(0, 22);
+  const labelItems = [];
   top.forEach(n => {
     const el = document.createElement('div');
     el.className = 'label';
@@ -602,9 +688,13 @@ async function enterCommunity(ci, preloaded, instant) {
     const o = new CSS2DObject(el);
     o.position.set(center.x + n.x, center.y + n.y + 2.4, center.z + n.z);
     overlay.add(o);
+    labelItems.push({ object: o, degree: n.d || 0, nodeIdx: idx.get(n.id) });
   });
 
-  overlay.userData = { center, radius: data.meta.radius || 60 };
+  overlay.userData = {
+    center, radius: data.meta.radius || 60,
+    data, nodeIndex: idx, labels: labelItems, pts,
+  };
 
   // 概览层隐藏：按对象类型筛选更稳健（原型里没有名为 points 的全局变量，
   // 直接引用会抛 "points is not defined" 并中断 enterCommunity）。
@@ -731,6 +821,8 @@ const CAM_Z = 50.2;
 const CAM_Z_PORTRAIT = 105.5;
 
 let _firstFrame = false;
+let labelTick = 0;
+let hoverNodeIdx = -1;      // 内部视图里当前悬浮的实体（供标签避让优先占位）
 function animate() {
   requestAnimationFrame(animate);
   const elapsed = performance.now() * .001;
@@ -772,6 +864,8 @@ function animate() {
     if (particle.visible) particle.position.copy(item.curve.getPoint((elapsed * .035 + particle.userData.offset) % 1));
   });
   controls.update();
+  // 内部视图的标签避让：每 5 帧一次（每帧都做会因强制 reflow 拖慢渲染）
+  if (inside !== null && (labelTick++ % 5 === 0)) layoutInnerLabels();
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
   // L0 概览首帧渲染完成即就绪。直入模式（?c=N）不在这里置位，
