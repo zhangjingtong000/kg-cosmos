@@ -36,18 +36,17 @@
   header .stat b{color:var(--muted);font-weight:600}
 
   #grid{
-    flex:1 1 auto;overflow:auto;padding:2px 22px 22px;
+    flex:1 1 auto;overflow:auto;padding:2px 22px 8px;
     display:grid;gap:13px;
     grid-template-columns:repeat(6,minmax(0,1fr));
     /* 行高撑满视口：否则卡片高度退化成 auto，canvas 掉回 HTML 默认 150px，
        图被压扁、底部留一大片空白（已实测）。 */
-    grid-auto-rows:minmax(190px,1fr);
+    grid-auto-rows:minmax(212px,1fr);
     scrollbar-width:thin;scrollbar-color:#243352 transparent;
   }
-  @media (max-width:1780px){#grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
-  @media (max-width:1480px){#grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-  @media (max-width:1160px){#grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-  @media (max-width:880px) {#grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:1299px){#grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (max-width:860px) {#grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:560px) {#grid{grid-template-columns:repeat(1,minmax(0,1fr))}}
 
   .card{
     position:relative;display:flex;flex-direction:column;
@@ -120,7 +119,7 @@
   }
 
   #foot{
-    position:fixed;left:22px;bottom:8px;z-index:3;color:var(--dim);font-size:11px;
+    flex:0 0 auto;padding:0 22px 9px;color:var(--dim);font-size:11px;
     pointer-events:none;
   }
 </style>
@@ -136,9 +135,8 @@
     <span class="stat" id="stat">加载中…</span>
   </header>
   <div id="grid"></div>
+  <div id="foot"></div>
 </div>
-
-<div id="foot"></div>
 
 <div id="overlay">
   <div id="detail">
