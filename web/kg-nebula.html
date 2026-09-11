@@ -85,11 +85,20 @@
           display: flex; flex-direction: column; gap: 8px;
           opacity: 0; pointer-events: none; transition: opacity .3s ease; }
   body.inside #side { opacity: 1; pointer-events: auto; }
+  #searchWrap { position: relative; flex: 0 0 auto; }
   #search { width: 100%; background: rgba(8, 13, 30, .88);
             border: 1px solid rgba(140, 170, 255, .26); color: #dbe7ff;
-            border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 12px; outline: none; }
+            border-radius: 8px; padding: 8px 30px 8px 10px; font: inherit;
+            font-size: 12px; outline: none; }
   #search:focus { border-color: rgba(150, 190, 255, .62); }
   #search::placeholder { color: rgba(160, 190, 235, .45); }
+  /* 清除按钮：只在有内容时出现 */
+  #searchClear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+                 width: 19px; height: 19px; padding: 0; border: 0; border-radius: 50%;
+                 background: rgba(140, 170, 255, .16); color: #cfe0ff; cursor: pointer;
+                 font-size: 13px; line-height: 1; display: none; }
+  #searchClear:hover { background: rgba(140, 170, 255, .34); color: #fff; }
+  body.hasQuery #searchClear { display: block; }
   #list { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain;
           background: rgba(8, 13, 30, .74); border: 1px solid rgba(140, 170, 255, .16);
           border-radius: 10px; padding: 4px;
@@ -101,7 +110,10 @@
   #list .item.sel { background: rgba(120, 160, 255, .24); color: #fff; }
   #list .item .nm { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #list .item .dg { color: rgba(160, 190, 235, .6); font-size: 11px; font-variant-numeric: tabular-nums; }
-  #list .empty { padding: 14px 8px; text-align: center; font-size: 12px; color: rgba(160, 190, 235, .5); }
+  #list .empty { padding: 20px 10px; text-align: center; font-size: 12px;
+                 line-height: 1.75; color: rgba(160, 190, 235, .5); }
+  #list .empty b { display: block; margin-bottom: 5px; font-weight: 500;
+                   color: rgba(196, 216, 246, .78); }
 </style>
 </head>
 <body>
@@ -110,7 +122,10 @@
 <div class="hint" id="hint">拖拽旋转 · 滚轮缩放 · 悬浮预览社区 · 点击星云进入内部</div>
 <aside id="detail"><div id="dbody"></div></aside>
 <aside id="side">
-  <input id="search" type="search" placeholder="搜索实体…" autocomplete="off" spellcheck="false">
+  <div id="searchWrap">
+    <input id="search" type="search" placeholder="搜索实体…" autocomplete="off" spellcheck="false">
+    <button id="searchClear" type="button" title="清除" aria-label="清除搜索">×</button>
+  </div>
   <div id="list"></div>
 </aside>
 <div id="inner"><div id="innerTitle"><b id="itName"></b><small id="itSub"></small></div><button id="back" type="button">← 返回星云概览</button></div>
@@ -612,40 +627,94 @@ function clearOverlay() {
 }
 
 /**
- * 内部视图的标签避让。
+ * 内部视图的标签分配与避让。
  *
- * CSS2D 标签在 3D 里是屏幕空间的 DOM，互相重叠时没有深度遮挡可言（实测
- * 22 个标签在社区中心会挤成一团）。这里每隔几帧做一次矩形碰撞检测：
- * labels 已按社区内度数降序排列，重要实体先占位，与之重叠的后来者隐藏。
+ * 每 5 帧执行一次（每帧做会因强制 reflow 拖慢渲染）：
+ *   1. 按缩放级别算标签预算——相机越靠近社区中心给得越多（约 6 ~ 52 个）；
+ *   2. 对全部节点算屏幕位置与权重（社区内度数 × 靠近视野中心的程度）；
+ *   3. 按权重排序，把标签池里的 DOM 依次分配出去；
+ *   4. 逐个做矩形碰撞检测，重叠的跳过（且不消耗槽位）。
+ *
+ * 这样外围节点只要被放大到视野中心同样能拿到标签，缩小时标签自动收敛；
+ * 悬浮或选中的节点权重加满，一定显示。
  */
 const _labelVec = new THREE.Vector3();
 function layoutInnerLabels() {
-  const labels = overlay.userData && overlay.userData.labels;
-  if (!labels || !labels.length || inside === null) return;
+  const ud = overlay.userData;
+  const labels = ud && ud.labels;
+  const data = ud && ud.data;
+  if (!labels || !labels.length || !data || inside === null) return;
+
+  const cx = innerWidth / 2, cy = innerHeight / 2;
+
+  // ① 标签预算：相机到社区中心的距离相对于社区半径
+  const rel = camera.position.distanceTo(ud.center) / Math.max(1e-3, ud.radius);
+  const zoomT = Math.min(1, Math.max(0, (3.2 - rel) / 2.6));
+  const budget = Math.round(6 + zoomT * 46);
+
+  // ② 给全部节点打分
+  let maxDeg = 1;
+  for (const n of data.nodes) if ((n.d || 0) > maxDeg) maxDeg = n.d;
+  const logMax = Math.log(1 + maxDeg);
+  const forced = hoverNodeIdx >= 0 ? hoverNodeIdx : selectedNodeIdx;
+
+  const cands = [];
+  for (let i = 0; i < data.nodes.length; i++) {
+    const n = data.nodes[i];
+    _labelVec.set(ud.center.x + n.x, ud.center.y + n.y, ud.center.z + n.z).project(camera);
+    if (_labelVec.z > 1 || _labelVec.z < -1) continue;
+    const sx = (_labelVec.x * .5 + .5) * innerWidth;
+    const sy = (-_labelVec.y * .5 + .5) * innerHeight;
+    if (sx < -90 || sx > innerWidth + 90 || sy < -50 || sy > innerHeight + 50) continue;
+    const dx = (sx - cx) / innerWidth, dy = (sy - cy) / innerHeight;
+    const centerScore = Math.max(0, 1 - Math.hypot(dx, dy) * 1.7);
+    const degScore = Math.log(1 + (n.d || 0)) / logMax;
+    cands.push({
+      i, sx, sy,
+      w: (0.30 + 0.70 * degScore) * (0.22 + 0.78 * centerScore) + (i === forced ? 10 : 0),
+    });
+  }
+  cands.sort((a, b) => b.w - a.w);
+
+  // ③ 分配 DOM  ④ 碰撞避让
   const placed = [];
-  // 悬浮或选中的实体优先占位，保证它的标签不会因为避让而消失
-  const prio = hoverNodeIdx >= 0 ? hoverNodeIdx : selectedNodeIdx;
-  const ordered = prio >= 0
-    ? [...labels].sort((a, b) =>
-        (b.nodeIdx === prio ? 1 : 0) - (a.nodeIdx === prio ? 1 : 0))
-    : labels;
-  for (const item of ordered) {
-    const el = item.object.element;
-    _labelVec.copy(item.object.position).project(camera);
-    if (_labelVec.z > 1 || _labelVec.z < -1) { el.style.visibility = 'hidden'; continue; }
-    const x = (_labelVec.x * .5 + .5) * innerWidth;
-    const y = (-_labelVec.y * .5 + .5) * innerHeight;
-    // 先置为可见才能量到尺寸（visibility 不影响 offsetWidth）
-    el.style.visibility = 'visible';
-    const w = el.offsetWidth || 90, h = el.offsetHeight || 16;
-    const box = { x: x - w / 2, y: y - h / 2, w, h };
+  let slot = 0;
+  for (const c of cands) {
+    const item = labels[slot];
+    if (!item) break;
+    const isForced = c.i === forced;
+    if (!isForced && slot >= budget) break;
+
+    const n = data.nodes[c.i];
+    const text = String(n.id);
+    if (item.text !== text) {          // 只在内容变化时改 DOM，避免无谓 reflow
+      item.object.element.innerHTML = `<b>${escHtml(text)}</b>`;
+      item.text = text;
+    }
+    item.object.position.set(ud.center.x + n.x, ud.center.y + n.y + 2.4, ud.center.z + n.z);
+    item.object.visible = true;
+    item.object.element.style.visibility = 'visible';
+    item.nodeIdx = c.i;
+
+    const w = item.object.element.offsetWidth || 90;
+    const h = item.object.element.offsetHeight || 16;
+    const box = { x: c.sx - w / 2, y: c.sy - h / 2, w, h };
     let hit = false;
     for (const q of placed) {
       if (box.x < q.x + q.w && box.x + box.w > q.x &&
           box.y < q.y + q.h && box.y + box.h > q.y) { hit = true; break; }
     }
-    if (hit) el.style.visibility = 'hidden';
-    else placed.push(box);
+    if (hit) {
+      item.object.visible = false;
+      item.nodeIdx = -1;
+      continue;                        // 槽位不消耗，留给下一个候选
+    }
+    placed.push(box);
+    slot++;
+  }
+  for (let k = slot; k < labels.length; k++) {
+    labels[k].object.visible = false;
+    labels[k].nodeIdx = -1;
   }
 }
 
@@ -668,12 +737,16 @@ function innerListHtml(filter) {
   const data = ud && ud.data;
   if (!data) return '';
   const q = (filter || '').trim().toLowerCase();
+  // 不再截断。原来卡在 400 项，最大的社区（1104 个实体）里后 700 个除非
+  // 搜索命中就永远点不到；而且要让"在三维画面里点节点"也能滚到列表对应项，
+  // 必须保证每一项都在列表里。
   const items = data.nodes
     .map((n, i) => ({ n, i }))
     .sort((a, b) => (b.n.d || 0) - (a.n.d || 0))
-    .filter(x => !q || String(x.n.id).toLowerCase().includes(q))
-    .slice(0, 400);
-  if (!items.length) return '<div class="empty">没有匹配的实体</div>';
+    .filter(x => !q || String(x.n.id).toLowerCase().includes(q));
+  if (!items.length) {
+    return '<div class="empty"><b>没有匹配的实体</b>换个更短的关键词试试</div>';
+  }
   return items.map(x =>
     `<div class="item${x.i === selectedNodeIdx ? ' sel' : ''}" data-i="${x.i}">` +
     `<span class="nm">${escHtml(x.n.id)}</span>` +
@@ -682,23 +755,64 @@ function innerListHtml(filter) {
 
 function refreshInnerList() {
   listEl.innerHTML = innerListHtml(searchEl.value);
+  document.body.classList.toggle('hasQuery', Boolean(searchEl.value));
 }
 
-/** 选中某个实体：高亮、对准相机、显示关系、列表标选中。 */
+/** 把列表滚动到某个实体并确保可见（在三维画面里点击节点时同步列表）。 */
+function scrollListToNode(i) {
+  let el = listEl.querySelector(`.item[data-i="${i}"]`);
+  if (!el && searchEl.value) {       // 可能被搜索过滤掉了，清掉搜索再找
+    searchEl.value = '';
+    refreshInnerList();
+    el = listEl.querySelector(`.item[data-i="${i}"]`);
+  }
+  if (el) el.scrollIntoView({ block: 'nearest' });
+}
+
+/**
+ * 选中某个实体：放大光晕、对准相机、显示关系、列表标选中。
+ * 再次点击同一个实体则取消选中。
+ */
 function selectNode(i) {
   const ud = overlay.userData;
   const n = ud && ud.data && ud.data.nodes[i];
   if (!n) return;
+
+  if (i === selectedNodeIdx) {     // 重复点击同一个 → 取消标注
+    clearSelection();
+    return;
+  }
+
   selectedNodeIdx = i;
   if (ud.halo) {
     ud.halo.position.set(ud.center.x + n.x, ud.center.y + n.y, ud.center.z + n.z);
     ud.halo.visible = true;
+    haloAnim = { t0: performance.now(), dur: 460, base: 46, material: ud.halo.material };
   }
   controls.target.set(ud.center.x + n.x, ud.center.y + n.y, ud.center.z + n.z);
-  hoverNodeIdx = i;              // 让它的标签在避让里优先占位
   renderInnerPreview(i);
   [...listEl.querySelectorAll('.item')].forEach(el =>
     el.classList.toggle('sel', +el.dataset.i === i));
+}
+
+/** 取消选中：隐藏光晕、收起关系面板、清掉列表选中态，视线缓动回社区中心。 */
+function clearSelection() {
+  selectedNodeIdx = -1;
+  haloAnim = null;
+  const ud = overlay.userData;
+  if (ud && ud.halo) {
+    ud.halo.visible = false;
+    ud.halo.material.uniforms.uOpacity.value = 0;
+  }
+  // 不回中的话，相机还盯着刚才那个节点，社区中心已经偏出画面
+  if (ud && ud.center) {
+    targetAnim = {
+      from: controls.target.clone(), to: ud.center.clone(),
+      t0: performance.now(), dur: 420,
+    };
+  }
+  hidePreview();
+  [...listEl.querySelectorAll('.item')].forEach(el => el.classList.remove('sel'));
 }
 
 listEl.addEventListener('click', (e) => {
@@ -706,6 +820,11 @@ listEl.addEventListener('click', (e) => {
   if (item) selectNode(+item.dataset.i);
 });
 searchEl.addEventListener('input', refreshInnerList);
+document.getElementById('searchClear').addEventListener('click', () => {
+  searchEl.value = '';
+  refreshInnerList();
+  searchEl.focus();
+});
 
 // ── 渲染社区内部（实体点 + 内部边 + 核心标签）──
 async function enterCommunity(ci, preloaded) {
@@ -789,28 +908,56 @@ async function enterCommunity(ci, preloaded) {
   lines.frustumCulled = false;
   overlay.add(lines);
 
-  // 核心实体标签：只标度数最高的一批，并交给 layoutInnerLabels 做屏幕空间
-  // 避让——22 个标签在社区中心会挤成一团（实测）。
-  const top = [...data.nodes].sort((a, b) => (b.d || 0) - (a.d || 0)).slice(0, 22);
+  // 标签池：预建一批 CSS2DObject，由 layoutInnerLabels 每几帧重新分配给
+  // "当前最该显示"的节点。
+  //
+  // 为什么不固定标注 Top-N：那样只有社区中心的枢纽有标签，外围节点即使被
+  // 放大到眼前也不显示。改成动态分配后候选是全部节点——谁靠近视野中心、
+  // 谁度数高，谁拿到标签；缩放越大预算越多。
+  const LABEL_POOL = Math.min(150, data.nodes.length);
   const labelItems = [];
-  top.forEach(n => {
+  for (let k = 0; k < LABEL_POOL; k++) {
     const el = document.createElement('div');
     el.className = 'label entity';
-    el.innerHTML = `<b>${n.id}</b>`;
     el.style.fontSize = '11px';
     const o = new CSS2DObject(el);
-    o.position.set(center.x + n.x, center.y + n.y + 2.4, center.z + n.z);
+    o.position.set(center.x, center.y, center.z);
+    o.visible = false;
     overlay.add(o);
-    labelItems.push({ object: o, degree: n.d || 0, nodeIdx: idx.get(n.id) });
-  });
+    labelItems.push({ object: o, nodeIdx: -1, text: '' });
+  }
 
-  // 选中高亮环：跟随被选中的实体，屏幕尺寸恒定
+  // 选中光晕：环形 + 中心亮点的圆点。
+  //
+  // 原来用 PointsMaterial，它把点渲染成**正方形**——屏幕上就是一个白方块把
+  // 节点框住，既不直观也不好看。这里改用自定义着色器画圆环，尺寸由 haloAnim
+  // 驱动，点击时有一次"放大过冲再回落"的动画。
   const haloGeo = new THREE.BufferGeometry();
   haloGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3));
-  const halo = new THREE.Points(haloGeo, new THREE.PointsMaterial({
-    size: 44, color: 0xffffff, transparent: true, opacity: 0.9,
-    sizeAttenuation: false, blending: THREE.AdditiveBlending, depthWrite: false,
-  }));
+  const haloMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, depthTest: false,
+    blending: THREE.AdditiveBlending,
+    uniforms: {
+      uSize: { value: 0 },
+      uOpacity: { value: 0 },
+      uColor: { value: new THREE.Color(0xffffff) },
+    },
+    vertexShader: `uniform float uSize;
+      void main(){ gl_PointSize = uSize;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `uniform vec3 uColor; uniform float uOpacity;
+      void main(){
+        vec2 d = gl_PointCoord - .5; float r = length(d);
+        if (r > .5) discard;
+        // 外环：一圈清晰的光边；内核：中心亮点
+        float ring = smoothstep(.50, .40, r) * smoothstep(.24, .34, r);
+        float core = smoothstep(.15, .0, r);
+        float a = (ring * .9 + core * .55) * uOpacity;
+        if (a < .004) discard;
+        gl_FragColor = vec4(uColor, a);
+      }`,
+  });
+  const halo = new THREE.Points(haloGeo, haloMat);
   halo.visible = false;
   halo.frustumCulled = false;
   overlay.add(halo);
@@ -858,8 +1005,11 @@ async function enterCommunity(ci, preloaded) {
   document.body.classList.add('inside');
   document.getElementById('itName').textContent = cloud.name;
   document.getElementById('itName').style.color = cloud.color;
+  // 显示数与总数相同时不必写两遍
+  const shownN = data.meta.shown, totalN = data.entityCount;
+  const cntText = shownN === totalN ? `${totalN} 个实体` : `${shownN} / ${totalN} 个实体`;
   document.getElementById('itSub').textContent =
-    `${data.meta.shown} 个实体（共 ${data.entityCount}） · ${data.meta.edges} 条内部关系`;
+    `${cntText} · ${data.meta.edges} 条内部关系`;
 
   // 刷新实体列表；选中态属于上一个社区，这里清空
   selectedNodeIdx = -1;
@@ -910,7 +1060,24 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   if (flying) return;
   const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
   if (moved > 5 || performance.now() - downT > 700) return;
-  if (inside !== null) return;
+
+  // ── 内部视图：点击实体 = 与点击列表项同种效果；点空白处取消选中 ──
+  if (inside !== null) {
+    pointer.x = (e.clientX / innerWidth) * 2 - 1;
+    pointer.y = -(e.clientY / innerHeight) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    raycaster.params.Points.threshold = 3.5;
+    const ptsTarget = overlay.userData && overlay.userData.pts;
+    const nodeHit = ptsTarget ? raycaster.intersectObject(ptsTarget, false)[0] : null;
+    if (nodeHit && nodeHit.index !== undefined) {
+      selectNode(nodeHit.index);
+      scrollListToNode(nodeHit.index);
+    } else {
+      clearSelection();
+    }
+    return;
+  }
+
   pointer.x = (e.clientX / innerWidth) * 2 - 1;
   pointer.y = -(e.clientY / innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
@@ -930,7 +1097,9 @@ const CAM_Z_PORTRAIT = 105.5;
 
 let _firstFrame = false;
 let labelTick = 0;
-let hoverNodeIdx = -1;      // 内部视图里当前悬浮的实体（供标签避让优先占位）
+let hoverNodeIdx = -1;      // 内部视图里当前悬浮的实体（供标签分配优先占位）
+let haloAnim = null;        // 选中光晕的放大动画状态
+let targetAnim = null;      // 视线缓动状态（取消选中后回到社区中心）
 function animate() {
   requestAnimationFrame(animate);
   const elapsed = performance.now() * .001;
@@ -964,7 +1133,26 @@ function animate() {
     if (particle.visible) particle.position.copy(item.curve.getPoint((elapsed * .035 + particle.userData.offset) % 1));
   });
   controls.update();
-  // 内部视图的标签避让：每 5 帧一次（每帧都做会因强制 reflow 拖慢渲染）
+
+  // 选中光晕的放大动画：快速放大并轻微过冲，然后回落稳定（约 460ms）
+  if (haloAnim) {
+    const x = Math.min(1, (performance.now() - haloAnim.t0) / haloAnim.dur);
+    const k = x < 0.68 ? (x / 0.68) * 1.22 : 1.22 - 0.22 * ((x - 0.68) / 0.32);
+    const m = haloAnim.material;
+    m.uniforms.uSize.value = haloAnim.base * k;
+    m.uniforms.uOpacity.value = Math.min(1, x * 4.5);
+    if (x >= 1) { m.uniforms.uSize.value = haloAnim.base; haloAnim = null; }
+  }
+
+  // 视线缓动：只用于"取消选中后回到社区中心"这类小幅调整，与场景切换无关
+  if (targetAnim) {
+    const x = Math.min(1, (performance.now() - targetAnim.t0) / targetAnim.dur);
+    const e = 1 - Math.pow(1 - x, 3);
+    controls.target.lerpVectors(targetAnim.from, targetAnim.to, e);
+    if (x >= 1) targetAnim = null;
+  }
+
+  // 内部视图的标签分配：每 5 帧一次（每帧都做会因强制 reflow 拖慢渲染）
   if (inside !== null && (labelTick++ % 5 === 0)) layoutInnerLabels();
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
@@ -999,9 +1187,24 @@ window.KGNebula = {
   exit: () => exitCommunity(),
   labelCount: () => document.querySelectorAll('.label').length,
   select: (i) => selectNode(i),
+  clear: () => clearSelection(),
   listCount: () => document.querySelectorAll('#list .item').length,
   haloOn: () => Boolean(overlay.userData && overlay.userData.halo && overlay.userData.halo.visible),
   panelOpen: () => document.getElementById('detail').classList.contains('open'),
+  subText: () => document.getElementById('itSub').textContent,
+  // 供自动化验证：某实体在屏幕上的坐标（用于派发点击事件）
+  nodeScreen: (i) => {
+    const ud = overlay.userData;
+    if (!ud || !ud.data || !ud.data.nodes[i]) return null;
+    const n = ud.data.nodes[i];
+    const v = new THREE.Vector3(ud.center.x + n.x, ud.center.y + n.y, ud.center.z + n.z)
+      .project(camera);
+    return {
+      x: (v.x * .5 + .5) * innerWidth,
+      y: (-v.y * .5 + .5) * innerHeight,
+      z: v.z,
+    };
+  },
 };
 
 addEventListener('resize', () => {
