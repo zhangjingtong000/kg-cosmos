@@ -129,6 +129,14 @@ def main():
             time.sleep(0.5)
             res['再点一次后高亮环'] = ev(ws, 'window.KGNebula.haloOn()')
 
+        # 进入社区后移动鼠标：概览层的社区与跨社区纤维不应被重新显示出来
+        ev(ws, "(function(){var cv=document.querySelector('canvas');"
+               "for (var i=0;i<6;i++){cv.dispatchEvent(new PointerEvent('pointermove',"
+               "{clientX:700+i*40,clientY:380+i*20,bubbles:true}));}"
+               "return 1;})()")
+        time.sleep(0.4)
+        res['内部视图下概览层泄漏对象'] = ev(ws, 'window.KGNebula.overviewLeak()')
+
         # 视线缓动：选中后 controls.target 应在约 260ms 内逐步逼近目标，
         # 而不是一步到位（那正是"画面瞬移"的成因）
         t_before = ev(ws, 'window.KGNebula.target()')

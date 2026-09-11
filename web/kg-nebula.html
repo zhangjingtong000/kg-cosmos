@@ -842,7 +842,11 @@ async function enterCommunity(ci, preloaded) {
     }
   }
   clearOverlay();
-  inside = ci;      // 供标签避让与 hover 判断；?c=N 直入时原本没人设置它
+  inside = ci;         // 供标签分配与 hover 判断；?c=N 直入时原本没人设置它
+  // insideActive 原来从声明起就永远是 false（原型遗留，没人给它赋值），
+  // 于是 updateHoverState() 里的 `group.visible = !insideActive` 恒为 true：
+  // 进入社区后鼠标一移动，社区间的纤维就被重新显示出来。
+  insideActive = true;
 
   const center = new THREE.Vector3().fromArray(cloud.position);
   const base = new THREE.Color(cloud.color);
@@ -1047,6 +1051,7 @@ function exitCommunity() {
   controls.target.set(0, 0, 0);
   controls.update();
   inside = null;
+  insideActive = false;
   hoverId = null;
   hidePreview();
 }
@@ -1192,6 +1197,18 @@ window.KGNebula = {
   panelOpen: () => document.getElementById('detail').classList.contains('open'),
   subText: () => document.getElementById('itSub').textContent,
   target: () => controls.target.toArray().map(v => +v.toFixed(2)),
+  // 供自动化验证：内部视图下仍可见的概览层对象数（应为 0）
+  overviewLeak: () => {
+    let n = 0;
+    scene.children.forEach(o => {
+      if (o === overlay || o.isCSS2DObject || o === renderer.domElement) return;
+      if (o.isLight || o.isCamera) return;
+      if (o.visible && (o.isPoints || o.isLineSegments) && !o.parent?.isGroup) n++;
+    });
+    cloudObjects.forEach(it => { if (it.group.visible) n++; });
+    filamentObjects.forEach(it => { if (it.group.visible) n++; });
+    return n;
+  },
   // 供自动化验证：某实体在屏幕上的坐标（用于派发点击事件）
   nodeScreen: (i) => {
     const ud = overlay.userData;
