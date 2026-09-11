@@ -263,8 +263,16 @@ class Neo4jStore:
         with self.driver.session() as s:
             for n in nodes:
                 canonical = name_map[n["name"].strip().lower()]
+                label = safe_node_label(n["type"])
+                # 身份判定只用 name（不含标签）：标签是"关于实体的断言"，不是身份的一部分。
+                # 旧写法 `MERGE (x:Label {name})` 会把同名实体的不同类型拆成多个节点——
+                # 实测 KG 被拆成 Concept/Dataset/Artifact 三个（度数 323/323/182 而非 828），
+                # arXiv 拆成 6 个，全图 4.3% 的节点是重复，直接扭曲社区检测与中心性分析。
+                # 现在标签只在**创建时**设定；已存在的节点保留其标签，跨篇类型冲突由
+                # tools/merge_duplicate_nodes.py 按标签优先级收敛。
                 s.run(
-                    f"MERGE (x:{safe_node_label(n['type'])} {{name: $name}}) "
+                    f"MERGE (x {{name: $name}}) "
+                    f"ON CREATE SET x:`{label}` "
                     "SET x.description = $desc, "
                     "x.evidence = coalesce(x.evidence, []) "
                     "+ [item IN $items WHERE NOT item IN coalesce(x.evidence, [])]",
