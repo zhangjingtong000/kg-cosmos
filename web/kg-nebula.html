@@ -7,9 +7,20 @@
 <style>
   * { box-sizing: border-box; }
   html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #050914; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
-  .space { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+  /* 背景改为纯色 + 极弱的径向层次。原来是 deep-space-galaxy.html 这个 iframe
+     （一层会动的星空），按用户要求把所有星星删掉了，只留一点空间感。 */
+  body { background: radial-gradient(ellipse 120% 80% at 50% 8%, #0b1428 0%, #060b18 46%, #04070f 100%); }
   canvas { position: fixed; inset: 0; display: block; }
   .label { color: rgba(239,246,255,.9); font-size: 12px; letter-spacing: .025em; text-align: center; white-space: nowrap; pointer-events: none; text-shadow: 0 2px 10px rgba(0,0,0,.95), 0 0 14px rgba(8,20,45,.9); }
+  /* 实体标签加半透明底板。社区 Triple 的节点与边是浅蓝（#7ecbff），
+     白色文字直接压在上面几乎读不出来；底板让标签不受底图颜色影响。 */
+  .label.entity {
+    background: rgba(5, 9, 20, .72);
+    border: 1px solid rgba(255, 255, 255, .07);
+    border-radius: 5px;
+    padding: 2px 6px 3px;
+    box-shadow: 0 1px 7px rgba(0, 0, 0, .55);
+  }
   .label b { display: block; font-size: 13px; font-weight: 550; }
   .label small { display: block; margin-top: 4px; color: rgba(202,220,244,.58); font-size: 10px; }
   .header { position: fixed; inset: 28px auto auto 32px; z-index: 3; color: rgba(232,241,255,.88); pointer-events: none; transition: opacity .35s ease; }
@@ -51,8 +62,10 @@
   #inner { position: fixed; inset: 0; z-index: 5; pointer-events: none; opacity: 0;
            transition: opacity .45s ease; }
   #inner.on { opacity: 1; }
-  #innerTitle { position: fixed; left: 50%; top: 26px; transform: translateX(-50%);
-                text-align: center; }
+  /* 标题加深色底板：社区中心是上千个实体的亮核，白字直接压上去读不出来 */
+  #innerTitle { position: fixed; left: 50%; top: 20px; transform: translateX(-50%);
+                text-align: center; padding: 6px 16px 8px; border-radius: 10px;
+                background: rgba(5, 9, 20, .62); backdrop-filter: blur(6px); }
   #innerTitle b { display: block; font-size: 17px; font-weight: 560; letter-spacing: .02em; }
   #innerTitle small { display: block; margin-top: 5px; font-size: 11px;
                       color: rgba(181, 203, 235, .6); }
@@ -61,14 +74,40 @@
           color: #cfe0ff; border-radius: 9px; padding: 8px 14px; font-size: 12px;
           backdrop-filter: blur(8px); }
   #back:hover { border-color: rgba(150, 190, 255, .6); color: #fff; }
+
+  /* ── 内部视图的实体列表与搜索 ── */
+  #side { position: fixed; left: 22px; top: 74px; bottom: 18px; width: 236px; z-index: 4;
+          display: flex; flex-direction: column; gap: 8px;
+          opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+  body.inside #side { opacity: 1; pointer-events: auto; }
+  #search { width: 100%; background: rgba(8, 13, 30, .88);
+            border: 1px solid rgba(140, 170, 255, .26); color: #dbe7ff;
+            border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 12px; outline: none; }
+  #search:focus { border-color: rgba(150, 190, 255, .62); }
+  #search::placeholder { color: rgba(160, 190, 235, .45); }
+  #list { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain;
+          background: rgba(8, 13, 30, .74); border: 1px solid rgba(140, 170, 255, .16);
+          border-radius: 10px; padding: 4px;
+          scrollbar-width: thin; scrollbar-color: rgba(120,160,255,.3) transparent; }
+  #list .item { display: flex; align-items: baseline; gap: 8px; padding: 5px 8px;
+                border-radius: 6px; cursor: pointer; font-size: 12px;
+                color: rgba(214, 228, 250, .88); }
+  #list .item:hover { background: rgba(120, 160, 255, .14); color: #fff; }
+  #list .item.sel { background: rgba(120, 160, 255, .24); color: #fff; }
+  #list .item .nm { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #list .item .dg { color: rgba(160, 190, 235, .6); font-size: 11px; font-variant-numeric: tabular-nums; }
+  #list .empty { padding: 14px 8px; text-align: center; font-size: 12px; color: rgba(160, 190, 235, .5); }
 </style>
 </head>
 <body>
-<iframe class="space" title="深空背景" src="../assets/deep-space-galaxy.html?passive=1"></iframe>
 <div class="header"><small>kg cosmos · community nebula</small><h1>社区星云</h1><div id="stat"></div></div>
 <div class="status" id="status"></div>
 <div class="hint" id="hint">拖拽旋转 · 滚轮缩放 · 悬浮预览社区 · 点击星云进入内部</div>
 <aside id="detail"><div id="dbody"></div></aside>
+<aside id="side">
+  <input id="search" type="search" placeholder="搜索实体…" autocomplete="off" spellcheck="false">
+  <div id="list"></div>
+</aside>
 <div id="inner"><div id="innerTitle"><b id="itName"></b><small id="itSub"></small></div><button id="back" type="button">← 返回星云概览</button></div>
 
 <script type="importmap">
@@ -111,14 +150,6 @@ const PRE_C = new URLSearchParams(location.search).get('c');
 const PRE_DATA = (PRE_C !== null && clouds[+PRE_C])
   ? await (await fetch(COMM_URL(+PRE_C))).json()
   : null;
-
-// 调试开关：&nobg=1 关掉背景星野 iframe。
-// 背景星野的星点和内部实体点在像素层面同级，肉眼数不清实体到底渲染出几个，
-// 关掉它才能用像素统计客观核验。
-if (new URLSearchParams(location.search).get('nobg') === '1') {
-  const _sp = document.querySelector('.space');
-  if (_sp) _sp.style.display = 'none';
-}
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 1000);
@@ -441,8 +472,9 @@ const hintEl = document.getElementById('hint');
 const overlay = new THREE.Group();   // 内部视图的容器（进入时填充，返回时清空）
 scene.add(overlay);
 let inside = null;                    // 当前进入的社区索引
-let flying = null;                    // 相机补间状态
-let FLY_MS = 1150;                    // 飞入时长；?c=N 直入时压到最小以便截图
+// 相机不再做飞入/退出补间：用户要求切换时直接显示正常画面尺寸，不要一个
+// 缩放动画过程。flying 仅为兼容既有判断保留，恒为 null。
+let flying = null;
 
 function neighborsOf(id) {
   return links.filter(l => l.source === id || l.target === id)
@@ -576,10 +608,11 @@ function layoutInnerLabels() {
   const labels = overlay.userData && overlay.userData.labels;
   if (!labels || !labels.length || inside === null) return;
   const placed = [];
-  // 悬浮中的实体优先占位，保证它的标签不会因为避让而消失
-  const ordered = hoverNodeIdx >= 0
+  // 悬浮或选中的实体优先占位，保证它的标签不会因为避让而消失
+  const prio = hoverNodeIdx >= 0 ? hoverNodeIdx : selectedNodeIdx;
+  const ordered = prio >= 0
     ? [...labels].sort((a, b) =>
-        (b.nodeIdx === hoverNodeIdx ? 1 : 0) - (a.nodeIdx === hoverNodeIdx ? 1 : 0))
+        (b.nodeIdx === prio ? 1 : 0) - (a.nodeIdx === prio ? 1 : 0))
     : labels;
   for (const item of ordered) {
     const el = item.object.element;
@@ -601,8 +634,65 @@ function layoutInnerLabels() {
   }
 }
 
+// ── 实体列表与搜索 ──
+// 列表按社区内度数降序。点击某项：高亮环定位到该实体、相机对准它、右侧面板
+// 列出它的关系；搜索框按名称子串过滤。
+const sideEl = document.getElementById('side');
+const searchEl = document.getElementById('search');
+const listEl = document.getElementById('list');
+let selectedNodeIdx = -1;
+
+function escHtml(s) {
+  return String(s).replace(/[&<>"]/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+function innerListHtml(filter) {
+  const ud = overlay.userData;
+  const data = ud && ud.data;
+  if (!data) return '';
+  const q = (filter || '').trim().toLowerCase();
+  const items = data.nodes
+    .map((n, i) => ({ n, i }))
+    .sort((a, b) => (b.n.d || 0) - (a.n.d || 0))
+    .filter(x => !q || String(x.n.id).toLowerCase().includes(q))
+    .slice(0, 400);
+  if (!items.length) return '<div class="empty">没有匹配的实体</div>';
+  return items.map(x =>
+    `<div class="item${x.i === selectedNodeIdx ? ' sel' : ''}" data-i="${x.i}">` +
+    `<span class="nm">${escHtml(x.n.id)}</span>` +
+    `<span class="dg">${x.n.d || 0}</span></div>`).join('');
+}
+
+function refreshInnerList() {
+  listEl.innerHTML = innerListHtml(searchEl.value);
+}
+
+/** 选中某个实体：高亮、对准相机、显示关系、列表标选中。 */
+function selectNode(i) {
+  const ud = overlay.userData;
+  const n = ud && ud.data && ud.data.nodes[i];
+  if (!n) return;
+  selectedNodeIdx = i;
+  if (ud.halo) {
+    ud.halo.position.set(ud.center.x + n.x, ud.center.y + n.y, ud.center.z + n.z);
+    ud.halo.visible = true;
+  }
+  controls.target.set(ud.center.x + n.x, ud.center.y + n.y, ud.center.z + n.z);
+  hoverNodeIdx = i;              // 让它的标签在避让里优先占位
+  renderInnerPreview(i);
+  [...listEl.querySelectorAll('.item')].forEach(el =>
+    el.classList.toggle('sel', +el.dataset.i === i));
+}
+
+listEl.addEventListener('click', (e) => {
+  const item = e.target.closest('.item');
+  if (item) selectNode(+item.dataset.i);
+});
+searchEl.addEventListener('input', refreshInnerList);
+
 // ── 渲染社区内部（实体点 + 内部边 + 核心标签）──
-async function enterCommunity(ci, preloaded, instant) {
+async function enterCommunity(ci, preloaded) {
   const cloud = clouds[ci];
   status.textContent = `正在进入「${cloud.name}」…`;
   status.classList.add('visible');
@@ -689,7 +779,7 @@ async function enterCommunity(ci, preloaded, instant) {
   const labelItems = [];
   top.forEach(n => {
     const el = document.createElement('div');
-    el.className = 'label';
+    el.className = 'label entity';
     el.innerHTML = `<b>${n.id}</b>`;
     el.style.fontSize = '11px';
     const o = new CSS2DObject(el);
@@ -698,9 +788,20 @@ async function enterCommunity(ci, preloaded, instant) {
     labelItems.push({ object: o, degree: n.d || 0, nodeIdx: idx.get(n.id) });
   });
 
+  // 选中高亮环：跟随被选中的实体，屏幕尺寸恒定
+  const haloGeo = new THREE.BufferGeometry();
+  haloGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3));
+  const halo = new THREE.Points(haloGeo, new THREE.PointsMaterial({
+    size: 44, color: 0xffffff, transparent: true, opacity: 0.9,
+    sizeAttenuation: false, blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  halo.visible = false;
+  halo.frustumCulled = false;
+  overlay.add(halo);
+
   overlay.userData = {
     center, radius: data.meta.radius || 60,
-    data, nodeIndex: idx, labels: labelItems, pts,
+    data, nodeIndex: idx, labels: labelItems, pts, halo,
   };
 
   // 概览层隐藏：按对象类型筛选更稳健（原型里没有名为 points 的全局变量，
@@ -714,13 +815,10 @@ async function enterCommunity(ci, preloaded, instant) {
   });
 
   // 相机飞入（R / dist / maxDistance 已在上方算好）
-  flying = {
-    t: 0, dur: Math.max(1, FLY_MS),
-    fromPos: camera.position.clone(),
-    toPos: new THREE.Vector3(center.x, center.y + R * 0.42, center.z + dist),
-    fromTgt: controls.target.clone(),
-    toTgt: center.clone(),
-  };
+  // 直接切到内部视角，不做飞入补间
+  camera.position.set(center.x, center.y + R * 0.42, center.z + dist);
+  controls.target.copy(center);
+  controls.update();
   hintEl.textContent = '';
   status.classList.remove('visible');
 
@@ -740,21 +838,17 @@ async function enterCommunity(ci, preloaded, instant) {
   });
   _hideOverview(false);
 
-  // 直入模式：在同一个同步块里把相机落位。若放到调用处的 await 之后再落位，
-  // 中间会插入一个微任务，headless 截图偶尔正好卡在"概览已隐藏、相机未落位"
-  // 的中间态，拍到的是一片空背景（实测时好时坏就是这个原因）。
-  if (instant && flying) {
-    camera.position.copy(flying.toPos);
-    controls.target.copy(flying.toTgt);
-    flying = null;
-    controls.update();
-  }
   innerHud.classList.add('on');
   document.body.classList.add('inside');
   document.getElementById('itName').textContent = cloud.name;
   document.getElementById('itName').style.color = cloud.color;
   document.getElementById('itSub').textContent =
     `${data.meta.shown} 个实体（共 ${data.entityCount}） · ${data.meta.edges} 条内部关系`;
+
+  // 刷新实体列表；选中态属于上一个社区，这里清空
+  selectedNodeIdx = -1;
+  searchEl.value = '';
+  refreshInnerList();
 }
 
 function exitCommunity() {
@@ -775,21 +869,14 @@ function exitCommunity() {
   document.body.classList.remove('inside');
   controls.maxDistance = 130;      // 恢复概览层的限制
   hintEl.textContent = '拖拽旋转 · 滚轮缩放 · 悬浮预览社区 · 点击星云进入内部';
-  const cloud = inside !== null ? clouds[inside] : null;
-  const target = cloud ? new THREE.Vector3().fromArray(cloud.position) : new THREE.Vector3(0, 0, 0);
-  flying = {
-    t: 0, dur: Math.max(1, FLY_MS),
-    fromPos: camera.position.clone(),
-    toPos: new THREE.Vector3(0, 2.6, innerWidth < 700 ? CAM_Z_PORTRAIT : CAM_Z),
-    fromTgt: controls.target.clone(),
-    toTgt: new THREE.Vector3(0, 0, 0),
-  };
+  // 直接回到概览视角，不做退出补间
+  camera.position.set(0, 2.6, innerWidth < 700 ? CAM_Z_PORTRAIT : CAM_Z);
+  controls.target.set(0, 0, 0);
+  controls.update();
   inside = null;
   hoverId = null;
   hidePreview();
 }
-
-const easeInOut = (x) => x < 0.5 ? 4*x*x*x : 1 - Math.pow(-2*x+2, 3)/2;
 
 let downX = 0, downY = 0, downT = 0;
 renderer.domElement.addEventListener('pointerdown', (e) => {
@@ -841,15 +928,7 @@ function animate() {
       ? it.labelObject.userData.mobileX : 0;
   });
 
-  // ── 相机补间 ──
-  if (flying) {
-    flying.t += 16.7;
-    const x = Math.min(1, flying.t / flying.dur);
-    const e = easeInOut(x);
-    camera.position.lerpVectors(flying.fromPos, flying.toPos, e);
-    controls.target.lerpVectors(flying.fromTgt, flying.toTgt, e);
-    if (x >= 1) { flying = null; }
-  }
+  // ── 相机补间已移除：进入/退出都直接落位，不做缩放动画 ──
   cloudObjects.forEach(({ veils }, index) => {
     veils.forEach((veil, layer) => {
       veil.quaternion.copy(camera.quaternion);
@@ -880,13 +959,9 @@ animate();
     const idx = +c;
     // 直入模式（?c=N）：数据已在模块顶层预取。
     // 这里刻意用**模块顶层 await** 而不是 queueMicrotask——顶层 await 会让
-    // load 事件等到内部视图渲染完成，headless 的 --screenshot 才一定能截到
-    // L1；用微任务时抓帧时机不确定，实测经常只截到概览层。
-    // 同时把相机直接落位、不播放飞入补间（补间依赖 rAF，在这一刻还没跑）。
-    FLY_MS = 0;
     // 先隐藏概览标题：CSS 过渡要 350ms，截图等不到，会截到 opacity 仍为 1 的中间态
     document.querySelector('.header').style.display = 'none';
-    await enterCommunity(idx, PRE_DATA, true);
+    await enterCommunity(idx, PRE_DATA);
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
     // 供 tools/cdp_shot.py 判定"内部视图已渲染完成"，避免抓帧时机竞争
@@ -899,6 +974,10 @@ window.KGNebula = {
   enter: (i) => enterCommunity(i),
   exit: () => exitCommunity(),
   labelCount: () => document.querySelectorAll('.label').length,
+  select: (i) => selectNode(i),
+  listCount: () => document.querySelectorAll('#list .item').length,
+  haloOn: () => Boolean(overlay.userData && overlay.userData.halo && overlay.userData.halo.visible),
+  panelOpen: () => document.getElementById('detail').classList.contains('open'),
 };
 
 addEventListener('resize', () => {
