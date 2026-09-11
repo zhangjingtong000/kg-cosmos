@@ -76,12 +76,15 @@
 <div id="panel">
   <h2>视图</h2>
   <div class="fld">
-    <label>显示实体数 <b id="nVal">800</b></label>
-    <input type="range" id="nRange" min="100" max="3000" step="100" value="800" />
+    <!-- 默认 150：实测该量级下标签才能真正看清。
+         800 节点时每节点仅约 1400 px²，标签必然互相压住；
+         150 节点时约 9600 px²，配合密集标签档仍可读。 -->
+    <label>显示实体数 <b id="nVal">150</b></label>
+    <input type="range" id="nRange" min="50" max="3000" step="50" value="150" />
   </div>
   <div class="fld">
-    <label>标签密度 <b id="lVal">适中</b></label>
-    <input type="range" id="lRange" min="0" max="5" step="1" value="3" />
+    <label>标签密度 <b id="lVal">很密</b></label>
+    <input type="range" id="lRange" min="0" max="5" step="1" value="1" />
   </div>
   <div class="fld">
     <label>着色</label>
@@ -184,7 +187,7 @@ const colorOf = n => colorBy === 'type'
 let ALL_NODES = [], ALL_LINKS = [];
 let graph = null, renderer = null, adjacency = new Map();
 let focusComm = -1, hoverNode = null;
-let labelDensity = 3;
+let labelDensity = 1;      // 默认「很密」（索引 1）：150 节点下标签仍可读
 
 // ── 数据 ──
 progress('载入图数据…', 0.12);
@@ -232,18 +235,37 @@ async function build(n) {
 
   progress('运行 ForceAtlas2 布局…', 0.45);
   await new Promise(r => setTimeout(r, 30));   // 让进度条有机会绘制
+
+  // 布局阶段统一节点半径：adjustSizes 会按 size 推开节点，
+  // 若此时保留"度数决定大小"的差异，大节点会挤压小节点，破坏均匀性。
+  // 布局完成后再恢复真实大小（见下方 restoreSizes）。
+  const realSize = new Map();
+  graph.forEachNode((id, a) => {
+    realSize.set(id, a.size);
+    graph.setNodeAttribute(id, 'size', 3);
+  });
+
+  // ── 参数经实验确定（web/_exp-layout.html，500 节点同图对比）──
+  //   库默认(gravity=1, scaling=10, 无 adjustSizes) 极差：
+  //     网格占用仅 0.054（94.6% 画布空白）且最密格有 24 个节点
+  //   改成本组后：网格占用 0.048 → 0.419（8.6 倍），最密格 30 → 3
+  //   关键是 adjustSizes（防重叠）+ 低 gravity（不被拉向中心）
   forceAtlas2.assign(graph, {
-    iterations: 260,
+    iterations: 320,
     settings: {
-      gravity: 1.1,
-      scalingRatio: 26,          // 斥力：越大越分散
-      slowDown: 2.2,
+      gravity: 0.02,             // 中心引力极低：节点不往中心堆
+      scalingRatio: 80,          // 斥力强：节点彼此推开
+      slowDown: 4,
       barnesHutOptimize: true,   // 大图必需：O(n²) → O(n log n)
       barnesHutTheta: 0.6,
-      adjustSizes: true,
+      adjustSizes: true,         // ★ 质变开关：按节点半径防重叠
       linLogMode: false,
+      outboundAttractionDistribution: false,
+      strongGravityMode: false,
     },
   });
+  // 恢复真实大小（度数越大越显眼），供渲染使用
+  graph.forEachNode((id, a) => graph.setNodeAttribute(id, 'size', realSize.get(id)));
   progress('渲染…', 0.9);
 
   if (renderer) renderer.kill();
@@ -396,7 +418,7 @@ addEventListener('keydown', (e) => {
 
 // ── 启动 ──
 document.getElementById('lVal').textContent = LABEL_NAMES[labelDensity];
-await build(800);
+await build(150);
 </script>
 </body>
 </html>
