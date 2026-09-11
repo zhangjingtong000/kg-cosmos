@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KG Cosmos · 知识图谱（2D 分析视图）</title>
+<style>
+  :root { --fg:#e6edff; --dim:#8e9dbf; --panel:rgba(9,13,28,.90); }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; overflow:hidden; background:#070a14;
+              font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif; color:var(--fg); }
+  #graph { position:fixed; inset:0; }
+
+  #top { position:fixed; left:20px; top:16px; z-index:10; pointer-events:none; }
+  #top small { display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+               color:rgba(180,200,235,.5); }
+  #top h1 { margin:4px 0 0; font-size:17px; font-weight:560; }
+
+  #panel { position:fixed; right:14px; top:14px; z-index:10; width:250px; padding:13px 15px;
+           border-radius:11px; background:var(--panel); border:1px solid rgba(140,170,255,.20);
+           backdrop-filter:blur(9px); max-height:calc(100vh - 28px); overflow-y:auto; }
+  #panel h2 { margin:0 0 8px; font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+              color:rgba(180,200,235,.55); font-weight:600; }
+  .fld { margin-bottom:10px; }
+  .fld label { display:flex; justify-content:space-between; font-size:11px;
+               color:var(--dim); margin-bottom:4px; }
+  .fld label b { color:#a8c4ff; font-weight:500; font-variant-numeric:tabular-nums; }
+  .fld select, .fld input[type=range] { width:100%; }
+  .fld select { background:rgba(10,16,34,.9); color:var(--fg);
+                border:1px solid rgba(140,170,255,.25); border-radius:7px;
+                padding:6px 8px; font-size:12px; }
+  .btns { display:flex; gap:6px; margin-top:3px; }
+  .btns button { flex:1; background:rgba(120,150,255,.14); color:var(--fg);
+                 border:1px solid rgba(140,170,255,.28); border-radius:7px;
+                 padding:6px 5px; font-size:11px; cursor:pointer; }
+  .btns button:hover { background:rgba(120,150,255,.26); border-color:rgba(150,190,255,.6); }
+  #stats { margin-top:11px; padding-top:9px; border-top:1px solid rgba(140,170,255,.12);
+           font-size:11px; color:var(--dim); line-height:1.7; }
+  #stats b { color:#a8c4ff; font-variant-numeric:tabular-nums; }
+  #legend { margin-top:9px; }
+  .lg { display:flex; align-items:center; gap:6px; font-size:11px; padding:2px 0;
+        cursor:pointer; border-radius:4px; }
+  .lg:hover { background:rgba(120,150,255,.10); }
+  .lg i { width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
+  .lg em { margin-left:auto; font-style:normal; color:var(--dim);
+           font-variant-numeric:tabular-nums; }
+
+  #info { position:fixed; left:20px; bottom:44px; z-index:10; width:290px; padding:12px 14px;
+          border-radius:10px; background:var(--panel); border:1px solid rgba(140,170,255,.22);
+          opacity:0; transform:translateY(8px); transition:opacity .2s, transform .2s;
+          pointer-events:none; }
+  #info.on { opacity:1; transform:none; }
+  #info h3 { margin:0 0 6px; font-size:13.5px; color:#fff; }
+  #info .m { font-size:11px; color:var(--dim); margin-bottom:7px; line-height:1.6; }
+  #info .nb { font-size:11px; color:#9fb6e0; max-height:130px; overflow-y:auto; }
+  #info .nb div { padding:1px 0; }
+
+  #hint { position:fixed; left:50%; bottom:14px; transform:translateX(-50%); z-index:10;
+          font-size:11px; color:rgba(180,200,235,.45); }
+  kbd { background:rgba(140,170,255,.16); border-radius:4px; padding:1px 6px; font-size:11px; }
+  #load { position:fixed; inset:0; z-index:20; display:flex; align-items:center;
+          justify-content:center; background:#070a14; font-size:13px; color:var(--dim);
+          text-align:center; line-height:2; flex-direction:column; gap:10px; }
+  #bar { width:300px; height:3px; background:rgba(140,170,255,.18); border-radius:2px; overflow:hidden; }
+  #bar > i { display:block; height:100%; width:0; background:#7fb3ff; transition:width .2s; }
+</style>
+</head>
+<body>
+<div id="graph"></div>
+
+<div id="top">
+  <small>kg cosmos · 2d analysis</small>
+  <h1>知识图谱（分析视图）</h1>
+</div>
+
+<div id="panel">
+  <h2>视图</h2>
+  <div class="fld">
+    <label>显示实体数 <b id="nVal">800</b></label>
+    <input type="range" id="nRange" min="100" max="3000" step="100" value="800" />
+  </div>
+  <div class="fld">
+    <label>标签密度 <b id="lVal">适中</b></label>
+    <input type="range" id="lRange" min="0" max="5" step="1" value="3" />
+  </div>
+  <div class="fld">
+    <label>着色</label>
+    <select id="colorBy">
+      <option value="community" selected>社区（Louvain）</option>
+      <option value="type">实体类型</option>
+    </select>
+  </div>
+  <div class="btns">
+    <button id="relayout">重新布局</button>
+    <button id="fit">适应视野</button>
+  </div>
+
+  <div id="stats"></div>
+  <div id="legend"></div>
+</div>
+
+<div id="info">
+  <h3 id="iName"></h3>
+  <div class="m" id="iMeta"></div>
+  <div class="nb" id="iNbrs"></div>
+</div>
+
+<div id="hint">滚轮缩放 · 拖拽平移 · <b>悬浮看邻居</b> · 点击选中 · 点击图例聚焦社区</div>
+<div id="load">
+  <div id="msg">正在载入图数据…</div>
+  <div id="bar"><i></i></div>
+</div>
+
+<script type="module">
+// ══════════════════════════════════════════════════════════════
+// 2D 分析视图（sigma.js + graphology + ForceAtlas2）
+//
+// 【为什么主视图选 2D】（实测 + 原理）
+//   3D 的核心矛盾：要清晰就必须删掉标签，删了标签就不知道节点是谁。
+//   实测 1500 节点在 3D 下每节点仅 557 px²，且存在遮挡与透视失真。
+//   2D 无遮挡、标签可避让、节点可直接比较、导航符合直觉，
+//   这也是 Gephi / Cytoscape / Neo4j Bloom 全部以 2D 为主的原因。
+//
+// 【布局】ForceAtlas2（Gephi 同款）：
+//   barnesHutOptimize 是大图必需的近似算法，把 O(n²) 降到 O(n log n)。
+//   scalingRatio 决定斥力强度：值越大节点越分散（可调）。
+//
+// 【标签】sigma.js 的标签避让是本视图的关键：
+//   labelRenderedSizeThreshold 按节点尺寸过滤标签，
+//   labelGridCellSize / labelDensity 控制网格避让，
+//   三者共同保证"该显示的显示、不重叠"。
+// ══════════════════════════════════════════════════════════════
+const ESM = 'https://esm.sh';
+const DATA_URL = new URL('./kg-data/force-top3000.json', location.href).href;
+
+const msgEl = document.getElementById('msg');
+const barEl = document.querySelector('#bar > i');
+const loadEl = document.getElementById('load');
+const statsEl = document.getElementById('stats');
+const legendEl = document.getElementById('legend');
+const infoEl = document.getElementById('info');
+
+function progress(text, pct) {
+  msgEl.textContent = text;
+  barEl.style.width = (pct * 100).toFixed(0) + '%';
+}
+
+// ── 依赖 ──
+let Graph, Sigma, forceAtlas2;
+try {
+  progress('加载 2D 渲染引擎…', 0.05);
+  [{ default: Graph }, { default: Sigma }, { default: forceAtlas2 }] = await Promise.all([
+    import(`${ESM}/graphology@0.25.4`),
+    import(`${ESM}/sigma@3.0.0`),
+    import(`${ESM}/graphology-layout-forceatlas2@0.10.1`),
+  ]);
+} catch (e) {
+  loadEl.innerHTML = `引擎加载失败：${e.message}<br><br>本机需能访问 <code>esm.sh</code>。`;
+  throw e;
+}
+
+// ── 配色 ──
+function hsl2hex(h, s, l) {
+  const f = n => { const k = (n + h * 12) % 12;
+    const a = s * Math.min(l, 1 - l);
+    return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); };
+  return '#' + [f(0), f(8), f(4)].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+const N_COMM = 18;
+const COMM_COLOR = Array.from({ length: N_COMM }, (_, i) =>
+  hsl2hex((i * 0.618033988749895) % 1, 0.60, 0.62));
+const TYPE_COLOR = {
+  Person:'#ff9f9f', Concept:'#7fb3ff', Method:'#7fffb3', Document:'#ffd97f',
+  Process:'#c77fff', System:'#7fffff', Artifact:'#ff9f7f', Component:'#b3ff7f',
+  Event:'#ff7fd9', Metric:'#7fd9ff', Dataset:'#d9ff7f', Organization:'#ffbf7f',
+  Location:'#9f7fff', Tool:'#7fffd9', Material:'#d9d9d9',
+};
+let colorBy = 'community';
+const colorOf = n => colorBy === 'type'
+  ? (TYPE_COLOR[n.type] || '#9aa7c7')
+  : (n.community >= 0 ? COMM_COLOR[n.community % N_COMM] : '#4a5678');
+
+// ── 状态 ──
+let ALL_NODES = [], ALL_LINKS = [];
+let graph = null, renderer = null, adjacency = new Map();
+let focusComm = -1, hoverNode = null;
+let labelDensity = 3;
+
+// ── 数据 ──
+progress('载入图数据…', 0.12);
+const raw = await (await fetch(DATA_URL)).json();
+ALL_NODES = raw.nodes;
+ALL_LINKS = raw.links;
+adjacency = new Map(ALL_NODES.map(n => [n.id, new Set()]));
+ALL_LINKS.forEach(l => {
+  adjacency.get(l.source)?.add(l.target);
+  adjacency.get(l.target)?.add(l.source);
+});
+progress(`已载入 ${ALL_NODES.length} 实体 / ${ALL_LINKS.length} 关系`, 0.2);
+
+// 标签密度档位：数值越小 → 显示越多标签（阈值越低）
+const LABEL_THRESHOLDS = [2, 4, 6, 9, 14, 22];
+const LABEL_NAMES = ['极密', '很密', '较密', '适中', '较疏', '很疏', '极疏'];
+
+function rankedNodes() {
+  return [...ALL_NODES].sort((a, b) => (b.degree || 0) - (a.degree || 0));
+}
+
+async function build(n) {
+  const keepList = rankedNodes().slice(0, n);
+  const keep = new Set(keepList.map(x => x.id));
+  const links = ALL_LINKS.filter(l => keep.has(l.source) && keep.has(l.target));
+
+  progress(`构建图结构（${keepList.length} 实体 / ${links.length} 关系）…`, 0.3);
+  graph = new Graph({ multi: false, type: 'undirected' });
+  for (const nd of keepList) {
+    graph.addNode(nd.id, {
+      label: nd.id,
+      x: Math.cos(Math.random() * Math.PI * 2) * (1 + Math.random()),
+      y: Math.sin(Math.random() * Math.PI * 2) * (1 + Math.random()),
+      size: 2.2 + 5.2 * Math.sqrt((nd.degree || 0) / Math.max(1, keepList[0].degree || 1)),
+      color: colorOf(nd),
+      nodeType: nd.type, degree: nd.degree || 0, community: nd.community ?? -1,
+      _raw: nd,
+    });
+  }
+  for (const l of links) {
+    if (!graph.hasNode(l.source) || !graph.hasNode(l.target)) continue;
+    if (graph.hasEdge(l.source, l.target)) continue;
+    graph.addEdge(l.source, l.target, { size: 0.5, color: 'rgba(150,180,255,0.16)' });
+  }
+
+  progress('运行 ForceAtlas2 布局…', 0.45);
+  await new Promise(r => setTimeout(r, 30));   // 让进度条有机会绘制
+  forceAtlas2.assign(graph, {
+    iterations: 260,
+    settings: {
+      gravity: 1.1,
+      scalingRatio: 26,          // 斥力：越大越分散
+      slowDown: 2.2,
+      barnesHutOptimize: true,   // 大图必需：O(n²) → O(n log n)
+      barnesHutTheta: 0.6,
+      adjustSizes: true,
+      linLogMode: false,
+    },
+  });
+  progress('渲染…', 0.9);
+
+  if (renderer) renderer.kill();
+  renderer = new Sigma(graph, document.getElementById('graph'), {
+    // ── 标签渲染（2D 相对 3D 的核心优势）──
+    renderLabels: true,
+    labelRenderedSizeThreshold: LABEL_THRESHOLDS[labelDensity],
+    labelDensity: 1.1,            // 网格内最多几个标签
+    labelGridCellSize: 78,        // 网格越大越稀疏
+    labelFont: '11px "Segoe UI","Microsoft YaHei",sans-serif',
+    labelColor: { color: '#cfdcff' },
+    labelSize: 11,
+    // ── 边的表现 ──
+    renderEdgeLabels: false,
+    defaultEdgeColor: 'rgba(150,180,255,0.16)',
+    // ── 交互与性能 ──
+    zIndex: true,
+    minCameraRatio: 0.05,
+    maxCameraRatio: 12,
+    enableEdgeEvents: false,
+    stagePadding: 26,
+    nodeReducer: (node, data) => {
+      const d = { ...data };
+      if (focusComm >= 0 && data.community !== focusComm) {
+        d.color = '#252c42'; d.label = ''; d.zIndex = 0;
+      }
+      if (hoverNode && hoverNode !== node) {
+        const nb = adjacency.get(hoverNode);
+        const on = nb && nb.has(node);
+        if (!on) { d.color = shade(d.color, 0.32); d.zIndex = 1; }
+        else { d.zIndex = 3; d.forceLabel = true; }
+      }
+      if (hoverNode === node) { d.zIndex = 4; d.forceLabel = true; }
+      return d;
+    },
+    edgeReducer: (edge, data) => {
+      const d = { ...data };
+      const [s, t] = graph.extremities(edge);
+      if (focusComm >= 0) {
+        const sc = graph.getNodeAttribute(s, 'community');
+        const tc = graph.getNodeAttribute(t, 'community');
+        if (sc !== focusComm && tc !== focusComm) return { ...d, hidden: true };
+      }
+      if (hoverNode) {
+        const on = s === hoverNode || t === hoverNode;
+        d.color = on ? 'rgba(180,210,255,0.72)' : 'rgba(150,180,255,0.06)';
+      }
+      return d;
+    },
+  });
+
+  renderer.on('enterNode', ({ node }) => {
+    hoverNode = node;
+    renderer.refresh();
+    showInfo(node);
+    document.getElementById('graph').style.cursor = 'pointer';
+  });
+  renderer.on('leaveNode', () => {
+    hoverNode = null;
+    renderer.refresh();
+    infoEl.classList.remove('on');
+    document.getElementById('graph').style.cursor = 'grab';
+  });
+
+  updateStats(graph.order, graph.size);
+  buildLegend();
+  loadEl.style.display = 'none';
+  setTimeout(() => renderer.getCamera().animatedReset({ duration: 500 }), 120);
+}
+
+function shade(hex, k) {
+  if (!hex || !hex.startsWith('#')) return hex;
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.round(((n >> 16) & 255) * k);
+  const g = Math.round(((n >> 8) & 255) * k);
+  const b = Math.round((n & 255) * k);
+  return `rgb(${r},${g},${b})`;
+}
+
+function showInfo(id) {
+  const nd = graph.getNodeAttributes(id);
+  const nb = [...(adjacency.get(id) || [])];
+  document.getElementById('iName').textContent = id;
+  document.getElementById('iName').style.color = nd.color;
+  document.getElementById('iMeta').innerHTML =
+    `${nd.nodeType} · 连接度 <b style="color:#a8c4ff">${nd.degree}</b>`
+    + (nd.community >= 0 ? ` · 社区 #${nd.community + 1}` : '')
+    + `<br>邻居 ${nb.length} 个`;
+  document.getElementById('iNbrs').innerHTML = nb.slice(0, 40)
+    .map(x => `<div>· ${x}</div>`).join('')
+    + (nb.length > 40 ? `<div style="color:#6b7a9e">…还有 ${nb.length - 40} 个</div>` : '');
+  infoEl.classList.add('on');
+}
+
+function updateStats(n, m) {
+  statsEl.innerHTML =
+    `当前显示 <b>${n}</b> / ${ALL_NODES.length} 实体<br>`
+    + `当前关系 <b>${m}</b> / ${ALL_LINKS.length}`;
+}
+
+function buildLegend() {
+  const cnt = {};
+  graph.forEachNode((id, a) => {
+    if (a.community >= 0) cnt[a.community] = (cnt[a.community] || 0) + 1;
+  });
+  const rows = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  legendEl.innerHTML = '<h2>社区（点击聚焦）</h2>' + rows.map(([k, v]) =>
+    `<div class="lg" data-c="${k}"><i style="background:${COMM_COLOR[+k % N_COMM]}"></i>
+      <span>社区 #${+k + 1}</span><em>${v}</em></div>`).join('');
+  legendEl.querySelectorAll('.lg').forEach(el => {
+    el.addEventListener('click', () => {
+      const c = +el.dataset.c;
+      focusComm = (focusComm === c) ? -1 : c;
+      renderer.refresh();
+    });
+  });
+}
+
+// ── 交互 ──
+let debounce = null;
+document.getElementById('nRange').addEventListener('input', (e) => {
+  const n = +e.target.value;
+  document.getElementById('nVal').textContent = n;
+  clearTimeout(debounce);
+  debounce = setTimeout(() => { loadEl.style.display = 'flex'; build(n); }, 420);
+});
+document.getElementById('lRange').addEventListener('input', (e) => {
+  labelDensity = +e.target.value;
+  document.getElementById('lVal').textContent = LABEL_NAMES[labelDensity] || '适中';
+  if (renderer) {
+    renderer.setSetting('labelRenderedSizeThreshold', LABEL_THRESHOLDS[labelDensity]);
+    renderer.refresh();
+  }
+});
+document.getElementById('colorBy').addEventListener('change', (e) => {
+  colorBy = e.target.value;
+  graph.forEachNode((id, a) => graph.setNodeAttribute(id, 'color', colorOf(a._raw)));
+  renderer.refresh();
+});
+document.getElementById('relayout').addEventListener('click', () => {
+  loadEl.style.display = 'flex';
+  build(+document.getElementById('nRange').value);
+});
+document.getElementById('fit').addEventListener('click', () => {
+  renderer.getCamera().animatedReset({ duration: 500 });
+});
+addEventListener('keydown', (e) => {
+  if (e.key === 'r' || e.key === 'R') renderer.getCamera().animatedReset({ duration: 400 });
+});
+
+// ── 启动 ──
+document.getElementById('lVal').textContent = LABEL_NAMES[labelDensity];
+await build(800);
+</script>
+</body>
+</html>
