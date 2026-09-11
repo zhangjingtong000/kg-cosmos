@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KG Cosmos · 社区图谱</title>
+<style>
+  :root{
+    --bg:#05080f;
+    --panel:rgba(11,17,34,.78);
+    --stroke:rgba(120,160,255,.14);
+    --text:#e8eefb;
+    --muted:#8698b8;
+    --dim:#5b6b88;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:var(--bg);color:var(--text);overflow:hidden;
+    font:13px/1.55 "Segoe UI","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* 背景：星野 + 极淡网格 */
+  #backdrop{position:fixed;inset:0;z-index:0;pointer-events:none}
+  #backbone{position:fixed;inset:0;z-index:1;pointer-events:none}
+
+  #shell{position:relative;z-index:2;display:flex;flex-direction:column;height:100%}
+
+  header{
+    flex:0 0 auto;display:flex;align-items:baseline;gap:16px;
+    padding:16px 22px 12px;
+  }
+  header h1{margin:0;font-size:15px;font-weight:600;letter-spacing:.2px}
+  header .sub{color:var(--muted);font-size:12px}
+  header .stat{margin-left:auto;color:var(--dim);font-size:11.5px;font-variant-numeric:tabular-nums}
+  header .stat b{color:var(--muted);font-weight:600}
+
+  #grid{
+    flex:1 1 auto;overflow:auto;padding:2px 22px 22px;
+    display:grid;gap:13px;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    /* 行高撑满视口：否则卡片高度退化成 auto，canvas 掉回 HTML 默认 150px，
+       图被压扁、底部留一大片空白（已实测）。 */
+    grid-auto-rows:minmax(190px,1fr);
+    scrollbar-width:thin;scrollbar-color:#243352 transparent;
+  }
+  @media (max-width:1780px){#grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+  @media (max-width:1480px){#grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  @media (max-width:1160px){#grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (max-width:880px) {#grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+  .card{
+    position:relative;display:flex;flex-direction:column;
+    background:var(--panel);border:1px solid var(--stroke);border-radius:12px;
+    overflow:hidden;cursor:pointer;
+    transition:transform .18s cubic-bezier(.2,.7,.3,1),
+               border-color .18s,box-shadow .18s,background .18s;
+    opacity:0;transform:translateY(10px) scale(.985);
+    animation:enter .42s cubic-bezier(.2,.7,.3,1) forwards;
+  }
+  @keyframes enter{to{opacity:1;transform:none}}
+  .card::before{                     /* 顶部社区色条 */
+    content:'';position:absolute;inset:0 0 auto 0;height:2px;
+    background:linear-gradient(90deg,var(--c),transparent 85%);
+    opacity:.85;
+  }
+  .card:hover{
+    transform:translateY(-2px) scale(1.012);
+    border-color:color-mix(in srgb,var(--c) 55%,transparent);
+    background:rgba(16,24,48,.85);
+    box-shadow:0 14px 44px -14px var(--c),0 0 0 1px color-mix(in srgb,var(--c) 22%,transparent) inset;
+    z-index:5;
+  }
+  .card.dim{opacity:.28;filter:saturate(.4)}
+  .card .head{padding:9px 12px 2px;display:flex;align-items:center;gap:7px}
+  .card .dot{width:7px;height:7px;border-radius:50%;background:var(--c);flex:0 0 auto;
+             box-shadow:0 0 8px var(--c)}
+  .card .cid{font-size:10px;color:var(--dim);font-variant-numeric:tabular-nums;letter-spacing:.3px}
+  .card .size{margin-left:auto;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .card .title{
+    padding:0 12px;font-size:12.5px;font-weight:600;line-height:1.35;height:2.7em;
+    overflow:hidden;color:var(--text);
+  }
+  .card canvas{display:block;width:100%;flex:1 1 auto;min-height:0}
+  .card .foot{
+    padding:5px 12px 9px;font-size:10.5px;color:var(--dim);
+    display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;
+  }
+  .card .foot b{color:var(--muted);font-weight:600}
+
+  /* 详情覆盖层 */
+  #overlay{
+    position:fixed;inset:0;z-index:40;display:none;
+    background:rgba(3,6,13,.82);backdrop-filter:blur(6px);
+    align-items:center;justify-content:center;
+  }
+  #overlay.on{display:flex}
+  #detail{
+    width:min(94vw,1680px);height:min(90vh,1000px);
+    background:linear-gradient(180deg,rgba(14,21,42,.96),rgba(9,14,29,.96));
+    border:1px solid color-mix(in srgb,var(--c) 32%,transparent);
+    border-radius:16px;display:flex;flex-direction:column;overflow:hidden;
+    box-shadow:0 40px 120px -30px #000,0 0 0 1px rgba(255,255,255,.03) inset;
+  }
+  #detail .bar{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--stroke)}
+  #detail .bar .dot{width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c)}
+  #detail .bar h2{margin:0;font-size:15px;font-weight:600}
+  #detail .bar .meta{color:var(--muted);font-size:12px}
+  #detail .bar button{
+    margin-left:auto;background:rgba(255,255,255,.06);color:var(--text);
+    border:1px solid var(--stroke);border-radius:8px;padding:5px 12px;
+    font:inherit;font-size:12px;cursor:pointer;
+  }
+  #detail .bar button:hover{background:rgba(255,255,255,.12)}
+  #detail .wrap{flex:1 1 auto;min-height:0;position:relative}
+  #detail canvas{display:block;width:100%;height:100%}
+  .hint{
+    position:absolute;left:20px;bottom:14px;color:var(--dim);font-size:11px;
+    pointer-events:none;
+  }
+
+  #foot{
+    position:fixed;left:22px;bottom:8px;z-index:3;color:var(--dim);font-size:11px;
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+<canvas id="backdrop"></canvas>
+<canvas id="backbone"></canvas>
+
+<div id="shell">
+  <header>
+    <h1>KG Cosmos · 社区图谱</h1>
+    <span class="sub">18 个主题社区 · 每格是该社区的核心骨架</span>
+    <span class="stat" id="stat">加载中…</span>
+  </header>
+  <div id="grid"></div>
+</div>
+
+<div id="foot"></div>
+
+<div id="overlay">
+  <div id="detail">
+    <div class="bar">
+      <span class="dot"></span>
+      <h2 id="d-title">—</h2>
+      <span class="meta" id="d-meta"></span>
+      <button id="d-close">关闭 (ESC)</button>
+    </div>
+    <div class="wrap"><canvas id="d-canvas"></canvas></div>
+    <div class="hint">滚轮缩放 · 拖拽平移 · 悬浮查看实体与关系</div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "graphology": "https://esm.sh/graphology@0.25.4",
+    "graphology-layout-forceatlas2": "https://esm.sh/graphology-layout-forceatlas2@0.10.1"
+  }
+}
+</script>
+<script type="module">
+import Graph from 'graphology';
+import forceAtlas2 from 'graphology-layout-forceatlas2';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   分面式社区图谱（faceted community atlas）
+
+   为什么不是一张全景力导向图：
+     实测"按度数取 Top-N"是全图密度的最坏情况——Top-150 得到 6.40 条
+     边/节点，屏幕上每个节点平均射出 12.8 条线，标签被 sigma.js 全部
+     抑制，视觉上塌缩成一个球（见 output/shots/user-view-2304.png）。
+     而社区内部的边天然稀疏（Louvain 本就按"内部稠密"划分），叠加
+     "每节点最多 4 条边"的上限后，每格边/节点 <= 1.68（可读阈值 2.5）。
+
+   所以这里把"结构"和"细节"分层：
+     首屏 —— 18 个社区的骨架缩略图，每格至多 40 实体，必然可读；
+     点击 —— 进入该社区的大图，40 个实体全部带标签。
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const DATA_URL = new URL('./kg-data/atlas.json', location.href).href;
+
+const grid      = document.getElementById('grid');
+const statEl    = document.getElementById('stat');
+const footEl    = document.getElementById('foot');
+const backboneC = document.getElementById('backbone');
+const backdropC = document.getElementById('backdrop');
+const overlay   = document.getElementById('overlay');
+const detail    = document.getElementById('detail');
+const dCanvas   = document.getElementById('d-canvas');
+
+let ATLAS = null;
+const cards = [];          // {el, canvas, comm, pos}
+let hoverIdx = -1;
+
+const dpr = () => Math.min(window.devicePixelRatio || 1, 2);
+/** 卡片缩略图的绘制参数：pad 收紧，让结构占满格子 */
+const CARD_OPT = { pad: 20, maxLabels: 9, labelSize: 10 };
+
+/* ── 工具 ───────────────────────────────────────────────────────────── */
+
+function hex2rgb(hex) {
+  const h = hex.replace('#', '');
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+}
+function rgba(hex, a) {
+  const [r, g, b] = hex2rgb(hex);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function fitCanvas(cv) {
+  const r = cv.getBoundingClientRect();
+  const s = dpr();
+  const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+  if (cv.width !== w * s || cv.height !== h * s) {
+    cv.width = w * s; cv.height = h * s;
+  }
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(s, 0, 0, s, 0, 0);
+  return { ctx, w, h };
+}
+
+/* ── 布局：每个社区独立跑 ForceAtlas2 ───────────────────────────────── */
+
+function layoutComm(comm, seed) {
+  const g = new Graph({ multi: false, type: 'undirected' });
+  const n = comm.nodes.length;
+  let rnd = seed >>> 0;
+  const rand = () => ((rnd = (rnd * 1664525 + 1013904223) >>> 0) / 4294967296);
+
+  for (let i = 0; i < n; i++) {
+    const a = rand() * Math.PI * 2, r = rand();
+    g.addNode(String(i), { x: Math.cos(a) * r, y: Math.sin(a) * r });
+  }
+  for (const [s, t] of comm.edges) {
+    const a = String(s), b = String(t);
+    if (a === b || g.hasEdge(a, b)) continue;
+    g.addEdge(a, b);
+  }
+
+  // 节点少 → 迭代多一些换更舒展的形状；adjustSizes 防止重叠
+  forceAtlas2.assign(g, {
+    iterations: 260,
+    settings: {
+      gravity: 1.5,
+      scalingRatio: 11,
+      slowDown: 2.4,
+      barnesHutOptimize: n > 60,
+      barnesHutTheta: 0.6,
+      adjustSizes: true,
+      linLogMode: false,
+      strongGravityMode: false,
+    },
+  });
+
+  const pos = [];
+  g.forEachNode((id, a) => { pos[+id] = { x: a.x, y: a.y }; });
+  return pos;
+}
+
+/* ── 绘制 ───────────────────────────────────────────────────────────── */
+
+/**
+ * @param cv       目标 canvas
+ * @param comm     社区数据
+ * @param pos      布局坐标
+ * @param opt      {pad, maxLabels, nodeScale, edgeAlpha, labelSize, glow}
+ */
+function paint(cv, comm, pos, opt) {
+  const o = Object.assign({
+    pad: 30, maxLabels: 8, nodeScale: 1, edgeAlpha: 0.26, labelSize: 9.5, glow: true,
+    view: null,
+  }, opt);
+  const { ctx, w: cw, h: ch } = fitCanvas(cv);
+  ctx.clearRect(0, 0, cw, ch);
+
+  const n = comm.nodes.length;
+  if (!n) return;
+
+  // 视图变换（详情页缩放/平移）。注意 fitCanvas 内部会 setTransform，
+  // 所以变换必须在这里之后叠加；缩放后逻辑画布尺寸为 cw/k × ch/k，
+  // 后续所有布局计算继续用 w/h，无需再关心缩放。
+  const view = o.view || { x: 0, y: 0, k: 1 };
+  ctx.save();
+  ctx.translate(view.x, view.y);
+  ctx.scale(view.k, view.k);
+  const w = cw / view.k, h = ch / view.k;
+
+  // 归一化：等比缩放，保持力导向的形状比例
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (let i = 0; i < n; i++) {
+    const p = pos[i]; if (!p) continue;
+    if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+  }
+  const spanX = Math.max(1e-6, maxX - minX), spanY = Math.max(1e-6, maxY - minY);
+  const iw = Math.max(1, w - o.pad * 2), ih = Math.max(1, h - o.pad * 2);
+
+  // 以等比缩放为基准，但允许任一轴最多拉伸 ANISO 倍。
+  // 为什么需要：力导向布局的形状偏竖长（实测社区 00 的包围盒宽高比约
+  // 0.55），纯等比缩放在宽屏容器里会白白浪费近一半宽度。限制在 1.32 倍
+  // 以内肉眼察觉不到形变，却能显著填满画布。
+  const ANISO = 1.32;
+  const sEq = Math.min(iw / spanX, ih / spanY);
+  const fx = Math.min(iw / spanX, sEq * ANISO);
+  const fy = Math.min(ih / spanY, sEq * ANISO);
+  const ox = o.pad + (iw - spanX * fx) / 2;
+  const oy = o.pad + (ih - spanY * fy) / 2;
+  const P = new Array(n);
+  for (let i = 0; i < n; i++) {
+    const p = pos[i];
+    P[i] = p ? { x: ox + (p.x - minX) * fx, y: oy + (p.y - minY) * fy } : { x: w / 2, y: h / 2 };
+  }
+
+  // 节点半径：按度数开方，压住极端值
+  let maxD = 1;
+  for (const nd of comm.nodes) if (nd.d > maxD) maxD = nd.d;
+  const R = comm.nodes.map(nd => (1.9 + 4.4 * Math.sqrt(nd.d / maxD)) * o.nodeScale);
+
+  // 度数降序（决定标签优先级与绘制顺序）
+  const order = comm.nodes.map((_, i) => i).sort((a, b) => comm.nodes[b].d - comm.nodes[a].d);
+
+  // ① 边
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = rgba(comm.color, o.edgeAlpha);
+  ctx.lineWidth = 0.9;
+  ctx.beginPath();
+  for (const [a, b] of comm.edges) {
+    if (!P[a] || !P[b]) continue;
+    ctx.moveTo(P[a].x, P[a].y);
+    ctx.lineTo(P[b].x, P[b].y);
+  }
+  ctx.stroke();
+
+  // ② 节点（先淡后实，形成层次）
+  for (const i of order) {
+    const p = P[i], r = R[i];
+    if (o.glow) {
+      ctx.fillStyle = rgba(comm.color, 0.10);
+      ctx.beginPath(); ctx.arc(p.x, p.y, r * 2.9, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = rgba(comm.color, 0.92);
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    ctx.beginPath(); ctx.arc(p.x - r * 0.28, p.y - r * 0.28, Math.max(0.6, r * 0.3), 0, Math.PI * 2); ctx.fill();
+  }
+
+  // ③ 标签：按度数优先放置，矩形碰撞则跳过 → 保证永不重叠
+  if (o.maxLabels > 0) {
+    ctx.font = `${o.labelSize}px "Segoe UI","Microsoft YaHei",sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const placed = [];
+    let put = 0;
+    for (const i of order) {
+      if (put >= o.maxLabels) break;
+      const raw = comm.nodes[i].i;
+      const text = raw.length > 25 ? raw.slice(0, 24) + '…' : raw;
+      const tw = ctx.measureText(text).width;
+      const p = P[i], r = R[i];
+      const bx = p.x - tw / 2 - 3, by = p.y + r + 2.5, bw = tw + 6, bh = o.labelSize + 3;
+      if (bx < 1 || bx + bw > w - 1 || by + bh > h - 1) continue;
+      let hit = false;
+      for (const q of placed) {
+        if (bx < q.x + q.w && bx + bw > q.x && by < q.y + q.h && by + bh > q.y) { hit = true; break; }
+      }
+      if (hit) continue;
+      placed.push({ x: bx, y: by, w: bw, h: bh });
+      ctx.fillStyle = 'rgba(6,10,20,.72)';
+      ctx.fillRect(bx, by, bw, bh);
+      ctx.fillStyle = 'rgba(226,236,252,.94)';
+      ctx.fillText(text, p.x, by + 1.5);
+      put++;
+    }
+  }
+  ctx.restore();
+}
+
+/* ── 背景星野 ───────────────────────────────────────────────────────── */
+
+function paintBackdrop() {
+  const cv = backdropC, s = dpr();
+  const w = window.innerWidth, h = window.innerHeight;
+  cv.width = w * s; cv.height = h * s;
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(s, 0, 0, s, 0, 0);
+
+  const g = ctx.createRadialGradient(w * .5, h * .05, 0, w * .5, h * .05, Math.max(w, h) * .9);
+  g.addColorStop(0, 'rgba(34,58,120,.34)');
+  g.addColorStop(.45, 'rgba(14,24,52,.20)');
+  g.addColorStop(1, 'rgba(3,5,11,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+
+  // 固定种子的星点，避免每次重绘跳动
+  let seed = 20260911;
+  const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+  for (let i = 0; i < 260; i++) {
+    const x = rand() * w, y = rand() * h, r = rand() * 1.25 + .25;
+    ctx.fillStyle = `rgba(170,200,255,${(rand() * .28 + .06).toFixed(3)})`;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+/* ── 卡片间主干 ─────────────────────────────────────────────────────── */
+
+function drawBackbone() {
+  const cv = backboneC, s = dpr();
+  const w = window.innerWidth, h = window.innerHeight;
+  cv.width = w * s; cv.height = h * s;
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(s, 0, 0, s, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  if (!ATLAS) return;
+
+  const maxW = Math.max(...ATLAS.backbone.map(b => b[2]), 1);
+  const centers = cards.map(c => {
+    const r = c.el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  });
+
+  ctx.globalCompositeOperation = 'lighter';
+  for (const [a, b, wt] of ATLAS.backbone) {
+    const ca = centers[a], cb = centers[b];
+    if (!ca || !cb) continue;
+    const strength = wt / maxW;
+    const lit = hoverIdx >= 0 && (hoverIdx === a || hoverIdx === b);
+    const alpha = (lit ? 0.42 : 0.10) + strength * 0.16;
+
+    // 两端社区色渐变
+    const grad = ctx.createLinearGradient(ca.x, ca.y, cb.x, cb.y);
+    grad.addColorStop(0, rgba(ATLAS.communities[a].color, alpha));
+    grad.addColorStop(1, rgba(ATLAS.communities[b].color, alpha));
+
+    // 稍微弯曲，避免全都穿过中心形成放射状
+    const mx = (ca.x + cb.x) / 2, my = (ca.y + cb.y) / 2;
+    const nx = -(cb.y - ca.y), ny = cb.x - ca.x;
+    const len = Math.hypot(nx, ny) || 1;
+    const bow = Math.min(90, len * 0.13) * (a % 2 ? 1 : -1);
+    const cx = mx + (nx / len) * bow, cy = my + (ny / len) * bow;
+
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = (lit ? 1.9 : 0.7) + Math.sqrt(strength) * (lit ? 3.4 : 1.7);
+    ctx.beginPath();
+    ctx.moveTo(ca.x, ca.y);
+    ctx.quadraticCurveTo(cx, cy, cb.x, cb.y);
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+/* ── 构建首屏 ───────────────────────────────────────────────────────── */
+
+function buildGrid() {
+  grid.innerHTML = '';
+  cards.length = 0;
+
+  ATLAS.communities.forEach((comm, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.setProperty('--c', comm.color);
+    card.style.animationDelay = `${idx * 26}ms`;
+    card.innerHTML = `
+      <div class="head">
+        <span class="dot"></span>
+        <span class="cid">COMMUNITY ${String(comm.cid).padStart(2, '0')}</span>
+        <span class="size">${comm.size.toLocaleString()} 实体</span>
+      </div>
+      <div class="title">${escapeHtml(comm.label)}</div>
+      <canvas></canvas>
+      <div class="foot">
+        <span>显示 <b>${comm.shown}</b> / ${comm.size}</span>
+        <span><b>${comm.edges.length}</b> 关系 · ${(comm.edges.length / comm.shown).toFixed(2)} 边/节点</span>
+      </div>`;
+    grid.appendChild(card);
+
+    const canvas = card.querySelector('canvas');
+    const rec = { el: card, canvas, comm, idx, pos: null };
+    cards.push(rec);
+
+    card.addEventListener('mouseenter', () => { hoverIdx = idx; syncHover(); });
+    card.addEventListener('mouseleave', () => { hoverIdx = -1; syncHover(); });
+    card.addEventListener('click', () => openDetail(idx));
+  });
+
+  // 布局 + 绘制（ForceAtlas2 在 40 节点上很快，但仍让出一帧给进度）
+  requestAnimationFrame(() => {
+    cards.forEach((rec, i) => {
+      rec.pos = layoutComm(rec.comm, 1000 + i * 7919);
+      paint(rec.canvas, rec.comm, rec.pos, CARD_OPT);
+    });
+    drawBackbone();
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function syncHover() {
+  cards.forEach(c => c.el.classList.toggle('dim', hoverIdx >= 0 && hoverIdx !== c.idx));
+  drawBackbone();
+}
+
+/* ── 详情覆盖层 ─────────────────────────────────────────────────────── */
+
+let detailIdx = -1;
+let detailView = { x: 0, y: 0, k: 1 };
+let detailBase = null;     // 归一化后的基准坐标
+
+function openDetail(idx) {
+  detailIdx = idx;
+  const comm = ATLAS.communities[idx];
+  overlay.classList.add('on');
+  detail.style.setProperty('--c', comm.color);
+  document.getElementById('d-title').textContent = comm.label;
+  document.getElementById('d-meta').textContent =
+    `COMMUNITY ${String(comm.cid).padStart(2, '0')} · 显示 ${comm.shown} / ${comm.size} 实体 · ${comm.edges.length} 关系`;
+  detailView = { x: 0, y: 0, k: 1 };
+  requestAnimationFrame(() => renderDetail());
+}
+
+function closeDetail() {
+  overlay.classList.remove('on');
+  detailIdx = -1;
+}
+
+function renderDetail() {
+  if (detailIdx < 0) return;
+  const comm = ATLAS.communities[detailIdx];
+  // 大图：全部标签，节点放大
+  paint(dCanvas, comm, cards[detailIdx].pos, {
+    pad: 64, maxLabels: 40, labelSize: 12, nodeScale: 1.9, glow: true, edgeAlpha: 0.3,
+    view: detailView,
+  });
+}
+
+/* ── 事件 ───────────────────────────────────────────────────────────── */
+
+window.addEventListener('resize', () => {
+  paintBackdrop();
+  drawBackbone();
+  cards.forEach(c => paint(c.canvas, c.comm, c.pos, CARD_OPT));
+  if (detailIdx >= 0) renderDetail();
+});
+
+document.getElementById('d-close').addEventListener('click', closeDetail);
+overlay.addEventListener('click', e => { if (e.target === overlay) closeDetail(); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+dCanvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = dCanvas.getBoundingClientRect();
+  const mx = e.clientX - r.left, my = e.clientY - r.top;
+  const f = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+  const k = Math.min(6, Math.max(0.5, detailView.k * f));
+  const real = k / detailView.k;
+  detailView.x = mx - (mx - detailView.x) * real;
+  detailView.y = my - (my - detailView.y) * real;
+  detailView.k = k;
+  renderDetail();
+}, { passive: false });
+
+/* ── 启动 ───────────────────────────────────────────────────────────── */
+
+(async function main() {
+  paintBackdrop();
+  try {
+    const res = await fetch(DATA_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    ATLAS = await res.json();
+  } catch (err) {
+    statEl.innerHTML = `<span style="color:#ff8a8a">数据加载失败：${err.message}</span>`;
+    return;
+  }
+
+  const m = ATLAS.meta;
+  statEl.innerHTML =
+    `<b>${m.communities}</b> 社区 &nbsp;·&nbsp; <b>${m.shown_nodes}</b> 核心实体 &nbsp;·&nbsp; ` +
+    `<b>${m.shown_edges}</b> 关系 &nbsp;·&nbsp; 边/节点 <b>${m.edge_per_node}</b> ` +
+    `<span style="opacity:.6">（全图 ${m.total_nodes} 实体 / ${m.total_links} 关系）</span>`;
+  footEl.textContent =
+    `未归类实体 ${m.unassigned.toLocaleString()} 个（占全图 ${(100 * m.unassigned / m.total_nodes).toFixed(1)}%，未参与社区划分）· ` +
+    `数据源 ${m.source} · 生成于 ${m.generated}`;
+
+  buildGrid();
+})();
+</script>
+</body>
+</html>
