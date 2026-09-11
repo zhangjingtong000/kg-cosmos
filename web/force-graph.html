@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KG Cosmos · 知识图谱（3D Force）</title>
+<style>
+  :root { --fg:#e6edff; --dim:#8e9dbf; --panel:rgba(9,13,28,.88); }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; overflow:hidden; background:#05070f;
+              font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif; color:var(--fg); }
+  #graph { position:fixed; inset:0; }
+
+  #top { position:fixed; left:22px; top:20px; z-index:10; pointer-events:none; }
+  #top small { display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+               color:rgba(180,200,235,.5); }
+  #top h1 { margin:5px 0 0; font-size:17px; font-weight:560; letter-spacing:.03em; }
+  #stat { margin-top:6px; font-size:11px; color:rgba(180,200,235,.6); }
+
+  #panel { position:fixed; right:18px; top:18px; z-index:10; width:250px; padding:14px 16px;
+           border-radius:11px; background:var(--panel); border:1px solid rgba(140,170,255,.20);
+           backdrop-filter:blur(9px); }
+  #panel h2 { margin:0 0 10px; font-size:11px; letter-spacing:.13em; text-transform:uppercase;
+              color:rgba(180,200,235,.55); font-weight:600; }
+  .fld { margin-bottom:11px; }
+  .fld label { display:block; font-size:11px; color:var(--dim); margin-bottom:5px; }
+  .fld select, .fld input[type=range] { width:100%; }
+  .fld select { background:rgba(10,16,34,.9); color:var(--fg); border:1px solid rgba(140,170,255,.25);
+                border-radius:7px; padding:6px 8px; font-size:12px; }
+  #legend { margin-top:4px; }
+  .lg { display:flex; align-items:center; gap:7px; font-size:11.5px; padding:2px 0; }
+  .lg i { width:8px; height:8px; border-radius:50%; flex:0 0 auto; display:inline-block; }
+  .lg em { margin-left:auto; font-style:normal; color:var(--dim);
+           font-variant-numeric:tabular-nums; }
+
+  #tip { position:fixed; z-index:12; pointer-events:none; display:none;
+         background:rgba(6,10,24,.95); border:1px solid rgba(140,170,255,.32);
+         border-radius:7px; padding:7px 10px; font-size:12px; max-width:320px; }
+  #tip b { color:#fff; } #tip i { color:var(--dim); font-style:normal; }
+
+  #load { position:fixed; inset:0; z-index:20; display:flex; align-items:center; justify-content:center;
+          background:#05070f; font-size:13px; color:var(--dim); text-align:center; line-height:2; }
+  kbd { background:rgba(140,170,255,.16); border-radius:4px; padding:1px 6px; font-size:11px; }
+  .hint { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:10;
+          font-size:11px; color:rgba(180,200,235,.42); letter-spacing:.04em; text-align:center; }
+</style>
+</head>
+<body>
+<div id="graph"></div>
+
+<div id="top">
+  <small>kg cosmos · force graph</small>
+  <h1>知识图谱</h1>
+  <div id="stat"></div>
+</div>
+
+<div id="panel">
+  <h2>图数据</h2>
+  <div class="fld">
+    <label>规模</label>
+    <select id="scale">
+      <option value="force-top800.json">紧凑 · 800 节点</option>
+      <option value="force-top1500.json" selected>标准 · 1500 节点</option>
+      <option value="force-top3000.json">完整 · 3000 节点</option>
+      <option value="force-full.json">全量 · 15315 节点（较慢）</option>
+    </select>
+  </div>
+  <div class="fld">
+    <label>着色</label>
+    <select id="colorBy">
+      <option value="community" selected>社区（Louvain）</option>
+      <option value="type">实体类型</option>
+    </select>
+  </div>
+  <div class="fld">
+    <label>连接力强度 <span id="chargeVal">默认</span></label>
+    <input type="range" id="charge" min="0" max="4" step="1" value="0" />
+  </div>
+  <h2 style="margin-top:14px">图例</h2>
+  <div id="legend"></div>
+</div>
+
+<div id="tip"></div>
+<div class="hint">拖拽旋转 · 滚轮缩放 · 悬浮查看 · 点击节点聚焦邻居 · <kbd>R</kbd> 重置视角</div>
+<div id="load">正在载入图数据…</div>
+
+<script type="module">
+// ══════════════════════════════════════════════════════════════
+// 使用 3d-force-graph（成熟库，不手写力模拟）
+//   加载方式：esm.sh —— 它自动解析整棵依赖树。
+//   之前的教训：unpkg 的 mjs 内部是裸导入 `three` 与
+//   `three/examples/jsm/controls/DragControls.js`，importmap 必须精确
+//   映射每个子路径，很脆弱；esm.sh 不需要 importmap。
+// ══════════════════════════════════════════════════════════════
+const ESM = 'https://esm.sh/3d-force-graph@1.80.0';
+const DATA_BASE = new URL('./kg-data/', location.href).href;
+
+const loadEl = document.getElementById('load');
+const statEl = document.getElementById('stat');
+const tipEl = document.getElementById('tip');
+const legendEl = document.getElementById('legend');
+
+let ForceGraph3D;
+try {
+  const mod = await import(ESM);
+  ForceGraph3D = mod.default;
+  if (typeof ForceGraph3D !== 'function') throw new Error('default 不是构造函数');
+} catch (e) {
+  loadEl.innerHTML = `3D 引擎加载失败：${e.message}<br><br>`
+    + `需要能访问 <code>esm.sh</code>（本机需开代理）。<br>`
+    + `也可把依赖装到本地：<code>pnpm add 3d-force-graph</code> 后改用本地路径。`;
+  throw e;
+}
+
+// ── 社区配色（与星云视图一致的黄金角采样，保证视觉统一）──
+function hsl2hex(h, s, l) {
+  const f = n => { const k = (n + h * 12) % 12;
+    const a = s * Math.min(l, 1 - l);
+    return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); };
+  return '#' + [f(0), f(8), f(4)].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+const N_COMM = 18;
+const COMM_COLOR = Array.from({ length: N_COMM }, (_, i) =>
+  hsl2hex((i * 0.618033988749895) % 1, 0.62, 0.62));
+const TYPE_COLOR = {
+  Person:'#ff9f9f', Concept:'#7fb3ff', Method:'#7fffb3', Document:'#ffd97f',
+  Process:'#c77fff', System:'#7fffff', Artifact:'#ff9f7f', Component:'#b3ff7f',
+  Event:'#ff7fd9', Metric:'#7fd9ff', Dataset:'#d9ff7f', Organization:'#ffbf7f',
+  Location:'#9f7fff', Tool:'#7fffd9', Material:'#d9d9d9',
+};
+
+const colorOf = (n, mode) => mode === 'type'
+  ? (TYPE_COLOR[n.type] || '#9aa7c7')
+  : (n.community >= 0 ? COMM_COLOR[n.community % N_COMM] : '#4a5678');
+
+// ── 初始化图 ──
+const el = document.getElementById('graph');
+const G = ForceGraph3D({ controlType: 'orbit' })(el);
+G.width(el.clientWidth).height(el.clientHeight)
+ .backgroundColor('#05070f')
+ .showNavInfo(false)
+ .nodeRelSize(4.2)
+ .nodeOpacity(0.92)
+ .nodeResolution(10)
+ .linkOpacity(0.22)
+ .linkWidth(0.6)
+ .linkDirectionalParticles(0)
+ .nodeLabel(() => '')
+ .onNodeHover(node => {
+   el.style.cursor = node ? 'pointer' : 'grab';
+   hovered = node || null;
+ })
+ .onNodeClick(node => focusNeighbors(node));
+
+let hovered = null;
+let colorMode = 'community';
+let chargeScale = 0;
+let curData = null;
+
+// ── 数据载入 ──
+async function loadGraph(file) {
+  loadEl.style.display = 'flex';
+  loadEl.textContent = '正在载入 ' + file + ' …';
+  const res = await fetch(DATA_BASE + file);
+  if (!res.ok) throw new Error('HTTP ' + res.status + ' @ ' + file);
+  const d = await res.json();
+  curData = d;
+
+  const links = d.links.map(l => ({ ...l }));
+  G.graphData({ nodes: d.nodes.map(n => ({ ...n })), links });
+
+  // 节点：颜色 + 大小（度数开方，避免超级枢纽压过一切）
+  const maxDeg = Math.max(1, ...d.nodes.map(n => n.degree || 0));
+  G.nodeColor(n => colorOf(n, colorMode))
+   .nodeVal(n => 1 + 3.6 * Math.sqrt((n.degree || 0) / maxDeg))
+   .nodeLabel(n => `<div style="font:12px system-ui;color:#fff">${n.id}</div>
+      <div style="font:11px system-ui;color:#8e9dbf">${n.type} · 连接度 ${n.degree}${
+        n.community >= 0 ? ' · 社区 #' + (n.community + 1) : ''}</div>`);
+
+  // 边：同社区内偏暗、跨社区稍亮（帮助辨认结构）
+  G.linkColor(l => {
+    const s = typeof l.source === 'object' ? l.source : null;
+    const t = typeof l.target === 'object' ? l.target : null;
+    if (s && t && s.community >= 0 && t.community >= 0 && s.community !== t.community)
+      return 'rgba(180,205,255,0.30)';
+    return 'rgba(150,180,255,0.16)';
+  });
+
+  // 统计与图例
+  statEl.textContent = `${d.meta.nodes.toLocaleString()} 节点 · `
+    + `${d.meta.links.toLocaleString()} 关系`
+    + (d.meta.communities ? ` · ${d.meta.communities} 社区` : '');
+  buildLegend(d);
+  loadEl.style.display = 'none';
+}
+
+function buildLegend(d) {
+  const cnt = {};
+  if (colorMode === 'type') {
+    d.nodes.forEach(n => { cnt[n.type] = (cnt[n.type] || 0) + 1; });
+    legendEl.innerHTML = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 12)
+      .map(([k, v]) => `<div class="lg"><i style="background:${TYPE_COLOR[k] || '#9aa7c7'}"></i>
+        <span>${k}</span><em>${v}</em></div>`).join('');
+  } else {
+    d.nodes.forEach(n => { if (n.community >= 0) cnt[n.community] = (cnt[n.community] || 0) + 1; });
+    const top = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 12);
+    legendEl.innerHTML = top.map(([k, v]) => `<div class="lg">
+      <i style="background:${COMM_COLOR[+k % N_COMM]}"></i>
+      <span>社区 #${+k + 1}</span><em>${v}</em></div>`).join('')
+      + `<div class="lg" style="opacity:.6"><i style="background:#4a5678"></i>
+         <span>未聚类</span><em>${d.nodes.filter(n => n.community < 0).length}</em></div>`;
+  }
+}
+
+// ── 聚焦邻居：点击节点后高亮它及其一跳邻居 ──
+let focusNode = null;
+function focusNeighbors(node) {
+  focusNode = node;
+  const nb = new Set([node.id]);
+  (curData.links || []).forEach(l => {
+    const s = typeof l.source === 'object' ? l.source.id : l.source;
+    const t = typeof l.target === 'object' ? l.target.id : l.target;
+    if (s === node.id) nb.add(t);
+    if (t === node.id) nb.add(s);
+  });
+  G.nodeColor(n => nb.has(n.id) ? colorOf(n, colorMode) : 'rgba(90,105,140,0.28)');
+  G.linkColor(l => {
+    const s = typeof l.source === 'object' ? l.source.id : l.source;
+    const t = typeof l.target === 'object' ? l.target.id : l.target;
+    const on = s === node.id || t === node.id;
+    return on ? 'rgba(200,220,255,0.75)' : 'rgba(90,105,140,0.06)';
+  });
+  // 视角对准该节点
+  const dist = 160;
+  const r = 1 + dist / Math.hypot(node.x || 1, node.y || 1, node.z || 1);
+  G.cameraPosition(
+    { x: (node.x || 0) * r, y: (node.y || 0) * r, z: (node.z || 0) * r },
+    node, 900);
+}
+function resetFocus() {
+  focusNode = null;
+  if (!curData) return;
+  G.nodeColor(n => colorOf(n, colorMode));
+  G.linkColor(l => {
+    const s = typeof l.source === 'object' ? l.source : null;
+    const t = typeof l.target === 'object' ? l.target : null;
+    if (s && t && s.community >= 0 && t.community >= 0 && s.community !== t.community)
+      return 'rgba(180,205,255,0.30)';
+    return 'rgba(150,180,255,0.16)';
+  });
+}
+
+// ── 交互 ──
+document.getElementById('scale').addEventListener('change', async (e) => {
+  try { await loadGraph(e.target.value); } catch (err) { alert('载入失败：' + err.message); }
+});
+document.getElementById('colorBy').addEventListener('change', (e) => {
+  colorMode = e.target.value;
+  if (curData) { buildLegend(curData); resetFocus(); }
+});
+document.getElementById('charge').addEventListener('input', (e) => {
+  chargeScale = +e.target.value;
+  document.getElementById('chargeVal').textContent = chargeScale === 0 ? '默认' : `×${chargeScale}`;
+  applyCharge();
+});
+function applyCharge() {
+  // 只调库提供的力参数，不手写模拟
+  const d3 = G.d3Force('charge');
+  if (d3 && d3.strength) d3.strength(-30 * Math.max(1, chargeScale + 1));
+}
+addEventListener('keydown', (e) => {
+  if (e.key === 'r' || e.key === 'R') { resetFocus(); G.zoomToFit(700, 60); }
+});
+
+// ── 悬浮提示（跟随鼠标）──
+addEventListener('pointermove', (e) => {
+  if (!hovered) { tipEl.style.display = 'none'; return; }
+  tipEl.style.display = 'block';
+  tipEl.innerHTML = `<b>${hovered.id}</b><br><i>${hovered.type} · 连接度 ${hovered.degree}`
+    + (hovered.community >= 0 ? ` · 社区 #${hovered.community + 1}` : '') + '</i>';
+  const pad = 14;
+  tipEl.style.left = Math.min(e.clientX + pad, innerWidth - tipEl.offsetWidth - 8) + 'px';
+  tipEl.style.top = Math.min(e.clientY + pad, innerHeight - tipEl.offsetHeight - 8) + 'px';
+});
+
+addEventListener('resize', () => {
+  G.width(el.clientWidth).height(el.clientHeight);
+});
+
+// ── 启动 ──
+try {
+  await loadGraph('force-top1500.json');
+  setTimeout(() => G.zoomToFit(900, 70), 1400);
+} catch (e) {
+  loadEl.innerHTML = `载入失败：${e.message}<br><br>`
+    + `确认服务在项目根启动：<code>python -m http.server 8098 --bind 127.0.0.1</code><br>`
+    + `访问 <code>http://localhost:8098/web/force-graph.html</code>`;
+}
+</script>
+</body>
+</html>
