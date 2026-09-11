@@ -73,6 +73,14 @@
     </select>
   </div>
   <div class="fld">
+    <label>节点标签</label>
+    <select id="labelMode">
+      <option value="auto" selected>自动（枢纽大字）</option>
+      <option value="all">全部显示</option>
+      <option value="hub">仅枢纽</option>
+    </select>
+  </div>
+  <div class="fld">
     <label>连接力强度 <span id="chargeVal">默认</span></label>
     <input type="range" id="charge" min="0" max="4" step="1" value="0" />
   </div>
@@ -112,6 +120,16 @@ try {
   throw e;
 }
 
+// three-spritetext：把节点渲染成【文字】而不是小球。
+// 这是官方 text-nodes 示例的关键做法 —— 没有它，图就是一团看不清的点云；
+// 有了它，即使节点密集也能读出实体名。
+let SpriteText = null;
+try {
+  SpriteText = (await import('https://esm.sh/three-spritetext')).default;
+} catch (e) {
+  console.warn('SpriteText 加载失败，回退为球体节点：' + e.message);
+}
+
 // ── 社区配色（与星云视图一致的黄金角采样，保证视觉统一）──
 function hsl2hex(h, s, l) {
   const f = n => { const k = (n + h * 12) % 12;
@@ -133,6 +151,25 @@ const colorOf = (n, mode) => mode === 'type'
   ? (TYPE_COLOR[n.type] || '#9aa7c7')
   : (n.community >= 0 ? COMM_COLOR[n.community % N_COMM] : '#4a5678');
 
+/**
+ * 把颜色写入节点数据（nodeColor 与 SpriteText 都读这个字段），
+ * 并让库重建文字对象以应用新颜色。
+ */
+function paintNodes(fn) {
+  if (!curData) return;
+  curData.nodes.forEach(n => { n.color = fn(n); });
+  G.graphData({
+    nodes: curData.nodes,
+    links: curData.links.map(l => ({ source: l.source, target: l.target, type: l.type })),
+  });
+}
+
+// 文字节点的显示策略（在 makeNodeObject 中读取，必须先声明）：
+//   'auto' = 枢纽大字 + 其余小字（推荐）
+//   'all'  = 全部同字号
+//   'hub'  = 仅枢纽显示文字，其余保持球体（最省性能）
+let labelMode = 'auto';
+
 // ── 初始化图 ──
 const el = document.getElementById('graph');
 const G = ForceGraph3D({ controlType: 'orbit' })(el);
@@ -152,6 +189,28 @@ G.width(el.clientWidth).height(el.clientHeight)
  })
  .onNodeClick(node => focusNeighbors(node));
 
+// 斥力：官方的 text-nodes 示例用 -120（库默认约 -30，对大图不够推开）
+G.d3Force('charge').strength(-120);
+
+// ── 节点渲染为文字（照搬官方 text-nodes 做法）──
+function makeNodeObject(node) {
+  const base = (node.color && node.color.startsWith && node.color.startsWith('hsl'))
+    ? node.color
+    : `hsl(${((node.community >= 0 ? node.community : 0) * 137.508) % 360},60%,64%)`;
+  if (!SpriteText) return null;                 // 回退：库默认球体
+  const deg = node.degree || 0;
+  const isHub = deg >= 8;
+  if (labelMode === 'hub' && !isHub) return null;
+  const s = new SpriteText(String(node.id));
+  s.material.depthWrite = false;                // 让文字背景透明
+  s.color = base;
+  s.textHeight = labelMode === 'all' ? 5 : (isHub ? 7.5 : 3.4);
+  s.center.y = -0.6;                            // 文字位于坐标上方
+  s.fontWeight = isHub ? '600' : '400';
+  return s;
+}
+G.nodeThreeObject(makeNodeObject).nodeThreeObjectExtend(true);
+
 let hovered = null;
 let colorMode = 'community';
 let chargeScale = 0;
@@ -167,11 +226,13 @@ async function loadGraph(file) {
   curData = d;
 
   const links = d.links.map(l => ({ ...l }));
-  G.graphData({ nodes: d.nodes.map(n => ({ ...n })), links });
+  // 节点：先按当前模式写入颜色，再交给库（SpriteText 与球体都读 node.color）
+  d.nodes.forEach(n => { n.color = colorOf(n, colorMode); });
+  G.graphData({ nodes: d.nodes, links });
 
-  // 节点：颜色 + 大小（度数开方，避免超级枢纽压过一切）
+  // 球体：用 node.color（文字节点的颜色在 makeNodeObject 里同步取自它）
   const maxDeg = Math.max(1, ...d.nodes.map(n => n.degree || 0));
-  G.nodeColor(n => colorOf(n, colorMode))
+  G.nodeColor('color')
    .nodeVal(n => 1 + 3.6 * Math.sqrt((n.degree || 0) / maxDeg))
    .nodeLabel(n => `<div style="font:12px system-ui;color:#fff">${n.id}</div>
       <div style="font:11px system-ui;color:#8e9dbf">${n.type} · 连接度 ${n.degree}${
@@ -263,10 +324,17 @@ document.getElementById('charge').addEventListener('input', (e) => {
   document.getElementById('chargeVal').textContent = chargeScale === 0 ? '默认' : `×${chargeScale}`;
   applyCharge();
 });
+document.getElementById('labelMode').addEventListener('change', (e) => {
+  labelMode = e.target.value;
+  // 文字对象由库按 nodeThreeObject 重建，改完直接刷新一次
+  if (curData) G.graphData({ nodes: curData.nodes,
+    links: curData.links.map(l => ({ source: l.source, target: l.target, type: l.type })) });
+});
 function applyCharge() {
-  // 只调库提供的力参数，不手写模拟
+  // 基准 -120（官方 text-nodes 用的值）；滑块 0 表示用基准，1..4 表示依次增强
   const d3 = G.d3Force('charge');
-  if (d3 && d3.strength) d3.strength(-30 * Math.max(1, chargeScale + 1));
+  if (!d3 || !d3.strength) return;
+  d3.strength(chargeScale === 0 ? -120 : -120 * (chargeScale + 1));
 }
 addEventListener('keydown', (e) => {
   if (e.key === 'r' || e.key === 'R') { resetFocus(); G.zoomToFit(700, 60); }
