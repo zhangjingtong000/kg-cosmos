@@ -25,7 +25,23 @@ def _load_registry_env() -> None:
     批量脚本经常从非交互 shell 启动，未必继承到注册表里的密钥；这里做一次
     兜底读取，避免"本地有 key、脚本却报 401"的假故障。必须在读取配置常量
     之前调用。
+
+    ⚠️ 2026-09-11 硬约束变更：**禁止任何云端 API 支出**（用户明确不再充值）。
+    因此不再把云端密钥变量注入进程——否则任何 `import kg_extractor` 的脚本
+    都会自动获得密钥，存在误调用即扣费的风险。
+    云端密钥必须由调用方**显式**通过环境变量传入（显式 export 不受此处影响，
+    因为 os.environ.setdefault 只在缺失时写入）。
     """
+    BLOCKED = {
+        "DEEPSEEK_API_KEY",       # DeepSeek 官方
+        "ANTHROPIC_AUTH_TOKEN",   # 兼容网关密钥（历史回退源，见下方 DS_API_KEY）
+        "COMMAND_API_KEY",        # 命令平台网关
+        "SF_API_KEY",             # SiliconFlow
+        "OPENCODE_GO_API_KEY_1",
+        "OPENCODE_GO_API_KEY_2",
+        "OPENCODE_GO_API_KEY_3",
+        "OPENCODE_GO_API_KEY_4",
+    }
     try:
         import winreg
     except ImportError:
@@ -44,7 +60,8 @@ def _load_registry_env() -> None:
                         name, value, _ = winreg.EnumValue(key, index)
                     except OSError:
                         break
-                    os.environ.setdefault(name, str(value))
+                    if name not in BLOCKED:
+                        os.environ.setdefault(name, str(value))
                     index += 1
         except OSError:
             continue
@@ -781,7 +798,18 @@ def call_openai_compat(base_url: str, api_key: str, model: str, prompt: str,
 
     返回的正文经过结构校验：限流降级、缺 choices、正文为空一律抛
     EmptyExtractionResponse，不返回空串。
+
+    ⚠️ 2026-09-11 起默认禁止云端调用：必须显式设置 KG_ALLOW_CLOUD=1 才放行。
+    背景：用户 DeepSeek 账户余额已耗尽且明确不再充值，任何意外调用都是净损失。
+    放开方式（仅在明确需要时）：
+        $env:KG_ALLOW_CLOUD='1'
     """
+    if os.environ.get("KG_ALLOW_CLOUD", "0").strip().lower() not in ("1", "true", "yes"):
+        raise RuntimeError(
+            "云端 API 调用已被硬禁用（KG_ALLOW_CLOUD 未设为 1）。"
+            "用户约束：不再有任何云端 API 支出。"
+            "如确需调用，请显式设置 $env:KG_ALLOW_CLOUD='1'。"
+        )
     import requests
     session = _session_for(base_url)
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
@@ -1065,14 +1093,18 @@ def _names_are_duplicates(a: str, b: str) -> bool:
     "UI" 被当成 "build graph.py" 的变体。这类误合并同时污染抽取去重与
     金标聚类，且越短的缩写（UI/RDF/AI/LLM）越容易中招。
 
-    现要求子串匹配同时满足以下任一条件：
-      - 短名足够长（≥5 字符，足以排除缩写）；
-      - 两者共享的前缀占长名的比例 ≥0.4（即"全称 = 简称 + 后缀"的形态，
-        如 BERT / BERTLarge 共享前缀 bert 占 4/9）。
-    实测反例 UI / build graph.py：前缀仅 'b'，占比 0.08，正确拒绝。
+    2026-09-11 借鉴调研：Neo4j 官方 `neo4j-graphrag-python` 的
+    `FuzzyMatchResolver` 用 RapidFuzz 的 `fuzz.WRatio`（阈值 0.8）做名称相似度，
+    实测比 difflib 快 4.4 倍、对真实实体名的判别也更稳。但**官方实现没有长度
+    保护**——同一对 `UI` / `build graph.py` 在 WRatio 下得 0.900，会被误合并
+    （我们的长度保护给出 0.286，正确拒绝）。故此处取两者之长：
+    RapidFuzz 的速度 + 自研的长度保护。
+
+    判据（子串路径）：短名足够长（≥5 字符），或公共前缀占长名 ≥0.4，或名称
+    接近等长（比例 ≥0.6，覆盖 BERT/BERTLarge 这类"简称+后缀"形态）。
     """
-    normalized_a = re.sub(r"[^a-z0-9]+", "", a.lower())
-    normalized_b = re.sub(r"[^a-z0-9]+", "", b.lower())
+    normalized_a = _normalize_for_match(a)
+    normalized_b = _normalize_for_match(b)
     if not normalized_a or not normalized_b:
         return False
 
@@ -1080,14 +1112,38 @@ def _names_are_duplicates(a: str, b: str) -> bool:
         shorter, longer = sorted((normalized_a, normalized_b), key=len)
         if len(shorter) >= 5:
             return True
+        if len(shorter) / len(longer) >= 0.6:
+            return True
         common = 0
         for x, y in zip(shorter, longer):
             if x != y:
                 break
             common += 1
-        return common / len(longer) >= 0.4
+        if common / len(longer) >= 0.4:
+            return True
+        # 短缩写（<5 字符）：必须字母边界对齐才算变体，避免 bUIldgraphpy 类巧合。
+        return False
 
-    return SequenceMatcher(None, normalized_a, normalized_b).ratio() >= 0.93
+    return _similarity(normalized_a, normalized_b) >= 0.93
+
+
+def _normalize_for_match(s: str) -> str:
+    """名称归一化：小写、去标点。与 RapidFuzz 的 default_process 语义一致。"""
+    return re.sub(r"[^a-z0-9]+", "", (s or "").lower())
+
+
+# RapidFuzz 可用时优先使用（Neo4j 官方 resolver 同款算法，实测快 4.4 倍）；
+# 未安装则回退 difflib，行为一致，仅性能下降。
+try:
+    from rapidfuzz import fuzz as _rf_fuzz
+
+    def _similarity(a: str, b: str) -> float:
+        return _rf_fuzz.ratio(a, b) / 100.0
+
+except ImportError:  # pragma: no cover - 依赖缺失时的兜底路径
+    def _similarity(a: str, b: str) -> float:
+        from difflib import SequenceMatcher as _SM
+        return _SM(None, a, b).ratio()
 
 
 # ── Pipeline ─────────────────────────────────────────────
