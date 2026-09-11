@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>知识图谱可视化 · 标杆参考</title>
+<style>
+  :root{
+    --paper:#f7f5f1;
+    --ink:#1a1a18;
+    --rule:#d8d4cc;
+    --muted:#6b6862;
+    --accent:#8c2f1f;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font:16px/1.65 Georgia,"Songti SC","Noto Serif CJK SC",serif;
+  }
+  header{
+    max-width:1180px;margin:0 auto;padding:64px 40px 28px;
+    border-bottom:1px solid var(--rule);
+  }
+  h1{font-size:34px;line-height:1.2;margin:0 0 12px;font-weight:400;letter-spacing:-.01em}
+  .lede{max-width:760px;color:var(--muted);font-size:16px;margin:0}
+  .lede b{color:var(--ink);font-weight:400;border-bottom:2px solid var(--accent);padding-bottom:1px}
+  main{max-width:1180px;margin:0 auto;padding:0 40px 100px}
+  section{padding-top:52px}
+  h2{
+    font:600 12px/1 ui-monospace,"SFMono-Regular",Consolas,monospace;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+    margin:0 0 6px;
+  }
+  .note{color:var(--muted);font-size:14.5px;max-width:800px;margin:0 0 26px}
+  figure{margin:0 0 40px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:32px;align-items:start}
+  figure img{
+    width:100%;height:auto;display:block;background:#fff;
+    border:1px solid var(--rule);
+  }
+  figcaption{font-size:14px;line-height:1.6}
+  figcaption .t{font-weight:600;display:block;margin-bottom:6px}
+  figcaption .d{color:var(--muted)}
+  figcaption .u{
+    display:inline-block;margin-top:8px;font:400 11.5px/1.5 ui-monospace,Consolas,monospace;
+    color:var(--accent);word-break:break-all;
+  }
+  .star{border-left:3px solid var(--accent);padding-left:18px}
+  @media (max-width:900px){
+    figure{grid-template-columns:1fr;gap:14px}
+    header,main{padding-left:22px;padding-right:22px}
+    h1{font-size:26px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>一次该显示多少节点</h1>
+  <p class="lede">22 个产品的官方口径与实测效果。结论是：<b>没有任何一家把节点全画出来还指望看清</b>。它们靠的是标签预算、先聚合再渲染、以及把极端规模降级成密度视图。这也是我们分层的依据。</p>
+</header>
+<main>
+
+<section>
+  <h2>01 / 直接反例</h2>
+  <p class="note">先看两个最有冲击力的：业界标杆在几十个节点时就出现标签重叠；十万节点的作品只画十几个标签。</p>
+
+  <figure>
+    <img src="../output/refs/cp_science.png" alt="Connected Papers">
+    <figcaption>
+      <span class="t">Connected Papers</span>
+      <span class="d">官方示例图只有 35–40 个节点，标签已经肉眼可见地叠在一起（"Cobo, 2012" 与 "Cobo, 2011" 糊成一团）。产品分析 5 万篇文献，最终只显示几十篇。</span>
+      <span class="u">connectedpapers.com</span>
+    </figcaption>
+  </figure>
+
+  <figure>
+    <img src="../output/refs/arxiv.jpg" alt="Cosmograph arXiv">
+    <figcaption>
+      <span class="t">Cosmograph · arXiv 十万论文图谱</span>
+      <span class="d">十万节点的作品，实测只有约 15 个标签。默认标签上限是 30+30=60 个——<b>标签数和节点数是解耦的</b>。</span>
+      <span class="u">next.cosmograph.app</span>
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>02 / 标签预算制</h2>
+  <p class="note">统一规律：网格划分 + 重要性排序 + 贪心取舍。没有一家靠"全画出来"。</p>
+
+  <figure>
+    <img src="../output/refs/gephi_labels.webp" alt="Gephi 标签避让">
+    <figcaption>
+      <span class="t">Gephi · 标签避让</span>
+      <span class="d">用四叉树做避让（<code>LabelAdjust</code>），0.11 版新增 <code>NODE_LABEL_AVOID_OVERLAP</code>。这是桌面端离线处理标签的标杆做法。</span>
+      <span class="u">gephi.org</span>
+    </figcaption>
+  </figure>
+
+  <figure>
+    <img src="../output/refs/obsidian_graph.png" alt="Obsidian Graph">
+    <figcaption>
+      <span class="t">Obsidian · 官方图谱</span>
+      <span class="d">约 30 个节点已经开始拥挤。官方文档原话：超过 25,000 个文件"不实用"。</span>
+      <span class="u">obsidian.md</span>
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>03 / 先聚合，再渲染</h2>
+  <p class="note">我们最终选的路线。上层概括下层，所以每一屏的节点数都是可控的。</p>
+
+  <figure>
+    <img src="../output/refs/gephi_clusters.webp" alt="Gephi 社区分离">
+    <figcaption>
+      <span class="t">Gephi · 社区分离</span>
+      <span class="d">按社区把节点拉开成一个个"群岛"，簇内紧密、簇间留白。这正是我们 18 个社区分面的思路来源。</span>
+      <span class="u">gephi.org</span>
+    </figcaption>
+  </figure>
+
+  <figure>
+    <img src="../output/refs/gephi_filters.webp" alt="Gephi 过滤">
+    <figcaption>
+      <span class="t">Gephi · 度数过滤</span>
+      <span class="d">官方教程的常规动作：用 Degree Rank 直接隐藏度数 &lt; 2 的节点。先过滤，再渲染。</span>
+      <span class="u">gephi.org</span>
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>04 / 密度视图与群岛</h2>
+
+  <figure>
+    <img src="../output/refs/vos_dense1.png" alt="VOSviewer 密度视图">
+    <figcaption>
+      <span class="t">VOSviewer · 密度视图</span>
+      <span class="d">极端规模下的降级方案：<b>没有节点、没有边、零标签</b>，纯蓝→绿→黄的热力图。VOSviewer 文档承认"超过 10,000 个节点的网络往往难以处理"。</span>
+      <span class="u">vosviewer.com</span>
+    </figcaption>
+  </figure>
+
+  <figure>
+    <img src="../output/refs/gephi_visualizations.webp" alt="Gephi 精选">
+    <figcaption>
+      <span class="t">Gephi · 可视化精选</span>
+      <span class="d">同一个引擎，靠布局与配色做出完全不同的气质。这说明"好看"来自布局与配色的克制，而不是加特效。</span>
+      <span class="u">gephi.org</span>
+    </figcaption>
+  </figure>
+</section>
+
+<section>
+  <h2>05 / 星云感从哪来</h2>
+  <p class="note">这一组是给"层级星云"方向找的直接参考。共同点：<b>大量节点用点云和流线表现，而不是给每个点挂标签</b>。</p>
+
+  <figure class="star">
+    <img src="../output/refs/modelatlas.jpg" alt="Model Atlas">
+    <figcaption>
+      <span class="t">Model Atlas ★</span>
+      <span class="d">深色空间里密集的彩色点云 + 流线状纤维，有体积、有深度。这就是"星云"该有的样子：靠粒子的密度和流向表达结构，而不是靠球体和标签。我们下一步的视觉基准。</span>
+      <span class="u">modelatlas</span>
+    </figcaption>
+  </figure>
+
+  <figure>
+    <img src="../output/refs/grandjean_unesco.png" alt="Grandjean UNESCO">
+    <figcaption>
+      <span class="t">Martin Grandjean · UNESCO 网络</span>
+      <span class="d">人文领域的网络图代表作。用极少的颜色和精确的排版，让结构自己说话。</span>
+      <span class="u">martingrandjean.ch</span>
+    </figcaption>
+  </figure>
+
+  <figure>
+    <img src="../output/refs/countryborders.png" alt="国界网络">
+    <figcaption>
+      <span class="t">国界网络图</span>
+      <span class="d">地理位置驱动的布局，天然带空间感。层级星云的社区排布可以借鉴这种"有依据的摆放"。</span>
+      <span class="u">research/_img</span>
+    </figcaption>
+  </figure>
+
+  <figure>
+    <img src="../output/refs/nyt.png" alt="NYT 图表">
+    <figcaption>
+      <span class="t">New York Times · 图表</span>
+      <span class="d">编辑设计的基准：字号层级清楚、留白充足、颜色克制。</span>
+      <span class="u">nytimes.com</span>
+    </figcaption>
+  </figure>
+</section>
+
+<p class="note" style="margin-top:60px;border-top:1px solid var(--rule);padding-top:22px">
+  完整报告（1877 行，325 个实测 HTTP 状态的 URL）在 <code>E:\fab\research\kg-viz-benchmarks.md</code>，全部原图在 <code>E:\fab\research\_img\</code>（共 25 张）。
+</p>
+
+</main>
+</body>
+</html>

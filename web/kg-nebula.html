@@ -7,12 +7,17 @@
 <style>
   * { box-sizing: border-box; }
   html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #050914; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
-  .space { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+  .space { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; transition: opacity .4s ease; }
+  /* 进入社区内部后压暗背景星野：它的星点和内部实体点在视觉上同级，
+     不压暗会把实体的可见数量掩盖掉一大半。 */
+  body.inside .space { opacity: .28; }
   canvas { position: fixed; inset: 0; display: block; }
   .label { color: rgba(239,246,255,.9); font-size: 12px; letter-spacing: .025em; text-align: center; white-space: nowrap; pointer-events: none; text-shadow: 0 2px 10px rgba(0,0,0,.95), 0 0 14px rgba(8,20,45,.9); }
   .label b { display: block; font-size: 13px; font-weight: 550; }
   .label small { display: block; margin-top: 4px; color: rgba(202,220,244,.58); font-size: 10px; }
-  .header { position: fixed; inset: 28px auto auto 32px; z-index: 3; color: rgba(232,241,255,.88); pointer-events: none; }
+  .header { position: fixed; inset: 28px auto auto 32px; z-index: 3; color: rgba(232,241,255,.88); pointer-events: none; transition: opacity .35s ease; }
+  /* 进入社区后隐藏概览层的标题，否则会和内部视图的返回按钮叠在一起 */
+  body.inside .header { opacity: 0; }
   .header small { display: block; color: rgba(181,203,235,.54); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
   .header h1 { margin: 6px 0 0; font-size: 18px; font-weight: 520; letter-spacing: .04em; }
   .hint { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); color: rgba(203,219,246,.42); font-size: 11px; letter-spacing: .05em; pointer-events: none; }
@@ -100,6 +105,22 @@ try {
       <code>python -m http.server 8098 --bind 127.0.0.1</code><br>
       访问 <code>http://localhost:8098/web/kg-nebula.html</code></div>`);
   throw err;
+}
+
+// ── ?c=N 直入：在模块顶层预取社区内部数据 ──
+// 顶层 await 会推迟 load 事件，headless 截图因此能等到数据就绪；
+// 正常交互进入时 PRE_DATA 为 null，走 enterCommunity 里的 fetch 分支。
+const PRE_C = new URLSearchParams(location.search).get('c');
+const PRE_DATA = (PRE_C !== null && clouds[+PRE_C])
+  ? await (await fetch(COMM_URL(+PRE_C))).json()
+  : null;
+
+// 调试开关：&nobg=1 关掉背景星野 iframe。
+// 背景星野的星点和内部实体点在像素层面同级，肉眼数不清实体到底渲染出几个，
+// 关掉它才能用像素统计客观核验。
+if (new URLSearchParams(location.search).get('nobg') === '1') {
+  const _sp = document.querySelector('.space');
+  if (_sp) _sp.style.display = 'none';
 }
 
 const scene = new THREE.Scene();
@@ -424,6 +445,7 @@ const overlay = new THREE.Group();   // 内部视图的容器（进入时填充�
 scene.add(overlay);
 let inside = null;                    // 当前进入的社区索引
 let flying = null;                    // 相机补间状态
+let FLY_MS = 1150;                    // 飞入时长；?c=N 直入时压到最小以便截图
 
 function neighborsOf(id) {
   return links.filter(l => l.source === id || l.target === id)
@@ -493,23 +515,33 @@ function clearOverlay() {
 }
 
 // ── 渲染社区内部（实体点 + 内部边 + 核心标签）──
-async function enterCommunity(ci) {
+async function enterCommunity(ci, preloaded, instant) {
   const cloud = clouds[ci];
   status.textContent = `正在进入「${cloud.name}」…`;
   status.classList.add('visible');
-  let data;
-  try {
-    const r = await fetch(COMM_URL(ci));
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    data = await r.json();
-  } catch (e) {
-    status.textContent = `社区 ${ci} 内部数据加载失败：${e.message}`;
-    return;
+  let data = preloaded || null;
+  if (!data) {
+    try {
+      const r = await fetch(COMM_URL(ci));
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      data = await r.json();
+    } catch (e) {
+      status.textContent = `社区 ${ci} 内部数据加载失败：${e.message}`;
+      return;
+    }
   }
   clearOverlay();
 
   const center = new THREE.Vector3().fromArray(cloud.position);
   const base = new THREE.Color(cloud.color);
+
+  // 相机距离提前算：下面点的屏幕尺寸要按它标定（见 uScale 注释）。
+  // 让球体占据视野高度的约 85%：dist = (R / tan(fov/2)) / 0.85。
+  // 原来用 R*1.9，对半径 103 的社区只有 196，而 controls.maxDistance 是 130，
+  // 相机会被 OrbitControls 硬拉回来，只能看到球体前面的一小块。
+  const R = data.meta.radius || 60;
+  const dist = (R / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / 0.85;
+  controls.maxDistance = Math.max(130, dist * 1.7);
 
   // 实体点：半径按度数（枢纽大），颜色=社区色深浅
   const N = data.nodes.length;
@@ -517,14 +549,18 @@ async function enterCommunity(ci) {
   const col = new Float32Array(N * 3);
   const siz = new Float32Array(N);
   const maxD = Math.max(1, ...data.nodes.map(n => n.d || 1));
+  const logMax = Math.log(1 + maxD);
   data.nodes.forEach((n, k) => {
     pos[k*3]   = center.x + n.x;
     pos[k*3+1] = center.y + n.y;
     pos[k*3+2] = center.z + n.z;
-    const t = Math.pow((n.d || 1) / maxD, 0.6);
+    // 社区内度数普遍很小（社区 0 平均只有 3.7），用 (d/maxD)^0.6 会让几乎
+    // 所有点都逼近最大尺寸，130 个大点互相遮盖后屏幕上看只剩十几个。
+    // 改用对数映射并压低基数，让枢纽与普通实体拉开差距。
+    const t = Math.log(1 + (n.d || 1)) / logMax;
     const cc = base.clone().lerp(new THREE.Color('#ffffff'), 0.16 + 0.62 * t);
     col[k*3] = cc.r; col[k*3+1] = cc.g; col[k*3+2] = cc.b;
-    siz[k] = 1.5 + 7.5 * t;
+    siz[k] = 12 + 16 * t;
   });
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -532,14 +568,27 @@ async function enterCommunity(ci) {
   g.setAttribute('aSize', new THREE.BufferAttribute(siz, 1));
   const m = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, vertexColors: true,
-    uniforms: { uScale: { value: innerHeight * 1.5 } },
+    // uScale 取相机距离，使 gl_PointSize ≈ aSize（屏幕像素恒定）。
+    // 原来固定用 innerHeight*1.5，点的大小会随社区半径变化——半径 182 的
+    // 社区相机距离 565，点只有 4~11px，缩放后整片消失。现在 siz 直接就是
+    // 点的屏幕直径（5~21px），与球体大小无关。
+    uniforms: { uScale: { value: dist } },
     vertexShader: `attribute float aSize; varying vec3 vColor; uniform float uScale;
       void main(){ vColor=color; vec4 mv=modelViewMatrix*vec4(position,1.);
       gl_PointSize=aSize*(uScale/-mv.z); gl_Position=projectionMatrix*mv; }`,
     fragmentShader: `varying vec3 vColor;
-      void main(){ vec2 d=gl_PointCoord-.5; float r=length(d); if(r>.5) discard;
-      float a=smoothstep(.5,.05,r); gl_FragColor=vec4(vColor,a*.92); }`,
+      void main(){
+        vec2 d = gl_PointCoord - .5; float r = length(d);
+        if (r > .5) discard;
+        // 实心核 + 柔和外晕。原来只有 smoothstep(.5,.05,r)，可见核心仅占直径
+        // 的 27%，最小实体的亮芯约 4px，在 1600x900 上几乎看不见——像素统计
+        // 显示 130 个点其实全部渲染了，只是面积中位数只有 13px²。
+        float halo = smoothstep(.5, .16, r);
+        float core = smoothstep(.20, .0, r);
+        gl_FragColor = vec4(vColor, clamp(halo * .78 + core, 0., 1.));
+      }`,
   });
+
   const pts = new THREE.Points(g, m);
   pts.frustumCulled = false;
   overlay.add(pts);
@@ -559,7 +608,7 @@ async function enterCommunity(ci) {
   eg.setAttribute('position', new THREE.BufferAttribute(ep, 3));
   eg.setAttribute('color', new THREE.BufferAttribute(ec, 3));
   const em = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true,
-    opacity: 0.30, blending: THREE.AdditiveBlending, depthWrite: false });
+    opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false });
   const lines = new THREE.LineSegments(eg, em);
   lines.frustumCulled = false;
   overlay.add(lines);
@@ -588,11 +637,9 @@ async function enterCommunity(ci) {
     if (isOverview) o.visible = false;
   });
 
-  // 相机飞入
-  const R = data.meta.radius || 60;
-  const dist = R * 1.9;
+  // 相机飞入（R / dist / maxDistance 已在上方算好）
   flying = {
-    t: 0, dur: 1150,
+    t: 0, dur: Math.max(1, FLY_MS),
     fromPos: camera.position.clone(),
     toPos: new THREE.Vector3(center.x, center.y + R * 0.42, center.z + dist),
     fromTgt: controls.target.clone(),
@@ -602,7 +649,13 @@ async function enterCommunity(ci) {
   status.classList.remove('visible');
 
   // 概览层淡出
-  cloudObjects.forEach(it => { it.group.visible = false; });
+  // 注意：CSS2DRenderer 的 renderObject 只检查对象自身的 visible，**不检查父级**，
+  // 所以把 group 设为不可见并不能隐藏其中的 CSS2D 标签——必须逐个隐藏
+  // labelObject，否则进入社区后概览层的社区名仍会浮在内部视图上面。
+  cloudObjects.forEach(it => {
+    it.group.visible = false;
+    if (it.labelObject) it.labelObject.visible = false;
+  });
   filamentObjects.forEach(it => { it.group.visible = false; });
   const _hideOverview = (v) => scene.children.forEach(o => {
     if (o === overlay || o.isCSS2DObject) return;
@@ -611,7 +664,17 @@ async function enterCommunity(ci) {
   });
   _hideOverview(false);
 
+  // 直入模式：在同一个同步块里把相机落位。若放到调用处的 await 之后再落位，
+  // 中间会插入一个微任务，headless 截图偶尔正好卡在"概览已隐藏、相机未落位"
+  // 的中间态，拍到的是一片空背景（实测时好时坏就是这个原因）。
+  if (instant && flying) {
+    camera.position.copy(flying.toPos);
+    controls.target.copy(flying.toTgt);
+    flying = null;
+    controls.update();
+  }
   innerHud.classList.add('on');
+  document.body.classList.add('inside');
   document.getElementById('itName').textContent = cloud.name;
   document.getElementById('itName').style.color = cloud.color;
   document.getElementById('itSub').textContent =
@@ -637,14 +700,19 @@ function exitCommunity() {
     if (o === overlay || o.isCSS2DObject) return;
     if (o.isPoints || o.isLineSegments) o.visible = true;
   });
-  cloudObjects.forEach(it => { it.group.visible = true; });
+  cloudObjects.forEach(it => {
+    it.group.visible = true;
+    if (it.labelObject) it.labelObject.visible = true;
+  });
   filamentObjects.forEach(it => { it.group.visible = true; });
   innerHud.classList.remove('on');
+  document.body.classList.remove('inside');
+  controls.maxDistance = 130;      // 恢复概览层的限制
   hintEl.textContent = '拖拽旋转 · 滚轮缩放 · 悬浮预览社区 · 点击星云进入内部';
   const cloud = inside !== null ? clouds[inside] : null;
   const target = cloud ? new THREE.Vector3().fromArray(cloud.position) : new THREE.Vector3(0, 0, 0);
   flying = {
-    t: 0, dur: 900,
+    t: 0, dur: Math.max(1, FLY_MS),
     fromPos: camera.position.clone(),
     toPos: new THREE.Vector3(0, 2.6, innerWidth < 700 ? CAM_Z_PORTRAIT : CAM_Z),
     fromTgt: controls.target.clone(),
@@ -683,6 +751,7 @@ addEventListener('keydown', (e) => { if (e.key === 'Escape') exitCommunity(); })
 const CAM_Z = 50.2;
 const CAM_Z_PORTRAIT = 105.5;
 
+let _firstFrame = false;
 function animate() {
   requestAnimationFrame(animate);
   const elapsed = performance.now() * .001;
@@ -726,8 +795,35 @@ function animate() {
   controls.update();
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
+  // L0 概览首帧渲染完成即就绪。直入模式（?c=N）不在这里置位，
+  // 否则 CDP 会在概览层就截图，拿到的不是内部视图。
+  if (!_firstFrame) { _firstFrame = true; if (!PRE_C) window.__ready = true; }
 }
 animate();
+
+// ── 直接进入某个社区：web/kg-nebula.html?c=0 ──
+// 用于分享具体社区，也便于自动化截图验证内部视图。
+{
+  const q = new URLSearchParams(location.search);
+  const c = q.get('c');
+  if (c !== null && clouds[+c]) {
+    const idx = +c;
+    // 直入模式（?c=N）：数据已在模块顶层预取。
+    // 这里刻意用**模块顶层 await** 而不是 queueMicrotask——顶层 await 会让
+    // load 事件等到内部视图渲染完成，headless 的 --screenshot 才一定能截到
+    // L1；用微任务时抓帧时机不确定，实测经常只截到概览层。
+    // 同时把相机直接落位、不播放飞入补间（补间依赖 rAF，在这一刻还没跑）。
+    FLY_MS = 0;
+    // 先隐藏概览标题：CSS 过渡要 350ms，截图等不到，会截到 opacity 仍为 1 的中间态
+    document.querySelector('.header').style.display = 'none';
+    await enterCommunity(idx, PRE_DATA, true);
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
+    // 供 tools/cdp_shot.py 判定"内部视图已渲染完成"，避免抓帧时机竞争
+    window.__ready = true;
+  }
+}
+
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
