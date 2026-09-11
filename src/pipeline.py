@@ -13,7 +13,10 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 
 from pdf_parser import parse_pdf, chunk_document
-from kg_extractor import MODELS, extract_chunk, extract_chunk_once, deduplicate_entities
+from kg_extractor import (
+    MODELS, canonicalize_relation_endpoints, deduplicate_entities, extract_chunk,
+    extract_chunk_once,
+)
 from graph_store import merge_evidence
 
 
@@ -96,6 +99,23 @@ def extract_graph(
         )
 
     all_nodes = deduplicate_entities(all_nodes, mode)
+
+    # 端点规范化：deduplicate_entities 会把实体名改成"最长的变体"，关系端点若不
+    # 同步改写就会失配——实测第一篇云端输出 779 条关系中 328 条（42%）的端点
+    # 在实体集合里找不到，写 Neo4j 时被静默丢弃。
+    all_edges = canonicalize_relation_endpoints(all_edges, all_nodes)
+    known = {n["name"].strip().casefold() for n in all_nodes if n.get("name")}
+    resolved, dangling = [], 0
+    for e in all_edges:
+        if (e.get("source", "").strip().casefold() in known
+                and e.get("target", "").strip().casefold() in known):
+            resolved.append(e)
+        else:
+            dangling += 1
+    if dangling:
+        print(f"    [warn] {dangling} 条关系的端点无法解析到实体，已丢弃", flush=True)
+    all_edges = resolved
+
     deduped_edges = {}
     for e in all_edges:
         key = (e["source"].lower(), e["target"].lower(), e["type"].lower())
@@ -117,4 +137,5 @@ def extract_graph(
         "images_found": sum(len(p["images"]) for p in parsed["pages"]),
         "chunk_failures": len(failures),
         "total_chunks": total_chunks,
+        "dangling_edges_dropped": dangling,
     }

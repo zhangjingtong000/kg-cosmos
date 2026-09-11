@@ -311,6 +311,44 @@ def retain_relations_with_known_endpoints(relations: list[dict], entity_names: l
     ]
 
 
+def canonicalize_relation_endpoints(relations: list[dict], entities: list[dict]) -> list[dict]:
+    """把关系端点改写到去重后的规范实体名。
+
+    背景（2026-09-11 发现）：`deduplicate_entities` 在跨 chunk 合并时会把实体名
+    改成"最长的那个变体"（`existing["name"] = e["name"]`），但关系端点不会同步
+    改写。于是合并后大量关系的端点与被保留的实体名失配。实测第一篇的云端输出：
+    779 条关系里 **328 条（42%）的端点在实体集合中根本找不到**——这些边在写入
+    Neo4j 时会被 `MATCH (a {name})` 静默丢弃，是真正的关系损失。
+
+    做法：先按归一化名称精确匹配，再对未命中的端点做一次保守的模糊匹配
+    （复用 `_names_are_duplicates`，已带长度保护）。匹配不到则保留原名，
+    由调用方的端点过滤决定去留。
+    """
+    names = [n.get("name", "") for n in entities if n.get("name")]
+    exact = {name.strip().casefold(): name for name in names}
+    normalized = {re.sub(r"[^a-z0-9]+", "", name.lower()): name for name in names}
+    cache: dict[str, str] = {}
+    out = []
+    for rel in relations:
+        new_rel = dict(rel)
+        for field in ("source", "target"):
+            raw = (rel.get(field) or "").strip()
+            if not raw:
+                continue
+            hit = exact.get(raw.casefold()) or normalized.get(
+                re.sub(r"[^a-z0-9]+", "", raw.lower()))
+            if hit is None and raw not in cache:
+                norm_raw = re.sub(r"[^a-z0-9]+", "", raw.lower())
+                hit = next((c for n, c in normalized.items()
+                            if _names_are_duplicates(norm_raw, n)), raw)
+                cache[raw] = hit
+            elif hit is None:
+                hit = cache[raw]
+            new_rel[field] = hit
+        out.append(new_rel)
+    return out
+
+
 def retain_semantic_table_entities(entities: list[dict]) -> list[dict]:
     """Remove table-only row markers that cannot be explored as knowledge entities."""
     generic_markers = {"base", "big", "small", "large", "default", "baseline"}
