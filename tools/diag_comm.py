@@ -24,10 +24,24 @@ tot_n = sum(r[1] for r in rows)
 tot_m = sum(r[2] for r in rows)
 print(f'\n合计 {tot_n} 节点 / {tot_m} 关系 → 全局 {tot_m/tot_n:.2f}')
 if rows:
-    print(f'\n单个文件结构示例 ({rows[0][0]}):')
+    print(f'\n坐标维度检查（防止只看第一个节点就误判布局）：')
+    for f, _, _, _ in rows:
+        d = json.load(open(os.path.join(D, f), encoding='utf-8'))
+        ns = d.get('nodes') or []
+        if not ns:
+            continue
+        xs = [n.get('x', 0) for n in ns]
+        ys = [n.get('y', 0) for n in ns]
+        zs = [n.get('z', 0) for n in ns]
+        nz_y = sum(1 for v in ys if abs(v) > 1e-9)
+        nz_z = sum(1 for v in zs if abs(v) > 1e-9)
+        print(f'  {f:<14} x[{min(xs):>8.1f},{max(xs):>8.1f}] '
+              f'y[{min(ys):>8.1f},{max(ys):>8.1f}] '
+              f'z[{min(zs):>8.1f},{max(zs):>8.1f}]  '
+              f'非零 y {nz_y}/{len(ns)}  非零 z {nz_z}/{len(ns)}')
     d = json.load(open(os.path.join(D, rows[0][0]), encoding='utf-8'))
-    print(' 顶层键:', list(d.keys()))
+    print(f'\n{rows[0][0]} 的字段: {list(d.keys())}')
     if d.get('nodes'):
-        print(' node 样例:', json.dumps(d['nodes'][0], ensure_ascii=False)[:200])
-    if d.get('links'):
-        print(' link 样例:', json.dumps(d['links'][0], ensure_ascii=False)[:200])
+        print(' node 样例:', json.dumps(d['nodes'][0], ensure_ascii=False)[:180])
+    if d.get('edges'):
+        print(' edge 样例:', json.dumps(d['edges'][0], ensure_ascii=False)[:120])
