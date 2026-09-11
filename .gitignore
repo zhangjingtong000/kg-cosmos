@@ -24,3 +24,6 @@ venv/
 
 # local scratch
 /tmp/
+
+# External reference checkouts (each has its own .git)
+/graphrag-workbench/
