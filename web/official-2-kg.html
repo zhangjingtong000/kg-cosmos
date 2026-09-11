@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>官方 large-graph 示例 · 换成本项目 KG 数据</title>
+<!-- 与 web/official-1-blocks.html（官方原样）逐字相同，
+     仅把 jsonUrl 指向本项目数据。数据字段也已对齐官方（id / user / description），
+     因此下面的示例代码一个字都没有改。 -->
+<style>
+  body { margin:0; background:#000; }
+  #3d-graph { position:fixed; inset:0; }
+</style>
+</head>
+<body>
+<div id="3d-graph"></div>
+<script type="module">
+import ForceGraph3D from 'https://esm.sh/3d-force-graph@1.80.0';
+
+const elem = document.getElementById('3d-graph');
+
+const Graph = new ForceGraph3D(elem)
+  .jsonUrl('./kg-data/official-format-top1500.json')
+  .nodeAutoColorBy('user')
+  .nodeLabel(node => `${node.user}: ${node.description}`)
+  .onNodeClick(node => window.open(`https://bl.ocks.org/${node.user}/${node.id}`, '_blank'));
+</script>
+</body>
+</html>

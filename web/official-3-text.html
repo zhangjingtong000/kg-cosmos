@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>官方 text-nodes 示例 · 换成本项目 KG 数据</title>
+<!-- 与官方 example/text-nodes/index.html 逐字相同（含 SpriteText 节点、
+     textHeight=8、center.y=-0.6、d3Force('charge').strength(-120)），
+     仅把 jsonUrl / nodeAutoColorBy 的字段换成本项目数据字段。 -->
+<style>
+  body { margin:0; background:#000; }
+  #3d-graph { position:fixed; inset:0; }
+</style>
+</head>
+<body>
+<div id="3d-graph"></div>
+<script type="module">
+import ForceGraph3D from 'https://esm.sh/3d-force-graph@1.80.0';
+import SpriteText from "https://esm.sh/three-spritetext";
+
+const elem = document.getElementById('3d-graph');
+
+const Graph = new ForceGraph3D(elem)
+    .jsonUrl('./kg-data/official-format-top1500.json')
+    .nodeAutoColorBy('user')
+    .nodeThreeObject(node => {
+      const sprite = new SpriteText(node.id);
+      sprite.material.depthWrite = false; // make sprite background transparent
+      sprite.color = node.color;
+      sprite.textHeight = 8;
+      sprite.center.y = -0.6; // shift above node
+      return sprite;
+    })
+    .nodeThreeObjectExtend(true);
+
+// Spread nodes a little wider
+Graph.d3Force('charge').strength(-120);
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>官方 large-graph 示例（原样搬运）</title>
+<!-- 唯一改动：把官方示例的 UMD <script src="//cdn.jsdelivr.net/npm/3d-force-graph"> 
+     换成 esm.sh 的 import（UMD 全局变量在本地离线场景不可靠）。
+     除此之外，下面的示例代码与官方 example/large-graph/index.html 完全一致。 -->
+<style>
+  body { margin:0; background:#000; }
+  #3d-graph { position:fixed; inset:0; }
+</style>
+</head>
+<body>
+<div id="3d-graph"></div>
+<script type="module">
+import ForceGraph3D from 'https://esm.sh/3d-force-graph@1.80.0';
+
+const elem = document.getElementById('3d-graph');
+
+const Graph = new ForceGraph3D(elem)
+  .jsonUrl('../3d-force-graph/example/datasets/blocks.json')
+  .nodeAutoColorBy('user')
+  .nodeLabel(node => `${node.user}: ${node.description}`)
+  .onNodeClick(node => window.open(`https://bl.ocks.org/${node.user}/${node.id}`, '_blank'));
+</script>
+</body>
+</html>

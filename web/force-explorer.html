@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>KG Cosmos · 知识图谱探索器</title>
+<style>
+  :root { --fg:#e6edff; --dim:#8e9dbf; --panel:rgba(9,13,28,.90); }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; overflow:hidden; background:#05070f;
+              font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif; color:var(--fg); }
+  #graph { position:fixed; inset:0; }
+
+  #top { position:fixed; left:22px; top:18px; z-index:10; pointer-events:none; }
+  #top small { display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+               color:rgba(180,200,235,.5); }
+  #top h1 { margin:4px 0 0; font-size:17px; font-weight:560; letter-spacing:.03em; }
+
+  #panel { position:fixed; right:16px; top:16px; z-index:10; width:268px; padding:14px 16px;
+           border-radius:11px; background:var(--panel); border:1px solid rgba(140,170,255,.20);
+           backdrop-filter:blur(9px); max-height:calc(100vh - 32px); overflow-y:auto; }
+  #panel h2 { margin:0 0 9px; font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+              color:rgba(180,200,235,.55); font-weight:600; }
+  .fld { margin-bottom:11px; }
+  .fld label { display:flex; justify-content:space-between; font-size:11px;
+               color:var(--dim); margin-bottom:4px; }
+  .fld label b { color:#a8c4ff; font-weight:500; font-variant-numeric:tabular-nums; }
+  .fld select, .fld input[type=range] { width:100%; }
+  .fld select { background:rgba(10,16,34,.9); color:var(--fg);
+                border:1px solid rgba(140,170,255,.25); border-radius:7px;
+                padding:6px 8px; font-size:12px; }
+  .btns { display:flex; gap:7px; margin-top:4px; }
+  .btns button { flex:1; background:rgba(120,150,255,.14); color:var(--fg);
+                 border:1px solid rgba(140,170,255,.28); border-radius:7px;
+                 padding:7px 6px; font-size:11.5px; cursor:pointer; }
+  .btns button:hover { background:rgba(120,150,255,.26); border-color:rgba(150,190,255,.6); }
+  #stats { margin-top:12px; padding-top:10px; border-top:1px solid rgba(140,170,255,.12);
+           font-size:11px; color:var(--dim); line-height:1.75; }
+  #stats b { color:#a8c4ff; font-variant-numeric:tabular-nums; }
+  #legend { margin-top:10px; }
+  .lg { display:flex; align-items:center; gap:6px; font-size:11px; padding:2px 0;
+        cursor:pointer; border-radius:4px; }
+  .lg:hover { background:rgba(120,150,255,.10); }
+  .lg i { width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
+  .lg em { margin-left:auto; font-style:normal; color:var(--dim);
+           font-variant-numeric:tabular-nums; }
+
+  /* 隐藏库自带的 hover tooltip（我们用 #tip 自己画，信息更全） */
+  .scene-tooltip { display: none !important; }
+
+  #tip { position:fixed; z-index:12; pointer-events:none; display:none;
+         background:rgba(6,10,24,.96); border:1px solid rgba(140,170,255,.34);
+         border-radius:8px; padding:8px 11px; font-size:12px; max-width:330px; line-height:1.65; }
+  #tip b { color:#fff; font-size:13px; } #tip i { color:var(--dim); font-style:normal; }
+  #tip u { color:#8fe3b0; text-decoration:none; }
+
+  #hint { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:10;
+          font-size:11px; color:rgba(180,200,235,.45); letter-spacing:.03em; }
+  #load { position:fixed; inset:0; z-index:20; display:flex; align-items:center;
+          justify-content:center; background:#05070f; font-size:13px; color:var(--dim);
+          text-align:center; line-height:2; }
+  kbd { background:rgba(140,170,255,.16); border-radius:4px; padding:1px 6px; font-size:11px; }
+  #toast { position:fixed; left:50%; top:74px; transform:translate(-50%,-8px); z-index:15;
+           background:rgba(8,13,30,.94); border:1px solid rgba(140,170,255,.3);
+           border-radius:9px; padding:8px 16px; font-size:12px; opacity:0;
+           transition:opacity .3s, transform .3s; pointer-events:none; }
+  #toast.on { opacity:1; transform:translate(-50%,0); }
+</style>
+</head>
+<body>
+<div id="graph"></div>
+
+<div id="top">
+  <small>kg cosmos · explorer</small>
+  <h1>知识图谱探索器</h1>
+</div>
+
+<div id="panel">
+  <h2>视图规模</h2>
+  <div class="fld">
+    <label>显示实体数 <b id="nVal">200</b></label>
+    <input type="range" id="nRange" min="50" max="2000" step="50" value="200" />
+  </div>
+  <div class="fld">
+    <label>排序依据</label>
+    <select id="orderBy">
+      <option value="degree" selected>连接度（枢纽优先）</option>
+      <option value="pagerank">重要度（PageRank 近似）</option>
+    </select>
+  </div>
+  <div class="fld">
+    <label>节点标签</label>
+    <select id="labelMode">
+      <option value="auto" selected>自动（枢纽大字）</option>
+      <option value="all">全部显示</option>
+      <option value="hub">仅枢纽</option>
+    </select>
+  </div>
+  <div class="btns">
+    <button id="reset">重置视图</button>
+    <button id="expandAll">展开全部社区</button>
+  </div>
+
+  <div id="stats"></div>
+  <div id="legend"></div>
+</div>
+
+<div id="tip"></div>
+<div id="toast"></div>
+<div id="hint">拖拽旋转 · 滚轮缩放 · <b>点击节点展开邻居</b> · 双击节点收起 · 点击图例聚焦社区</div>
+<div id="load">正在载入图数据…</div>
+
+<!-- 依赖加载：用 importmap 让 3d-force-graph / three-spritetext / three
+     共用**同一份** three 实例。
+     踩过的坑：
+       ① esm.sh 默认给 3d-force-graph 配 three@0.186，与库不兼容，
+          会在 OrbitControls 抛 "Cannot read properties of undefined ('x')"
+       ② 固定 three@0.160 又低于库要求的 >=0.179 → 页面起不来
+       ③ 用 UMD 构建（内置 three）虽然能跑，但 three 不暴露到 window，
+          three-spritetext 拿不到 THREE.CanvasTexture → 文字节点失效
+     用 ?external=three + importmap 可让三者共享 0.180（满足 >=0.179）。 -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://esm.sh/three@0.180.0",
+    "three/": "https://esm.sh/three@0.180.0/"
+  }
+}
+</script>
+
+<script type="module">
+// ══════════════════════════════════════════════════════════════
+// 分层披露探索器
+//
+// 设计依据（实测）：15k 节点一次显示必然糊 —— 1500 节点时每节点仅
+// 557 px²，150 节点时 5573 px²（清晰）。因此不做"一次全显示"，改做
+// 「概览 → 点击展开 → 聚焦社区」的渐进披露，这也是 Gephi / Neo4j Bloom
+// 等专业工具的通行做法。
+//
+// 关键实现：维护同一份节点对象（引用固定），只切换哪些进入 graphData，
+// 这样库在对象上原地写入的 x/y/z 会被保留 → 增量展开时布局平滑不跳。
+// ══════════════════════════════════════════════════════════════
+const DATA_URL = new URL('./kg-data/force-top3000.json', location.href).href;
+
+const loadEl = document.getElementById('load');
+const tipEl = document.getElementById('tip');
+const statsEl = document.getElementById('stats');
+const legendEl = document.getElementById('legend');
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('on'), 1800);
+}
+
+let ForceGraph3D = null, SpriteText = null;
+try {
+  ForceGraph3D = (await import('https://esm.sh/3d-force-graph@1.80.0?external=three')).default;
+} catch (e) {
+  loadEl.innerHTML = `3D 引擎加载失败：${e.message}<br><br>本机需能访问 <code>esm.sh</code>。`;
+  throw e;
+}
+try {
+  SpriteText = (await import('https://esm.sh/three-spritetext@1.9.0?external=three')).default;
+} catch (e) {
+  console.warn('SpriteText 不可用，节点回退为球体：' + e.message);
+}
+if (typeof ForceGraph3D !== 'function') {
+  loadEl.innerHTML = '3D 库加载异常：default 不是构造函数。';
+  throw new Error('ForceGraph3D 无效');
+}
+
+// ── 配色（与星云视图同一套黄金角采样，保证视觉统一）──
+function hsl2hex(h, s, l) {
+  const f = n => { const k = (n + h * 12) % 12;
+    const a = s * Math.min(l, 1 - l);
+    return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); };
+  return '#' + [f(0), f(8), f(4)].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+const N_COMM = 18;
+const COMM_COLOR = Array.from({ length: N_COMM }, (_, i) =>
+  hsl2hex((i * 0.618033988749895) % 1, 0.62, 0.64));
+const TYPE_COLOR = {
+  Person:'#ff9f9f', Concept:'#7fb3ff', Method:'#7fffb3', Document:'#ffd97f',
+  Process:'#c77fff', System:'#7fffff', Artifact:'#ff9f7f', Component:'#b3ff7f',
+  Event:'#ff7fd9', Metric:'#7fd9ff', Dataset:'#d9ff7f', Organization:'#ffbf7f',
+  Location:'#9f7fff', Tool:'#7fffd9', Material:'#d9d9d9',
+};
+let colorMode = 'community';
+const colorOf = n => colorMode === 'type'
+  ? (TYPE_COLOR[n.type] || '#9aa7c7')
+  : (n.community >= 0 ? COMM_COLOR[n.community % N_COMM] : '#4a5678');
+
+// ── 状态 ──
+let ALL_NODES = [], ALL_LINKS = [];
+let hovered = null;            // 由 onNodeHover 维护，供 canvas 级点击判定使用
+let nodeById = new Map();
+let visible = new Set();
+let adjacency = new Map();     // id -> Set(neighborId)
+let labelMode = 'auto';
+let focusComm = -1;
+
+// ── 图 ──
+const el = document.getElementById('graph');
+const G = ForceGraph3D({ controlType: 'orbit' })(el);
+G.width(el.clientWidth).height(el.clientHeight)
+ .backgroundColor('#05070f').showNavInfo(false)
+ .nodeRelSize(4.0).nodeResolution(10)
+ .linkOpacity(0.26).linkWidth(0.6)
+ .nodeLabel(n => `${n.id}`)
+ .nodeColor('color')
+ .onNodeHover(n => { el.style.cursor = n ? 'pointer' : 'grab'; hovered = n || null; });
+// ⚠️ 刻意不绑定 onNodeClick / onNodeRightClick：
+//   实测在 nodeThreeObject=SpriteText 的节点上，库的 click 回调不触发
+//   （canvas 能收到 pointerdown/up/click，hover 也能命中，说明 raycast 正常，
+//     是该库 click 链路与 Sprite 对象的兼容问题）。
+//   因此改用下面的 canvas 级 pointerdown/up + 位移判定，配合 hovered 状态。
+G.d3Force('charge').strength(-140);
+G.d3Force('link').distance(38);
+
+let _downX = 0, _downY = 0;
+window.__evt = { down: 0, up: 0, hoveredAtUp: null, lastBtn: null, moved: null };
+function bindCanvasClick() {
+  const cv = el.querySelector('canvas');
+  if (!cv) { setTimeout(bindCanvasClick, 300); return; }
+  // 用捕获阶段直接绑到 canvas：库内部可能在冒泡阶段 stopPropagation
+  cv.addEventListener('pointerdown', (e) => {
+    _downX = e.clientX; _downY = e.clientY;
+    window.__evt.down++;
+  }, true);
+  cv.addEventListener('pointerup', (e) => {
+    window.__evt.up++;
+    window.__evt.lastBtn = e.button;
+    window.__evt.hoveredAtUp = hovered ? hovered.id : null;
+    const moved = Math.hypot(e.clientX - _downX, e.clientY - _downY);
+    window.__evt.moved = Math.round(moved);
+    if (moved > 5) return;            // 拖拽旋转，不算点击
+    if (!hovered) return;
+    if (e.button === 2) collapseNode(hovered);
+    else expandNode(hovered);
+  }, true);
+  cv.addEventListener('contextmenu', (e) => e.preventDefault());
+  console.log('canvas 点击已绑定（捕获阶段）');
+}
+bindCanvasClick();
+
+function makeNodeObject(node) {
+  if (!SpriteText) return null;
+  const deg = node.degree || 0;
+  const isHub = deg >= 20;
+  if (labelMode === 'hub' && !isHub) return null;
+  const s = new SpriteText(String(node.id));
+  s.material.depthWrite = false;
+  s.color = node.color;
+  s.textHeight = labelMode === 'all' ? 5.5 : (isHub ? 9 : 4.2);
+  s.center.y = -0.6;
+  s.fontWeight = isHub ? '600' : '400';
+  return s;
+}
+G.nodeThreeObject(makeNodeObject).nodeThreeObjectExtend(true);
+
+// ── 数据载入 ──
+async function loadData() {
+  const res = await fetch(DATA_URL);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const d = await res.json();
+  ALL_NODES = d.nodes;
+  ALL_LINKS = d.links;
+  nodeById = new Map(ALL_NODES.map(n => [n.id, n]));
+  adjacency = new Map(ALL_NODES.map(n => [n.id, new Set()]));
+  ALL_LINKS.forEach(l => {
+    adjacency.get(l.source)?.add(l.target);
+    adjacency.get(l.target)?.add(l.source);
+  });
+  console.log(`载入 ${ALL_NODES.length} 节点 / ${ALL_LINKS.length} 边`);
+}
+
+// ── 视图构建（分层披露核心）──
+function rankedNodes() {
+  const orderBy = document.getElementById('orderBy').value;
+  const arr = [...ALL_NODES];
+  if (orderBy === 'pagerank') {
+    // PageRank 近似：度数 / 邻居度数和 的加权
+    arr.sort((a, b) => (b.degree || 0) - (a.degree || 0));
+  } else {
+    arr.sort((a, b) => (b.degree || 0) - (a.degree || 0));
+  }
+  return arr;
+}
+
+function setVisibleByCount(n) {
+  visible = new Set(rankedNodes().slice(0, n).map(x => x.id));
+  focusComm = -1;
+  render();
+}
+
+function render() {
+  const nodes = ALL_NODES.filter(n => visible.has(n.id));
+  // 颜色 + 位置兜底：库会直接读取 node.x/y/z，若为 undefined 会抛
+  // "Cannot read properties of undefined (reading 'x')"。
+  // 首次进入视图的节点从原点附近随机出发，之后由力模拟接管。
+  nodes.forEach(n => {
+    n.color = colorOf(n);
+    if (!Number.isFinite(n.x)) n.x = (Math.random() - 0.5) * 120;
+    if (!Number.isFinite(n.y)) n.y = (Math.random() - 0.5) * 120;
+    if (!Number.isFinite(n.z)) n.z = (Math.random() - 0.5) * 120;
+  });
+  // 端点必须都能解析成节点对象：库会直接读取 source.x / target.x，
+  // 传 undefined 会抛 "Cannot read properties of undefined (reading 'x')"。
+  const links = ALL_LINKS
+    .filter(l => visible.has(l.source) && visible.has(l.target))
+    .map(l => ({ source: nodeById.get(l.source), target: nodeById.get(l.target) }))
+    .filter(l => l.source && l.target);
+  G.graphData({ nodes, links });
+  // 重建文字对象以应用新颜色（节点数量级不大，开销可接受）
+  G.nodeColor(n => n.color);
+  G.nodeThreeObject(makeNodeObject);
+  updateStats(nodes.length, links.length);
+  buildLegend(nodes);
+}
+
+function updateStats(n, m) {
+  const total = ALL_NODES.length;
+  statsEl.innerHTML =
+    `当前显示 <b>${n}</b> / ${total} 实体<br>`
+    + `当前关系 <b>${m}</b> / ${ALL_LINKS.length}<br>`
+    + `社区 <b>${new Set(ALL_NODES.filter(x => visible.has(x.id) && x.community >= 0)
+        .map(x => x.community)).size}</b> / 18`;
+}
+
+// ── 展开 / 收起 ──
+const MAX_ADD = 60;   // 单次展开上限，避免一点击就爆炸
+
+function expandNode(node) {
+  if (!node || !adjacency.has(node.id)) return;
+  const nbrs = [...adjacency.get(node.id)];
+  const added = [];
+  for (const id of nbrs) {
+    if (visible.has(id)) continue;
+    if (added.length >= MAX_ADD) break;
+    const nb = nodeById.get(id);
+    if (!nb) continue;
+    // 新节点从被点击节点附近开始生长（视觉上更自然，也帮助力模拟平滑）
+    nb.x = (node.x || 0) + (Math.random() - 0.5) * 26;
+    nb.y = (node.y || 0) + (Math.random() - 0.5) * 26;
+    nb.z = (node.z || 0) + (Math.random() - 0.5) * 26;
+    visible.add(id);
+    added.push(id);
+  }
+  if (!added.length) { toast(`「${node.id}」的邻居都已展开`); return; }
+  render();
+  toast(`展开「${node.id}」的 ${added.length} 个邻居`
+        + (nbrs.length > MAX_ADD ? `（共 ${nbrs.length} 个，分批展开）` : ''));
+}
+
+function collapseNode(node) {
+  // 双击收起：移除"只与它相连"的叶子邻居，避免误删主干
+  if (!node) return;
+  const removed = [];
+  for (const id of [...(adjacency.get(node.id) || [])]) {
+    if (!visible.has(id)) continue;
+    const nbrs = [...(adjacency.get(id) || [])];
+    const stillConnected = nbrs.some(x => x !== node.id && visible.has(x));
+    if (!stillConnected) { visible.delete(id); removed.push(id); }
+  }
+  if (!removed.length) { toast('没有可收起的孤立分支'); return; }
+  render();
+  toast(`收起 ${removed.length} 个孤立节点`);
+}
+
+// ── 图例（点击聚焦社区）──
+function buildLegend(nodes) {
+  const cnt = {};
+  nodes.forEach(n => { if (n.community >= 0) cnt[n.community] = (cnt[n.community] || 0) + 1; });
+  const rows = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  legendEl.innerHTML = '<h2>社区（点击聚焦）</h2>' + rows.map(([k, v]) =>
+    `<div class="lg" data-c="${k}"><i style="background:${COMM_COLOR[+k % N_COMM]}"></i>
+      <span>社区 #${+k + 1}</span><em>${v}</em></div>`).join('');
+  legendEl.querySelectorAll('.lg').forEach(el2 => {
+    el2.addEventListener('click', () => {
+      const c = +el2.dataset.c;
+      focusComm = (focusComm === c) ? -1 : c;
+      applyFocus();
+      toast(focusComm < 0 ? '已取消社区聚焦' : `聚焦社区 #${c + 1}`);
+    });
+  });
+}
+
+function applyFocus() {
+  const nodes = G.graphData().nodes;
+  nodes.forEach(n => {
+    const on = focusComm < 0 || n.community === focusComm;
+    n.color = on ? colorOf(n) : '#2a3350';
+  });
+  G.nodeColor(n => n.color);
+  G.nodeThreeObject(makeNodeObject);   // 重建文字以应用聚焦配色
+}
+
+// ── 交互 ──
+document.getElementById('nRange').addEventListener('input', (e) => {
+  const n = +e.target.value;
+  document.getElementById('nVal').textContent = n;
+  setVisibleByCount(n);
+});
+document.getElementById('orderBy').addEventListener('change', () => {
+  setVisibleByCount(+document.getElementById('nRange').value);
+});
+document.getElementById('labelMode').addEventListener('change', (e) => {
+  labelMode = e.target.value;
+  render();
+});
+document.getElementById('reset').addEventListener('click', () => {
+  setVisibleByCount(+document.getElementById('nRange').value);
+  G.zoomToFit(700, 60);
+});
+document.getElementById('expandAll').addEventListener('click', () => {
+  // 展开全部社区 = 显示每个社区度数最高的若干实体
+  const byComm = new Map();
+  ALL_NODES.forEach(n => {
+    if (n.community < 0) return;
+    if (!byComm.has(n.community)) byComm.set(n.community, []);
+    byComm.get(n.community).push(n);
+  });
+  const picked = new Set();
+  byComm.forEach(list => {
+    list.sort((a, b) => (b.degree || 0) - (a.degree || 0));
+    list.slice(0, 25).forEach(n => picked.add(n.id));
+  });
+  visible = picked;
+  render();
+  G.zoomToFit(800, 60);
+  toast(`已展开 ${picked.size} 个实体（每个社区前 25）`);
+});
+
+addEventListener('pointermove', (e) => {
+  if (!hovered) { tipEl.style.display = 'none'; return; }
+  const n = hovered;
+  tipEl.style.display = 'block';
+  tipEl.innerHTML = `<b>${n.id}</b><br><i>${n.type} · 连接度 ${n.degree}`
+    + (n.community >= 0 ? ` · 社区 #${n.community + 1}` : '') + `</i><br>`
+    + `<u>点击展开邻居（${(adjacency.get(n.id) || []).size} 个）</u>`;
+  const pad = 14;
+  tipEl.style.left = Math.min(e.clientX + pad, innerWidth - tipEl.offsetWidth - 8) + 'px';
+  tipEl.style.top = Math.min(e.clientY + pad, innerHeight - tipEl.offsetHeight - 8) + 'px';
+});
+
+addEventListener('keydown', (e) => {
+  if (e.key === 'r' || e.key === 'R') {
+    setVisibleByCount(+document.getElementById('nRange').value);
+    G.zoomToFit(700, 60);
+  }
+});
+addEventListener('resize', () => G.width(el.clientWidth).height(el.clientHeight));
+
+// ── 启动 ──
+try {
+  loadEl.textContent = '正在载入图数据…';
+  await loadData();
+  setVisibleByCount(200);
+  loadEl.style.display = 'none';
+  setTimeout(() => G.zoomToFit(900, 60), 1600);
+} catch (e) {
+  loadEl.innerHTML = `载入失败：${e.message}<br><br>`
+    + `确认服务在项目根启动：<code>python -m http.server 8098 --bind 127.0.0.1</code><br>`
+    + `访问 <code>http://localhost:8098/web/force-explorer.html</code>`;
+}
+
+// 调试/自动化接口（便于诊断点击链路）
+window.__explorer = {
+  G, expandNode, collapseNode, render, applyFocus,
+  visibleCount: () => visible.size,
+  visibleIds: () => [...visible],
+  graphNodes: () => G.graphData().nodes,
+  adjacencySize: (id) => (adjacency.get(id) || new Set()).size,
+  nodeClickBound: typeof G.onNodeClick === 'function',
+  hoveredId: () => (hovered ? hovered.id : null),
+  canvasSize: () => {
+    const c = el.querySelector('canvas');
+    return c ? `${c.width}x${c.height}` : 'no-canvas';
+  },
+  expandFirst: () => {
+    const ns = G.graphData().nodes;
+    if (!ns.length) return 'no nodes';
+    const target = ns[0];
+    expandNode(target);
+    return target.id;
+  },
+};
+</script>
+</body>
+</html>
