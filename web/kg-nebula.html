@@ -42,17 +42,26 @@
   #detail h2 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
   #detail .sub { font-size: 11px; color: rgba(181, 203, 235, .62); margin-bottom: 10px; line-height: 1.6; }
   #detail .sec { font-size: 10px; letter-spacing: .13em; text-transform: uppercase;
-                 color: rgba(181, 203, 235, .5); margin: 13px 0 6px; }
+                 color: rgba(181, 203, 235, .72); margin: 14px 0 6px;
+                 padding-bottom: 4px; border-bottom: 1px solid rgba(140, 170, 255, .1); }
   #detail .row { display: flex; align-items: baseline; gap: 8px; font-size: 12px;
                  padding: 3px 0; border-bottom: 1px solid rgba(140, 170, 255, .07); }
   #detail .row:last-child { border-bottom: 0; }
   #detail .row .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #detail .row .dg { color: rgba(181, 203, 235, .55); font-size: 11px;
                      font-variant-numeric: tabular-nums; }
-  #detail .link { display: flex; align-items: center; gap: 7px; font-size: 12px; padding: 3px 0; }
-  #detail .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
-  #detail .arrow { color: rgba(181, 203, 235, .4); }
-  #detail .cnt { margin-left: auto; color: rgba(181, 203, 235, .6); font-size: 11px;
+  #detail .link { display: flex; align-items: center; gap: 7px; font-size: 12px; padding: 4px 0; }
+  #detail .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto;
+                 box-shadow: 0 0 6px currentColor; }
+  /* 关联强度条：一眼看出哪个社区与本社区关系最强 */
+  #detail .lname { flex: 0 1 auto; max-width: 48%; overflow: hidden;
+                   text-overflow: ellipsis; white-space: nowrap;
+                   color: rgba(214, 228, 250, .92); }
+  #detail .lbar { flex: 1 1 auto; height: 3px; border-radius: 2px; min-width: 26px;
+                  background: rgba(140, 170, 255, .13); overflow: hidden; }
+  #detail .lbar i { display: block; height: 100%; border-radius: 2px; opacity: .85; }
+  #detail .cnt { flex: 0 0 auto; min-width: 30px; text-align: right;
+                 color: rgba(206, 222, 246, .85); font-size: 11px;
                  font-variant-numeric: tabular-nums; }
   #detail .cta { margin-top: 12px; font-size: 11px; color: rgba(150, 190, 255, .85);
                  border-top: 1px solid rgba(140, 170, 255, .12); padding-top: 9px; }
@@ -427,11 +436,31 @@ const status = document.getElementById('status');
 const flowParticles = new Map();
 let activeCloudId = null;
 
+// 沿纤维流动的光点。
+//
+// 原来是一颗半径 .055 的实心白球（MeshBasicMaterial + opacity .92），在细线上
+// 匀速滑动，看起来像一只虫子在爬，和星云的静穆感很违和。改成：自定义着色器画
+// 的柔和圆形辉光（屏幕尺寸恒定），并沿曲线两端淡出、中段最亮——读起来像能量在
+// 纤维里流动，而不是一颗球在移动。
 filamentObjects.forEach((item, index) => {
-  const particle = new THREE.Mesh(
-    new THREE.SphereGeometry(.055, 12, 12),
-    new THREE.MeshBasicMaterial({ color: '#dceaff', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })
-  );
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3));
+  const particle = new THREE.Points(g, new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: {
+      uOpacity: { value: 0 },
+      uColor: { value: new THREE.Color('#cfe2ff') },
+    },
+    vertexShader: `void main(){ gl_PointSize = 11.0;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `uniform float uOpacity; uniform vec3 uColor;
+      void main(){
+        vec2 d = gl_PointCoord - .5; float r = length(d);
+        if (r > .5) discard;
+        float a = smoothstep(.5, .0, r);
+        gl_FragColor = vec4(uColor, a * a * uOpacity);
+      }`,
+  }));
   particle.userData.offset = index * .173;
   particle.visible = false;
   scene.add(particle);
@@ -460,9 +489,9 @@ function updateHoverState() {
     item.dustMaterials.forEach((material, thread) => {
       material.uniforms.uOpacity.value = item.profile.dustOpacity / item.dustMaterials.length * 2.15 * (.72 + thread * .09) * factor;
     });
+    // 只控制显隐；不透明度交给 animate 做沿曲线的淡入淡出
     const particle = flowParticles.get(item);
     particle.visible = Boolean(connected);
-    particle.material.opacity = connected ? .92 : 0;
   });
 }
 renderer.domElement.addEventListener('pointermove', (event) => {
@@ -511,21 +540,25 @@ function renderPreview(cloudId) {
     .slice(0, 3).map(([t, n]) => `${t} ${n}`).join(' · ');
   const nbrs = neighborsOf(cloudId);
   const total = nbrs.reduce((a, n) => a + n.count, 0);
-  const sc = { strong: '#abc9ff', medium: '#829bd2', weak: '#637eae' };
+  const maxCnt = nbrs.length ? nbrs[0].count : 1;   // nbrs 已按关系数降序
   dbody.innerHTML =
     `<h2 style="color:${c.color}">${c.name}</h2>
      <div class="sub">${c.entityCount} 个实体 · ${typeLine || '—'}<br>
        对外 ${nbrs.length} 个社区 · 共 ${total} 条关系</div>
-     <div class="sec">核心实体（按连接度）</div>
-     ${(c.core || []).slice(0, 8).map(e =>
-        `<div class="row"><span class="nm">${e.id}</span><span class="dg">${e.degree}</span></div>`
+     <div class="sec">核心实体</div>
+     ${(c.core || []).slice(0, 6).map(e =>
+        `<div class="row"><span class="nm">${escHtml(e.id)}</span><span class="dg">${e.degree}</span></div>`
       ).join('')}
-     <div class="sec">跨社区关联</div>
-     ${nbrs.slice(0, 6).map(n => {
+     <div class="sec">跨社区关联 · 强度</div>
+     ${nbrs.slice(0, 8).map(n => {
         const o = cloudById.get(n.other);
-        return `<div class="link"><span class="dot" style="background:${sc[n.strength] || '#637eae'}"></span>
-          <span>${o ? o.cloud.name : n.other}</span><span class="arrow">→</span>
-          <span class="cnt">${n.count}</span></div>`;
+        const col = o ? o.cloud.color : '#8fb4ff';      // 用目标社区自己的颜色
+        const pct = Math.max(3, Math.round(100 * n.count / maxCnt));
+        return '<div class="link">' +
+          `<span class="dot" style="background:${col};color:${col}"></span>` +
+          `<span class="lname">${escHtml(o ? o.cloud.name : n.other)}</span>` +
+          `<span class="lbar"><i style="width:${pct}%;background:${col}"></i></span>` +
+          `<span class="cnt">${n.count}</span></div>`;
       }).join('')}
      <div class="cta">点击星云进入内部 · 查看 ${c.entityCount} 个实体</div>`;
   detail.classList.add('open');
@@ -1134,7 +1167,12 @@ function animate() {
   });
   filamentObjects.forEach((item) => {
     const particle = flowParticles.get(item);
-    if (particle.visible) particle.position.copy(item.curve.getPoint((elapsed * .035 + particle.userData.offset) % 1));
+    if (!particle.visible) return;
+    const t = (elapsed * .045 + particle.userData.offset) % 1;
+    particle.position.copy(item.curve.getPoint(t));
+    // 两端淡出、中段最亮：像能量在纤维里流动，而不是一颗球在爬
+    const fade = Math.sin(Math.PI * t);
+    particle.material.uniforms.uOpacity.value = .55 * fade * fade;
   });
   controls.update();
 
