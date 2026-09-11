@@ -110,7 +110,9 @@ with open(PARTIAL, "a", encoding="utf-8") as fh:
                 log(f"  [{i}] 失败: {type(exc).__name__}: {str(exc)[:150]}")
 
         # 立即落盘该块结果（含失败标记，避免重跑失败块时死循环）
-        fh.write(json.dumps({"i": i, "page": ch["page"], "nodes": ents, "edges": rels},
+        fh.write(json.dumps({"i": i, "page": ch["page"], "nodes": ents, "edges": rels,
+                             "error": next((f["error"] for f in failures
+                                            if f["chunk"] == i), None)},
                             ensure_ascii=False) + "\n")
         fh.flush()
         nodes.extend(ents)
@@ -129,6 +131,9 @@ if done_idx:
             continue
         nodes.extend(rec.get("nodes", []))
         edges.extend(rec.get("edges", []))
+        if rec.get("error"):
+            failures.append({"chunk": rec.get("i"), "page": rec.get("page"),
+                             "error": rec["error"]})
 
 dedup_nodes = deduplicate_entities(list(nodes), MODE)
 dedup_edges = {}
