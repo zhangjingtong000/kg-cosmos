@@ -546,6 +546,13 @@ function clearOverlay() {
   while (overlay.children.length) {
     const o = overlay.children.pop();
     o.traverse?.(c => {
+      // CSS2DObject 的 DOM 元素必须手动移除。CSS2DRenderer 只会遍历仍在
+      // 场景树里的对象去更新 element.style；对象一旦被 remove，它的 DOM
+      // 就永久留在页面上，而且不再跟随节点移动——反复进出社区后，同一段
+      // 文字会出现在好几处且位置错乱（实测）。
+      if (c.isCSS2DObject && c.element && c.element.parentNode) {
+        c.element.parentNode.removeChild(c.element);
+      }
       if (c.geometry) c.geometry.dispose?.();
       if (c.material) {
         if (Array.isArray(c.material)) c.material.forEach(m => m.dispose?.());
@@ -752,18 +759,8 @@ async function enterCommunity(ci, preloaded, instant) {
 
 function exitCommunity() {
   if (inside === null && !flying) return;
-  // 清空内部图层
-  while (overlay.children.length) {
-    const o = overlay.children.pop();
-    o.traverse?.(c => {
-      if (c.geometry) c.geometry.dispose?.();
-      if (c.material) {
-        if (Array.isArray(c.material)) c.material.forEach(m => m.dispose?.());
-        else c.material.dispose?.();
-      }
-    });
-    overlay.remove(o);
-  }
+  // 清空内部图层（复用 clearOverlay，它同时移除 CSS2DObject 的 DOM）
+  clearOverlay();
   // 恢复概览层
   scene.children.forEach(o => {
     if (o === overlay || o.isCSS2DObject) return;
@@ -896,6 +893,13 @@ animate();
     window.__ready = true;
   }
 }
+
+// ── 供自动化验证使用的调试接口（见 tools/cdp_check_labels.py）──
+window.KGNebula = {
+  enter: (i) => enterCommunity(i),
+  exit: () => exitCommunity(),
+  labelCount: () => document.querySelectorAll('.label').length,
+};
 
 addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
