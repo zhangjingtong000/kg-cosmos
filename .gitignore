@@ -21,3 +21,6 @@ venv/
 # Local scratch and test artifacts
 /tmp/
 /test-results/
+
+# local scratch
+/tmp/
