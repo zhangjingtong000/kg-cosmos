@@ -129,6 +129,19 @@ def main():
             time.sleep(0.5)
             res['再点一次后高亮环'] = ev(ws, 'window.KGNebula.haloOn()')
 
+        # 视线缓动：选中后 controls.target 应在约 260ms 内逐步逼近目标，
+        # 而不是一步到位（那正是"画面瞬移"的成因）
+        t_before = ev(ws, 'window.KGNebula.target()')
+        ev(ws, "document.querySelectorAll('#list .item')[5].click()")
+        time.sleep(0.06)
+        t_mid = ev(ws, 'window.KGNebula.target()')
+        time.sleep(0.6)
+        t_after = ev(ws, 'window.KGNebula.target()')
+        res['视线 点击前'] = t_before
+        res['视线 +60ms'] = t_mid
+        res['视线 +660ms'] = t_after
+        res['缓动生效'] = (t_before != t_after) and (t_mid != t_after)
+
         print(json.dumps(res, ensure_ascii=False, indent=2))
         ws.close()
         return 0

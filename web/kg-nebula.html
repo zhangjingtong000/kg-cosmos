@@ -789,13 +789,19 @@ function selectNode(i) {
     ud.halo.visible = true;
     haloAnim = { t0: performance.now(), dur: 460, base: 46, material: ud.halo.material };
   }
-  controls.target.set(ud.center.x + n.x, ud.center.y + n.y, ud.center.z + n.z);
+  // 视线平滑对准该实体。直接 set 会让画面瞬移，点完不知道视线跑哪去了；
+  // from 取当前值，所以连续点击不同节点时也不会跳。
+  targetAnim = {
+    from: controls.target.clone(),
+    to: new THREE.Vector3(ud.center.x + n.x, ud.center.y + n.y, ud.center.z + n.z),
+    t0: performance.now(), dur: 260,
+  };
   renderInnerPreview(i);
   [...listEl.querySelectorAll('.item')].forEach(el =>
     el.classList.toggle('sel', +el.dataset.i === i));
 }
 
-/** 取消选中：隐藏光晕、收起关系面板、清掉列表选中态，视线缓动回社区中心。 */
+/** 取消选中：隐藏光晕、收起关系面板、清掉列表选中态，视线保持不动。 */
 function clearSelection() {
   selectedNodeIdx = -1;
   haloAnim = null;
@@ -803,13 +809,6 @@ function clearSelection() {
   if (ud && ud.halo) {
     ud.halo.visible = false;
     ud.halo.material.uniforms.uOpacity.value = 0;
-  }
-  // 不回中的话，相机还盯着刚才那个节点，社区中心已经偏出画面
-  if (ud && ud.center) {
-    targetAnim = {
-      from: controls.target.clone(), to: ud.center.clone(),
-      t0: performance.now(), dur: 420,
-    };
   }
   hidePreview();
   [...listEl.querySelectorAll('.item')].forEach(el => el.classList.remove('sel'));
@@ -1099,7 +1098,7 @@ let _firstFrame = false;
 let labelTick = 0;
 let hoverNodeIdx = -1;      // 内部视图里当前悬浮的实体（供标签分配优先占位）
 let haloAnim = null;        // 选中光晕的放大动画状态
-let targetAnim = null;      // 视线缓动状态（取消选中后回到社区中心）
+let targetAnim = null;      // 视线缓动状态（选中实体时平滑对准，避免画面瞬移）
 function animate() {
   requestAnimationFrame(animate);
   const elapsed = performance.now() * .001;
@@ -1144,7 +1143,7 @@ function animate() {
     if (x >= 1) { m.uniforms.uSize.value = haloAnim.base; haloAnim = null; }
   }
 
-  // 视线缓动：只用于"取消选中后回到社区中心"这类小幅调整，与场景切换无关
+  // 视线缓动：选中实体时平滑对准，避免画面瞬移（与进出社区的场景切换无关）
   if (targetAnim) {
     const x = Math.min(1, (performance.now() - targetAnim.t0) / targetAnim.dur);
     const e = 1 - Math.pow(1 - x, 3);
@@ -1192,6 +1191,7 @@ window.KGNebula = {
   haloOn: () => Boolean(overlay.userData && overlay.userData.halo && overlay.userData.halo.visible),
   panelOpen: () => document.getElementById('detail').classList.contains('open'),
   subText: () => document.getElementById('itSub').textContent,
+  target: () => controls.target.toArray().map(v => +v.toFixed(2)),
   // 供自动化验证：某实体在屏幕上的坐标（用于派发点击事件）
   nodeScreen: (i) => {
     const ud = overlay.userData;
