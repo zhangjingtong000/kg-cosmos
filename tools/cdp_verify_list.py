@@ -89,6 +89,17 @@ def main():
         res['证据出处'] = ev(ws, "document.querySelector('#dbody .evsrc')?.textContent")
         res['证据原文'] = ev(ws, "(document.querySelector('#dbody .evtext')?.textContent||'').slice(0,60)")
 
+        # 再次点击同一项 → 应取消选中
+        ev(ws, "document.querySelectorAll('#list .item')[3].click()")
+        time.sleep(0.35)
+        res['重复点击后高亮环'] = ev(ws, 'window.KGNebula.haloOn()')
+        res['重复点击后面板'] = ev(ws, 'window.KGNebula.panelOpen()')
+        res['重复点击后选中项'] = ev(
+            ws, "(document.querySelector('#list .item.sel')?.textContent||'').trim() || null")
+        # 再选回来，供截图
+        ev(ws, "document.querySelectorAll('#list .item')[3].click()")
+        time.sleep(0.7)
+
         # 截图留档（此时高亮环已定位、右侧面板显示证据）
         shot = cdp(ws, 'Page.captureScreenshot', {'format': 'png'})
         with open(r'D:\kg-demo\output\shots\evidence-panel.png', 'wb') as f:
