@@ -68,7 +68,11 @@ REL_TEMPLATE = {
     "ENABLES": "{s} enables {t}.",
     "APPLIES_TO": "{s} is applied to {t}.",
     "LOCATED_AT": "{s} is located at {t}.",
-    "CREATED_BY": "{s} was created by {t}.",
+    # 方向约定：T3.1 已把 CREATED_BY 统一为 Author(Person) → Work(Document)。
+    # 所以 hypothesis 必须是「作品由作者创作」，而不是「作者被作品创作」。
+    # 旧模板 "{s} was created by {t}." 与统一后的方向正好相反，会把语义判反
+    # （实测：方向归一后通过率从 39.6% 掉到 26.0%，改回本模板后恢复）。
+    "CREATED_BY": "{t} was created by {s}.",
     "CITES": "{s} cites {t}.",
     "RELATED_TO": "{s} is related to {t}.",
 }
