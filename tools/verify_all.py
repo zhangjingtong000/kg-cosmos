@@ -31,6 +31,7 @@ CHECKS = [
 # 纯数据侧的检查：不依赖浏览器，快
 DATA_CHECKS = [
     ("本体口径一致性（唯一来源自检）", ["tools/check_ontology_consistency.py"]),
+    ("文档数字与产物一致性", ["tools/check_doc_numbers.py"]),
     ("指标与数据快照的版本绑定（stale 检测）", ["tools/metric_provenance.py"]),
     ("社区布局数据自检", ["tools/diag_comm.py"]),
     ("claims 诊断（矛盾视图是否成立）", ["tools/diag_claims.py"]),

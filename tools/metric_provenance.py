@@ -60,6 +60,13 @@ METRICS = {
     'L8_largest_component_pct': ('l8-structure-audit.json', ['connectivity', 'largest_component_pct'], 'tools/l8_structure_audit.py'),
     'L8_isolated_nodes': ('l8-structure-audit.json', ['connectivity', 'isolated_nodes'], 'tools/l8_structure_audit.py'),
     'L8_nodes': ('l8-structure-audit.json', ['scale', 'nodes'], 'tools/l8_structure_audit.py'),
+    # L9 是本项目**唯一非自洽型**的指标：它从原文段落出发回答
+    # "原文里的东西抽到没有"，而不是只检查图内部是否一致。
+    'L9_endpoint_recall': ('l9-recall.json', ['endpoint_recall'], 'tools/l9_recall.py'),
+    'L9_gold_entities': ('l9-recall.json', ['gold_entities'], 'tools/l9_recall.py'),
+    # 反建精度抽检（噪声率上界）
+    'l3_backfill_noise_share': ('l3-backfill-precision-sample.json',
+                                ['heuristic_noise_share'], 'tools/l3_backfill_precision.py'),
 }
 
 
