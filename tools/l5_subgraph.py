@@ -59,16 +59,21 @@ def main():
                 continue
             if nm not in node_meta:
                 ev = (n.get('evidence') or [{}])[0]
+                txt = ev.get('text') or ''
                 node_meta[nm] = {
                     'type': n.get('type'),
-                    'evidence': (ev.get('text') or '')[:EVID_LIMIT],
+                    # evidence_full 只用于 L1 的字面匹配判定；evidence 是截断版，
+                    # 仅用于写进子图文件控制体积。混用会让 L1 偏低
+                    # （实测：截断到 600 字符时 L1 从 93.0% 掉到 88.1%）。
+                    'evidence_full': txt,
+                    'evidence': txt[:EVID_LIMIT],
                 }
 
-    # ── L1 实体存在层（节点级）──
+    # ── L1 实体存在层（节点级，用完整证据判定）──
     l1_hit = l1_tot = 0
     for nm, m in node_meta.items():
         l1_tot += 1
-        if norm(nm) and norm(nm) in norm(m['evidence']):
+        if norm(nm) and norm(nm) in norm(m['evidence_full']):
             l1_hit += 1
     l1 = l1_hit / l1_tot if l1_tot else 0.0
 

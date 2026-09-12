@@ -29,8 +29,8 @@ ONTOLOGY = {
     'EVALUATES', 'CAUSES', 'CONTRADICTS',
 }
 # 语义上看起来合理、值得考虑收编进本体的候选
-CANDIDATES = ['CONTAINS', 'REPRESENTED_BY', 'ADDRESSES', 'PREDICTS',
-              'PREDICTED_BY', 'EVALUATED_ON', 'OUTPERFORMS', 'IMPROVES',
+CANDIDATES = ['CONTRIBUTED_TO', 'CONTAINS', 'REPRESENTED_BY', 'ADDRESSES',
+              'PREDICTS', 'EVALUATED_ON', 'OUTPERFORMS', 'IMPROVES',
               'EXTENDS', 'BASED_ON', 'INTRODUCES', 'PROPOSES']
 
 
@@ -118,16 +118,24 @@ def main():
 
     print('\n判定：')
     if len(po) / len(edges) < 0.02:
-        print('  **"本体不完备"的证据很弱。**')
         print(f'  越界边只占 {len(po)/len(edges):.2%}；{len(cnt)} 种越界类型里 '
               f'{len([k for k in cnt if cnt[k]==1])} 种只出现 1 次。')
         print('  这些类型名绝大多数是**实体名被当成了关系类型**（Representation Learning /')
-        print('  Entity / Stock / Position ...），属于抽取噪声，不是本体漏掉了真实语义。')
-        print(f'  真正形如关系名的只有 {len(looks_rel)} 种 / {n_rel} 条，'
-              f'其中 CONTAINS 9 条、REPRESENTED_BY / ADDRESSES / PREDICTS 各 3 条。')
-        print('  样本都是个位数，可以列为**候选**，但不足以据此扩本体。')
-        print(f'  （均值差 {d:+.4f} 在 n={len(po)} 下 t={t:+.2f}，'
-              '少量高分噪声边即可造成该差距。）')
+        print('  Entity / Stock / Position ...），属于抽取噪声。')
+        print(f'  形如关系名的只有 {len(looks_rel)} 种 / {n_rel} 条。')
+        if d > 0.02:
+            print(f'\n  ⚠️ 越界边均值比本体内**高** {d:+.4f}（t={t:+.2f}）。')
+            print('     但 n 很小，几十条高分噪声即可造成该差距，不足以据此扩本体。')
+        elif d < -0.02:
+            print(f'\n  越界边均值比本体内**低** {d:+.4f}（t={t:+.2f}）——')
+            print('     这说明越界更多是抽取噪声，而不是本体漏掉了真实且可验证的语义。')
+            print('     **"本体不完备"不成立。**')
+        else:
+            print(f'\n  两者均值差异 {d:+.4f} 很小，"越界边得分更高"这一说法不成立。')
+        if n_rel and looks_rel:
+            print(f'\n  值得单独记录：形如关系名的类型里 '
+                  + ', '.join(f'{k}({cnt[k]})' for k in sorted(looks_rel, key=lambda x: -cnt[x])[:5])
+                  + '。这些可列为"待观察候选"，但样本量都不足以支撑扩本体。')
     else:
         print('  越界边占比不可忽略，建议逐类复核后决定是否扩本体。')
 
