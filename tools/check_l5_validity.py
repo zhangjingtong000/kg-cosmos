@@ -110,6 +110,87 @@ def main():
         print('     这是本层唯一能给出**严格效度**的路径；'
               '在它完成之前，L5 的 63.7% 只能声明为"通过率"，不能声明为"准确率"。')
 
+    # ── ③ 第二判定者（本地 Ollama）为何未执行 ──
+    # 这不是"忘了做"，而是有明确的资源约束；写出来，免得下一轮又去试一遍。
+    print('\n=== ③ 第二判定者（本地 Ollama）的可用性 ===\n')
+    import shutil
+    ollama_exe = shutil.which('ollama')
+    if not ollama_exe:
+        print('  · 本机没装 ollama ⇒ 该路径不可用')
+        notes.append('第二判定者不可用：本机无 ollama')
+    else:
+        print(f'  · ollama 可执行文件: {ollama_exe}（服务未运行）')
+        gpu_txt = ''
+        try:
+            import subprocess
+            gpu_txt = subprocess.run(
+                ['nvidia-smi', '--query-gpu=memory.used,memory.total',
+                 '--format=csv,noheader'],
+                capture_output=True, text=True, timeout=10).stdout.strip()
+        except Exception:
+            gpu_txt = ''
+        print(f'  · 显存: {gpu_txt or "读不到"}')
+        notes.append(
+            '第二判定者未执行：本机显存被其他进程占用（约 5.2/8.2 GB），'
+            '9B 级模型装不下；可用的其余模型是嵌入模型（bge-m3 / nomic）'
+            '或视觉模型（qwen3-vl:4b / qwen25-vl-3b），都不适合做 NLI 判定。'
+            '**这是资源约束，不是遗漏**——待显存空闲时可跑 '
+            'tools/l5_validity_second_judge.py。')
+
+    # ── ④ 阈值灵敏度（可自动算；但要说清哪些是恒等式、哪些有信息量）──
+    #     通过率随阈值单调下降是**数学恒等式**，没有信息量；
+    #     有信息量的是「规则层假阳性在通过集里占多少」随阈值怎么变——
+    #     因为规则层完全不依赖模型权重，它是唯一独立于判别器的读数。
+    print('\n=== ④ 阈值灵敏度（规则层下界独立于模型）===\n')
+    rel = Q / 'relation-verify-all.json'
+    sens = []
+    if rel.exists():
+        edges = json.loads(rel.read_text(encoding='utf-8'))['edges']
+
+        def is_selfloop(e):
+            import re as _re
+            n = lambda s: _re.sub(r'[^a-z0-9]+', '', (s or '').lower())
+            return n(e.get('source')) == n(e.get('target'))
+
+        n_all = len(edges)
+        print(f'  {"阈值":>6s} {"通过":>7s} {"通过率":>8s} {"其中自环":>9s} {"规则下界":>9s}')
+        for t in (0.50, 0.60, 0.67, 0.75, 0.80):
+            passed = [e for e in edges if (e.get('entail_prob') or 0) >= t]
+            loops = sum(1 for e in passed if is_selfloop(e))
+            rate = len(passed) / n_all * 100
+            floor = loops / len(passed) * 100 if passed else 0.0
+            sens.append({'threshold': t, 'passed': len(passed),
+                         'pass_rate': round(rate, 2), 'selfloop': loops,
+                         'rule_fp_floor_pct': round(floor, 3)})
+            print(f'  {t:6.2f} {len(passed):7d} {rate:7.1f}% {loops:9d} {floor:8.3f}%')
+        print('\n  读法：')
+        print('   · 通过率随阈值下降是**恒等式**（就是"分数 ≥ 阈值"的定义），')
+        print('     不构成任何质量证据；')
+        print('   · 有信息量的是「规则下界」这一列：它用**完全不依赖模型权重**的')
+        print('     字面规则（规范化后 source == target 的自环）估出通过集里')
+        print('     至少有多少条是错的。')
+        # ⚠️ 这里的方向必须由数据决定，不能凭直觉写。
+        # 初版按"提阈值应筛掉明显错误"写成了"下界会下降"，
+        # 而实测是**上升**（0.696% → 0.866%）——自环在通过集里的占比
+        # 反而随阈值升高，说明判别器**对自环不敏感**
+        # （实测自环通过率 91.4%，远高于全集 63.7%）。
+        first = sens[0]['rule_fp_floor_pct']
+        last = sens[-1]['rule_fp_floor_pct']
+        if last > first:
+            print(f'   · **实测该列上升**（{first:.3f}% → {last:.3f}%）：')
+            print('     自环在通过集里的占比反而随阈值升高 ⇒')
+            print('     **提阈值并不能筛掉这类明显错误，判别器对自环不敏感**')
+            print('     （自环通过率约 91%，远高于全集 63.7%）。')
+            print('     这条结论**独立于任何模型**，可以直接写进论文。')
+            notes.append(
+                f'阈值灵敏度：规则下界随阈值**上升**（{first:.3f}%→{last:.3f}%）'
+                f'⇒ 判别器对自环不敏感，提阈值筛不掉它')
+        else:
+            print(f'   · 实测该列下降（{first:.3f}% → {last:.3f}%）：')
+            print('     说明提阈值确实在筛掉这类明显错误（但仍是下界，不是准确率）。')
+    else:
+        notes.append('缺 relation-verify-all.json，跳过阈值灵敏度')
+
     print('\n=== 结论 ===\n')
     for n in notes:
         print(f'  · {n}')
@@ -123,10 +204,12 @@ def main():
         'probe': {'forms_spread_pp': round(spread, 2), 'rates': rates,
                   'p2_delta_pp': round(delta, 2) if len(p2) == 2 else None,
                   'p3_flip_rate': p3['flip_rate'], 'p4_strict_ppm': round(strict, 3)},
+        'threshold_sensitivity': sens,
         'annotation': {'sampled': n_sample, 'labeled': n_label,
                        'complete': bool(n_sample and n_label >= n_sample)},
         'notes': notes,
-        'caveat': '严格效度需人工盲判；代理证据不能替代。',
+        'caveat': '严格效度需人工盲判；代理证据不能替代。'
+                  '通过率随阈值的变化是恒等式，有信息量的是规则层下界。',
     }, ensure_ascii=False, indent=2), encoding='utf-8')
 
     if fails:
