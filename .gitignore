@@ -27,3 +27,12 @@ venv/
 
 # External reference checkouts (each has its own .git)
 /graphrag-workbench/
+
+# ── 外部参考仓库（2026-09-12 从版本控制移除）──
+# 这三个目录是从 GitHub 克隆的第三方仓库，曾被误加为 gitlink（mode 160000），
+# 但仓库里**没有 .gitmodules**，所以别人克隆后既拿不到内容、也无法初始化，
+# 是一个坏引用。它们只作本地参考，不该进主仓库。
+# 相关的数据文件已复制进 web/data/ 使页面自包含。
+/Project_Golem/
+/3d-force-graph/
+/Cognitive-Cartographer/

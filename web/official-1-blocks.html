@@ -3,10 +3,13 @@
 <head>
 <meta charset="utf-8">
 <title>官方 large-graph 示例（原样搬运）</title>
-<!-- 与官方 example/large-graph/index.html 的唯一区别是**引入方式**：
-     官方用 `<script src="//cdn.jsdelivr.net/npm/3d-force-graph">`（外部 CDN）。
+<!-- 与官方 example/large-graph/index.html 的唯一区别是**引入方式**与**数据来源**：
+     官方用 `<script src="//cdn.jsdelivr.net/npm/3d-force-graph">`（外部 CDN），
      本项目改成**本地 UMD**，以便断网演示——`web/lib/3d-force-graph.min.js`
      就是 1.80.0 的 UMD 包，会挂出全局 `ForceGraph3D`。
+     数据也从 `web/data/official-blocks.json` 取（原先指向仓库根下的
+     `3d-force-graph/example/datasets/blocks.json`，而那个目录是外部克隆的
+     第三方仓库、已从版本控制移除，克隆本仓库的人不会有它）。
      除此之外下面的示例代码与官方逐字一致。
 
      （此前这里曾改用 esm.sh 的 ESM import，注释理由是"UMD 全局变量在本地离线
@@ -24,7 +27,7 @@
 const elem = document.getElementById('3d-graph');
 
 const Graph = new ForceGraph3D(elem)
-  .jsonUrl('../3d-force-graph/example/datasets/blocks.json')
+  .jsonUrl('./data/official-blocks.json')
   .nodeAutoColorBy('user')
   .nodeLabel(node => `${node.user}: ${node.description}`)
   .onNodeClick(node => window.open(`https://bl.ocks.org/${node.user}/${node.id}`, '_blank'));
