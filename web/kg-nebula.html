@@ -238,7 +238,9 @@
 </style>
 <link rel="stylesheet" href="./lib/a11y.css">
 </head>
-<body>
+<!-- `nebula` 类供 a11y.css 单独定位「返回导航页」按钮：
+     本页左栏是满高的实体列表，固定左下会压住列表项（实测截图确认）。 -->
+<body class="nebula">
 <div class="header"><small>kg cosmos · community nebula</small><h1>社区星云</h1><div id="stat"></div></div>
 <div class="status" id="status"></div>
 <div class="hint" id="hint">拖拽旋转 · 滚轮缩放 · 悬浮预览社区 · 点击星云进入内部</div>
@@ -510,11 +512,17 @@ updateLabelAnchors();
  *   这与内部视图 `layoutInnerLabels()` 的矩形避让同源，只是 18 个标签代价极低。
  *
  * 【为什么不直接隐藏】
- *   完全隐藏会让用户失去"那边还有个社区"的线索；压到 0.22 仍可辨认，
+ *   完全隐藏会让用户失去"那边还有个社区"的线索；压暗仍可辨认，
  *   同时明确表示它在后面。它与 `updateHoverState` 算出的基础透明度是**相乘**
  *   关系（基础值存在 `item._baseLabelOpacity`），互不覆盖。
+ *
+ * 【压暗值取 0.42 而不是 0.22】
+ *   基础透明度本身可能是 0.34（非 hover 态），0.34 × 0.22 = **0.075**——
+ *   那已经不是"可辨认但靠后"，而是一层**看不清的鬼影**，反而成了视觉噪声
+ *   （对抗评审实测指出）。0.42 时最暗约 0.14，叠加标签底板提供的对比度后，
+ *   才既表达"在后面"又仍读得出。
  */
-const OCCLUDED_LABEL_OPACITY = 0.22;
+const OCCLUDED_LABEL_OPACITY = 0.42;
 const _occDir = new THREE.Vector3();
 const _occTarget = new THREE.Vector3();
 function updateLabelOcclusion() {
@@ -1542,12 +1550,24 @@ async function enterCommunity(ci, preloaded) {
   const m = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, vertexColors: true,
     uniforms: { uScale: { value: innerHeight * 1.5 } },
-    vertexShader: `attribute float aSize; varying vec3 vColor; uniform float uScale;
+    // 【为什么要把 gl_PointSize 传给片元着色器】
+    //   AdditiveBlending 下每个点都是**加色叠加**，而 aSize 随度数增长，
+    //   于是度数最高的枢纽点面积最大、中心叠加次数最多 —— 结果是**枢纽节点
+    //   糊成一团白斑**，恰好最看不清（对抗评审实测指出，且边/节点比 2.12
+    //   本在合理范围，说明是渲染问题而非取样问题）。
+    //   修法：让不透明度与点的屏幕尺寸**反相关**——点越大，单位面积的光越压低，
+    //   保住边缘的发光轮廓，但中心不再过曝。小点（枢纽以外的多数节点）不受影响。
+    vertexShader: `attribute float aSize; varying vec3 vColor; varying float vPS;
+      uniform float uScale;
       void main(){ vColor=color; vec4 mv=modelViewMatrix*vec4(position,1.);
-      gl_PointSize=aSize*(uScale/-mv.z); gl_Position=projectionMatrix*mv; }`,
-    fragmentShader: `varying vec3 vColor;
+      gl_PointSize=aSize*(uScale/-mv.z); vPS=gl_PointSize;
+      gl_Position=projectionMatrix*mv; }`,
+    fragmentShader: `varying vec3 vColor; varying float vPS;
       void main(){ vec2 d=gl_PointCoord-.5; float r=length(d); if(r>.5) discard;
-      float a=smoothstep(.5,.05,r); gl_FragColor=vec4(vColor,a*.92); }`,
+      float core=smoothstep(.5,.05,r);
+      // 140/(vPS+90)：vPS≈20（普通节点）时约 1.0，vPS≈200（枢纽）时约 0.48
+      float dim=clamp(140.0/(vPS+90.0),0.42,1.0);
+      gl_FragColor=vec4(vColor, core*.92*dim); }`,
   });
 
   const pts = new THREE.Points(g, m);

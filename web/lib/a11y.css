@@ -43,8 +43,10 @@
 #a11y-skip:focus { left: 12px; }
 
 /* ── 4. 返回导航页 ──
-   固定在左下角：五个主页面那里都是空的（头部在左上、控件在右上、
-   星云页右下是提示条），不会与既有元素重叠。 */
+   默认固定在左下角：多数页面那里是空的。
+   但星云页的左栏是一个**占满高度的实体列表**（overflow-y:auto，一直延伸到底部），
+   固定在左下会压住列表项——实测截图看到「← 导航页」与「KRL」叠在一起。
+   所以给星云页单独改到**右上角**（那里是空的）。 */
 #a11y-home {
   position: fixed; left: 14px; bottom: 14px; z-index: 60;
   display: inline-flex; align-items: center; gap: 6px;
@@ -60,8 +62,12 @@
   color: #fff; background: rgba(18,28,54,.92);
   border-color: rgba(126,203,255,.55);
 }
-/* 星云页底部中央有操作提示文字，避开它 */
-body.inside #a11y-home { bottom: 46px; }
+/* 星云页：左栏是满高列表、底部中央有操作提示，改挂右上角 */
+body.nebula #a11y-home {
+  left: auto; right: 14px; bottom: auto; top: 14px;
+}
+/* 星云页进入社区后右上是"返回星云概览"，下移避开 */
+body.nebula.inside #a11y-home { top: 54px; }
 
 /* ── 5. 键盘可达的元素要有可见的手型与可聚焦性 ── */
 [role="button"], [tabindex="0"] { cursor: pointer; }
