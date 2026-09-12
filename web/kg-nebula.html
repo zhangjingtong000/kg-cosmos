@@ -169,6 +169,38 @@
   #legend .lg-ramp span { font-size: 10px; color: rgba(160, 190, 235, .55); }
   #legend .lg-note { margin-top: 7px; font-size: 10px; line-height: 1.5;
                      color: rgba(160, 190, 235, .5); }
+
+  /* ── 原文 PDF 抽屉（T6.2 证据深链）──
+     选型说明：原计划的 `react-pdf-highlighter` 是 React 组件，与本项目
+     无构建链的原生 HTML/JS 前端不匹配。改用 **Chrome/Edge 内置 PDF 查看器
+     的 URL 片段**：`#page=N` 跳页、`#search=文本` 自动定位并高亮。
+     零依赖、零成本，且高亮是查看器原生行为，不需要自己画。 */
+  #pdfPane { position: fixed; top: 0; right: 0; bottom: 0; z-index: 7;
+             width: min(60vw, 780px); display: flex; flex-direction: column;
+             background: #0a1020; border-left: 1px solid rgba(140, 170, 255, .2);
+             box-shadow: -18px 0 48px rgba(0, 0, 0, .5);
+             transform: translateX(101%);
+             transition: transform .34s cubic-bezier(.22, .61, .36, 1); }
+  #pdfPane.open { transform: none; }
+  #pdfPane .pdf-head { flex: 0 0 auto; display: flex; align-items: center; gap: 10px;
+                       padding: 11px 14px; border-bottom: 1px solid rgba(140, 170, 255, .14); }
+  #pdfPane .pdf-head b { flex: 1 1 auto; min-width: 0; overflow: hidden;
+                         text-overflow: ellipsis; white-space: nowrap;
+                         font-size: 12.5px; font-weight: 520; color: #dfe8ff; }
+  #pdfPane .pdf-head a { flex: 0 0 auto; font-size: 11.5px; color: #9fc4ff;
+                         text-decoration: none; border: 1px solid rgba(140, 170, 255, .26);
+                         border-radius: 7px; padding: 4px 9px; }
+  #pdfPane .pdf-head a:hover { border-color: rgba(160, 200, 255, .6); color: #fff; }
+  #pdfPane .pdf-head button { flex: 0 0 auto; width: 26px; height: 26px; padding: 0;
+                              border: 0; border-radius: 50%; cursor: pointer;
+                              background: rgba(140, 170, 255, .16); color: #cfe0ff;
+                              font-size: 15px; line-height: 1; }
+  #pdfPane .pdf-head button:hover { background: rgba(140, 170, 255, .34); color: #fff; }
+  #pdfPane iframe { flex: 1 1 auto; width: 100%; border: 0; background: #14171c; }
+  /* 证据行里的"在原文中查看"入口 */
+  #detail .evlink { margin-left: 6px; font-size: 10.5px; color: #9fc4ff;
+                    text-decoration: none; border-bottom: 1px dashed rgba(159, 196, 255, .4); }
+  #detail .evlink:hover { color: #fff; border-bottom-color: rgba(255, 255, 255, .7); }
 </style>
 </head>
 <body>
@@ -185,6 +217,14 @@
 </aside>
 <div id="inner"><div id="innerTitle"><b id="itName"></b><small id="itSub"></small></div><button id="back" type="button">← 返回星云概览</button></div>
 <aside id="legend"></aside>
+<aside id="pdfPane">
+  <div class="pdf-head">
+    <b id="pdfName"></b>
+    <a id="pdfOpen" target="_blank" rel="noopener" href="#">新标签打开 ↗</a>
+    <button id="pdfClose" type="button" aria-label="关闭原文预览">×</button>
+  </div>
+  <iframe id="pdfFrame" title="原文 PDF"></iframe>
+</aside>
 
 <script type="importmap">
 { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
@@ -648,6 +688,80 @@ renderer.domElement.addEventListener('pointermove', (event) => {
 /**
  * 悬浮实体时显示它的关系。
  */
+// ══════════════════════════════════════════════════════════════
+// 原文 PDF 深链（T6.2）
+//
+// 选型：原计划的 `react-pdf-highlighter` 是 React 组件，与本项目**无构建链的
+// 原生 HTML/JS 前端**不匹配（引入它等于引入一整套构建链）。改用
+// **Chrome/Edge 内置 PDF 查看器的 URL 片段**：
+//   `#page=N`     跳到第 N 页
+//   `#search=文本` 定位并高亮匹配文本
+// 零依赖、零成本。
+//
+// 【实测边界（2026-09-12，不要当成"高亮已实现"）】
+//   · `#page=N` **确实生效**：无头 Chrome 截图确认跳到了第 8/16 页。
+//   · `#search=` **在本环境的无头 Chrome 里未生效**——带与不带该参数的
+//     截图**字节数完全相同**（213176 B）。有头模式下是否生效无法在本环境验证。
+//   因此 `#search` 只作为**增强**保留（无害，真浏览器里可能有效），
+//   但**代码、按钮文案与 tooltip 都不承诺高亮**。要真正可控的高亮，
+//   得改用 pdf.js 自绘文本层，那是另一件工作量更大的事。
+// ══════════════════════════════════════════════════════════════
+const pdfPane = document.getElementById('pdfPane');
+const pdfFrame = document.getElementById('pdfFrame');
+const pdfName = document.getElementById('pdfName');
+const pdfOpenLink = document.getElementById('pdfOpen');
+
+/** 从证据文本里挑一个适合做 `#search=` 的片段。
+ *
+ * 太长会因 PDF 文本层的空格/换行差异匹配不上，太短会命中无关位置。
+ * 取 24–56 字符、尽量在词边界收尾；不足 12 字符就不带 search（只跳页）。
+ */
+function pdfSearchSnippet(text) {
+  const t = String(text || '')
+    .replace(/[…]+$/g, '')      // 末尾省略号是摘要时加的，不在原文里
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!t) return '';
+  const cut = t.slice(0, 56);
+  const sp = cut.lastIndexOf(' ');
+  const s = (sp >= 24 ? cut.slice(0, sp) : cut).trim();
+  return s.length >= 12 ? s : '';
+}
+
+function pdfHref(src, page, snippet) {
+  const q = snippet ? `&search=${encodeURIComponent(snippet)}` : '';
+  return new URL(`../data/corpus/${src}#page=${page}${q}`, location.href).href;
+}
+
+function openPdf(src, page, snippet) {
+  if (!src) return;
+  const url = pdfHref(src, page, snippet);
+  // 只在 URL 真变了才重设 src：重复点同一条证据时不该让 PDF 重新加载一遍
+  if (pdfFrame.getAttribute('src') !== url) pdfFrame.setAttribute('src', url);
+  pdfOpenLink.href = url;
+  pdfName.textContent = `${src} · 第 ${page} 页`;
+  pdfPane.classList.add('open');
+  detail.classList.remove('open');   // 让位给原文，避免两个右侧面板叠在一起
+}
+
+function closePdf() {
+  pdfPane.classList.remove('open');
+  // 置空以释放 PDF 渲染占用的内存；下次打开会重新加载
+  pdfFrame.setAttribute('src', 'about:blank');
+}
+
+document.getElementById('pdfClose').addEventListener('click', closePdf);
+addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && pdfPane.classList.contains('open')) closePdf();
+});
+// 事件委托：证据面板是 innerHTML 整体重建的，逐个绑监听会随重渲染失效
+dbody.addEventListener('click', (e) => {
+  const a = e.target.closest('.evlink');
+  if (!a) return;
+  e.preventDefault();
+  openPdf(a.dataset.src, a.dataset.page, a.dataset.snip);
+});
+
 function renderInnerPreview(nodeIdx) {
   const ud = overlay.userData;
   const data = ud && ud.data;
@@ -664,9 +778,14 @@ function renderInnerPreview(nodeIdx) {
   });
   const evs = evidenceTable && evidenceTable[n.id];
   const evHtml = evs && evs.length
-    ? '<div class="sec">证据出处</div>' + evs.map(e =>
-        `<div class="ev"><div class="evsrc">${escHtml(e.src)} · 第 ${e.page} 页</div>` +
-        `<div class="evtext">${escHtml(e.text)}</div></div>`).join('')
+    ? '<div class="sec">证据出处</div>' + evs.map(e => {
+        const snip = pdfSearchSnippet(e.text);
+        return `<div class="ev"><div class="evsrc">${escHtml(e.src)} · 第 ${e.page} 页`
+          + `<a class="evlink" href="#" data-src="${escHtml(String(e.src))}"`
+          + ` data-page="${escHtml(String(e.page))}" data-snip="${escHtml(snip)}"`
+          + ` title="在内置预览里打开该页（页码跳转已验证；文本高亮依赖浏览器查看器，未验证）">在原文中查看 ↗</a>`
+          + `</div><div class="evtext">${escHtml(e.text)}</div></div>`;
+      }).join('')
     : '<div class="sec">证据出处</div>' +
       '<div class="row"><span class="nm" style="color:rgba(160,190,235,.55)">' +
       '该实体没有直接证据</span></div>';
@@ -1445,6 +1564,19 @@ window.KGNebula = {
   // 这是"默认外观未被改变"的机器证据——比肉眼看两张截图相似要可靠得多，
   // 因为 THREE 的 sRGB→Linear 色彩管理会让手工算的 RGB 与页面内不一致。
   _internals: () => ({ THREE, ud: overlay.userData }),
+
+  // ── 原文 PDF 深链（T6.2）──
+  // 无头浏览器不渲染 PDF，所以这里只能验"链接构造得对不对"，
+  // 高亮的实际观感必须在真浏览器里看。
+  pdfOpen: () => pdfPane.classList.contains('open'),
+  pdfSrc: () => pdfFrame.getAttribute('src'),
+  openPdf: (src, page, snip) => {
+    openPdf(src, page, snip);
+    return pdfFrame.getAttribute('src');
+  },
+  closePdf: () => { closePdf(); return pdfPane.classList.contains('open'); },
+  pdfHrefOf: (src, page, snip) => pdfHref(src, page, snip),
+  pdfSnippetOf: (text) => pdfSearchSnippet(text),
 
   // ── 着色引擎（T6.4）──
   colorMode: () => ({ ...colorMode }),
