@@ -25,6 +25,8 @@ CHECKS = [
     ("方法能力与局限视图", ["tools/cdp_verify_method_limits.py"]),
     ("图谱分析面板（数字可追溯）", ["tools/cdp_verify_analytics.py"]),
     ("问题子图 PathQA", ["tools/cdp_verify_pathqa.py"]),
+    # 盲判界面是 L5 严格效度的**唯一**入口；它坏了会让 3–6 小时的人工投入白费。
+    ("L5 盲判界面（盲态不泄漏 · 判定可落盘）", ["tools/cdp_verify_l5_review.py"]),
     ("证据深链 PDF 高亮（pdf.js 自绘，可断言）", ["tools/cdp_verify_pdflink.py"], "slow"),
 ]
 
