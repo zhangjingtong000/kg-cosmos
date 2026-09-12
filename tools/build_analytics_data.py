@@ -239,6 +239,9 @@ def main():
     # L9 端点召回层：本项目**唯一非自洽型**的指标。
     # 六层全部判"图内部是否一致"，回答不了"原文里的东西抽到没有"；
     # L9 从原文段落出发（操作性金标，独立于抽取管线）回答这个问题。
+    # L9 端点召回 + **关系召回**（2026-09-12 补后者）。
+    # 关系召回是本项目最根本的一个读数：端点召回 86.2% 看着不错，
+    # 但原文明确断言的关系只有约四成进了图。
     l9 = {}
     l9p = QUAL / "l9-recall.json"
     if l9p.exists():
@@ -250,6 +253,24 @@ def main():
             "spans": d9.get("spans"),
             "note": d9.get("note"),
             "limitation": "只覆盖端点召回，未覆盖关系召回；样本 7 段，非多人标注。",
+        }
+    l9r = {}
+    l9rp = QUAL / "l9-relation-recall.json"
+    if l9rp.exists():
+        dr = read(l9rp)
+        l9r = {
+            "recall_pair_all": dr.get("recall_pair_all"),
+            "recall_triple_all": dr.get("recall_triple_all"),
+            "recall_pair_supported": dr.get("recall_pair_supported"),
+            "recall_triple_supported": dr.get("recall_triple_supported"),
+            "n_gold_raw": dr.get("n_triple_gold_raw"),
+            "n_gold_entity_only": dr.get("n_triple_gold_entity_only"),
+            "n_dropped_non_entity": dr.get("n_triple_dropped_non_entity"),
+            "n_segment": dr.get("n_segment"),
+            "reading": dr.get("reading"),
+            "stability_note": dr.get("stability_note"),
+            "caveat": dr.get("caveat"),
+            "endpoint_recall": l9.get("endpoint_recall") if l9 else None,
         }
 
     payload = {
@@ -296,6 +317,7 @@ def main():
         "l5_validity": l5v,
         "l7_role_audit": l7r,
         "l9_recall": l9,
+        "l9_relation_recall": l9r,
         "governance": governance,
         "by_type": by_type,
         "hit_distribution": hits,

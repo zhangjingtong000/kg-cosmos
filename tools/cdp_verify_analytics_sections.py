@@ -39,6 +39,12 @@ EXPECT = [
      "/现行/.test(document.getElementById('l5vSens').innerText)"
      " && /最优/.test(document.getElementById('l5vSens').innerText)"),
     ("L7 归因 KPI 有 3 个", "document.querySelectorAll('#l7r .kpi').length === 3"),
+    # L9 关系召回：比端点召回更根本的读数（约四成 vs 86%）
+    ("l9rSec 可见", "document.getElementById('l9rSec').hidden === false"),
+    ("L9 关系召回 KPI 有 3 个", "document.querySelectorAll('#l9r .kpi').length === 3"),
+    ("关系召回区块含 86.2% 与 47.6%",
+     "/86\\.2%/.test(document.getElementById('l9r').innerText)"
+     " && /47\\.6%/.test(document.getElementById('l9r').innerText)"),
     ("L5 区块含 PPV 字样", "/PPV/.test(document.getElementById('l5v').innerText)"),
 ]
 
@@ -96,4 +102,4 @@ print()
 if fails:
     print('未通过：', fails)
     sys.exit(1)
-print('全部通过：两个新区块已正确渲染')
+print('全部通过：三个新区块已正确渲染')

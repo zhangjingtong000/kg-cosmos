@@ -55,6 +55,9 @@ DATA_CHECKS = [
     # L7 的 role_violation 到底是"约束太严"还是"谓词选错"——58 条独立判读的统计。
     # 这条决定了论文里能不能把它写成"端点类型违规率"（实测 58.6% 是谓词问题）。
     ("L7 角色违规归因（约束精度）", ["tools/check_l7_role_violation.py"]),
+    # L9 关系召回：端点召回高（86.2%）**不代表**关系抽全了（实测约四成）。
+    # 这是本项目最根本的一个读数。
+    ("L9 关系召回（抽全了没有）", ["tools/l9_relation_recall.py"]),
     # 离线可用性是「离线演示铁律」（内部记录 §1 第 6 条）的守门检查：
     # 主视图曾因 three.js 走 unpkg CDN 而断网白屏，现已本地化。
     ("主视图离线可用（屏蔽外部域名）", ["tools/cdp_verify_offline.py", "web/kg-nebula.html"]),

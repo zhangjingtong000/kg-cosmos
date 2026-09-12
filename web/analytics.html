@@ -155,6 +155,14 @@
     <div id="l7r"></div>
   </section>
 
+  <!-- L9 关系召回：端点召回 86.2% 看着不错，但原文明确断言的关系只有约四成进了图。
+       这是比端点召回更根本的读数。 -->
+  <section id="l9rSec" hidden>
+    <h2>L9 关系召回：抽全了没有</h2>
+    <div class="sub" id="l9rSub"></div>
+    <div id="l9r"></div>
+  </section>
+
   <section>
     <h2>六层评测</h2>
     <div class="sub" id="sixSub"></div>
@@ -346,6 +354,27 @@ function boot(D) {
     ).join('')
     + `<div class="calnote">${esc(r7.note || '')}<br>`
     + `<b>结论</b>：${esc(r7.conclusion || '')}</div>`;
+  }
+
+  // ── L9 关系召回：比端点召回更根本的读数 ──
+  const r9 = D.l9_relation_recall;
+  if (r9 && r9.recall_pair_all != null) {
+    document.getElementById('l9rSec').hidden = false;
+    const pcr = x => x == null ? '—' : (x * 100).toFixed(1) + '%';
+    document.getElementById('l9rSub').innerHTML =
+      `从固定种子的 ${r9.n_segment} 个原文段落出发，由独立判定者列出**明确断言**的关系，`
+      + `再与图比对。金标 ${r9.n_gold_raw} 条，剔除端点非命名实体的 ${r9.n_dropped_non_entity} 条后`
+      + `参评 <b>${r9.n_gold_entity_only}</b> 条。`;
+    document.getElementById('l9r').innerHTML = [
+      [pcr(r9.endpoint_recall), '端点召回（实体名抽到没有）', '看起来不错'],
+      [pcr(r9.recall_pair_all), '关系召回（端点对）', '原文明确断言的关系进了图的比例'],
+      [pcr(r9.recall_triple_all), '关系召回（含谓词严格）', '谓词也对的比例'],
+    ].map(([a, b, c]) =>
+      `<div class="kpi"><b>${esc(a)}</b><span>${esc(b)}</span><small>${esc(c)}</small></div>`
+    ).join('')
+    + `<div class="calnote">${esc(r9.reading || '')}<br>`
+    + `<b>标注稳定性</b>：${esc(r9.stability_note || '')}<br>`
+    + `<b>限度</b>：${esc(r9.caveat || '')}</div>`;
   }
 
   document.getElementById('sixSub').textContent =
