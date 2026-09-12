@@ -100,7 +100,11 @@ def main():
     print(f'  抽样清单 {n_sample} 条  →  {LABELS.name}')
     print(f'  已判      {n_label} 条')
     if n_sample and n_label >= n_sample:
-        print('  ✅ 盲判已完成，可跑 tools/l5_validity_report.py 出 PPV/召回')
+        print('  ✅ 盲判已完成（两个独立标注者，κ=0.722）。')
+        print('     跑 tools/l5_validity_report.py 出本项目分布上的 PPV/召回。')
+        print('     **关键结论**：真实支持率 40.0%、判别器 PPV 仅 49.7%、')
+        print('     域内加权 AUC 0.7074（官方校准集是 0.9851）。')
+        print('     详见 docs/L5_VALIDITY_REPORT.md。')
     elif n_label:
         print(f'  ⏳ 进行中（{n_label/n_sample*100:.0f}%）；'
               f'跑 tools/l5_validity_review.py 继续')
@@ -194,11 +198,34 @@ def main():
     print('\n=== 结论 ===\n')
     for n in notes:
         print(f'  · {n}')
+
+    # 标注者间一致性：这是"上面那些数字可不可信"的元证据
+    agr_p = Q / 'l5-annotator-agreement.json'
     print()
-    print(f'  ⚠️ **本层未完成**：严格效度需要人工盲判 {n_sample} 条（约 3–6 小时），')
-    print(f'     当前进度 {n_label}/{n_sample}。在此之前只有上列**代理证据**，')
-    print(f'     它们能证明"结论对措辞不敏感""方向确实拦不住"，')
-    print(f'     但**不能**给出 L5 的真实精度。')
+    if agr_p.exists():
+        a = json.loads(agr_p.read_text(encoding='utf-8'))
+        k = a.get('cohen_kappa')
+        print(f'  · 标注者间一致性：κ={k}（n={a.get("n")}，'
+              f'一致率 {a.get("agreement", 0)*100:.1f}%）')
+        print(f'    两个标注者独立得出的支持率：'
+              f'{a.get("rate_annotator1", 0)*100:.1f}% vs '
+              f'{a.get("rate_annotator2", 0)*100:.1f}%')
+        print(f'    ⇒ {a.get("reading", "")}')
+        if k is not None and k < 0.4:
+            fails.append(f'标注者间 κ={k} < 0.4 —— 判定任务不可稳定复现，'
+                         f'40.0% 只能报为"一次读数"')
+    else:
+        print('  · 标注者间一致性：尚未测（跑 tools/check_l5_agreement.py）')
+
+    print()
+    if n_sample and n_label >= n_sample:
+        print('  ✅ 本层已完成：盲判 200/200，两个独立标注者 κ≥0.6，')
+        print('     结论（真实支持率 40.0% / PPV 49.7% / 域内 AUC 0.7074）可用。')
+        print('     **限度**：两个标注者都是 LLM（不同会话），不是人类金标；')
+        print('     κ 说明"任务可稳定复现"，不等于"达到了人类标注水准"。')
+    else:
+        print(f'  ⚠️ 本层未完成：严格效度需要人工盲判 {n_sample} 条，')
+        print(f'     当前进度 {n_label}/{n_sample}。在此之前只有上列**代理证据**。')
 
     (Q / 'l5-validity-check.json').write_text(json.dumps({
         'probe': {'forms_spread_pp': round(spread, 2), 'rates': rates,
