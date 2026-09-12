@@ -13,6 +13,7 @@
 import json
 import math
 from pathlib import Path
+from idempotent_write import dumps, write_if_changed
 
 Q = Path(r'D:\kg-demo\data\quality')
 LABELS = Q / 'l5-validity-labels.jsonl'
@@ -90,8 +91,9 @@ def main():
                 'κ 衡量的是"这个判定任务能否被稳定复现"，与标注者是不是人无关，'
                 '但**不能**据此声称达到了人类金标的水准。',
     }
-    (Q / 'l5-annotator-agreement.json').write_text(
-        json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
+    # 幂等写：内容没变就不碰 mtime。否则每次跑回归都会刷新这个产物，
+    # 让以它为上游的 analytics.json 变成 STALE（这个坑被咬过三次）。
+    write_if_changed(Q / 'l5-annotator-agreement.json', dumps(out))
     print(f'\n报告已写出: {Q / "l5-annotator-agreement.json"}')
 
 

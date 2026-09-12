@@ -20,6 +20,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from idempotent_write import dumps, write_if_changed
 
 ROOT = Path(__file__).resolve().parent.parent
 Q = ROOT / 'data' / 'quality'
@@ -227,7 +228,8 @@ def main():
         print(f'  ⚠️ 本层未完成：严格效度需要人工盲判 {n_sample} 条，')
         print(f'     当前进度 {n_label}/{n_sample}。在此之前只有上列**代理证据**。')
 
-    (Q / 'l5-validity-check.json').write_text(json.dumps({
+    # 幂等写：内容没变就不碰 mtime（否则跑回归会刷新它，让下游变 STALE）。
+    write_if_changed(Q / 'l5-validity-check.json', dumps({
         'probe': {'forms_spread_pp': round(spread, 2), 'rates': rates,
                   'p2_delta_pp': round(delta, 2) if len(p2) == 2 else None,
                   'p3_flip_rate': p3['flip_rate'], 'p4_strict_ppm': round(strict, 3)},
@@ -237,7 +239,7 @@ def main():
         'notes': notes,
         'caveat': '严格效度需人工盲判；代理证据不能替代。'
                   '通过率随阈值的变化是恒等式，有信息量的是规则层下界。',
-    }, ensure_ascii=False, indent=2), encoding='utf-8')
+    }))
 
     if fails:
         print('\n未通过：')
