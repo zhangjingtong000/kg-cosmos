@@ -85,6 +85,25 @@ METRICS = {
     # 反建精度抽检（噪声率上界）
     'l3_backfill_noise_share': ('l3-backfill-precision-sample.json',
                                 ['heuristic_noise_share'], 'tools/l3_backfill_precision.py'),
+    # ── L5 域内效度（2026-09-12）：本项目最重要的一个发现 ──
+    # 63.7% 只是通过率，真实支持率 40.0%、PPV 49.7%。
+    # 这几个数依赖 l5-validity-labels.jsonl（人工盲判标签），换标签就要重算。
+    'L5_true_support_rate': ('l5-validity-report.json', ['true_support_rate'],
+                             'tools/l5_validity_report.py'),
+    'L5_ppv': ('l5-validity-report.json', ['ppv'], 'tools/l5_validity_report.py'),
+    'L5_domain_auc': ('l5-validity-report.json', ['in_domain_auc'],
+                      'tools/l5_validity_report.py'),
+    'L5_vs_human_kappa': ('l5-validity-report.json', ['cohens_kappa'],
+                          'tools/l5_validity_report.py'),
+    'L5_annotator_kappa': ('l5-annotator-agreement.json', ['cohen_kappa'],
+                           'tools/check_l5_agreement.py'),
+    # ── L7 角色违规归因：决定论文里能不能写成"端点类型违规率" ──
+    'L7_role_false_positive_rate': ('l7-role-violation-audit.json',
+                                    ['false_positive_rate'],
+                                    'tools/check_l7_role_violation.py'),
+    'L7_role_predicate_wrong_rate': ('l7-role-violation-audit.json',
+                                     ['predicate_wrong_rate'],
+                                     'tools/check_l7_role_violation.py'),
 }
 
 

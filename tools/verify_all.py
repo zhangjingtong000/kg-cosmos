@@ -24,6 +24,10 @@ CHECKS = [
     ("统一着色引擎（含默认外观等价性回归）", ["tools/cdp_verify_color.py", "0"]),
     ("方法能力与局限视图", ["tools/cdp_verify_method_limits.py"]),
     ("图谱分析面板（数字可追溯）", ["tools/cdp_verify_analytics.py"]),
+    # 数据接进去了不等于**显示得出来**：L5 效度与 L7 归因这两个区块是 hidden 的，
+    # 只有 boot() 拿到对应字段才会取消隐藏。字段名对不上时，
+    # 上面的"数字可追溯"仍会通过（它读的是 analytics.json，不是 DOM）。
+    ("分析面板新区块（L5 效度 · L7 归因）", ["tools/cdp_verify_analytics_sections.py"]),
     ("问题子图 PathQA", ["tools/cdp_verify_pathqa.py"]),
     # 盲判界面是 L5 严格效度的**唯一**入口；它坏了会让 3–6 小时的人工投入白费。
     ("L5 盲判界面（盲态不泄漏 · 判定可落盘）", ["tools/cdp_verify_l5_review.py"]),

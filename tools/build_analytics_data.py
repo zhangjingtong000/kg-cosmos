@@ -108,8 +108,13 @@ def main():
         {"id": "L4", "name": "关系谓词层", "value": pct(six["L4_predicate"]["all"]),
          "detail": "谓词落在本体 15 类内",
          "basis": f"{cur['count']} 条边"},
+        # L5 的 detail 必须带上 PPV —— 否则面板上只显示 63.7%，
+        # 会被读成"63.7% 的边有原文支持"（那是错的）。
         {"id": "L5", "name": "三元组验证层", "value": pct(six["L5_triplet"]["all"]),
-         "detail": f"本地判别器 entail_prob ≥ {thr}",
+         "figure": f"{pct(six['L5_triplet']['all'])}% 通过率",
+         "detail": f"判别器判通过 {pct(six['L5_triplet']['all'])}%"
+                   f"（这是通过率，不是支持率）；独立盲判实测 "
+                   f"PPV 49.7%、真实支持率 40.0%",
          "basis": f"{cur['count']} 条边"},
         {"id": "L6", "name": "证据层", "value": pct(six["L6_evidence"]["all"]),
          "detail": "每条边都有页面级引文",
@@ -123,6 +128,69 @@ def main():
     pre_cb = [e for e in pre["edges"] if e["type"] == "CREATED_BY"]
     cur_cb_r, _ = pass_rate(cur_cb)
     pre_cb_r, _ = pass_rate(pre_cb)
+
+    # ── L5 域内效度（2026-09-12 新增）──
+    # 这是本项目最重要的一个发现，必须让它在面板上可见：
+    # 63.7% 只是"判别器判通过的比例"，而它在**本项目数据分布**上的
+    # 真实支持率是 40.0%、PPV 只有 49.7%。
+    # 不把它放进面板，演示时屏幕上就只会看到一个被误解的 63.7%。
+    l5v = {}
+    p_val = QUAL / "l5-validity-check.json"
+    p_rep = QUAL / "l5-validity-report.json"      # 权威：含 bootstrap 95% CI
+    p_agr = QUAL / "l5-annotator-agreement.json"
+    if p_val.exists() or p_rep.exists():
+        v = read(p_val) if p_val.exists() else {}
+        rep = read(p_rep) if p_rep.exists() else {}
+        l5v = {
+            # 优先取权威报告（它是加权 + bootstrap 的产物），取不到才退回常量
+            "true_support_rate": rep.get("true_support_rate", 0.40),
+            "ppv": rep.get("ppv", 0.497),
+            "npv": rep.get("npv", 0.230),
+            "recall": rep.get("recall", 0.793),
+            "f1": rep.get("f1", 0.611),
+            "weighted_accuracy": rep.get("weighted_accuracy", 0.596),
+            "domain_auc": rep.get("in_domain_auc", 0.7074),
+            "calib_auc": cur.get("calib_roc_auc"),
+            "kappa_vs_human": rep.get("cohens_kappa", 0.236),
+            "ci": rep.get("ci"),                 # 95% 置信区间（层内 bootstrap 1000 次）
+            "confusion": rep.get("confusion") or
+                         {"tp": 13778, "fp": 13960, "tn": 12082, "fn": 3604},
+            "threshold_sensitivity": rep.get("threshold_sensitivity")
+                                     or v.get("threshold_sensitivity", []),
+            "note": ("63.7% 是判别器**判通过的比例**，不是支持率、更不是精度。"
+                     "200 条分层抽样的独立盲判给出：真实支持率 40.0%、"
+                     "PPV 49.7%、域内 AUC 0.7074（官方校准集上是 0.9851）。"
+                     "判通过的边里约一半不被原文支持，假阳性比真阳性还多。"),
+            "caveat": ("两个标注者都是 LLM（不同会话，κ=0.722）。"
+                       "κ 说明任务可稳定复现，不等于达到人类金标水准。"),
+        }
+        if p_agr.exists():
+            a = read(p_agr)
+            l5v["annotator_agreement"] = {
+                "n": a.get("n"), "cohen_kappa": a.get("cohen_kappa"),
+                "agreement": a.get("agreement"),
+                "rate_annotator1": a.get("rate_annotator1"),
+                "rate_annotator2": a.get("rate_annotator2"),
+            }
+
+    # ── L7 角色违规归因（2026-09-12 新增）──
+    l7r = {}
+    p_l7 = QUAL / "l7-role-violation-audit.json"
+    if p_l7.exists():
+        a7 = read(p_l7)
+        l7r = {
+            "n": a7.get("n"),
+            "by_relation": a7.get("by_relation"),
+            "total": a7.get("total"),
+            "false_positive_rate": a7.get("false_positive_rate"),
+            "predicate_wrong_rate": a7.get("predicate_wrong_rate"),
+            "true_violation_rate": a7.get("true_violation_rate"),
+            "conclusion": a7.get("conclusion"),
+            "proposes": a7.get("proposes"),
+            "note": ("`role_violation` 里 58.6% 其实是**谓词选错**，"
+                     "不是端点类型不对 ⇒ 该指标名应读作"
+                     "「端点类型或谓词问题」，不能写成「端点类型违规率」。"),
+        }
 
     governance = {
         "note": "同判别器、同阈值，唯一变量是图是否经过 T3/T4 治理",
@@ -214,6 +282,10 @@ def main():
                     f"未归入任何社区。导航页显示的 18 即此处的 exported_to_frontend。",
         },
         "six_layer": six_layer,
+        # 这两段是 2026-09-12 补的：让"63.7% 不是质量"这个最重要的发现
+        # 在面板上可见，而不是只躺在 docs 里。
+        "l5_validity": l5v,
+        "l7_role_audit": l7r,
         "l9_recall": l9,
         "governance": governance,
         "by_type": by_type,

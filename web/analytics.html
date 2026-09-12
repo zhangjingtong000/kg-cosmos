@@ -48,6 +48,22 @@
              color: rgba(170,196,230,.68); background: rgba(140,170,255,.05);
              border: 1px solid rgba(140,170,255,.1); }
   .calnote b { color: rgba(214,230,252,.9); }
+  /* L5 阈值灵敏度的小表 */
+  table.sens { width: 100%; border-collapse: collapse; margin-top: 6px;
+               font-size: 12px; font-variant-numeric: tabular-nums; }
+  table.sens th, table.sens td { padding: 6px 10px; text-align: right;
+                                 border-bottom: 1px solid rgba(140,170,255,.1); }
+  table.sens th { color: rgba(181,203,235,.6); font-weight: 500; font-size: 11px; }
+  table.sens td { color: #dfe8ff; }
+  table.sens th:first-child, table.sens td:first-child { text-align: left; }
+  /* L5 面板的 KPI 用暖色边框，与六层的常色区分开，强调"这是结论性的" */
+  #l5v { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr));
+         gap: 10px; margin-bottom: 10px; }
+  #l5v .kpi { border-color: rgba(255,178,127,.35); }
+  #l5v .kpi b { color: #ffcfa8; }
+  #l7r { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+         gap: 10px; margin-bottom: 10px; }
+  #l7r .kpi { border-color: rgba(179,255,127,.28); }
 
   section { margin-top: 34px; }
   h2 { font-size: 14px; font-weight: 560; margin: 0 0 4px; color: #eaf2ff; }
@@ -120,6 +136,23 @@
     <h2>口径对照</h2>
     <div class="sub">本项目有三套并存的规模数字，含义不同、不可互相替代</div>
     <div id="calibers"></div>
+  </section>
+
+  <!-- L5 的域内效度：让"63.7% 不是质量"这个最重要的发现在面板上可见。
+       不放这里，演示时屏幕上就只有一个会被误读的 63.7%。 -->
+  <section id="l5vSec" hidden>
+    <h2>L5 域内效度：63.7% 到底是什么</h2>
+    <div class="sub" id="l5vSub"></div>
+    <div id="l5v"></div>
+    <div id="l5vSens"></div>
+  </section>
+
+  <!-- L7 的 role_violation 到底在说什么：58 条独立判读的归因。
+       决定了论文里能不能把它写成"端点类型违规率"（实测 58.6% 是谓词问题）。 -->
+  <section id="l7rSec" hidden>
+    <h2>L7 角色违规归因：它到底在说什么</h2>
+    <div class="sub" id="l7rSub"></div>
+    <div id="l7r"></div>
   </section>
 
   <section>
@@ -220,6 +253,78 @@ function boot(D) {
         + `抽取口径只统计独立抽取出来的节点。六层区的 L3 行给了两个数。`
       : '')
   + `</div>`;
+
+  // ── L5 域内效度：把"63.7% 不是质量"这件事摆在最显眼处 ──
+  const v = D.l5_validity;
+  if (v && v.ppv != null) {
+    document.getElementById('l5vSec').hidden = false;
+    const ag = v.annotator_agreement || {};
+    const pc = (x, d) => x == null ? '—' : (x * 100).toFixed(d == null ? 1 : d) + '%';
+    const ci = v.ci || {};
+    const ciTxt = k => {
+      const c = ci[k];
+      return c ? `95%CI ${(c[0] * 100).toFixed(1)}–${(c[1] * 100).toFixed(1)}%` : '';
+    };
+    document.getElementById('l5vSub').innerHTML =
+      `200 条分层抽样 + 独立盲判（判定者与判别器不同模型，盲态不泄漏）`
+      + ` · 两个标注者一致率 <b>${pc(ag.agreement)}</b>`
+      + `、Cohen's κ <b>${ag.cohen_kappa}</b>，两人独立得出相同的支持率`
+      + ` <b>${pc(ag.rate_annotator1)}</b>`;
+
+    const kpis = [
+      [pc(v.true_support_rate), '全图真实支持率', ciTxt('true_support_rate') || '此前用 63.7% 通过率代替'],
+      [pc(v.ppv), 'PPV（判通过里真的成立）', ciTxt('ppv') || '判通过的边约一半不被支持'],
+      [v.domain_auc.toFixed(4), '域内加权 AUC', `官方校准集上是 ${v.calib_auc}`],
+      [v.kappa_vs_human.toFixed(3), "与人工判定 Cohen's κ", '轻微一致'],
+      [v.confusion.fp, '假阳性', `比真阳性（${v.confusion.tp}）还多`],
+    ];
+    document.getElementById('l5v').innerHTML = kpis.map(([a, b, c]) =>
+      `<div class="kpi"><b>${esc(a)}</b><span>${esc(b)}</span><small>${esc(c)}</small></div>`
+    ).join('') + `<div class="calnote">${esc(v.note)}<br><b>限度</b>：${esc(v.caveat)}</div>`;
+
+    const sens = v.threshold_sensitivity || [];
+    if (sens.length) {
+      const hasPpv = sens.some(r => r.ppv != null);
+      document.getElementById('l5vSens').innerHTML =
+        `<table class="sens"><thead><tr><th>阈值</th><th>全图通过</th><th>通过率</th>`
+        + (hasPpv ? `<th>PPV</th>` : '')
+        + `<th>${hasPpv ? '召回' : '其中自环'}</th></tr></thead><tbody>`
+        + sens.map(r => {
+            const pass = r.population_pass != null ? r.population_pass : r.passed;
+            const rate = r.pass_rate != null
+              ? (r.pass_rate > 1 ? r.pass_rate.toFixed(1) : (r.pass_rate * 100).toFixed(1)) + '%'
+              : '—';
+            const col4 = hasPpv ? pc(r.ppv) : (r.selfloop != null ? r.selfloop : '—');
+            const col5 = hasPpv ? pc(r.recall) : (r.rule_fp_floor_pct != null ? r.rule_fp_floor_pct + '%' : '—');
+            return `<tr><td>${Number(r.threshold).toFixed(2)}</td><td>${pass}</td>`
+              + `<td>${rate}</td><td>${col4}</td><td>${col5}</td></tr>`;
+          }).join('')
+        + `</tbody></table>`
+        + `<div class="calnote">通过率随阈值下降是<b>恒等式</b>（就是"分数 ≥ 阈值"的定义），`
+        + `不构成质量证据；有信息量的是 <b>PPV</b>。实测阈值 0.5→0.8 时通过率降 27.6pp`
+        + `而 PPV 只升 8.8pp ⇒ <b>它是数量旋钮，不是质量旋钮</b>。<br>`
+        + `另有一条独立于模型的证据：用字面规则（规范化后自环）估的假阳性下界`
+        + `<b>随阈值上升</b>（0.696%→0.866%），说明<b>提阈值筛不掉这类明显错误</b>。</div>`;
+    }
+  }
+
+  // ── L7 角色违规归因：58 条独立判读 ──
+  const r7 = D.l7_role_audit;
+  if (r7 && r7.n) {
+    const pc7 = x => x == null ? '—' : (x * 100).toFixed(1) + '%';
+    document.getElementById('l7rSec').hidden = false;
+    document.getElementById('l7rSub').innerHTML =
+      `${r7.n} 条 \`role_violation\` 样本的独立判读（固定 seed，判读口径事先写好）`;
+    document.getElementById('l7r').innerHTML = [
+      [pc7(r7.true_violation_rate), '真的端点类型违规', '组合确实说不通'],
+      [pc7(r7.predicate_wrong_rate), '其实是谓词选错', '不是端点类型的错'],
+      [pc7(r7.false_positive_rate), '约束定得太严', '假阳性 —— 越低越好'],
+    ].map(([a, b, c]) =>
+      `<div class="kpi"><b>${esc(a)}</b><span>${esc(b)}</span><small>${esc(c)}</small></div>`
+    ).join('')
+    + `<div class="calnote">${esc(r7.note || '')}<br>`
+    + `<b>结论</b>：${esc(r7.conclusion || '')}</div>`;
+  }
 
   document.getElementById('sixSub').textContent =
     `全部 ${D.by_type.rows.reduce((a, r) => a + r.n, 0)} 条关系边上计算；L2 是节点级，无百分比`;
