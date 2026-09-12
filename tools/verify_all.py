@@ -17,6 +17,7 @@ import time
 from pathlib import Path
 
 CHECKS = [
+    ("导航页 · 链接可达 · 示意图未溢出", ["tools/cdp_verify_nav.py"]),
     ("星云交互 · 标签 · 证据面板", ["tools/cdp_verify_ui.py", "0"]),
     ("统一着色引擎（含默认外观等价性回归）", ["tools/cdp_verify_color.py", "0"]),
     ("方法能力与局限视图", ["tools/cdp_verify_method_limits.py"]),

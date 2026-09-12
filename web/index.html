@@ -1,262 +1,209 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KG Demo — Glass Nodes + Gradient Links</title>
+<title>KG Cosmos · 知识图谱构建与可视化</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
   body {
-    background: #edede8;
-    font-family: "Inter", "PingFang SC", system-ui, sans-serif;
-    display: flex; align-items: center; justify-content: center;
-    height: 100vh; overflow: hidden;
+    background: radial-gradient(ellipse 130% 70% at 50% -10%, #101c3a 0%, #070c1a 48%, #04070f 100%);
+    color: #dfe8ff; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    padding: 54px 34px 70px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
-  canvas { display: block; }
-  .label {
-    position: absolute; pointer-events: none;
-    font-size: 12px; color: #555; letter-spacing: 0.02em;
-    transform: translate(-50%, -50%);
-    text-shadow: 0 0 6px rgba(237,237,232,0.9);
-  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  header { margin-bottom: 34px; }
+  header small { display: block; color: rgba(181,203,235,.5); font-size: 11px;
+                 letter-spacing: .2em; text-transform: uppercase; }
+  header h1 { margin: 10px 0 0; font-size: 30px; font-weight: 560; letter-spacing: .01em; }
+  header p { margin: 14px 0 0; max-width: 760px; font-size: 13px; line-height: 1.9;
+             color: rgba(190,212,242,.68); }
+  header p b { color: #cfe0ff; font-weight: 560; }
+  .facts { display: flex; flex-wrap: wrap; gap: 26px; margin-top: 22px; }
+  .fact b { display: block; font-size: 19px; font-weight: 600; color: #eaf2ff;
+            font-variant-numeric: tabular-nums; }
+  .fact span { font-size: 11px; color: rgba(181,203,235,.55); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(316px, 1fr));
+          gap: 16px; margin-top: 34px; }
+  a.card { display: block; text-decoration: none; color: inherit;
+           background: rgba(11,18,38,.82); border: 1px solid rgba(140,170,255,.16);
+           border-radius: 14px; padding: 18px 19px 17px; position: relative;
+           overflow: hidden; transition: border-color .18s, transform .18s, background .18s; }
+  a.card:hover { border-color: rgba(150,190,255,.5); background: rgba(16,25,50,.9);
+                 transform: translateY(-2px); }
+  a.card.primary { border-color: rgba(150,190,255,.34); }
+  a.card.primary::after { content: "主视图"; position: absolute; top: 15px; right: 15px;
+                          font-size: 9.5px; letter-spacing: .1em; color: #9fc4ff;
+                          border: 1px solid rgba(159,196,255,.34); border-radius: 20px;
+                          padding: 2px 8px; }
+  .art { height: 62px; margin-bottom: 14px; position: relative; }
+  .card h2 { margin: 0; font-size: 16px; font-weight: 560; color: #eaf2ff; }
+  .card .desc { margin: 7px 0 0; font-size: 12px; line-height: 1.75;
+                color: rgba(190,212,242,.62); min-height: 42px; }
+  .card .num { margin-top: 11px; padding-top: 10px;
+               border-top: 1px solid rgba(140,170,255,.1);
+               font-size: 11px; color: rgba(159,196,255,.8);
+               font-variant-numeric: tabular-nums; }
+  .card .go { position: absolute; right: 19px; bottom: 16px; font-size: 13px;
+              color: rgba(159,196,255,.55); transition: color .18s, transform .18s; }
+  a.card:hover .go { color: #cfe0ff; transform: translateX(3px); }
+
+  /* 每张卡片的示意图形都用纯 CSS 画，不引任何图片或图标库。
+     注意：示意图容器必须嵌在 .art **里面**（<div class="art"><div class="dots">…），
+     不能写成 <div class="art dots"> —— 那样 .dots 的 `position:absolute; inset:0`
+     会覆盖 .art 的定位，使示意图脱离文档流并铺满整张卡片：
+     卡片高度少 62px、圆点散落压住标题。这个坑是实测 rect 才发现的。 */
+  .dots { position: absolute; inset: 0; }
+  .dots i { position: absolute; border-radius: 50%; display: block; }
+  .ring { position: absolute; border-radius: 50%; border: 1px solid; }
+  .bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 5px; }
+  .bars i { flex: 1 1 0; border-radius: 2px 2px 0 0; }
+  .cells { position: absolute; inset: 0; display: grid;
+           grid-template-columns: repeat(6, 1fr); gap: 4px; }
+  .cells i { border-radius: 3px; background: rgba(120,160,255,.14); }
+  .cells i.on { background: rgba(140,190,255,.45); }
+  .rays { position: absolute; inset: 0; }
+  .rays i { position: absolute; left: 50%; top: 50%; height: 1px;
+            background: linear-gradient(90deg, rgba(140,190,255,.5), rgba(140,190,255,0));
+            transform-origin: 0 50%; }
+
+  h3.sec { margin: 44px 0 4px; font-size: 11px; letter-spacing: .14em;
+           text-transform: uppercase; color: rgba(181,203,235,.45); }
+  .legacy { margin-top: 12px; font-size: 11.5px; line-height: 2.1;
+            color: rgba(160,190,235,.5); }
+  .legacy a { color: rgba(159,196,255,.7); text-decoration: none;
+              border-bottom: 1px dashed rgba(159,196,255,.3); }
+  .legacy a:hover { color: #fff; }
+  footer { margin-top: 46px; padding-top: 18px;
+           border-top: 1px solid rgba(140,170,255,.1);
+           font-size: 11px; line-height: 1.9; color: rgba(150,190,255,.42); }
+  footer code { color: rgba(190,214,246,.7); }
 </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<script>
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
+<div class="wrap">
+  <header>
+    <small>kg cosmos</small>
+    <h1>学术文献知识图谱 · 构建与可视化</h1>
+    <p>从 <b>17 篇 arXiv 综述</b>抽取实体与关系，经<b>端点归一化</b>、<b>实体聚类</b>、
+      <b>关系方向治理</b>与<b>证据支持度判别</b>后建成的知识图谱，以及围绕它的一组探索界面。
+      全部判别与评测在<b>本机 GPU 离线完成</b>。</p>
+    <div class="facts">
+      <div class="fact"><b>15315</b><span>实体</span></div>
+      <div class="fact"><b>21186</b><span>关系</span></div>
+      <div class="fact"><b>18</b><span>Louvain 社区</span></div>
+      <div class="fact"><b>93.0%</b><span>实体证据存在率</span></div>
+      <div class="fact"><b>63.7%</b><span>关系原文支持率</span></div>
+      <div class="fact"><b>¥0</b><span>全流程成本</span></div>
+    </div>
+  </header>
 
-const W = (canvas.width = window.innerWidth);
-const H = (canvas.height = window.innerHeight);
+  <div class="grid">
+    <a class="card primary" href="kg-nebula.html">
+      <div class="art"><div class="dots">
+        <span class="ring" style="left:6px;top:6px;width:50px;height:50px;border-color:rgba(126,203,255,.5)"></span>
+        <i style="left:26px;top:24px;width:14px;height:14px;background:#7ecbff;box-shadow:0 0 12px #7ecbff"></i>
+        <i style="left:66px;top:14px;width:9px;height:9px;background:#b3ff7f;box-shadow:0 0 9px #b3ff7f"></i>
+        <i style="left:88px;top:40px;width:7px;height:7px;background:#ffd97f;box-shadow:0 0 8px #ffd97f"></i>
+        <i style="left:60px;top:48px;width:6px;height:6px;background:#ff9f7f;box-shadow:0 0 8px #ff9f7f"></i>
+      </div></div>
+      <h2>社区星云</h2>
+      <p class="desc">18 个 Louvain 社区的三维星云概览；进入社区后是内部实体云，
+        支持搜索、点选高亮、证据出处与着色维度切换。</p>
+      <div class="num">核心视图 · 可切换「社区 / 类型」分区与「度数 / PageRank」排序</div>
+      <span class="go">→</span>
+    </a>
 
-// --- Nodes ---
-// Each node: { x, y, r, color, label }
-const nodes = [
-  { x: W*0.18, y: H*0.25, r: 38, color: [220, 80, 110],  label: 'Deep Squat' },
-  { x: W*0.35, y: H*0.15, r: 28, color: [80, 160, 190],   label: 'Hip Flexor' },
-  { x: W*0.52, y: H*0.30, r: 44, color: [200, 140, 60],   label: 'Barbell' },
-  { x: W*0.48, y: H*0.60, r: 32, color: [130, 100, 180],  label: 'Quadriceps' },
-  { x: W*0.68, y: H*0.18, r: 26, color: [60, 150, 120],   label: 'Core' },
-  { x: W*0.78, y: H*0.42, r: 36, color: [210, 100, 140],  label: 'Glutes' },
-  { x: W*0.72, y: H*0.68, r: 30, color: [90, 130, 200],   label: 'Hamstrings' },
-  { x: W*0.30, y: H*0.72, r: 34, color: [180, 110, 80],   label: 'Lower Back' },
-  { x: W*0.55, y: H*0.82, r: 40, color: [160, 70, 130],   label: 'Deadlift' },
-  { x: W*0.85, y: H*0.75, r: 24, color: [70, 150, 150],   label: 'Balance' },
-];
+    <a class="card" href="pathqa.html">
+      <div class="art"><div class="rays">
+        <span class="ring" style="left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-color:rgba(140,190,255,.45)"></span>
+        <i style="width:70px;transform:rotate(-18deg)"></i>
+        <i style="width:62px;transform:rotate(28deg)"></i>
+        <i style="width:52px;transform:rotate(96deg)"></i>
+        <i style="width:66px;transform:rotate(200deg)"></i>
+        <i style="width:46px;transform:rotate(300deg)"></i>
+      </div></div>
+      <h2>问题子图</h2>
+      <p class="desc">输入一句问法，在图谱里定位相关实体并抽出 2 跳子图。
+        这是「图谱能否被用来回答问题」的最小外部效度检验。</p>
+      <div class="num">字面匹配 → BFS 2 跳 → 力导向 SVG</div>
+      <span class="go">→</span>
+    </a>
 
-// --- Edges ---
-// Each edge: [fromIdx, toIdx, thickness]
-const edges = [
-  [0,1,2], [0,2,3], [2,3,4], [3,4,3], [3,5,2],
-  [5,6,3], [6,7,2], [7,8,3], [8,9,1], [0,9,1],
-  [1,4,1], [5,2,2], [7,3,2], [8,6,1], [4,9,1],
-];
+    <a class="card" href="method-limits.html">
+      <div class="art"><div class="cells">
+        <i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i class="on"></i>
+        <i></i><i class="on"></i><i></i><i class="on"></i><i></i><i></i>
+        <i class="on"></i><i></i><i class="on"></i><i class="on"></i><i></i><i class="on"></i>
+      </div></div>
+      <h2>方法能力与局限</h2>
+      <p class="desc">243 条「某方法在某能力维度上的表现或局限」记录，
+        每条都带原文依据、来源论文与页码，可按维度或方法筛选。</p>
+      <div class="num">243 条 · 178 个方法 · 194 个能力维度</div>
+      <span class="go">→</span>
+    </a>
 
-// --- Draw background subtle grid ---
-function drawGrid() {
-  ctx.strokeStyle = 'rgba(180,178,172,0.18)';
-  ctx.lineWidth = 0.5;
-  const step = 60;
-  for (let x = step; x < W; x += step) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-  }
-  for (let y = step; y < H; y += step) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-  }
-}
+    <a class="card" href="analytics.html">
+      <div class="art"><div class="bars">
+        <i style="height:93%;background:linear-gradient(180deg,#8ce0a8,#4fbf82)"></i>
+        <i style="height:69%;background:linear-gradient(180deg,#7fb3ff,#4a7fd8)"></i>
+        <i style="height:99%;background:linear-gradient(180deg,#8ce0a8,#4fbf82)"></i>
+        <i style="height:64%;background:linear-gradient(180deg,#7fb3ff,#4a7fd8)"></i>
+        <i style="height:100%;background:linear-gradient(180deg,#8ce0a8,#4fbf82)"></i>
+        <i style="height:52%;background:linear-gradient(180deg,#ffb27f,#d97a45)"></i>
+        <i style="height:76%;background:linear-gradient(180deg,#7fb3ff,#4a7fd8)"></i>
+      </div></div>
+      <h2>图谱分析面板</h2>
+      <p class="desc">六层评测、同口径治理前后对比、关系类型分布与端点命中分布。
+        面板上每个数字都可追溯回构建产物。</p>
+      <div class="num">L1 93.0% · L3 68.5% · L4 99.1% · L5 63.7% · L6 100%</div>
+      <span class="go">→</span>
+    </a>
 
-// --- Draw a single glass/candy node ---
-function drawNode(n) {
-  const { x, y, r, color: [cr, cg, cb] } = n;
+    <a class="card" href="refs.html">
+      <div class="art"><div class="dots">
+        <i style="left:8px;top:18px;width:34px;height:22px;border-radius:4px;background:rgba(140,190,255,.35)"></i>
+        <i style="left:48px;top:12px;width:34px;height:22px;border-radius:4px;background:rgba(179,255,127,.3)"></i>
+        <i style="left:28px;top:38px;width:34px;height:22px;border-radius:4px;background:rgba(255,217,127,.3)"></i>
+      </div></div>
+      <h2>可视化标杆参考</h2>
+      <p class="desc">调研阶段收集的 25 张主流知识图谱可视化产品截图，
+        含交互机制标注，是界面设计的参照系。</p>
+      <div class="num">25 张 · 机制级标注</div>
+      <span class="go">→</span>
+    </a>
+  </div>
 
-  // Shadow — soft, offset, gives micro-3D depth
-  ctx.save();
-  ctx.shadowColor = `rgba(${cr*0.3},${cg*0.3},${cb*0.3},0.35)`;
-  ctx.shadowBlur = r * 0.6;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 3;
+  <h3 class="sec">探索过程中的其他原型（保留备查）</h3>
+  <div class="legacy">
+    <a href="community-atlas.html">社区图集（2D 分面）</a> ·
+    <a href="graph-2d.html">二维图</a> ·
+    <a href="force-explorer.html">力导向浏览器</a> ·
+    <a href="force-graph.html">力导向图</a> ·
+    <a href="index3d.html">三维原型</a> ·
+    <a href="index3d-force.html">三维力导向</a> ·
+    <a href="index3d-bounce.html">三维弹跳</a> ·
+    <a href="kg_galaxy.html">星系</a> ·
+    <a href="kg_space.html">空间</a> ·
+    <a href="prototype-semantic-filaments.html">语义纤维</a> ·
+    <a href="exploration.html">早期探索</a> ·
+    <a href="legacy-glass-nodes.html">玻璃节点原型</a> ·
+    <a href="official-2-kg.html">官方格式样例</a>
+  </div>
 
-  // Main body — radial gradient simulating glass sphere
-  const grad = ctx.createRadialGradient(x - r*0.25, y - r*0.30, r*0.05, x, y, r);
-  grad.addColorStop(0,   `rgba(${Math.min(255,cr+80)},${Math.min(255,cg+80)},${Math.min(255,cb+80)},0.95)`);
-  grad.addColorStop(0.25,`rgba(${Math.min(255,cr+40)},${Math.min(255,cg+40)},${Math.min(255,cb+40)},0.92)`);
-  grad.addColorStop(0.55,`rgba(${cr},${cg},${cb},0.88)`);
-  grad.addColorStop(0.80,`rgba(${Math.max(0,cr-50)},${Math.max(0,cg-50)},${Math.max(0,cb-50)},0.85)`);
-  grad.addColorStop(1,   `rgba(${Math.max(0,cr-80)},${Math.max(0,cg-80)},${Math.max(0,cb-80)},0.78)`);
-
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fillStyle = grad;
-  ctx.fill();
-  ctx.restore();
-
-  // Specular highlight — bright spot upper-left, keys the "glass" look
-  const hlGrad = ctx.createRadialGradient(x - r*0.28, y - r*0.32, 0, x - r*0.28, y - r*0.32, r*0.45);
-  hlGrad.addColorStop(0, 'rgba(255,255,255,0.75)');
-  hlGrad.addColorStop(0.4,'rgba(255,255,255,0.25)');
-  hlGrad.addColorStop(1, 'rgba(255,255,255,0)');
-
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fillStyle = hlGrad;
-  ctx.fill();
-
-  // Tiny bright dot — the "wet" specular
-  ctx.beginPath();
-  ctx.arc(x - r*0.26, y - r*0.34, r*0.08, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(255,255,255,0.9)';
-  ctx.fill();
-
-  // Subtle rim light
-  ctx.beginPath();
-  ctx.arc(x, y, r - 1.5, 0, Math.PI * 2);
-  ctx.strokeStyle = `rgba(255,255,255,0.15)`;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-}
-
-// --- Draw a single edge with gradient stroke ---
-function drawEdge(n1, n2, thickness) {
-  const dx = n2.x - n1.x;
-  const dy = n2.y - n1.y;
-  const dist = Math.sqrt(dx*dx + dy*dy);
-
-  // Control point for slight curve
-  const mx = (n1.x + n2.x) / 2;
-  const my = (n1.y + n2.y) / 2;
-  const perpX = -dy / dist * (dist * 0.08 + Math.random() * dist * 0.10);
-  const perpY =  dx / dist * (dist * 0.08 + Math.random() * dist * 0.10);
-  const cx = mx + perpX;
-  const cy = my + perpY;
-
-  // Draw the bezier curve multiple times with varying opacity
-  // to create the "pulled sugar" gradient effect — dense middle, fading ends
-  const segments = 40;
-  const midWeight = thickness * 1.6;
-  const endWeight = thickness * 0.15;
-
-  for (let i = 0; i < segments; i++) {
-    const t1 = i / segments;
-    const t2 = (i + 1) / segments;
-
-    // Cubic bezier: interpolate from n1 to n2 via control point cx,cy
-    // We treat it as two quadratic bezier segments from n1->(cx,cy)->n2
-    // For simplicity, use a single quadratic bezier with midpoint control
-    const getPoint = (t) => {
-      const inv = 1 - t;
-      return {
-        x: inv*inv * n1.x + 2*inv*t * cx + t*t * n2.x,
-        y: inv*inv * n1.y + 2*inv*t * cy + t*t * n2.y,
-      };
-    };
-
-    const p1 = getPoint(t1);
-    const p2 = getPoint(t2);
-
-    // Opacity peaks at center, fades to ends (gaussian-like)
-    const midT = (t1 + t2) / 2;
-    const distFromCenter = Math.abs(midT - 0.5) * 2; // 0 at center, 1 at ends
-    const alpha = Math.exp(-distFromCenter * distFromCenter * 4); // gaussian falloff
-
-    // Line width also varies
-    const w = endWeight + (midWeight - endWeight) * alpha;
-
-    // Color: slightly tinted toward the midpoint color of the two nodes
-    const mixR = Math.round((n1.color[0] + n2.color[0]) / 2);
-    const mixG = Math.round((n1.color[1] + n2.color[1]) / 2);
-    const mixB = Math.round((n1.color[2] + n2.color[2]) / 2);
-
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.strokeStyle = `rgba(${mixR},${mixG},${mixB},${alpha * 0.55})`;
-    ctx.lineWidth = w;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-  }
-
-  // Overlay a thin bright core at the center of each line
-  const coreSegs = 20;
-  for (let i = Math.floor(coreSegs*0.3); i < Math.floor(coreSegs*0.7); i++) {
-    const t1 = i / coreSegs;
-    const t2 = (i + 1) / coreSegs;
-    const midT = (t1 + t2) / 2;
-    const distFromCenter = Math.abs(midT - 0.5) * 2;
-    const alpha = Math.exp(-distFromCenter * distFromCenter * 3) * 0.35;
-
-    const inv1 = 1 - t1, inv2 = 1 - t2;
-    const p1 = { x: inv1*inv1*n1.x + 2*inv1*t1*cx + t1*t1*n2.x, y: inv1*inv1*n1.y + 2*inv1*t1*cy + t1*t1*n2.y };
-    const p2 = { x: inv2*inv2*n1.x + 2*inv2*t2*cx + t2*t2*n2.x, y: inv2*inv2*n1.y + 2*inv2*t2*cy + t2*t2*n2.y };
-
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
-    ctx.lineWidth = thickness * 0.5;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-  }
-}
-
-// --- Draw label ---
-function drawLabel(n) {
-  ctx.font = '11px "Inter","PingFang SC",system-ui,sans-serif';
-  ctx.fillStyle = '#5a5a55';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  ctx.fillText(n.label, n.x, n.y + n.r + 10);
-}
-
-// --- Render ---
-function render() {
-  ctx.clearRect(0, 0, W, H);
-  drawGrid();
-
-  // Draw edges first (behind nodes)
-  edges.forEach(([from, to, thick]) => {
-    drawEdge(nodes[from], nodes[to], thick);
-  });
-
-  // Draw nodes
-  nodes.forEach(n => drawNode(n));
-
-  // Draw labels
-  nodes.forEach(n => drawLabel(n));
-}
-
-render();
-
-// --- Gentle hover interaction: glow nearest node ---
-canvas.addEventListener('mousemove', (e) => {
-  render();
-  const mx = e.clientX, my = e.clientY;
-  let closest = null, closestDist = Infinity;
-
-  nodes.forEach((n, i) => {
-    const d = Math.hypot(mx - n.x, my - n.y);
-    if (d < closestDist) { closestDist = d; closest = i; }
-  });
-
-  if (closest !== null && closestDist < 150) {
-    const n = nodes[closest];
-    const glow = ctx.createRadialGradient(n.x, n.y, n.r*0.6, n.x, n.y, n.r*1.8);
-    const [cr, cg, cb] = n.color;
-    glow.addColorStop(0, `rgba(${cr},${cg},${cb},0.35)`);
-    glow.addColorStop(1, 'rgba(255,255,255,0)');
-
-    ctx.beginPath();
-    ctx.arc(n.x, n.y, n.r * 1.8, 0, Math.PI*2);
-    ctx.fillStyle = glow;
-    ctx.fill();
-  }
-});
-
-window.addEventListener('resize', () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  location.reload();
-});
-</script>
+  <footer>
+    数据管线：PyMuPDF 解析 → 分块 → LLM 抽取 → 端点归一化 → 实体聚类 → 关系治理 →
+    本地 Triplet Critic 证据判别 → 图数据库。
+    本页与全部子页面均为<b>原生 HTML/JS，无构建链、无外部依赖</b>（three.js 走 CDN）。
+    质量报告见仓库 <code>docs/L5_SIX_LAYER_REPORT.md</code>；
+    调研汇总见 <code>docs/MAINSTREAM_SOLUTIONS_SURVEY.md</code>。
+  </footer>
+</div>
+<!-- 供 tools/cdp_shot.py 之类的自动化截图判断"可以抓帧了"。
+     本页没有异步数据，直接置位即可。 -->
+<script>window.__ready = true;</script>
 </body>
 </html>
