@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KG Cosmos · 方法能力与局限</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: radial-gradient(ellipse 120% 70% at 50% 0%, #0d1730 0%, #070c1a 45%, #04070f 100%);
+    color: #dfe8ff; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    padding: 34px 30px 60px; line-height: 1.6;
+  }
+  header { max-width: 1180px; margin: 0 auto 22px; }
+  header small { display: block; color: rgba(181,203,235,.55); font-size: 11px;
+                 letter-spacing: .16em; text-transform: uppercase; }
+  header h1 { margin: 8px 0 0; font-size: 25px; font-weight: 560; letter-spacing: .02em; }
+  .lede { margin: 12px 0 0; max-width: 900px; font-size: 12.5px; line-height: 1.85;
+          color: rgba(196,214,240,.72); padding: 12px 14px; border-radius: 10px;
+          background: rgba(120,160,255,.06); border-left: 2px solid rgba(120,160,255,.35); }
+  .lede b { color: #cfe0ff; font-weight: 560; }
+  .kpis { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 16px; }
+  .kpi { }
+  .kpi b { display: block; font-size: 20px; font-weight: 600; color: #eaf2ff;
+           font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 11px; color: rgba(181,203,235,.6); }
+
+  .bar { position: sticky; top: 0; z-index: 5; max-width: 1180px; margin: 0 auto 18px;
+         display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+         padding: 12px 0; background: linear-gradient(#04070f 62%, rgba(4,7,15,0));
+         backdrop-filter: blur(6px); }
+  .bar input[type=search], .bar select, .bar button {
+    font: inherit; font-size: 12.5px; color: #dbe7ff;
+    background: rgba(12,19,38,.92); border: 1px solid rgba(140,170,255,.22);
+    border-radius: 8px; padding: 8px 10px; outline: none; }
+  .bar input[type=search] { flex: 1 1 260px; min-width: 200px; }
+  .bar input[type=search]:focus, .bar select:focus { border-color: rgba(150,190,255,.6); }
+  .bar select { max-width: 240px; }
+  .bar button { cursor: pointer; }
+  .bar button:hover { border-color: rgba(150,190,255,.5); color: #fff; }
+  .hit { font-size: 11.5px; color: rgba(181,203,235,.62); margin-left: auto;
+         font-variant-numeric: tabular-nums; }
+
+  main { max-width: 1180px; margin: 0 auto;
+         display: grid; grid-template-columns: repeat(auto-fill, minmax(372px, 1fr));
+         gap: 13px; align-items: start; }
+  .card { background: rgba(10,16,34,.86); border: 1px solid rgba(140,170,255,.15);
+          border-radius: 11px; padding: 13px 15px 12px;
+          transition: border-color .16s ease, transform .16s ease, background .16s ease; }
+  .card:hover { border-color: rgba(150,190,255,.42); background: rgba(14,22,44,.92);
+                transform: translateY(-1px); }
+  /* 方法名占满剩余宽度并在过长时省略，维度胶囊固定在右侧不换行——
+     这样所有卡片的两端位置一致，扫读时能形成整齐的列。 */
+  .top { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+  .subj { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+          white-space: nowrap; font-size: 13.5px; font-weight: 560; color: #eaf2ff; }
+  .sep { flex: 0 0 auto; color: rgba(150,190,255,.45); font-size: 12px; }
+  .dim { flex: 0 0 auto; font-size: 11.5px; color: #a8c6ff; padding: 2px 7px;
+         border-radius: 20px; background: rgba(120,160,255,.13);
+         border: 1px solid rgba(140,170,255,.2); cursor: pointer;
+         white-space: nowrap; }
+  .dim:hover { background: rgba(120,160,255,.26); color: #fff; }
+  .dim.hot { color: #ffd9a0; background: rgba(255,190,110,.12);
+             border-color: rgba(255,190,110,.26); }
+  .desc { margin: 0 0 9px; font-size: 12.5px; line-height: 1.72; color: rgba(214,228,250,.9); }
+  .desc mark, .subj mark, .dim mark { background: rgba(255,214,120,.26); color: #fff;
+                                      border-radius: 3px; padding: 0 2px; }
+  .ev { margin: 0 0 9px; }
+  .ev summary { font-size: 11px; color: rgba(150,190,255,.8); cursor: pointer;
+                list-style: none; user-select: none; }
+  .ev summary::-webkit-details-marker { display: none; }
+  .ev summary::before { content: "▸ "; color: rgba(150,190,255,.55); }
+  .ev[open] summary::before { content: "▾ "; }
+  .ev summary:hover { color: #cfe0ff; }
+  .ev blockquote { margin: 7px 0 0; padding: 9px 11px; font-size: 11.5px; line-height: 1.72;
+                   color: rgba(196,214,240,.72); background: rgba(6,10,22,.7);
+                   border-left: 2px solid rgba(120,160,255,.3); border-radius: 0 6px 6px 0;
+                   white-space: pre-wrap; word-break: break-word; }
+  .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+          padding-top: 9px; border-top: 1px solid rgba(140,170,255,.1); }
+  .paper { font-size: 11px; color: rgba(150,190,255,.78); }
+  .badge { font-size: 10px; padding: 1px 7px; border-radius: 20px;
+           border: 1px solid transparent; cursor: help; }
+  .badge.rej { color: rgba(150,180,220,.7); background: rgba(120,160,255,.08);
+               border-color: rgba(120,160,255,.16); }
+  .badge.sus { color: #ffd9a0; background: rgba(255,190,110,.1);
+               border-color: rgba(255,190,110,.24); }
+  .empty { max-width: 1180px; margin: 40px auto; text-align: center; font-size: 13px;
+           color: rgba(160,190,235,.55); }
+  footer { max-width: 1180px; margin: 34px auto 0; padding-top: 16px;
+           border-top: 1px solid rgba(140,170,255,.1);
+           font-size: 11.5px; line-height: 1.8; color: rgba(160,190,235,.52); }
+  footer code { color: rgba(190,214,246,.75); }
+</style>
+</head>
+<body>
+<header>
+  <small>kg cosmos · method capability map</small>
+  <h1>方法能力与局限</h1>
+  <p class="lede" id="lede"></p>
+  <div class="kpis" id="kpis"></div>
+</header>
+
+<div class="bar">
+  <input id="q" type="search" placeholder="搜索方法 / 维度 / 描述…（按 / 聚焦）" autocomplete="off">
+  <select id="dimSel"><option value="">全部维度</option></select>
+  <select id="subjSel"><option value="">全部方法</option></select>
+  <button id="reset" type="button">重置</button>
+  <span class="hit" id="hit"></span>
+</div>
+
+<main id="grid"></main>
+<div class="empty" id="empty" hidden>没有匹配的记录</div>
+
+<footer>
+  数据：<code>data/quality/claims.json</code> → <code>tools/build_method_limits_data.py</code>。
+  原本由 T3.3 从 243 条 <code>CONTRADICTS</code> 边重建而来；
+  <code>tools/diag_claims.py</code> 判定它们不构成矛盾（243 条对应 242 个不同的
+  方法–维度对，没有任何一对被两篇以上论文同时表态），故改作本视图。
+</footer>
+
+<script>
+const esc = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+// 高频维度（出现 ≥2 次）给"热点"样式，让读者一眼看到被反复提及的能力维度
+const HOT = new Set();
+
+let DATA = null, ITEMS = [], view = [];
+
+function highlight(text, q) {
+  const safe = esc(text);
+  if (!q) return safe;
+  try {
+    const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return safe.replace(re, '<mark>$1</mark>');
+  } catch (_) { return safe; }
+}
+
+function render() {
+  const q = document.getElementById('q').value.trim();
+  const dim = document.getElementById('dimSel').value;
+  const subj = document.getElementById('subjSel').value;
+  const ql = q.toLowerCase();
+
+  view = ITEMS.filter(it => {
+    if (dim && it.dim !== dim) return false;
+    if (subj && it.subject !== subj) return false;
+    if (!ql) return true;
+    return (it.subject + ' ' + it.dim + ' ' + it.description).toLowerCase().includes(ql);
+  });
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = view.map(it => `
+    <article class="card">
+      <div class="top">
+        <span class="subj" title="${esc(it.subject)}">${highlight(it.subject, q)}</span>
+        <span class="sep">→</span>
+        <span class="dim${HOT.has(it.dim) ? ' hot' : ''}" data-dim="${esc(it.dim)}"
+              title="只看该维度">${highlight(it.dim, q)}</span>
+      </div>
+      <p class="desc">${highlight(it.description || '（原文未给出描述）', q)}</p>
+      ${it.evidence ? `<details class="ev"><summary>查看原文依据</summary>
+        <blockquote>${esc(it.evidence)}${it.evidence.length >= 700 ? '…' : ''}</blockquote>
+      </details>` : ''}
+      <div class="meta">
+        <span class="paper">${esc(it.paper)} · p${esc(it.page)}</span>
+        <span class="badge ${it.status === 'SUSPECTED' ? 'sus' : 'rej'}"
+              title="该状态是「按'这条是不是矛盾'的假设」判定的：REJECTED = 原文不支持它构成矛盾；SUSPECTED = 落入灰区需复核。既然前提不成立，本视图不以此为主信息。">${esc(it.status)}${it.confidence != null ? ' ' + Number(it.confidence).toFixed(2) : ''}</span>
+      </div>
+    </article>`).join('');
+
+  document.getElementById('hit').textContent =
+    view.length === ITEMS.length ? `共 ${ITEMS.length} 条` : `${view.length} / ${ITEMS.length} 条`;
+  document.getElementById('empty').hidden = view.length > 0;
+}
+
+function boot() {
+  const m = DATA.meta;
+  document.getElementById('lede').innerHTML =
+    `<b>为什么是「能力与局限」而不是「矛盾」：</b>${esc(m.note)}`
+    + ` 本视图按「方法 → 能力维度」组织：<b>${m.total}</b> 条记录、`
+    + `<b>${m.subjects}</b> 个方法、<b>${m.dimensions}</b> 个维度，来自 <b>${m.papers}</b> 篇论文。`;
+
+  document.getElementById('kpis').innerHTML = [
+    [m.total, '条记录'], [m.subjects, '个方法'], [m.dimensions, '个能力维度'],
+    [m.papers, '篇来源论文'],
+    [Object.entries(m.status_counts).map(([k, v]) => `${k} ${v}`).join(' · '), '原判定状态'],
+  ].map(([v, l]) => `<div class="kpi"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('');
+
+  // 展平成卡片项
+  ITEMS = [];
+  for (const d of DATA.dimensions) {
+    if (d.count >= 2) HOT.add(d.name);
+    for (const it of d.items) ITEMS.push(Object.assign({ dim: d.name }, it));
+  }
+  // 排序：先热点维度，再按方法名，读起来有层次
+  ITEMS.sort((a, b) => (HOT.has(b.dim) - HOT.has(a.dim))
+    || a.dim.localeCompare(b.dim) || a.subject.localeCompare(b.subject));
+
+  const dimCount = new Map();
+  for (const it of ITEMS) dimCount.set(it.dim, (dimCount.get(it.dim) || 0) + 1);
+  const dims = [...dimCount.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  document.getElementById('dimSel').innerHTML = '<option value="">全部维度</option>'
+    + dims.map(([d, n]) => `<option value="${esc(d)}">${esc(d)} (${n})</option>`).join('');
+
+  const subjCount = new Map();
+  for (const it of ITEMS) subjCount.set(it.subject, (subjCount.get(it.subject) || 0) + 1);
+  const subs = [...subjCount.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  document.getElementById('subjSel').innerHTML = '<option value="">全部方法</option>'
+    + subs.map(([s, n]) => `<option value="${esc(s)}">${esc(s)} (${n})</option>`).join('');
+
+  for (const id of ['q', 'dimSel', 'subjSel']) {
+    document.getElementById(id).addEventListener('input', render);
+    document.getElementById(id).addEventListener('change', render);
+  }
+  document.getElementById('reset').addEventListener('click', () => {
+    document.getElementById('q').value = '';
+    document.getElementById('dimSel').value = '';
+    document.getElementById('subjSel').value = '';
+    render();
+  });
+  // 点卡片上的维度胶囊 = 只看该维度
+  document.getElementById('grid').addEventListener('click', (e) => {
+    const el = e.target.closest('.dim');
+    if (!el) return;
+    document.getElementById('dimSel').value = el.dataset.dim;
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+      e.preventDefault();
+      document.getElementById('q').focus();
+    }
+    if (e.key === 'Escape') {
+      document.getElementById('q').value = '';
+      render();
+    }
+  });
+
+  render();
+  window.__ready = true;
+}
+
+fetch('./kg-data/method-limits.json')
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(d => { DATA = d; boot(); })
+  .catch(e => {
+    document.getElementById('lede').textContent = '数据加载失败：' + e.message;
+    window.__ready = true;
+  });
+</script>
+</body>
+</html>
