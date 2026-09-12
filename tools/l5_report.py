@@ -179,12 +179,24 @@ def main():
         print('   主要类型: ' + ', '.join(f'{t} {c}' for t, c in dots.most_common(5)))
 
     if '--json' in sys.argv:
+        # L2 由 tools/l2_report.py --write 填。本脚本**不能把它覆盖成 None**：
+        # 两个脚本写同一个文件的同一个字段，谁后跑谁说了算——
+        # 实测在 l2_report 之后重跑一次 l5_report，L2 就变回 null，
+        # 分析面板随即显示 "? 组"。这正是 ERROR_CASES 案例 12 的同一类问题。
+        prev_l2 = None
+        _six_path = os.path.join(Q, 'l5-six-layer.json')
+        if os.path.exists(_six_path):
+            try:
+                with open(_six_path, encoding='utf-8') as _f:
+                    prev_l2 = json.load(_f).get('L2_entity_clustering')
+            except Exception:
+                prev_l2 = None
         out = {
             'source': os.path.basename(VERIFY),
             'threshold': thr,
             'edges_total': len(edges),
             'L1_entity_presence': {'hit': l1_hit, 'total': l1_tot, 'rate': l1},
-            'L2_entity_clustering': None,
+            'L2_entity_clustering': prev_l2,
             # L3 落盘也必须是多口径。`closed` 含从边反建的节点，属人工构造，
             # 单独引用会被读成抽取质量；`extracted` 才是"只算独立抽取节点"的口径。
             'L3_endpoints': {

@@ -84,13 +84,22 @@ def main():
         {"id": "L1", "name": "实体存在层", "value": pct(six["L1_entity_presence"]["rate"]),
          "detail": f"{six['L1_entity_presence']['hit']}/{six['L1_entity_presence']['total']} 个实体名字面出现在自己的证据引文中",
          "basis": "节点级"},
+        # L2 是节点级、没有百分比，用 figure 承载"585 组"这个数
+        # （前端原先把它写成硬编码的 `384 组`，改数据后就成了 stale 数字）。
         {"id": "L2", "name": "实体聚类层", "value": None,
-         "detail": f"归并 {L2.get('merged_groups', {}).get('total', '?')} 组"
-                   f"（{L2.get('names_before', '?')} → {L2.get('names_after', '?')} 名），"
-                   f"{L2.get('pending_same_as', '?')} 组待复核",
+         "figure": f"{L2.get('cumulative_merged_groups', '?')} 组",
+         "detail": f"累计归并 {L2.get('cumulative_merged_groups', '?')} 组"
+                   f"（{L2.get('names_before', '?')} → {L2.get('names_after', '?')} 名，"
+                   f"减少 {L2.get('cumulative_reduction_pct', '?')}%）；"
+                   f"本轮重跑合并 {L2.get('merged_groups', {}).get('total_this_run', '?')} 组",
          "basis": "节点级"},
-        {"id": "L3", "name": "关系端点层", "value": pct(six["L3_endpoints"]["all"]),
-         "detail": "两端都落在已抽取节点集内",
+        # L3 必须并列两个口径：闭合口径含人工反建的节点（定义恒等），
+        # 抽取口径才是"只算独立抽取出来的节点"。
+        {"id": "L3", "name": "关系端点层",
+         "value": pct(six["L3_endpoints"]["all"]),
+         "detail": f"闭合口径 {pct(six['L3_endpoints']['all'])}%（含从边反建的节点，属人工构造）"
+                   f" · 抽取口径 {pct(six.get('L3_endpoints_extracted_caliber', {}).get('all', 0))}%"
+                   f"（只算独立抽取的节点）",
          "basis": f"{cur['count']} 条边"},
         {"id": "L4", "name": "关系谓词层", "value": pct(six["L4_predicate"]["all"]),
          "detail": "谓词落在本体 15 类内",
@@ -138,6 +147,30 @@ def main():
     }
 
     hits = cur.get("hit_distribution", {})
+
+    # 社区数的两个口径必须一起给：Louvain 实际检测出 60 个社区，
+    # 前端只导出规模最大的 18 个（其余是碎片）。只报一个数就会被读成前后矛盾
+    # ——导航页写 18、本面板写 60，审计正是抓到了这一点。
+    communities_total = scale.get("communities")
+    communities_exported = 18
+    dust = scale.get("dust")
+
+    # L9 端点召回层：本项目**唯一非自洽型**的指标。
+    # 六层全部判"图内部是否一致"，回答不了"原文里的东西抽到没有"；
+    # L9 从原文段落出发（操作性金标，独立于抽取管线）回答这个问题。
+    l9 = {}
+    l9p = QUAL / "l9-recall.json"
+    if l9p.exists():
+        d9 = read(l9p)
+        l9 = {
+            "endpoint_recall": d9.get("endpoint_recall"),
+            "gold_entities": d9.get("gold_entities"),
+            "matched": d9.get("matched"),
+            "spans": d9.get("spans"),
+            "note": d9.get("note"),
+            "limitation": "只覆盖端点召回，未覆盖关系召回；样本 7 段，非多人标注。",
+        }
+
     payload = {
         "meta": {
             "generated_by": "tools/build_analytics_data.py",
@@ -145,13 +178,39 @@ def main():
                 "web/kg-data/nebula.json", "data/quality/l5-six-layer.json",
                 "data/quality/relation-verify-all.json",
                 "data/quality/baseline/relation-verify-all.PRE-T3.json",
+                "data/quality/l9-recall.json",
             ],
             "threshold": thr,
             "model_roc_auc": cur.get("calib_roc_auc"),
             "model": cur.get("model", "").split("snapshots")[0].split("models--")[-1].replace("--", "/").rstrip("/\\"),
+            "calibers": {
+                "overview_graph": {
+                    "nodes": scale.get("nodes"), "edges": scale.get("edges"),
+                    "meaning": "无向去重后的简化图，供三维界面渲染",
+                },
+                "eval_full": {
+                    "edges": six.get("edges_total"),
+                    "meaning": "含方向与重复的评测全集，六层指标在此口径上计算",
+                },
+                "l5_supported": {
+                    "edges": six.get("edges_supported"),
+                    "meaning": "经本地判别器判为原文支持的子集",
+                },
+                "l3_extracted_caliber": six.get("L3_endpoints_extracted_caliber"),
+                "note": "三套规模数字含义不同、不可互相替代；跨口径比较前先看这里。",
+            },
         },
         "scale": scale,
+        "community_calibers": {
+            "louvain_total": communities_total,
+            "exported_to_frontend": communities_exported,
+            "dust_nodes": dust,
+            "note": f"Louvain 共检出 {communities_total} 个社区，其中规模最大的 "
+                    f"{communities_exported} 个导出到前端；另有 {dust} 个碎片节点"
+                    f"未归入任何社区。导航页显示的 18 即此处的 exported_to_frontend。",
+        },
         "six_layer": six_layer,
+        "l9_recall": l9,
         "governance": governance,
         "by_type": by_type,
         "hit_distribution": hits,

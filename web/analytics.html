@@ -30,6 +30,24 @@
   .kpi span { display: block; margin-top: 3px; font-size: 11px; color: rgba(181,203,235,.6); }
   .kpi small { display: block; margin-top: 5px; font-size: 10.5px;
                color: rgba(150,190,255,.5); }
+  /* 口径对照：三套规模数字的含义解释 */
+  #calibers { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+              gap: 10px; }
+  .cal { border-radius: 10px; padding: 11px 13px;
+         border: 1px solid rgba(140,170,255,.14); background: rgba(10,16,34,.62); }
+  .cal b { display: block; font-size: 12px; font-weight: 560; }
+  .cal span { display: block; margin-top: 4px; font-size: 14px; font-weight: 600;
+              color: #eaf2ff; font-variant-numeric: tabular-nums; }
+  .cal small { display: block; margin-top: 5px; font-size: 10.5px; line-height: 1.7;
+               color: rgba(160,190,235,.55); }
+  .cal.c1 { border-color: rgba(126,203,255,.3); } .cal.c1 b { color: #a9d8ff; }
+  .cal.c2 { border-color: rgba(179,255,127,.26); } .cal.c2 b { color: #cdf5a8; }
+  .cal.c3 { border-color: rgba(255,217,127,.26); } .cal.c3 b { color: #f0dcae; }
+  .calnote { grid-column: 1 / -1; margin-top: 2px; padding: 10px 13px;
+             border-radius: 9px; font-size: 11px; line-height: 1.95;
+             color: rgba(170,196,230,.68); background: rgba(140,170,255,.05);
+             border: 1px solid rgba(140,170,255,.1); }
+  .calnote b { color: rgba(214,230,252,.9); }
 
   section { margin-top: 34px; }
   h2 { font-size: 14px; font-weight: 560; margin: 0 0 4px; color: #eaf2ff; }
@@ -96,10 +114,25 @@
 
   <div class="kpis" id="kpis"></div>
 
+  <!-- 三套规模数字并存，必须当场解释，否则会被读成前后矛盾 -->
+  <section>
+    <h2>口径对照</h2>
+    <div class="sub">本项目有三套并存的规模数字，含义不同、不可互相替代</div>
+    <div id="calibers"></div>
+  </section>
+
   <section>
     <h2>六层评测</h2>
     <div class="sub" id="sixSub"></div>
     <div id="layers"></div>
+  </section>
+
+  <!-- 唯一非自洽型指标：前六层都只判"图内部是否一致"，
+       回答不了"原文里的东西抽到没有"。L9 从原文段落出发回答它。 -->
+  <section>
+    <h2>L9 端点召回（六层之外）</h2>
+    <div class="sub" id="l9Sub"></div>
+    <div id="l9"></div>
   </section>
 
   <section>
@@ -152,12 +185,37 @@ function boot(D) {
   document.getElementById('kpis').innerHTML = [
     [s.nodes, '节点', 'web/kg-data/nebula.json'],
     [s.edges, '边', '概览层导出'],
-    [s.communities, 'Louvain 社区', `最大 ${s.largest_community} 节点`],
+    // 社区数有两个口径：Louvain 检出 60 个，前端只导出最大的 18 个。
+    // 只显示一个数会与导航页的 18 冲突，所以两个都写。
+    [s.communities, 'Louvain 社区', `导出前 ${D.community_calibers.exported_to_frontend} 个 · 另 ${s.dust} 碎片`],
     [s.modularity, '模块度', '社区结构显著'],
     [D.supported_subgraph.edges, 'L5 支持子图 · 边', `${D.supported_subgraph.nodes} 节点`],
     [D.supported_subgraph.dropped, '被 L5 筛掉', `占 ${(D.supported_subgraph.dropped / (D.supported_subgraph.edges + D.supported_subgraph.dropped) * 100).toFixed(1)}%`],
   ].map(([v, l, n]) =>
     `<div class="kpi"><b>${esc(v)}</b><span>${esc(l)}</span><small>${esc(n)}</small></div>`).join('');
+
+  // ── 口径对照：三套数字并存必须当场解释 ──
+  const cal = m.calibers || {};
+  document.getElementById('calibers').innerHTML = [
+    ['概览层图', cal.overview_graph, 'c1'],
+    ['评测全集', cal.eval_full, 'c2'],
+    ['L5 支持子集', cal.l5_supported, 'c3'],
+  ].filter(([, v]) => v).map(([label, v, cls]) => {
+    const nums = [v.nodes != null ? `${v.nodes} 节点` : null,
+                  v.edges != null ? `${v.edges} 边` : null]
+                 .filter(Boolean).join(' · ');
+    return `<div class="cal ${cls}"><b>${esc(label)}</b><span>${esc(nums)}</span>`
+      + `<small>${esc(v.meaning)}</small></div>`;
+  }).join('')
+  + `<div class="calnote">${esc(cal.note || '')}`
+  + (D.community_calibers ? `<br>${esc(D.community_calibers.note)}` : '')
+  + (cal.l3_extracted_caliber
+      ? `<br><b>L3 特别说明</b>：L3 有两个口径，务必并列引用 —— `
+        + `闭合口径含从边反建的 ${cal.l3_extracted_caliber.backfilled_nodes} 个节点，`
+        + `而这些节点正是由边端点造出来的，拿它们去满足"端点在节点集内"属于定义恒等；`
+        + `抽取口径只统计独立抽取出来的节点。六层区的 L3 行给了两个数。`
+      : '')
+  + `</div>`;
 
   document.getElementById('sixSub').textContent =
     `全部 ${D.by_type.rows.reduce((a, r) => a + r.n, 0)} 条关系边上计算；L2 是节点级，无百分比`;
@@ -171,9 +229,30 @@ function boot(D) {
         <div class="dt">${esc(L.detail)}</div>
       </div>
       <div class="val ${L.value == null ? '' : cls(L.value)}">
-        ${L.value == null ? '<em>384 组</em>' : L.value + '%'}
+        ${L.value == null ? `<em>${esc(L.figure || '见说明')}</em>` : L.value + '%'}
       </div>
     </div>`).join('');
+
+  // ── L9 端点召回（六层之外唯一的非自洽型指标）──
+  const l9 = D.l9_recall || {};
+  if (l9.endpoint_recall != null) {
+    document.getElementById('l9Sub').textContent =
+      `从原文段落出发、独立于抽取管线标注的操作性金标；`
+      + `${l9.spans} 段、${l9.gold_entities} 个金标实体`;
+    document.getElementById('l9').innerHTML = `
+      <div class="layer">
+        <div class="nm">L9 端点召回<i>原文段落里出现、且应当抽出的实体，有多少进了图</i></div>
+        <div class="mid">
+          <div class="track"><i style="width:${(l9.endpoint_recall * 100).toFixed(1)}%;background:${hue(l9.endpoint_recall * 100)}"></i></div>
+          <div class="dt">命中 ${l9.matched} / ${l9.gold_entities}
+            · 前六层全部是自洽型判定，回答不了"抽全了没有"，这一层回答它</div>
+        </div>
+        <div class="val ${cls(l9.endpoint_recall * 100)}">${(l9.endpoint_recall * 100).toFixed(1)}%</div>
+      </div>
+      <div class="calnote">${esc(l9.note || '')}<br><b>限度</b>：${esc(l9.limitation || '')}</div>`;
+  } else {
+    document.getElementById('l9Sub').textContent = '尚未产出（跑 tools/l9_recall.py）';
+  }
 
   const g = D.governance;
   document.getElementById('govSub').textContent =

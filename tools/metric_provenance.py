@@ -161,13 +161,31 @@ def main():
             stale.append(k)
 
     print()
+    # 产物内部的完整性检查：字段是不是 null 也算一种 "stale"。
+    # L2 由 l2_report.py 填，而 l5_report.py 会重写同一个文件——
+    # 在 l2_report 之后重跑一次 l5_report 就会把 L2 打回 null，
+    # 分析面板随即显示 "? 组"。这个坑真的踩到过，所以在这里守一道。
+    holes = []
+    for name, (fname, path, script) in METRICS.items():
+        v = read_metric(fname, path)
+        if v is None:
+            holes.append((name, fname, script))
+    if holes:
+        print('以下指标取不到值（产物字段缺失或为 null）：')
+        for n, f, s in holes:
+            print(f'  · {n:32s} ← {f}（应由 {s} 写入）')
+        print('  常见原因：某个脚本把同一文件的字段重写成 null，'
+              '或该产物还没跑过。')
+
     if stale:
-        print('以下数据源已变化，相关指标必须重跑：')
+        print('\n以下数据源已变化，相关指标必须重跑：')
         for k in stale:
-            affected = [n for n, (f, p, s) in METRICS.items()]
-            print(f'  · {k}  ⇒ 影响 {len(affected)} 个指标（全部重算最省事）')
+            print(f'  · {k}  ⇒ 影响 {len(METRICS)} 个指标（全部重算最省事）')
         print('\n重算命令见 docs/L5_SIX_LAYER_REPORT.md §7。')
         print('重算完成后跑：python tools/metric_provenance.py --write')
+        return 1
+
+    if holes:
         return 1
 
     print('数据指纹未变，指标的版本绑定有效 ✅')
