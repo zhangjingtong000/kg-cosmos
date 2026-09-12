@@ -29,7 +29,10 @@ def main():
     with open(CB, encoding='utf-8') as f:
         cbv = json.load(f)
 
-    new_cb = {e['source'] + '\x00' + e['target']: e for e in cbv['edges']}
+    # 键必须含 paper：同一对 (source, target) 可能出现在多篇论文里
+    # （如 `Xindong Wu → A Comprehensive Survey on …` 在综述与其原文中都有）。
+    # 旧版只用 source\x00target，后写入的会覆盖先写入的，导致 477 条分数错配。
+    new_cb = {(e['paper'], e['source'], e['target']): e for e in cbv['edges']}
     print(f'主文件 {allv["count"]} 条；CREATED_BY 新分数 {len(new_cb)} 条')
 
     # 备份
@@ -42,12 +45,15 @@ def main():
     for e in allv['edges']:
         if e.get('type') != 'CREATED_BY':
             continue
-        n = new_cb.get(e['source'] + '\x00' + e['target'])
+        n = new_cb.get((e['paper'], e['source'], e['target']))
         if n is None:
             missing += 1
             continue
+        # hypothesis 必须一起替换：它是要写进论文与证据面板的文本，
+        # 只换分数会让数据自相矛盾（分数按新方向算，句子却是旧方向）。
         e['entail_prob'] = n['entail_prob']
         e['pass'] = n['pass']
+        e['hypothesis'] = n['hypothesis']
         replaced += 1
     print(f'替换 {replaced} 条，未匹配 {missing} 条')
 
@@ -81,6 +87,31 @@ def main():
         'replaced_edges': replaced,
         'source': os.path.basename(CB),
     }
+
+    # ── 自校验：合并结果必须与来源文件逐条一致，且 hypothesis 与边的方向同向 ──
+    # 这一层是补上来的：此前只替换分数、漏了 hypothesis，脚本"成功"退出
+    # 但产出了自相矛盾的数据（分数按新方向算、句子是旧方向 8746 条），
+    # 而且没有任何下游会报错。宁可在这里中止，也不要把坏数据写出去。
+    import re as _re
+    _pat = _re.compile(r'^(.*?) was created by (.*?)\.$')
+    bad_orient = bad_sync = 0
+    for e in allv['edges']:
+        if e.get('type') != 'CREATED_BY':
+            continue
+        n = new_cb.get((e['paper'], e['source'], e['target']))
+        if n is None:
+            continue
+        if (e['hypothesis'] != n['hypothesis']
+                or str(e['entail_prob']) != str(n['entail_prob'])
+                or str(e['pass']) != str(n['pass'])):
+            bad_sync += 1
+        m = _pat.match(e['hypothesis'] or '')
+        if (not m or m.group(1).strip() != e['target'].strip()
+                or m.group(2).strip() != e['source'].strip()):
+            bad_orient += 1
+    print(f'自校验：与来源文件不一致 {bad_sync} 条；hypothesis 语序与方向不符 {bad_orient} 条')
+    if bad_sync or bad_orient:
+        raise SystemExit('!! 合并结果不自洽，已中止写出（未修改主文件）')
 
     with open(ALL, 'w', encoding='utf-8') as f:
         json.dump(allv, f, ensure_ascii=False, indent=2)
