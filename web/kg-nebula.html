@@ -123,6 +123,52 @@
                  line-height: 1.75; color: rgba(160, 190, 235, .5); }
   #list .empty b { display: block; margin-bottom: 5px; font-weight: 500;
                    color: rgba(196, 216, 246, .78); }
+
+  /* ── 统一着色引擎的图例（T6.4）──
+     引擎把着色拆成两个正交维度：Partition（离散分区→基色）×
+     Ranking（连续排序→基色向白的插值量）。图例必须同时显示这两件事，
+     否则用户看不出"这个颜色现在代表什么"。 */
+  #legend { position: fixed; right: 22px; bottom: 18px; width: 236px; z-index: 4;
+            max-height: 62vh; overflow: hidden; opacity: 0; pointer-events: none;
+            transition: opacity .3s ease;
+            background: rgba(8, 13, 30, .84); border: 1px solid rgba(140, 170, 255, .18);
+            border-radius: 10px; padding: 10px 12px 11px; color: #dfe8ff;
+            backdrop-filter: blur(8px); }
+  body.inside #legend { opacity: 1; pointer-events: auto; }
+  #legend .lg-h { font-size: 10px; letter-spacing: .13em; text-transform: uppercase;
+                  color: rgba(181, 203, 235, .7); margin-bottom: 8px; }
+  #legend .lg-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  #legend .lg-lab { font-size: 10px; color: rgba(160, 190, 235, .6); flex: 0 0 26px; }
+  #legend .seg { display: flex; gap: 3px; flex: 1 1 auto; }
+  #legend .seg button { flex: 1 1 0; background: rgba(140, 170, 255, .10);
+                        border: 1px solid rgba(140, 170, 255, .16);
+                        color: rgba(207, 224, 255, .78); border-radius: 6px;
+                        padding: 3px 0; font: inherit; font-size: 10.5px; cursor: pointer; }
+  #legend .seg button:hover { background: rgba(140, 170, 255, .22); color: #fff; }
+  #legend .seg button.on { background: rgba(120, 160, 255, .34);
+                           border-color: rgba(160, 200, 255, .58); color: #fff; }
+  /* 列表自己滚动，而不是让整个图例滚动：否则条目一多，底部的排序色带
+     与说明会被滚出视野，而"亮度代表什么"恰恰是图例最该常驻的部分。 */
+  #legend .lg-list { margin-top: 9px; max-height: 30vh; overflow-y: auto;
+                     padding-right: 2px;
+                     scrollbar-width: thin; scrollbar-color: rgba(120,160,255,.3) transparent; }
+  #legend .lg-item { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+  #legend .lg-sw { width: 9px; height: 9px; border-radius: 2px; flex: 0 0 auto;
+                   box-shadow: 0 0 5px currentColor; }
+  #legend .lg-nm { flex: 0 1 auto; min-width: 0; max-width: 42%; overflow: hidden;
+                   text-overflow: ellipsis; white-space: nowrap;
+                   color: rgba(214, 228, 250, .86); font-size: 11px; }
+  #legend .lg-bar { flex: 1 1 18px; height: 3px; border-radius: 2px;
+                    background: rgba(140, 170, 255, .13); overflow: hidden; }
+  #legend .lg-bar i { display: block; height: 100%; border-radius: 2px; opacity: .9; }
+  #legend .lg-n { flex: 0 0 auto; color: rgba(181, 203, 235, .62); font-size: 10px;
+                  font-variant-numeric: tabular-nums; }
+  #legend .lg-ramp { display: flex; align-items: center; gap: 6px; margin-top: 9px;
+                     padding-top: 8px; border-top: 1px solid rgba(140, 170, 255, .1); }
+  #legend .lg-ramp .bar { flex: 1 1 auto; height: 6px; border-radius: 3px; }
+  #legend .lg-ramp span { font-size: 10px; color: rgba(160, 190, 235, .55); }
+  #legend .lg-note { margin-top: 7px; font-size: 10px; line-height: 1.5;
+                     color: rgba(160, 190, 235, .5); }
 </style>
 </head>
 <body>
@@ -138,6 +184,7 @@
   <div id="list"></div>
 </aside>
 <div id="inner"><div id="innerTitle"><b id="itName"></b><small id="itSub"></small></div><button id="back" type="button">← 返回星云概览</button></div>
+<aside id="legend"></aside>
 
 <script type="importmap">
 { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
@@ -858,6 +905,156 @@ document.getElementById('searchClear').addEventListener('click', () => {
   searchEl.focus();
 });
 
+// ══════════════════════════════════════════════════════════════
+// 统一着色引擎（T6.4）
+//
+// 着色 = Partition（离散分区，决定基色）× Ranking（连续排序，决定基色
+// 向白插值的量）。两个维度正交、各自可切换，图例同时展示这两件事——
+// 否则用户看不出"这个颜色现在代表什么"。
+//
+// 【为什么默认值必须与改造前逐字等价】
+//   改造前内部实体云就是 `社区色.lerp(白, 0.16 + 0.62 × 度数归一)`。
+//   引擎默认取 partition='community'、ranking='degree'，公式与它完全一致，
+//   因此引入引擎**不改变默认外观**；只有用户主动切换后才出现新配色。
+//   这样引擎是纯增量，不会让已验收的视觉效果发生位移。
+//
+// 【为什么 Partition 必须提供"类型"】
+//   数据里每个节点都带 `t`（15 类实体类型），但改造前**完全没有用到**——
+//   整个社区内部是一色渐变，分不出方法/人物/数据集。
+//   类型是这张图里信息量最大的离散维度，理应可见。
+//
+// 回归检查：tools/cdp_verify_color.py
+// ══════════════════════════════════════════════════════════════
+const TYPE_COLORS = {
+  Person: '#ff7f7f', Concept: '#7fb3ff', Method: '#7fffb3',
+  Document: '#ffd97f', Process: '#c77fff', System: '#7fffff',
+  Artifact: '#ff9f7f', Component: '#b3ff7f', Event: '#ff7fd9',
+  Metric: '#7fd9ff', Dataset: '#d9ff7f', Organization: '#ffbf7f',
+  Location: '#9f7fff', Tool: '#7fffd9', Material: '#d9d9d9',
+};
+const TYPE_FALLBACK = '#9fb6d8';
+
+const colorMode = { partition: 'community', ranking: 'degree' };
+
+/** 排序值归一化到 [0,1]，供亮度插值使用。 */
+function rankT(n, ranking, maxD, maxR) {
+  if (ranking === 'degree') return Math.pow((n.d || 1) / maxD, 0.6);
+  if (ranking === 'pagerank') return Math.pow((n.r || 0) / maxR, 0.6);
+  return 0.5;                        // 'none'：关闭排序维度，亮度取中值
+}
+
+/** 核心：给定节点集与着色模式，算出颜色与尺寸两个数组。 */
+function computeNodeStyle(nodes, data, partition, ranking) {
+  const base = new THREE.Color(data.color);
+  const white = new THREE.Color('#ffffff');
+  let maxD = 1, maxR = 1e-12;
+  for (const n of nodes) {
+    if ((n.d || 1) > maxD) maxD = n.d || 1;
+    if ((n.r || 0) > maxR) maxR = n.r || 0;
+  }
+  const col = new Float32Array(nodes.length * 3);
+  const siz = new Float32Array(nodes.length);
+  const cache = new Map();           // 同一分区复用 THREE.Color，避免每节点 new
+  nodes.forEach((n, k) => {
+    const t = rankT(n, ranking, maxD, maxR);
+    let b;
+    if (partition === 'type') {
+      const hex = TYPE_COLORS[n.t] || TYPE_FALLBACK;
+      b = cache.get(hex);
+      if (!b) { b = new THREE.Color(hex); cache.set(hex, b); }
+    } else {
+      b = base;
+    }
+    const cc = b.clone().lerp(white, 0.16 + 0.62 * t);
+    col[k * 3] = cc.r; col[k * 3 + 1] = cc.g; col[k * 3 + 2] = cc.b;
+    siz[k] = 1.5 + 7.5 * t;
+  });
+  return { col, siz };
+}
+
+/** 图例条目：分区 → (标签, 数量, 基色)，按数量降序。 */
+function legendEntries(nodes, partition, data) {
+  if (partition === 'type') {
+    const cnt = new Map();
+    for (const n of nodes) cnt.set(n.t, (cnt.get(n.t) || 0) + 1);
+    return [...cnt.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([t, n]) => ({ label: t, n, color: TYPE_COLORS[t] || TYPE_FALLBACK }));
+  }
+  // 'community'：内部视图里只有一个社区，图例退化为单项
+  return [{ label: data.name || '本社区', n: nodes.length, color: data.color }];
+}
+
+const legendEl = document.getElementById('legend');
+
+function renderLegend() {
+  const ud = overlay.userData;
+  if (!ud || !ud.data || !ud.pts || inside === null) { legendEl.innerHTML = ''; return; }
+  const nodes = ud.data.nodes;
+  const entries = legendEntries(nodes, colorMode.partition, ud.data);
+  const maxN = entries.length ? entries[0].n : 1;
+
+  const btn = (group, val, text) =>
+    `<button type="button" data-group="${group}" data-val="${val}"` +
+    `${colorMode[group] === val ? ' class="on"' : ''}>${text}</button>`;
+
+  // 排序色带：把基色按亮度公式铺成渐变，让"越亮 = 排名越高"直接可见。
+  // 类型分区没有单一基色，退而用**最高频类型**的色（列表首项）作代表，
+  // 中性灰白会让人误以为色带与分区无关。
+  let ramp = '';
+  if (colorMode.ranking !== 'none') {
+    const baseCol = new THREE.Color(
+      colorMode.partition === 'type'
+        ? (entries[0] ? entries[0].color : TYPE_FALLBACK)
+        : ud.data.color);
+    const stops = [0, .25, .5, .75, 1].map(t =>
+      '#' + baseCol.clone().lerp(new THREE.Color('#ffffff'), 0.16 + 0.62 * t).getHexString());
+    ramp = `<div class="lg-ramp"><span>低</span>` +
+           `<span class="bar" style="background:linear-gradient(90deg,${stops.join(',')})"></span>` +
+           `<span>高</span></div>`;
+  }
+
+  legendEl.innerHTML =
+    `<div class="lg-h">着色引擎</div>
+     <div class="lg-row"><span class="lg-lab">分区</span><span class="seg">
+       ${btn('partition', 'community', '社区')}${btn('partition', 'type', '类型')}</span></div>
+     <div class="lg-row"><span class="lg-lab">排序</span><span class="seg">
+       ${btn('ranking', 'degree', '度数')}${btn('ranking', 'pagerank', 'PR')}${btn('ranking', 'none', '无')}</span></div>
+     <div class="lg-list">
+       ${entries.map(e => `<div class="lg-item">
+          <span class="lg-sw" style="background:${e.color};color:${e.color}"></span>
+          <span class="lg-nm">${escHtml(String(e.label))}</span>
+          <span class="lg-bar"><i style="width:${Math.max(4, Math.round(100 * e.n / maxN))}%;background:${e.color}"></i></span>
+          <span class="lg-n">${e.n}</span></div>`).join('')}
+     </div>
+     ${ramp}
+     <div class="lg-note">${colorMode.ranking === 'none'
+        ? '排序已关闭，亮度统一'
+        : `亮度 = ${colorMode.ranking === 'pagerank' ? 'PageRank' : '度数'}归一（越亮越高）`}
+       · 点大小同源</div>`;
+
+  legendEl.querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => {
+      colorMode[b.dataset.group] = b.dataset.val;
+      applyColorMode();
+    });
+  });
+}
+
+/** 把当前着色模式应用到已存在的点云上（只更新缓冲，不重建几何）。 */
+function applyColorMode() {
+  const ud = overlay.userData;
+  if (!ud || !ud.pts || !ud.data) return;
+  const { col, siz } = computeNodeStyle(ud.data.nodes, ud.data,
+                                        colorMode.partition, colorMode.ranking);
+  const g = ud.pts.geometry;
+  g.attributes.color.array.set(col);
+  g.attributes.color.needsUpdate = true;
+  g.attributes.aSize.array.set(siz);
+  g.attributes.aSize.needsUpdate = true;
+  renderLegend();
+}
+
 // ── 渲染社区内部（实体点 + 内部边 + 核心标签）──
 async function enterCommunity(ci, preloaded) {
   const cloud = clouds[ci];
@@ -890,21 +1087,23 @@ async function enterCommunity(ci, preloaded) {
   // 可达 182.8，相机一进入就被硬拉回球体内部，看到的是密不透风的线网。
   controls.maxDistance = Math.max(130, dist * 1.7);
 
-  // 实体点：半径按度数（枢纽大），颜色=社区色深浅
+  // 实体点：**位置与样式分离**——位置在此处算，颜色与大小交给着色引擎。
+  // 改造前是内联的 `度数^0.6 → 社区色 lerp 白`，现在该公式成为引擎的默认
+  // 参数（partition='community' / ranking='degree'），数值逐字等价。
   const N = data.nodes.length;
   const pos = new Float32Array(N * 3);
   const col = new Float32Array(N * 3);
   const siz = new Float32Array(N);
-  const maxD = Math.max(1, ...data.nodes.map(n => n.d || 1));
   data.nodes.forEach((n, k) => {
     pos[k*3]   = center.x + n.x;
     pos[k*3+1] = center.y + n.y;
     pos[k*3+2] = center.z + n.z;
-    const t = Math.pow((n.d || 1) / maxD, 0.6);
-    const cc = base.clone().lerp(new THREE.Color('#ffffff'), 0.16 + 0.62 * t);
-    col[k*3] = cc.r; col[k*3+1] = cc.g; col[k*3+2] = cc.b;
-    siz[k] = 1.5 + 7.5 * t;
   });
+  {
+    const style = computeNodeStyle(data.nodes, data, colorMode.partition, colorMode.ranking);
+    col.set(style.col);
+    siz.set(style.siz);
+  }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
@@ -1003,6 +1202,9 @@ async function enterCommunity(ci, preloaded) {
     data, nodeIndex: idx, labels: labelItems, pts, halo,
   };
 
+  // 图例必须在此处刷新：它读 overlay.userData，而 userData 刚被赋值。
+  renderLegend();
+
   // 概览层隐藏：按对象类型筛选更稳健（原型里没有名为 points 的全局变量，
   // 直接引用会抛 "points is not defined" 并中断 enterCommunity）。
   scene.children.forEach(o => {
@@ -1065,6 +1267,9 @@ function exitCommunity() {
   if (inside === null && !flying) return;
   // 清空内部图层（复用 clearOverlay，它同时移除 CSS2DObject 的 DOM）
   clearOverlay();
+  // 图例只属于内部视图：清空内容而不是只靠 CSS 隐藏，
+  // 否则下次进入别的社区时会先闪一帧上一个社区的图例。
+  legendEl.innerHTML = '';
   // 恢复概览层
   scene.children.forEach(o => {
     if (o === overlay || o.isCSS2DObject) return;
@@ -1234,6 +1439,36 @@ window.KGNebula = {
   haloOn: () => Boolean(overlay.userData && overlay.userData.halo && overlay.userData.halo.visible),
   panelOpen: () => document.getElementById('detail').classList.contains('open'),
   subText: () => document.getElementById('itSub').textContent,
+
+  // 供等价性回归使用（tools/cdp_verify_color.py）：暴露 THREE 与当前 overlay，
+  // 使验证脚本能用**改造前的公式**重算一遍颜色，再与引擎输出逐值比对。
+  // 这是"默认外观未被改变"的机器证据——比肉眼看两张截图相似要可靠得多，
+  // 因为 THREE 的 sRGB→Linear 色彩管理会让手工算的 RGB 与页面内不一致。
+  _internals: () => ({ THREE, ud: overlay.userData }),
+
+  // ── 着色引擎（T6.4）──
+  colorMode: () => ({ ...colorMode }),
+  setColorMode: (p, r) => {
+    if (p) colorMode.partition = p;
+    if (r) colorMode.ranking = r;
+    applyColorMode();
+    return { ...colorMode };
+  },
+  legendItems: () => document.querySelectorAll('#legend .lg-item').length,
+  legendButtons: () => [...document.querySelectorAll('#legend .seg button')]
+    .map(b => ({ group: b.dataset.group, val: b.dataset.val, on: b.classList.contains('on') })),
+  // 当前点云里实际出现的颜色集合（取整到 8 位）。用于确认"切换真的改变了
+  // 缓冲区"而不是只换了图例文字——这是本次改造最容易出现的假通过。
+  nodeColors: () => {
+    const ud = overlay.userData;
+    if (!ud || !ud.pts) return null;
+    const a = ud.pts.geometry.attributes.color.array;
+    const set = new Set();
+    for (let i = 0; i < a.length; i += 3) {
+      set.add([a[i], a[i + 1], a[i + 2]].map(v => Math.round(v * 255)).join(','));
+    }
+    return [...set];
+  },
   target: () => controls.target.toArray().map(v => +v.toFixed(2)),
   // 供自动化验证：内部视图下仍可见的概览层对象数（应为 0）
   overviewLeak: () => {
