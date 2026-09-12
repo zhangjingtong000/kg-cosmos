@@ -37,6 +37,9 @@ DATA_CHECKS = [
     # 离线可用性是「离线演示铁律」（内部记录 §1 第 6 条）的守门检查：
     # 主视图曾因 three.js 走 unpkg CDN 而断网白屏，现已本地化。
     ("主视图离线可用（屏蔽外部域名）", ["tools/cdp_verify_offline.py", "web/kg-nebula.html"]),
+    # 前后端连通：需要后端在 8000 跑着（tools/serve.py）。
+    # 若后端没起，本项会明确报"后端不可用"而不是静默跳过。
+    ("前后端连通 · API 优先 + 静态回退", ["tools/cdp_verify_e2e.py"]),
 ]
 
 

@@ -269,6 +269,9 @@
 <script type="importmap">
 { "imports": { "three": "./lib/three/build/three.module.js", "three/addons/": "./lib/three/examples/jsm/" } }
 </script>
+<!-- 数据加载器必须在下面的 module 之前就位：
+     module 里顶层就 `await KGData.kg(...)`，加载器没到会直接抛。 -->
+<script src="./lib/kg-api.js"></script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -281,13 +284,14 @@ import * as pdfjsLib from './lib/pdfjs/pdf.min.mjs';
 //       社区内部实体与边按需加载（进入星云时）——概览刻意不画实体级边，
 //       否则上万条边会把画面糊成一片。
 // ══════════════════════════════════════════════════════════════
-const DATA_URL = new URL('./kg-data/filaments.json', location.href).href;
-const COMM_URL = (i) => new URL(`./kg-data/comm-${i}.json`, location.href).href;
+// 数据加载走 web/lib/kg-api.js：**优先后端 API**（/api/kg/<name>），
+// 失败回退静态 kg-data/。前者证明前后端真的连通（此前 5 个 API 端点一个都没被
+// 前端调用过），后者保证断网/纯静态站演示时照常可用。
+const DATA_URL = './kg-data/filaments.json';   // 仅用于报错文案
+const COMM_URL = (i) => `comm-${i}.json`;
 let clouds, links, META;
 try {
-  const res = await fetch(DATA_URL);
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const payload = await res.json();
+  const payload = await KGData.kg('filaments.json');
   clouds = payload.clouds; links = payload.links; META = payload.meta || {};
   console.log(`载入 ${clouds.length} 社区 / ${links.length} 纤维`);
 } catch (err) {
@@ -306,7 +310,7 @@ try {
 // 正常交互进入时 PRE_DATA 为 null，走 enterCommunity 里的 fetch 分支。
 const PRE_C = new URLSearchParams(location.search).get('c');
 const PRE_DATA = (PRE_C !== null && clouds[+PRE_C])
-  ? await (await fetch(COMM_URL(+PRE_C))).json()
+  ? await KGData.kg(COMM_URL(+PRE_C))
   : null;
 
 const scene = new THREE.Scene();
@@ -1491,9 +1495,7 @@ async function enterCommunity(ci, preloaded) {
   let data = preloaded || null;
   if (!data) {
     try {
-      const r = await fetch(COMM_URL(ci));
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      data = await r.json();
+      data = await KGData.kg(COMM_URL(ci));
     } catch (e) {
       status.textContent = `社区 ${ci} 内部数据加载失败：${e.message}`;
       return;

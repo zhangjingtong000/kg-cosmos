@@ -156,6 +156,9 @@
   <footer id="foot"></footer>
 </div>
 
+<!-- 数据加载器要先于下面的脚本加载：它是普通同步 script，
+     若放在后面会先执行 KGData.kg(...) 而报 KGData is not defined。 -->
+<script src="./lib/kg-api.js"></script>
 <script>
 const esc = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -303,8 +306,9 @@ function boot(D) {
   window.__ready = true;
 }
 
-fetch('./kg-data/analytics.json')
-  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+// 优先走后端 API（/api/kg/analytics.json），失败回退静态 kg-data/。
+// 加载器见 web/lib/kg-api.js；本次实际走了哪条路径记在 KGData.source 里。
+KGData.kg('analytics.json')
   .then(boot)
   .catch(e => {
     document.getElementById('lede').innerHTML =
