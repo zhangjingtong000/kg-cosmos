@@ -53,7 +53,9 @@ def main():
 
     # ── 载入全部论文快照：节点证据 + 节点全集 ──
     node_ev = {}          # 归一化实体名 → 证据文本（取第一条）
-    all_names = set()     # 节点全集（原始名）
+    all_names = set()     # 节点全集（原始名，含反建）
+    extracted_names = set()   # 只含独立抽取出来的节点
+    backfilled_names = set()  # 只含从边反建出来的节点
     norm_names = set()
     files = sorted(glob.glob(os.path.join(GRAPHS, '*.json')))
     for p in files:
@@ -65,10 +67,19 @@ def main():
                 continue
             all_names.add(nm)
             norm_names.add(norm(nm))
+            # 区分"独立抽取出来的节点"与"从边反建出来的节点"。
+            # 这个区分是 L3 多口径报告的基础：反建节点是**由边端点造出来的**，
+            # 拿它们去满足"端点在节点集内"这个判据属于定义恒等，
+            # 不能当成抽取质量的提升（对抗评审明确指出）。
+            if n.get('_backfilled'):
+                backfilled_names.add(nm)
+            else:
+                extracted_names.add(nm)
             if nm not in node_ev:
                 ev = (n.get('evidence') or [{}])[0]
                 node_ev[nm] = ev.get('text') or ''
     print(f'论文快照 {len(files)} 篇，节点名 {len(all_names)} 个（归一化后 {len(norm_names)}）')
+    print(f'  其中独立抽取 {len(extracted_names)}，从边反建 {len(backfilled_names)}')
 
     # ── L1 实体存在层（节点级）──
     l1_hit = l1_tot = 0
@@ -103,13 +114,19 @@ def main():
             return None
         l3 = sum(1 for e in rows
                  if e['source'] in all_names and e['target'] in all_names)
+        # L3 的**抽取口径**：两端都必须是"独立抽取出来的节点"，
+        # 不含从边反建的那些。反建节点是由边端点造出来的，
+        # 拿它们去满足 L3 属于定义恒等，不能当作质量提升。
+        l3_extracted = sum(1 for e in rows
+                           if e['source'] in extracted_names
+                           and e['target'] in extracted_names)
         l4 = sum(1 for e in rows if e.get('type') in ONTOLOGY)
         l5 = sum(1 for e in rows if is_supported(e))
         l6 = sum(1 for e in rows if (e.get('evidence') or '').strip()
                  and e.get('page') is not None)
         both = sum(1 for e in rows if e.get('hit') == 'both')
-        return {'label': label, 'n': n, 'l3': l3, 'l4': l4, 'l5': l5, 'l6': l6,
-                'both': both}
+        return {'label': label, 'n': n, 'l3': l3, 'l3_extracted': l3_extracted,
+                'l4': l4, 'l5': l5, 'l6': l6, 'both': both}
 
     supported = [e for e in edges if is_supported(e)]
     stats_all = layer_stats(edges, '全集')
@@ -121,13 +138,22 @@ def main():
     print('-' * 104)
     print(f'L1 实体存在层（节点级）       {l1_hit}/{l1_tot} = {l1:.1%}'
           f'   实体名未字面出现在自身证据引文中')
-    print(f'L2 实体聚类层                 N/A —— 本阶段未建（T4）')
+    print(f'L2 实体聚类层                 归并 585 组（见 tools/l2_report.py）')
     for st in (stats_all, stats_sup):
         if not st:
             continue
         n = st['n']
-        print(f'L3 关系端点层  [{st["label"]}]   {st["l3"]}/{n} = {st["l3"]/n:.1%}'
-              f'   两端都在节点集内')
+        # L3 必须**多口径并列**，禁止只报闭合口径。
+        # 闭合口径（含反建节点）是定义恒等：反建节点就是从边端点造出来的，
+        # 拿它去满足"端点在节点集内"必然命中。只报这个数等于粉饰。
+        print(f'L3 关系端点层  [{st["label"]}]')
+        print(f'    抽取口径（只算独立抽取的节点） {st["l3_extracted"]}/{n} = '
+              f'{st["l3_extracted"]/n:.1%}')
+        print(f'    闭合口径（含从边反建的节点）   {st["l3"]}/{n} = {st["l3"]/n:.1%}'
+              f'   ← 含人工构造，不可单独引用')
+        if st is stats_all:
+            print(f'    反建贡献：新增 {len(backfilled_names)} 个节点，'
+                  f'把 {st["l3"] - st["l3_extracted"]} 条边的端点补齐')
         print(f'L4 关系谓词层  [{st["label"]}]   {st["l4"]}/{n} = {st["l4"]/n:.1%}'
               f'   谓词在本体 15 类内')
         print(f'L5 三元组验证  [{st["label"]}]   {st["l5"]}/{n} = {st["l5"]/n:.1%}'
@@ -159,8 +185,20 @@ def main():
             'edges_total': len(edges),
             'L1_entity_presence': {'hit': l1_hit, 'total': l1_tot, 'rate': l1},
             'L2_entity_clustering': None,
-            'L3_endpoints': {'all': stats_all['l3'] / stats_all['n'],
-                             'supported': stats_sup['l3'] / stats_sup['n']},
+            # L3 落盘也必须是多口径。`closed` 含从边反建的节点，属人工构造，
+            # 单独引用会被读成抽取质量；`extracted` 才是"只算独立抽取节点"的口径。
+            'L3_endpoints': {
+                'all': stats_all['l3'] / stats_all['n'],
+                'supported': stats_sup['l3'] / stats_sup['n'],
+            },
+            'L3_endpoints_extracted_caliber': {
+                'all': stats_all['l3_extracted'] / stats_all['n'],
+                'supported': stats_sup['l3_extracted'] / stats_sup['n'],
+                'backfilled_nodes': len(backfilled_names),
+                'note': 'L3_endpoints 是闭合口径（含从边反建的节点，属人工构造）；'
+                        '本字段是抽取口径，只统计独立抽取出来的节点。'
+                        '两者必须并列引用。',
+            },
             'L4_predicate': {'all': stats_all['l4'] / stats_all['n'],
                              'supported': stats_sup['l4'] / stats_sup['n']},
             'L5_triplet': {'all': stats_all['l5'] / stats_all['n'],
