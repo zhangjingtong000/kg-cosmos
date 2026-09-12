@@ -36,6 +36,10 @@ DATA_CHECKS = [
     ("社区布局数据自检", ["tools/diag_comm.py"]),
     ("claims 诊断（矛盾视图是否成立）", ["tools/diag_claims.py"]),
     ("结构指标与随机图基线", ["tools/l8_structure_audit.py"]),
+    # L5 域内效度：可自动化部分（表述敏感性 / 方向盲区 / 独立假阳性下界）
+    # + 人工盲判进度追踪。它**不会**因为盲判没做完而失败——
+    # "未完成"是一个需要如实报告的状态，不是错误。
+    ("L5 域内效度（含盲判进度）", ["tools/check_l5_validity.py"]),
     # 离线可用性是「离线演示铁律」（内部记录 §1 第 6 条）的守门检查：
     # 主视图曾因 three.js 走 unpkg CDN 而断网白屏，现已本地化。
     ("主视图离线可用（屏蔽外部域名）", ["tools/cdp_verify_offline.py", "web/kg-nebula.html"]),
