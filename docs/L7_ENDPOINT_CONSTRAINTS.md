@@ -254,11 +254,52 @@ kind == directed 无方向指纹   → 只看允许集
 
 判读口径：读 `description` 里谁是主动方，与表的 `semantics` 比对；描述为空或只有关系名的记「无信息」。
 
-**已做人工精度抽查的只有 3 类**（`CREATED_BY` 20 条 + `PRODUCES` 20 条 +
-`EVALUATES` 8 条 = 48 条）。**其余 12 类的允许集只做了覆盖率事后核对，从未人工判读**：
-`PART_OF`、`USES`、`APPLIES_TO`、`SUPPORTS`、`CAUSES`、`ENABLES`、`CITES`、
-`MEASURES`、`LOCATED_AT`、`COMPARES_WITH`、`CONTRADICTS`、`RELATED_TO`。
-这张表在论文里只能声明为"未验证的初始划分"，不能声明为"已验证的本体约束"。
+**已做人工精度抽查的类**：`CREATED_BY` 20 条 + `PRODUCES` 20 条 + `EVALUATES` 8 条
+（§5 上半）+ 补充的 `USES` 20 / `PRODUCES` 20 / `PART_OF` 18 条 role_violation 判读
+（见下）。**其余 9 类的允许集仍只做了覆盖率事后核对，未人工判读**：
+`APPLIES_TO`、`SUPPORTS`、`CAUSES`、`ENABLES`、`CITES`、`MEASURES`、
+`LOCATED_AT`、`COMPARES_WITH`、`CONTRADICTS`、`RELATED_TO`。
+论文里对这几类只能声明为"未验证的初始划分"。
+
+### 5.1 补充判读：`role_violation` 到底在说什么
+
+抽取 `role_violation` 最多的三类（`USES` 42 / `PRODUCES` 23 / `PART_OF` 18）各抽 20/18 条，
+交给**独立于约束设计者**的判定者判读（固定 seed=7，可复现）。
+判读口径事先写好：
+
+| 裁决 | 含义 |
+|---|---|
+| `true_violation` | 组合确实说不通，约束判得对 |
+| `false_positive` | 组合其实说得通 ⇒ **约束定得太严** |
+| `predicate_wrong` | 组合说不通，但根因是**谓词选错**（不是端点类型的错） |
+
+实测（58 条）：
+
+| 关系 | true_violation | predicate_wrong | false_positive | 合计 |
+|---|---:|---:|---:|---:|
+| `USES` | 5 | 15 | 0 | 20 |
+| `PRODUCES` | 3 | 12 | 5 | 20 |
+| `PART_OF` | 11 | 7 | 0 | 18 |
+| **合计** | **19（32.8%）** | **34（58.6%）** | **5（8.6%）** | 58 |
+
+**两条结论（都会影响论文口径）**：
+
+1. **约束的假阳性率只有 8.6%** —— 允许集定得**不算太严**，这张表基本可用。
+   这比"未验证"要好，也比"约束很严会误伤"的担心要轻。
+
+2. **但 `role_violation` 里 58.6% 其实是谓词选错**，不是端点类型不对。
+   **这个指标名有误导性**：它捕捉的主要是"关系类型选错了"，
+   而不是"端点类型违规"。报告与论文里应把它读作
+   **"端点类型或谓词问题"**，不能写成"端点类型违规率"。
+
+**`PRODUCES` 那 5 条假阳性的成因很集中**，提示允许集可以这样放宽：
+  · **NER → 人名/地名**：命名实体识别的产出就是被识别出的实体，
+    `target` 允许集应纳入 `Person` / `Location`；
+  · **会议 → 论文**：会议发表论文，`source` 允许集应纳入 `Event`；
+  · **Loss → Gradient**：损失函数产生梯度，`source` 允许集应纳入 `Metric`。
+
+（这些是**建议**而非已改动：改允许集会改变 `role_compliance` 的数字，
+需要连同 §3 表格一起重算。本轮只给出证据。）
 
 ---
 
