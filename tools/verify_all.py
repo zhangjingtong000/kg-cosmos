@@ -32,6 +32,9 @@ DATA_CHECKS = [
     ("社区布局数据自检", ["tools/diag_comm.py"]),
     ("claims 诊断（矛盾视图是否成立）", ["tools/diag_claims.py"]),
     ("结构指标与随机图基线", ["tools/l8_structure_audit.py"]),
+    # 离线可用性是「离线演示铁律」（内部记录 §1 第 6 条）的守门检查：
+    # 主视图曾因 three.js 走 unpkg CDN 而断网白屏，现已本地化。
+    ("主视图离线可用（屏蔽外部域名）", ["tools/cdp_verify_offline.py", "web/kg-nebula.html"]),
 ]
 
 

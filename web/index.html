@@ -77,6 +77,11 @@
   .legacy a { color: rgba(159,196,255,.7); text-decoration: none;
               border-bottom: 1px dashed rgba(159,196,255,.3); }
   .legacy a:hover { color: #fff; }
+  .legacy .note { margin-top: 10px; padding-top: 9px; font-size: 11px; line-height: 1.85;
+                  color: rgba(150,190,255,.45);
+                  border-top: 1px solid rgba(140,170,255,.1); }
+  .legacy .note code { color: rgba(190,214,246,.7); }
+  .legacy sup { color: rgba(255,178,127,.85); font-size: 10px; }
   footer { margin-top: 46px; padding-top: 18px;
            border-top: 1px solid rgba(140,170,255,.1);
            font-size: 11px; line-height: 1.9; color: rgba(150,190,255,.42); }
@@ -179,10 +184,10 @@
 
   <h3 class="sec">探索过程中的其他原型（保留备查）</h3>
   <div class="legacy">
-    <a href="community-atlas.html">社区图集（2D 分面）</a> ·
-    <a href="graph-2d.html">二维图</a> ·
-    <a href="force-explorer.html">力导向浏览器</a> ·
-    <a href="force-graph.html">力导向图</a> ·
+    <a href="community-atlas.html">社区图集（2D 分面）<sup>*</sup></a> ·
+    <a href="graph-2d.html">二维图<sup>*</sup></a> ·
+    <a href="force-explorer.html">力导向浏览器<sup>*</sup></a> ·
+    <a href="force-graph.html">力导向图<sup>*</sup></a> ·
     <a href="index3d.html">三维原型</a> ·
     <a href="index3d-force.html">三维力导向</a> ·
     <a href="index3d-bounce.html">三维弹跳</a> ·
@@ -191,7 +196,14 @@
     <a href="prototype-semantic-filaments.html">语义纤维</a> ·
     <a href="exploration.html">早期探索</a> ·
     <a href="legacy-glass-nodes.html">玻璃节点原型</a> ·
-    <a href="official-2-kg.html">官方格式样例</a>
+    <a href="official-1-blocks.html">官方样例 · blocks</a> ·
+    <a href="official-2-kg.html">官方样例 · 本项目数据</a> ·
+    <a href="official-3-text.html">官方样例 · text-nodes<sup>*</sup></a>
+    <div class="note">
+      <sup>*</sup> 标记者**需要联网**：它们依赖 <code>esm.sh</code> 的 CDN 资源，未做本地化。
+      其余页面（含上方五张主卡片）均已验证**断网可用**，可用
+      <code>python tools/cdp_verify_offline.py &lt;页面路径&gt;</code> 复核。
+    </div>
   </div>
 
   <footer>

@@ -3,9 +3,15 @@
 <head>
 <meta charset="utf-8">
 <title>官方 large-graph 示例（原样搬运）</title>
-<!-- 唯一改动：把官方示例的 UMD <script src="//cdn.jsdelivr.net/npm/3d-force-graph"> 
-     换成 esm.sh 的 import（UMD 全局变量在本地离线场景不可靠）。
-     除此之外，下面的示例代码与官方 example/large-graph/index.html 完全一致。 -->
+<!-- 与官方 example/large-graph/index.html 的唯一区别是**引入方式**：
+     官方用 `<script src="//cdn.jsdelivr.net/npm/3d-force-graph">`（外部 CDN）。
+     本项目改成**本地 UMD**，以便断网演示——`web/lib/3d-force-graph.min.js`
+     就是 1.80.0 的 UMD 包，会挂出全局 `ForceGraph3D`。
+     除此之外下面的示例代码与官方逐字一致。
+
+     （此前这里曾改用 esm.sh 的 ESM import，注释理由是"UMD 全局变量在本地离线
+       场景不可靠"——那个判断是反的：esm.sh 本身必须联网，反而把唯一的离线
+       可能性去掉了。现已改回本地 UMD。） -->
 <style>
   body { margin:0; background:#000; }
   #3d-graph { position:fixed; inset:0; }
@@ -13,9 +19,8 @@
 </head>
 <body>
 <div id="3d-graph"></div>
-<script type="module">
-import ForceGraph3D from 'https://esm.sh/3d-force-graph@1.80.0';
-
+<script src="./lib/3d-force-graph.min.js"></script>
+<script>
 const elem = document.getElementById('3d-graph');
 
 const Graph = new ForceGraph3D(elem)

@@ -5,7 +5,17 @@
 <title>官方 text-nodes 示例 · 换成本项目 KG 数据</title>
 <!-- 与官方 example/text-nodes/index.html 逐字相同（含 SpriteText 节点、
      textHeight=8、center.y=-0.6、d3Force('charge').strength(-120)），
-     仅把 jsonUrl / nodeAutoColorBy 的字段换成本项目数据字段。 -->
+     仅把 jsonUrl / nodeAutoColorOf 的字段换成本项目数据字段。
+
+     ⚠️ 本页**需要联网**（走 esm.sh）。曾尝试改成本地 UMD 以支持断网演示，
+     实测**全黑失败**：`web/lib/3d-force-graph.min.js` 是 UMD 且**内置了自己的
+     three**，而 `web/lib/three-spritetext.min.js` 走的是全局 `THREE`
+     （由 `web/lib/three/three.min.js` 提供，版本 0.160）——
+     两份 three 实例不兼容，SpriteText 造出的 sprite 不被 ForceGraph3D 接受。
+     要真正离线化，得把两者都换成 ESM 版并让 importmap 指向同一份 three，
+     成本高于本页（官方示例搬运、仅作对比参照）的价值，故如实保留联网依赖。
+     演示主线（导航页、社区星云、方法能力、分析面板、PathQA、标杆参考）
+     以及 official-1/2 均已验证可离线运行。 -->
 <style>
   body { margin:0; background:#000; }
   #3d-graph { position:fixed; inset:0; }
