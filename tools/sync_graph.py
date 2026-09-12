@@ -38,11 +38,15 @@ BACKUP = OUT / "backup"
 
 NEO4J = dict(uri="bolt://localhost:7687", user="neo4j", password="kgdemo2026")
 
-# 本体（含新引入的 CONTRIBUTED_TO）
+# 本体（15 类关系）
+# CONTRIBUTED_TO 于 2026-09-12 按用户决策移除：它是 T3.1 做 CREATED_BY 方向归一
+# 时 relabel 出的产物（Person → 会议），L5 通过率仅 32.1%，且在 15 类本体里
+# 无处安放。此前它被收进白名单（本体临时变 16 类），而 l5_ontology_audit.py
+# 仍按 15 类审计，导致这 165 条边在 L4 里被算成"越界"。删除后两处口径统一。
 ONTOLOGY_RELS = {
     "PART_OF", "USES", "PRODUCES", "MEASURES", "EVALUATES", "COMPARES_WITH",
     "SUPPORTS", "CONTRADICTS", "CAUSES", "ENABLES", "APPLIES_TO", "LOCATED_AT",
-    "CREATED_BY", "CITES", "RELATED_TO", "CONTRIBUTED_TO",
+    "CREATED_BY", "CITES", "RELATED_TO",
 }
 ONTOLOGY_TYPES = {
     "Concept", "Method", "System", "Component", "Process", "Artifact",
@@ -194,15 +198,14 @@ def main():
     print(f"导入完成 {time.time()-t0:.1f}s")
     print(f"导入后: {store.stats()}")
 
-    # 一致性校验
+    # 一致性校验。
+    # 这里的白名单**必须引用上面的 ONTOLOGY_RELS**，不能另抄一份：
+    # 本轮就吃过这个亏——入库白名单含 CONTRIBUTED_TO（16 类），
+    # 而 l5_ontology_audit.py 按 15 类审计，同一个类型在两处口径不同。
     with store.driver.session() as s:
         bad = s.run(
             "MATCH ()-[r]->() WHERE NOT type(r) IN $ok RETURN count(r) AS c",
-            ok=list({
-                "PART_OF", "USES", "PRODUCES", "MEASURES", "EVALUATES",
-                "COMPARES_WITH", "SUPPORTS", "CONTRADICTS", "CAUSES", "ENABLES",
-                "APPLIES_TO", "LOCATED_AT", "CREATED_BY", "CITES", "RELATED_TO",
-                "CONTRIBUTED_TO"})).single()["c"]
+            ok=sorted(ONTOLOGY_RELS)).single()["c"]
         loops = s.run("MATCH (a)-[r]->(a) RETURN count(r) AS c").single()["c"]
         noev = s.run(
             "MATCH ()-[r]->() WHERE r.evidence IS NULL OR size(r.evidence)=0 "

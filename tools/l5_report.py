@@ -82,6 +82,21 @@ def main():
     l1 = l1_hit / l1_tot if l1_tot else 0.0
 
     # ── 边级四层 ──
+    def is_supported(e):
+        """该边是否被 L5 接受。
+
+        **优先用 `pass` 字段**，而不是现场比 `entail_prob >= thr`：
+        `pass` 是 relation_verifier.py 用**未舍入**的分数判定的，而
+        `entail_prob` 落盘时只保留 4 位小数——边界值会被抹平
+        （实际 0.66995 存成 0.67，现场比较就会把它算成通过）。
+        实测全集 43867 条里有 3 条因此不一致，`tools/l5_calibrate.py`
+        的「[核实] pass 字段与 entail_prob >= thr」一节就是专门测这个的。
+        没有 `pass` 字段时（按类型单独重跑产出的中间文件）才退回现场比较。
+        """
+        if 'pass' in e:
+            return e['pass'] in (True, 'True')
+        return e.get('entail_prob', 0) >= thr
+
     def layer_stats(rows, label):
         n = len(rows)
         if not n:
@@ -89,14 +104,14 @@ def main():
         l3 = sum(1 for e in rows
                  if e['source'] in all_names and e['target'] in all_names)
         l4 = sum(1 for e in rows if e.get('type') in ONTOLOGY)
-        l5 = sum(1 for e in rows if e.get('entail_prob', 0) >= thr)
+        l5 = sum(1 for e in rows if is_supported(e))
         l6 = sum(1 for e in rows if (e.get('evidence') or '').strip()
                  and e.get('page') is not None)
         both = sum(1 for e in rows if e.get('hit') == 'both')
         return {'label': label, 'n': n, 'l3': l3, 'l4': l4, 'l5': l5, 'l6': l6,
                 'both': both}
 
-    supported = [e for e in edges if e.get('entail_prob', 0) >= thr]
+    supported = [e for e in edges if is_supported(e)]
     stats_all = layer_stats(edges, '全集')
     stats_sup = layer_stats(supported, 'L5 支持子集')
 
@@ -116,7 +131,7 @@ def main():
         print(f'L4 关系谓词层  [{st["label"]}]   {st["l4"]}/{n} = {st["l4"]/n:.1%}'
               f'   谓词在本体 15 类内')
         print(f'L5 三元组验证  [{st["label"]}]   {st["l5"]}/{n} = {st["l5"]/n:.1%}'
-              f'   entail_prob >= {thr}')
+              f'   pass 字段（等价 entail_prob >= {thr}，边界差 3 条见注释）')
         print(f'L6 证据层      [{st["label"]}]   {st["l6"]}/{n} = {st["l6"]/n:.1%}'
               f'   有页面级引文')
         print(f'   端点双命中（hit=both）        {st["both"]}/{n} = {st["both"]/n:.1%}')
@@ -126,7 +141,10 @@ def main():
     print('-' * 104)
     print('过滤效果对照')
     print('-' * 104)
-    dropped = [e for e in edges if e.get('entail_prob', 0) < thr]
+    # 丢弃 = 保留的补集。**不能**写成 `entail_prob < thr`：
+    # 那 3 条边界边（分数存成 0.67、pass=false）会既不进保留也不进丢弃，
+    # 使"保留 + 丢弃 ≠ 全集"。统一走 is_supported 才能保证两者互补。
+    dropped = [e for e in edges if not is_supported(e)]
     for label, rows in (('保留（L5 支持）', supported), ('丢弃（L5 不支持）', dropped)):
         if not rows:
             continue

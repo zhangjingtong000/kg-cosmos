@@ -78,7 +78,15 @@ def main():
     l1 = l1_hit / l1_tot if l1_tot else 0.0
 
     # ── 过滤 ──
-    kept = [e for e in edges if e.get('entail_prob', 0) >= thr]
+    # 用 `pass` 字段而不是现场比 entail_prob >= thr：分数落盘只保留 4 位小数，
+    # 边界值会被抹平（实际 0.66995 存成 0.67），实测全集 43867 条里有 3 条
+    # 因此不一致。l5_report.py 用同一口径，两者必须一致，否则子图与指标对不上。
+    def is_supported(e):
+        if 'pass' in e:
+            return e['pass'] in (True, 'True')
+        return e.get('entail_prob', 0) >= thr
+
+    kept = [e for e in edges if is_supported(e)]
     print(f'保留 {len(kept)} 条（{len(kept)/len(edges):.1%}）')
 
     used = set()
@@ -124,7 +132,7 @@ def main():
         'L2_entity_clustering': None,   # 由 tools/l2_report.py 写入 l5-six-layer.json
         'L3_endpoints': round(rate(kept, lambda e: e['source'] in names and e['target'] in names), 4),
         'L4_predicate': round(rate(kept, lambda e: e.get('type') in ONTOLOGY), 4),
-        'L5_triplet': round(rate(kept, lambda e: e.get('entail_prob', 0) >= thr), 4),
+        'L5_triplet': round(rate(kept, is_supported), 4),
         'L6_evidence': round(rate(edges, lambda e: (e.get('evidence') or '').strip()
                                   and e.get('page') is not None), 4),
         'hit_both': round(rate(kept, lambda e: e.get('hit') == 'both'), 4),
