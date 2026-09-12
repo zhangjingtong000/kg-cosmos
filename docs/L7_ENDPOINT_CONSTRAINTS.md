@@ -254,12 +254,19 @@ kind == directed 无方向指纹   → 只看允许集
 
 判读口径：读 `description` 里谁是主动方，与表的 `semantics` 比对；描述为空或只有关系名的记「无信息」。
 
-**已做人工精度抽查的类**：`CREATED_BY` 20 条 + `PRODUCES` 20 条 + `EVALUATES` 8 条
-（§5 上半）+ 补充的 `USES` 20 / `PRODUCES` 20 / `PART_OF` 18 条 role_violation 判读
-（见下）。**其余 9 类的允许集仍只做了覆盖率事后核对，未人工判读**：
-`APPLIES_TO`、`SUPPORTS`、`CAUSES`、`ENABLES`、`CITES`、`MEASURES`、
-`LOCATED_AT`、`COMPARES_WITH`、`CONTRADICTS`、`RELATED_TO`。
-论文里对这几类只能声明为"未验证的初始划分"。
+**已做人工/独立判读的类（共 8 类，两组样本合计 69 条）**：
+
+| 组 | 类 | 判什么 | 条数 |
+|---|---|---|---|
+| 精度抽查 | `CREATED_BY`、`PRODUCES`、`EVALUATES` | 反转判定准不准 | 48 |
+| role_violation 第一批 | `USES`、`PRODUCES`、`PART_OF` | 角色违规是约束太严还是真错 | 58 |
+| role_violation 第二批 | `APPLIES_TO`、`CAUSES`、`CITES`、`ENABLES`、`LOCATED_AT` | 同上 | 11 |
+
+**仍未判读的类（7 类）**：`SUPPORTS`、`MEASURES`、`COMPARES_WITH`、`CONTRADICTS`、
+`RELATED_TO`、`CAUSES` 的部分样本未覆盖、`ENABLES` 的其余样本。
+**但要注意**：这 7 类里有 5 类的 `role_violation` **本来就是 0**
+（`SUPPORTS` / `MEASURES` / `COMPARES_WITH` / `CONTRADICTS` / `RELATED_TO`），
+**没有样本可判**。而"零违规"要分两种含义，见 §5.2——不能直接读成"约束正确"。
 
 ### 5.1 补充判读：`role_violation` 到底在说什么
 
@@ -300,6 +307,55 @@ kind == directed 无方向指纹   → 只看允许集
 
 （这些是**建议**而非已改动：改允许集会改变 `role_compliance` 的数字，
 需要连同 §3 表格一起重算。本轮只给出证据。）
+
+### 5.2 第二批：另外 5 类（n=11）——结论与第一批**差一个数量级**
+
+第一批的三类（`USES` / `PRODUCES` / `PART_OF`）假阳性只有 8.6%，
+看起来约束表整体是可靠的。补判另外 5 类后，这个印象被推翻：
+
+| 关系 | 真违规 | 谓词错 | **假阳性** |
+|---|---:|---:|---:|
+| `APPLIES_TO` | 0 | 0 | **1** |
+| `CAUSES` | 0 | 1 | **2** |
+| `CITES` | 1 | 0 | 0 |
+| `ENABLES` | 0 | 0 | **5** |
+| `LOCATED_AT` | 1 | 0 | 0 |
+| **合计** | 2 | 1 | **8 / 11 = 72.7%** |
+
+**两批的假阳性率相差一个数量级（8.6% vs 72.7%）**，
+说明 15 类约束表的**内部质量不均**：
+`USES` / `PRODUCES` / `PART_OF` 基本可用，而 **`ENABLES` / `CAUSES` / `APPLIES_TO` 太严**。
+
+**`ENABLES` 尤其明确**：它的 5 条样本**全部**是假阳性，且成因完全一致——
+允许集把 `Person` / `Document` / `Material` 从两端都排掉了，而这三类恰好是
+「人被使能（`enabled researchers to…`）」「文献被使能」「物质被使能」的正常用法。
+`CAUSES` 的 `target` 排除 `Person` 也误伤了「某事对人是挑战（`poses a challenge for humans`）」
+这类边；`APPLIES_TO` 把 `Material` 排除出 `source`，挡住了「数据/物料作为被处理对象」。
+
+**建议放宽**（同样本轮只给证据、未改动）：
+  · `ENABLES`：两端纳入 `Person` / `Document` / `Material`
+  · `CAUSES`：`target` 纳入 `Person`
+  · `APPLIES_TO`：`source` 纳入 `Material`
+
+**限度**：第二批只有 11 条（因为这 5 类各自的 `role_violation` 本来就很少：
+1 / 3 / 1 / 5 / 1），比例估计的置信区间很宽。
+但「`ENABLES` 五条全是假阳性且成因一致」这一点是明确的——
+它不是抽样噪声，而是允许集设计的问题。
+
+### 5.3 "零 `role_violation`" 的两种含义（必须区分）
+
+有 5 类关系的 `role_violation` 是 **0**，看起来"类型用得很规范"。但要分清：
+
+| 含义 | 类 | 说明 |
+|---|---|---|
+| **恒等式**（约束永不触发） | `MEASURES`、`RELATED_TO` | 两侧允许集都是**全集**，角色检查根本不触发 ⇒ 100% 是构造性的，**不提供质量信息** |
+| **确实没违规** | `SUPPORTS`（13 类允许）、`COMPARES_WITH`（12）、`CONTRADICTS`（11） | 有具体限制，100% 是真的判出来的 |
+
+这一检查已做成常驻（`check_l7_role_violation.py` 的 `tautological_constraints` 段）。
+**审计表里 `MEASURES` / `RELATED_TO` 显示的是 `n/a` 而非 `100%`，这一点报告处理正确。**
+
+同类陷阱本项目已栽过一次：`LOCATED_AT` 的 `direction_compliance = 100%` 是构造性的
+（反向触发条件在 43867 条边里命中 0 次），见 §3 的 ※ 脚注。
 
 ---
 
