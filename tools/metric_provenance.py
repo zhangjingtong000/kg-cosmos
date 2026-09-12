@@ -19,6 +19,10 @@
   指纹用「文件数 + 总字节 + 最新 mtime + 内容 sha1 前 16 位」，
   足以发现"数据变了但指标没重跑"。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import glob
 import hashlib
@@ -27,7 +31,7 @@ import os
 import sys
 import time
 
-ROOT = r'D:\kg-demo'
+ROOT = str(ROOT)
 Q = os.path.join(ROOT, 'data', 'quality')
 OUT = os.path.join(Q, 'metric-provenance.json')
 
@@ -49,6 +53,20 @@ METRICS = {
     'L2_names_after': ('l5-six-layer.json', ['L2_entity_clustering', 'names_after'], 'tools/l2_report.py'),
     'L3_endpoints_all': ('l5-six-layer.json', ['L3_endpoints', 'all'], 'tools/l5_report.py'),
     'L4_predicate_all': ('l5-six-layer.json', ['L4_predicate', 'all'], 'tools/l5_report.py'),
+    # L4 谓词**选择**层（2026-09-12 新增）。旧 L4 只判"谓词是否落在这 15 类内"，
+    # 一条本该 USES 的边标成 PART_OF 照样通过 ⇒ 99.5% 接近自证。
+    # 本项用同一条 premise 与 15 个假设句模板各算 entail_prob、取 argmax 作预测谓词，
+    # 报"与标注谓词的一致率"。它是**两个模型的一致率**，不是与人工金标的准确率。
+    'L4_predicate_top1': ('l4-predicate.json', ['metrics', 'top1_accuracy'],
+                          'tools/l4_predicate_report.py'),
+    'L4_predicate_top1_excl_ties': ('l4-predicate.json',
+                                    ['metrics', 'top1_accuracy_excluding_ties'],
+                                    'tools/l4_predicate_report.py'),
+    'L4_predicate_macro_f1': ('l4-predicate.json', ['metrics', 'macro_f1'],
+                              'tools/l4_predicate_report.py'),
+    'L4_predicate_baseline_related_to': ('l4-predicate.json',
+                                         ['metrics', 'baseline_related_to'],
+                                         'tools/l4_predicate_report.py'),
     'L5_triplet_all': ('l5-six-layer.json', ['L5_triplet', 'all'], 'tools/l5_report.py'),
     'L6_evidence_all': ('l5-six-layer.json', ['L6_evidence', 'all'], 'tools/l5_report.py'),
     'hit_both_all': ('l5-six-layer.json', ['hit_both', 'all'], 'tools/l5_report.py'),

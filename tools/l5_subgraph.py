@@ -15,6 +15,10 @@ T2.4 · 产出「被原文支持的关系」子图（可落盘），并在其上
 子图定义：entail_prob >= threshold 的边，加上它们两端涉及的节点。
 注意这是"边级"过滤，不做悬空端点剔除——悬空是 L3 的事，二者正交（见报告 §3.2）。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import collections
 import glob
 import json
@@ -22,7 +26,7 @@ import os
 import re
 from datetime import datetime
 
-ROOT = r'D:\kg-demo'
+ROOT = str(ROOT)
 Q = os.path.join(ROOT, 'data', 'quality')
 G = os.path.join(ROOT, 'data', 'corpus', 'graphs')
 VERIFY = os.path.join(Q, 'relation-verify-all.json')

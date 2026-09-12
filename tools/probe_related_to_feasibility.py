@@ -10,13 +10,17 @@
 
 本脚本回答这个前提问题，并给出证据句的可分辨性预估。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import re
 import statistics as st
 from collections import Counter
 from pathlib import Path
 
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
+GRAPHS = ROOT / "data/corpus/graphs"
 
 
 def norm(n: str) -> str:

@@ -13,22 +13,28 @@
   `Author(Person/Organization) → Work(...)`，这正是
   `tools/apply_created_by_fix.py` 里已有的 `AUTHOR` / `CREATABLE` 定义。
   于是"方向对不对"变成一个纯规则、零成本、可复现的检查。
-  本层**只做 CREATED_BY**：其余 14 类的合法端点类型属**本体设计决策**，
-  需要人工定义，不由本脚本擅自推断（自动统计推导已证伪——
+  本层**只做 CREATED_BY**（保留作为对账基线）：其余 14 类的端点类型约束已定义在
+  `src/ontology.py::RELATION_ENDPOINT_CONSTRAINTS`，逐类审计由
+  `tools/l7_relation_constraints_audit.py` 产出，完整报告见
+  `docs/L7_ENDPOINT_CONSTRAINTS.md`。自动统计推导已证伪——
   16 类的"主导端点类型对"占比全 < 60%，见 l7_direction_audit.py 的结论）。
 
 用法：
   python tools/l7_direction_verify.py
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import sys
 from collections import Counter
 from pathlib import Path
 
-sys.path.insert(0, r'D:\kg-demo\tools')
+sys.path.insert(0, str(ROOT / 'tools'))
 
-GRAPH = Path(r'D:\kg-demo\data\corpus\graphs')
-OUT = Path(r'D:\kg-demo\data\quality\l7-direction-verification.json')
+GRAPH = ROOT / 'data/corpus/graphs'
+OUT = ROOT / 'data/quality/l7-direction-verification.json'
 
 # ── 端点类型约束来自 src/ontology.py（唯一来源）──
 # 早先这里是从 tools/apply_created_by_fix.py 抄一份，等于
@@ -126,7 +132,13 @@ def main():
     cls_samples = {'reversed': [], 'citation_endpoint': [], 'other': []}
     for paper, s, t in edges:
         ts, tt = ntype.get(s), ntype.get(t)
-        if ts is None or tt is None:
+        # `Unknown` 是反建出来的节点类型（见 src/ontology.py 的 DERIVED_ENTITY_LABELS），
+        # 与"端点不在节点表内"一样**不可判定**，必须一起跳过。
+        # 早先这里只跳过 None，于是 2425 条 Unknown 端点的边全部掉进违规分类，
+        # 三类之和被抬到 2847，而实际可判定违规只有 422 —— 报告里那 2352 条
+        # 「其他（约束可能偏紧）」绝大多数是这么来的，会把读数的人引向
+        # "约束太严"的错误结论。
+        if ts is None or tt is None or ts == 'Unknown' or tt == 'Unknown':
             continue
         ok_s, ok_t = ts in AUTHOR, tt in CREATABLE
         if ok_s and ok_t:
@@ -177,10 +189,13 @@ def main():
         'target_violations': tgt_bad,
         'violation_classes': dict(cls),
         'top_bad_pairs': [[list(k), v] for k, v in bad_pair.most_common(20)],
-        'note': ('本层只覆盖 CREATED_BY：其余 14 类的合法端点类型属本体设计决策，'
-                 '需人工定义；自动统计推导已证伪（主导类型对占比全 < 60%）。'
+        'note': ('本层只覆盖 CREATED_BY：其余 14 类的端点类型约束见 '
+                 'src/ontology.py 的 RELATION_ENDPOINT_CONSTRAINTS，'
+                 '逐类结果由 tools/l7_relation_constraints_audit.py 产出'
+                 '（其中 CREATED_BY 与本脚本对账一致）。'
                  '违规分三类：方向颠倒（可自动反转）、引文式端点（端点质量问题）、'
-                 '其他（约束可能偏紧）。本脚本只报告，不改数据。'),
+                 '其他（约束可能偏紧）。**分类已排除 Unknown 端点**（类型不可知，'
+                 '不判），三类之和等于 source+target 违规数。本脚本只报告，不改数据。'),
     }
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'\n报告已写出: {OUT}')

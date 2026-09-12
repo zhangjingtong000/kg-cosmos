@@ -7,6 +7,10 @@
 headless 下没法用鼠标，所以这里按网格派发 pointermove，找到第一个让
 #detail 打开的位置（同时报告命中的社区名）。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import base64
 import json
 import subprocess
@@ -18,7 +22,7 @@ import websocket
 
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
 URL = 'http://127.0.0.1:8098/web/kg-nebula.html'
-OUT = sys.argv[1] if len(sys.argv) > 1 else r'D:\kg-demo\output\shots\hover.png'
+OUT = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / 'output/shots/hover.png')
 W = sys.argv[2] if len(sys.argv) > 2 else '1673'
 H = sys.argv[3] if len(sys.argv) > 3 else '984'
 

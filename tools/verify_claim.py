@@ -5,13 +5,17 @@
   2. T3.1 修复 CREATED_BY 方向之后，效果有没有被验证过
   3. 这一轮我到底改没改图数据 / 生产代码
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import collections
 import glob
 import json
 import os
 import subprocess
 
-ROOT = r'D:\kg-demo'
+ROOT = str(ROOT)
 Q = os.path.join(ROOT, 'data', 'quality')
 G = os.path.join(ROOT, 'data', 'corpus', 'graphs')
 

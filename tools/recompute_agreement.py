@@ -17,13 +17,17 @@
   python tools/recompute_agreement.py                       # 两篇都算
   python tools/recompute_agreement.py --paper 2401.04507v1
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import itertools
 import json
 import re
 from pathlib import Path
 
-GOLD_DIR = Path(r"D:\kg-demo\data\gold")
+GOLD_DIR = ROOT / "data/gold"
 
 
 def parse_args():
@@ -158,7 +162,7 @@ def alias_aware_sets(units_by_annotator):
     """
     import sys
 
-    sys.path.insert(0, r"D:\kg-demo\src")
+    sys.path.insert(0, str(ROOT / "src"))
     from kg_extractor import _names_are_duplicates
 
     # 1. 收集全部待聚类名字（实体会员 + 关系两端）

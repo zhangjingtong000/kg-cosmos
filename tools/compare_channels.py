@@ -7,12 +7,16 @@
   实体/关系的 P、R、F1  |  显著性（结构词与泛指短语占输出比例）  |  输出规模
 另附标注一致性，因为它决定这些指标的置信边界。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import sys
 from pathlib import Path
 
-GOLD_DIR = Path(r"D:\kg-demo\data\gold")
-DOCS = Path(r"D:\kg-demo\docs")
+GOLD_DIR = ROOT / "data/gold"
+DOCS = ROOT / "docs"
 
 PAPERS = [
     ("2012.00456v1", "文献计量知识图谱", "1-12"),

@@ -19,13 +19,17 @@
   python tools/add_pagerank.py            # 计算并写回
   python tools/add_pagerank.py --dry-run  # 只报告，不写文件
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 from pathlib import Path
 
 import networkx as nx
 
-NEBULA = Path(r"D:\kg-demo\web\kg-data\nebula.json")
+NEBULA = ROOT / "web/kg-data/nebula.json"
 
 
 def parse_args():

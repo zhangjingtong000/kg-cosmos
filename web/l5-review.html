@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>L5 域内效度 · 盲判</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--line:#2a2f3a;--fg:#e6e9ef;--dim:#9aa3b2;
+        --ok:#2ea043;--no:#d1495b;--un:#8a7fd4;--hl:#ffd84d}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;gap:16px;
+         align-items:center;position:sticky;top:0;background:var(--bg);z-index:5;flex-wrap:wrap}
+  header b{font-size:15px}
+  .bar{flex:1;height:8px;background:#22262f;border-radius:4px;overflow:hidden;min-width:160px}
+  .bar>i{display:block;height:100%;background:var(--ok);width:0}
+  .dim{color:var(--dim)}
+  main{display:flex;height:calc(100vh - 52px)}
+  #card{flex:1;overflow:auto;padding:20px 24px;max-width:920px}
+  #pdfPane{width:0;border-left:1px solid var(--line);overflow:auto;transition:width .18s;
+           background:#0b0d11}
+  #pdfPane.open{width:min(46vw,720px);padding:10px 14px}
+  .tri{font-size:20px;font-weight:600;margin:6px 0 2px;word-break:break-word}
+  .tri .rel{color:var(--hl)}
+  .tag{display:inline-block;font-size:12px;padding:1px 8px;border:1px solid var(--line);
+       border-radius:99px;color:var(--dim);margin-right:6px}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:8px;
+       padding:12px 14px;margin:12px 0}
+  .box h4{margin:0 0 6px;font-size:12px;color:var(--dim);font-weight:600;letter-spacing:.04em}
+  .quote{white-space:pre-wrap;word-break:break-word}
+  .hy{color:#ffd84d}
+  mark{background:#3a3410;color:var(--hl);padding:0 2px;border-radius:2px}
+  .btns{display:flex;gap:10px;margin:18px 0 8px;flex-wrap:wrap}
+  button{font:inherit;padding:10px 18px;border-radius:8px;border:1px solid var(--line);
+         background:#20242d;color:var(--fg);cursor:pointer}
+  button:hover{border-color:#4a5568}
+  button.ok{border-color:var(--ok)}button.no{border-color:var(--no)}
+  button.un{border-color:var(--un)}
+  button.sel{background:#2b3140}
+  .reasons{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px}
+  .reasons button{padding:5px 10px;font-size:12px}
+  .nav{display:flex;gap:10px;align-items:center;margin-top:8px}
+  kbd{background:#22262f;border:1px solid var(--line);border-bottom-width:2px;
+      border-radius:4px;padding:0 5px;font-size:12px}
+  #pdfView{position:relative;text-align:center;margin-top:6px}
+  #pdfTextLayer{position:absolute;left:0;top:0;line-height:1;pointer-events:none}
+  #pdfTextLayer span{position:absolute;white-space:pre;color:transparent;transform-origin:0 0}
+  #pdfTextLayer span.hl{background:rgba(255,216,77,.35);outline:1px solid rgba(255,216,77,.5)}
+  a{color:#7cc4ff}
+  .done{color:var(--ok)}
+</style>
+</head>
+<body>
+<header>
+  <b>L5 域内效度盲判</b>
+  <span class="dim" id="pos">-</span>
+  <span class="bar"><i id="prog"></i></span>
+  <span class="dim" id="stat"></span>
+  <span class="dim">判据：<b>只看原文是否真的支持这条三元组</b>，不要猜模型怎么想</span>
+</header>
+<main>
+  <div id="card"></div>
+  <div id="pdfPane">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span class="dim" id="pdfName"></span>
+      <span class="dim" id="pdfPageInfo"></span>
+      <a id="pdfOpen" target="_blank" rel="noopener">新标签打开 ↗</a>
+      <button onclick="closePdf()">关闭 (Esc)</button>
+    </div>
+    <div id="pdfView"><canvas id="pdfCanvas"></canvas><div id="pdfTextLayer"></div></div>
+  </div>
+</main>
+<script type="module">
+import * as pdfjsLib from './lib/pdfjs/pdf.min.mjs';
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('./lib/pdfjs/pdf.worker.min.mjs', location.href).href;
+
+let items = [], labels = {}, idx = 0, lastReason = '';
+const $ = (s) => document.querySelector(s);
+
+async function boot() {
+  const r = await fetch('/api/items').then((x) => x.json());
+  items = r.items; labels = r.labels || {};
+  const first = items.findIndex((it) => !labels[it.id]);
+  idx = first < 0 ? 0 : first;
+  render();
+}
+window.boot = boot;
+
+const esc = (s) => String(s || '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+/** 在证据段落里把喂给判别器的那句话标出来 —— 让人一眼看到「模型看到的是什么」。
+ *  ⚠ 不能直接 indexOf：证据段落里有换行/多空格，而 premise 是切句后用单空格
+ *  拼起来的，字面必然对不上（实测对不上率接近 100%）。这里先把证据压平空白、
+ *  同时记录「压平后字符 → 原文下标」的映射，命中后再映射回原文区间。 */
+function markPremise(evidence, premise) {
+  const ev = String(evidence || '');
+  const p = String(premise || '').replace(/\s+/g, ' ').trim();
+  if (!p) return esc(ev);
+  let flat = ''; const map = [];
+  for (let i = 0; i < ev.length; i++) {
+    if (/\s/.test(ev[i])) { if (flat && !flat.endsWith(' ')) { flat += ' '; map.push(i); } }
+    else { flat += ev[i]; map.push(i); }
+  }
+  const find = (needle) => {
+    if (!needle) return null;
+    const j = flat.indexOf(needle);
+    if (j < 0) return null;
+    const to = map[Math.min(j + needle.length, map.length) - 1] + 1;
+    return [map[j], to];
+  };
+  let r = find(p) || find(p.slice(0, 40));
+  if (!r) {                       // 退化：用最长的词单点定位，至少把位置指出来
+    for (const w of p.split(' ').filter((x) => x.length >= 6).sort((a, b) => b.length - a.length)) {
+      r = find(w); if (r) break;
+    }
+  }
+  if (!r) return esc(ev) + '\n\n（⚠ 前提句未能在这段证据里定位——PDF 抽文本与切句有差异）';
+  return esc(ev.slice(0, r[0])) + '<mark>' + esc(ev.slice(r[0], r[1])) + '</mark>' + esc(ev.slice(r[1]));
+}
+
+function render() {
+  const it = items[idx];
+  const done = Object.keys(labels).length;
+  $('#pos').textContent = `第 ${idx + 1} / ${items.length} 条  (${it.id})`;
+  $('#prog').style.width = `${done / items.length * 100}%`;
+  const ok = Object.values(labels).filter((v) => v.verdict === 'support').length;
+  const no = Object.values(labels).filter((v) => v.verdict === 'reject').length;
+  const un = Object.values(labels).filter((v) => v.verdict === 'unclear').length;
+  $('#stat').textContent = `已标 ${done} · 支持 ${ok} / 不支持 ${no} / 说不清 ${un}`;
+  const cur = labels[it.id] || {};
+  $('#card').innerHTML = `
+    <div>
+      <span class="tag">${esc(it.paper)} · 第 ${it.page} 页</span>
+      <span class="tag">${esc(it.type)} — ${esc(it.type_zh || '')}</span>
+      ${cur.verdict ? '<span class="tag done">已标：' + ({ support: '支持', reject: '不支持', unclear: '说不清' }[cur.verdict]) + '</span>' : ''}
+    </div>
+    <div class="tri">${esc(it.source)} <span class="rel">—[${esc(it.type)}]→</span> ${esc(it.target)}</div>
+    <div class="box"><h4>判别器实际读到的「假设」（hypothesis）</h4>
+      <div class="quote hy">${esc(it.hypothesis)}</div></div>
+    <div class="box"><h4>判别器实际读到的「前提」（premise，从下段证据里自动抽的一句）</h4>
+      <div class="quote">${esc(it.premise)}</div></div>
+    <div class="box"><h4>该边的完整证据段落（页内引文，已把前提句标黄）</h4>
+      <div class="quote">${markPremise(it.evidence, it.premise)}</div></div>
+    <div class="btns">
+      <button class="ok ${cur.verdict === 'support' ? 'sel' : ''}" onclick="label('support')">1 · 原文支持这条三元组</button>
+      <button class="no ${cur.verdict === 'reject' ? 'sel' : ''}" onclick="label('reject')">2 · 原文不支持</button>
+      <button class="un ${cur.verdict === 'unclear' ? 'sel' : ''}" onclick="label('unclear')">3 · 说不清 / 无法判定</button>
+    </div>
+    <div class="reasons">
+      <span class="dim">若判「不支持」，可选原因：</span>
+      ${[['evidence_unrelated', '证据与三元组无关（引错段）'], ['endpoint_missing', '端点不在证据里'],
+         ['direction_wrong', '方向反了'], ['predicate_wrong', '谓词不对'],
+         ['too_generic', '空泛/同义反复'], ['other', '其他']]
+        .map(([k, t]) => `<button class="${cur.reason === k ? 'sel' : ''}" onclick="reason('${k}')">${t}</button>`).join('')}
+    </div>
+    <div class="nav">
+      <button onclick="go(-1)">← 上一条</button>
+      <button onclick="go(1)">下一条 →</button>
+      <button onclick="openPdfOf()">在原文中查看 (P)</button>
+      <span class="dim">快捷键：<kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 判定并自动下一条 ·
+        <kbd>P</kbd> 看原文 · <kbd>←</kbd><kbd>→</kbd> 翻页 · <kbd>Esc</kbd> 关原文</span>
+    </div>`;
+  prepPdf();
+}
+
+function current() { return items[idx]; }
+
+async function label(v) {
+  const it = current();
+  labels[it.id] = { id: it.id, verdict: v, reason: v === 'reject' ? (lastReason || '') : '',
+                    ts: new Date().toISOString() };
+  lastReason = '';
+  fetch('/api/label', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(labels[it.id]) });
+  if (idx < items.length - 1) idx++;
+  render();
+}
+window.label = label;
+function reason(k) { lastReason = k; render(); }
+window.reason = reason;
+function go(d) { idx = Math.min(items.length - 1, Math.max(0, idx + d)); render(); }
+window.go = go;
+
+/* ---------------- pdf.js 原文定位（复用 kg-nebula.html 的自绘方案） ---------------- */
+const pdfPane = $('#pdfPane'), pdfView = $('#pdfView'), pdfCanvas = $('#pdfCanvas');
+const pdfTextLayer = $('#pdfTextLayer');
+let pdfDoc = null, pdfSrc = '', pdfPage = 1, pdfSnip = '', token = 0, renderTask = null;
+
+function snippetOf(t) {
+  const s = String(t || '').replace(/[…]+$/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  const sp = s.lastIndexOf(' ');
+  const cut = (sp >= 30 ? s.slice(0, sp) : s).trim();
+  return cut.length >= 12 ? cut : '';
+}
+function highlight(spans, snip) {
+  const norm = (s) => String(s || '').replace(/\s+/g, ' ').toLowerCase().trim();
+  const target = norm(snip); if (!target) return 0;
+  let full = ''; const owner = [];
+  spans.forEach((el, i) => { const t = norm(el.textContent); if (!t) return;
+    if (full && !full.endsWith(' ')) { full += ' '; owner.push(-1); }
+    for (const ch of t) { full += ch; owner.push(i); } });
+  const mark = (from, len) => { const set = new Set();
+    for (let k = from; k < from + len; k++) if (owner[k] >= 0) set.add(owner[k]);
+    set.forEach((i) => spans[i].classList.add('hl')); return set.size; };
+  const pos = full.indexOf(target);
+  if (pos >= 0) return mark(pos, target.length);
+  const words = target.split(' ').filter((w) => w.length >= 6).sort((a, b) => b.length - a.length);
+  for (const w of words) { const p = full.indexOf(w); if (p >= 0) return mark(p, w.length); }
+  return 0;
+}
+async function renderPage() {
+  if (!pdfDoc) return;
+  const tk = ++token;
+  // 翻条/翻页会把新的 render() 排到同一个 canvas 上，pdf.js 会直接抛
+  // 「Cannot use the same canvas during multiple render() operations」。
+  // 必须先取消上一趟渲染并等它落地，再开新的。
+  if (renderTask) {
+    try { renderTask.cancel(); } catch (e) { /* 已结束 */ }
+    try { await renderTask.promise; } catch (e) { /* 取消是预期路径 */ }
+    renderTask = null;
+  }
+  const page = await pdfDoc.getPage(pdfPage);
+  if (tk !== token) return;
+  const base = page.getViewport({ scale: 1 });
+  const scale = Math.min(2.0, Math.max(320, pdfView.clientWidth - 10) / base.width);
+  const vp = page.getViewport({ scale });
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  pdfCanvas.width = Math.floor(vp.width * dpr); pdfCanvas.height = Math.floor(vp.height * dpr);
+  pdfCanvas.style.width = `${Math.floor(vp.width)}px`; pdfCanvas.style.height = `${Math.floor(vp.height)}px`;
+  renderTask = page.render({ canvasContext: pdfCanvas.getContext('2d'), viewport: vp,
+                             transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null });
+  try {
+    await renderTask.promise;
+  } catch (e) {
+    if (!e || e.name !== 'RenderingCancelledException') throw e;
+    return;
+  }
+  renderTask = null;
+  if (tk !== token) return;
+  const content = await page.getTextContent();
+  pdfTextLayer.innerHTML = '';
+  pdfTextLayer.style.width = `${Math.floor(vp.width)}px`;
+  pdfTextLayer.style.height = `${Math.floor(vp.height)}px`;
+  const spans = [];
+  for (const item of content.items) {
+    if (!item.str) continue;
+    const tx = pdfjsLib.Util.transform(vp.transform, item.transform);
+    const fh = Math.hypot(tx[2], tx[3]) || (item.height || 10) * scale;
+    const el = document.createElement('span');
+    el.textContent = item.str;
+    el.style.left = `${tx[4].toFixed(2)}px`; el.style.top = `${(tx[5] - fh).toFixed(2)}px`;
+    el.style.fontSize = `${fh.toFixed(2)}px`;
+    pdfTextLayer.appendChild(el); spans.push(el);
+  }
+  const hits = highlight(spans, pdfSnip);
+  $('#pdfPageInfo').textContent = `${pdfPage} / ${pdfDoc.numPages}　高亮 ${hits} 处`;
+  const first = pdfTextLayer.querySelector('span.hl');
+  if (first) pdfView.scrollTop = Math.max(0, first.offsetTop - pdfView.clientHeight / 3);
+}
+/** 切条时若 PDF 抽屉开着，就重新定位到新条目的页与句子。 */
+async function prepPdf() {
+  if (!pdfPane.classList.contains('open')) return;
+  await openPdfOf();
+}
+async function openPdfOf() {
+  const it = current();
+  pdfSnip = snippetOf(it.premise) || snippetOf(it.evidence);
+  $('#pdfOpen').href = new URL(`../data/corpus/${it.paper}.pdf#page=${it.page}`, location.href).href;
+  $('#pdfName').textContent = `${it.paper} · 第 ${it.page} 页`;
+  pdfPane.classList.add('open');
+  pdfPage = Number(it.page) || 1;
+  try {
+    if (!pdfDoc || pdfSrc !== it.paper) {
+      pdfDoc = await pdfjsLib.getDocument(`../data/corpus/${it.paper}.pdf`).promise;
+      pdfSrc = it.paper;
+    }
+    await renderPage();
+  } catch (e) {
+    pdfTextLayer.innerHTML = ''; $('#pdfPageInfo').textContent = `加载失败：${e.message}`;
+  }
+}
+window.openPdfOf = openPdfOf;
+function closePdf() { pdfPane.classList.remove('open'); }
+window.closePdf = closePdf;
+
+addEventListener('keydown', (e) => {
+  if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if (e.key === '1') label('support');
+  else if (e.key === '2') label('reject');
+  else if (e.key === '3') label('unclear');
+  else if (e.key === 'ArrowRight') go(1);
+  else if (e.key === 'ArrowLeft') go(-1);
+  else if (e.key.toLowerCase() === 'p') openPdfOf();
+  else if (e.key === 'Escape') closePdf();
+});
+
+boot();
+</script>
+</body>
+</html>

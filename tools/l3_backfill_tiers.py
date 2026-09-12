@@ -9,13 +9,17 @@
 本脚本给出三档阈值的覆盖，并统计各档里"看起来不是实体"的名字占比，
 供决定"反建到多宽"。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import re
 from collections import Counter
 from pathlib import Path
 
-VERIFY = Path(r'D:\kg-demo\data\quality\relation-verify-all.json')
-GRAPH = Path(r'D:\kg-demo\data\corpus\graphs')
+VERIFY = ROOT / 'data/quality/relation-verify-all.json'
+GRAPH = ROOT / 'data/corpus/graphs'
 
 # 明显的"非实体"词：论文零件、泛指词、碎片
 JUNK = re.compile(
@@ -111,7 +115,7 @@ def main():
             'evidence+shape+occ5': sum(occ[n] for n in occ if ev_hit[n] > 0 and looks_like_entity(n) and occ[n] >= 5),
         },
     }
-    p = Path(r'D:\kg-demo\data\quality\l3-backfill-tiers.json')
+    p = ROOT / 'data/quality/l3-backfill-tiers.json'
     p.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'\n报告已写出: {p}')
 

@@ -16,6 +16,10 @@
   data/gold/gold-<paper>.json        最终金标（含 provenance 与分歧清单）
   data/gold/merge-report-<paper>.md  人工可读报告（一致率、分歧、可疑引文）
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import re
@@ -23,10 +27,10 @@ import sys
 from itertools import combinations
 from pathlib import Path
 
-sys.path.insert(0, r"D:\kg-demo\src")
+sys.path.insert(0, str(ROOT / "src"))
 from kg_extractor import _names_are_duplicates, ENTITY_TYPES, RELATION_TYPES  # noqa: E402
 
-GOLD = Path(r"D:\kg-demo\data\gold")
+GOLD = ROOT / "data/gold"
 
 
 def parse_args():

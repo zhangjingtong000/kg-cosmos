@@ -33,6 +33,10 @@
   python tools/relation_verifier.py --all           # 全量（自动校准后跑）
   python tools/relation_verifier.py --all --relation RELATED_TO
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import os
@@ -45,8 +49,8 @@ PROXY = "http://127.0.0.1:7897"
 for _k in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"):
     os.environ.setdefault(_k, PROXY)
 
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
-OUT_DIR = Path(r"D:\kg-demo\data\quality")
+GRAPHS = ROOT / "data/corpus/graphs"
+OUT_DIR = ROOT / "data/quality"
 
 HF_HUB = Path(r"C:\Users\Administrator\.cache\huggingface\hub")
 TRIPLET_DIR = next(

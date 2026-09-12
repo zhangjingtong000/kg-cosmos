@@ -7,6 +7,10 @@
 检查：进入社区后列表有内容；点击列表项后高亮环出现、右侧关系面板打开、
 列表项标记为选中；搜索能过滤列表。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import base64
 import json
 import subprocess
@@ -102,7 +106,7 @@ def main():
 
         # 截图留档（此时高亮环已定位、右侧面板显示证据）
         shot = cdp(ws, 'Page.captureScreenshot', {'format': 'png'})
-        with open(r'D:\kg-demo\output\shots\evidence-panel.png', 'wb') as f:
+        with open(str(ROOT / 'output/shots/evidence-panel.png'), 'wb') as f:
             f.write(base64.b64decode(shot['result']['data']))
         print('截图已保存 output/shots/evidence-panel.png')
 

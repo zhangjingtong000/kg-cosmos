@@ -11,6 +11,10 @@ T2.5 · 评估 15 类本体是否完备。
 另：库中 L4 显示"0 违规"，是因为 safe_relation_type 把越界类型强制改写成
 RELATED_TO；原始抽取里越界边有数千条。本脚本按原始类型统计。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import collections
 import json
 import os
@@ -19,10 +23,10 @@ import sys
 
 import numpy as np
 
-sys.path.insert(0, os.path.join(r'D:\kg-demo', 'src'))
+sys.path.insert(0, os.path.join(str(ROOT), 'src'))
 from ontology import RELATION_TYPES   # noqa: E402
 
-Q = r'D:\kg-demo\data\quality'
+Q = str(ROOT / 'data/quality')
 VERIFY = os.path.join(Q, 'relation-verify-all.json')
 
 # 15 类本体，取值来自 src/ontology.py（唯一来源）。

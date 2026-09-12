@@ -15,17 +15,23 @@
   集合字面量的写法在项目里很规整，正则足够稳；解析不到也算失败（说明定义方式变了，
   需要人来更新本脚本）。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import re
 import sys
 from pathlib import Path
 
-ROOT = Path(r'D:\kg-demo')
+ROOT = Path(str(ROOT))
 sys.path.insert(0, str(ROOT / 'src'))
 
 from ontology import (  # noqa: E402
     ALLOWED_ENTITY_LABELS, CREATED_BY_AUTHOR_TYPES, CREATED_BY_CREATABLE_TYPES,
     DERIVED_ENTITY_LABELS, ENTITY_TYPES, L5_THRESHOLD, RELATION_TYPES,
+    RELATION_ENDPOINT_CONSTRAINTS, REL_HYPOTHESIS_TEMPLATE, REL_PHRASE_TEMPLATE,
+    SYMMETRIC_RELATIONS, validate_constraints,
 )
 
 
@@ -45,6 +51,19 @@ def parse_int(text, name):
 def parse_float(text, name):
     m = re.search(re.escape(name) + r'\s*=\s*([0-9.]+)', text)
     return float(m.group(1)) if m else None
+
+
+def parse_str_dict(text, name):
+    """从源码里解析 `name = { "KEY": "value", ... }`（跨行，value 内无转义引号）。
+
+    用于 L5/L4 的假设句模板表——它是 dict 而非 set，`parse_set` 抓不到。
+    模板值里含 `{s}` / `{t}` 占位符与句点，正则 `[^"]*` 足够稳。
+    """
+    m = re.search(re.escape(name) + r'\s*=\s*\{(.*?)\n\}', text, re.S)
+    if not m:
+        return None
+    got = dict(re.findall(r'"([A-Z_]+)"\s*:\s*"([^"]*)"', m.group(1)))
+    return got or None
 
 
 def main():
@@ -167,6 +186,67 @@ def main():
             fails.append(f'L5 阈值不一致：{rel} 是 {v}，ontology.py 是 {L5_THRESHOLD}')
         else:
             checks.append((name, 'ok', rel))
+
+    # ── 语义对称关系：verify_direction.py 里仍是一份字面量 ──
+    # 这份划分决定"哪些关系不做方向判定"，写两处同样会漂移。
+    vd = ROOT / 'tools/verify_direction.py'
+    if vd.exists():
+        got = parse_set(vd.read_text(encoding='utf-8'), 'SYMMETRIC')
+        if got is None:
+            checks.append(('对称关系 tools/verify_direction.py', 'PARSE-FAIL',
+                           'tools/verify_direction.py'))
+            fails.append('SYMMETRIC 未能从 tools/verify_direction.py 解析到')
+        elif got != set(SYMMETRIC_RELATIONS):
+            checks.append(('对称关系 tools/verify_direction.py', 'MISMATCH',
+                           'tools/verify_direction.py'))
+            fails.append(
+                f'对称关系不一致：verify_direction.py 独有 {sorted(got - set(SYMMETRIC_RELATIONS))}、'
+                f'缺 {sorted(set(SYMMETRIC_RELATIONS) - got)}'
+                f'（唯一来源是 src/ontology.py 的 SYMMETRIC_RELATIONS）')
+        else:
+            checks.append(('对称关系 tools/verify_direction.py', 'ok(字面量一致)',
+                           'tools/verify_direction.py'))
+
+    # ── L5/L4 的假设句模板表：唯一来源是 src/ontology.py ──
+    # `relation_verifier.py` 与 `verify_direction.py` 各存了一份 REL_TEMPLATE，
+    # 注释里写着"改这里必须同步改那边"——正是案例 12 说的"写两处必漂移"。
+    # 本检查把两处与 ontology.REL_HYPOTHESIS_TEMPLATE **逐字**相减；
+    # L4 谓词选择评测（tools/l4_predicate_report.py）直接用 ontology 的那一份，
+    # 所以这三处一旦错开，L5 与 L4 就不再问同一个问题，必须报错。
+    for rel, name in (('tools/relation_verifier.py', 'REL_TEMPLATE'),
+                      ('tools/verify_direction.py', 'REL_TEMPLATE')):
+        p = ROOT / rel
+        if not p.exists():
+            checks.append((f'假设句模板 {rel}', 'missing-file', rel))
+            continue
+        txt = p.read_text(encoding='utf-8')
+        if 'REL_HYPOTHESIS_TEMPLATE' in txt:
+            checks.append((f'假设句模板 {rel}', 'ok(引用 ontology)', rel))
+            continue
+        got = parse_str_dict(txt, name)
+        if got is None:
+            checks.append((f'假设句模板 {rel}', 'PARSE-FAIL', rel))
+            fails.append(f'{name} 未能从 {rel} 解析到，且它没有引用 ontology.py')
+        elif got != REL_HYPOTHESIS_TEMPLATE:
+            only_a = sorted(set(got) - set(REL_HYPOTHESIS_TEMPLATE))
+            only_b = sorted(set(REL_HYPOTHESIS_TEMPLATE) - set(got))
+            diff = sorted(k for k in set(got) & set(REL_HYPOTHESIS_TEMPLATE)
+                          if got[k] != REL_HYPOTHESIS_TEMPLATE[k])
+            checks.append((f'假设句模板 {rel}', 'MISMATCH', rel))
+            fails.append(
+                f'假设句模板不一致：{rel} 独有 {only_a}、缺 {only_b}、'
+                f'取值不同 {diff}（唯一来源是 src/ontology.py 的 REL_HYPOTHESIS_TEMPLATE）')
+        else:
+            checks.append((f'假设句模板 {rel}', 'ok(字面量一致)', rel))
+
+    # ── L7 端点类型约束表自身的完整性 ──
+    problems = validate_constraints()
+    if problems:
+        checks.append(('L7 端点类型约束表', 'MISMATCH', 'tools/../src/ontology.py'))
+        fails.extend(f'L7 约束表自检失败：{p}' for p in problems)
+    else:
+        checks.append((f'L7 端点类型约束表（{len(RELATION_ENDPOINT_CONSTRAINTS)} 类）',
+                       'ok(自检通过)', 'src/ontology.py'))
 
     print('=== 本体口径自检 ===\n')
     for label, status, path in checks:

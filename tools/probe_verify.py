@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """完整列出 relation-verify-all.json 的结构、汇总表与 per-edge 字段。"""
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 
-P = r'D:\kg-demo\data\quality\relation-verify-all.json'
+P = str(ROOT / 'data/quality/relation-verify-all.json')
 with open(P, encoding='utf-8') as f:
     d = json.load(f)
 

@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 """探测 filtered-edges.json 等治理产物的结构，确认 T2.4 是否已有半成品。"""
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import os
 
-Q = r'D:\kg-demo\data\quality'
+Q = str(ROOT / 'data/quality')
 TARGETS = ['filtered-edges.json', 'created-by-plan.json', 'claims.json',
            'entity-alias-map.json', 'type-normalization-plan.json', 'entity-quality.json']
 

@@ -23,12 +23,16 @@ T2.3 · 为 L5 关系证据层定过滤线。
   0.9 才算"，没有任何依据。正确做法是统一用标定阈值，**按类型报告通过率**，
   通过率的差异本身就是质量画像。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import collections
 import json
 
 import numpy as np
 
-P = r'D:\kg-demo\data\quality\relation-verify-all.json'
+P = str(ROOT / 'data/quality/relation-verify-all.json')
 CORE = [
     'RELATED_TO', 'CREATED_BY', 'USES', 'PART_OF', 'APPLIES_TO', 'PRODUCES',
     'ENABLES', 'CITES', 'MEASURES', 'LOCATED_AT', 'SUPPORTS', 'COMPARES_WITH',

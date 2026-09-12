@@ -15,12 +15,16 @@ status / 引用），目的是为 T6.6「矛盾/争议视图」提供数据。
 用法：
   python tools/diag_claims.py
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
-CLAIMS = Path(r"D:\kg-demo\data\quality\claims.json")
+CLAIMS = ROOT / "data/quality/claims.json"
 
 # 「替代/区分」类标记：A 用 X 而不是 Y
 REPLACE_PAT = re.compile(
@@ -145,7 +149,7 @@ def main():
         "distinct_pairs": len(pair_papers),
         "verdict": verdict,
     }
-    p = Path(r"D:\kg-demo\data\quality\claims-diagnosis.json")
+    p = ROOT / "data/quality/claims-diagnosis.json"
     p.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n报告已写出: {p}")
 

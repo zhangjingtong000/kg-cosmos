@@ -4,10 +4,14 @@
 但主视图 `kg-nebula.html` 的 three.js 走 unpkg CDN。
 `tools/cdp_verify_offline.py` 已实测断网后该页完全无法启动。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import re
 from pathlib import Path
 
-WEB = Path(r'D:\kg-demo\web')
+WEB = ROOT / 'web'
 # 匹配 http(s):// 的资源引用（src / href / importmap / import 语句）
 PAT = re.compile(r'https?://[^\s"\'<>()]+')
 

@@ -2,6 +2,10 @@
 
 对比两个数据集的图论结构，找出决定性差异，并生成"修正版"数据用于验证。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import sys
 from collections import Counter
@@ -9,8 +13,8 @@ from pathlib import Path
 
 import networkx as nx
 
-DATA = Path(r"D:\kg-demo\web\kg-data")
-OFFICIAL = Path(r"D:\kg-demo\3d-force-graph\example\datasets")
+DATA = ROOT / "web/kg-data"
+OFFICIAL = ROOT / "3d-force-graph/example/datasets"
 
 
 def analyze(name, nodes, links):

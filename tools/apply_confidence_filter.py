@@ -33,6 +33,10 @@
   python tools/apply_confidence_filter.py --apply
   python tools/apply_confidence_filter.py --rollback <dir>
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import re
@@ -42,8 +46,8 @@ import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
 
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
-OUT = Path(r"D:\kg-demo\data\quality")
+GRAPHS = ROOT / "data/corpus/graphs"
+OUT = ROOT / "data/quality"
 BACKUP = OUT / "backup"
 VERIFY = OUT / "relation-verify-all.json"
 

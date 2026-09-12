@@ -19,6 +19,10 @@
   python tools/apply_contributed_to_removal.py            # dry-run
   python tools/apply_contributed_to_removal.py --apply
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import shutil
@@ -26,8 +30,8 @@ import sys
 import time
 from pathlib import Path
 
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
-BACKUP_ROOT = Path(r"D:\kg-demo\data\quality\backup")
+GRAPHS = ROOT / "data/corpus/graphs"
+BACKUP_ROOT = ROOT / "data/quality/backup"
 TARGET = "CONTRIBUTED_TO"
 
 

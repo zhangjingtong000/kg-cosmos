@@ -21,14 +21,18 @@
   python tools/l7_direction_audit.py                 # 全部关系类型
   python tools/l7_direction_audit.py --min-support 30
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
-VERIFY = Path(r"D:\kg-demo\data\quality\relation-verify-all.json")
-NEBULA = Path(r"D:\kg-demo\web\kg-data\nebula.json")
-OUT = Path(r"D:\kg-demo\data\quality\l7-direction-audit.json")
+VERIFY = ROOT / "data/quality/relation-verify-all.json"
+NEBULA = ROOT / "web/kg-data/nebula.json"
+OUT = ROOT / "data/quality/l7-direction-audit.json"
 
 
 def parse_args():

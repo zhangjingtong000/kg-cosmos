@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 """对比 13:50 的探针文件与 15:13 的全量文件，定位 早先的阶段计划 表格数字的来源。"""
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import collections
 
-PROBE = r'D:\kg-demo\data\gold\probe-related-to.json'
-FULL = r'D:\kg-demo\data\quality\relation-verify-all.json'
+PROBE = str(ROOT / 'data/gold/probe-related-to.json')
+FULL = str(ROOT / 'data/quality/relation-verify-all.json')
 
 with open(PROBE, encoding='utf-8') as f:
     p = json.load(f)

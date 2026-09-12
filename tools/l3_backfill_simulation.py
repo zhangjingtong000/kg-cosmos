@@ -6,13 +6,17 @@
 **引用它的那些边的 evidence 里**，所以可以把这些 evidence 汇总给新节点。
 本脚本量化两种做法（带证据 / 不带证据）的后果。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
-VERIFY = Path(r'D:\kg-demo\data\quality\relation-verify-all.json')
-GRAPH = Path(r'D:\kg-demo\data\corpus\graphs')
+VERIFY = ROOT / 'data/quality/relation-verify-all.json'
+GRAPH = ROOT / 'data/corpus/graphs'
 
 JUNK = re.compile(
     r'^(summary|task|tasks|table|figure|fig\.?|section|appendix|abstract|'
@@ -128,7 +132,7 @@ def main():
         'remaining_gap_edges': len(still),
         'remaining_gap_names': len(left_names),
     }
-    p = Path(r'D:\kg-demo\data\quality\l3-backfill-simulation.json')
+    p = ROOT / 'data/quality/l3-backfill-simulation.json'
     p.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'\n报告已写出: {p}')
 

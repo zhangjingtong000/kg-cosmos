@@ -12,13 +12,17 @@ hypothesis 模板没同步改，导致方向全反、通过率从 39.6% 掉到 2
 
 其余 14 类模板与数据都没变，分数可原样复用，因此不必整份重跑。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import collections
 import json
 import os
 import shutil
 from datetime import datetime
 
-Q = r'D:\kg-demo\data\quality'
+Q = str(ROOT / 'data/quality')
 ALL = os.path.join(Q, 'relation-verify-all.json')
 CB = os.path.join(Q, 'relation-verify-rel-CREATED_BY.json')
 

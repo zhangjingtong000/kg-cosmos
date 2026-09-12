@@ -17,13 +17,17 @@ T4.4 的原则是"规则归一直接合并；模糊匹配只建边不合并节�
 所以 L2 里因类型冲突被跳过的 196 条，应该落成 status='pending' 的 SAME_AS 候选边，
 而不是丢掉——本脚本把它们产出。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import collections
 import glob
 import json
 import os
 import sys
 
-ROOT = r'D:\kg-demo'
+ROOT = str(ROOT)
 Q = os.path.join(ROOT, 'data', 'quality')
 G = os.path.join(ROOT, 'data', 'corpus', 'graphs')
 

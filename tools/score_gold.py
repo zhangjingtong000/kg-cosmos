@@ -16,17 +16,21 @@
   python tools/score_gold.py                # 只评云端（已入库快照）
   python tools/score_gold.py local cloud    # 对比两个通道
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import re
 import sys
 from pathlib import Path
 
-sys.path.insert(0, r"D:\kg-demo\src")
+sys.path.insert(0, str(ROOT / "src"))
 from kg_extractor import _names_are_duplicates  # noqa: E402
 
-GOLD_DIR = Path(r"D:\kg-demo\data\gold")
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
+GOLD_DIR = ROOT / "data/gold"
+GRAPHS = ROOT / "data/corpus/graphs"
 
 
 def parse_args():

@@ -25,6 +25,10 @@
   python tools/calibrate_verifier.py
   python tools/calibrate_verifier.py --max 3000     # 快速抽样
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import os
@@ -36,7 +40,7 @@ for k in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"):
     os.environ[k] = PROXY
 os.environ.pop("HF_ENDPOINT", None)
 
-OUT = Path(r"D:\kg-demo\data\quality")
+OUT = ROOT / "data/quality"
 
 TRIPLET_DIR = next(
     Path(r"C:\Users\Administrator\.cache\huggingface\hub").glob(

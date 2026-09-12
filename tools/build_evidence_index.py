@@ -13,12 +13,16 @@ evidence: {source_id, source_name, page, chunk_idx, text}。
 按社区切分而不是出一个大文件：进入某个社区时才加载对应的那一个（约几百 KB），
 避免首屏被几 MB 的证据表拖慢。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import collections
 import glob
 import json
 import os
 
-ROOT = r'D:\kg-demo'
+ROOT = str(ROOT)
 GRAPHS = os.path.join(ROOT, 'data', 'corpus', 'graphs')
 FULL = os.path.join(ROOT, 'web', 'kg-data', 'force-full.json')
 OUT = os.path.join(ROOT, 'web', 'kg-data')

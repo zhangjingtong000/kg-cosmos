@@ -28,14 +28,18 @@
   python tools/fix_created_by.py --report
   python tools/fix_created_by.py --report --top 40
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
-OUT = Path(r"D:\kg-demo\data\quality")
+GRAPHS = ROOT / "data/corpus/graphs"
+OUT = ROOT / "data/quality"
 
 
 def parse_args():

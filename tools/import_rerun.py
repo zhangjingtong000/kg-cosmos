@@ -8,15 +8,19 @@
 Neo4j 中只有一份节点（MERGE by name），因此删除会波及跨文献关系。这是精确
 替换的固有代价；若需完全干净，应清库后重跑全部语料（见文档说明）。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, r"D:\kg-demo\src")
+sys.path.insert(0, str(ROOT / "src"))
 from graph_store import Neo4jStore  # noqa: E402
 
 PAPERS = ["2506.09566v1", "2406.08223v2", "2510.20345v1", "1703.08098v9", "2202.07412v1"]
-GOLD_DIR = Path(r"D:\kg-demo\data\gold")
+GOLD_DIR = ROOT / "data/gold"
 
 store = Neo4jStore(uri="bolt://localhost:7687", user="neo4j", password="kgdemo2026")
 print(f"导入前: {store.stats()}")

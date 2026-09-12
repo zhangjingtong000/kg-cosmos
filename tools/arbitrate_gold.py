@@ -5,10 +5,14 @@
           §3 明确收录（论文自己命名的流程步骤、对比基线、工具链）
           §5 票数门槛（实体 ≥2 票采纳；单票项按 §1–§3 裁决）
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 from pathlib import Path
 
-GOLD_DIR = Path(r"D:\kg-demo\data\gold")
+GOLD_DIR = ROOT / "data/gold"
 PAPER = "2012.00456v1"
 
 # 逐条裁决：收录(accept) 或 排除(reject)，附规则条款与理由

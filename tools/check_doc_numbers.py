@@ -15,12 +15,16 @@
   再去 README / RUNBOOK / 六层报告里找**互相矛盾**的旧值。
   只报"明确对不上"的，不做模糊判断——宁可漏报也不误报。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import re
 import sys
 from pathlib import Path
 
-ROOT = Path(r'D:\kg-demo')
+ROOT = Path(str(ROOT))
 Q = ROOT / 'data' / 'quality'
 
 # (展示名, 权威取值, 该值在文档里"应该出现"的形式, 禁止出现的旧值)

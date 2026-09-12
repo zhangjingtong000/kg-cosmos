@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 """读取 sync-filter-audit.json 与 filtered-edges.json 的统计，确认当前图的口径。"""
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import os
 
-Q = r'D:\kg-demo\data\quality'
+Q = str(ROOT / 'data/quality')
 
 with open(os.path.join(Q, 'sync-filter-audit.json'), encoding='utf-8') as f:
     a = json.load(f)

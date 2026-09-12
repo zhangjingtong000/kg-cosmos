@@ -13,6 +13,10 @@ T2.4 · 产出"被原文支持的关系"子图，并在其上重算 L1–L6 六�
     L3/L4/L5/L6 是边级。
   · L2（实体聚类层）本阶段未建，报告中显式标注为 N/A，不假装有数字。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import collections
 import glob
 import json
@@ -20,7 +24,7 @@ import os
 import re
 import sys
 
-ROOT = r'D:\kg-demo'
+ROOT = str(ROOT)
 sys.path.insert(0, os.path.join(ROOT, 'src'))
 from ontology import RELATION_TYPES   # noqa: E402
 

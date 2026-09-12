@@ -14,14 +14,18 @@
   导出**可核验的清单**并用一组启发式给出初判，最后给出分层精度估计。
   这份清单是给人复核的，不是为了自动下结论。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import random
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
-GRAPH = Path(r'D:\kg-demo\data\corpus\graphs')
-OUT = Path(r'D:\kg-demo\data\quality\l3-backfill-precision-sample.json')
+GRAPH = ROOT / 'data/corpus/graphs'
+OUT = ROOT / 'data/quality/l3-backfill-precision-sample.json'
 random.seed(20260912)
 
 # 启发式：判"这个名字像不像一个实体"

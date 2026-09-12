@@ -14,6 +14,10 @@
 用法：
   python tools/fetch_three_local.py
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import os
 import sys
 from pathlib import Path
@@ -21,7 +25,7 @@ from pathlib import Path
 PROXY = "http://127.0.0.1:7897"
 VER = "0.160.0"
 BASE = f"https://unpkg.com/three@{VER}"
-OUT = Path(r"D:\kg-demo\web\lib\three")
+OUT = ROOT / "web/lib/three"
 
 FILES = [
     ("build/three.module.js", "three.module.js"),

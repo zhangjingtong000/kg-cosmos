@@ -23,14 +23,18 @@
   python tools/verify_direction.py                 # 每类抽 60 条
   python tools/verify_direction.py --per-type 150
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import random
 from collections import defaultdict
 from pathlib import Path
 
-VERIFY = Path(r"D:\kg-demo\data\quality\relation-verify-all.json")
-OUT = Path(r"D:\kg-demo\data\quality\direction-sensitivity.json")
+VERIFY = ROOT / "data/quality/relation-verify-all.json"
+OUT = ROOT / "data/quality/direction-sensitivity.json"
 HF_HUB = Path(r"C:\Users\Administrator\.cache\huggingface\hub")
 
 # 与 tools/relation_verifier.py 保持逐字一致（改这里必须同步改那边）

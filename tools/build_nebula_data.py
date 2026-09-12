@@ -21,6 +21,10 @@
   python tools/build_nebula_data.py
   python tools/build_nebula_data.py --max-communities 60
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import math
@@ -30,11 +34,11 @@ from pathlib import Path
 
 import networkx as nx
 
-sys.path.insert(0, r"D:\kg-demo\src")
+sys.path.insert(0, str(ROOT / "src"))
 from graph_store import Neo4jStore  # noqa: E402
 
-OUT = Path(r"D:\kg-demo\web\kg-data")
-QUALITY = Path(r"D:\kg-demo\data\quality")
+OUT = ROOT / "web/kg-data"
+QUALITY = ROOT / "data/quality"
 
 # 15 类实体的颜色（前端调色板基底）
 TYPE_COLORS = {

@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 """看清 entity-alias-map.json 的三层决策：L1 归一 / L2 模糊 / L4 缩写，各自跳过了什么。"""
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import collections
 import json
 import os
 
-Q = r'D:\kg-demo\data\quality'
+Q = str(ROOT / 'data/quality')
 with open(os.path.join(Q, 'entity-alias-map.json'), encoding='utf-8') as f:
     am = json.load(f)
 

@@ -10,12 +10,16 @@ L3（关系端点层）= 68.4%，即 43867 条边里有 13843 条至少有一个
         出现过 = 只是没进这一篇的节点集（可召回）
         从未出现 = 确实没被抽出来（要重抽取）
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
-GRAPH = Path(r'D:\kg-demo\data\corpus\graphs')
-VERIFY = Path(r'D:\kg-demo\data\quality\relation-verify-all.json')
+GRAPH = ROOT / 'data/corpus/graphs'
+VERIFY = ROOT / 'data/quality/relation-verify-all.json'
 
 
 def main():
@@ -113,7 +117,7 @@ def main():
                     for t, m, n in rows},
         'top_never_extracted': never_seen.most_common(40),
     }
-    p = Path(r'D:\kg-demo\data\quality\l3-gap-analysis.json')
+    p = ROOT / 'data/quality/l3-gap-analysis.json'
     p.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'\n报告已写出: {p}')
 

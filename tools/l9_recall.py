@@ -21,6 +21,10 @@
   python tools/l9_recall.py --sample     # 抽样并导出待标注清单
   python tools/l9_recall.py --score      # 读标注并计算召回
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import random
@@ -28,8 +32,8 @@ import re
 import sys
 from pathlib import Path
 
-GRAPH = Path(r'D:\kg-demo\data\corpus\graphs')
-Q = Path(r'D:\kg-demo\data\quality')
+GRAPH = ROOT / 'data/corpus/graphs'
+Q = ROOT / 'data/quality'
 SAMPLE_OUT = Q / 'l9-span-sample.json'
 GOLD = Q / 'l9-gold-spans.json'
 SEED = 20260912
@@ -58,7 +62,7 @@ def collect_spans(per_paper=2):
     （pdf_parser.chunk_document，max_chars=500 / overlap 0.3），
     保证抽到的段落与当初喂给抽取器的是同一批文本。
     """
-    sys.path.insert(0, str(Path(r'D:\kg-demo\src')))
+    sys.path.insert(0, str(ROOT / 'src'))
     try:
         from pdf_parser import parse_pdf, chunk_document
     except Exception as e:
@@ -67,7 +71,7 @@ def collect_spans(per_paper=2):
 
     rnd = random.Random(SEED)
     spans = []
-    pdfs = sorted((Path(r'D:\kg-demo\data\corpus')).glob('*.pdf'))
+    pdfs = sorted((ROOT / 'data/corpus').glob('*.pdf'))
     stems_with_graph = {f.stem for f in GRAPH.glob('*.json')}
     for pdf in pdfs:
         if pdf.stem not in stems_with_graph:

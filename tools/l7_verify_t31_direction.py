@@ -17,10 +17,14 @@
 用法：
   python tools/l7_verify_t31_direction.py
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 from pathlib import Path
 
-QUAL = Path(r"D:\kg-demo\data\quality")
+QUAL = ROOT / "data/quality"
 PATCH = QUAL / "created-by-patch.json"
 PRE = QUAL / "baseline" / "relation-verify-all.PRE-T3.json"
 POST = QUAL / "relation-verify-all.json"

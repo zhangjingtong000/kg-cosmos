@@ -502,7 +502,10 @@ L5 实测只能拦住 **23.9%** 的方向反转（本体 12 类非对称关系 7
 而 T3.1 已用规则反转了 2348 条边。详见 `docs/L5_SIX_LAYER_REPORT.md` §4.5。
 
 补救方向是**独立于语义模型的规则层**（端点类型约束），而不是复用 L5；
-但那要为本体 15 类逐条定义约束，属本体设计决策，尚未实施。
+**2026-09-12 已实施**：15 类约束表在 `src/ontology.py::RELATION_ENDPOINT_CONSTRAINTS`，
+逐类实测与可判性分级见 `docs/L7_ENDPOINT_CONSTRAINTS.md`。
+要点：只有 `CREATED_BY`/`PRODUCES`/`LOCATED_AT` 能由端点类型判方向，
+`CREATED_BY` 方向合规 98.0%、检出反转 120 条。
 
 ---
 

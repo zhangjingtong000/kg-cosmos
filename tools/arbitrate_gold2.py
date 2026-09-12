@@ -4,10 +4,14 @@
   §2 排除：泛指短语、图表编号、统计符号、示例/虚构数据、仅出现在参考文献/URL/示例句
   §3 收录：论文自己命名的流程/方法步骤、对比基线、工具链、论文定义的产物
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 from pathlib import Path
 
-GOLD_DIR = Path(r"D:\kg-demo\data\gold")
+GOLD_DIR = ROOT / "data/gold"
 PAPER = "2401.04507v1"
 
 # (name) -> (decision, clause, reason)

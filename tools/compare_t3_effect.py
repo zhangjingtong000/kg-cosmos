@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """对比治理前(PRE-T3)与治理后(now)的 L5 结果。"""
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 
-Q = r'D:\kg-demo\data\quality'
+Q = str(ROOT / 'data/quality')
 new = json.load(open(Q + r'\relation-verify-all.json', encoding='utf-8'))
 old = json.load(open(Q + r'\baseline\relation-verify-all.PRE-T3.json', encoding='utf-8'))
 

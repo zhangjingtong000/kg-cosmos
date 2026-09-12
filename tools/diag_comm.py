@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 """检查 kg-nebula.html 内部视图所用的 comm-*.json 规模。"""
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import glob
 import os
 
-D = r'D:\kg-demo\web\kg-data'
+D = str(ROOT / 'web/kg-data')
 rows = []
 for p in sorted(glob.glob(os.path.join(D, 'comm-*.json'))):
     try:

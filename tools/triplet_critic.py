@@ -23,6 +23,10 @@
   # 只看某类型
   python tools/triplet_critic.py --all --relation RELATED_TO
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import os
@@ -36,8 +40,8 @@ os.environ.setdefault("HTTP_PROXY", "http://127.0.0.1:7897")
 os.environ.setdefault("HTTPS_PROXY", "http://127.0.0.1:7897")
 os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
 
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
-OUT_DIR = Path(r"D:\kg-demo\data\quality")
+GRAPHS = ROOT / "data/corpus/graphs"
+OUT_DIR = ROOT / "data/quality"
 MODEL_ID = "Babelscape/mdeberta-v3-base-triplet-critic-xnli"
 THRESHOLD = 0.75
 

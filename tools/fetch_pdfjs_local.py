@@ -17,6 +17,10 @@
 用法：
   python tools/fetch_pdfjs_local.py
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import os
 import sys
 from pathlib import Path
@@ -24,7 +28,7 @@ from pathlib import Path
 PROXY = "http://127.0.0.1:7897"
 VER = "4.6.82"          # 4.x 稳定线；mjs 构建从 4.0 起提供
 BASE = f"https://unpkg.com/pdfjs-dist@{VER}"
-OUT = Path(r"D:\kg-demo\web\lib\pdfjs")
+OUT = ROOT / "web/lib/pdfjs"
 
 FILES = [
     ("build/pdf.min.mjs", "pdf.min.mjs"),

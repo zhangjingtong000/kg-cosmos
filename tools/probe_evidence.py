@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 """探测证据链数据的结构：实体/关系是否带出处（论文、页码、原句）。"""
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import os
 
-ROOT = r'D:\kg-demo'
+ROOT = str(ROOT)
 P = os.path.join(ROOT, 'data', 'corpus', 'graphs', '2302.05019v1.json')
 
 d = json.load(open(P, encoding='utf-8'))

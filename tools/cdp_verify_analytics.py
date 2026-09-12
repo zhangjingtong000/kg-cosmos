@@ -8,6 +8,10 @@
 用法：
   python tools/cdp_verify_analytics.py
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import subprocess
 import sys
@@ -19,7 +23,7 @@ import websocket
 
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
 URL = 'http://127.0.0.1:8098/web/analytics.html'
-QUAL = Path(r'D:\kg-demo\data\quality')
+QUAL = ROOT / 'data/quality'
 
 
 def cdp(ws, method, params=None, state=None):

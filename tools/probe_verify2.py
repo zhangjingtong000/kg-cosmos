@@ -6,12 +6,16 @@
 而本文件 by_type 写：RELATED_TO median 0.6899。
 两者不可能同时成立，必须搞清是哪一份口径/哪一次运行。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import os
 import time
 import collections
 
-P = r'D:\kg-demo\data\quality\relation-verify-all.json'
+P = str(ROOT / 'data/quality/relation-verify-all.json')
 st = os.stat(P)
 print('文件修改时间:', time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(st.st_mtime)))
 print('大小 %.1f MB' % (st.st_size / 1024 / 1024))

@@ -7,11 +7,15 @@
   规则必然带来假阳性（把 `This paper` 也提出来），所以本脚本的产物是
   **待复核清单**，不是终稿；复核后写入 l9-gold-spans.json 才算金标。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import re
 from pathlib import Path
 
-Q = Path(r'D:\kg-demo\data\quality')
+Q = ROOT / 'data/quality'
 SAMPLE = Q / 'l9-span-sample.json'
 OUT = Q / 'l9-candidates.json'
 

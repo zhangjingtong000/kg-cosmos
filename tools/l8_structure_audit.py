@@ -19,6 +19,10 @@
 用法：
   python tools/l8_structure_audit.py
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import random
 import statistics as st
@@ -31,8 +35,8 @@ import networkx as nx
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'src'))
 from ontology import ENTITY_TYPES, RELATION_TYPES   # noqa: E402
 
-WEB = Path(r"D:\kg-demo\web\kg-data")
-QUAL = Path(r"D:\kg-demo\data\quality")
+WEB = ROOT / "web/kg-data"
+QUAL = ROOT / "data/quality"
 OUT = QUAL / "l8-structure-audit.json"
 
 # 本体类数从唯一来源取，不再硬编码字面量。

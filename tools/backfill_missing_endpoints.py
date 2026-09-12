@@ -24,6 +24,10 @@
   python tools/backfill_missing_endpoints.py --apply
   python tools/backfill_missing_endpoints.py --rollback <备份目录>
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import re
@@ -33,8 +37,8 @@ import time
 from collections import Counter, defaultdict
 from pathlib import Path
 
-GRAPH = Path(r'D:\kg-demo\data\corpus\graphs')
-BACKUP_ROOT = Path(r'D:\kg-demo\data\quality\backup')
+GRAPH = ROOT / 'data/corpus/graphs'
+BACKUP_ROOT = ROOT / 'data/quality/backup'
 
 JUNK = re.compile(
     r'^(summary|task|tasks|table|figure|fig\.?|section|appendix|abstract|'

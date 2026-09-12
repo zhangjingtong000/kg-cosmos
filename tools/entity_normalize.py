@@ -34,6 +34,10 @@
   python tools/entity_normalize.py --apply        # 写入
   python tools/entity_normalize.py --rollback <dir>
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import re
@@ -43,9 +47,9 @@ import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
 
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
-CORPUS = Path(r"D:\kg-demo\data\corpus")
-OUT = Path(r"D:\kg-demo\data\quality")
+GRAPHS = ROOT / "data/corpus/graphs"
+CORPUS = ROOT / "data/corpus"
+OUT = ROOT / "data/quality"
 BACKUP = OUT / "backup"
 
 # ── F3 语义敏感对黑名单：大小写差异改变含义，禁止合并 ──

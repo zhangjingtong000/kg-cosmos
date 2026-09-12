@@ -18,13 +18,17 @@
   python tools/serve.py --check         # 只做前置检查，不启动
   python tools/serve.py --port 8123
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import socket
 import sys
 from pathlib import Path
 
-ROOT = Path(r'D:\kg-demo')
+ROOT = Path(str(ROOT))
 WEB = ROOT / 'web'
 KG_DATA = WEB / 'kg-data'
 QUALITY = ROOT / 'data' / 'quality'

@@ -13,23 +13,27 @@ canonicalize_relation_endpoints 在导入时映射，可把边保留率从 55.9%
 
 用法：python tools/rescue_aliases.py [--dry-run]
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, r"D:\kg-demo\src")
+sys.path.insert(0, str(ROOT / "src"))
 from graph_store import Neo4jStore  # noqa: E402
 from kg_extractor import canonicalize_relation_endpoints, deduplicate_entities  # noqa: E402
 
 DRY = "--dry-run" in sys.argv
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
+GRAPHS = ROOT / "data/corpus/graphs"
 SKIP = ("work-", "probe-", "cmp-", "ctrl-", "bench", "diag", "range", "gold-",
         "cost", "opt", "size", "conc", "local", "prompt", "v3", "ch-", "count-",
         "tmp-", "speedtest", "count-")
 
 # 已用修复后管线重跑的 5 篇：优先用它们（channel-cloud-*.json）
 RERUN = {p.stem.replace("channel-cloud-", "")
-         for p in Path(r"D:\kg-demo\data\gold").glob("channel-cloud-*.json")}
+         for p in ROOT / "data/gold".glob("channel-cloud-*.json")}
 
 store = Neo4jStore(uri="bolt://localhost:7687", user="neo4j", password="kgdemo2026")
 print(f"重建前: {store.stats()}")
@@ -49,7 +53,7 @@ for p in sorted(GRAPHS.glob("*.json")):
 
 # 重跑过的用新数据覆盖
 for pid in RERUN:
-    p = Path(r"D:\kg-demo\data\gold") / f"channel-cloud-{pid}.json"
+    p = ROOT / "data/gold" / f"channel-cloud-{pid}.json"
     if p.exists():
         sources[pid] = ("rerun", json.loads(p.read_text(encoding="utf-8")))
 

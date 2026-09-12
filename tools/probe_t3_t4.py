@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 """核实 T3 三个子项是否已 apply，以及 T4（L2 实体聚类）已有的基础。"""
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import os
 
-Q = r'D:\kg-demo\data\quality'
+Q = str(ROOT / 'data/quality')
 
 # T4 的基础：别名映射表
 p = os.path.join(Q, 'entity-alias-map.json')

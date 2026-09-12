@@ -22,6 +22,10 @@
   python tools/sync_graph.py            # dry-run
   python tools/sync_graph.py --apply
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import sys
@@ -29,11 +33,11 @@ import time
 from collections import Counter
 from pathlib import Path
 
-sys.path.insert(0, r"D:\kg-demo\src")
+sys.path.insert(0, str(ROOT / "src"))
 from graph_store import Neo4jStore  # noqa: E402
 
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
-OUT = Path(r"D:\kg-demo\data\quality")
+GRAPHS = ROOT / "data/corpus/graphs"
+OUT = ROOT / "data/quality"
 BACKUP = OUT / "backup"
 
 NEO4J = dict(uri="bolt://localhost:7687", user="neo4j", password="kgdemo2026")

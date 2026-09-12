@@ -19,6 +19,10 @@ Fleiss' κ 要求等量、Cohen's κ 只支持 2 人，α 是唯一规范选择�
 用法：
   python tools/diagnose_relations.py --paper 2012.00456v1 --pages 12
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
 import re
@@ -26,11 +30,11 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-sys.path.insert(0, r"D:\kg-demo\src")
+sys.path.insert(0, str(ROOT / "src"))
 from kg_extractor import _names_are_duplicates  # noqa: E402
 
-GOLD_DIR = Path(r"D:\kg-demo\data\gold")
-GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
+GOLD_DIR = ROOT / "data/gold"
+GRAPHS = ROOT / "data/corpus/graphs"
 
 # ── 谓词语义家族（基于本体 15 类关系）──
 REL_FAMILY = {

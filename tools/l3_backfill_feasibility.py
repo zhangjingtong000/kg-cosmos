@@ -11,12 +11,16 @@ B 是否可行，取决于三个可查的事实：
      出现过说明是真实体、只是没被抽成节点；没出现过才是噪声；
   ③ 能否给它们定一个 type（从边另一端节点的类型推断）。
 """
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+from pathlib import Path as _Path
+_HERE = _Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
-VERIFY = Path(r'D:\kg-demo\data\quality\relation-verify-all.json')
-GRAPH = Path(r'D:\kg-demo\data\corpus\graphs')
+VERIFY = ROOT / 'data/quality/relation-verify-all.json'
+GRAPH = ROOT / 'data/corpus/graphs'
 
 
 def norm(s):
@@ -105,7 +109,7 @@ def main():
                          'guessed_type': (neighbour_types[n].most_common(1) or [('—', 0)])[0][0]}
                         for n, c in miss_occ.most_common(80)],
     }
-    p = Path(r'D:\kg-demo\data\quality\l3-backfill-feasibility.json')
+    p = ROOT / 'data/quality/l3-backfill-feasibility.json'
     p.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'\n报告已写出: {p}')
 
