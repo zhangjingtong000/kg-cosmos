@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KG Cosmos · 问题子图</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(ellipse 120% 60% at 50% 0%, #0d1730 0%, #070c1a 46%, #04070f 100%);
+    color: #dfe8ff; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+  }
+  header { flex: 0 0 auto; padding: 20px 26px 12px; }
+  header small { display: block; color: rgba(181,203,235,.55); font-size: 10.5px;
+                 letter-spacing: .16em; text-transform: uppercase; }
+  header h1 { margin: 5px 0 0; font-size: 19px; font-weight: 560; }
+  header p { margin: 7px 0 0; font-size: 11.5px; line-height: 1.7; max-width: 880px;
+             color: rgba(170,199,240,.6); }
+
+  .ask { flex: 0 0 auto; display: flex; gap: 8px; align-items: center;
+         padding: 0 26px 10px; flex-wrap: wrap; }
+  #q { flex: 1 1 320px; min-width: 220px; font: inherit; font-size: 13px; color: #dbe7ff;
+       background: rgba(12,19,38,.94); border: 1px solid rgba(140,170,255,.26);
+       border-radius: 9px; padding: 10px 12px; outline: none; }
+  #q:focus { border-color: rgba(150,190,255,.62); }
+  #go { font: inherit; font-size: 12.5px; cursor: pointer; color: #06101f;
+        background: linear-gradient(180deg,#9fc4ff,#6f9ff0); border: 0;
+        border-radius: 9px; padding: 10px 18px; font-weight: 560; }
+  #go:hover { filter: brightness(1.08); }
+  .ex { font-size: 11px; color: rgba(159,196,255,.75); cursor: pointer;
+        border: 1px solid rgba(140,170,255,.22); border-radius: 20px; padding: 3px 10px;
+        background: rgba(120,160,255,.07); }
+  .ex:hover { background: rgba(120,160,255,.2); color: #fff; }
+
+  .stage { flex: 1 1 auto; display: flex; min-height: 0; padding: 0 26px 22px; gap: 14px; }
+  #graph { flex: 1 1 auto; min-width: 0; background: rgba(8,13,28,.6);
+           border: 1px solid rgba(140,170,255,.14); border-radius: 12px;
+           position: relative; overflow: hidden; }
+  #graph svg { display: block; width: 100%; height: 100%; }
+  #side { flex: 0 0 306px; display: flex; flex-direction: column; gap: 10px;
+          min-height: 0; overflow-y: auto; }
+  #side .box { background: rgba(8,13,28,.72); border: 1px solid rgba(140,170,255,.14);
+               border-radius: 11px; padding: 11px 13px; }
+  #side h3 { margin: 0 0 8px; font-size: 10.5px; letter-spacing: .13em;
+             text-transform: uppercase; color: rgba(181,203,235,.72);
+             padding-bottom: 5px; border-bottom: 1px solid rgba(140,170,255,.1); }
+  #side .row { display: flex; align-items: baseline; gap: 8px; font-size: 11.5px;
+               padding: 3px 0; }
+  #side .row .nm { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis;
+                   white-space: nowrap; color: rgba(214,228,250,.88); cursor: pointer; }
+  #side .row .nm:hover { color: #fff; text-decoration: underline; }
+  #side .row .dg { color: rgba(160,190,235,.55); font-size: 10.5px;
+                   font-variant-numeric: tabular-nums; }
+  #side .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+  #hint2 { position: absolute; inset: 0; display: flex; align-items: center;
+           justify-content: center; text-align: center; padding: 30px;
+           font-size: 12.5px; line-height: 1.9; color: rgba(160,190,235,.5); }
+  .empty { font-size: 11.5px; color: rgba(160,190,235,.5); padding: 6px 0; }
+  footer { flex: 0 0 auto; padding: 0 26px 14px; font-size: 10.5px;
+           color: rgba(150,190,255,.42); line-height: 1.7; }
+  mark { background: rgba(255,214,120,.26); color: #fff; border-radius: 3px; padding: 0 2px; }
+</style>
+</head>
+<body>
+<header>
+  <small>kg cosmos · path qa</small>
+  <h1>问题子图</h1>
+  <p>输入一句问法，系统在图上定位相关实体，抽出它们周围的 2 跳子图。
+     这是「图谱能不能被用来回答问题」的最小外部效度检验——
+     对应调研里 MINE（Measure of Information in Nodes and Edges）的思路：
+     不看内部指标，看图谱能否支撑一次真实检索。</p>
+</header>
+
+<div class="ask">
+  <input id="q" type="search" placeholder="例如：TransE 的局限 / knowledge graph embedding / 大模型与可解释性"
+         autocomplete="off" spellcheck="false">
+  <button id="go" type="button">提问</button>
+  <span id="examples"></span>
+</div>
+
+<div class="stage">
+  <div id="graph"><div id="hint2">正在加载图谱…</div></div>
+  <aside id="side">
+    <div class="box"><h3>命中的实体</h3><div id="seeds"><div class="empty">—</div></div></div>
+    <div class="box"><h3>子图统计</h3><div id="stats"><div class="empty">—</div></div></div>
+    <div class="box"><h3>子图内的关系</h3><div id="edges"><div class="empty">—</div></div></div>
+  </aside>
+</div>
+
+<footer id="foot">数据：<code>web/kg-data/nebula.json</code>（Louvain 社区的概览层导出）。
+  检索是字面匹配 + BFS，不含语义模型——匹配不到时应当如实显示"没有命中"，而不是猜。</footer>
+
+<script>
+const esc = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+const TYPE_COLORS = {
+  Person: '#ff7f7f', Concept: '#7fb3ff', Method: '#7fffb3', Document: '#ffd97f',
+  Process: '#c77fff', System: '#7fffff', Artifact: '#ff9f7f', Component: '#b3ff7f',
+  Event: '#ff7fd9', Metric: '#7fd9ff', Dataset: '#d9ff7f', Organization: '#ffbf7f',
+  Location: '#9f7fff', Tool: '#7fffd9', Material: '#d9d9d9',
+};
+const TCOL = (t) => TYPE_COLORS[t] || '#9fb6d8';
+
+let NODES = [], ADJ = new Map(), BY_NAME = new Map();
+const MAX_SEEDS = 6, HOPS = 2, MAX_NODES = 70;
+
+function buildIndex(data) {
+  NODES = data.nodes;
+  for (const n of NODES) {
+    const key = n.id.toLowerCase();
+    if (!BY_NAME.has(key)) BY_NAME.set(key, []);
+    BY_NAME.get(key).push(n);
+    ADJ.set(n.id, []);
+  }
+  for (const e of data.edges) {
+    const [a, b, t] = e;
+    if (ADJ.has(a) && ADJ.has(b)) {
+      ADJ.get(a).push({ to: b, type: t || 'RELATED_TO' });
+      ADJ.get(b).push({ to: a, type: t || 'RELATED_TO' });
+    }
+  }
+  document.getElementById('hint2').innerHTML =
+    `图谱已就绪：<b style="color:#cfe0ff">${NODES.length}</b> 个实体、`
+    + `<b style="color:#cfe0ff">${data.edges.length}</b> 条关系。<br>输入一句问法开始检索。`;
+}
+
+/** 从问题里找种子实体：实体名整串出现在问题中就命中（忽略大小写）。
+ *  不用分词——中文问句分词不可靠，而实体名本身是英文短语，整串匹配更稳。
+ *
+ *  关键一步是**丢掉被更长命中包含的短名字**：否则
+ *  「knowledge graph embedding」会同时命中 `Graph`、`Embedding`、`Knowledge Graph`，
+ *  子图会被通用词带偏；而「TransE 的局限」会额外命中毫无意义的子串 `Tran`。
+ *  排除之后只保留"最长的那几个说法"，再按图上的度数排序取前 MAX_SEEDS 个。 */
+function findSeeds(question) {
+  const ql = question.toLowerCase().trim();
+  if (!ql) return [];
+  const hits = [];
+  for (const n of NODES) {
+    const id = n.id.toLowerCase();
+    if (id.length < 3) continue;              // 太短的名字（如 "KG"）会到处误命中
+    if (ql.includes(id)) hits.push({ node: n, len: id.length });
+  }
+  hits.sort((a, b) => b.len - a.len);
+  const kept = [];
+  for (const h of hits) {
+    const hh = h.node.id.toLowerCase();
+    if (kept.some(k => k.node.id.toLowerCase().includes(hh))) continue;
+    kept.push(h);
+    if (kept.length >= MAX_SEEDS * 4) break;
+  }
+  kept.sort((a, b) => (b.node.d || 0) - (a.node.d || 0));
+  const seen = new Set(), out = [];
+  for (const h of kept) {
+    if (seen.has(h.node.id)) continue;
+    seen.add(h.node.id);
+    out.push(h.node);
+    if (out.length >= MAX_SEEDS) break;
+  }
+  return out;
+}
+
+/** 从种子做 BFS 取子图，节点数封顶 MAX_NODES。 */
+function subgraph(seeds) {
+  const keep = new Set(seeds.map(s => s.id));
+  const dist = new Map(seeds.map(s => [s.id, 0]));
+  let frontier = seeds.map(s => s.id);
+  for (let hop = 1; hop <= HOPS; hop++) {
+    const next = [];
+    for (const id of frontier) {
+      for (const e of (ADJ.get(id) || [])) {
+        if (keep.has(e.to)) continue;
+        if (keep.size >= MAX_NODES) break;
+        keep.add(e.to);
+        dist.set(e.to, hop);
+        next.push(e.to);
+      }
+      if (keep.size >= MAX_NODES) break;
+    }
+    frontier = next;
+    if (!frontier.length || keep.size >= MAX_NODES) break;
+  }
+  const nodes = NODES.filter(n => keep.has(n.id));
+  const links = [];
+  const seen = new Set();
+  for (const n of nodes) {
+    for (const e of (ADJ.get(n.id) || [])) {
+      if (!keep.has(e.to)) continue;
+      const k = n.id < e.to ? n.id + '\x00' + e.to : e.to + '\x00' + n.id;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      links.push({ a: n.id, b: e.to, type: e.type });
+    }
+  }
+  return { nodes, links, dist };
+}
+
+/** 极简力导向：Fruchterman-Reingold 的简化版。
+ *  节点数封顶 70，O(n²) 完全够用，也就不必引任何图布局库。 */
+function layout(nodes, links, W, H) {
+  const N = nodes.length;
+  const idx = new Map(nodes.map((n, i) => [n.id, i]));
+  const P = nodes.map((n, i) => {
+    const a = (i / N) * Math.PI * 2;
+    return { x: W / 2 + Math.cos(a) * Math.min(W, H) * 0.28 + (Math.random() - .5) * 8,
+             y: H / 2 + Math.sin(a) * Math.min(W, H) * 0.28 + (Math.random() - .5) * 8 };
+  });
+  const L = links.map(l => [idx.get(l.a), idx.get(l.b)]).filter(([a, b]) => a != null && b != null);
+  const k = Math.sqrt((W * H) / Math.max(1, N)) * 0.62;
+  let temp = Math.min(W, H) * 0.14;
+  for (let it = 0; it < 320; it++) {
+    const dx = new Float64Array(N), dy = new Float64Array(N);
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        let vx = P[i].x - P[j].x, vy = P[i].y - P[j].y;
+        let d2 = vx * vx + vy * vy;
+        if (d2 < 0.01) { vx = (Math.random() - .5) * .6; vy = (Math.random() - .5) * .6; d2 = .36; }
+        const d = Math.sqrt(d2), f = (k * k) / d;
+        const ux = vx / d, uy = vy / d;
+        dx[i] += ux * f; dy[i] += uy * f;
+        dx[j] -= ux * f; dy[j] -= uy * f;
+      }
+    }
+    for (const [a, b] of L) {
+      let vx = P[a].x - P[b].x, vy = P[a].y - P[b].y;
+      const d = Math.max(0.01, Math.hypot(vx, vy)), f = (d * d) / k;
+      const ux = vx / d, uy = vy / d;
+      dx[a] -= ux * f; dy[a] -= uy * f;
+      dx[b] += ux * f; dy[b] += uy * f;
+    }
+    for (let i = 0; i < N; i++) {
+      // 向心引力：防止孤立簇被斥力推到画布外
+      dx[i] += (W / 2 - P[i].x) * 0.012;
+      dy[i] += (H / 2 - P[i].y) * 0.012;
+      const d = Math.hypot(dx[i], dy[i]) || 1;
+      const lim = Math.min(d, temp);
+      P[i].x += (dx[i] / d) * lim;
+      P[i].y += (dy[i] / d) * lim;
+      P[i].x = Math.max(16, Math.min(W - 16, P[i].x));
+      P[i].y = Math.max(16, Math.min(H - 16, P[i].y));
+    }
+    temp *= 0.985;
+  }
+  return { P, L };
+}
+
+function render(question, seeds, sg) {
+  const box = document.getElementById('graph');
+  const W = box.clientWidth, H = box.clientHeight;
+  if (!sg.nodes.length) { box.innerHTML = '<div id="hint2">没有命中任何实体。<br>换一个更具体的名字试试。</div>'; return; }
+  const { P, L } = layout(sg.nodes, sg.links, W, H);
+  const idx = new Map(sg.nodes.map((n, i) => [n.id, i]));
+  const deg = new Map();
+  for (const l of sg.links) {
+    deg.set(l.a, (deg.get(l.a) || 0) + 1);
+    deg.set(l.b, (deg.get(l.b) || 0) + 1);
+  }
+  const maxDeg = Math.max(1, ...deg.values());
+  const seedSet = new Set(seeds.map(s => s.id));
+  const nodeR = (id) => 3.4 + 9 * Math.sqrt((deg.get(id) || 0) / maxDeg);
+
+  // 标签分配：种子必给，其余按子图内度数降序补，**逐个做矩形避让**，上限 9 个。
+  // 之前按 maxDeg 的固定比例取，在长尾子图里可能一个都取不到（实测只剩 1 个）；
+  // 但单纯加大数量又会让中心区糊成一团（实测 10 个时中间完全重叠）。
+  // 取前 K 个 + 避让，两头的问题都能解决。
+  const labelSet = new Set();
+  const placedRects = [];
+  const tryLabel = (n) => {
+    const i = idx.get(n.id);
+    const w = n.id.length * 5.9 + 6, h = 14;
+    const rect = { x: P[i].x - w / 2, y: P[i].y + nodeR(n.id) + 3, w, h };
+    const hit = placedRects.some(q => !(rect.x > q.x + q.w || rect.x + rect.w < q.x
+                                     || rect.y > q.y + q.h || rect.y + rect.h < q.y));
+    if (hit) return false;
+    placedRects.push(rect);
+    labelSet.add(n.id);
+    return true;
+  };
+  for (const n of sg.nodes) if (seedSet.has(n.id) && labelSet.size < 9) tryLabel(n);
+  for (const n of [...sg.nodes].sort((a, b) => (deg.get(b.id) || 0) - (deg.get(a.id) || 0))) {
+    if (labelSet.size >= 9) break;
+    if (labelSet.has(n.id)) continue;
+    tryLabel(n);
+  }
+
+  const parts = [];
+  parts.push('<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">');
+  parts.push('<g stroke-linecap="round">');
+  for (const [a, b] of L) {
+    const pa = P[a], pb = P[b];
+    parts.push(`<line x1="${pa.x.toFixed(1)}" y1="${pa.y.toFixed(1)}" x2="${pb.x.toFixed(1)}" y2="${pb.y.toFixed(1)}" stroke="rgba(140,180,255,0.19)" stroke-width="1"/>`);
+  }
+  parts.push('</g>');
+  sg.nodes.forEach((n, i) => {
+    const d = deg.get(n.id) || 0;
+    const r = nodeR(n.id);
+    const c = TCOL(n.t);
+    const isSeed = seedSet.has(n.id);
+    const lbl = labelSet.has(n.id) ? n.id : '';
+    if (isSeed) {
+      parts.push(`<circle class="ring" cx="${P[i].x.toFixed(1)}" cy="${P[i].y.toFixed(1)}" r="${(r + 6).toFixed(1)}" fill="none" stroke="${c}" stroke-opacity="0.5" stroke-width="1.2"/>`);
+    }
+    parts.push(`<circle class="n" cx="${P[i].x.toFixed(1)}" cy="${P[i].y.toFixed(1)}" r="${r.toFixed(1)}" fill="${c}" fill-opacity="${isSeed ? 0.95 : 0.72}"><title>${esc(n.id)} · ${esc(n.t || '')} · 子图内 ${d} 条关系</title></circle>`);
+    if (lbl) {
+      parts.push(`<text x="${P[i].x.toFixed(1)}" y="${(P[i].y + r + 11).toFixed(1)}" text-anchor="middle" font-size="${isSeed ? 11 : 10}" fill="${isSeed ? '#eaf2ff' : 'rgba(214,228,250,.72)'}" font-family="PingFang SC, Microsoft YaHei, sans-serif">${esc(lbl.length > 22 ? lbl.slice(0, 21) + '…' : lbl)}</text>`);
+    }
+  });
+  parts.push('</svg>');
+  box.innerHTML = parts.join('');
+
+  // 侧栏
+  document.getElementById('seeds').innerHTML = seeds.length
+    ? seeds.map(s => `<div class="row"><span class="dot" style="background:${TCOL(s.t)}"></span>
+        <span class="nm" title="${esc(s.id)}">${esc(s.id)}</span>
+        <span class="dg">${esc(s.t || '')} · ${s.d || 0}</span></div>`).join('')
+    : '<div class="empty">没有命中</div>';
+
+  const tcount = new Map();
+  for (const n of sg.nodes) tcount.set(n.t, (tcount.get(n.t) || 0) + 1);
+  const top = [...tcount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  document.getElementById('stats').innerHTML =
+    `<div class="row"><span class="nm" style="cursor:default">子图实体</span><span class="dg">${sg.nodes.length}</span></div>
+     <div class="row"><span class="nm" style="cursor:default">子图关系</span><span class="dg">${sg.links.length}</span></div>`
+    + top.map(([t, c]) => `<div class="row"><span class="dot" style="background:${TCOL(t)}"></span>
+        <span class="nm" style="cursor:default">${esc(t || '未知')}</span><span class="dg">${c}</span></div>`).join('');
+
+  const ecount = new Map();
+  for (const l of sg.links) ecount.set(l.type, (ecount.get(l.type) || 0) + 1);
+  document.getElementById('edges').innerHTML = ecount.size
+    ? [...ecount.entries()].sort((a, b) => b[1] - a[1])
+        .map(([t, c]) => `<div class="row"><span class="nm" style="cursor:default">${esc(t)}</span>
+          <span class="dg">${c}</span></div>`).join('')
+    : '<div class="empty">—</div>';
+}
+
+let DATA = null;
+
+function ask() {
+  const q = document.getElementById('q').value.trim();
+  if (!q || !DATA) return;
+  const seeds = findSeeds(q);
+  const sg = seeds.length ? subgraph(seeds)
+    : { nodes: [], links: [], dist: new Map() };
+  render(q, seeds, sg);
+  window.__lastAsk = { q, seeds: seeds.map(s => s.id),
+                       nodes: sg.nodes.length, links: sg.links.length };
+}
+
+function boot(data) {
+  DATA = data;
+  buildIndex(data);
+  const ex = ['TransE 的局限', 'knowledge graph embedding', 'large language model'];
+  document.getElementById('examples').innerHTML = ex
+    .map(e => `<span class="ex" data-q="${esc(e)}">${esc(e)}</span>`).join(' ');
+  document.querySelectorAll('.ex').forEach(el =>
+    el.addEventListener('click', () => {
+      document.getElementById('q').value = el.dataset.q;
+      ask();
+    }));
+  document.getElementById('go').addEventListener('click', ask);
+  document.getElementById('q').addEventListener('keydown', e => {
+    if (e.key === 'Enter') ask();
+  });
+  addEventListener('resize', () => { if (window.__lastAsk) ask(); });
+  window.__ready = true;
+}
+
+fetch('./kg-data/nebula.json')
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(boot)
+  .catch(e => {
+    document.getElementById('hint2').innerHTML =
+      '<span style="color:#ffb27f">图谱加载失败：' + esc(e.message) + '</span>';
+    window.__ready = true;
+  });
+</script>
+</body>
+</html>
