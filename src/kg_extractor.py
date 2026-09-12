@@ -958,69 +958,12 @@ def parse_relations(raw: str) -> list[dict]:
 
 # ── Chunking ──────────────────────────────────────────────
 
-def chunk_text(text: str, max_chars: int = 500, overlap_ratio: float = 0.3) -> list[str]:
-    """
-    Structure-aware chunking with sliding window overlap.
-
-    - Splits on paragraph/sentence boundaries
-    - Keeps paragraphs intact when possible
-    - Overlap: last N chars of previous chunk prepended to next chunk
-    - Falls back to sentence splitting for very long paragraphs
-    """
-    if len(text) <= max_chars:
-        return [text]
-
-    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
-    chunks = []
-    current = ""
-
-    for para in paragraphs:
-        # If adding this paragraph fits, do it
-        if len(current) + len(para) + 2 <= max_chars:
-            current = (current + "\n\n" + para).strip() if current else para
-        else:
-            # Current chunk is full → save it
-            if current:
-                chunks.append(current)
-            # If this paragraph alone is too long, split by sentences
-            if len(para) > max_chars:
-                sentences = [s.strip() + "." for s in para.replace("!", ".").replace("?", ".").split(".") if s.strip()]
-                sub = ""
-                for sent in sentences:
-                    if len(sub) + len(sent) <= max_chars:
-                        sub = (sub + " " + sent).strip() if sub else sent
-                    else:
-                        if sub:
-                            chunks.append(sub)
-                        sub = sent
-                if sub:
-                    current = sub
-                else:
-                    current = ""
-            else:
-                current = para
-
-    if current:
-        chunks.append(current)
-
-    # Apply sliding window overlap
-    if overlap_ratio > 0 and len(chunks) > 1:
-        overlapped = [chunks[0]]
-        overlap_chars = int(max_chars * overlap_ratio)
-        for i in range(1, len(chunks)):
-            prev = chunks[i - 1]
-            if len(prev) > overlap_chars:
-                prefix = prev[-overlap_chars:]
-                # Start overlap at a word boundary
-                space_idx = prefix.find(" ")
-                if space_idx > 0:
-                    prefix = prefix[space_idx:].strip()
-                overlapped.append(prefix + "\n\n" + chunks[i])
-            else:
-                overlapped.append(chunks[i])
-        chunks = overlapped
-
-    return chunks
+# `chunk_text` 统一由 pdf_parser 提供（2026-09-12 去重）。
+# 此处曾有一份与 pdf_parser 逐行重复的实现，唯一差别是空文本时返回
+# 含空串的列表而非空列表——那会往下游多送一个空 chunk。
+# 两份实现并存本身就是 ERROR_CASES 案例 12 说的「同一规则写两处」，
+# 所以合并成一份而不是各留一份。
+from pdf_parser import chunk_text  # noqa: F401  (re-export 供既有调用方使用)
 
 
 def deduplicate_entities(entities: list[dict], mode: str = "local") -> list[dict]:
