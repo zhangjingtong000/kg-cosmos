@@ -63,8 +63,10 @@ def load_annotations(paper: str):
 def build_matrix(units_by_annotator, fill):
     """构建 (M_annotators, N_units) 可靠性矩阵。
 
-    fill=0.0  ：未列出记为 0（本项目的正确口径）
-    fill=nan  ：未列出记为缺失（对照口径）
+    fill=0.0  ：未列出记为 0 —— **本脚本主报的口径**（唯一可行，原因见
+                `alpha_of` 的说明：缺失口径下决策空间退化为单类别）。
+                操作性语义 = 「该标注者未采纳此候选」。
+    fill=nan  ：未列出记为缺失 —— 保留作对照，但在这份数据上 α 不可定义。
     """
     import numpy as np
 
@@ -82,6 +84,22 @@ def build_matrix(units_by_annotator, fill):
 
 
 def alpha_of(units_by_annotator, fill):
+    """算 Krippendorff α（nominal）。
+
+    ⚠️ **`fill=nan` 在这份数据上数学不可定义，不是"另一种口径"。**
+    标注数据只记录了「谁列入了哪些候选项」，没有任何"明确拒绝"的记录；
+    若把未列入记为缺失，矩阵的非缺失值就**全是 1**，决策空间退化为
+    单类别 ⇒ 期望不一致度 $D_e = 0$ ⇒ α 的分母为 0。
+    官方包的报错形式是 `RuntimeWarning: invalid value encountered in
+    scalar divide` 后返回 `nan`，不是异常——很容易被误读成"算不出来但可以绕"。
+
+    `value_domain=[0, 1]` 仍需显式给出：否则官方包会从数据推断值域，
+    在只有 1 的情形下抛 `There has to be more than one value in the domain`。
+
+    因此 **`fill=0.0` 是本项目唯一可行、也是主报的口径**。它的操作性语义是
+    「该标注者未采纳此候选」——由标注指南要求逐条给出有原文依据的条目所支撑，
+    与"必须逐项打勾的封闭式问卷"不同，这个语义必须在论文里写清。
+    """
     import numpy as np
     import krippendorff
 
@@ -91,9 +109,9 @@ def alpha_of(units_by_annotator, fill):
             a = krippendorff.alpha(
                 reliability_data=M,
                 level_of_measurement="nominal",
+                value_domain=[0, 1],
             )
         except ValueError:
-            # nan 口径下，只被 1 个标注者提出的单元使取值域退化为单值
             return float("nan")
     return float(a)
 
@@ -218,10 +236,12 @@ def run_paper(paper: str):
         print(f"   支持度分布（被 k 个标注者同时列出）: {unit_support(sets)}")
 
         a_zero = alpha_of(sets, 0.0)
-        print(f"   ★ Krippendorff α (nominal, 未列出=0)   = {a_zero:.4f}")
-
         a_nan = alpha_of(sets, float("nan"))
-        print(f"     Krippendorff α (nominal, 未列出=nan) = {a_nan:.4f}   ← 对照")
+        multi = sum(v for k, v in unit_support(sets).items() if int(k) >= 2)
+        print(f"   ★ α (nominal, 未列出=0)   = {a_zero:.4f}   ← 唯一可行口径（见 alpha_of 注释）")
+        print(f"     α (nominal, 未列出=nan) = {a_nan:.4f}"
+              f"   ← 数学上不可定义：非缺失值全为 1，决策空间退化为单类别")
+        print(f"     被 ≥2 人标注过的单元: {multi} / {len(all_units)}")
 
         pj = jaccard_pairs(sets)
         print(f"     成对集合相似度（非 chance-corrected）  = {pj*100:.1f}%")
@@ -245,19 +265,20 @@ def run_paper(paper: str):
         pj_alias = jaccard_pairs(merged_sets)
         print(f"   ── 对照口径：先按 _names_are_duplicates(0.93) 聚类 ──")
         print(f"      簇数 {n_clusters}（字面口径为 {len(all_units)}）")
-        print(f"      α (nominal)                  = {a_alias:.4f}")
+        print(f"      α (未列出=0)                 = {a_alias:.4f}")
         print(f"      成对集合相似度                = {pj_alias*100:.1f}%")
 
         report["layers"][layer] = {
             "unit_union": len(all_units),
+            "units_multi_annotated": multi,
             "alpha_nominal_zero_filled": round(a_zero, 4),
-            "alpha_nominal_nan": None if a_nan != a_nan else round(a_nan, 4),
+            "alpha_nominal_nan_undefined": None if a_nan != a_nan else round(a_nan, 4),
             "pairwise_jaccard": round(pj, 4),
             "support_distribution": {str(k): v for k, v in unit_support(sets).items()},
             "leave_one_out": loo,
             "alias_aware": {
                 "n_clusters": n_clusters,
-                "alpha_nominal": round(a_alias, 4),
+                "alpha_nominal_zero_filled": round(a_alias, 4),
                 "pairwise_jaccard": round(pj_alias, 4),
             },
         }
