@@ -21,6 +21,15 @@
     padding: 2px 6px 3px;
     box-shadow: 0 1px 7px rgba(0, 0, 0, .55);
   }
+  /* 概览层的社区标签也补一层**更轻**的底板。
+     原先它只有 text-shadow——而社区名正好落在加色混合（AdditiveBlending）的
+     星云亮区上，那里的背景亮度接近纯白，白字对比度很低。
+     底板比实体标签淡一些，既提对比度，又不至于把星云压成一排色板。 */
+  .label:not(.entity) {
+    background: rgba(5, 9, 20, .44);
+    border-radius: 7px;
+    padding: 3px 10px 4px;
+  }
   .label b { display: block; font-size: 13px; font-weight: 550; }
   .label small { display: block; margin-top: 4px; color: rgba(202,220,244,.58); font-size: 10px; }
   .header { position: fixed; inset: 28px auto auto 32px; z-index: 3; color: rgba(232,241,255,.88); pointer-events: none; transition: opacity .35s ease; }
@@ -304,6 +313,20 @@ const cloudById = new Map();
 const cloudObjects = [];
 function seeded(seed) { let state = seed >>> 0; return () => ((state = (state * 1664525 + 1013904223) >>> 0) / 4294967296); }
 
+// ⚠️ 关于 bloom 的一条约束（调研结论，当前实现尚未引入 bloom，先记在这里）。
+//
+// 下面这些 FBM 星云幕是**直接画进渲染目标**的，而 bloom 是**全屏阈值后处理**：
+// 一旦引入 EffectComposer + UnrealBloomPass，整屏的星云亮雾都会被算进阈值，
+// 结果是"边一多整屏泛白"，星云幕会把节点和标签一起糊掉。
+// 调研原文的建议是：**避免对边和背景也开 bloom**，正确姿势是
+// **阈值调高、只让节点溢光、背景保持纯黑**。
+//
+// 因此若将来要加辉光，必须**分层**：
+//   ① 布局/星云幕/纤维 → 单独的 pass，不进 bloom；
+//   ② 节点与选中光晕 → 另一层，只对这一层做 bloom；
+//   ③ 或改用 additive 的 sprite 光晕（当前选中光晕就是这么做的），根本不上后处理。
+// 不走分层而上一个全局 UnrealBloomPass，是这一处最容易踩的坑。
+
 const NEBULA_NOISE = `
   float hash21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
   float noise2(vec2 p) {
@@ -425,6 +448,72 @@ function updateLabelAnchors() {
   });
 }
 updateLabelAnchors();
+
+/**
+ * 概览层社区标签的**可读性处理**（调研里的"CSS2D 深度遮挡"在本项目落地为这一版）。
+ *
+ * 【先说清楚为什么不是"射线-球遮挡"】
+ *   调研指出的 CSS2D 硬伤是"不参与深度遮挡，球后面的标签会透出来"。
+ *   我第一版照此实现了「相机→标签的射线 vs 其他社区核心球」的解析求交，
+ *   但**实测 occludedCount() 恒为 0**。查数据才明白：
+ *   18 个社区用斐波那契球面分布在半径 270~810 的球壳上，相邻间距约 188
+ *   世界单位，而社区可视半径只有 `size * 1.4` ≈ 4.8 —— **相差 40 倍**，
+ *   这个布局下社区之间根本不会互相遮挡。照搬建议而不核对自己的空间尺度，
+ *   就会做出一个"跑得通但永远不触发"的功能。
+ *
+ * 【那实际影响可读性的是什么】
+ *   1. 标签直接压在加色混合的星云亮区上，白字对比度不足（已由 CSS 底板解决，
+ *      见 `.label` 的 background）；
+ *   2. **标签之间在屏幕上重叠** —— 远的那个被近的盖住，这才是本布局下的真问题。
+ *   所以这里改成：按屏幕矩形做碰撞，**远的先算**，被更近的标签压住的就降透明度。
+ *   这与内部视图 `layoutInnerLabels()` 的矩形避让同源，只是 18 个标签代价极低。
+ *
+ * 【为什么不直接隐藏】
+ *   完全隐藏会让用户失去"那边还有个社区"的线索；压到 0.22 仍可辨认，
+ *   同时明确表示它在后面。它与 `updateHoverState` 算出的基础透明度是**相乘**
+ *   关系（基础值存在 `item._baseLabelOpacity`），互不覆盖。
+ */
+const OCCLUDED_LABEL_OPACITY = 0.22;
+const _occDir = new THREE.Vector3();
+const _occTarget = new THREE.Vector3();
+function updateLabelOcclusion() {
+  if (insideActive || !cloudObjects.length) return;   // 内部视图是点云，由矩形避让处理
+  const boxes = [];
+  for (const item of cloudObjects) {
+    if (!item.label || !item.group.visible || !item.labelObject) continue;
+    const wp = item.labelObject.getWorldPosition(_occTarget);
+    const p = _occDir.copy(wp).project(camera);
+    if (p.z > 1) continue;                            // 在相机背后
+    boxes.push({
+      item,
+      x: (p.x * .5 + .5) * innerWidth,
+      y: (-p.y * .5 + .5) * innerHeight,
+      w: item.label.offsetWidth || 96,
+      h: item.label.offsetHeight || 34,
+      dist: camera.position.distanceTo(wp),
+    });
+  }
+  // 远的先算：先占位的都是更近的标签，后来的若与已占位矩形相交 ⇒ 它被挡住了
+  boxes.sort((a, b) => b.dist - a.dist);
+  const placed = [];
+  for (const b of boxes) {
+    const rect = { x: b.x - b.w / 2, y: b.y - b.h / 2, w: b.w, h: b.h };
+    let hit = false;
+    for (const q of placed) {
+      // 留一点余量，避免"擦边"也算重叠
+      if (rect.x < q.x + q.w - 3 && rect.x + rect.w > q.x + 3 &&
+          rect.y < q.y + q.h - 3 && rect.y + rect.h > q.y + 3) { hit = true; break; }
+    }
+    const f = hit ? OCCLUDED_LABEL_OPACITY : 1;
+    if (!hit) placed.push(rect);
+    const item = b.item;
+    if (item._occFactor !== f) {
+      item._occFactor = f;
+      item.label.style.opacity = String((item._baseLabelOpacity == null
+        ? 1 : item._baseLabelOpacity) * f);
+    }
+  }
+}
 
 // Each object below represents an aggregate of many real cross-topic edges.
 // There is deliberately one path per cloud pair, never a visual edge per entity.
@@ -567,7 +656,10 @@ function updateHoverState() {
     item.veils.forEach(veil => veil.material.uniforms.uOpacity.value = veil.userData.baseOpacity * factor);
     item.starField.material.opacity = .56 * factor;
     item.core.material.opacity = .64 * (active ? 1.25 : factor);
-    item.label.style.opacity = factor > .5 ? '1' : '.34';
+    // 记下基础透明度，而不是直接写死到 style 上：
+    // updateLabelOcclusion() 要在这个基础上再乘一个"被挡住"的因子。
+    item._baseLabelOpacity = factor > .5 ? 1 : .34;
+    item.label.style.opacity = String(item._baseLabelOpacity * (item._occFactor || 1));
   });
   filamentObjects.forEach((item) => {
     const connected = activeCloudId && isConnected(item.link, activeCloudId);
@@ -838,6 +930,17 @@ function clearOverlay() {
  * 悬浮或选中的节点权重加满，一定显示。
  */
 const _labelVec = new THREE.Vector3();
+
+// 节点级标签门槛（像素）：屏幕半径小于它就不给标签。
+//
+// 取值依据是**实测**而不是估计：进入社区 0（1023 个节点、半径约 177 世界单位、
+// 相机距离约 R*1.9）后，着色器算出的 gl_PointSize 换回半径大致落在 6~17px，
+// 其中度数中位数为 1 的节点约 6px、枢纽节点约 16px。
+// 所以门槛取 **8px**：正好把"度数低、在屏幕上只是个小点"的那批筛掉，
+// 又不会误伤枢纽。最初按直觉写了 2.6px，实测 1023/1023 全部通过门槛，
+// 等于没设——这类"看起来合理"的常量必须用实测数据校准。
+const LABEL_MIN_SCREEN_R = 8.0;
+
 function layoutInnerLabels() {
   const ud = overlay.userData;
   const labels = ud && ud.labels;
@@ -846,7 +949,8 @@ function layoutInnerLabels() {
 
   const cx = innerWidth / 2, cy = innerHeight / 2;
 
-  // ① 标签预算：相机到社区中心的距离相对于社区半径
+  // ① 标签预算（上限）：相机到社区中心的距离相对于社区半径。
+  //    注意它现在只是**上限**，不再是主要门槛——见下面 ②b 的节点级门槛。
   const rel = camera.position.distanceTo(ud.center) / Math.max(1e-3, ud.radius);
   const zoomT = Math.min(1, Math.max(0, (3.2 - rel) / 2.6));
   const budget = Math.round(6 + zoomT * 46);
@@ -855,16 +959,41 @@ function layoutInnerLabels() {
   let maxDeg = 1;
   for (const n of data.nodes) if ((n.d || 0) > maxDeg) maxDeg = n.d;
   const logMax = Math.log(1 + maxDeg);
+
+  // ②b 节点级屏幕尺寸门槛。
+  //
+  // 旧做法只看"相机离社区中心多远"这个**全局档位**来决定发多少标签，
+  // 粒度太粗：同一个档位下，外围节点已经在屏幕上小到看不清却仍能拿标签，
+  // 而核心节点再大也只是排在预算内。InfraNodus 的做法是把门槛落在
+  // **单个节点的屏幕尺寸**上（sigma.js 的 `labelThreshold` 就是节点屏幕半径），
+  // 这里照此实现。
+  //
+  // 屏幕半径与实体点着色器**同源**：着色器是
+  // `gl_PointSize = aSize * (uScale / -mv.z)`，所以直接读 aSize 属性数组，
+  // 而不是另算一遍归一化度数——那样在切换 Ranking 维度后就会与画面不一致。
+  const aSizeAttr = ud.pts && ud.pts.geometry && ud.pts.geometry.attributes.aSize;
+  const aSizeArr = aSizeAttr ? aSizeAttr.array : null;
+  const uScale = innerHeight * 1.5;          // 与进入社区时写入 uniforms.uScale 的值一致
   const forced = hoverNodeIdx >= 0 ? hoverNodeIdx : selectedNodeIdx;
 
   const cands = [];
+  const _wp = new THREE.Vector3();
   for (let i = 0; i < data.nodes.length; i++) {
     const n = data.nodes[i];
-    _labelVec.set(ud.center.x + n.x, ud.center.y + n.y, ud.center.z + n.z).project(camera);
+    _wp.set(ud.center.x + n.x, ud.center.y + n.y, ud.center.z + n.z);
+    _labelVec.copy(_wp).project(camera);
     if (_labelVec.z > 1 || _labelVec.z < -1) continue;
     const sx = (_labelVec.x * .5 + .5) * innerWidth;
     const sy = (-_labelVec.y * .5 + .5) * innerHeight;
     if (sx < -90 || sx > innerWidth + 90 || sy < -50 || sy > innerHeight + 50) continue;
+
+    // ②b 节点级门槛：屏幕半径（像素）低于阈值就完全没有资格，
+    //     悬浮/选中的节点例外（forced 加 10 分保证它排在前面）。
+    if (aSizeArr && i !== forced) {
+      const screenR = 0.5 * aSizeArr[i] * uScale / Math.max(1e-3, camera.position.distanceTo(_wp));
+      if (screenR < LABEL_MIN_SCREEN_R) continue;
+    }
+
     const dx = (sx - cx) / innerWidth, dy = (sy - cy) / innerHeight;
     const centerScore = Math.max(0, 1 - Math.hypot(dx, dy) * 1.7);
     const degScore = Math.log(1 + (n.d || 0)) / logMax;
@@ -1518,8 +1647,16 @@ function animate() {
     if (x >= 1) targetAnim = null;
   }
 
-  // 内部视图的标签分配：每 5 帧一次（每帧都做会因强制 reflow 拖慢渲染）
-  if (inside !== null && (labelTick++ % 5 === 0)) layoutInnerLabels();
+  // 每 5 帧做一次标签相关计算（每帧都做会因强制 reflow 拖慢渲染）。
+  // tick 必须在这里统一自增：原先自增写在内部视图的分支里，
+  // 概览层时它永远是 0、`% 5 === 0` 每帧成立，遮挡计算会退化成每帧跑。
+  labelTick++;
+  if (labelTick % 5 === 0) {
+    if (inside !== null) layoutInnerLabels();
+    // 概览层社区标签的深度遮挡。必须排在 updateHoverState 之后，
+    // 因为它是在后者算出的透明度上再乘一个因子。
+    else updateLabelOcclusion();
+  }
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
   // L0 概览首帧渲染完成即就绪。直入模式（?c=N）不在这里置位，
@@ -1564,6 +1701,34 @@ window.KGNebula = {
   // 这是"默认外观未被改变"的机器证据——比肉眼看两张截图相似要可靠得多，
   // 因为 THREE 的 sRGB→Linear 色彩管理会让手工算的 RGB 与页面内不一致。
   _internals: () => ({ THREE, ud: overlay.userData }),
+
+  // ── 标签分配与深度遮挡（视觉细节验证用）──
+  // 概览层：多少社区标签因被前面的星云挡住而压暗
+  occludedCount: () => cloudObjects.filter(it => (it._occFactor || 1) < 1).length,
+  labelOpacityHistogram: () => {
+    const h = {};
+    for (const el of document.querySelectorAll('.label')) {
+      const o = el.style.opacity || '1';
+      h[o] = (h[o] || 0) + 1;
+    }
+    return h;
+  },
+  labelMinRadius: () => LABEL_MIN_SCREEN_R,
+  // 内部视图：按"节点级屏幕尺寸门槛"过滤后，有多少节点有资格拿标签
+  eligibleLabelCount: () => {
+    const ud = overlay.userData;
+    if (!ud || !ud.data || !ud.pts) return null;
+    const a = ud.pts.geometry.attributes.aSize.array;
+    const uScale = innerHeight * 1.5;
+    let n = 0;
+    for (let i = 0; i < ud.data.nodes.length; i++) {
+      const nd = ud.data.nodes[i];
+      const wp = new THREE.Vector3(ud.center.x + nd.x, ud.center.y + nd.y, ud.center.z + nd.z);
+      const r = 0.5 * a[i] * uScale / Math.max(1e-3, camera.position.distanceTo(wp));
+      if (r >= LABEL_MIN_SCREEN_R) n++;
+    }
+    return n;
+  },
 
   // ── 原文 PDF 深链（T6.2）──
   // 无头浏览器不渲染 PDF，所以这里只能验"链接构造得对不对"，
