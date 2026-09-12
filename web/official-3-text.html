@@ -45,5 +45,7 @@ const Graph = new ForceGraph3D(elem)
 // Spread nodes a little wider
 Graph.d3Force('charge').strength(-120);
 </script>
+<!-- 离线守卫：本页依赖 esm.sh，断网时给出明确提示而不是白屏。见 web/lib/net-guard.js -->
+<script src="./lib/net-guard.js"></script>
 </body>
 </html>

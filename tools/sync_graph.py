@@ -54,6 +54,12 @@ ONTOLOGY_TYPES = {
     "Location", "Event", "Document",
 }
 
+# 后处理专用标签（不属于本体）。从边反建出来的端点标 Unknown
+# （见 tools/backfill_missing_endpoints.py），它不能被算进"本体 15 类"，
+# 否则 l8 的类型统计、白名单测试都会跟着错——这正是 ERROR_CASES 案例 12
+# 说的"同一规则写两处"。与 src/graph_store.py 的 DERIVED_LABELS 保持一致。
+DERIVED_TYPES = {"Unknown"}
+
 
 def parse_args():
     ap = argparse.ArgumentParser(description="同步快照到 Neo4j")
@@ -152,7 +158,8 @@ def main():
     print(f"\n实体类型分布: {dict(type_counter.most_common(8))}")
     print(f"关系类型 Top 8: {dict(rel_counter.most_common(8))}")
 
-    oob_types = [t for t in type_counter if t not in ONTOLOGY_TYPES]
+    oob_types = [t for t in type_counter
+                 if t not in ONTOLOGY_TYPES and t not in DERIVED_TYPES]
     print(f"\n越界实体类型: {oob_types or '无 ✅'}")
     print(f"越界关系类型: {'无 ✅（已全部标记过滤）' if not oob_edges else '见上'}")
 

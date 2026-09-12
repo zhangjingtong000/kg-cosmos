@@ -31,6 +31,7 @@ import argparse
 import json
 import re
 import shutil
+import sys
 import time
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -39,9 +40,14 @@ GRAPHS = Path(r"D:\kg-demo\data\corpus\graphs")
 OUT = Path(r"D:\kg-demo\data\quality")
 BACKUP = OUT / "backup"
 
-AUTHOR = {"Person", "Organization"}
-CREATABLE = {"Document", "Method", "System", "Tool", "Artifact", "Dataset",
-             "Component", "Concept", "Process", "Metric", "Material"}
+# 端点类型约束来自 src/ontology.py（唯一来源）。
+# 这份是**做改动**的规则，tools/l7_direction_verify.py 是**校验**的规则，
+# 两边必须同源，否则就成了"用补丁的假设验证补丁"。
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'src'))
+from ontology import (  # noqa: E402
+    CREATED_BY_AUTHOR_TYPES as AUTHOR,
+    CREATED_BY_CREATABLE_TYPES as CREATABLE,
+)
 VENUE = re.compile(
     r"\b(conference|workshop|symposium|journal|proceedings|meeting|"
     r"ecml|icml|iclr|neurips|nips|acl|emnlp|naacl|aaai|ijcai|kdd|sigir|www|"

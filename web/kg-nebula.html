@@ -10,7 +10,12 @@
   /* 背景改为纯色 + 极弱的径向层次。原来是 deep-space-galaxy.html 这个 iframe
      （一层会动的星空），按用户要求把所有星星删掉了，只留一点空间感。 */
   body { background: radial-gradient(ellipse 120% 80% at 50% 8%, #0b1428 0%, #060b18 46%, #04070f 100%); }
-  canvas { position: fixed; inset: 0; display: block; }
+  /* 只针对 three.js 的渲染画布，**不能写成裸 `canvas`**：
+     PDF 抽屉里的 `#pdfCanvas` 也是 canvas，会同被 `position:fixed; inset:0`
+     钉到全屏，于是它的绘制原点与文本层错开——实测文本层相对画布偏移 403px，
+     高亮框落在错误的行上。three 的画布在运行时由 renderer.domElement 创建，
+     故在下面创建后给它挂 id。 */
+  #scene-canvas { position: fixed; inset: 0; display: block; }
   .label { color: rgba(239,246,255,.9); font-size: 12px; letter-spacing: .025em; text-align: center; white-space: nowrap; pointer-events: none; text-shadow: 0 2px 10px rgba(0,0,0,.95), 0 0 14px rgba(8,20,45,.9); }
   /* 实体标签加半透明底板。社区 Triple 的节点与边是浅蓝（#7ecbff），
      白色文字直接压在上面几乎读不出来；底板让标签不受底图颜色影响。 */
@@ -313,6 +318,9 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setClearColor(0x000000, 0);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
+// 挂 id 让 CSS 能只针对这张画布做全屏定位；不能依赖裸 `canvas` 选择器，
+// 否则 PDF 抽屉里的 #pdfCanvas 也会被钉成全屏（见样式表里的说明）。
+renderer.domElement.id = 'scene-canvas';
 document.body.appendChild(renderer.domElement);
 
 const labelRenderer = new CSS2DRenderer();
@@ -997,9 +1005,19 @@ document.getElementById('pdfPrev').addEventListener('click', () => pdfStep(-1));
 document.getElementById('pdfNext').addEventListener('click', () => pdfStep(1));
 addEventListener('keydown', (e) => {
   if (!pdfPane.classList.contains('open')) return;
+  if (!['Escape', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+  // `stopImmediatePropagation()` 是**必需**的，不能只靠上面那个 class 判断。
+  //
+  // 机制：window 上还挂着另一个 Escape 监听器（`exitCommunity`）。
+  // 监听器按注册顺序执行，本监听器先跑 `closePdf()` 把 `.open` 移除了，
+  // 于是后面那个监听器再读 `pdfPane.classList.contains('open')` 时已经是 false，
+  // 它照样执行 exitCommunity —— 用户被一并扔回星云概览。
+  // 第一版就是这么"修"的，实测无效（pdf:true→false 的同时 inside:true→false）。
+  // 阻断传播才能在事件层面表达"这个 Escape 已经被消费了"。
+  e.stopImmediatePropagation();
   if (e.key === 'Escape') closePdf();
   else if (e.key === 'ArrowLeft') pdfStep(-1);
-  else if (e.key === 'ArrowRight') pdfStep(1);
+  else pdfStep(1);
 });
 // 事件委托：证据面板是 innerHTML 整体重建的，逐个绑监听会随重渲染失效
 dbody.addEventListener('click', (e) => {
@@ -1334,6 +1352,11 @@ const TYPE_COLORS = {
   Artifact: '#ff9f7f', Component: '#b3ff7f', Event: '#ff7fd9',
   Metric: '#7fd9ff', Dataset: '#d9ff7f', Organization: '#ffbf7f',
   Location: '#9f7fff', Tool: '#7fffd9', Material: '#d9d9d9',
+  // 从边反建出来的端点：它们在原文里出现过、却没被抽成节点，
+  // 因此**类型确实无从得知**（见 tools/backfill_missing_endpoints.py）。
+  // 给一个低饱和中性灰，让"我不知道这是什么类型"在视觉上就是明确的，
+  // 而不是落到通用兜底色上被误读成一个正常类型。
+  Unknown: '#8b95a8',
 };
 const TYPE_FALLBACK = '#9fb6d8';
 
@@ -1434,7 +1457,9 @@ function renderLegend() {
      <div class="lg-note">${colorMode.ranking === 'none'
         ? '排序已关闭，亮度统一'
         : `亮度 = ${colorMode.ranking === 'pagerank' ? 'PageRank' : '度数'}归一（越亮越高）`}
-       · 点大小同源</div>`;
+       · 点大小同源${entries.some(e => e.label === 'Unknown')
+        ? '<br><b style="color:#8b95a8">Unknown</b> = 从边反建、类型未知的端点'
+        : ''}</div>`;
 
   legendEl.querySelectorAll('button').forEach(b => {
     b.addEventListener('click', () => {
@@ -1735,7 +1760,13 @@ renderer.domElement.addEventListener('pointerup', (e) => {
 document.getElementById('back').addEventListener('click', (e) => {
   e.stopPropagation(); exitCommunity();
 });
-addEventListener('keydown', (e) => { if (e.key === 'Escape') exitCommunity(); });
+addEventListener('keydown', (e) => {
+  // 注意：判断条件是"PDF 抽屉当前是否开着"，但**不能只靠它**来避免冲突。
+  // PDF 的监听器注册在前，它处理完 Escape 会移走 `.open`，于是这里读到 false、
+  // 仍然会退出社区。真正的隔离靠 PDF 那侧调用 `stopImmediatePropagation()`。
+  // 这一句只是给"PDF 本来就关着"的常规情形兜底。
+  if (e.key === 'Escape' && !pdfPane.classList.contains('open')) exitCommunity();
+});
 
 const CAM_Z = 50.2;
 const CAM_Z_PORTRAIT = 105.5;

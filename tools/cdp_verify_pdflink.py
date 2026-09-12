@@ -143,7 +143,34 @@ def main():
                 fails.append(f'文本层 span 过少（{spans}），页面可能没渲染出来')
             if hl <= 0:
                 fails.append('**没有高亮任何 span —— PDF 高亮未生效**')
-            # 3. 翻页后高亮应重算
+            # 3. 几何对齐 + Escape 行为（两个曾出过的真 bug）
+            geo = ev(ws, """(() => {
+              const c = document.getElementById('pdfCanvas');
+              const t = document.getElementById('pdfTextLayer');
+              if (!c || !t) return null;
+              const cr = c.getBoundingClientRect(), tr = t.getBoundingClientRect();
+              return {
+                canvasLeft: +cr.left.toFixed(1), canvasWidth: +cr.width.toFixed(1),
+                layerLeft: +tr.left.toFixed(1), layerWidth: +tr.width.toFixed(1),
+                canvasPos: getComputedStyle(c).position,
+                winW: innerWidth,
+                offset: +Math.abs(cr.left - tr.left).toFixed(1),
+              };
+            })()""")
+            print(f'[3] 画布与文本层几何: {json.dumps(geo, ensure_ascii=False) if geo else None}')
+            if not geo:
+                fails.append('取不到 #pdfCanvas / #pdfTextLayer')
+            else:
+                if geo['offset'] > 2:
+                    fails.append(f"画布与文本层左边缘错开 {geo['offset']}px"
+                                 f"（应 <2px）—— 高亮会落在错误的行上")
+                else:
+                    print(f"    OK 左边缘对齐（错开 {geo['offset']}px）")
+                if geo['canvasPos'] == 'fixed' and geo['canvasWidth'] >= geo['winW'] - 1:
+                    fails.append('画布被钉成全屏（position:fixed + 整宽）'
+                                 '—— 全局 canvas 选择器又误伤了 PDF 画布')
+
+            # 4. 翻页后高亮应重算（必须在 Escape 之前测——Escape 会把 PDF 关掉）
             if st.get('pages', 0) > 1:
                 ev(ws, 'KGNebula.pdfStep(1)')
                 time.sleep(1.6)
@@ -151,7 +178,7 @@ def main():
                              'spans: document.querySelectorAll("#pdfTextLayer span").length, '
                              'hl: document.querySelectorAll("#pdfTextLayer span.hl").length})')
                 d2 = json.loads(st2)
-                print(f'[3] 翻到下一页: 第 {d2["p"]} 页，span {d2["spans"]}，高亮 {d2["hl"]}')
+                print(f'[4] 翻到下一页: 第 {d2["p"]} 页，span {d2["spans"]}，高亮 {d2["hl"]}')
                 if d2['p'] != (st.get('page') or 0) + 1:
                     fails.append('翻页未生效')
                 if d2['spans'] <= 0:
@@ -159,10 +186,29 @@ def main():
                 ev(ws, 'KGNebula.pdfStep(-1)')
                 time.sleep(1.2)
 
-        # 4. 关闭释放
+            # 5. Escape 只应关 PDF，不应同时退出社区
+            #    ⚠️ 只派发**一次**：初版派发了两次（先 document 冒泡、再直接 window），
+            #    第二个事件落在"PDF 已关"的状态上，本来就该退社区，
+            #    于是把测试自己写成了红灯。
+            before_esc = ev(ws, """({pdf: KGNebula.pdfOpen(),
+              inside: document.body.classList.contains('inside')})""")
+            ev(ws, "window.dispatchEvent(new KeyboardEvent('keydown',"
+                   "{key:'Escape', bubbles:true}))")
+            time.sleep(0.6)
+            after_esc = ev(ws, """({pdf: KGNebula.pdfOpen(),
+              inside: document.body.classList.contains('inside')})""")
+            print(f'[5] Escape: 之前 {before_esc} → 之后 {after_esc}')
+            if before_esc and before_esc.get('pdf') and after_esc.get('pdf'):
+                fails.append('Escape 没有关闭 PDF 抽屉')
+            if after_esc and not after_esc.get('inside'):
+                fails.append('Escape 把用户一并退出了社区（应只关 PDF）')
+            elif after_esc and after_esc.get('inside'):
+                print('    OK 只关 PDF，仍在社区内')
+
+        # 6. 关闭释放
         closed = ev(ws, 'KGNebula.closePdf()')
         left = ev(ws, 'document.querySelectorAll("#pdfTextLayer span").length')
-        print(f'[4] 关闭后 open={closed}，残留 span={left}')
+        print(f'[6] 关闭后 open={closed}，残留 span={left}')
         if closed is not False:
             fails.append('关闭后抽屉仍打开')
         if left:

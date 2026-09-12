@@ -15,19 +15,21 @@ import collections
 import json
 import os
 import re
+import sys
 
 import numpy as np
+
+sys.path.insert(0, os.path.join(r'D:\kg-demo', 'src'))
+from ontology import RELATION_TYPES   # noqa: E402
 
 Q = r'D:\kg-demo\data\quality'
 VERIFY = os.path.join(Q, 'relation-verify-all.json')
 
-# 15 类本体。APPLIES_TO 属于本体——早先漏掉它会把 3850 条本体边错算成越界，
+# 15 类本体，取值来自 src/ontology.py（唯一来源）。
+# 不再就地抄一份——同一规则写两处的下场见 docs/ERROR_CASES.md 案例 12。
+# APPLIES_TO 属于本体：早先漏掉它会把 3850 条本体边错算成越界，
 # 使"越界边得分更高"的结论失真。
-ONTOLOGY = {
-    'RELATED_TO', 'CREATED_BY', 'USES', 'PART_OF', 'APPLIES_TO', 'PRODUCES',
-    'ENABLES', 'CITES', 'MEASURES', 'LOCATED_AT', 'SUPPORTS', 'COMPARES_WITH',
-    'EVALUATES', 'CAUSES', 'CONTRADICTS',
-}
+ONTOLOGY = set(RELATION_TYPES)
 # 语义上看起来合理、值得考虑收编进本体的候选
 CANDIDATES = ['CONTRIBUTED_TO', 'CONTAINS', 'REPRESENTED_BY', 'ADDRESSES',
               'PREDICTS', 'EVALUATED_ON', 'OUTPERFORMS', 'IMPROVES',

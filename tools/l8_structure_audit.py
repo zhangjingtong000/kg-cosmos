@@ -22,17 +22,26 @@
 import json
 import random
 import statistics as st
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
 import networkx as nx
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'src'))
+from ontology import ENTITY_TYPES, RELATION_TYPES   # noqa: E402
+
 WEB = Path(r"D:\kg-demo\web\kg-data")
 QUAL = Path(r"D:\kg-demo\data\quality")
 OUT = QUAL / "l8-structure-audit.json"
 
-ONTOLOGY_ENTITIES = 15      # 本体实体类型数
-ONTOLOGY_RELATIONS = 15     # 本体关系类型数
+# 本体类数从唯一来源取，不再硬编码字面量。
+# 原先这里写 `ONTOLOGY_ENTITIES = 15`，而 2026-09-12 给存储层加了派生标签
+# Unknown 之后，同一天里"15"与"16"就在两个文件里各说各话——
+# 正是 docs/ERROR_CASES.md 案例 12 说的那类分裂。
+ONTOLOGY_ENTITIES = len(ENTITY_TYPES)
+ONTOLOGY_RELATIONS = len(RELATION_TYPES)
+
 N_RANDOM = 10               # 随机图基线重复次数
 
 

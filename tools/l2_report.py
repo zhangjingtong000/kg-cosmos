@@ -39,12 +39,21 @@ def main():
     summary = am['summary']
 
     names = set()
+    backfilled = set()
     for p in sorted(glob.glob(os.path.join(G, '*.json'))):
         with open(p, encoding='utf-8') as f:
             d = json.load(f)
         for n in d.get('nodes', []):
-            if n.get('name'):
-                names.add(n['name'])
+            if not n.get('name'):
+                continue
+            # ⚠️ 必须排除"从边反建"的节点（_backfilled）。
+            # 反建发生在 L2 归并**之后**（tools/backfill_missing_endpoints.py），
+            # 把它算进 "归并后" 会让 L2 显示"名字反而多了 23.68%" ——
+            # 口径错乱，不是真的归并失败。
+            if n.get('_backfilled'):
+                backfilled.add(n['name'])
+                continue
+            names.add(n['name'])
 
     before = eq.get('unique_names')
     after = len(names)
@@ -54,6 +63,9 @@ def main():
     print('=' * 92)
     print(f'归并前唯一名字 {before}   归并后 {after}   减少 {before - after} '
           f'（{(before - after) / before:.2%}）')
+    if backfilled:
+        print(f'（另有 {len(backfilled)} 个名字是"从边反建"的节点，'
+              f'发生在归并之后，不计入本层）')
     print(f'alias 表 {len(alias)} 条；其中变体名已从节点集消失 '
           f'{sum(1 for k in alias if k not in names)} 条，仍保留 '
           f'{sum(1 for k in alias if k in names)} 条（缩写↔全称两边都是节点）')
@@ -160,13 +172,19 @@ def main():
     print(f'  两条成员互为简单单复数：{plural_pairs} / {len(cands)}')
     print(f'  组内存在"只出现 1 次"的低频变体：{low_freq_variant} / {len(cands)}')
     print()
-    print('  判读：跳过**有依据**（192 组确实类型不同），但**判据本身不可靠**——')
-    print('  变体多是低频出现的名字（÷1），而低频实体的类型标注本身就是噪声：')
-    print('  例如 Link Prediction=Method(×12) vs Link Predictions=Concept(×1)，')
+    print('  判读（2026-09-12 判据已改版，以下为改版后的结论）：')
+    print('  初版判据取"任一成员的类型"，只要不同就跳过 —— 方向对，但判据本身不可靠：')
+    print('  变体多是低频出现的名字，而低频实体的类型标注本身就是噪声。')
+    print('  例：Link Prediction=Method(×12) vs Link Predictions=Concept(×1)，')
     print('  后者只出现一次，被判成 Concept 不足以说明它们是不同实体。')
-    print(f'  而 {plural_pairs} 组是简单单复数对，几乎可以确定是同一实体。')
-    print('  → 结论：这 196 组不应被永久丢弃，应以 SAME_AS(pending) 保留待复核；')
-    print('     若要自动合并，判据应改用"频次加权类型"而不是任一成员的类型。')
+    print()
+    print('  → 改版后按形态分三类（见 tools/entity_normalize.py）：')
+    print('     ① 纯单复数（只差 s/es/ies）无条件合并；')
+    print('     ② 其他近名走"频次加权类型"，主导占比 ≥ 0.80 才合并；')
+    print('     ③ 语义敏感名单（与 L1 共用）一律跳过。')
+    print('    实测把 L2 合并率从 40.8% 提到 97.0%，累计归并 585 组。')
+    print('    同时仍正确拒绝 ComplEx / Complex —— 它们类型恰好都是 Method，')
+    print('    只有敏感名单拦得住（合并会造成实质性错误）。')
 
     if '--write' in sys.argv:
         out = {
@@ -189,10 +207,15 @@ def main():
             s['L2_entity_clustering'] = {
                 'names_before': before,
                 'names_after': after,
+                # 注意 merged_groups 是**本轮**各层的合并组数（判据改版后重跑只有 200），
+                # 而累计归并数 = names_before - names_after = 585
+                # （第一轮 384 + 第二轮 200）。两个数都要给，否则容易被读错。
                 'merged_groups': {'L1_rule': cross.get(('L1', 'merge'), 0),
                                   'L2_fuzzy': cross.get(('L2', 'merge'), 0),
                                   'L4_abbrev': cross.get(('L4', 'merge'), 0),
-                                  'total': totals['merge']},
+                                  'total_this_run': totals['merge']},
+                'cumulative_merged_groups': before - after,
+                'cumulative_reduction_pct': round((before - after) / before * 100, 2) if before else None,
                 'skipped': {'type_conflict': cross.get(('L2', 'skip-type-conflict'), 0),
                             'short': cross.get(('L1', 'skip-short'), 0) + cross.get(('L2', 'skip-short'), 0),
                             'sensitive': cross.get(('L1', 'skip-sensitive'), 0)},
@@ -200,9 +223,12 @@ def main():
                 'pending_same_as': len(cands),
                 'pending_plural_pairs': plural_pairs,
                 'pending_low_freq_variant': low_freq_variant,
-                'criterion_issue': 'skip-type-conflict 用的是"任一成员的类型"，'
-                                   '而 171/196 组含只出现一次的低频变体，其类型标注不可靠；'
-                                   '应改为频次加权类型。',
+                'backfilled_excluded': len(backfilled),
+                'criterion_history': (
+                    '初版判据取"任一成员的类型"，196 组被跳过（其中 183 组只是简单复数）；'
+                    '2026-09-12 改版为「纯单复数无条件合并 + 其他近名走频次加权类型 + '
+                    '语义敏感名单」，L2 合并率 40.8% → 97.0%。'
+                ),
             }
             with open(six, 'w', encoding='utf-8') as f:
                 json.dump(s, f, ensure_ascii=False, indent=2)

@@ -186,11 +186,24 @@ class NetworkXStore:
 class Neo4jStore:
     # 实体与关系的本体白名单（与 kg_extractor 的 ENTITY_TYPES / RELATION_TYPES 一致）。
     # 存储层做最后一道闸：解析器漏掉一次，也不能让越界类型进图。
+    # 实体本体标签（15 类）。**必须与 kg_extractor.ENTITY_TYPES 完全一致**——
+    # tests/test_ontology_whitelist.py 就是守这条不变量的，别往这里加东西。
     ALLOWED_LABELS = {
         "Concept", "Method", "System", "Component", "Process", "Artifact",
         "Dataset", "Metric", "Tool", "Material", "Person", "Organization",
         "Location", "Event", "Document",
     }
+
+    # 后处理专用标签：**不由抽取器产出**，而是由治理脚本写入图中。
+    # 与本体分开声明，是为了让"本体 == 抽取器能力"这条不变量继续成立。
+    #
+    # `Unknown`：从引用它的边反建出来的端点（tools/backfill_missing_endpoints.py，
+    # 2026-09-12 用户决策）。这些实体在原文里出现过、却没被抽成节点，
+    # 类型确实无从得知——与其猜一个（实测邻居推断会把
+    # `Document-Level Relation Extraction` 猜成 `Person`），不如如实标 Unknown，
+    # 前端用中性灰显式区分。若把它混进 ALLOWED_LABELS，
+    # 本体就会变成 16 类，白名单测试与 l8 的口径统计都会跟着错。
+    DERIVED_LABELS = {"Unknown"}
     ALLOWED_RELATION_TYPES = {
         "PART_OF", "USES", "PRODUCES", "MEASURES", "EVALUATES", "COMPARES_WITH",
         "SUPPORTS", "CONTRADICTS", "CAUSES", "ENABLES", "APPLIES_TO", "LOCATED_AT",
@@ -239,13 +252,14 @@ class Neo4jStore:
             return t if t in self.ALLOWED_RELATION_TYPES else "RELATED_TO"
 
         def safe_node_label(s):
-            """节点标签必须命中 15 类本体；大小写归一后仍越界的降级为 Concept。
+            """节点标签必须命中 15 类本体**或**后处理专用标签；
+            大小写归一后仍越界的降级为 Concept。
 
             实测出现过 `system`（小写）这种大小写漂移，也出现过 `ORKG`、`TransE`
             这类实体名被当成类型。
             """
             raw = (s or "").strip()
-            for allowed in self.ALLOWED_LABELS:
+            for allowed in (self.ALLOWED_LABELS | self.DERIVED_LABELS):
                 if raw.lower() == allowed.lower():
                     return allowed
             return "Concept"

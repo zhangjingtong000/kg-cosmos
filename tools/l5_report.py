@@ -21,17 +21,17 @@ import re
 import sys
 
 ROOT = r'D:\kg-demo'
+sys.path.insert(0, os.path.join(ROOT, 'src'))
+from ontology import RELATION_TYPES   # noqa: E402
+
 Q = os.path.join(ROOT, 'data', 'quality')
 GRAPHS = os.path.join(ROOT, 'data', 'corpus', 'graphs')
 VERIFY = os.path.join(Q, 'relation-verify-all.json')
 
-# 15 类本体（与 早先的阶段计划 §4.1 L4 的白名单一致）。
+# 15 类本体。取值来自 src/ontology.py（唯一来源），不再就地抄一份——
+# 抄一份的下场见 docs/ERROR_CASES.md 案例 12。
 # 注意 APPLIES_TO 属于本体——早先漏掉它会把 3850 条本体边错算成越界。
-ONTOLOGY = {
-    'RELATED_TO', 'CREATED_BY', 'USES', 'PART_OF', 'APPLIES_TO', 'PRODUCES',
-    'ENABLES', 'CITES', 'MEASURES', 'LOCATED_AT', 'SUPPORTS', 'COMPARES_WITH',
-    'EVALUATES', 'CAUSES', 'CONTRADICTS',
-}
+ONTOLOGY = set(RELATION_TYPES)
 
 _norm_re = re.compile(r'[^0-9a-z\u4e00-\u9fff]+')
 
