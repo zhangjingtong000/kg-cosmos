@@ -172,6 +172,15 @@ def main():
                 "rate_annotator1": a.get("rate_annotator1"),
                 "rate_annotator2": a.get("rate_annotator2"),
             }
+        # 过滤策略对比：现行 pass 不是最优的，而且即使用最优策略 PPV 也只有 56%
+        # ⇒ L5 的正确定位是"排序信号"而不是"二元过滤器"。
+        p_str = QUAL / "l5-filter-strategy.json"
+        if p_str.exists():
+            st = read(p_str)
+            l5v["filter_strategies"] = st.get("strategies")
+            l5v["filter_coverage_full"] = st.get("coverage_full")
+            l5v["filter_only_h"] = st.get("only_H_returned")
+            l5v["positioning"] = st.get("positioning")
 
     # ── L7 角色违规归因（2026-09-12 新增）──
     l7r = {}

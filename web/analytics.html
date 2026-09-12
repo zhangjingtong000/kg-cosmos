@@ -285,6 +285,27 @@ function boot(D) {
     const sens = v.threshold_sensitivity || [];
     if (sens.length) {
       const hasPpv = sens.some(r => r.ppv != null);
+      // 策略对比表：现行 pass 不是最优的，而且最优策略的 PPV 也只有 56%
+      const strs = v.filter_strategies || [];
+      const cov = v.filter_coverage_full || {};
+      const stratTbl = strs.length ? (
+        `<div class="calnote" style="margin-top:14px"><b>过滤策略对比</b>（` +
+        `PPV/召回来自 200 条分层加权样本；覆盖率来自全量 ${cov.n_total} 条）</div>` +
+        `<table class="sens strat"><thead><tr><th>策略</th><th>覆盖</th><th>PPV</th>` +
+        `<th>召回</th><th>F1</th></tr></thead><tbody>` +
+        strs.filter(s => /^[ABDEHIJ]/.test(s.name)).map(s => {
+          const isBase = /^A /.test(s.name);
+          const isBest = /^H /.test(s.name);
+          const tag = isBase ? ' ← 现行' : (isBest ? ' ← 最优' : '');
+          return `<tr${isBase ? ' style="background:rgba(255,178,127,.06)"' : ''}` +
+            `${isBest ? ' style="background:rgba(179,255,127,.06)"' : ''}>` +
+            `<td>${esc(s.name + tag)}</td><td>${(s.keep * 100).toFixed(1)}%</td>` +
+            `<td>${(s.ppv * 100).toFixed(1)}%</td>` +
+            `<td>${(s.recall * 100).toFixed(1)}%</td><td>${s.f1.toFixed(3)}</td></tr>`;
+        }).join('') + `</tbody></table>` +
+        (v.positioning ? `<div class="calnote"><b>定位结论</b>：${esc(v.positioning)}</div>` : '')
+      ) : '';
+
       document.getElementById('l5vSens').innerHTML =
         `<table class="sens"><thead><tr><th>阈值</th><th>全图通过</th><th>通过率</th>`
         + (hasPpv ? `<th>PPV</th>` : '')
@@ -304,7 +325,8 @@ function boot(D) {
         + `不构成质量证据；有信息量的是 <b>PPV</b>。实测阈值 0.5→0.8 时通过率降 27.6pp`
         + `而 PPV 只升 8.8pp ⇒ <b>它是数量旋钮，不是质量旋钮</b>。<br>`
         + `另有一条独立于模型的证据：用字面规则（规范化后自环）估的假阳性下界`
-        + `<b>随阈值上升</b>（0.696%→0.866%），说明<b>提阈值筛不掉这类明显错误</b>。</div>`;
+        + `<b>随阈值上升</b>（0.696%→0.866%），说明<b>提阈值筛不掉这类明显错误</b>。</div>`
+        + stratTbl;
     }
   }
 

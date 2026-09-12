@@ -29,7 +29,15 @@ EXPECT = [
     ("l5vSec 可见", "document.getElementById('l5vSec').hidden === false"),
     ("l7rSec 可见", "document.getElementById('l7rSec').hidden === false"),
     ("L5 KPI 有 5 个", "document.querySelectorAll('#l5v .kpi').length === 5"),
-    ("阈值表有 5 行", "document.querySelectorAll('#l5vSens table.sens tbody tr').length === 5"),
+    # 注意 `:not(.strat)`：页面现在有两张 `.sens` 表（阈值表 + 策略对比表），
+    # 不加限定会匹配到两张表的所有行。初版就因此误报"阈值表不是 5 行"。
+    ("阈值表有 5 行",
+     "document.querySelectorAll('#l5vSens table.sens:not(.strat) tbody tr').length === 5"),
+    ("策略对比表有 >=6 行",
+     "document.querySelectorAll('#l5vSens table.sens.strat tbody tr').length >= 6"),
+    ("策略表标出了现行与最优",
+     "/现行/.test(document.getElementById('l5vSens').innerText)"
+     " && /最优/.test(document.getElementById('l5vSens').innerText)"),
     ("L7 归因 KPI 有 3 个", "document.querySelectorAll('#l7r .kpi').length === 3"),
     ("L5 区块含 PPV 字样", "/PPV/.test(document.getElementById('l5v').innerText)"),
 ]
