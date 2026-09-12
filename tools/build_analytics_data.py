@@ -272,6 +272,19 @@ def main():
             "caveat": dr.get("caveat"),
             "endpoint_recall": l9.get("endpoint_recall") if l9 else None,
         }
+        # 漏抽归因：这是**可操作**的部分——不是"整体抽得差"，
+        # 而是集中在特定谓词与 2024+ 的新论文上，所以补救成本远低于全量重抽。
+        p_miss = QUAL / "l9-miss-analysis.json"
+        if p_miss.exists():
+            m = read(p_miss)
+            l9r["miss_analysis"] = {
+                "n_miss": m.get("n_miss"),
+                "miss_by_relation": m.get("miss_by_relation"),
+                "miss_endpoint_status": m.get("miss_endpoint_status"),
+                "by_year": m.get("by_year"),
+                "worst_papers": m.get("worst_papers"),
+                "conclusion": m.get("conclusion"),
+            }
 
     payload = {
         "meta": {

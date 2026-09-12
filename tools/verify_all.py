@@ -58,6 +58,11 @@ DATA_CHECKS = [
     # L9 关系召回：端点召回高（86.2%）**不代表**关系抽全了（实测约四成）。
     # 这是本项目最根本的一个读数。
     ("L9 关系召回（抽全了没有）", ["tools/l9_relation_recall.py"]),
+    # 漏抽归因：漏抽不均匀（集中在特定谓词与 2024+ 新论文），
+    # 这决定了补救成本——只重抽新论文 6.2 小时 vs 全量 18.7 小时。
+    ("L9 漏抽归因（补救路径）", ["tools/l9_miss_analysis.py"]),
+    # 针对性重抽工具：默认 dry-run，只列出目标与耗时，不改任何数据。
+    ("选择性重抽（dry-run，不改数据）", ["tools/re_extract_recent.py"]),
     # 离线可用性是「离线演示铁律」（内部记录 §1 第 6 条）的守门检查：
     # 主视图曾因 three.js 走 unpkg CDN 而断网白屏，现已本地化。
     ("主视图离线可用（屏蔽外部域名）", ["tools/cdp_verify_offline.py", "web/kg-nebula.html"]),

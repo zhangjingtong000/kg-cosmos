@@ -45,6 +45,12 @@ EXPECT = [
     ("关系召回区块含 86.2% 与 47.6%",
      "/86\\.2%/.test(document.getElementById('l9r').innerText)"
      " && /47\\.6%/.test(document.getElementById('l9r').innerText)"),
+    # 漏抽归因：证明"漏抽集中在 2024+"与补救路径在屏幕上可见
+    ("漏抽归因表有 6 行年份",
+     "document.querySelectorAll('#l9rMiss table.sens tbody tr').length === 6"),
+    ("漏抽归因含 2024 与重抽指引",
+     "/2024/.test(document.getElementById('l9rMiss').innerText)"
+     " && /re_extract_recent/.test(document.getElementById('l9rMiss').innerText)"),
     ("L5 区块含 PPV 字样", "/PPV/.test(document.getElementById('l5v').innerText)"),
 ]
 
