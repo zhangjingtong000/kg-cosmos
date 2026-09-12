@@ -1,20 +1,24 @@
 # -*- coding: utf-8 -*-
-"""验证证据深链（T6.2）：证据面板里的"在原文中查看"是否正确构造 PDF 链接。
+"""验证证据深链（T6.2）：证据行 → 原文对应页，并**真的高亮那段证据**。
 
-能力边界要说清楚：**无头 Chrome 不渲染 PDF**，所以本脚本无法验证高亮效果，
-只能验证链接本身——跳页参数、search 片段、以及 PDF 文件真的能被 HTTP 取到。
-高亮的观感必须在真浏览器里看。
+【这一版和上一版的区别】
+  上一版用「Chrome 内置 PDF 查看器的 URL 片段」，无头环境**无法验证高亮**
+  （`#search=` 不生效，只能断言链接构造得对）。
+  现在改用 pdf.js 自绘 + 自建文本层，于是可以直接断言：
+    · 文本层建起来了多少个 span；
+    · 其中多少个被标成 `.hl`（高亮）；
+    · 翻页后高亮是否会跟着重算。
+  这才是"PDF 高亮已实现"的证据，而不只是"链接拼得对"。
 
 用法：
   python tools/cdp_verify_pdflink.py
 """
 import base64
-import hashlib
 import json
+import os
 import subprocess
 import sys
 import time
-import urllib.parse
 import urllib.request
 
 import websocket
@@ -40,12 +44,12 @@ def ev(ws, expr):
             {'expression': expr, 'returnByValue': True, 'awaitPromise': True})
     res = r.get('result', {})
     if 'exceptionDetails' in res:
-        return {'__error__': res['exceptionDetails'].get('text', 'exception')}
+        return {'__error__': res['exceptionDetails'].get('text')}
     return res.get('result', {}).get('value')
 
 
 def main():
-    port = 9950 + (int(time.time() * 1000) % 40)
+    port = 9700 + (int(time.time() * 1000) % 40)
     url = f'{BASE}/web/kg-nebula.html?c=0'
     proc = subprocess.Popen([
         CHROME, '--headless=new', '--enable-unsafe-swiftshader', '--disable-gpu',
@@ -70,7 +74,7 @@ def main():
             print('CDP 未就绪')
             return 1
         page = next(t for t in targets if t.get('type') == 'page')
-        ws = websocket.create_connection(page['webSocketDebuggerUrl'], timeout=60)
+        ws = websocket.create_connection(page['webSocketDebuggerUrl'], timeout=90)
         cdp(ws, 'Page.enable')
         cdp(ws, 'Runtime.enable')
 
@@ -85,125 +89,100 @@ def main():
             fails.append('页面未就绪')
 
         # 1. snippet 提取的边界行为
-        cases = [
-            ('short text', ''),
-            ('Knowledge graphs (KGs) of real-world facts about entities and…',
-             'Knowledge graphs (KGs) of real-world facts'),
-            ('  multi   space\ttext with enough length to qualify  ', None),
-        ]
-        snips = ev(ws, "(() => [" +
-                   ",".join(f"KGNebula.pdfSnippetOf({json.dumps(c[0])})" for c in cases) +
-                   "])()")
-        print(f'[1] pdfSnippetOf 结果: {snips}')
+        snips = ev(ws, """[
+          KGNebula.pdfSnippetOf('short'),
+          KGNebula.pdfSnippetOf('Knowledge graphs (KGs) of real-world facts about entities and…'),
+          KGNebula.pdfSnippetOf('  multi   space\\ttext with enough length to qualify  ')
+        ]""")
+        print(f'[1] pdfSnippetOf: {snips}')
         if snips[0] != '':
-            fails.append('过短的文本不应产生 search 片段')
-        if not snips[1] or '…' in snips[1] or '  ' in snips[1]:
-            fails.append(f'snippet 里残留省略号或多空格: {snips[1]!r}')
-        if snips[2] and '  ' in snips[2]:
-            fails.append('snippet 未压平连续空白')
+            fails.append('过短文本不应产生高亮片段')
+        if '…' in (snips[1] or '') or '  ' in (snips[1] or ''):
+            fails.append(f'snippet 未清理干净: {snips[1]!r}')
 
-        # 2. 链接构造
-        href = ev(ws, "KGNebula.pdfHrefOf('1703.08098v9.pdf', 4, 'A survey of embedding')")
-        print(f'[2] pdfHrefOf → {href}')
-        if '#page=4' not in href or 'search=' not in href:
-            fails.append(f'链接缺少 page 或 search 参数: {href}')
-        if '/data/corpus/' not in href:
-            fails.append(f'链接路径不含 /data/corpus/: {href}')
-        noq = ev(ws, "KGNebula.pdfHrefOf('x.pdf', 2, '')")
-        if 'search=' in noq:
-            fails.append('空片段时不应带 search 参数')
-
-        # 3. 链接背后的 PDF 真的能取到（把 #fragment 去掉后请求）
-        real = href.split('#')[0]
-        try:
-            with urllib.request.urlopen(real, timeout=10) as r:
-                ctype = r.headers.get('Content-Type')
-                clen = r.headers.get('Content-Length')
-            print(f'[3] PDF 可访问: {r.status} {ctype} {clen} 字节')
-            if 'pdf' not in (ctype or '').lower():
-                fails.append(f'Content-Type 不是 PDF: {ctype}')
-        except Exception as e:
-            fails.append(f'PDF 取不到: {e}')
-
-        # 4. 打开抽屉：选中一个有证据的节点，点它的"在原文中查看"
-        res = ev(ws, """(() => {
+        # 2. 点证据行里的"在原文中查看"，等 pdf.js 渲染完
+        res = ev(ws, """(async () => {
           const ud = KGNebula._internals().ud;
           if (!ud || !ud.data) return {err: 'no data'};
-          // 找一个在证据表里有出处的节点
           for (let i = 0; i < ud.data.nodes.length; i++) {
             KGNebula.select(i);
             const a = document.querySelector('#detail .evlink');
             if (a) {
-              const before = KGNebula.panelOpen();
+              const info = {node: ud.data.nodes[i].id, src: a.dataset.src,
+                            page: a.dataset.page, snipLen: (a.dataset.snip || '').length};
               a.click();
-              return {
-                node: ud.data.nodes[i].id,
-                src: a.dataset.src, page: a.dataset.page,
-                snipLen: (a.dataset.snip || '').length,
-                detailBefore: before,
-                pdfOpen: KGNebula.pdfOpen(),
-                pdfSrc: KGNebula.pdfSrc(),
-                detailAfter: KGNebula.panelOpen(),
-              };
+              // 等 pdf.js 把文档与页面渲染完
+              for (let t = 0; t < 80; t++) {
+                await new Promise(r => setTimeout(r, 150));
+                const st = KGNebula.pdfState();
+                if (st && (st.error || st.spans)) { info.state = st; break; }
+              }
+              info.pdfOpen = KGNebula.pdfOpen();
+              return info;
             }
           }
           return {err: 'no evlink'};
         })()""")
-        print(f'[4] 点击"在原文中查看": {json.dumps(res, ensure_ascii=False)}')
+        print(f'[2] 点击"在原文中查看": {json.dumps(res, ensure_ascii=False)[:400]}')
         if res.get('err'):
-            fails.append(f'未能找到带证据的节点: {res["err"]}')
+            fails.append(f'未找到带证据的节点: {res["err"]}')
         else:
-            if res['pdfOpen'] is not True:
+            st = res.get('state') or {}
+            if st.get('error'):
+                fails.append(f'pdf.js 加载失败: {st["error"]}')
+            if res.get('pdfOpen') is not True:
                 fails.append('点击后 PDF 抽屉未打开')
-            if f'#page={res["page"]}' not in (res['pdfSrc'] or ''):
-                fails.append(f'PDF src 的页码与证据不一致: {res["pdfSrc"]}')
-            if res['detailAfter']:
-                fails.append('打开 PDF 后应让详情面板让位，实际仍打开')
-            # 5. 关闭
-            closed = ev(ws, "KGNebula.closePdf()")
-            src_after = ev(ws, "KGNebula.pdfSrc()")
-            print(f'[5] 关闭后 open={closed}  src={src_after}')
-            if closed is not False:
-                fails.append('关闭后抽屉仍处于打开态')
-            if src_after != 'about:blank':
-                fails.append(f'关闭后未释放 iframe（src={src_after}）')
+            if not st.get('pages'):
+                fails.append('未取到 PDF 页数')
+            else:
+                print(f'     PDF 共 {st["pages"]} 页，当前第 {st.get("page")} 页')
+            spans = st.get('spans') or 0
+            hl = st.get('highlights') or 0
+            print(f'     文本层 span {spans} 个，其中高亮 {hl} 个（片段 {st.get("snippet","")[:48]!r}）')
+            if spans < 20:
+                fails.append(f'文本层 span 过少（{spans}），页面可能没渲染出来')
+            if hl <= 0:
+                fails.append('**没有高亮任何 span —— PDF 高亮未生效**')
+            # 3. 翻页后高亮应重算
+            if st.get('pages', 0) > 1:
+                ev(ws, 'KGNebula.pdfStep(1)')
+                time.sleep(1.6)
+                st2 = ev(ws, 'JSON.stringify({p: KGNebula.pdfState().page, '
+                             'spans: document.querySelectorAll("#pdfTextLayer span").length, '
+                             'hl: document.querySelectorAll("#pdfTextLayer span.hl").length})')
+                d2 = json.loads(st2)
+                print(f'[3] 翻到下一页: 第 {d2["p"]} 页，span {d2["spans"]}，高亮 {d2["hl"]}')
+                if d2['p'] != (st.get('page') or 0) + 1:
+                    fails.append('翻页未生效')
+                if d2['spans'] <= 0:
+                    fails.append('翻页后文本层为空')
+                ev(ws, 'KGNebula.pdfStep(-1)')
+                time.sleep(1.2)
 
-        # ── 6. 页码片段的生效性（实测，不是推断）──
-        # 无头 Chrome **能渲染 PDF**（这点与常见认知相反），所以跳页可以直接验：
-        # 落到不同页时截图不同。而 `#search=` 无法这样验证成"生效"，
-        # 只如实记录"它与不带该参数时截图相同"这一事实。
-        def pdf_shot_hash(page, search=None):
-            # 同一个 PDF 只改 fragment **不会触发导航**，页面会停在上一次的状态
-            # （第一次跑这个测试时 #page=1 与 #page=8 的截图完全相同，
-            #  差点被误判成"页码片段失效"）。加一个每次不同的 query 参数
-            # 强制真正重新加载。
-            tag = hashlib.sha1(f'{page}|{search}'.encode()).hexdigest()[:8]
-            frag = f'#page={page}' + (f'&search={search}' if search else '')
-            cdp(ws, 'Page.navigate',
-                {'url': f'{BASE}/data/corpus/1703.08098v9.pdf?t={tag}{frag}'})
-            time.sleep(3.5)
-            s = cdp(ws, 'Page.captureScreenshot', {'format': 'png'})
-            return hashlib.sha256(base64.b64decode(s['result']['data'])).hexdigest()[:12]
+        # 4. 关闭释放
+        closed = ev(ws, 'KGNebula.closePdf()')
+        left = ev(ws, 'document.querySelectorAll("#pdfTextLayer span").length')
+        print(f'[4] 关闭后 open={closed}，残留 span={left}')
+        if closed is not False:
+            fails.append('关闭后抽屉仍打开')
+        if left:
+            fails.append('关闭后文本层未清空')
 
-        h1 = pdf_shot_hash(1)
-        h8 = pdf_shot_hash(8)
-        print(f'[6] #page=1 → {h1}')
-        print(f'    #page=8 → {h8}')
-        if h1 == h8:
-            fails.append('#page 片段未生效（第 1 页与第 8 页截图完全相同）')
-        else:
-            print('    OK 页码片段生效（两页截图不同）')
-
-        h8s = pdf_shot_hash(8, 'score%20functions')
-        same = (h8s == h8)
-        print(f'[7] #page=8&search=score functions → {h8s}  '
-              f'{"与 #page=8 完全相同" if same else "与 #page=8 不同"}')
-        if same:
-            print('    ⚠️ 实测记录：无头 Chrome 下 `#search=` **未生效**。')
-            print('       代码保留该参数作为增强，但按钮文案与 tooltip 都不承诺高亮；')
-            print('       有头模式是否生效无法在本环境验证。要可控高亮须改用 pdf.js 自绘。')
-        else:
-            print('    `#search=` 在本环境生效')
+        # 5. 截图留档（高亮可见）
+        ev(ws, """(async () => {
+          const ud = KGNebula._internals().ud;
+          for (let i = 0; i < ud.data.nodes.length; i++) {
+            KGNebula.select(i);
+            const a = document.querySelector('#detail .evlink');
+            if (a) { a.click(); break; }
+          }
+        })()""")
+        time.sleep(4.0)
+        os.makedirs('output/verify', exist_ok=True)
+        shot = cdp(ws, 'Page.captureScreenshot', {'format': 'png'})
+        with open('output/verify/pdf-highlight.png', 'wb') as f:
+            f.write(base64.b64decode(shot['result']['data']))
+        print('\n截图已保存 output/verify/pdf-highlight.png')
 
         ws.close()
     finally:
@@ -219,8 +198,7 @@ def main():
         for f in fails:
             print('  · ' + f)
         return 1
-    print('全部通过：`#page=N` 已实测生效（第 1 页与第 8 页截图哈希不同）；'
-          '`#search=` 在本环境的无头 Chrome 下未生效，代码已按"不承诺高亮"处理')
+    print('全部通过：PDF 高亮已实现且可断言')
     return 0
 
 

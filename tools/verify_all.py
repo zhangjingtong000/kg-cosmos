@@ -24,7 +24,7 @@ CHECKS = [
     ("方法能力与局限视图", ["tools/cdp_verify_method_limits.py"]),
     ("图谱分析面板（数字可追溯）", ["tools/cdp_verify_analytics.py"]),
     ("问题子图 PathQA", ["tools/cdp_verify_pathqa.py"]),
-    ("证据深链 PDF（页码片段生效性）", ["tools/cdp_verify_pdflink.py"], "slow"),
+    ("证据深链 PDF 高亮（pdf.js 自绘，可断言）", ["tools/cdp_verify_pdflink.py"], "slow"),
 ]
 
 # 纯数据侧的检查：不依赖浏览器，快
