@@ -137,6 +137,24 @@ python tools/verify_all.py         # 含 PDF 高亮检查
 `data/quality/metric-provenance.json`，之后任何时候跑
 `python tools/metric_provenance.py` 都能发现"数据变了但指标没重跑"。
 
+### 判断"有没有东西需要重跑"：三件工具，各答一个问题
+
+```bash
+python tools/freshness_report.py     # 产物是否晚于它依赖的上游？（顺序对不对）
+python tools/metric_provenance.py    # 数据变了但指标没重算？（指纹对不对）
+python tools/check_doc_numbers.py    # 文档与页面里写的数还对吗？
+```
+
+三者互补，都已挂进回归：
+
+| 工具 | 回答的问题 | 失败的典型症状 |
+|---|---|---|
+| `freshness_report.py` | 产物之间的**先后顺序** | 改了 L7 归因却忘了重建分析面板 |
+| `metric_provenance.py` | 数据指纹是否变了 | 图谱改了但六层没重算 |
+| `check_doc_numbers.py` | 文档/页面里的数字 | 页面还写着上一轮的旧值 |
+
+**改完任何数据后，把这三条都跑一遍**，比记那串重算顺序可靠得多。
+
 ---
 
 ## 7. 常见问题

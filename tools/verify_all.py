@@ -39,6 +39,9 @@ DATA_CHECKS = [
     ("本体口径一致性（唯一来源自检）", ["tools/check_ontology_consistency.py"]),
     ("文档数字与产物一致性", ["tools/check_doc_numbers.py"]),
     ("指标与数据快照的版本绑定（stale 检测）", ["tools/metric_provenance.py"]),
+    # 产物之间的先后依赖：某个产物是不是在它依赖的上游之后生成的。
+    # 与上面两项互补：那个答"数据变了没重算"，这个答"上下游顺序对不对"。
+    ("数据新鲜度（产物晚于其依赖的上游）", ["tools/freshness_report.py"]),
     ("社区布局数据自检", ["tools/diag_comm.py"]),
     ("claims 诊断（矛盾视图是否成立）", ["tools/diag_claims.py"]),
     ("结构指标与随机图基线", ["tools/l8_structure_audit.py"]),
