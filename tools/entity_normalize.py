@@ -90,6 +90,8 @@ def parse_args():
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--rollback", default="")
     ap.add_argument("--top", type=int, default=25)
+    ap.add_argument("--type-dominance", type=float, default=0.80,
+                    help="L2 单复数组内，主导类型票数占比低于此值才判为真类型冲突而跳过")
     return ap.parse_args()
 
 
@@ -159,6 +161,28 @@ def extract_abbreviations():
     return pairs
 
 
+def is_sensitive(members):
+    """组内是否存在"大小写变体但语义不同"的风险。
+
+    F3：组内出现已确认的同名不同实体对（如 `Complex` / `ComplEx`）。
+    F3b：组内卷入已知模型名，且同时存在它的原始大小写与全小写通用词
+         —— 这时无法安全判别，宁可不动。
+
+    **L1 与 L2 必须共用这一条**：初版只有 L1 调它，L2 没有，
+    于是 `ComplEx` / `Complex` / `ComplEX` 在前者被拦住、在后者被合并，
+    把 T4 保守策略的收益吃掉了。同一规则写两遍就会这样分裂。
+    """
+    lows = sorted({m.lower() for m in members})
+    if any(set(pair) <= set(lows) for pair in F3_SKIP_LOWER):
+        return True
+    if any(l in KNOWN_MODEL_NAMES for l in lows):
+        if any(l == l.lower() and l in KNOWN_MODEL_NAMES for l in lows):
+            others = [l for l in lows if l not in KNOWN_MODEL_NAMES]
+            if others:
+                return True
+    return False
+
+
 def build_alias_map(freq, types):
     """产出 {alias_name: canonical_name} 与审计记录。"""
     alias = {}
@@ -180,16 +204,7 @@ def build_alias_map(freq, types):
                           "members": members})
             continue
         # F3 语义敏感：组内出现已确认"大小写变体但语义不同"的对 ⇒ 跳过
-        lows = sorted({m.lower() for m in members})
-        hit_skip = any(set(pair) <= set(lows) for pair in F3_SKIP_LOWER)
-        # F3b 已知模型名卷入且组内有纯小写的通用词 ⇒ 跳过
-        if not hit_skip and any(l in KNOWN_MODEL_NAMES for l in lows):
-            if any(l == l.lower() and l in KNOWN_MODEL_NAMES for l in lows):
-                # 组内同时存在模型名的原始大小写与全小写形式 → 无法安全判别
-                others = [l for l in lows if l not in KNOWN_MODEL_NAMES]
-                if others:
-                    hit_skip = True
-        if hit_skip:
+        if is_sensitive(members):
             audit.append({"layer": "L1", "action": "skip-sensitive", "key": k,
                           "members": members})
             continue
@@ -215,11 +230,85 @@ def build_alias_map(freq, types):
             audit.append({"layer": "L2", "action": "skip-short", "key": k,
                           "members": members})
             continue
-        # 只合并"单复数"差异明确的对：类型需一致
-        tsets = [types[m].most_common(1)[0][0] for m in members]
-        if len(set(tsets)) > 1:
+        # 与 L1 共用同一条敏感词保护（初版 L2 漏了，见 is_sensitive 的注释）
+        if is_sensitive(members):
+            audit.append({"layer": "L2", "action": "skip-sensitive", "key": k,
+                          "members": members})
+            continue
+        # 类型判据改为**频次加权**（2026-09-12），并区分两类近名。
+        #
+        # 旧判据取每个成员**各自**的最高频类型，只要不同就跳过：
+        #     tsets = [types[m].most_common(1)[0][0] for m in members]
+        #     if len(set(tsets)) > 1: skip
+        # 问题是成员的票数可能只有 1：`Link Prediction`=Method×12 与
+        # `Link Predictions`=Concept×1 —— 后者只出现过一次，它的类型标注本身
+        # 就是噪声，不足以说明这是两个不同实体。196 个跳过组里有 183 组是
+        # 简单单复数对、171 组含"只出现 1 次"的低频变体。
+        #
+        # 但**不能只是放宽阈值**：实测把阈值降到 0.5 能合并 181 组，代价是把
+        # `Complex`（数学概念）并进了 `ComplEx`（知识图谱嵌入模型）——这两个词
+        # 经 flat() 归一后字面完全相同，任何字面判据都分不开，只有类型能分。
+        # 而"正确拒绝 Complex/ComplEx"正是 T4 保守策略的收益之一。
+        #
+        # 所以按形态分两类处理：
+        #   ① **纯单复数**（`X` → `Xs`/`Xes`/`Xies`）：词干完全一致，
+        #      几乎必然是同一实体，**无条件合并**，类型差异视为噪声。
+        #   ② **其他近名**（词干有变化，或归一后字面相同如 Complex/ComplEx）：
+        #      改走**频次加权类型**——把组内所有成员的类型计数累加，看主导占比。
+        #      占比高（Method 12 vs Concept 1 = 92%）⇒ 少数派是噪声，合并；
+        #      占比低（各 50%）⇒ 真类型冲突，跳过。
+        def pure_plural_group(members):
+            """组内是否只差**规则复数词尾**（`X` → `Xs`/`Xes`/`Xies`）。
+
+            基准必须用 `plural_key` 得到的**词干**，不能用"最长成员"：
+            最长成员通常就是复数形式，于是 `singular in (plural + 's')` 永远
+            不成立，纯单复数组会被全部误判（初版就是这个错，198 组里判出 0 组）。
+
+            同时这个写法天然排除了"lower 后字面完全相同"的情形：
+            `ComplEx` / `ComplEX` / `Complex` 的 canonical 与词干都是 `complex`，
+            没有任何成员等于 `complex + s`，因此 `saw_stem_change` 保持 False
+            ⇒ 返回 False，交给类型判据处理。这正是需要的——`Complex`（数学概念）
+            与 `ComplEx`（知识图谱嵌入模型）字面完全一样，只能靠类型区分。
+            """
+            stem = plural_key(members[0])
+            saw_stem_change = False
+            for m in members:
+                c = canonical_key(m)
+                if c == stem:
+                    continue                       # 单数形式（词干本身）
+                if c in (stem + 's', stem + 'es'):
+                    saw_stem_change = True
+                    continue
+                if stem.endswith('y') and c == stem[:-1] + 'ies':
+                    saw_stem_change = True
+                    continue
+                return False
+            return saw_stem_change
+
+        if pure_plural_group(members):
+            canon = max(members, key=lambda m: (freq[m], len(m)))
+            for m in members:
+                if m != canon and m not in alias:
+                    alias[m] = canon
+            l2_groups += 1
+            audit.append({"layer": "L2", "action": "merge",
+                          "canonical": canon,
+                          "aliases": [m for m in members if m != canon],
+                          "rule": "pure-plural"})
+            continue
+
+        weighted = Counter()
+        for m in members:
+            weighted.update(types[m])
+        total_votes = sum(weighted.values()) or 1
+        dom_type, dom_votes = weighted.most_common(1)[0]
+        dom_share = dom_votes / total_votes
+        if dom_share < ARGS.type_dominance:
             audit.append({"layer": "L2", "action": "skip-type-conflict", "key": k,
-                          "members": members, "types": tsets})
+                          "members": members,
+                          "weighted_types": dict(weighted),
+                          "dominant": dom_type,
+                          "dominant_share": round(dom_share, 3)})
             continue
         canon = max(members, key=lambda m: (freq[m], len(m)))
         for m in members:
