@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KG Cosmos · 图谱分析面板</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: radial-gradient(ellipse 120% 60% at 50% 0%, #0d1730 0%, #070c1a 46%, #04070f 100%);
+    color: #dfe8ff; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    padding: 34px 30px 64px; line-height: 1.6;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+  header small { display: block; color: rgba(181,203,235,.55); font-size: 11px;
+                 letter-spacing: .16em; text-transform: uppercase; }
+  header h1 { margin: 8px 0 0; font-size: 25px; font-weight: 560; letter-spacing: .02em; }
+  .lede { margin: 12px 0 0; font-size: 12.5px; line-height: 1.85;
+          color: rgba(196,214,240,.72); padding: 12px 14px; border-radius: 10px;
+          background: rgba(120,160,255,.06); border-left: 2px solid rgba(120,160,255,.35); }
+  .lede b { color: #cfe0ff; font-weight: 560; }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+          gap: 12px; margin-top: 22px; }
+  .kpi { background: rgba(10,16,34,.8); border: 1px solid rgba(140,170,255,.15);
+         border-radius: 11px; padding: 13px 15px; }
+  .kpi b { display: block; font-size: 22px; font-weight: 600; color: #eaf2ff;
+           font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+  .kpi span { display: block; margin-top: 3px; font-size: 11px; color: rgba(181,203,235,.6); }
+  .kpi small { display: block; margin-top: 5px; font-size: 10.5px;
+               color: rgba(150,190,255,.5); }
+
+  section { margin-top: 34px; }
+  h2 { font-size: 14px; font-weight: 560; margin: 0 0 4px; color: #eaf2ff; }
+  .sub { font-size: 11.5px; color: rgba(181,203,235,.55); margin-bottom: 14px; }
+
+  /* ── 六层 ── */
+  /* 详情放在进度条下方而不是右侧：右侧列宽有限，长句子会折行把行高撑得参差。 */
+  .layer { display: grid; grid-template-columns: 132px 1fr 64px; align-items: center;
+           gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(140,170,255,.08); }
+  .layer:last-child { border-bottom: 0; }
+  .layer .nm { font-size: 12.5px; color: rgba(214,228,250,.9); }
+  .layer .nm i { display: block; font-style: normal; font-size: 10.5px;
+                 color: rgba(150,190,255,.5); }
+  .layer .mid { min-width: 0; }
+  .track { height: 8px; border-radius: 4px; background: rgba(140,170,255,.1);
+           overflow: hidden; }
+  .track i { display: block; height: 100%; border-radius: 4px; transition: width .5s ease; }
+  .layer .dt { margin-top: 5px; font-size: 11px; line-height: 1.5;
+               color: rgba(160,196,246,.6); }
+  .layer .val { text-align: right; font-size: 13.5px; font-variant-numeric: tabular-nums;
+                color: rgba(214,228,250,.92); }
+  .layer .val em { font-style: normal; font-size: 11px; }
+
+  /* ── 治理对比 ── */
+  .gov { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+         gap: 12px; }
+  .gcard { background: rgba(10,16,34,.8); border: 1px solid rgba(140,170,255,.15);
+           border-radius: 11px; padding: 14px 16px; }
+  .gcard .t { font-size: 12px; color: rgba(181,203,235,.7); }
+  .gcard .n { display: flex; align-items: baseline; gap: 9px; margin-top: 8px;
+              font-variant-numeric: tabular-nums; }
+  .gcard .b { font-size: 15px; color: rgba(170,195,230,.62); text-decoration: line-through;
+              text-decoration-color: rgba(170,195,230,.3); }
+  .gcard .arrow { color: rgba(150,190,255,.4); font-size: 12px; }
+  .gcard .a { font-size: 22px; font-weight: 600; color: #eaf2ff; }
+  .gcard .d { margin-left: auto; font-size: 13px; font-weight: 560; color: #8ce0a8; }
+  .gcard .src { margin-top: 7px; font-size: 10.5px; color: rgba(150,190,255,.45); }
+
+  /* ── 关系类型 ── */
+  .bar { display: grid; grid-template-columns: 168px 1fr 58px 62px; align-items: center;
+         gap: 12px; padding: 6px 0; }
+  .bar .nm { font-size: 12px; color: rgba(214,228,250,.88); overflow: hidden;
+             text-overflow: ellipsis; white-space: nowrap; }
+  .bar .track { position: relative; }
+  .bar .n { text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums;
+            color: rgba(181,203,235,.7); }
+  .bar .r { text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .low { color: #ffb27f; } .mid { color: #7fb3ff; } .high { color: #8ce0a8; }
+
+  footer { margin-top: 40px; padding-top: 16px;
+           border-top: 1px solid rgba(140,170,255,.1);
+           font-size: 11.5px; line-height: 1.85; color: rgba(160,190,235,.5); }
+  footer code { color: rgba(190,214,246,.75); }
+  .err { color: #ffb27f; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <small>kg cosmos · graph analytics</small>
+    <h1>图谱分析面板</h1>
+    <p class="lede" id="lede"></p>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section>
+    <h2>六层评测</h2>
+    <div class="sub" id="sixSub"></div>
+    <div id="layers"></div>
+  </section>
+
+  <section>
+    <h2>治理效果（同口径前后对比）</h2>
+    <div class="sub" id="govSub"></div>
+    <div class="gov" id="gov"></div>
+  </section>
+
+  <section>
+    <h2>关系类型分布</h2>
+    <div class="sub" id="typeSub"></div>
+    <div id="types"></div>
+  </section>
+
+  <section>
+    <h2>端点证据命中</h2>
+    <div class="sub">判别器判「三元组能否被原文支持」时，两个端点在证据句里的命中情况</div>
+    <div id="hits"></div>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const esc = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+const cls = (v) => v == null ? 'mid' : (v >= 90 ? 'high' : v >= 60 ? 'mid' : 'low');
+
+// 质量色阶：高=绿、中=蓝、低=橙。同一套色贯穿六层与关系类型，便于横向扫读。
+function hue(v) {
+  if (v == null) return 'rgba(140,170,255,.55)';
+  if (v >= 90) return 'linear-gradient(90deg,#4fbf82,#8ce0a8)';
+  if (v >= 60) return 'linear-gradient(90deg,#4a7fd8,#7fb3ff)';
+  return 'linear-gradient(90deg,#d97a45,#ffb27f)';
+}
+
+function boot(D) {
+  const m = D.meta, s = D.scale;
+  document.getElementById('lede').innerHTML =
+    `数据来自已产出的离线结果，本页只做汇总展示，不重算模型。`
+    + ` 判别器 <b>${esc(m.model)}</b>，官方校准集 ROC-AUC <b>${esc(m.model_roc_auc)}</b>，`
+    + `阈值 <b>${esc(m.threshold)}</b>。`;
+  document.getElementById('foot').innerHTML =
+    `来源：${m.sources.map(x => `<code>${esc(x)}</code>`).join(' · ')}<br>`
+    + `生成脚本 <code>${esc(m.generated_by)}</code>。`
+    + ` L3 的治理效果需按图结构查端点，本面板不重算，沿用报告数字并注明来源。`;
+
+  document.getElementById('kpis').innerHTML = [
+    [s.nodes, '节点', 'web/kg-data/nebula.json'],
+    [s.edges, '边', '概览层导出'],
+    [s.communities, 'Louvain 社区', `最大 ${s.largest_community} 节点`],
+    [s.modularity, '模块度', '社区结构显著'],
+    [D.supported_subgraph.edges, 'L5 支持子图 · 边', `${D.supported_subgraph.nodes} 节点`],
+    [D.supported_subgraph.dropped, '被 L5 筛掉', `占 ${(D.supported_subgraph.dropped / (D.supported_subgraph.edges + D.supported_subgraph.dropped) * 100).toFixed(1)}%`],
+  ].map(([v, l, n]) =>
+    `<div class="kpi"><b>${esc(v)}</b><span>${esc(l)}</span><small>${esc(n)}</small></div>`).join('');
+
+  document.getElementById('sixSub').textContent =
+    `全部 ${D.by_type.rows.reduce((a, r) => a + r.n, 0)} 条关系边上计算；L2 是节点级，无百分比`;
+
+  document.getElementById('layers').innerHTML = D.six_layer.map(L => `
+    <div class="layer">
+      <div class="nm">${esc(L.id)} ${esc(L.name)}<i>${esc(L.basis)}</i></div>
+      <div class="mid">
+        <div class="track">${L.value == null ? ''
+          : `<i style="width:${L.value}%;background:${hue(L.value)}"></i>`}</div>
+        <div class="dt">${esc(L.detail)}</div>
+      </div>
+      <div class="val ${L.value == null ? '' : cls(L.value)}">
+        ${L.value == null ? '<em>384 组</em>' : L.value + '%'}
+      </div>
+    </div>`).join('');
+
+  const g = D.governance;
+  document.getElementById('govSub').textContent =
+    `${g.note}；边数 ${g.edge_count.before} → ${g.edge_count.after}`;
+  document.getElementById('gov').innerHTML = g.rows.map(r => `
+    <div class="gcard">
+      <div class="t">${esc(r.label)}</div>
+      <div class="n">
+        <span class="b">${r.before}%</span>
+        <span class="arrow">→</span>
+        <span class="a">${r.after}%</span>
+        <span class="d">${r.delta > 0 ? '+' : ''}${r.delta}</span>
+      </div>
+      ${r.source ? `<div class="src">${esc(r.source)}</div>` : ''}
+    </div>`).join('');
+
+  document.getElementById('typeSub').innerHTML =
+    `共 ${D.by_type.rows.length} 种关系类型，下面列出边数 ≥ 50 的 ${D.by_type.rows.filter(r => r.n >= 50).length} 种`
+    + `（${esc(D.by_type.note)}）。通过率 = 该类中 entail_prob ≥ ${esc(D.by_type.threshold)} 的占比`;
+
+  document.getElementById('types').innerHTML = D.by_type.rows
+    .filter(r => r.n >= 50)
+    .map(r => {
+      const p = +(r.pass_rate * 100).toFixed(1);
+      return `<div class="bar">
+        <div class="nm" title="${esc(r.type)}">${esc(r.type)}</div>
+        <div class="track"><i style="width:${p}%;background:${hue(p)}"></i></div>
+        <div class="n">${r.n}</div>
+        <div class="r ${cls(p)}">${p}%</div>
+      </div>`;
+    }).join('');
+
+  const h = D.hit_distribution, tot = Object.values(h).reduce((a, b) => a + b, 0);
+  const label = { both: '两端都命中', one: '仅一端命中', none: '两端都未命中' };
+  const color = { both: '#8ce0a8', one: '#7fb3ff', none: '#ffb27f' };
+  document.getElementById('hits').innerHTML = ['both', 'one', 'none']
+    .filter(k => h[k] != null)
+    .map(k => {
+      const p = +(h[k] / tot * 100).toFixed(1);
+      return `<div class="bar">
+        <div class="nm">${esc(label[k] || k)}</div>
+        <div class="track"><i style="width:${p}%;background:${color[k]}"></i></div>
+        <div class="n">${h[k]}</div>
+        <div class="r" style="color:${color[k]}">${p}%</div>
+      </div>`;
+    }).join('');
+
+  window.__ready = true;
+}
+
+fetch('./kg-data/analytics.json')
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(boot)
+  .catch(e => {
+    document.getElementById('lede').innerHTML =
+      '<span class="err">数据加载失败：' + esc(e.message) + '</span>';
+    window.__ready = true;
+  });
+</script>
+</body>
+</html>

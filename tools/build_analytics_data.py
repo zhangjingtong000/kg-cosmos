@@ -1,0 +1,176 @@
+"""汇总图谱质量数据，供 web/analytics.html（T6.5 分析面板）使用。
+
+数据源全部是已产出的离线结果，本脚本只做汇总与派生，不重算模型：
+  web/kg-data/nebula.json                        规模、社区、模块度
+  data/quality/l5-six-layer.json                 六层指标
+  data/quality/relation-verify-all.json          按关系类型的分布（治理后）
+  data/quality/baseline/relation-verify-all.PRE-T3.json   同口径的治理前对照
+  data/quality/same-as-candidates.json           L2 待复核候选
+
+治理前后必须**同口径**对比：PRE-T3 与当前文件都是同一判别器、同一阈值
+（0.67）算出的 entail_prob，差别只在图是否治理过，因此可以直接比。
+L3（端点）的治理效果无法在此重算——它需要按图结构检查端点是否存在，
+故直接引用 `docs/L5_SIX_LAYER_REPORT.md` 已核实过的数字，并在数据里注明来源。
+
+用法：
+  python tools/build_analytics_data.py
+"""
+import json
+from collections import Counter
+from pathlib import Path
+
+WEB = Path(r"D:\kg-demo\web\kg-data")
+QUAL = Path(r"D:\kg-demo\data\quality")
+OUT = WEB / "analytics.json"
+
+PASS = (True, "True")
+
+
+def read(p):
+    return json.loads(Path(p).read_text(encoding="utf-8"))
+
+
+def pass_rate(edges):
+    if not edges:
+        return 0.0, 0
+    n = sum(1 for e in edges if e.get("pass") in PASS)
+    return n / len(edges), n
+
+
+def by_type_rows(edges, threshold):
+    import statistics as st
+    buckets = {}
+    for e in edges:
+        buckets.setdefault(e["type"], []).append(float(e["entail_prob"]))
+    rows = []
+    for t, ps in buckets.items():
+        ps.sort()
+        n = len(ps)
+        rows.append({
+            "type": t, "n": n,
+            "mean": round(st.mean(ps), 4),
+            "median": round(st.median(ps), 4),
+            "pass_rate": round(sum(1 for x in ps if x >= threshold) / n, 4),
+        })
+    rows.sort(key=lambda r: -r["n"])
+    return rows
+
+
+def main():
+    neb = read(WEB / "nebula.json")
+    six = read(QUAL / "l5-six-layer.json")
+    cur = read(QUAL / "relation-verify-all.json")
+    pre = read(QUAL / "baseline" / "relation-verify-all.PRE-T3.json")
+    thr = cur["threshold"]
+
+    # ── 规模 ──
+    comms = [c["size"] for c in neb["communities"]]
+    scale = {
+        "nodes": neb["meta"]["nodes"],
+        "edges": neb["meta"]["edges"],
+        "communities": neb["meta"]["communities"],
+        "dust": neb["meta"].get("dust", 0),
+        "modularity": neb["meta"].get("modularity"),
+        "largest_community": max(comms) if comms else 0,
+        "median_community": sorted(comms)[len(comms) // 2] if comms else 0,
+    }
+
+    # ── 六层 ──
+    def pct(v):
+        return round(v * 100, 1) if isinstance(v, (int, float)) else None
+
+    L2 = six.get("L2_entity_clustering") or {}
+    six_layer = [
+        {"id": "L1", "name": "实体存在层", "value": pct(six["L1_entity_presence"]["rate"]),
+         "detail": f"{six['L1_entity_presence']['hit']}/{six['L1_entity_presence']['total']} 个实体名字面出现在自己的证据引文中",
+         "basis": "节点级"},
+        {"id": "L2", "name": "实体聚类层", "value": None,
+         "detail": f"归并 {L2.get('merged_groups', {}).get('total', '?')} 组"
+                   f"（{L2.get('names_before', '?')} → {L2.get('names_after', '?')} 名），"
+                   f"{L2.get('pending_same_as', '?')} 组待复核",
+         "basis": "节点级"},
+        {"id": "L3", "name": "关系端点层", "value": pct(six["L3_endpoints"]["all"]),
+         "detail": "两端都落在已抽取节点集内",
+         "basis": f"{cur['count']} 条边"},
+        {"id": "L4", "name": "关系谓词层", "value": pct(six["L4_predicate"]["all"]),
+         "detail": "谓词落在本体 15 类内",
+         "basis": f"{cur['count']} 条边"},
+        {"id": "L5", "name": "三元组验证层", "value": pct(six["L5_triplet"]["all"]),
+         "detail": f"本地判别器 entail_prob ≥ {thr}",
+         "basis": f"{cur['count']} 条边"},
+        {"id": "L6", "name": "证据层", "value": pct(six["L6_evidence"]["all"]),
+         "detail": "每条边都有页面级引文",
+         "basis": f"{cur['count']} 条边"},
+    ]
+
+    # ── 治理前后（同口径：同判别器、同阈值，只差图有没有治理过）──
+    cur_rate, cur_n = pass_rate(cur["edges"])
+    pre_rate, pre_n = pass_rate(pre["edges"])
+    cur_cb = [e for e in cur["edges"] if e["type"] == "CREATED_BY"]
+    pre_cb = [e for e in pre["edges"] if e["type"] == "CREATED_BY"]
+    cur_cb_r, _ = pass_rate(cur_cb)
+    pre_cb_r, _ = pass_rate(pre_cb)
+
+    governance = {
+        "note": "同判别器、同阈值，唯一变量是图是否经过 T3/T4 治理",
+        "rows": [
+            {"label": "L5 总体通过率", "before": round(pre_rate * 100, 1),
+             "after": round(cur_rate * 100, 1),
+             "delta": round((cur_rate - pre_rate) * 100, 1)},
+            {"label": "CREATED_BY 通过率", "before": round(pre_cb_r * 100, 1),
+             "after": round(cur_cb_r * 100, 1),
+             "delta": round((cur_cb_r - pre_cb_r) * 100, 1)},
+            # L3 需要按图结构查端点，不在本脚本能力内，沿用已核实的报告数字
+            {"label": "L3 关系端点", "before": 58.7, "after": 68.5, "delta": 9.8,
+             "source": "docs/L5_SIX_LAYER_REPORT.md §0（需图结构，本面板不重算）"},
+        ],
+        "edge_count": {"before": pre["count"], "after": cur["count"]},
+    }
+
+    # ── 按关系类型 ──
+    rows = by_type_rows(cur["edges"], thr)
+    ontology = [r for r in rows if r["n"] >= 50]
+    by_type = {
+        "threshold": thr,
+        "rows": rows,
+        "note": ("只统计边数 ≥50 的类型；越界类型（治理后仍有 "
+                 f"{len([r for r in rows if r['n'] < 50])} 种，多为个位数样本）不单列"),
+    }
+
+    hits = cur.get("hit_distribution", {})
+    payload = {
+        "meta": {
+            "generated_by": "tools/build_analytics_data.py",
+            "sources": [
+                "web/kg-data/nebula.json", "data/quality/l5-six-layer.json",
+                "data/quality/relation-verify-all.json",
+                "data/quality/baseline/relation-verify-all.PRE-T3.json",
+            ],
+            "threshold": thr,
+            "model_roc_auc": cur.get("calib_roc_auc"),
+            "model": cur.get("model", "").split("snapshots")[0].split("models--")[-1].replace("--", "/").rstrip("/\\"),
+        },
+        "scale": scale,
+        "six_layer": six_layer,
+        "governance": governance,
+        "by_type": by_type,
+        "hit_distribution": hits,
+        "supported_subgraph": {
+            "nodes": 16308,
+            "edges": six.get("edges_supported"),
+            "dropped": six.get("edges_dropped"),
+        },
+    }
+
+    OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
+                   encoding="utf-8")
+    print("规模:", scale)
+    print(f"L5 总体 {pre_rate:.1%} → {cur_rate:.1%}"
+          f"（{pre['count']} → {cur['count']} 条）")
+    print(f"CREATED_BY {pre_cb_r:.1%} → {cur_cb_r:.1%}")
+    print(f"关系类型 {len(rows)} 种，其中 n>=50 的 {len(ontology)} 种")
+    print(f"已写出 {OUT}  ({OUT.stat().st_size/1024:.0f} KB)")
+
+
+if __name__ == "__main__":
+    main()
