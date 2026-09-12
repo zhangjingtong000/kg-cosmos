@@ -1,0 +1,76 @@
+/* 全站可访问性与导航：键盘可达、动效可关、任意页面能回导航页。
+ *
+ * 【为什么是外挂而不是改每个页面】
+ *   5 个页面各自有自己的头部结构（kg-nebula 有"返回星云概览"、
+ *   analytics 有标题栏），逐个改容易互相冲突、也容易漏。
+ *   这里用一份共用 CSS + 一段注入脚本，一处生效、全站一致。
+ *
+ * 【补的是什么（对抗评审列的 major 项）】
+ *   实测改动前：全站 0 处 `:focus-visible`、0 处 `prefers-reduced-motion`、
+ *   5 个页面没有任何一个能回到导航页；星云页的实体列表项全部不可 Tab 聚焦，
+ *   进入社区只能靠鼠标。对一个要在演示现场用键盘演示的项目，这是硬伤。
+ */
+
+/* ── 1. 键盘焦点必须可见 ──
+   默认样式在有背景色的按钮/链接上几乎看不见，而全站原本一个都没写。 */
+:focus-visible {
+  outline: 2px solid #7ecbff !important;
+  outline-offset: 2px !important;
+  border-radius: 3px;
+}
+/* 鼠标点击时不显示焦点环，避免"点一下到处都是框" */
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── 2. 尊重"减少动效"偏好 ──
+   星云页有持续的相机漂移、粒子流动、标签淡入；
+   对前庭功能敏感的用户这是真实不适来源，而系统偏好本就提供了开关。 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── 3. 跳转到主内容（键盘用户跳过导航） ── */
+#a11y-skip {
+  position: fixed; left: -9999px; top: 8px; z-index: 2147483647;
+  padding: 9px 15px; border-radius: 8px; font-size: 13px;
+  background: #0f1729; color: #dfe8ff; border: 1px solid #7ecbff;
+  text-decoration: none;
+}
+#a11y-skip:focus { left: 12px; }
+
+/* ── 4. 返回导航页 ──
+   固定在左下角：五个主页面那里都是空的（头部在左上、控件在右上、
+   星云页右下是提示条），不会与既有元素重叠。 */
+#a11y-home {
+  position: fixed; left: 14px; bottom: 14px; z-index: 60;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 9px;
+  font: 500 12px/1 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  color: rgba(214,230,252,.82); text-decoration: none;
+  background: rgba(10,16,34,.82);
+  border: 1px solid rgba(140,170,255,.22);
+  backdrop-filter: blur(6px);
+  transition: color .18s ease, border-color .18s ease, background .18s ease;
+}
+#a11y-home:hover {
+  color: #fff; background: rgba(18,28,54,.92);
+  border-color: rgba(126,203,255,.55);
+}
+/* 星云页底部中央有操作提示文字，避开它 */
+body.inside #a11y-home { bottom: 46px; }
+
+/* ── 5. 键盘可达的元素要有可见的手型与可聚焦性 ── */
+[role="button"], [tabindex="0"] { cursor: pointer; }
+[role="button"]:focus-visible, [tabindex="0"]:focus-visible {
+  outline: 2px solid #7ecbff !important; outline-offset: 2px !important;
+}
+
+/* ── 6. 屏幕阅读器专用文本 ── */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}

@@ -18,6 +18,7 @@ from pathlib import Path
 
 CHECKS = [
     ("导航页 · 链接可达 · 示意图未溢出", ["tools/cdp_verify_nav.py"]),
+    ("全站可访问性（键盘可达 · 回导航页 · 动效可关）", ["tools/cdp_verify_a11y.py"]),
     ("星云交互 · 标签 · 证据面板", ["tools/cdp_verify_ui.py", "0"]),
     ("标签分配与深度遮挡（节点级门槛）", ["tools/cdp_verify_label_detail.py"]),
     ("统一着色引擎（含默认外观等价性回归）", ["tools/cdp_verify_color.py", "0"]),
