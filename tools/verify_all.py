@@ -66,17 +66,30 @@ DATA_CHECKS = [
 ]
 
 
-def run(label, args, timeout=300):
-    t0 = time.time()
-    try:
-        p = subprocess.run([sys.executable] + args, capture_output=True,
-                           text=True, encoding="utf-8", errors="replace",
-                           timeout=timeout, cwd=str(Path(__file__).parent.parent))
-        out = (p.stdout or "") + (p.stderr or "")
-        ok = p.returncode == 0
-    except subprocess.TimeoutExpired:
-        out, ok = "超时", False
-    dt = time.time() - t0
+def run(label, args, timeout=300, retry_on=None):
+    """跑一项检查。retry_on 给出"可重试"的错误特征——**只对偶发故障重试**。
+
+    为什么需要：CDP 脚本要起一个无头 Chrome，实测偶尔会启动失败
+    （`RuntimeError: CDP 未就绪`）。这种偶发失败如果直接算红，
+    会让人对回归失去信任、进而忽略真正的红灯。所以只对**明确的偶发特征**重试一次，
+    其他失败一律不重试（真问题必须仍然报红）。
+    """
+    attempts = 2 if retry_on else 1
+    for attempt in range(attempts):
+        t0 = time.time()
+        try:
+            p = subprocess.run([sys.executable] + args, capture_output=True,
+                               text=True, encoding="utf-8", errors="replace",
+                               timeout=timeout, cwd=str(Path(__file__).parent.parent))
+            out = (p.stdout or "") + (p.stderr or "")
+            ok = p.returncode == 0
+        except subprocess.TimeoutExpired:
+            out, ok = "超时", False
+        dt = time.time() - t0
+        transient = (not ok) and any(k in out for k in (retry_on or ()))
+        if ok or not transient or attempt == attempts - 1:
+            break
+        print(f"⏳ {label:38s} {dt:6.1f}s  偶发失败（CDP 未就绪），重试一次…")
     tail = [ln for ln in out.strip().splitlines() if ln.strip()][-1:] or [""]
     print(f"{'✅' if ok else '❌'} {label:38s} {dt:6.1f}s  {tail[0][:88]}")
     if not ok:
@@ -98,13 +111,16 @@ def main():
     print("=" * 100)
     print("前端检查（每个都会起一个带 CDP 的 Chrome）")
     print("-" * 100)
+    # 前端检查都要起无头 Chrome；"CDP 未就绪"是实测过的偶发启动失败，
+    # 只对这一类重试（真失败仍然报红）。
+    CDP_TRANSIENT = ("CDP 未就绪",)
     for item in CHECKS:
         label, args = item[0], item[1]
         slow = len(item) > 2 and item[2] == "slow"
         if slow and fast:
             print(f"⏭  {label:38s}   (--fast 跳过)")
             continue
-        results.append(run(label, args))
+        results.append(run(label, args, retry_on=CDP_TRANSIENT))
     print()
     print("=" * 100)
     ok = sum(1 for r in results if r)

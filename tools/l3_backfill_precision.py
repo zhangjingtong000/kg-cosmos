@@ -23,6 +23,7 @@ import random
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
+from idempotent_write import dumps, write_if_changed
 
 GRAPH = ROOT / 'data/corpus/graphs'
 OUT = ROOT / 'data/quality/l3-backfill-precision-sample.json'
@@ -189,7 +190,7 @@ def main():
                  '混入泛指词。真精度需人工读 sample 清单逐条判定。'
                  '本脚本不自动改数据。'),
     }
-    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
+    write_if_changed(OUT, dumps(out))
     print(f'\n报告已写出: {OUT}')
 
 

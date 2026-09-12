@@ -123,7 +123,7 @@ kind == directed 无方向指纹   → 只看允许集
 | 关系 | `semantics`（source → target 角色） | `source_core` | `target_core` | `source_allowed` | `target_allowed` | 依据 |
 | --- | --- | --- | --- | --- | --- | --- |
 | `CREATED_BY` | 创作者 → 被创作物（沿用 T3.1 的 Author→Work） | `Person, Organization` | `Document, Method, System, Tool, Artifact, Dataset, Component, Concept, Process, Metric, Material` | 同 core | 同 core | 既有约定 |
-| `PRODUCES` | 生产者 → 产物 | `Method, System, Process, Person` | `Concept, Artifact` | `ALL − {Location, Event, Metric, Material}` | `ALL − {Person, Organization, Location, Event}` | 语义 + 数据 |
+| `PRODUCES` | 生产者 → 产物 | `Method, System, Process, Person` | `Concept, Artifact` | `ALL − {Location, Material}` | `ALL − {Organization, Event}` | 语义 + 数据 |
 | `LOCATED_AT` | 有位置的实体 → 场所 | `ALL − {Location, Organization, Event}` | `Location, Organization, Event` | `ALL` | `ALL − {Person, Method, Metric, Material}` | 语义 |
 
 `ALL` = 本体 15 类实体。注意 `CREATED_BY` 的 `source_allowed` / `target_allowed` **与 T3.1 的
@@ -136,10 +136,10 @@ kind == directed 无方向指纹   → 只看允许集
 | --- | --- | --- | --- | --- | --- |
 | `PART_OF` | directed | 部分 → 整体 | 全部 15 类 | `ALL − {Person}` | 判不了 |
 | `USES` | directed | 使用者 → 被使用的手段/数据/组件 | `ALL − {Location, Event, Material}` | `ALL − {Person}` | 判不了 |
-| `APPLIES_TO` | directed | 被应用的方法/技术 → 应用对象或领域 | `ALL − {Location, Event, Material}` | `ALL` | 判不了 |
+| `APPLIES_TO` | directed | 被应用的方法/技术 → 应用对象或领域 | `ALL − {Location, Event}` | `ALL` | 判不了 |
 | `SUPPORTS` | directed | 支持者（证据/方法）→ 被支持的论断或流程 | `ALL − {Location, Material}` | `ALL − {Location, Material}` | 判不了 |
-| `CAUSES` | directed | 原因 → 结果 | `ALL − {Location, Material}` | `ALL − {Location, Person}` | 判不了 |
-| `ENABLES` | directed | 使能者（条件/能力）→ 被使能者 | `ALL − {Person, Organization, Location, Event, Material}` | `ALL − {Person, Organization, Location, Event, Material, Document}` | 判不了 |
+| `CAUSES` | directed | 原因 → 结果 | `ALL − {Location, Material}` | `ALL − {Location}` | 判不了 |
+| `ENABLES` | directed | 使能者（条件/能力）→ 被使能者 | `ALL − {Location, Event}` | `ALL − {Location, Event}` | 判不了 |
 | `CITES` | directed | 引用者 → 被引用的文献/方法/作者 | `ALL − {Location, Material}` | `ALL − {Location, Material}` | 判不了 |
 | `EVALUATES` | directed | 评测者/评测手段 → 被评测对象 | `ALL − {Location, Event, Material}` | `ALL − {Person, Location, Event, Material, Organization}` | 判不了（指纹已撤销） |
 | `COMPARES_WITH` | symmetric | 互相比对，无左右之分 | `ALL − {Location, Event, Material}` | 同左 | 对称 |
@@ -157,18 +157,18 @@ kind == directed 无方向指纹   → 只看允许集
 | `CREATED_BY` | 6241 | 5819 | 0 | **120** | 302 | 2514 | **98.0%** | 95.2% | 95.1% |
 | `USES` | 4857 | – | 4815 | – | 42 | 2482 | n/a | – | 99.1% |
 | `PART_OF` | 4001 | – | 3983 | – | 18 | 1815 | n/a | – | 99.6% |
-| `APPLIES_TO` | 2521 | – | 2520 | – | 1 | 1329 | n/a | – | 100.0% |
-| `PRODUCES` | 1519 | 684 | 776 | **36** | 23 | 694 | **95.0%** | 47.4% | 98.4% |
-| `ENABLES` | 739 | – | 734 | – | 5 | 260 | n/a | – | 99.3% |
+| `APPLIES_TO` | 2521 | – | 2521 | – | 0 | 1329 | n/a | – | 100.0% |
+| `PRODUCES` | 1519 | 684 | 825 | **36** | 10 | 694 | **95.0%** | 47.4% | 99.3% |
+| `ENABLES` | 739 | – | 739 | – | 0 | 260 | n/a | – | 100.0% |
 | `CITES` | 639 | – | 638 | – | 1 | 328 | n/a | – | 99.8% |
 | `MEASURES` | 537 | – | – | – | – | 335 | n/a | – | n/a |
 | `LOCATED_AT` | 590 | 283 | 306 | **0** ※ | 1 | 263 | **100.0%** ※ | 48.0% | 99.8% |
 | `SUPPORTS` | 560 | – | 560 | – | 0 | 233 | n/a | – | 100.0% |
 | `COMPARES_WITH` | 374 | – | 374 | – | 0 | 224 | n/a | – | 100.0% |
 | `EVALUATES` | 302 | – | 296 | – | 6 | 152 | n/a | – | 98.0% |
-| `CAUSES` | 196 | – | 193 | – | 3 | 84 | n/a | – | 98.5% |
+| `CAUSES` | 196 | – | 195 | – | 1 | 84 | n/a | – | 99.5% |
 | `CONTRADICTS` | 176 | – | 176 | – | 0 | 67 | n/a | – | 100.0% |
-| **合计** | **29877** | 6786 | 15371 | **156** | 402 | 13753 | | | |
+| **合计** | **29877** | 6786 | 15392 | **156** | 381 | 13753 | | | |
 
 对账：29877 + 13753（不可判）+ 237（本体外关系类型）= 43867 ✅
 

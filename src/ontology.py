@@ -166,8 +166,19 @@ RELATION_ENDPOINT_CONSTRAINTS = {
         kind="directed",
         source_core={"Method", "System", "Process", "Person"},
         target_core={"Concept", "Artifact"},
-        source_allowed=_ALL - {"Location", "Event", "Metric", "Material"},
-        target_allowed=_ALL - {"Person", "Organization", "Location", "Event"},
+        # ⚠️ 2026-09-12 放宽 allowed（依据：58 条 role_violation 的独立判读）。
+        # 判读发现 5 条假阳性，成因集中，全部是"允许集排掉了正常用法"：
+        #   · NER → 人名/地名：命名实体识别的产物就是被识别出的实体
+        #     ⇒ target 纳入 Person / Location
+        #   · 会议 → 论文：会议发表论文（source 是 Event）
+        #     ⇒ source 纳入 Event
+        #   · Loss → Gradient：损失函数产生梯度（source 是 Metric）
+        #     ⇒ source 纳入 Metric
+        # 注意：只动 allowed，**不动 source_core / target_core**——
+        # 方向指纹是另一回事（_DIRECTION_GUARD 钉着它），放宽 allowed
+        # 只是让更多边通过角色检查，不改变方向判定。
+        source_allowed=_ALL - {"Location", "Material"},
+        target_allowed=_ALL - {"Organization", "Event"},
         basis="semantics",
         evidence="可判定 1519 条：source 侧 Method 438（28.8%）/ Concept 304（20.0%）/"
                  " System 210（13.8%）/ Process 172（11.3%）/ Person 115（7.6%）；"
@@ -200,7 +211,10 @@ RELATION_ENDPOINT_CONSTRAINTS = {
         kind="directed",
         source_core=frozenset(),
         target_core=frozenset(),
-        source_allowed=_ALL - {"Location", "Event", "Material"},
+        # 2026-09-12 放宽：独立判读里有 1 条假阳性是
+        # 「Data → Screening」（`Early accumulated data underwent screening`），
+        # 即数据/物料作为"被处理的对象"，source 是 Material 属正常用法 ⇒ 纳入。
+        source_allowed=_ALL - {"Location", "Event"},
         target_allowed=_ALL,
         basis="semantics",
         evidence="可判定 2521 条：source 侧 Method 1038（41.2%）/ Concept 635（25.2%）；"
@@ -261,7 +275,10 @@ RELATION_ENDPOINT_CONSTRAINTS = {
         source_core=frozenset(),
         target_core=frozenset(),
         source_allowed=_ALL - {"Location", "Material"},
-        target_allowed=_ALL - {"Location", "Person"},
+        # 2026-09-12 放宽：独立判读里 2 条假阳性都是
+        # `KG selection / KG discovery poses a challenge for humans`——
+        # 「某事对人是挑战」是 CAUSES 的正常用法，target 排除 Person 过严。
+        target_allowed=_ALL - {"Location"},
         basis="semantics",
         evidence="可判定仅 196 条：Concept→Concept 50、Concept→Metric 24、"
                  "Process→Concept 15、Concept→Process 10 —— Concept/Process 两侧"
@@ -273,9 +290,16 @@ RELATION_ENDPOINT_CONSTRAINTS = {
         kind="directed",
         source_core=frozenset(),
         target_core=frozenset(),
-        source_allowed=_ALL - {"Person", "Organization", "Location", "Event", "Material"},
-        target_allowed=_ALL - {"Person", "Organization", "Location", "Event",
-                               "Material", "Document"},
+        # ⚠️ 2026-09-12 大幅放宽——这是全表假阳性率最高的一类。
+        # 独立判读的 5 条样本**全部**是假阳性，成因完全一致：
+        # 允许集把 Person / Document / Material 从两端排掉，而这三类恰是
+        #   · 人被使能：`Advancing hardware capabilities enabled researchers to…`
+        #   · 文献被使能：`Pre-test served as foundation for reviews`
+        #   · 物质被使能：`Bio2Token holds potential for biomolecular complex design`
+        # 的正常用法。Organization 与 Person 同族（"条件使组织能做某事"），一并纳入。
+        # 这 5 条占第二批样本的 45%，是"约束太严"最主要的来源。
+        source_allowed=_ALL - {"Location", "Event"},
+        target_allowed=_ALL - {"Location", "Event"},
         basis="semantics",
         evidence="可判定 739 条：Concept→Concept 162 与 Concept→Process 92 为主，"
                  "Concept/Method/Process 两侧都常见；Person 侧仅 0.5%。",

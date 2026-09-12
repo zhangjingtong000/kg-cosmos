@@ -15,6 +15,7 @@
 import json
 from collections import Counter
 from pathlib import Path
+from idempotent_write import dumps, write_if_changed
 
 ROOT = Path(__file__).resolve().parent.parent
 Q = ROOT / 'data' / 'quality'
@@ -188,7 +189,7 @@ def main():
                    '第二批样本量小，比例估计的置信区间很宽，'
                    '但"ENABLES 五条全是假阳性且成因一致"这一点是明确的。'),
     }
-    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
+    write_if_changed(OUT, dumps(out))
     print(f'\n报告已写出: {OUT}')
 
 
