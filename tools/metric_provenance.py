@@ -57,10 +57,10 @@ METRICS = {
     # 一条本该 USES 的边标成 PART_OF 照样通过 ⇒ 99.5% 接近自证。
     # 本项用同一条 premise 与 15 个假设句模板各算 entail_prob、取 argmax 作预测谓词，
     # 报"与标注谓词的一致率"。它是**两个模型的一致率**，不是与人工金标的准确率。
-    'L4_predicate_top1': ('l4-predicate.json', ['metrics', 'top1_accuracy'],
+    'L4_predicate_agreement': ('l4-predicate.json', ['metrics', 'agreement_top1'],
                           'tools/l4_predicate_report.py'),
-    'L4_predicate_top1_excl_ties': ('l4-predicate.json',
-                                    ['metrics', 'top1_accuracy_excluding_ties'],
+    'L4_predicate_agreement_excl_ties': ('l4-predicate.json',
+                                    ['metrics', 'agreement_top1_excluding_ties'],
                                     'tools/l4_predicate_report.py'),
     'L4_predicate_macro_f1': ('l4-predicate.json', ['metrics', 'macro_f1'],
                               'tools/l4_predicate_report.py'),

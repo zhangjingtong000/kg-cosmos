@@ -10,6 +10,25 @@
 
 ## 0. 结论摘要
 
+> ### ⚠️ 必读：本层在 `CREATED_BY` 上**不是独立验证**
+>
+> `CREATED_BY` 报出的 98.0% 高合规率里，有**很大一部分是循环论证的必然结果**，
+> 不能当作 L7 的独立成果来陈述：
+>
+> · T3.1 的 `tools/apply_created_by_fix.py` 已经用**与 L7 完全同一套**
+>   `AUTHOR`/`CREATABLE` 规则，反转了 **2348 条** `CREATED_BY` 边、并把 165 条
+>   重标为 `CONTRIBUTED_TO`（后者已从图中删除）；
+> · 这 2348 条在本层必然判 `compliant_directed`，占 5819 的 **40.3%**；
+> · 换成任何一套自洽的规则，只要"改动层"和"校验层"共用同一份定义，
+>   都会得到同样的高合规率——**它检验的是两边有没有漂移，不是方向对不对**。
+>
+> **本层对 `CREATED_BY` 唯一的独立产出，是那 120 条反转与 302 条角色违规**
+> ——它们要么不在 T3.1 的改动范围内，要么因 `CITATIONISH` 被跳过。
+> 论文里引用 98.0% 时必须同时说明这一点，否则就是"用补丁的假设验证补丁"。
+>
+> 至于 `PRODUCES` 与 `LOCATED_AT`，改动层从未触碰过，**它们的数字是独立的**——
+> 但代价是覆盖率很低（47.4% / 48.0%）。
+
 15 类关系已各有一条端点类型约束，写进 `src/ontology.py`，可直接被校验层与改动层 import。
 
 **但其中只有 3 类真能由端点类型判方向**：
@@ -17,8 +36,8 @@
 | 可判性 | 关系类型 | 条数 |
 | --- | --- | --- |
 | 方向可判（有方向指纹） | `CREATED_BY`、`PRODUCES`、`LOCATED_AT` | 3 |
-| 语义对称，按定义不判方向 | `COMPARES_WITH`、`CONTRADICTS` | 2 |
-| 明确不可判定 | `MEASURES`、`RELATED_TO` | 2 |
+| 语义对称，按定义不判方向 | `COMPARES_WITH`、`CONTRADICTS`、`RELATED_TO` | 3 |
+| 明确不可判定（有方向但类型判不了） | `MEASURES` | 1 |
 | 方向敏感但类型判不了向（只做角色检查） | 其余 8 类 | 8 |
 
 这不是没做完，而是这套图的真实性质：要让类型决定方向，两侧的允许角色必须**几乎不相交**，
@@ -26,9 +45,17 @@
 
 三条硬结论：
 
-1. **`CREATED_BY` 是唯一可以直接用的方向判据**。可判定 6241 条里方向合规 **98.0%**，
-   检出反转 120 条，人工抽查 20 条中 17 条描述明确是「被创作物 → 创作者」、3 条无描述、
-   **0 条误报**。
+1. **`CREATED_BY` 是唯一可以直接用的方向判据**（但见上方循环论证声明）。
+   可判定 6241 条里方向合规 **98.0%**，检出反转 120 条。
+   人工抽查 20 条中 **17 条**描述明确是「被创作物 → 创作者」
+   （`Word2Vec was created by Mikolov et al.` 一类）、**2 条**描述字段只有 `CREATED_BY`
+   无任何信息、**1 条是谓词误用而非方向问题**
+   （`Cluster Modification Algorithm → Gu et al.`，描述实为"Gu et al. 使用了该算法"，
+   本该是 `USES`）。**真阳性率 ≈ 85%**，不是 100%。
+   另需注意：这 120 条里约 117 条会因命中 `apply_created_by_fix.py` 的
+   `CITATIONISH` 规则（`et al` / `(2019)` / `, 2019`）被跳过，
+   **实际能自动反转的只有约 3 条**。所以 L7 对 `CREATED_BY` 的产出定位是
+   **报告，而不是修复**。
 2. **`EVALUATES` 与 `APPLIES_TO` 的方向指纹被主动撤销**。前者按 `{Method,Document,Person}
    → {Dataset,Concept}` 判出的 8 条「反转」经逐条核对**全部是假阳性**；后者判出的 248 条里
    `Concept→Process` 98 条是「知识图谱用于问答」这类完全合法的边。撤销比留着好看得多。
@@ -135,7 +162,7 @@ kind == directed 无方向指纹   → 只看允许集
 | `ENABLES` | 739 | – | 734 | – | 5 | 260 | n/a | – | 99.3% |
 | `CITES` | 639 | – | 638 | – | 1 | 328 | n/a | – | 99.8% |
 | `MEASURES` | 537 | – | – | – | – | 335 | n/a | – | n/a |
-| `LOCATED_AT` | 590 | 283 | 306 | **0** | 1 | 263 | **100.0%** | 48.0% | 99.8% |
+| `LOCATED_AT` | 590 | 283 | 306 | **0** ※ | 1 | 263 | **100.0%** ※ | 48.0% | 99.8% |
 | `SUPPORTS` | 560 | – | 560 | – | 0 | 233 | n/a | – | 100.0% |
 | `COMPARES_WITH` | 374 | – | 374 | – | 0 | 224 | n/a | – | 100.0% |
 | `EVALUATES` | 302 | – | 296 | – | 6 | 152 | n/a | – | 98.0% |
@@ -144,6 +171,20 @@ kind == directed 无方向指纹   → 只看允许集
 | **合计** | **29877** | 6786 | 15371 | **156** | 402 | 13753 | | | |
 
 对账：29877 + 13753（不可判）+ 237（本体外关系类型）= 43867 ✅
+
+> **※ `LOCATED_AT` 的 100% 是构造性的，不能当作"方向全对"汇报。**
+> 它的反向触发条件是「source ∈ {Location, Organization, Event} 且 target 非此类」，
+> 而这类边在这 43867 条里**一次都没有出现**——判据的触发条件与实际抽取模式不相交，
+> 于是 `reversed` 恒为 0、"方向合规"恒为 100%。
+> 换句话说：这个 100% 说明的是**没有可判的反例**，不是**方向都对**。
+>
+> 另有两类同源现象：
+> · 3 类对称关系（`COMPARES_WITH`、`CONTRADICTS`、`RELATED_TO`）的
+>   `reversed = 0` 是**设计行为**（按定义不判方向），不是检出结果；
+> · 其余 8 类因 kind 不是 directed，同样不产出 `reversed`。
+>
+> 因此下表里 `reversed` 真正非零的**只有 `CREATED_BY` 与 `PRODUCES` 两类**
+> ——这也正是 156 条反转的全部来源。
 
 **与 `tools/l7_direction_verify.py` 原型逐项对账**（同一批边、同一张表）：
 
@@ -206,12 +247,18 @@ kind == directed 无方向指纹   → 只看允许集
 
 | 关系 | 判为反转 | 抽 20 条人工判读 | 真阳性率 | 处置 |
 | --- | ---: | --- | ---: | --- |
-| `CREATED_BY` | 120 | 17 条描述明确是「被创作物 → 创作者」（`Word2Vec was created by Mikolov et al.`），3 条描述字段只有 `CREATED_BY`，**0 条误报** | ≈ 85%（保守计） | 可进自动修复流程 |
+| `CREATED_BY` | 120 | **17 条**描述明确是「被创作物 → 创作者」（`Word2Vec was created by Mikolov et al.`）；**2 条**描述字段只有 `CREATED_BY`（无信息）；**1 条是谓词误用**（`Cluster Modification Algorithm → Gu et al.`，描述为 "Gu et al. apply a cluster modification algorithm"，本该是 `USES`） | **≈ 85%** | **只出报告，不自动改**：这 120 条里约 117 条会命中 `apply_created_by_fix.py` 的 `CITATIONISH` 规则被跳过，实际可自动反转的约 3 条 |
 | `PRODUCES` | 36 | 12 条真反转（`CNN produces a score` 被写成 `Score → CNN`），8 条是谓词误用或类型噪声，集中在 `Concept→Process` | ≈ 60% | **只进人工队列，不自动改** |
 | `LOCATED_AT` | 0 | 无可抽 | 无法估计 | 保持观察 |
 | `EVALUATES`（已撤销） | 8 | **0 条真反转**：`FewRel dataset was built to evaluate …`、`Evaluation assesses the edge prior method` 方向本身没错 | 0% | 指纹已撤销 |
 
 判读口径：读 `description` 里谁是主动方，与表的 `semantics` 比对；描述为空或只有关系名的记「无信息」。
+
+**已做人工精度抽查的只有 3 类**（`CREATED_BY` 20 条 + `PRODUCES` 20 条 +
+`EVALUATES` 8 条 = 48 条）。**其余 12 类的允许集只做了覆盖率事后核对，从未人工判读**：
+`PART_OF`、`USES`、`APPLIES_TO`、`SUPPORTS`、`CAUSES`、`ENABLES`、`CITES`、
+`MEASURES`、`LOCATED_AT`、`COMPARES_WITH`、`CONTRADICTS`、`RELATED_TO`。
+这张表在论文里只能声明为"未验证的初始划分"，不能声明为"已验证的本体约束"。
 
 ---
 
@@ -221,12 +268,28 @@ kind == directed 无方向指纹   → 只看允许集
 
 实测：`PART_OF` 的 `target=Event` 588 条、`LOCATED_AT` 241 条、`CITES` 104 条，
 描述几乎全是 `The paper was published in ICANN / AAAI / NIPS / ICLR / ACL`。
-`Event` 类型的实体名高频项是 `AAAI`(9)、`International Conference on Machine Learning`(9)、
-`WWW`(8)、`ICLR`(8)。
+
+`target` 类型为 `Event` 的边共 **1910 条**，端点实体名 Top6：
+`AAAI` **169**、`EMNLP` **165**、`ACL` **150**、`ICLR` **79**、`COLING` **63**、`IJCAI` **62**
+（口径：`relation-verify-all.json` 全部 43867 条边，按边计次；
+节点表 19427 个名字中 `Event` 类型共 **355** 个）。
+
+> 修正记录：本文档旧版这里写的是 `AAAI(9)`、`International Conference on
+> Machine Learning(9)`、`WWW(8)`、`ICLR(8)`，**与主数据差一个数量级、无法复现**，
+> 已按上述口径更正。
 
 这不是方向问题，是**本体缺一个 `Venue` 类**（15 类里没有）。
-缓解：`Event` 在所有关系的允许集里一律保留，只在方向指纹里作为「场所」使用；
-报告里单列，不把它算作任何一类方向错误。
+
+缓解（**更正**）：`Event` **并非**在所有关系的允许集里一律保留——实测它被排除在
+**7 类**的 `source_allowed` 之外（`CREATED_BY`、`PRODUCES`、`EVALUATES`、
+`APPLIES_TO`、`USES`、`ENABLES`、`COMPARES_WITH`）、**5 类**的 `target_allowed` 之外
+（`CREATED_BY`、`PRODUCES`、`EVALUATES`、`ENABLES`、`COMPARES_WITH`）。
+被排除的后果是这些边落入 `role_violation`（角色违规）而**不是** `reversed`（方向反转）
+——例如 `CREATED_BY` 上因此产生 87 条角色违规（`Person→Event` 34、`Event→Organization` 29、
+`Event→Person` 24）。这些是 §6.4 记录的**谓词误用**，不污染方向指标。
+报告与论文里应把它们单列，不当作方向错误。
+
+> 修正记录：旧版这里写「`Event` 在所有关系的允许集里一律保留」，与代码事实相反，已更正。
 
 ### 6.2 端点类型标签本身有噪声
 

@@ -118,7 +118,7 @@ def load_edges():
     """读权威边集。只保留『本体 15 类内 + premise 非空』——这是 L4 的有效分母。
 
     本体外 237 条（161 种类型里的长尾）不作为候选：它们的标注谓词不在候选集里，
-    放进 argmax 只会制造一个恒错的类别，把准确率压低却说明不了任何事。
+    放进 argmax 只会制造一个恒错的类别，把一致率压低却说明不了任何事。
     它们的数量单独报出，避免"分母被悄悄缩小"。
     """
     d = json.loads(VERIFY.read_text(encoding="utf-8"))
@@ -336,7 +336,7 @@ def mrr(rs):
 
 
 def bootstrap_acc(rs, B, seed):
-    """层内 bootstrap：按 label 层内有放回重抽同样条数，重算加权准确率。"""
+    """层内 bootstrap：按 label 层内有放回重抽同样条数，重算加权一致率。"""
     layers = defaultdict(list)
     for r in rs:
         layers[r["label"]].append(r)
@@ -474,7 +474,7 @@ def main():
           f"   上界（把平局也算对）{(cor_w+tie_w)/TOT:.1%}")
     print(f"  margin 分位 p25/p50/p75  "
           f"{mg[int(.25*len(mg))]:.3f} / {mg[int(.50*len(mg))]:.3f} / {mg[int(.75*len(mg))]:.3f}")
-    print("  读法：若这一项很低（实测约 0.2%）⇒ **argmax 的任意性不是一致率低的主因**，")
+    print("  读法：若这一项很低（实测约 0.2%）⇒ **argmax 的任意性不是准确率低的主因**，")
     print("        真正的主因是模板之间语义重叠（见上面 B：标注类 ≥阈值却输给别的类）。")
 
     # ── hit 分层 ──
@@ -541,10 +541,10 @@ def main():
         "template_form": ARGS.form,
         "templates": {k: TEMPLATES[k] for k in ONTOLOGY},
         "metrics": {
-            "top1_accuracy": round(acc, 4),
-            "top1_accuracy_hit_both": round(acc_both, 4),
-            "top1_accuracy_excluding_ties": round(acc_nt, 4),
-            "top1_accuracy_ties_as_correct": round((cor_w + tie_w) / TOT, 4),
+            "agreement_top1": round(acc, 4),
+            "agreement_top1_hit_both": round(acc_both, 4),
+            "agreement_top1_excluding_ties": round(acc_nt, 4),
+            "agreement_top1_ties_as_correct": round((cor_w + tie_w) / TOT, 4),
             "tie_lost_share": round(tie_w / TOT, 4),
             "tie_eps": ARGS.tie_eps,
             "margin_p50": round(mg[int(.50 * len(mg))], 4),

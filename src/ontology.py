@@ -138,8 +138,12 @@ RELATION_ENDPOINT_CONSTRAINTS = {
         source_allowed=_AGENT,
         target_allowed=_WORK,
         basis="convention",
-        evidence="可判定 6241 条中 source=Person 占 93.6%、target 落 11 类产物"
-                 "占 92.0%；source 侧 Person/Organization 覆盖 94.7%。",
+        # 数字已实测复核（2026-09-12，可判定 6241 条口径，已排除 Unknown 端点）：
+        #   source ∈ Author      : 5911/6241 = 94.7%
+        #   target ∈ Creatable   : 5972/6241 = 95.7%   ← 原写 92.0%，实测不符已修
+        #   两者都合法（=方向合规）: 5819/6241 = 93.2%
+        evidence="可判定 6241 条中 source 侧 Person/Organization 覆盖 94.7%、"
+                 "target 落 11 类产物占 95.7%。",
         reversal="judgeable",
     ),
     "LOCATED_AT": _constraint(
