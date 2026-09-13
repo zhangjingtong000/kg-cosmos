@@ -8,58 +8,82 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
   body {
-    background: radial-gradient(ellipse 120% 60% at 50% 0%, #0d1730 0%, #070c1a 46%, #04070f 100%);
-    color: #dfe8ff; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    /* 底从"深蓝"改成中性深墨：#0d1730 那圈冷蓝是整页蓝紫感的源头之一。 */
+    background: radial-gradient(ellipse 120% 60% at 50% 0%, #16171f 0%, #0d0e13 46%, #08080c 100%);
+    color: var(--pq-txt, #e4e6ec); font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
     display: flex; flex-direction: column; height: 100vh; overflow: hidden;
   }
   header { flex: 0 0 auto; padding: 20px 26px 12px; }
-  header small { display: block; color: rgba(181,203,235,.55); font-size: 10.5px;
+  header small { display: block; color: rgba(198,201,213,.5); font-size: 10.5px;
                  letter-spacing: .16em; text-transform: uppercase; }
   header h1 { margin: 5px 0 0; font-size: 19px; font-weight: 560; }
   header p { margin: 7px 0 0; font-size: 11.5px; line-height: 1.7; max-width: 880px;
-             color: rgba(170,199,240,.6); }
+             color: rgba(190,193,205,.62); }
 
   .ask { flex: 0 0 auto; display: flex; gap: 8px; align-items: center;
          padding: 0 26px 10px; flex-wrap: wrap; }
-  #q { flex: 1 1 320px; min-width: 220px; font: inherit; font-size: 13px; color: #dbe7ff;
-       background: rgba(12,19,38,.94); border: 1px solid rgba(140,170,255,.26);
+  #q { flex: 1 1 320px; min-width: 220px; font: inherit; font-size: 13px; color: #e4e6ec;
+       background: rgba(18,19,26,.94); border: 1px solid rgba(174,178,194,.22);
        border-radius: 9px; padding: 10px 12px; outline: none; }
-  #q:focus { border-color: rgba(150,190,255,.62); }
-  #go { font: inherit; font-size: 12.5px; cursor: pointer; color: #06101f;
-        background: linear-gradient(180deg,#9fc4ff,#6f9ff0); border: 0;
-        border-radius: 9px; padding: 10px 18px; font-weight: 560; }
-  #go:hover { filter: brightness(1.08); }
-  .ex { font-size: 11px; color: rgba(159,196,255,.75); cursor: pointer;
-        border: 1px solid rgba(140,170,255,.22); border-radius: 20px; padding: 3px 10px;
-        background: rgba(120,160,255,.07); }
-  .ex:hover { background: rgba(120,160,255,.2); color: #fff; }
+  /* 聚焦态用暖金：焦点=此刻正在做的事，和主按钮同色 */
+  #q:focus { border-color: rgba(224,164,105,.6); }
+  /* 主按钮本身就是暖金。上一版是蓝渐变再用 !important 盖掉，两套来源打架。 */
+  #go { font: inherit; font-size: 12.5px; cursor: pointer; color: #221507;
+        background: linear-gradient(180deg,#edb87e,#d5975a); border: 0;
+        border-radius: 9px; padding: 10px 18px; font-weight: 700; }
+  #go:hover { filter: brightness(1.07);
+              box-shadow: 0 10px 30px -12px rgba(224,164,105,.7); }
+  .ex { font-size: 11px; color: rgba(198,201,213,.72); cursor: pointer;
+        border: 1px solid rgba(174,178,194,.2); border-radius: 20px; padding: 3px 10px;
+        background: rgba(198,201,213,.06); }
+  .ex:hover { border-color: rgba(224,164,105,.55); color: var(--pq-warm);
+              background: rgba(224,164,105,.09); }
 
   .stage { flex: 1 1 auto; display: flex; min-height: 0; padding: 0 26px 22px; gap: 14px; }
-  #graph { flex: 1 1 auto; min-width: 0; background: rgba(8,13,28,.6);
-           border: 1px solid rgba(140,170,255,.14); border-radius: 12px;
+  #graph { flex: 1 1 auto; min-width: 0; background: rgba(13,14,19,.68);
+           border: 1px solid rgba(174,178,194,.13); border-radius: 12px;
            position: relative; overflow: hidden; }
-  #graph svg { display: block; width: 100%; height: 100%; }
+  #graph svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%;
+               touch-action: none; }
+  /* 图谱交互（2026-09）。位置补间由 JS 的 rAF 负责，这里刻意**不用** CSS transition：
+     <line> 的 x1/y1/x2/y2 不是 CSS 属性，过渡不了，边会明显滞后于节点。 */
+  #graph svg circle.n { cursor: grab; }
+  #graph.dragging, #graph.dragging svg circle.n { cursor: grabbing; }
+  #graph svg text { pointer-events: none; user-select: none; }
+  #graph svg circle.n:hover { stroke: #fff; stroke-width: 1.5; }
+  #cam { position: absolute; right: 10px; bottom: 8px; display: flex; gap: 9px;
+         align-items: center; font-size: 10px; color: rgba(160,164,178,.5); }
+  #cam .tip { pointer-events: none; letter-spacing: .03em; }
+  #cam button { font: inherit; color: rgba(206,209,220,.82); cursor: pointer;
+                background: rgba(198,201,213,.09); border: 1px solid rgba(174,178,194,.2);
+                border-radius: 999px; padding: 2px 9px; }
+  #cam button:hover { background: rgba(224,164,105,.18); border-color: rgba(224,164,105,.5);
+                      color: #fff; }
   #side { flex: 0 0 306px; display: flex; flex-direction: column; gap: 10px;
           min-height: 0; overflow-y: auto; }
-  #side .box { background: rgba(8,13,28,.72); border: 1px solid rgba(140,170,255,.14);
+  #side .box { background: rgba(13,14,19,.78); border: 1px solid rgba(174,178,194,.13);
                border-radius: 11px; padding: 11px 13px; }
   #side h3 { margin: 0 0 8px; font-size: 10.5px; letter-spacing: .13em;
-             text-transform: uppercase; color: rgba(181,203,235,.72);
-             padding-bottom: 5px; border-bottom: 1px solid rgba(140,170,255,.1); }
+             text-transform: uppercase; color: rgba(198,201,213,.7);
+             padding-bottom: 5px; border-bottom: 1px solid rgba(174,178,194,.1); }
   #side .row { display: flex; align-items: baseline; gap: 8px; font-size: 11.5px;
                padding: 3px 0; }
   #side .row .nm { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis;
-                   white-space: nowrap; color: rgba(214,228,250,.88); cursor: pointer; }
+                   white-space: nowrap; color: rgba(222,225,233,.9); cursor: pointer; }
   #side .row .nm:hover { color: #fff; text-decoration: underline; }
-  #side .row .dg { color: rgba(160,190,235,.55); font-size: 10.5px;
+  #side .row .dg { color: rgba(160,164,178,.58); font-size: 10.5px;
                    font-variant-numeric: tabular-nums; }
   #side .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
-  #hint2 { position: absolute; inset: 0; padding-top: 22vh; display: block; 
-           justify-content: center; text-align: center; padding: 30px;
-           font-size: 12.5px; line-height: 1.9; color: rgba(160,190,235,.5); }
-  .empty { font-size: 11.5px; color: rgba(160,190,235,.5); padding: 6px 0; }
-  footer { flex: 0 0 auto; padding: 0 26px 14px; font-size: 10.5px;
-           color: rgba(150,190,255,.42); line-height: 1.7; }
+  /* 空态覆盖层。`padding` 必须写成完整四值 —— 之前 `padding: 30px` 声明在
+     padding-top 之后，把 22vh 整个覆盖掉，文字掉到画面正中；justify-content
+     在 block 容器上本来也不起作用。 */
+  #hint2 { position: absolute; inset: 0; padding: 22vh 30px 30px; text-align: center;
+           font-size: 12.5px; line-height: 1.9; color: rgba(160,164,178,.52); }
+  .empty { font-size: 11.5px; color: rgba(160,164,178,.52); padding: 6px 0; }
+  /* 左内边距要让开左下角那个 fixed 的「← 导航页」（a11y.js 注入，left:14px，
+     宽约 90px）。否则页脚第一行的开头会被它压住——截图里"数据：web/"整个被盖掉。 */
+  footer { flex: 0 0 auto; padding: 0 26px 14px 112px; font-size: 10.5px;
+           color: rgba(160,164,178,.44); line-height: 1.7; }
   mark { background: rgba(255,214,120,.26); color: #fff; border-radius: 3px; padding: 0 2px; }
 
 /* ── 标题字体（由 tools/apply_fonts.py 注入）────────────────────────────
@@ -99,60 +123,61 @@ h3 { font-weight: 600; }
 .note > p + p::before{
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
   background: linear-gradient(90deg,
-    rgba(var(--warmRGB,150,180,255),.42), rgba(140,170,255,.06) 62%, transparent);
+    rgba(224,164,105,.4), rgba(174,178,194,.07) 62%, transparent);
 }
 .note b{
   font-family: "Smiley Sans","Noto Serif SC",serif;
-  font-weight: 400; color: var(--warm, #ffcfa8);
+  font-weight: 400; color: var(--pq-warm);
   font-size: 15.5px; letter-spacing: .01em;
 }
 .note strong{ color: #fff; font-weight: 600; }
 .note code{
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: .9em; padding: 1px 5px; border-radius: 3px;
-  background: rgba(140,170,255,.12); color: #cfe0ff;
+  background: rgba(198,201,213,.1); color: #d6d9e2;
 }
 
-/* 2026-09 加：打破"全是蓝紫"。给强调、次强调、警戒各一个明确色相，
-   并规定它们各自只承担一种语义，不再混用。 */
+/* 这一处曾经独立定义过一整套 --hue-*（于是同一页出现第三套色源，值还是冷蓝 +
+   荧光青）。现在真值只保留在下面的 --pq-* 一处，这里改成别名。
+   打破"全是蓝紫"靠的是**减少色相**，不是多加一套变量。 */
 :root{
-  --hue-cool: #7fb3ff;      /* 主色：冷蓝，结构性元素（分隔线、次级标签） */
-  --hue-cyan: #5fe0d0;      /* 次色：青，正面结论（召回、覆盖、通过） */
-  --hue-warm: #ffb27f;      /* 暖色：负面/需注意（误差、漏抽、风险） */
-  --hue-gold: #ffd9a0;      /* 金：强调数字、结论性指标 */
+  --hue-cool: var(--pq-cool);   /* 结构性元素：中性灰 */
+  --hue-cyan: var(--pq-cyan);   /* 正面结论 */
+  --hue-warm: var(--pq-warm);   /* 主行动、命中、需注意 */
+  --hue-gold: #edc79a;          /* 强调数字 */
 }
 
-/* ── 配色扩展（2026-09）────────────────────────────────────────────────
-   用户反馈「很蓝紫的配色，很丑」。原先全页只用一个蓝色相在七档 alpha 上打转，
-   与导航页的"星云旅程"也接不上。
-   这里引入两个明确语义的通道：
-     --pq-cool 冷蓝：结构性元素（边框、分隔线、未选态）
-     --pq-warm 暖金：命中、当前高亮、主行动（Button）
-     --pq-cyan 青  ：正面结论（覆盖率、命中率）
-   冷蓝仍是底，但"重要的东西"不再也是蓝的。 */
+/* ── 配色体系（2026-09 重做）──────────────────────────────────────────────
+   用户反馈「很蓝紫的配色，很丑」。
+
+   上一版是**打补丁**：底层仍是同一族冷蓝在七档 alpha 上打转，只在上面用几个
+   !important 盖暖色。于是页面同时存在两套色源，读起来是"蓝底上贴了几块橙"，
+   而且可辨识的色相自始至终只有一个蓝。
+
+   这一版直接换掉底层。全页只留**两个有彩色**：
+     金 #e0a469 —— 主行动、命中、当前焦点
+     青 #7cc0b6 —— 正面结论、统计数字
+   其余全部是中性灰阶（--pq-cool 现在是灰，不是蓝）。图谱节点的 15 个类型色
+   也从同一条"金 → 青"色相带上派生（见下方 TYPE_COLORS），饱和度压到 35–50%。
+
+   为什么这样更好：一屏里能被记住的颜色越少，层次越清楚。原来的蓝在七个 alpha
+   上打转，等于没有层次；现在"金=要动手、青=看结论、灰=背景"，语义是唯一的。 */
 :root{
-  --pq-cool:#7fb3ff;
-  --pq-warm:#ffcfa8;
-  --pq-warm-deep:#ff9f6b;
-  --pq-cyan:#5fe0d0;
+  --pq-ink:#0b0c11;
+  --pq-surface:#14151c;
+  --pq-line:rgba(174,178,194,.13);
+  --pq-txt:#e4e6ec;
+  --pq-txt-2:rgba(198,201,213,.68);
+  --pq-txt-3:rgba(160,164,178,.5);
+  --pq-cool:#9aa0ae;        /* 结构性元素：中性灰，不再是蓝 */
+  --pq-warm:#e0a469;        /* 主行动与命中 */
+  --pq-warm-deep:#c9873f;
+  --pq-cyan:#7cc0b6;        /* 正面结论 */
 }
-/* 主按钮改暖色：一屏里最该被点的东西不应该是蓝的 */
-#go,button.primary{
-  background:linear-gradient(120deg,#ffb27f,#ff9f6b) !important;
-  border-color:rgba(255,178,127,.55) !important;
-  color:#2a1406 !important; font-weight:700 !important;
-}
-#go:hover{ box-shadow:0 10px 30px -10px rgba(255,159,107,.75) !important; }
-/* 示例问句胶囊：悬停从蓝转暖 */
-.ex:hover{
-  border-color:rgba(255,178,127,.6) !important;
-  color:var(--pq-warm) !important;
-  background:rgba(255,178,127,.10) !important;
-}
-/* 命中实体的行：左侧加一道暖色，与"未命中"的灰蓝明确区分 */
-#seeds .nm{ border-left:2px solid rgba(255,178,127,.55); padding-left:8px; }
-/* 子图统计里的数字用青色，和冷蓝的标签拉开 */
-#stats b,#stats strong{ color:var(--pq-cyan) !important; }
+/* 命中实体的行：左侧一道暖色，与"未命中"的灰明确区分 */
+#seeds .nm{ border-left:2px solid rgba(224,164,105,.55); padding-left:8px; }
+/* 子图统计里的数字用青，和灰色标签拉开 */
+#stats b,#stats strong{ color:var(--pq-cyan); }
 </style>
 <link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/fonts/fonts.css">
@@ -175,7 +200,7 @@ h3 { font-weight: 600; }
 </div>
 
 <div class="stage">
-  <div id="graph"><div id="hint2">正在加载图谱…</div></div>
+  <div id="graph"><div id="hint2">正在加载图谱…</div><div id="cam"><span class="tip">拖节点 · 拖空白平移 · 滚轮缩放</span><button id="reset" type="button">复位</button></div></div>
   <aside id="side">
     <div class="box"><h3>命中的实体</h3><div id="seeds"><div class="empty">—</div></div></div>
     <div class="box"><h3>子图统计</h3><div id="stats"><div class="empty">—</div></div></div>
@@ -191,13 +216,31 @@ const esc = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;');
 
+/* 类型色板（2026-09 重做）。
+   旧值是 15 个 HSL 亮度 75%、饱和度 100% 的荧光色（其中 7 个偏蓝紫）。
+   在深底上它们互相打架，这是这一页
+   看起来"很丑"最直接的原因；而且 7/15 偏蓝紫，正是用户说的"全是蓝紫"。
+
+   新板子是同一条"金 → 青"色相带上派生的 15 个点，饱和度 35–50%、亮度 55–72%，
+   并按**语义族**归并：方法/工具/制品/组件/系统落在暖端，概念/过程/事件在中段，
+   度量/数据集在青端，只有 Document/Location 用低饱和雾蓝。这样同一类东西在图上
+   会连成一片颜色，而不是散成噪点。Unknown 是派生标签，落到中性灰。 */
 const TYPE_COLORS = {
-  Person: '#ff7f7f', Concept: '#7fb3ff', Method: '#7fffb3', Document: '#ffd97f',
-  Process: '#c77fff', System: '#7fffff', Artifact: '#ff9f7f', Component: '#b3ff7f',
-  Event: '#ff7fd9', Metric: '#7fd9ff', Dataset: '#d9ff7f', Organization: '#ffbf7f',
-  Location: '#9f7fff', Tool: '#7fffd9', Material: '#d9d9d9',
+  /* 暖端：方法与工具 —— 被检索最多的实体，给最亮的金 */
+  Method: '#e3b878', Tool: '#d8a869', Artifact: '#c9975f',
+  Component: '#bd8659', System: '#b0765f',
+  /* 人与组织 */
+  Person: '#cc8288', Organization: '#b1727f',
+  /* 概念、过程与事件：低饱和藕紫，不是荧光紫 */
+  Concept: '#9c8bb0', Process: '#8d84a8', Event: '#a68fa8',
+  /* 度量与数据集：青瓷端 */
+  Metric: '#7aa9a4', Dataset: '#719c92',
+  /* 文档与地点：全页仅剩的两个蓝，且压到低饱和 */
+  Document: '#7c8fae', Location: '#7084a0',
+  /* 中性 */
+  Material: '#8b8f9c',
 };
-const TCOL = (t) => TYPE_COLORS[t] || '#9fb6d8';
+const TCOL = (t) => TYPE_COLORS[t] || '#7f8492';
 
 let NODES = [], ADJ = new Map(), BY_NAME = new Map();
 const MAX_SEEDS = 6, HOPS = 2, MAX_NODES = 70;
@@ -218,8 +261,8 @@ function buildIndex(data) {
     }
   }
   document.getElementById('hint2').innerHTML =
-    `图谱已就绪：<b style="color:#cfe0ff">${NODES.length}</b> 个实体、`
-    + `<b style="color:#cfe0ff">${data.edges.length}</b> 条关系。<br>输入一句问法开始检索。`;
+    `图谱已就绪：<b style="color:#7cc0b6">${NODES.length}</b> 个实体、`
+    + `<b style="color:#7cc0b6">${data.edges.length}</b> 条关系。<br>输入一句问法开始检索。`;
 }
 
 /** 从问题里找种子实体：实体名整串出现在问题中就命中（忽略大小写）。
@@ -292,15 +335,30 @@ function subgraph(seeds) {
   return { nodes, links, dist };
 }
 
+/* 布局与视口状态。
+   POS  = 此刻实际渲染位置（补间对象，拖动时直接改写）
+   TARGET = 布局算出的目标位置
+   PIN  = 用户拖拽钉住的节点，力导向不再移动它们
+   VIEW = 相机（缩放 + 平移） */
+const POS = new Map(), TARGET = new Map(), PIN = new Map();
+const VIEW = { k: 1, tx: 0, ty: 0 };
+
 /** 极简力导向：Fruchterman-Reingold 的简化版。
- *  节点数封顶 70，O(n²) 完全够用，也就不必引任何图布局库。 */
-function layout(nodes, links, W, H) {
+ *  节点数封顶 70，O(n²) 完全够用，也就不必引任何图布局库。
+ *
+ *  2026-09 改：随机数换成**由问句播种的确定性 PRNG**。原先那个随机源不带种子，
+ *  生成初值，同一个问题连问两次节点位置完全不同，用户看到的是一张"抖动着
+ *  换位置"的图。同时优先沿用 POS 里已有的坐标（位置继承），新旧子图的共同
+ *  节点几乎不动，视觉上是"图在原地长出新枝"，而不是整张图被换掉。 */
+function layout(nodes, links, W, H, rnd) {
   const N = nodes.length;
   const idx = new Map(nodes.map((n, i) => [n.id, i]));
   const P = nodes.map((n, i) => {
+    const prev = POS.get(n.id);
+    if (prev) return { x: prev.x, y: prev.y };
     const a = (i / N) * Math.PI * 2;
-    return { x: W / 2 + Math.cos(a) * Math.min(W, H) * 0.28 + (Math.random() - .5) * 8,
-             y: H / 2 + Math.sin(a) * Math.min(W, H) * 0.28 + (Math.random() - .5) * 8 };
+    return { x: W / 2 + Math.cos(a) * Math.min(W, H) * 0.28 + (rnd() - .5) * 8,
+             y: H / 2 + Math.sin(a) * Math.min(W, H) * 0.28 + (rnd() - .5) * 8 };
   });
   const L = links.map(l => [idx.get(l.a), idx.get(l.b)]).filter(([a, b]) => a != null && b != null);
   const k = Math.sqrt((W * H) / Math.max(1, N)) * 0.62;
@@ -311,7 +369,7 @@ function layout(nodes, links, W, H) {
       for (let j = i + 1; j < N; j++) {
         let vx = P[i].x - P[j].x, vy = P[i].y - P[j].y;
         let d2 = vx * vx + vy * vy;
-        if (d2 < 0.01) { vx = (Math.random() - .5) * .6; vy = (Math.random() - .5) * .6; d2 = .36; }
+        if (d2 < 0.01) { vx = (rnd() - .5) * .6; vy = (rnd() - .5) * .6; d2 = .36; }
         const d = Math.sqrt(d2), f = (k * k) / d;
         const ux = vx / d, uy = vy / d;
         dx[i] += ux * f; dy[i] += uy * f;
@@ -326,6 +384,9 @@ function layout(nodes, links, W, H) {
       dx[b] += ux * f; dy[b] += uy * f;
     }
     for (let i = 0; i < N; i++) {
+      // 用户拖过的节点：位置被钉死，力导向不再移动它（但它仍参与斥力计算）
+      const pin = PIN.get(nodes[i].id);
+      if (pin) { P[i].x = pin.x; P[i].y = pin.y; continue; }
       // 向心引力：防止孤立簇被斥力推到画布外
       dx[i] += (W / 2 - P[i].x) * 0.012;
       dy[i] += (H / 2 - P[i].y) * 0.012;
@@ -338,20 +399,63 @@ function layout(nodes, links, W, H) {
     }
     temp *= 0.985;
   }
+
+  // 布局结果写进 TARGET（补间的收敛目标）；POS 记录"此刻实际在哪"。
+  // 新出现的节点从画布中心附近起飞再落到目标位置，有"展开"的观感，
+  // 而不是凭空出现在终点。
+  // 收敛后按包围盒整体铺开。FR 的平衡半径由 k 与向心引力系数共同决定，实测只占
+  // 到画布宽度的四成左右，四周大片留白。调 k 或引力系数是互相牵制的（改一个另一个
+  // 就失衡），按包围盒等比缩放更稳、也更可复现。
+  // 这个变换是幂等的：铺开后的位置再喂回下一轮布局，包围盒已经占满，sc ≈ 1。
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const p of P) {
+    if (p.x < minX) minX = p.x;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.y > maxY) maxY = p.y;
+  }
+  const bw = Math.max(1, maxX - minX), bh = Math.max(1, maxY - minY);
+  const pad = 52;   // 给外圈标签留位，否则贴边的标签会被画布裁掉
+  const sc = Math.min(2.4, Math.min((W - pad * 2) / bw, (H - pad * 2) / bh));
+  const ccx = (minX + maxX) / 2, ccy = (minY + maxY) / 2;
+  for (const p of P) {
+    p.x = Math.max(18, Math.min(W - 18, W / 2 + (p.x - ccx) * sc));
+    p.y = Math.max(18, Math.min(H - 18, H / 2 + (p.y - ccy) * sc));
+  }
+
+  TARGET.clear();
+  nodes.forEach((n, i) => TARGET.set(n.id, { x: P[i].x, y: P[i].y }));
+  for (const [id, q] of TARGET) {
+    if (!POS.has(id)) POS.set(id, { x: W / 2 + (rnd() - .5) * 26, y: H / 2 + (rnd() - .5) * 26 });
+  }
+
+  // POS 随提问累积，偶尔清掉已经不在图上的旧条目
+  if (POS.size > 360) for (const id of [...POS.keys()]) if (!TARGET.has(id)) POS.delete(id);
+
   return { P, L };
 }
 
 function render(question, seeds, sg) {
   const box = document.getElementById('graph');
   const W = box.clientWidth, H = box.clientHeight;
-  if (!sg.nodes.length) { box.innerHTML = '<div id="hint2">没有命中任何实体。<br>换一个更具体的名字试试。</div>'; /* 提前 return 之前必须清空侧栏：否则画布说"没有命中"，
-       而侧栏仍留着上一次的实体/关系统计 —— 同屏两个相反的结论。 */
+  const hint = document.getElementById('hint2');
+  if (!sg.nodes.length) {
+      /* 空态只切覆盖层，不再用 innerHTML 把整个 <svg> 一起推平重建 —— 那样连
+         svg 节点本身都丢了，下一次渲染还得重新创建，也拿不到平滑过渡。 */
+      if (hint) { hint.style.display = 'block';
+                  hint.innerHTML = '没有命中任何实体。<br>换一个更具体的名字试试。'; }
+      clearScene();
+      PIN.clear(); TARGET.clear(); POS.clear();
+      /* 提前 return 之前必须清空侧栏：否则画布说"没有命中"，
+         而侧栏仍留着上一次的实体/关系统计 —— 同屏两个相反的结论。 */
       ['seeds','stats','edges'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '<div class="empty">—</div>';
       });
       return; }
-  const { P, L } = layout(sg.nodes, sg.links, W, H);
+  if (hint) { hint.style.display = 'none'; hint.textContent = ''; }
+  /* 布局随机数由问句播种：同一个问题必须永远得到同一张图。 */
+  const { P, L } = layout(sg.nodes, sg.links, W, H, mulberry32(hash32(question)));
   const idx = new Map(sg.nodes.map((n, i) => [n.id, i]));
   const deg = new Map();
   for (const l of sg.links) {
@@ -362,54 +466,55 @@ function render(question, seeds, sg) {
   const seedSet = new Set(seeds.map(s => s.id));
   const nodeR = (id) => 3.4 + 9 * Math.sqrt((deg.get(id) || 0) / maxDeg);
 
-  // 标签分配：种子必给，其余按子图内度数降序补，**逐个做矩形避让**，上限 9 个。
-  // 之前按 maxDeg 的固定比例取，在长尾子图里可能一个都取不到（实测只剩 1 个）；
-  // 但单纯加大数量又会让中心区糊成一团（实测 10 个时中间完全重叠）。
-  // 取前 K 个 + 避让，两头的问题都能解决。
-  const labelSet = new Set();
+  // 标签分配：种子必给，其余按子图内度数降序补，上限 9 个。
+  //
+  // 2026-09 改了两处，都是为了让中心区不再糊成一团：
+  //   ① 避让矩形里**预先把所有节点圆放进去**。原先只做标签之间的避让，于是标签
+  //      即使彼此不重叠，也照样盖住旁边的节点圆；
+  //   ② 允许标签摆在节点的八个方向上，取第一个不冲突的位置。原先一律摆正下方，
+  //      中心密集处根本没有空位，只能互相挤。
+  // 顺带：位置存成**相对节点的偏移**（ox/oy）而不是绝对坐标 —— 否则 rAF 补间
+  // 移动节点时，标签会留在原地和节点脱开。
+  const labelPos = new Map();
   const placedRects = [];
+  for (const n of sg.nodes) {
+    const i = idx.get(n.id), rr = nodeR(n.id) + 3;
+    placedRects.push({ x: P[i].x - rr, y: P[i].y - rr, w: rr * 2, h: rr * 2 });
+  }
+  const hitAny = (rect) => placedRects.some(q => !(rect.x > q.x + q.w || rect.x + rect.w < q.x
+                                                || rect.y > q.y + q.h || rect.y + rect.h < q.y));
+  const DIRS = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, 1], [1, -1], [-1, -1]];
   const tryLabel = (n) => {
     const i = idx.get(n.id);
-    const w = n.id.length * 5.9 + 6, h = 14;
-    const rect = { x: P[i].x - w / 2, y: P[i].y + nodeR(n.id) + 3, w, h };
-    const hit = placedRects.some(q => !(rect.x > q.x + q.w || rect.x + rect.w < q.x
-                                     || rect.y > q.y + q.h || rect.y + rect.h < q.y));
-    if (hit) return false;
-    placedRects.push(rect);
-    labelSet.add(n.id);
-    return true;
+    const txt = n.id.length > 22 ? n.id.slice(0, 21) + '…' : n.id;
+    const w = txt.length * 5.9 + 6, h = 13, gap = nodeR(n.id) + 6;
+    for (const [ux, uy] of DIRS) {
+      const cx = P[i].x + ux * (gap + w / 2);
+      const cy = P[i].y + uy * (gap + h / 2);
+      const rect = { x: cx - w / 2, y: cy - h / 2, w: w, h: h };
+      if (hitAny(rect)) continue;
+      placedRects.push(rect);
+      labelPos.set(n.id, { ox: cx - P[i].x, oy: cy - P[i].y, t: txt });
+      return true;
+    }
+    return false;
   };
-  for (const n of sg.nodes) if (seedSet.has(n.id) && labelSet.size < 9) tryLabel(n);
+  for (const n of sg.nodes) if (seedSet.has(n.id) && labelPos.size < 9) tryLabel(n);
   for (const n of [...sg.nodes].sort((a, b) => (deg.get(b.id) || 0) - (deg.get(a.id) || 0))) {
-    if (labelSet.size >= 9) break;
-    if (labelSet.has(n.id)) continue;
+    if (labelPos.size >= 9) break;
+    if (labelPos.has(n.id)) continue;
     tryLabel(n);
   }
 
-  const parts = [];
-  parts.push('<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">');
-  parts.push('<g stroke-linecap="round">');
-  for (const [a, b] of L) {
-    const pa = P[a], pb = P[b];
-    parts.push(`<line x1="${pa.x.toFixed(1)}" y1="${pa.y.toFixed(1)}" x2="${pb.x.toFixed(1)}" y2="${pb.y.toFixed(1)}" stroke="rgba(140,180,255,0.19)" stroke-width="1"/>`);
-  }
-  parts.push('</g>');
-  sg.nodes.forEach((n, i) => {
-    const d = deg.get(n.id) || 0;
-    const r = nodeR(n.id);
-    const c = TCOL(n.t);
-    const isSeed = seedSet.has(n.id);
-    const lbl = labelSet.has(n.id) ? n.id : '';
-    if (isSeed) {
-      parts.push(`<circle class="ring" cx="${P[i].x.toFixed(1)}" cy="${P[i].y.toFixed(1)}" r="${(r + 6).toFixed(1)}" fill="none" stroke="${c}" stroke-opacity="0.5" stroke-width="1.2"/>`);
-    }
-    parts.push(`<circle class="n" cx="${P[i].x.toFixed(1)}" cy="${P[i].y.toFixed(1)}" r="${r.toFixed(1)}" fill="${c}" fill-opacity="${isSeed ? 0.95 : 0.72}"><title>${esc(n.id)} · ${esc(n.t || '')} · 子图内 ${d} 条关系</title></circle>`);
-    if (lbl) {
-      parts.push(`<text x="${P[i].x.toFixed(1)}" y="${(P[i].y + r + 11).toFixed(1)}" text-anchor="middle" font-size="${isSeed ? 11 : 10}" fill="${isSeed ? '#eaf2ff' : 'rgba(214,228,250,.72)'}" font-family="PingFang SC, Microsoft YaHei, sans-serif">${esc(lbl.length > 22 ? lbl.slice(0, 21) + '…' : lbl)}</text>`);
-    }
-  });
-  parts.push('</svg>');
-  box.innerHTML = parts.join('');
+  /* 元素按 id 复用外层 <g>，位置交给 POS→TARGET 补间，于是"重新提问"
+     看起来是图在原地演化，而不是换了一张图。 */
+  buildScene(sg, L, {
+    radius: (id) => nodeR(id),
+    degree: (id) => deg.get(id) || 0,
+    isSeed: (id) => seedSet.has(id),
+    label: (id) => labelPos.get(id) || null,
+  }, W, H);
+  wake();
 
   // 侧栏
   document.getElementById('seeds').innerHTML = seeds.length
@@ -436,6 +541,238 @@ function render(question, seeds, sg) {
     : '<div class="empty">—</div>';
 }
 
+/* ── 渲染与交互（2026-09）─────────────────────────────────────────────────
+   位置由 POS（此刻在哪）→ TARGET（布局给出的目标）的 rAF 阻尼补间驱动。
+   刻意不用 CSS transition：<line> 的 x1/y1/x2/y2 不是 CSS 属性，过渡不了，
+   边会明显滞后于节点。拖动时 POS 被直接改写，所以跟手没有延迟。
+   ──────────────────────────────────────────────────────────────────────── */
+const SVGNS = 'http://www.w3.org/2000/svg';
+let SCENE = null, RAF = 0;
+
+/** 32 位 FNV-1a。用来把问句变成布局随机种子 —— 同一个问句必须得到同一张图。 */
+function hash32(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+
+/** mulberry32：小巧的确定性 PRNG，用来替换 layout 里原来那个不确定的随机源。 */
+function mulberry32(a) {
+  return function () {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function tick(now) {
+  const dt = Math.min(0.05, Math.max(0.001, (now - (tick.t || now)) / 1000));
+  tick.t = now;
+  const a = 1 - Math.pow(0.1, dt);   // 帧率无关的阻尼，约 0.4s 到位
+  let moving = false;
+  for (const [id, p] of POS) {
+    const q = TARGET.get(id);
+    if (!q) continue;
+    p.x += (q.x - p.x) * a;
+    p.y += (q.y - p.y) * a;
+    if (Math.abs(q.x - p.x) > 0.1 || Math.abs(q.y - p.y) > 0.1) moving = true;
+  }
+  paint();
+  RAF = moving ? requestAnimationFrame(tick) : 0;
+}
+
+/** 唤醒补间。所有会改变画面的操作（提问、拖动、缩放、复位）都要调它。 */
+function wake() { if (!RAF) { tick.t = 0; RAF = requestAnimationFrame(tick); } }
+
+function paint() {
+  if (!SCENE) return;
+  const cam = SCENE.cam;
+  cam.setAttribute('transform',
+    'translate(' + VIEW.tx.toFixed(2) + ',' + VIEW.ty.toFixed(2) + ') scale(' + VIEW.k.toFixed(4) + ')');
+  for (const [id, g] of SCENE.nodes) {
+    const p = POS.get(id);
+    if (p) g.setAttribute('transform', 'translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')');
+  }
+  for (const e of SCENE.edges) {
+    const pa = POS.get(e.a), pb = POS.get(e.b);
+    if (!pa || !pb) continue;
+    e.el.setAttribute('x1', pa.x.toFixed(1));
+    e.el.setAttribute('y1', pa.y.toFixed(1));
+    e.el.setAttribute('x2', pb.x.toFixed(1));
+    e.el.setAttribute('y2', pb.y.toFixed(1));
+  }
+}
+
+function clearScene() {
+  if (!SCENE) return;
+  SCENE.gE.textContent = '';
+  SCENE.gN.textContent = '';
+  SCENE.nodes.clear();
+  SCENE.edges.length = 0;
+  SCENE.svg.style.display = 'none';
+}
+
+/** 用字符串拼 SVG 会丢掉元素身份，也就无法做补间；这里改成 DOM 复用。
+ *  圆在各自的 <g> 内画在原点，位移全部由 <g transform> 承担。 */
+function buildScene(sg, L, style, W, H) {
+  const box = document.getElementById('graph');
+  let svg = box.querySelector('svg');
+  if (!svg) {
+    svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('xmlns', SVGNS);
+    box.insertBefore(svg, box.firstChild);   // 压在最底层，别盖住空态与操作提示
+  }
+  svg.style.display = 'block';
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  const cam = document.createElementNS(SVGNS, 'g');
+  const gE = document.createElementNS(SVGNS, 'g');
+  gE.setAttribute('stroke-linecap', 'round');
+  const gN = document.createElementNS(SVGNS, 'g');
+  cam.appendChild(gE); cam.appendChild(gN); svg.appendChild(cam);
+
+  const edges = [];
+  for (const [a, b] of L) {
+    const el = document.createElementNS(SVGNS, 'line');
+    el.setAttribute('stroke', 'rgba(168,172,186,0.16)');
+    el.setAttribute('stroke-width', '1');
+    gE.appendChild(el);
+    edges.push({ a: sg.nodes[a].id, b: sg.nodes[b].id, el });
+  }
+
+  const nodes = new Map();
+  /* 按度数升序添加：高度数节点最后画，压在小节点之上。否则中心那几个枢纽
+     （TransE 之类）会被周围的小圆盖住一角。 */
+  for (const n of [...sg.nodes].sort((a, b) => style.degree(a.id) - style.degree(b.id))) {
+    const r = style.radius(n.id), c = TCOL(n.t), isSeed = style.isSeed(n.id);
+    const g = document.createElementNS(SVGNS, 'g');
+    if (isSeed) {
+      const ring = document.createElementNS(SVGNS, 'circle');
+      ring.setAttribute('class', 'ring');
+      ring.setAttribute('cx', '0'); ring.setAttribute('cy', '0');
+      ring.setAttribute('r', (r + 6).toFixed(1));
+      ring.setAttribute('fill', 'none');
+      ring.setAttribute('stroke', c);
+      ring.setAttribute('stroke-opacity', '0.62');
+      ring.setAttribute('stroke-width', '1.2');
+      g.appendChild(ring);
+    }
+    const dot = document.createElementNS(SVGNS, 'circle');
+    dot.setAttribute('class', 'n');
+    dot.setAttribute('cx', '0'); dot.setAttribute('cy', '0');
+    dot.setAttribute('r', r.toFixed(1));
+    dot.setAttribute('fill', c);
+    /* 0.72 → 0.84：低饱和色在深底上会被透明度进一步洗灰，得抬高一点 */
+    dot.setAttribute('fill-opacity', isSeed ? '0.98' : '0.84');
+    dot.dataset.id = n.id;   // 拖动时从这里认节点
+    const tip = document.createElementNS(SVGNS, 'title');
+    tip.textContent = n.id + ' · ' + (n.t || '') + ' · 子图内 ' + style.degree(n.id) + ' 条关系';
+    dot.appendChild(tip);
+    g.appendChild(dot);
+    const lbl = style.label(n.id);
+    if (lbl) {
+      const tx = document.createElementNS(SVGNS, 'text');
+      tx.setAttribute('x', lbl.ox.toFixed(1));
+      tx.setAttribute('y', lbl.oy.toFixed(1));
+      tx.setAttribute('text-anchor', 'middle');
+      tx.setAttribute('dominant-baseline', 'central');
+      tx.setAttribute('font-size', isSeed ? '11' : '10');
+      tx.setAttribute('fill', isSeed ? '#edeff4' : 'rgba(212,215,224,.74)');
+      tx.setAttribute('font-family', 'PingFang SC, Microsoft YaHei, sans-serif');
+      tx.textContent = lbl.t;
+      g.appendChild(tx);
+    }
+    gN.appendChild(g);
+    nodes.set(n.id, g);
+  }
+
+  SCENE = { svg: svg, cam: cam, gE: gE, gN: gN, nodes: nodes, edges: edges };
+  paint();
+}
+
+/** 拖节点（并钉住它）、拖空白平移、滚轮缩放。 */
+function bindGraph() {
+  const box = document.getElementById('graph');
+  if (!box || box.dataset.bound) return;
+  box.dataset.bound = '1';
+
+  const btn = document.getElementById('reset');
+  if (btn) btn.addEventListener('click', () => {
+    VIEW.k = 1; VIEW.tx = 0; VIEW.ty = 0; wake();
+  });
+
+  let drag = null;
+
+  const local = (e) => {
+    const svg = SCENE && SCENE.svg;
+    if (!svg) return null;
+    const r = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    const sx = (vb && vb.width ? vb.width : r.width) / r.width;
+    const sy = (vb && vb.height ? vb.height : r.height) / r.height;
+    return { x: (e.clientX - r.left) * sx, y: (e.clientY - r.top) * sy, sx: sx, sy: sy };
+  };
+  const unproject = (p) => ({ x: (p.x - VIEW.tx) / VIEW.k, y: (p.y - VIEW.ty) / VIEW.k });
+
+  box.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    const p = local(e);
+    if (!p) return;
+    const t = e.target;
+    const id = (t && t.dataset) ? t.dataset.id : null;
+    if (id && POS.has(id)) {
+      const w = unproject(p);
+      drag = { id: id, ox: w.x - POS.get(id).x, oy: w.y - POS.get(id).y };
+    } else {
+      drag = { pan: true, px: e.clientX, py: e.clientY, tx: VIEW.tx, ty: VIEW.ty,
+               sx: p.sx, sy: p.sy };
+    }
+    box.classList.add('dragging');
+    try { box.setPointerCapture(e.pointerId); } catch (_) {}
+    e.preventDefault();
+  });
+
+  box.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    if (drag.pan) {
+      VIEW.tx = drag.tx + (e.clientX - drag.px) * drag.sx;
+      VIEW.ty = drag.ty + (e.clientY - drag.py) * drag.sy;
+    } else {
+      const p = local(e);
+      if (!p) return;
+      const w = unproject(p);
+      const q = { x: w.x - drag.ox, y: w.y - drag.oy };
+      POS.set(drag.id, q);
+      TARGET.set(drag.id, { x: q.x, y: q.y });   // 不设目标的话补间会把它拉回去
+      PIN.set(drag.id, { x: q.x, y: q.y });      // 钉住：下一次布局也不再移动它
+    }
+    wake();
+  });
+
+  const end = (e) => {
+    if (!drag) return;
+    box.classList.remove('dragging');
+    try { box.releasePointerCapture(e.pointerId); } catch (_) {}
+    drag = null;
+  };
+  box.addEventListener('pointerup', end);
+  box.addEventListener('pointercancel', end);
+
+  box.addEventListener('wheel', (e) => {
+    const p = local(e);
+    if (!p) return;
+    e.preventDefault();
+    const k2 = Math.max(0.4, Math.min(3.0, VIEW.k * Math.pow(1.0016, -e.deltaY)));
+    const w = unproject(p);            // 让光标下的那个点保持不动
+    VIEW.tx = p.x - w.x * k2;
+    VIEW.ty = p.y - w.y * k2;
+    VIEW.k = k2;
+    wake();
+  }, { passive: false });
+}
+
 let DATA = null;
 
 function ask() {
@@ -460,6 +797,7 @@ function boot(data) {
       document.getElementById('q').value = el.dataset.q;
       ask();
     }));
+  bindGraph();
   document.getElementById('go').addEventListener('click', ask);
   document.getElementById('q').addEventListener('keydown', e => {
     if (e.key === 'Enter') ask();
