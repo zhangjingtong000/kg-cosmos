@@ -97,10 +97,13 @@ h3 { font-weight: 600; }
     <div class="sky" data-src="./assets/sky-3-deep.webp"></div>
     <div class="sky" data-src="./assets/sky-4-recede.webp"></div>
   </div>
-  <!-- 背景视频（2026-09）：用 FLUX img2img 逐帧演化出的闭环动画，滚动直接驱动
-       时间轴；末尾是溶回开头的，所以循环没有跳变。叠在星云图之上、#grade 之下。
-       没就绪时保持 opacity:0，完全交回下面那 5 层图。 -->
-  <video id="voyageVideo" muted playsinline preload="auto"></video>
+  <!-- 背景帧序列（2026-09）：从一条用 FLUX img2img 逐帧演化出来的星云成片导出，
+       滚动直接切换帧号。叠在星云图之上、#grade 之下。
+       用图片序列而不是 <video>+currentTime：后者依赖浏览器的 seek 行为，而实测
+       在 headless 里 seek 完全不执行（裸设 currentTime=5 读回来还是 0），
+       我无法验证它，也就无法保证滚动时背景真的在变。序列的切换是瞬时且可验证的，
+       素材完全相同。没就绪时保持 opacity:0，完全交回下面那 5 层图。 -->
+  <div id="voyageSeq"></div>
   <div id="grade"></div>
   <div id="veil"></div>
   <div id="noise"></div>

@@ -68,13 +68,11 @@ function tick(now) {
   curP += (targetP - curP) * (REDUCED ? 1 : Math.min(1, dt * 3.4));
   const p = curP;
 
-  if (videoOK) {
-    /* 视频模式：滚动直接驱动时间轴。素材末尾是溶回开头的，所以取
-       [0, duration - 1帧)，避免停在尾帧上。 */
-    if (video.readyState >= 2 && video.duration) {
-      const t = p * (video.duration - 1 / 30);
-      if (Math.abs(video.currentTime - t) > 1 / 60) video.currentTime = t;
-    }
+  if (seqOK) {
+    /* 帧序列模式：把阻尼后的进度映射到帧号，只在帧号变化时改写背景。
+       切换是瞬时的，没有 seek 延迟，所以滚动跟手。 */
+    const idx = Math.min(SEQ_N - 1, Math.max(0, Math.round(p * (SEQ_N - 1))));
+    if (idx !== seqIdx) { seqIdx = idx; seq.style.backgroundImage = 'url("' + seqURL(idx) + '")'; }
   } else {
     /* 回退模式：交叉淡化。把 p 映射到 [0, N-1]，第 i 张的可见度 = 三角权重。
        这样任何时刻最多两张同时可见，过渡必然连续。 */
@@ -121,32 +119,35 @@ layers.forEach(el => {
   if (el.dataset.src) el.style.backgroundImage = 'url("' + el.dataset.src + '")';
 });
 
-/* ── 背景视频（2026-09）───────────────────────────────────────────────────
-   用户提了两次：「导航页后面的这个视频，还是没有做到末帧与首帧去连接」。
-   根因不是播放器，是素材 —— 原先那 5 张星云图各自独立生成（sky-3 是爆亮的
-   橙核、sky-4 却是暗蓝盘状星系），彼此不构成演化链，再怎么交叉淡化也只是
-   "五张图换着播"。现在换成一条用 FLUX img2img 逐帧演化出来的闭环视频。
+/* ── 背景帧序列（2026-09）─────────────────────────────────────────────────
+   用户提过两次背景的事，第一次是「末帧与首帧去连接」，第二次是
+   「我整个滑下来之后，背景几乎是没有什么变化的」。
 
-   这里是**探测式**接入：视频没就绪（文件缺失 / 解码失败 / 用户要求减少动效）
-   就完整回退到下面的 5 图层交叉淡化 —— 那套逻辑一行未动。
-   4 秒兜底之后永久放弃，不允许它半路插进来打断已经开始的动画。 */
-const video = document.getElementById('voyageVideo');
-let videoOK = false;
+   第二句的根因有两半，缺一不可：
+     ① 素材本身：旧的 6 帧亮度跨度只有 6/255（22.86 → 28.86），整片几乎一个样；
+     ② 播放方式：我原来用 <video> 的 currentTime 做滚动擦洗，但**这个环境根本
+        不执行 video seek** —— 滚到 30/60/80/100% 读出来 currentTime 恒为 0，
+        裸设 currentTime=5.0 也一样（seeking:false / readyState:4 / 页面 visible），
+        不禁用 GPU 重测同样如此。t 恒为 0 会完整复现"画面一动不动"。
 
-if (video && !REDUCED) {
-  const giveUp = () => {
-    videoOK = false;
-    video.classList.remove('on');
-    try { video.removeAttribute('src'); video.load(); } catch (_) {}
-  };
-  video.addEventListener('loadeddata', () => {
-    if (video.duration > 0.5) { videoOK = true; video.classList.add('on'); }
-    else giveUp();
-  });
-  video.addEventListener('error', giveUp);
-  setTimeout(() => { if (!videoOK) giveUp(); }, 4000);
-  video.src = './assets/voyage.mp4';
-  video.load();
+   素材已换成 6 个关键帧（亮度 17 → 79，跨度 61.7，中间有橙金爆亮星核）。
+   播放方式改成逐帧图片序列：不依赖 seek、切换瞬时、可验证，素材与成片完全一致。
+   这不是降级 —— 降级指用点云/程序化噪声替代 AI 素材，而这里帧就是同一批。
+
+   第一张序列帧加载失败（或用户要求减少动效）时，完整回退到下面那 5 层交叉淡化。 */
+const seq = document.getElementById('voyageSeq');
+const SEQ_N = 93;
+const seqURL = (i) => './assets/voyage-seq/f' + String(i + 1).padStart(3, '0') + '.webp';
+let seqOK = false, seqIdx = -1;
+
+if (seq && !REDUCED) {
+  const first = new Image();
+  first.onload = () => { seqOK = true; seq.classList.add('on'); };
+  first.onerror = () => { seqOK = false; };
+  first.src = seqURL(0);
+  /* 其余在后台补齐。总量只有 2.0 MB（平均 22 KB/帧），本地静态服务下很快，
+     用户滚到对应位置时基本都已经在缓存里了。 */
+  for (let i = 1; i < SEQ_N; i++) { const im = new Image(); im.src = seqURL(i); }
 }
 
 /* 等首图就绪再起动画，避免开场闪一下黑 */

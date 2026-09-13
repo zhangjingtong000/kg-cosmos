@@ -43,11 +43,11 @@ body{
 
 /* 星云图层：五张叠在一起，透明度与缩放由 JS 控制 */
 #skyLayers{position:absolute;inset:0}
-/* 背景视频。不隐藏 #skyLayers（见 voyage.js 顶部说明），视频只是盖在它上面；
+/* 背景帧序列。不隐藏 #skyLayers（见 voyage.js 顶部说明），它只是盖在图层上面；
    没就绪时 opacity:0，等于不存在。 */
-#voyageVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  opacity:0;transition:opacity .9s ease;pointer-events:none}
-#voyageVideo.on{opacity:1}
+#voyageSeq{position:absolute;inset:0;background-size:cover;background-position:center;
+  background-repeat:no-repeat;opacity:0;transition:opacity .9s ease;pointer-events:none}
+#voyageSeq.on{opacity:1}
 .sky{
   position:absolute;inset:-3%;            /* 留出缩放余量，避免边缘露白 */
   background-position:center center;
