@@ -273,7 +273,7 @@ def main():
             "endpoint_recall": l9.get("endpoint_recall") if l9 else None,
         }
         # 漏抽归因：这是**可操作**的部分——不是"整体抽得差"，
-        # 而是集中在特定谓词与 2024+ 的新论文上，所以补救成本远低于全量重抽。
+        # 而是集中在特定谓词与 2024+ 的新论文上。
         p_miss = QUAL / "l9-miss-analysis.json"
         if p_miss.exists():
             m = read(p_miss)
@@ -285,6 +285,41 @@ def main():
                 "worst_papers": m.get("worst_papers"),
                 "conclusion": m.get("conclusion"),
             }
+        # ── 别名修正后的区间（**以这个为准**，别再只报单点）──
+        # 严格匹配会把 `LLMs` vs `Large Language Model` 判成漏，从而低估。
+        p_corr = QUAL / "l9-relation-recall-corrected.json"
+        if p_corr.exists():
+            c = read(p_corr)
+            l9r["recall_range"] = c.get("recall_range")
+            l9r["recall_tiers"] = {
+                "L1_strict_triple": c.get("L1_strict_triple"),
+                "L2_alias_triple": c.get("L2_alias_triple"),
+                "L2b_exact_pair": c.get("L2b_exact_pair"),
+                "L3_alias_pair": c.get("L3_alias_pair"),
+            }
+            l9r["range_note"] = c.get("note")
+        # ── 产出构成：把"召回约一半"的解读限定住 ──
+        p_over = QUAL / "l9-overextraction.json"
+        if p_over.exists():
+            o = read(p_over)
+            l9r["overextraction"] = {
+                "n_edge": o.get("n_edge_on_gold_spans"),
+                "n_pass": o.get("n_pass"),
+                "n_not_pass": o.get("n_not_pass"),
+                "n_structural": o.get("n_structural"),
+                "structural_share": o.get("structural_share"),
+                "per_span_avg": round(
+                    (o.get("n_edge_on_gold_spans") or 0)
+                    / max(1, len(o.get("per_span") or [])), 1),
+                "reading": o.get("reading"),
+            }
+        # 本地重抽已被实测否决——把依据也带上，避免误以为"还能再抽一遍"
+        l9r["local_reextract_rejected"] = {
+            "note": ("原图由云端 DeepSeek 抽取；重抽只能用本地 qwen3.5:9b。"
+                     "实测三段对照：云端各抽 30/19/21 条边，本地只抽 6/2/3 条 "
+                     "⇒ 本地产出约为云端的 1/5–1/10，重抽不会改善。"),
+            "tool": "tools/local_reextract_feasibility.py",
+        }
 
     payload = {
         "meta": {

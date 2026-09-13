@@ -38,6 +38,11 @@ CHECKS = [
 DATA_CHECKS = [
     ("本体口径一致性（唯一来源自检）", ["tools/check_ontology_consistency.py"]),
     ("文档数字与产物一致性", ["tools/check_doc_numbers.py"]),
+    # 内联 JS 的语法：一旦有语法错，整页白屏（boot() 根本不会执行），
+    # 后果比一个数据错严重得多，而检测只要 node --check。
+    # 实测我在 analytics.html 里连改四版括号才发现——当时 CDP 检查只报
+    # "某元素不可见"，看不出是语法错。
+    ("前端内联 JS 语法（防白屏）", ["tools/check_js_syntax.py"]),
     ("指标与数据快照的版本绑定（stale 检测）", ["tools/metric_provenance.py"]),
     # 产物之间的先后依赖：某个产物是不是在它依赖的上游之后生成的。
     # 与上面两项互补：那个答"数据变了没重算"，这个答"上下游顺序对不对"。

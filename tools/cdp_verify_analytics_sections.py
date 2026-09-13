@@ -42,9 +42,16 @@ EXPECT = [
     # L9 关系召回：比端点召回更根本的读数（约四成 vs 86%）
     ("l9rSec 可见", "document.getElementById('l9rSec').hidden === false"),
     ("L9 关系召回 KPI 有 3 个", "document.querySelectorAll('#l9r .kpi').length === 3"),
-    ("关系召回区块含 86.2% 与 47.6%",
+    ("关系召回区块含 86.2% 与区间",
      "/86\\.2%/.test(document.getElementById('l9r').innerText)"
-     " && /47\\.6%/.test(document.getElementById('l9r').innerText)"),
+     " && /42\\.9–57\\.1%/.test(document.getElementById('l9r').innerText)"),
+    ("四档位表有 4 行",
+     "document.querySelectorAll('#l9rTiers table.sens tbody tr').length === 8"),
+    ("产出构成含每段 19 条与「金标本身列举不全」",
+     "/19/.test(document.getElementById('l9rTiers').innerText)"
+     " && /金标本身列举不全/.test(document.getElementById('l9rTiers').innerText)"),
+    ("写明「重抽一遍已被否决」",
+     "/已实测否决/.test(document.getElementById('l9rTiers').innerText)"),
     # 漏抽归因：证明"漏抽集中在 2024+"与补救路径在屏幕上可见
     ("漏抽归因表有 6 行年份",
      "document.querySelectorAll('#l9rMiss table.sens tbody tr').length === 6"),

@@ -161,6 +161,7 @@
     <h2>L9 关系召回：抽全了没有</h2>
     <div class="sub" id="l9rSub"></div>
     <div id="l9r"></div>
+    <div id="l9rTiers"></div>
     <div id="l9rMiss"></div>
   </section>
 
@@ -362,20 +363,66 @@ function boot(D) {
   if (r9 && r9.recall_pair_all != null) {
     document.getElementById('l9rSec').hidden = false;
     const pcr = x => x == null ? '—' : (x * 100).toFixed(1) + '%';
+    // 召回**报区间**（严格 vs 别名最松），不再只报单点——
+    // 严格匹配会把 `LLMs` vs `Large Language Model` 这类写法差异判成漏。
+    const rg = r9.recall_range || [];
+    const rngTxt = rg.length === 2
+      ? `${(rg[0] * 100).toFixed(1)}–${(rg[1] * 100).toFixed(1)}%`
+      : pcr(r9.recall_pair_all);
     document.getElementById('l9rSub').innerHTML =
       `从固定种子的 ${r9.n_segment} 个原文段落出发，由独立判定者列出**明确断言**的关系，`
       + `再与图比对。金标 ${r9.n_gold_raw} 条，剔除端点非命名实体的 ${r9.n_dropped_non_entity} 条后`
       + `参评 <b>${r9.n_gold_entity_only}</b> 条。`;
     document.getElementById('l9r').innerHTML = [
       [pcr(r9.endpoint_recall), '端点召回（实体名抽到没有）', '看起来不错'],
-      [pcr(r9.recall_pair_all), '关系召回（端点对）', '原文明确断言的关系进了图的比例'],
-      [pcr(r9.recall_triple_all), '关系召回（含谓词严格）', '谓词也对的比例'],
+      [rngTxt, '关系召回（区间）', '严格 → 别名最松，四个档位见下'],
+      [pcr(r9.recall_triple_all), '三元组严格命中', '端点与谓词都对'],
     ].map(([a, b, c]) =>
       `<div class="kpi"><b>${esc(a)}</b><span>${esc(b)}</span><small>${esc(c)}</small></div>`
     ).join('')
     + `<div class="calnote">${esc(r9.reading || '')}<br>`
     + `<b>标注稳定性</b>：${esc(r9.stability_note || '')}<br>`
     + `<b>限度</b>：${esc(r9.caveat || '')}</div>`;
+
+    // 四个档位的明细 + 产出构成：把"召回约一半"的解读限定住
+    const tiers = r9.recall_tiers || {};
+    const over = r9.overextraction || {};
+    // 用顺序拼接而不是嵌套三元——嵌套三元 + 模板字符串的括号极易数错，
+    // 实测在这里连改三版才通过 node --check。分段拼就没有这个问题。
+    let tierHtml = '';
+    if (Object.keys(tiers).length) {
+      tierHtml += `<div class="calnote" style="margin-top:14px"><b>四个档位</b>`
+        + `（"算不算同一个关系"本身有歧义，所以必须报区间）</div>`
+        + `<table class="sens"><thead><tr><th>档位</th><th>命中</th><th>召回</th></tr></thead><tbody>`;
+      tierHtml += [
+        ['端点精确 + 谓词一致（最严）', tiers.L1_strict_triple],
+        ['端点按别名 + 谓词一致', tiers.L2_alias_triple],
+        ['端点精确 + 只看端点对', tiers.L2b_exact_pair],
+        ['端点按别名 + 只看端点对（最松）', tiers.L3_alias_pair],
+      ].map(([n, h]) => `<tr><td>${esc(n)}</td><td>${h}</td>`
+        + `<td>${(h / r9.n_gold_entity_only * 100).toFixed(1)}%</td></tr>`).join('');
+      tierHtml += `</tbody></table>`;
+    }
+    if (over.n_edge) {
+      tierHtml += `<div class="calnote" style="margin-top:14px"><b>产出构成</b>`
+        + `——这一项决定「召回约一半」该怎么读</div>`
+        + `<table class="sens"><thead><tr><th>指标</th><th>值</th></tr></thead><tbody>`
+        + `<tr><td>金标段落对应图里边数</td><td>${over.n_edge}</td></tr>`
+        + `<tr><td>每段平均边数</td><td>${over.per_span_avg}</td></tr>`
+        + `<tr><td>其中通过 L5</td><td>${over.n_pass}（${(over.n_pass / over.n_edge * 100).toFixed(0)}%）</td></tr>`
+        + `<tr><td>结构性边（Section/Figure/Table）</td><td>${over.n_structural}（${(over.structural_share * 100).toFixed(1)}%）</td></tr>`
+        + `</tbody></table>`
+        + `<div class="calnote">${esc(over.reading || '')}<br>`
+        + `<b>所以「关系召回约一半」要读作</b>：<b>金标列出的那几条里，约一半能在图中找到</b>；`
+        + `而<b>不能</b>读成"图只覆盖了原文关系的一半"——图里每段有约 ${over.per_span_avg} 条边，`
+        + `远超金标列出的 2–5 条。<b>不是抽取器漏了关系，而是金标本身列举不全。</b></div>`;
+    }
+    if (r9.local_reextract_rejected) {
+      tierHtml += `<div class="calnote"><b>⚠️ 「重抽一遍」这条路已实测否决</b>：`
+        + `${esc(r9.local_reextract_rejected.note)}`
+        + `（复现：<code>${esc(r9.local_reextract_rejected.tool)}</code>）</div>`;
+    }
+    document.getElementById('l9rTiers').innerHTML = tierHtml;
 
     // 漏抽归因：**可操作**的部分——漏抽不是均匀的，
     // 集中在特定谓词与 2024+ 的新论文上，所以补救成本远低于全量重抽。
