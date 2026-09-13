@@ -41,14 +41,13 @@ body{
 #stage{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
        background:#02040a}
 
-/* 星云图层：五张叠在一起，透明度与缩放由 JS 控制 */
-#skyLayers{position:absolute;inset:0}
-/* 背景帧序列。不隐藏 #skyLayers（见 voyage.js 顶部说明），它只是盖在图层上面；
-   没就绪时 opacity:0，等于不存在。 */
-#voyageSeq{position:absolute;inset:0;background-size:cover;background-position:center;
-  background-repeat:no-repeat;opacity:0;transition:opacity .9s ease;pointer-events:none}
-#voyageSeq.on{opacity:1}
-.sky{
+/* 星云图层：12 张叠在一起，透明度与缩放由 JS 逐帧控制 */
+#voyageFrames{position:absolute;inset:0}
+/* 12 个常驻图层。背景图由 JS 一次性设好，之后每帧只改 opacity/transform ——
+   全程 GPU 合成，不重新解码。这是"流畅"的关键：换成切 background-image URL
+   会每帧重新解码，而十几张 1280x720 的解码缓存留不住，滑回去还要重解，
+   直接闪成一片。will-change 把它们提前提升为合成层。 */
+.frm{
   position:absolute;inset:-3%;            /* 留出缩放余量，避免边缘露白 */
   background-position:center center;
   background-size:cover;

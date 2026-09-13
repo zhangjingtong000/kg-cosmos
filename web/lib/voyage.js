@@ -26,11 +26,14 @@
 
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const stage  = document.getElementById('stage');
-const layers = [...document.querySelectorAll('#skyLayers .sky')];
+const layers = [...document.querySelectorAll('#voyageFrames .frm')];
 const reel   = document.getElementById('reel');
 const N = Math.max(1, layers.length);
 
 let targetP = 0, curP = 0;
+/* 用户是否已经真正操作过滚动。加载阶段（含浏览器的滚动恢复）为 false，
+   此时背景直接吸附到目标位置，而不是从第 0 帧演过去。见 tick 里的说明。 */
+let userMoved = false;
 let mx = 0, my = 0, sx = 0, sy = 0;
 
 function readScroll() {
@@ -53,43 +56,38 @@ function kf(t, pts) {
 
 /* 每张图的镜头曲线。同一时刻只有相邻两张在动：
    一张继续推进、一张开始拉远，交叠处自然形成"穿过"的观感。 */
-const LENS = [
-  { s0: 1.00, s1: 1.18, x0: 0,  x1: 0,  y0: 0,  y1: -2 },  // 远景 → 推近
-  { s0: 1.02, s1: 1.24, x0: 2,  x1: -1, y0: 1,  y1: -3 },  // 继续靠近
-  { s0: 1.04, s1: 1.30, x0: -2, x1: 2,  y0: 2,  y1: -2 },  // 进入
-  { s0: 1.06, s1: 1.34, x0: 0,  x1: 0,  y0: 2,  y1: -1 },  // 深处（扩张最猛）
-  { s0: 1.26, s1: 1.04, x0: -1, x1: 0,  y0: -1, y1: 0 }    // 拉远（反过来）
-];
+/* 镜头：每层都从 1.00 缓慢推到 1.08（Ken Burns）。
+   第一版给 5 层各手写了一组起止值，其实彼此差别很小；
+   12 层用同一条曲线更好维护，视觉上没有区别。 */
+const zoomAt = (local) => 1.0 + 0.08 * local;
 
 let last = 0;
 function tick(now) {
   const dt = last ? (now - last) / 1000 : 0.016;
   last = now;
-  curP += (targetP - curP) * (REDUCED ? 1 : Math.min(1, dt * 3.4));
+  /* 用户还没真正动过滚动条之前，curP 直接吸附 targetP，不做阻尼。
+     浏览器的滚动恢复（刷新时跳回原位置）发生在脚本执行之后，而且可能很晚
+     （图片加载改变布局时还会再来一次）。缺了这个判断，那些迟到的 scroll 事件
+     会让 curP 从 0 一路阻尼上去 —— 用户看到的就是"整段背景被重播一遍"。
+     一旦用户按下滚轮 / 触摸 / 键盘，就切换成阻尼模式，那才是想要的平滑过渡。 */
+  if (!userMoved) { curP = targetP; }
+  else { curP += (targetP - curP) * (REDUCED ? 1 : Math.min(1, dt * 3.4)); }
   const p = curP;
 
-  if (seqOK) {
-    /* 帧序列模式：把阻尼后的进度映射到帧号，只在帧号变化时改写背景。
-       切换是瞬时的，没有 seek 延迟，所以滚动跟手。 */
-    const idx = Math.min(SEQ_N - 1, Math.max(0, Math.round(p * (SEQ_N - 1))));
-    if (idx !== seqIdx) { seqIdx = idx; seq.style.backgroundImage = 'url("' + seqURL(idx) + '")'; }
-  } else {
+  {
     /* 回退模式：交叉淡化。把 p 映射到 [0, N-1]，第 i 张的可见度 = 三角权重。
        这样任何时刻最多两张同时可见，过渡必然连续。 */
     const pos = p * (N - 1);
     for (let i = 0; i < N; i++) {
+      // 可见度 = 三角权重：任何时刻最多相邻两张同时可见，过渡必然连续
       const w = Math.max(0, 1 - Math.abs(pos - i));
-      const L = LENS[i] || LENS[0];
       // 图内局部进度：进入时为 0，离开时为 1
       const local = Math.min(1, Math.max(0, pos - i + 0.5));
-      const s = L.s0 + (L.s1 - L.s0) * local;
-      const x = L.x0 + (L.x1 - L.x0) * local;
-      const y = L.y0 + (L.y1 - L.y0) * local;
+      const s = zoomAt(local);
       layers[i].style.opacity = w.toFixed(4);
       layers[i].style.transform =
         'scale(' + s.toFixed(4) + ') translate3d('
-        + (x - sx * 1.6).toFixed(2) + '%, '
-        + (y - sy * 1.2).toFixed(2) + '%, 0)';
+        + (-sx * 1.2).toFixed(2) + '%, ' + (-sy * 0.9).toFixed(2) + '%, 0)';
     }
   }
   sx += (mx - sx) * 0.045;
@@ -112,6 +110,11 @@ addEventListener('pointermove', e => {
   mx = (e.clientX / innerWidth - 0.5) * 2;
   my = (e.clientY / innerHeight - 0.5) * 2;
 }, { passive: true });
+/* 一旦用户真正操作过滚动，就切到阻尼模式。在此之前（页面加载、浏览器恢复
+   滚动位置、图片加载引起的重排）背景一律直接吸附。 */
+['wheel', 'touchstart', 'keydown', 'mousedown'].forEach(t =>
+  addEventListener(t, () => { userMoved = true; }, { passive: true, once: true }));
+
 readScroll();
 
 /* 用 background-image 铺层（比 <img> 更好控制 object-fit 与缩放中心） */
@@ -119,36 +122,16 @@ layers.forEach(el => {
   if (el.dataset.src) el.style.backgroundImage = 'url("' + el.dataset.src + '")';
 });
 
-/* ── 背景帧序列（2026-09）─────────────────────────────────────────────────
-   用户提过两次背景的事，第一次是「末帧与首帧去连接」，第二次是
-   「我整个滑下来之后，背景几乎是没有什么变化的」。
-
-   第二句的根因有两半，缺一不可：
-     ① 素材本身：旧的 6 帧亮度跨度只有 6/255（22.86 → 28.86），整片几乎一个样；
-     ② 播放方式：我原来用 <video> 的 currentTime 做滚动擦洗，但**这个环境根本
-        不执行 video seek** —— 滚到 30/60/80/100% 读出来 currentTime 恒为 0，
-        裸设 currentTime=5.0 也一样（seeking:false / readyState:4 / 页面 visible），
-        不禁用 GPU 重测同样如此。t 恒为 0 会完整复现"画面一动不动"。
-
-   素材已换成 6 个关键帧（亮度 17 → 79，跨度 61.7，中间有橙金爆亮星核）。
-   播放方式改成逐帧图片序列：不依赖 seek、切换瞬时、可验证，素材与成片完全一致。
-   这不是降级 —— 降级指用点云/程序化噪声替代 AI 素材，而这里帧就是同一批。
-
-   第一张序列帧加载失败（或用户要求减少动效）时，完整回退到下面那 5 层交叉淡化。 */
-const seq = document.getElementById('voyageSeq');
-const SEQ_N = 93;
-const seqURL = (i) => './assets/voyage-seq/f' + String(i + 1).padStart(3, '0') + '.webp';
-let seqOK = false, seqIdx = -1;
-
-if (seq && !REDUCED) {
-  const first = new Image();
-  first.onload = () => { seqOK = true; seq.classList.add('on'); };
-  first.onerror = () => { seqOK = false; };
-  first.src = seqURL(0);
-  /* 其余在后台补齐。总量只有 2.0 MB（平均 22 KB/帧），本地静态服务下很快，
-     用户滚到对应位置时基本都已经在缓存里了。 */
-  for (let i = 1; i < SEQ_N; i++) { const im = new Image(); im.src = seqURL(i); }
-}
+/* 2026-09：背景的实现方式换过三轮，把结论记在这里，免得以后又绕回去。
+   第一版 5 张独立生成的星云图交叉淡化 —— 过渡本身是流畅的（常驻图层只改
+   opacity/transform，不重新解码），但那 5 张图彼此不构成演化链，
+   用户看到的是"五张图换着播"，且亮度跨度只有 6/255，滑完几乎没变化。
+   第二版换成 <video>+currentTime 做滚动擦洗 —— 实测这个环境根本不执行 video
+   seek（裸设 currentTime=5 读回来还是 0），t 恒为 0，画面一动不动。
+   第三版切 93 个 background-image URL —— 每换一次就重新解码一次，直接闪成一片。
+   现在这一版：6 个关键帧重新生成（亮度 17 → 79，跨度 61.7，中间有橙金爆亮星核），
+   插值成 93 帧再抽出 12 张常驻图层，回到第一版那套**只改 opacity/transform**的
+   机制 —— 素材是新的、连成一条旅程，渲染方式则是被验证过流畅的那一种。 */
 
 /* 等首图就绪再起动画，避免开场闪一下黑 */
 function preload(list) {

@@ -69,8 +69,10 @@ def main():
         cdp(ws, 'Runtime.enable')
         time.sleep(1.0)
 
-        # 1. 五张星云图层：都必须有 data-src，且都已加载成功
-        skies = ev(ws, """[...document.querySelectorAll('#skyLayers .sky')].map(el => ({
+        # 1. 十二张背景图层：都必须有 data-src，且都已加载成功
+        # （2026-09：从 5 张各自独立生成的星云图，换成一条成片上抽出的 12 帧；
+        #   渲染机制不变 —— 常驻图层，只改 opacity/transform，不重新解码。）
+        skies = ev(ws, """[...document.querySelectorAll('#voyageFrames .frm')].map(el => ({
           src: el.dataset.src || '',
           bg: (el.style.backgroundImage || '').slice(0, 60),
           op: +getComputedStyle(el).opacity
@@ -78,8 +80,8 @@ def main():
         print(f'[1] 星云图层: {len(skies)} 张')
         for i, s in enumerate(skies):
             print(f"    #{i}  {s['src']:34s} bg={s['bg'][:34]}")
-        if len(skies) != 5:
-            fails.append(f'星云图层应为 5 张，实为 {len(skies)}')
+        if len(skies) != 12:
+            fails.append(f'背景图层应为 12 张，实为 {len(skies)}')
         for i, s in enumerate(skies):
             if not s['src']:
                 fails.append(f'第 {i} 张星云图层缺少 data-src')
@@ -87,7 +89,7 @@ def main():
                 fails.append(f'第 {i} 张星云图层的 background-image 未设置')
         # 图片是否真的加载成功（加载失败时 opacity 永远为 0 / 背景是黑）
         okimg = ev(ws, """(() => {
-          const els = [...document.querySelectorAll('#skyLayers .sky')];
+          const els = [...document.querySelectorAll('#voyageFrames .frm')];
           return els.map(el => {
             const m = (el.style.backgroundImage||'').match(/url\("?([^")]+)"?\)/);
             if (!m) return false;
