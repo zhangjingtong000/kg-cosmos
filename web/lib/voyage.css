@@ -41,21 +41,13 @@ body{
 #stage{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
        background:#02040a}
 
-/* 星云图层：12 张叠在一起，透明度与缩放由 JS 逐帧控制 */
-#voyageFrames{position:absolute;inset:0}
-/* 12 个常驻图层。背景图由 JS 一次性设好，之后每帧只改 opacity/transform ——
-   全程 GPU 合成，不重新解码。这是"流畅"的关键：换成切 background-image URL
-   会每帧重新解码，而十几张 1280x720 的解码缓存留不住，滑回去还要重解，
-   直接闪成一片。will-change 把它们提前提升为合成层。 */
-.frm{
-  position:absolute;inset:-3%;            /* 留出缩放余量，避免边缘露白 */
-  background-position:center center;
-  background-size:cover;
-  background-repeat:no-repeat;
-  opacity:0;
-  will-change:opacity,transform;
-  transform-origin:center 46%;            /* 缩放中心略偏上，构图更稳 */
+/* 背景画布：滚动驱动帧序列（见 voyage.js 顶部说明）。
+   它盖在 #skyLayers 之上、#grade/#veil 之下；第一帧就绪后加 .on 淡入。 */
+#voyageCanvas{
+  position:absolute;inset:0;width:100%;height:100%;display:block;
+  opacity:0;transition:opacity .8s ease;pointer-events:none;
 }
+#voyageCanvas.on{opacity:1;}
 
 /* 文字区遮罩：随滚动加深（深入星云时正文更需要压暗才读得清） */
 #veil{

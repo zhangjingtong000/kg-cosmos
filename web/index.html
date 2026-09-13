@@ -93,13 +93,10 @@ h3 { font-weight: 600; }
   <!-- 背景图层：5 张常驻，只改 opacity/transform，不换 URL、不重新解码。
        层数刻意保持 5 —— 每层跨越约 2 秒的滚动距离，穿越才是慢而连续的；
        层数一多，每层只跨零点几秒，快速滚动时就会"之前的帧突然出现"。 -->
-  <div id="voyageFrames">
-    <div class="frm" data-src="./assets/voyage-frames/s01.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s02.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s03.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s04.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s05.webp"></div>
-  </div>
+  <!-- 背景画布：帧序列由滚动驱动，drawImage 画当前帧。
+       帧号没变时完全不重绘（这是"拖进度条不卡"的关键）。
+       素材是 Wan2.2 I2V 链生成的 20 秒真视频，段间首末帧物理闭合。 -->
+  <canvas id="voyageCanvas"></canvas>
     <div class="sky" data-src="./assets/sky-1-approach.webp"></div>
     <div class="sky" data-src="./assets/sky-2-enter.webp"></div>
     <div class="sky" data-src="./assets/sky-3-deep.webp"></div>

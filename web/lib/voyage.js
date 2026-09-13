@@ -26,9 +26,10 @@
 
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const stage  = document.getElementById('stage');
-const layers = [...document.querySelectorAll('#voyageFrames .frm')];
+const canvas = document.getElementById('voyageCanvas');
+const ctx = canvas ? canvas.getContext('2d') : null;
 const reel   = document.getElementById('reel');
-const N = Math.max(1, layers.length);
+const SEQ_N = 121;                       // 帧数，与 voyage-frames/ 一致
 
 let targetP = 0, curP = 0;
 /* 用户是否已经真正操作过滚动。加载阶段（含浏览器的滚动恢复）为 false，
@@ -56,16 +57,34 @@ function kf(t, pts) {
 
 /* 每张图的镜头曲线。同一时刻只有相邻两张在动：
    一张继续推进、一张开始拉远，交叠处自然形成"穿过"的观感。 */
-/* 镜头：每层一组自己的缩放与漂移起止值（这是第一版的做法，照抄回来）。
-   比"所有层共用一条缩放曲线"好在：相邻两层的推进方向不同，
-   交叉淡化时看起来像镜头在持续穿行，而不是同一张图反复放大。 */
-const LENS = [
-  { s0: 1.00, s1: 1.18, x0: 0,  x1: 0,  y0: 0,  y1: -2 },  // 远景 → 推近
-  { s0: 1.02, s1: 1.24, x0: 2,  x1: -1, y0: 1,  y1: -3 },  // 继续靠近
-  { s0: 1.04, s1: 1.30, x0: -2, x1: 2,  y0: 2,  y1: -2 },  // 进入
-  { s0: 1.06, s1: 1.34, x0: 0,  x1: 0,  y0: 2,  y1: -1 },  // 深处（扩张最猛）
-  { s0: 1.26, s1: 1.04, x0: -1, x1: 0,  y0: -1, y1: 0 }    // 拉远（反过来）
-];
+/* ── 帧序列（2026-09）──────────────────────────────────────────────────
+   素材是 Wan2.2 I2V 链生成的 20 秒真视频（121 帧）。
+   渲染方式照搬社区验证过的做法：一张 canvas、drawImage 画当前帧、
+   **帧号没变就完全不重绘**。上一版用 DOM 图层做 scale/transform，
+   十几张全屏图层同时合成，拖进度条时全部重绘 —— 那才是"卡"的来源。 */
+const seqURL = (i) => './assets/voyage-frames/s' + String(i + 1).padStart(3, '0') + '.webp';
+const frames = [];
+let seqOK = false, seqDrawn = -1;
+
+function sizeCanvas() {
+  if (!canvas) return;
+  /* DPR 上限 1.5：3× 屏上看不出差别，但要画的像素少一半多。 */
+  const dpr = Math.min(1.5, devicePixelRatio || 1);
+  canvas.width = Math.max(1, Math.round(innerWidth * dpr));
+  canvas.height = Math.max(1, Math.round(innerHeight * dpr));
+  seqDrawn = -1;                  // 尺寸变了，强制重绘一次
+}
+
+function drawSeq(idx) {
+  if (!ctx || idx === seqDrawn) return;    // ★ 帧号没变就不画
+  const im = frames[idx];
+  if (!im || !im.complete || !im.naturalWidth) return;
+  seqDrawn = idx;
+  const cw = canvas.width, ch = canvas.height;
+  const sc = Math.max(cw / im.naturalWidth, ch / im.naturalHeight);   // cover
+  const w = im.naturalWidth * sc, h = im.naturalHeight * sc;
+  ctx.drawImage(im, (cw - w) / 2, (ch - h) / 2, w, h);
+}
 
 let last = 0;
 function tick(now) {
@@ -80,25 +99,9 @@ function tick(now) {
   else { curP += (targetP - curP) * (REDUCED ? 1 : Math.min(1, dt * 3.4)); }
   const p = curP;
 
-  {
-    /* 回退模式：交叉淡化。把 p 映射到 [0, N-1]，第 i 张的可见度 = 三角权重。
-       这样任何时刻最多两张同时可见，过渡必然连续。 */
-    const pos = p * (N - 1);
-    for (let i = 0; i < N; i++) {
-      // 可见度 = 三角权重：任何时刻最多相邻两张同时可见，过渡必然连续
-      const w = Math.max(0, 1 - Math.abs(pos - i));
-      // 图内局部进度：进入时为 0，离开时为 1
-      const local = Math.min(1, Math.max(0, pos - i + 0.5));
-      const L = LENS[i] || LENS[0];
-      const s = L.s0 + (L.s1 - L.s0) * local;
-      const x = L.x0 + (L.x1 - L.x0) * local;
-      const y = L.y0 + (L.y1 - L.y0) * local;
-      layers[i].style.opacity = w.toFixed(4);
-      layers[i].style.transform =
-        'scale(' + s.toFixed(4) + ') translate3d('
-        + (x - sx * 1.6).toFixed(2) + '%, '
-        + (y - sy * 1.2).toFixed(2) + '%, 0)';
-    }
+  if (seqOK) {
+    const idx = Math.min(SEQ_N - 1, Math.max(0, Math.round(p * (SEQ_N - 1))));
+    drawSeq(idx);
   }
   sx += (mx - sx) * 0.045;
   sy += (my - sy) * 0.045;
@@ -127,10 +130,19 @@ addEventListener('pointermove', e => {
 
 readScroll();
 
-/* 用 background-image 铺层（比 <img> 更好控制 object-fit 与缩放中心） */
-layers.forEach(el => {
-  if (el.dataset.src) el.style.backgroundImage = 'url("' + el.dataset.src + '")';
-});
+/* 预载帧序列。第一张就绪就可以开始驱动 —— 后面 120 张继续在后台解码，
+   本地静态服务下很快，用户滚到对应位置时基本都已在缓存里。 */
+if (canvas && !REDUCED) {
+  sizeCanvas();
+  for (let i = 0; i < SEQ_N; i++) {
+    const im = new Image();
+    if (i === 0) im.onload = () => { seqOK = true; canvas.classList.add('on'); sizeCanvas(); };
+    im.decoding = 'async';
+    im.src = seqURL(i);
+    frames.push(im);
+  }
+  addEventListener('resize', sizeCanvas);
+}
 
 /* 2026-09：背景的实现方式换过三轮，把结论记在这里，免得以后又绕回去。
    第一版 5 张独立生成的星云图交叉淡化 —— 过渡本身是流畅的（常驻图层只改
@@ -151,7 +163,7 @@ function preload(list) {
     im.src = src;
   })));
 }
-preload(layers.map(el => el.dataset.src).filter(Boolean)).then(() => {
+preload([seqURL(0)]).then(() => {
   requestAnimationFrame(tick);
   window.__ready = true;
 });

@@ -69,40 +69,79 @@ def main():
         cdp(ws, 'Runtime.enable')
         time.sleep(1.0)
 
-        # 1. 十二张背景图层：都必须有 data-src，且都已加载成功
-        # （2026-09：从 5 张各自独立生成的星云图，换成一条成片上抽出的 12 帧；
-        #   渲染机制不变 —— 常驻图层，只改 opacity/transform，不重新解码。）
-        skies = ev(ws, """[...document.querySelectorAll('#voyageFrames .frm')].map(el => ({
-          src: el.dataset.src || '',
-          bg: (el.style.backgroundImage || '').slice(0, 60),
-          op: +getComputedStyle(el).opacity
-        }))""")
-        print(f'[1] 星云图层: {len(skies)} 张')
-        for i, s in enumerate(skies):
-            print(f"    #{i}  {s['src']:34s} bg={s['bg'][:34]}")
-        if len(skies) != 5:
-            fails.append(f'背景图层应为 5 张，实为 {len(skies)}')
-        for i, s in enumerate(skies):
-            if not s['src']:
-                fails.append(f'第 {i} 张星云图层缺少 data-src')
-            if 'url(' not in s['bg']:
-                fails.append(f'第 {i} 张星云图层的 background-image 未设置')
-        # 图片是否真的加载成功（加载失败时 opacity 永远为 0 / 背景是黑）
-        okimg = ev(ws, """(() => {
-          const els = [...document.querySelectorAll('#voyageFrames .frm')];
-          return els.map(el => {
-            const m = (el.style.backgroundImage||'').match(/url\("?([^")]+)"?\)/);
-            if (!m) return false;
-            // 用 Image 再取一次，命中缓存时是同步完成的
-            const im = new Image(); im.src = m[1];
-            return im.complete && im.naturalWidth > 0;
+        # 1. 背景画布：必须存在、已启用，并且**真的画上了像素**
+        cv = ev(ws, """(() => {
+          const c = document.getElementById('voyageCanvas');
+          if (!c) return { has: false };
+          const ctx = c.getContext('2d');
+          // 画布中心 + 四分之一处各取一点，覆盖可能被裁掉的边角
+          const pts = [[0.5, 0.5], [0.25, 0.35], [0.75, 0.65]];
+          const px = pts.map(([fx, fy]) => {
+            const d = ctx.getImageData(Math.round(c.width * fx), Math.round(c.height * fy), 1, 1).data;
+            return [d[0], d[1], d[2], d[3]];
           });
+          return { has: true, w: c.width, h: c.height,
+                   on: c.classList.contains('on'),
+                   op: +getComputedStyle(c).opacity, px: px };
         })()""")
-        bad = [i for i, v in enumerate(okimg or []) if not v]
-        if bad:
-            fails.append(f'以下星云图加载失败: {bad}')
+        print(f'[1] 背景画布: has={cv.get("has")} {cv.get("w")}x{cv.get("h")} '
+              f'on={cv.get("on")} opacity={cv.get("op")}')
+        print(f'    中心/边角像素: {cv.get("px")}')
+        if not cv.get('has'):
+            fails.append('找不到 #voyageCanvas')
         else:
-            print('[2] OK 五张星云图均已加载')
+            if not cv.get('on'):
+                fails.append('画布没有启用（第一帧没就绪，背景会是空的）')
+            if cv.get('w', 0) < 100 or cv.get('h', 0) < 100:
+                fails.append(f'画布尺寸异常: {cv.get("w")}x{cv.get("h")}')
+            drawn = [p for p in (cv.get('px') or []) if p and p[3] > 0]
+            if not drawn:
+                fails.append('画布上没有任何像素 —— 帧序列没画上去')
+            # 注意：**不**检查"是否全黑" —— 第一帧本来就是深空星场（YAVG 16.7），
+            # 它就该是接近黑的。背景到底变没变，由下面的滚动对比来证明。
+
+        # 2. 帧序列资源可达（抽查首帧与末帧，确认不是 404）
+        seq = ev(ws, """(async () => {
+          const urls = ['./assets/voyage-frames/s001.webp',
+                        './assets/voyage-frames/s061.webp',
+                        './assets/voyage-frames/s121.webp'];
+          const out = [];
+          for (const u of urls) {
+            try {
+              const r = await fetch(u, { method: 'HEAD' });
+              out.push([u.split('/').pop(), r.status]);
+            } catch (e) { out.push([u.split('/').pop(), 'ERR']); }
+          }
+          return out;
+        })()""")
+        print(f'[2] 帧序列抽查: {seq}')
+        bad = [x for x in (seq or []) if x[1] != 200]
+        if bad:
+            fails.append(f'帧序列文件取不到: {bad}')
+
+        # 2b. 滚动驱动验证：往下滚，画布应该越来越亮（深空 → 星云 → 亮核）
+        trail = []
+        for frac in (0.0, 0.25, 0.5, 0.75, 1.0):
+            ev(ws, 'scrollTo(0, Math.round((document.body.scrollHeight - innerHeight) * %s))' % frac)
+            time.sleep(1.6)          # 等阻尼收敛（curP 约 1s 到位）
+            px = ev(ws, """(() => {
+              const c = document.getElementById('voyageCanvas');
+              const ctx = c.getContext('2d');
+              const d = ctx.getImageData(Math.round(c.width / 2), Math.round(c.height / 2), 1, 1).data;
+              return [d[0], d[1], d[2]];
+            })()""")
+            lum = round(sum(px) / 3, 1) if px else -1
+            trail.append((frac, lum))
+            print(f'[2b] 滚动 {int(frac * 100):3d}%  中心像素 {px}  亮度 {lum}')
+        lums = [l for _, l in trail]
+        if lums[-1] - lums[0] < 20:
+            fails.append(f'滚动时背景几乎没变亮（{lums[0]} -> {lums[-1]}），帧序列没被驱动')
+        if any(lums[i + 1] - lums[i] < -12 for i in range(len(lums) - 1)):
+            bad = [(trail[i][0], trail[i][1], trail[i + 1][1]) for i in range(len(lums) - 1)
+                   if lums[i + 1] - lums[i] < -12]
+            fails.append(f'亮度出现回落（{bad}）—— 帧序列可能没按顺序推进')
+        ev(ws, 'scrollTo(0, 0)')
+        time.sleep(1.2)
 
         # 3. 入口链接
         entries = ev(ws, """[...document.querySelectorAll('a.entry')].map(e => ({
