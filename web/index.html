@@ -11,13 +11,20 @@
 
 <a id="a11y-skip" class="a11y-skip" href="#ch-0">跳到正文</a>
 
-<!-- 固定深空背景。三层环境光 + 稀疏星点 + 细噪点，全部 CSS，
-     不用 WebGL/Canvas —— 原因见 lib/voyage.js 顶部的说明。 -->
+<!-- 固定背景：五张 FLUX 生成的星云图，按滚动进度交叉淡化。
+     这些图由本机 ComfyUI + FLUX.1-schnell 生成（tools/gen_nebula_sequence.py），
+     全部在本地，页面零外部请求。 -->
 <div id="stage" aria-hidden="true">
-  <div id="glow"><i></i><i></i><i></i></div>
-  <div id="stars"></div>
-  <div id="noise"></div>
+  <div id="skyLayers">
+    <div class="sky" data-src="./assets/sky-0-distant.webp"></div>
+    <div class="sky" data-src="./assets/sky-1-approach.webp"></div>
+    <div class="sky" data-src="./assets/sky-2-enter.webp"></div>
+    <div class="sky" data-src="./assets/sky-3-deep.webp"></div>
+    <div class="sky" data-src="./assets/sky-4-recede.webp"></div>
+  </div>
+  <div id="grade"></div>
   <div id="veil"></div>
+  <div id="noise"></div>
   <div id="grain"></div>
 </div>
 

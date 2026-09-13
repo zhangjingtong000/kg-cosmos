@@ -1,13 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   KG COSMOS — 深空背景（纯 CSS，不用 WebGL/Canvas 画星云）
+   KG COSMOS — 星云旅程背景
    ───────────────────────────────────────────────────────────────────────────
-   见 voyage.js 顶部的说明：三个"画星云"的版本都失败了，
-   本版改为一个**确定能做好的**深空背景——安静、精密、有纵深。
+   背景是**五张 FLUX 生成的星云图**（web/assets/sky-*.png），
+   由 voyage.js 按滚动进度交叉淡化 + 缓慢缩放（Ken Burns）。
+   这里只负责分层、遮罩与文字对比度。
 
-   构成：
-     #glow  三层冷色光晕（环境光，不是星云），随滚动缓慢漂移
-     #stars 星点（三档亮度，约 140 颗），用 box-shadow 一次性绘制
-     #noise 极细的 SVG 噪点，破掉纯色渐变常见的"塑料感"
+   走过的弯路记在 voyage.js 顶部：用 WebGL/Canvas 自己画星云试了三版都失败，
+   最后还是靠本机 ComfyUI + FLUX 生成。
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root{
@@ -22,7 +21,7 @@
   --warmRGB:126,176,255;
   --drift:0vh;
   --grow:1;
-  --starA:1;
+  --veil:0.34;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg)}
@@ -39,74 +38,51 @@ body{
 ::selection{background:rgba(127,179,255,.28);color:#fff}
 
 /* ── 固定背景 ─────────────────────────────────────────────────────────── */
-#stage{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#stage{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+       background:#02040a}
 
-/* 底色：极深的空间蓝黑 + 一层中心提亮 */
-#stage::before{
-  content:"";position:absolute;inset:0;
+/* 星云图层：五张叠在一起，透明度与缩放由 JS 控制 */
+#skyLayers{position:absolute;inset:0}
+.sky{
+  position:absolute;inset:-3%;            /* 留出缩放余量，避免边缘露白 */
+  background-position:center center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  opacity:0;
+  will-change:opacity,transform;
+  transform-origin:center 46%;            /* 缩放中心略偏上，构图更稳 */
+}
+
+/* 文字区遮罩：随滚动加深（深入星云时正文更需要压暗才读得清） */
+#veil{
+  position:absolute;inset:0;
   background:
-    radial-gradient(120% 90% at 50% 42%,
-      rgba(16,24,52,.92) 0%, rgba(8,13,30,.72) 38%, rgba(2,4,10,.98) 78%),
-    linear-gradient(180deg,#02040a,#010206 60%,#02040a);
+    radial-gradient(120% 88% at 24% 42%,
+      rgba(2,4,10,0) 0%,
+      rgba(2,4,10,calc(var(--veil) * .55)) 46%,
+      rgba(2,4,10,calc(var(--veil) * 1.7)) 100%),
+    linear-gradient(180deg, rgba(2,4,10,.62) 0%, rgba(2,4,10,0) 22%,
+                    rgba(2,4,10,0) 58%, rgba(2,4,10,.90) 100%);
+  transition:background .25s linear;
 }
 
-/* 三层冷色光晕：这是"环境光"，不是星云。缓慢漂移 → 纵深 */
-#glow{position:absolute;inset:-10%;transform:translateY(var(--drift)) scale(var(--grow));
-      transition:transform .6s cubic-bezier(.19,1,.22,1)}
-#glow i{
-  position:absolute;display:block;border-radius:50%;
-  filter:blur(38px);mix-blend-mode:screen;
-}
-#glow i:nth-child(1){                      /* 主光：冷蓝，偏左上 */
-  width:78vw;height:78vw;left:1%;top:-1%;
-  background:radial-gradient(circle,
-    rgba(var(--warmRGB),.32) 0%, rgba(var(--warmRGB),.14) 42%, transparent 72%);
-  animation:dr1 34s ease-in-out infinite;
-}
-#glow i:nth-child(2){                      /* 次光：青，右下 */
-  width:68vw;height:68vw;right:-2%;bottom:0%;
-  background:radial-gradient(circle,
-    rgba(120,255,226,.20) 0%, rgba(90,200,255,.10) 44%, transparent 74%);
-  animation:dr2 44s ease-in-out infinite;
-}
-#glow i:nth-child(3){                      /* 点缀：微紫，中心偏下 */
-  width:54vw;height:54vw;left:28%;top:38%;
-  background:radial-gradient(circle,
-    rgba(178,140,255,.19) 0%, rgba(140,120,255,.08) 46%, transparent 76%);
-  animation:dr3 52s ease-in-out infinite;
-}
-@keyframes dr1{0%,100%{transform:translate3d(0,0,0)}
-               50%{transform:translate3d(3vw,2vh,0)}}
-@keyframes dr2{0%,100%{transform:translate3d(0,0,0)}
-               50%{transform:translate3d(-3vw,-3vh,0)}}
-@keyframes dr3{0%,100%{transform:translate3d(0,0,0) scale(1)}
-               50%{transform:translate3d(2vw,-2vh,0) scale(1.08)}}
-
-/* 星点：三档亮度。**刻意稀疏**——20 颗位置讲究的星胜过 18780 个噪点 */
-#stars{position:absolute;inset:0;opacity:var(--starA);
-       transition:opacity .5s linear}
-#stars i{position:absolute;left:0;top:0;border-radius:50%;
-         background:transparent}
-
-/* 极细噪点：破掉纯色渐变的"塑料感" */
+/* 极细噪点：破掉平滑渐变常见的"塑料感" */
 #noise{
-  position:absolute;inset:0;opacity:.30;mix-blend-mode:overlay;
+  position:absolute;inset:0;opacity:.22;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml;utf8,\
 <svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'>\
 <filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' \
 numOctaves='3' stitchTiles='stitch'/></filter>\
-<rect width='140' height='140' filter='url(%23n)' opacity='.55'/></svg>");
+<rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
 }
 
-/* 暗角 + 文字区对比度 */
-#veil{
-  position:absolute;inset:0;
-  background:
-    radial-gradient(115% 85% at 26% 42%,
-      rgba(2,4,10,0) 0%, rgba(2,4,10,.30) 48%, rgba(2,4,10,.84) 100%),
-    linear-gradient(180deg, rgba(2,4,10,.55) 0%, rgba(2,4,10,0) 20%,
-                    rgba(2,4,10,0) 62%, rgba(2,4,10,.86) 100%);
+/* 色温叠加：冷蓝 → 暖金，强度很低，只是把五张图的色调拉成一条线 */
+#grade{
+  position:absolute;inset:0;mix-blend-mode:soft-light;opacity:.55;
+  background:linear-gradient(180deg,
+    rgba(var(--warmRGB),.32), rgba(var(--warmRGB),.06) 55%, rgba(0,0,0,.28));
 }
+
 #grain{
   position:absolute;inset:0;opacity:.34;
   background-image:repeating-linear-gradient(

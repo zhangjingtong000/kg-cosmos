@@ -1,38 +1,37 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   KG COSMOS — 滚动驱动的深空（纯 CSS 场，不做星云）
+   KG COSMOS — 滚动驱动的星云旅程
    ───────────────────────────────────────────────────────────────────────────
 
-   这是一次**方向修正**，写在最前面，免得后来的人再走一遍弯路。
+   这一版是**方向性修正的终点**，把前面的弯路记在这里：
 
-   前三个版本都试图"画出星云"，全部失败：
-     v1  WebGL 点云（1 万点）  → 三重衰减叠加，几乎全黑
-     v2  WebGL 点云（加云雾层）→ 变成"彩色沙子"，密集处过曝成白盘
-     v3  Canvas 2D 径向渐变    → 变成一个个模糊圆斑，尘埃带挖出"甜甜圈"
+     v1–v3  用 WebGL 点云 / Canvas 渐变"自己画星云" → 全部失败
+            （噪点、彩色沙子、甜甜圈）
+     v4–v5  纯 CSS 深空 → 干净但平淡，看不出"旅程"
+     v6     **本地 ComfyUI + FLUX.1-schnell 生成 5 张星云图** ← 就是这里
 
-   失败的原因是共通的：**星云的观感来自连续介质的高频细节**（气体湍流、
-   尘埃带、星芒），它不是"点"也不是"几个渐变圆"能合成的。
-   用有限的手段硬凑，只会得到噪点或圆斑——**比不做更糟**。
+   结论：星云的观感来自**连续介质的高频细节**（气体湍流、尘埃带、发光边缘），
+   这类东西代码合成不出来，而**生成模型做得很轻松**。本机本来就有 ComfyUI
+   和 FLUX，绕了一大圈才用上——记下来，避免后来者重复这段路。
 
-   所以这一版**放弃画星云**，改做一件确定能做好的事：
-   **一个克制、精密、有纵深的深空背景**。它的高级感来自：
-     · 极深的空间底色 + 三层缓慢漂移的冷色光晕（不是星云，只是"环境光"）
-     · 三档亮度的星点（共约 140 颗，用 box-shadow 一次性画出，**刻意稀疏**）
-     · 一层极细的粒子噪声（CSS 生成的 SVG 噪点，抗"纯色塑料感"）
-     · 滚动驱动的色温偏移（冷蓝 → 微暖）与光晕位移
-     · 与文字排版形成对比：背景安静，信息清楚
+   实现：
+     · 五张图（web/assets/sky-*.png）按滚动进度**交叉淡化**，
+       同一时刻最多两张可见，因此过渡连续、没有硬切；
+     · 每张图配一条**缓慢缩放/位移**曲线（Ken Burns），
+       让"推进"与"拉远"有真实镜头感，而不是单纯换图；
+     · 进度带阻尼（滚动停下后画面继续飘一会儿）；
+     · 色温、文字区遮罩、暗角全部由同一条 p 驱动。
 
-   "少即是多"在这里不是退让，而是正确的判断：
-   **20 颗位置讲究的星，胜过 18780 个噪点。**
-
-   数据仍在页面上（18780 实体 / 29120 关系 / 60 社区），
-   但它以**文字与数字**呈现，而不是假装成一张星云图。
+   离线约束：图在本地（5 张 PNG 约 4.9 MB），页面零外部请求。
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const stage = document.getElementById('stage');
-const reel  = document.getElementById('reel');
+const stage  = document.getElementById('stage');
+const layers = [...document.querySelectorAll('#skyLayers .sky')];
+const reel   = document.getElementById('reel');
+const N = Math.max(1, layers.length);
 
 let targetP = 0, curP = 0;
+let mx = 0, my = 0, sx = 0, sy = 0;
 
 function readScroll() {
   const total = Math.max(1, reel.scrollHeight - innerHeight);
@@ -52,66 +51,81 @@ function kf(t, pts) {
   return pts[pts.length - 1][1];
 }
 
-/* 生成星点：三档亮度，刻意稀疏。用 box-shadow 一次性绘制，省 DOM。 */
-function buildStars() {
-  const box = document.getElementById('stars');
-  if (!box) return;
-  const layers = [
-    { n: 220, size: 1,   a: 0.48, spread: 100 },  // 暗、密、铺满
-    { n: 90,  size: 1.7, a: 0.76, spread: 100 },  // 中等
-    { n: 26,  size: 2.6, a: 1.0,  spread: 100 }   // 亮、少、带柔光
-  ];
-  let html = '';
-  for (const L of layers) {
-    const shadows = [];
-    for (let i = 0; i < L.n; i++) {
-      const x = (Math.random() * L.spread).toFixed(2);
-      const y = (Math.random() * L.spread).toFixed(2);
-      shadows.push(`${x}vw ${y}vh 0 ${L.size > 2 ? 0.6 : 0}px rgba(214,230,255,${L.a})`);
-    }
-    html += `<i style="width:${L.size}px;height:${L.size}px;`
-          + `box-shadow:${shadows.join(',')}"></i>`;
-  }
-  box.innerHTML = html;
-}
+/* 每张图的镜头曲线。同一时刻只有相邻两张在动：
+   一张继续推进、一张开始拉远，交叠处自然形成"穿过"的观感。 */
+const LENS = [
+  { s0: 1.00, s1: 1.18, x0: 0,  x1: 0,  y0: 0,  y1: -2 },  // 远景 → 推近
+  { s0: 1.02, s1: 1.24, x0: 2,  x1: -1, y0: 1,  y1: -3 },  // 继续靠近
+  { s0: 1.04, s1: 1.30, x0: -2, x1: 2,  y0: 2,  y1: -2 },  // 进入
+  { s0: 1.06, s1: 1.34, x0: 0,  x1: 0,  y0: 2,  y1: -1 },  // 深处（扩张最猛）
+  { s0: 1.26, s1: 1.04, x0: -1, x1: 0,  y0: -1, y1: 0 }    // 拉远（反过来）
+];
 
-/* 滚动驱动：色温、光晕位移、星点亮度 */
 let last = 0;
 function tick(now) {
   const dt = last ? (now - last) / 1000 : 0.016;
   last = now;
-  curP += (targetP - curP) * (REDUCED ? 1 : Math.min(1, dt * 3.2));
+  curP += (targetP - curP) * (REDUCED ? 1 : Math.min(1, dt * 3.4));
   const p = curP;
 
-  // 冷蓝 → 微暖（幅度很小：这是"氛围位移"，不是变色）
-  const warm = kf(p, [[0, 0], [0.3, 0.32], [0.6, 1.0], [1, 0.46]]);
-  const r = Math.round(126 + 78 * warm);
-  const g = Math.round(176 + 18 * warm);
-  const b = Math.round(255 - 92 * warm);
-  stage.style.setProperty('--warmRGB', `${r},${g},${b}`);
+  /* 交叉淡化：把 p 映射到 [0, N-1]，第 i 张的可见度 = 三角权重。
+     这样任何时刻最多两张同时可见，过渡必然连续。 */
+  const pos = p * (N - 1);
+  for (let i = 0; i < N; i++) {
+    const w = Math.max(0, 1 - Math.abs(pos - i));
+    const L = LENS[i] || LENS[0];
+    // 图内局部进度：进入时为 0，离开时为 1
+    const local = Math.min(1, Math.max(0, pos - i + 0.5));
+    const s = L.s0 + (L.s1 - L.s0) * local;
+    const x = L.x0 + (L.x1 - L.x0) * local;
+    const y = L.y0 + (L.y1 - L.y0) * local;
+    layers[i].style.opacity = w.toFixed(4);
+    layers[i].style.transform =
+      'scale(' + s.toFixed(4) + ') translate3d('
+      + (x - sx * 1.6).toFixed(2) + '%, '
+      + (y - sy * 1.2).toFixed(2) + '%, 0)';
+  }
+  sx += (mx - sx) * 0.045;
+  sy += (my - sy) * 0.045;
 
-  // 光晕：随滚动缓慢上移并放大（三层错开速度 → 纵深）
-  const drift = kf(p, [[0, 0], [0.35, -12], [0.7, 9], [1, -5]]);
-  stage.style.setProperty('--drift', drift.toFixed(2) + 'vh');
-  const grow = kf(p, [[0, 0.86], [0.45, 1.38], [1, 0.96]]);
-  stage.style.setProperty('--grow', grow.toFixed(3));
-
-  // 星点整体亮度：深处稍暗，让前景文字更清
-  const sl = kf(p, [[0, 1.05], [0.35, 0.70], [0.7, 0.40], [1, 0.85]]);
-  stage.style.setProperty('--starA', sl.toFixed(3));
+  /* 色温与文字遮罩：与图的色彩走向同步（冷蓝 → 暖金 → 回落） */
+  const warm = kf(p, [[0, 0], [0.34, 0.10], [0.62, 0.95], [0.86, 1.0], [1, 0.34]]);
+  stage.style.setProperty('--warmRGB',
+    Math.round(150 + 100 * warm) + ',' + Math.round(180 - 6 * warm) + ','
+    + Math.round(255 - 130 * warm));
+  const veil = kf(p, [[0, 0.34], [0.3, 0.46], [0.62, 0.62], [0.86, 0.68], [1, 0.48]]);
+  stage.style.setProperty('--veil', veil.toFixed(3));
 
   requestAnimationFrame(tick);
 }
 
 addEventListener('scroll', readScroll, { passive: true });
 addEventListener('resize', readScroll);
+addEventListener('pointermove', e => {
+  mx = (e.clientX / innerWidth - 0.5) * 2;
+  my = (e.clientY / innerHeight - 0.5) * 2;
+}, { passive: true });
 readScroll();
-buildStars();
-requestAnimationFrame(tick);
 
-window.__ready = true;
+/* 用 background-image 铺层（比 <img> 更好控制 object-fit 与缩放中心） */
+layers.forEach(el => {
+  if (el.dataset.src) el.style.backgroundImage = 'url("' + el.dataset.src + '")';
+});
 
-/* ── 章节入场与进度点 ───────────────────────────────────────────────────── */
+/* 等首图就绪再起动画，避免开场闪一下黑 */
+function preload(list) {
+  return Promise.all(list.map(src => new Promise(res => {
+    const im = new Image();
+    im.onload = im.onerror = () => res();
+    im.src = src;
+  })));
+}
+preload(layers.map(el => el.dataset.src).filter(Boolean)).then(() => {
+  requestAnimationFrame(tick);
+  window.__ready = true;
+});
+
+/* ── 章节入场与右侧进度点 ───────────────────────────────────────────────── */
 const chs = [...document.querySelectorAll('.ch')];
 const dots = [...document.querySelectorAll('#rail .dot')];
 const cio = new IntersectionObserver(es => {
@@ -155,7 +169,7 @@ if (REDUCED) {
 }
 if (REDUCED) document.querySelectorAll('.ch').forEach(c => c.classList.add('seen'));
 
-/* ── 页面上仍如实展示数据规模 ───────────────────────────────────────────── */
+/* ── 页面上的数据规模 ───────────────────────────────────────────────────── */
 fetch('./kg-data/nebula.json')
   .then(r => r.ok ? r.json() : null)
   .then(D => {
@@ -166,11 +180,11 @@ fetch('./kg-data/nebula.json')
     const e = (D.edges || []).length;
     const c = (D.communities || []).length;
     lf.innerHTML =
-      `<span class="it"><span class="v">${n.toLocaleString()}</span>`
-      + `<span class="l">实体 · 真实抽取</span></span>`
-      + `<span class="it"><span class="v">${e.toLocaleString()}</span>`
-      + `<span class="l">关系 · 评测全集 43867</span></span>`
-      + `<span class="it"><span class="v">${c}</span>`
-      + `<span class="l">社区 · Louvain</span></span>`;
+      '<span class="it"><span class="v">' + n.toLocaleString() + '</span>'
+      + '<span class="l">实体 · 真实抽取</span></span>'
+      + '<span class="it"><span class="v">' + e.toLocaleString() + '</span>'
+      + '<span class="l">关系 · 评测全集 43867</span></span>'
+      + '<span class="it"><span class="v">' + c + '</span>'
+      + '<span class="l">社区 · Louvain</span></span>';
   })
   .catch(() => {});

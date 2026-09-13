@@ -69,54 +69,66 @@ def main():
         cdp(ws, 'Runtime.enable')
         time.sleep(1.0)
 
-        cards = ev(ws, """[...document.querySelectorAll('a.card')].map(c => {
-          const art = c.querySelector('.art');
-          const inner = art ? art.firstElementChild : null;
-          const b = (el) => { const r = el.getBoundingClientRect();
-                              return {top: +r.top.toFixed(1), h: +r.height.toFixed(1)}; };
-          return {
-            href: c.getAttribute('href'),
-            title: c.querySelector('h2').textContent,
-            cardH: +c.getBoundingClientRect().height.toFixed(1),
-            art: art ? b(art) : null,
-            innerClass: inner ? inner.className : null,
-            innerH: inner ? b(inner).h : null,
-          };
-        })""")
-        print(f'[1] 卡片数: {len(cards)}')
-        for c in cards:
-            print(f"    {c['title']:14s} → {c['href']:22s} 卡片高 {c['cardH']:6.1f}"
-                  f"  art {c['art']['h'] if c['art'] else 0:.0f}px  内层 {c['innerClass']}")
-        if len(cards) != 5:
-            fails.append(f'主卡片应为 5 张，实为 {len(cards)}')
+        # 1. 五张星云图层：都必须有 data-src，且都已加载成功
+        skies = ev(ws, """[...document.querySelectorAll('#skyLayers .sky')].map(el => ({
+          src: el.dataset.src || '',
+          bg: (el.style.backgroundImage || '').slice(0, 60),
+          op: +getComputedStyle(el).opacity
+        }))""")
+        print(f'[1] 星云图层: {len(skies)} 张')
+        for i, s in enumerate(skies):
+            print(f"    #{i}  {s['src']:34s} bg={s['bg'][:34]}")
+        if len(skies) != 5:
+            fails.append(f'星云图层应为 5 张，实为 {len(skies)}')
+        for i, s in enumerate(skies):
+            if not s['src']:
+                fails.append(f'第 {i} 张星云图层缺少 data-src')
+            if 'url(' not in s['bg']:
+                fails.append(f'第 {i} 张星云图层的 background-image 未设置')
+        # 图片是否真的加载成功（加载失败时 opacity 永远为 0 / 背景是黑）
+        okimg = ev(ws, """(() => {
+          const els = [...document.querySelectorAll('#skyLayers .sky')];
+          return els.map(el => {
+            const m = (el.style.backgroundImage||'').match(/url\("?([^")]+)"?\)/);
+            if (!m) return false;
+            // 用 Image 再取一次，命中缓存时是同步完成的
+            const im = new Image(); im.src = m[1];
+            return im.complete && im.naturalWidth > 0;
+          });
+        })()""")
+        bad = [i for i, v in enumerate(okimg or []) if not v]
+        if bad:
+            fails.append(f'以下星云图加载失败: {bad}')
+        else:
+            print('[2] OK 五张星云图均已加载')
 
-        # 2. 防回归：示意图容器必须是 .art 的**子元素**，且高度等于 art
-        for c in cards:
-            if not c['art'] or c['innerH'] is None:
-                fails.append(f"{c['title']} 缺少示意图容器")
-                continue
-            if abs(c['innerH'] - c['art']['h']) > 1:
-                fails.append(
-                    f"{c['title']} 的示意图高度 {c['innerH']} ≠ .art 高度 {c['art']['h']}"
-                    f"（说明它脱离了 .art 的定位上下文）")
-            if c['art']['h'] != 62:
-                fails.append(f"{c['title']} 的 .art 高度为 {c['art']['h']}，应为 62")
-        if not fails:
-            print('[2] OK 示意图都嵌在 .art 内，高度与 .art 一致（未脱离文档流）')
+        # 3. 入口链接
+        entries = ev(ws, """[...document.querySelectorAll('a.entry')].map(e => ({
+          href: e.getAttribute('href'),
+          title: (e.querySelector('h3')||{}).textContent || ''
+        }))""")
+        print(f'[3] 入口数: {len(entries)}')
+        for e in entries:
+            print(f"    {e['title'][:18]:20s} → {e['href']}")
+        if len(entries) != 4:
+            fails.append(f'入口应为 4 个，实为 {len(entries)}')
 
-        # 3. 同行卡片等高（grid 的 stretch 生效）
-        tops = {}
-        for c in cards:
-            tops.setdefault(round(c['art']['top']), []).append(c['cardH'])
-        for top, hs in tops.items():
-            if len(hs) > 1 and max(hs) - min(hs) > 1:
-                fails.append(f'同一行卡片高度不一致: {hs}')
-        if not any('同一行' in f for f in fails):
-            print(f'[3] OK 同一行卡片等高（行数 {len(tops)}）')
+        # 4. 数据区被 JS 填充（说明数据链路仍在工作）
+        facts = ev(ws, "(document.getElementById('liveFacts')||{}).innerText || ''")
+        print(f'[4] 数据区: {facts[:70].replace(chr(10), " / ")!r}')
+        if '18,780' not in facts and '18780' not in facts:
+            fails.append('数据区未被填充（liveFacts 里没有实体数）')
 
-        # 4. 所有链接可达
-        hrefs = [c['href'] for c in cards] + ev(
-            ws, "[...document.querySelectorAll('.legacy a')].map(a => a.getAttribute('href'))")
+        # 5. 进度点数量 = 章节数
+        nDot = ev(ws, "document.querySelectorAll('#rail .dot').length")
+        nCh = ev(ws, "document.querySelectorAll('.ch').length")
+        print(f'[5] 进度点 {nDot} / 章节 {nCh}')
+        if nDot != nCh:
+            fails.append(f'进度点 {nDot} ≠ 章节数 {nCh}')
+
+        # 6. 所有链接可达（入口 + 页脚）
+        hrefs = [e['href'] for e in entries] + ev(
+            ws, "[...document.querySelectorAll('#foot a')].map(a => a.getAttribute('href'))")
         bad = []
         for h in hrefs:
             try:
@@ -126,7 +138,7 @@ def main():
                         bad.append(f'{h} → {r.status}')
             except Exception as e:
                 bad.append(f'{h} → {e}')
-        print(f'[4] 检查 {len(hrefs)} 个链接，失效 {len(bad)} 个')
+        print(f'[6] 检查 {len(hrefs)} 个链接，失效 {len(bad)} 个')
         if bad:
             fails.extend(bad)
 
