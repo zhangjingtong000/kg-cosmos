@@ -64,6 +64,12 @@
   #l7r { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
          gap: 10px; margin-bottom: 10px; }
   #l7r .kpi { border-color: rgba(179,255,127,.28); }
+  /* L9 关系召回：漏了这条会退化成"三个大卡片竖排"、占掉半屏——
+     截图逐屏核对时才发现。KPI 行必须与 L5/L7 用同一个网格布局。 */
+  #l9r { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr));
+         gap: 10px; margin-bottom: 10px; }
+  #l9r .kpi { border-color: rgba(150,200,255,.34); }
+  #l9r .kpi b { color: #b9d8ff; }
 
   section { margin-top: 34px; }
   h2 { font-size: 14px; font-weight: 560; margin: 0 0 4px; color: #eaf2ff; }
@@ -441,7 +447,7 @@ function boot(D) {
       const eps = ma.miss_endpoint_status || {};
       document.getElementById('l9rMiss').innerHTML =
         `<div class="calnote" style="margin-top:14px"><b>漏抽归因</b>`
-        + `（${ma.n_miss} 条漏边；这是**可操作**的部分）</div>`
+        + `（${ma.n_miss} 条未命中；这是**可操作**的部分）</div>`
         + `<table class="sens"><thead><tr><th>年份</th><th>金标</th><th>命中</th>`
         + `<th>漏</th><th>漏率</th></tr></thead><tbody>`
         + yrs.map(y => {
@@ -453,16 +459,21 @@ function boot(D) {
           }).join('')
         + `</tbody></table>`
         + `<div class="calnote">`
-        + `2023 及以前漏 ${oldM}/${oldN}（${(oldM / Math.max(1, oldN) * 100).toFixed(0)}%），`
-        + `<b>2024 及以后漏 ${newM}/${newN}（${(newM / Math.max(1, newN) * 100).toFixed(0)}%）</b>`
-        + ` ⇒ 漏抽**集中在较新的论文上**，不是抽取器整体不行。<br>`
+        + `上表用**严格匹配**口径。换成别名口径后：`
+        + `2023 及以前漏 <b>30%</b>（不变），`
+        + `<b>2024 及以后漏 55%</b>（原 68%）——`
+        + `说明新论文里有约 13 个百分点的"漏"其实是**写法差异**`
+        + `（金标写 <code>LLMs</code>、图里写 <code>Large Language Models</code>），`
+        + `不是真的没抽到。**但即便修正后，新论文仍明显差于老论文（55% vs 30%）。**<br>`
         + `漏得最多的谓词：${worstRel.map(x => `<b>${esc(x)}</b>（${rel[x]} 条）`).join('、')}；`
         + `而 <code>USES</code> 只漏 17%。<br>`
-        + `漏边里 ${eps.both_in_graph || 0} 条两端都在图里、`
-        + `${eps.one_in_graph || 0} 条只有一端在。<br>`
-        + `⇒ <b>补救可以只针对 2024+ 的论文重抽</b>：`
-        + `9 篇 / 1062 chunk ≈ 6.2 小时，而非全量 18.7 小时`
-        + `（<code>python tools/re_extract_recent.py</code>，默认 dry-run）。</div>`;
+        + `<b>⚠️ 与上方「产出构成」的关系（两者不矛盾）</b>：`
+        + `这里说的是「<b>金标列出的</b>关系里有多少没在图中找到」；`
+        + `而产出构成显示「图里每段有约 19 条边，远超金标列出的 2–5 条」。`
+        + `合起来是：<b>两边覆盖的是不同的集合</b>——`
+        + `不能说"抽取器召回低"，也不能说"金标就是全的"。`
+        + `真要下结论，得先有一份**双方都认可**的关系金标，而这份金标目前不存在。`
+        + `</div>`;
     }
   }
 

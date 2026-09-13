@@ -55,9 +55,11 @@ EXPECT = [
     # 漏抽归因：证明"漏抽集中在 2024+"与补救路径在屏幕上可见
     ("漏抽归因表有 6 行年份",
      "document.querySelectorAll('#l9rMiss table.sens tbody tr').length === 6"),
-    ("漏抽归因含 2024 与重抽指引",
+    ("漏抽归因含 2024 与别名口径修正",
      "/2024/.test(document.getElementById('l9rMiss').innerText)"
-     " && /re_extract_recent/.test(document.getElementById('l9rMiss').innerText)"),
+     " && /别名口径/.test(document.getElementById('l9rMiss').innerText)"),
+    ("漏抽归因写明与产出构成不矛盾",
+     "/不矛盾/.test(document.getElementById('l9rMiss').innerText)"),
     ("L5 区块含 PPV 字样", "/PPV/.test(document.getElementById('l5v').innerText)"),
 ]
 
