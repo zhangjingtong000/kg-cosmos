@@ -61,6 +61,10 @@ DATA_CHECKS = [
     # 别名修正：严格匹配会把 `LLMs` vs `Large Language Model` 这类写法差异
     # 判成漏，从而低估召回。必须报区间而不是单点。
     ("L9 关系召回区间（别名修正）", ["tools/l9_relation_recall_corrected.py"]),
+    # 产出构成：每段抽多少条、pass 率、"兜底关系 RELATED_TO" 占多少。
+    # 它把"关系召回约一半"的解读限定住——金标本身列举不全，
+    # 不能读成"图只覆盖了原文关系的一半"。
+    ("L9 产出构成（多抽/兜底占比）", ["tools/l9_overextraction.py"]),
     # 漏抽归因：漏抽不均匀（集中在特定谓词与 2024+ 新论文），
     # 这决定了补救成本——只重抽新论文 6.2 小时 vs 全量 18.7 小时。
     ("L9 漏抽归因（补救路径）", ["tools/l9_miss_analysis.py"]),
