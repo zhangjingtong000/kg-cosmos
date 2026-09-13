@@ -346,9 +346,9 @@ let DATA = null, ITEMS = [], view = [];
    它不改动任何原始字段，也不声称这是原文的分类体系。 */
 const GROUPS = [
   { id: 'ext', no: '01', title: '抽取与图谱构建', en: 'extraction & construction',
-    re: /extract|schema|ontolog|triple|relation extraction|entity|tabular|table|web|corpus|document|chunk|\bocr\b|\bpdf\b|text|annotation|dataset|data quality|data scar|knowledge graph construction|knowledge base|knowledge storage|knowledge management|metadata|storage|pipeline|keyword|template|syntactic|semantic role|reference|knowlm|techgpt|survey|paper|citation|labell?ed|unlabelled/i },
+    re: /extract|schema|ontolog|triple|relation extraction|entity|tabular|table|web|corpus|document|chunk|\bocr\b|\bpdf\b|text|annotation|dataset|data quality|data scar|knowledge graph construction|knowledge base|knowledge storage|knowledge management|metadata|storage|pipeline|keyword|template|syntactic|semantic role|reference|knowlm|techgpt|survey|paper|citation|labell?ed|unlabelled|archimate|cohesiv|abstraction/i },
   { id: 'emb', no: '02', title: '表示学习与嵌入', en: 'representation & embedding',
-    re: /transe|mrup|proje|hake|torus|conve|convkb|\bple\b|embedding|embed|translational|bilinear|vector|geometric|manifold|sphere|scoring|link prediction|triple-based|relational model|quaternion|negative sampl|dimension|mapping function|quantiz|2d stack|\bsinc\b|rotat|expressiveness|entity alignment|class belief|cartesian|score/i },
+    re: /transe|mrup|proje|hake|torus|conve|convkb|\bple\b|embedding|embed|translational|bilinear|vector|geometric|manifold|sphere|scoring|link prediction|triple-based|relational model|quaternion|negative sampl|dimension|mapping function|quantiz|2d stack|\bsinc\b|rotat|expressiveness|entity alignment|class belief|cartesian|score|disjoint|relatedness|similarity|representation/i },
   { id: 'llm', no: '03', title: '大模型与提示工程', en: 'llm & prompting',
     re: /large language model|\bllm|chatglm|kicgpt|prompt|instruct|fine-?tun|in-?context|zero-?shot|one-?shot|few-?shot|\bfsl\b|meta-?learn|pre-?trained language|small-scale large|hallucinat|training-free|knowledge induction|domain-specific expertise|language model|telephone number|\bntp\b/i },
   { id: 'inf', no: '04', title: '推理与知识利用', en: 'reasoning & knowledge use',
@@ -359,10 +359,8 @@ const GROUPS = [
     re: /temporal|dynamic|\bdkg|\bskg|time|event|forecast|trend|stream|real-?time|new knowledge|evolving|retrain|re-training|static|shuffl|historical|news|social media/i },
   { id: 'eval', no: '07', title: '评测、跨域与泛化', en: 'evaluation & generalization',
     re: /evaluat|benchmark|metric|quality|noise|conflict|error|coverage|reproduc|baseline|generaliz|robust|adaptab|scalab|cross-|unseen|seen class|minority|machine translation|flexibility|computational|resource|memory|over-?fit|convergence|converge|spars|domain|complexity/i },
-  { id: 'onto', no: '08', title: '本体、语义与概念建模', en: 'ontology & semantics',
-    re: /semantic|concept|class\b|instance|archimate|disjoint|similarity|relatedness|cohesive|abstraction|taxonom|hierarch|logic pattern|relationship type/i },
 ];
-const TAIL = { id: 'tail', no: '09', title: '其余单点记录', en: 'uncategorised' };
+const TAIL = { id: 'tail', no: '08', title: '其余单点记录', en: 'uncategorised' };
 
 /* 命中强度分三档：3 = 说法本身就在这个主题里，2 = 能力维度属于这个主题，
    1 = 其余。Core 只收录 ≥2 的条目——第一轮截图里「Shuffling」「Born-In」
@@ -379,8 +377,11 @@ const SUBJECT_FIRST = [
 function matchGroup(it) {
   for (const r of SUBJECT_FIRST) if (r.re.test(it.subject)) return { id: r.id, tier: 3 };
   const head = it.subject + ' | ' + it.dim;
-  for (const g of GROUPS) if (g.re.test(it.description || '')) return { id: g.id, tier: 3 };
   for (const g of GROUPS) if (g.re.test(head)) return { id: g.id, tier: 2 };
+  /* 描述兜底放在**所有**维度之后：一句描述里偶然出现 "shuffling"、"temporal"
+     就整条改组的代价太大——「Shuffling | Overfitting」原本因此被塞进时序组。
+     维度先全局走一遍，只有真正没有归属的条目才落到这个兜底。 */
+  for (const g of GROUPS) if (g.re.test(it.description || '')) return { id: g.id, tier: 1 };
   return { id: 'tail', tier: 0 };
 }
 const GROUP_FN = new WeakMap();
@@ -570,7 +571,7 @@ function render() {
 function boot() {
   const m = DATA.meta;
   document.getElementById('lede').innerHTML =
-    `把 <b>${m.subjects}</b> 个方法在 <b>${m.dimensions}</b> 个能力维度上的表态，按主题归成 9 组读：`
+    `把 <b>${m.subjects}</b> 个方法在 <b>${m.dimensions}</b> 个能力维度上的表态，按主题归成 8 组读：`
     + `每组先给被反复提到的核心条目，其余压成组尾的一行注记。`
     + `这里的每一条都是「某方法在某项能力上的表现或局限」，而不是两个方法之间的冲突——`
     + `原因见页末口径说明。`;
@@ -624,14 +625,25 @@ function boot() {
     document.body.dataset.density = tight ? 'tight' : 'full';
     db.textContent = tight ? '详读版式' : '极简版式';
   });
-  /* 点维度胶囊 = 只看该维度。
-     胶囊是新的 .tag 类，不在 a11y.js 的 SELECTORS（.chip/.capsule/.pill）里，
+  /* 点维度标签 = 只看该维度。
+     标签是新的 .tag 类，不在 a11y.js 的 SELECTORS（.chip/.capsule/.pill）里，
      所以它在模板里自带 tabindex="0" + role="button"，并在这里补键盘等价操作——
      键盘可达性不能因为换了类名而退步。 */
   const grid = document.getElementById('grid');
+  let keepFocus = false;   // 键盘触发时为真：筛选后把焦点移回同一维度标签
   function pickDim(el) {
-    document.getElementById('dimSel').value = el.dataset.dim;
+    const dim = el.dataset.dim;
+    document.getElementById('dimSel').value = dim;
     render();
+    /* 重渲染会整片替换 DOM，刚聚焦的标签被销毁、焦点掉回 body——
+       对纯键盘用户等于"每按一次回车就丢一次位置"。这里把焦点补回去。
+       放在下一帧：render() 里的 innerHTML 替换在部分浏览器上要等重排才生效。 */
+    if (keepFocus) {
+      requestAnimationFrame(() => {
+        const again = [...grid.querySelectorAll('.tag')].find(t => t.dataset.dim === dim);
+        if (again) again.focus();
+      });
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   grid.addEventListener('click', (e) => {
@@ -643,7 +655,9 @@ function boot() {
     const el = e.target.closest('.tag');
     if (!el) return;
     e.preventDefault();
+    keepFocus = true;
     pickDim(el);
+    keepFocus = false;
   });
   addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
