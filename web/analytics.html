@@ -5,125 +5,311 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KG Cosmos · 图谱分析面板</title>
 <style>
+  /* ══════════════════════════════════════════════════════════════════════
+     图谱分析面板 · 视觉与信息层级重做（2026-09）
+     ──────────────────────────────────────────────────────────────────────
+     用户原话：「其他页面……全是字儿」「不要放不开」「全是蓝紫的配色」。
+     此前这一页的问题逐条确认过：KPI 没有主次、六层评测埋在 top≈3171px、
+     没有锚点目录、正/负/中性共用一族颜色、`.lede` 还是「树干 + 黑框」、
+     小字对比度不达 WCAG AA、没有响应式。
+
+     这一版的三条主线：
+       ① **重排信息架构**：首屏给出三个核心读数 + 9 条锚点目录；
+          「六层评测」从第 5 位提到第 2 屏，成为主角；方法论说明（口径对照）下沉到页尾。
+       ② **建立 KPI 主次**：三个大读数（clamp 38–56px）+ 一行辅助小字。
+          其余规模数字不再与核心结论平铺等权。
+       ③ **颜色承担语义**：青=正面结论/统计数字，陶土=负面/需注意，
+          金=主行动与当前焦点，其余一律中性灰阶。
+
+     配色沿用全站统一的 --pq-*（见文件末尾 :root），不引入任何新的蓝或紫。
+     字体族不新写：标题复用 <style> 里已定义好的那一族，靠**字号与衬线/无衬线
+     对比**拉层次，不靠 font-weight（子集的多个字重共享同一份字形）。
+     ══════════════════════════════════════════════════════════════════════ */
+
   * { box-sizing: border-box; }
   html, body { margin: 0; min-height: 100%; }
+  html { scroll-behavior: smooth; }
   body {
-    background: radial-gradient(ellipse 120% 60% at 50% 0%, #0d1730 0%, #070c1a 46%, #04070f 100%);
-    color: #dfe8ff; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-    padding: 34px 30px 64px; line-height: 1.6;
+    /* 底从「深蓝星云」换成中性深墨：原来那圈冷蓝正是"全是蓝紫"的源头之一。
+       页面自身的渐变只做极轻的顶部提亮，不参与任何语义。 */
+    background:
+      radial-gradient(ellipse 130% 52% at 50% 0%, #171922 0%, #0d0e13 44%, #08080c 100%)
+      fixed;
+    color: var(--pq-txt, #e4e6ec);
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    /* 底部留白：页脚最后一行要避开 a11y.js 注入的左下角「← 导航页」 */
+    padding: 46px 30px 92px;
+    font-size: 14.5px; line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 1120px; margin: 0 auto; }
-  header small { display: block; color: rgba(181,203,235,.55); font-size: 11px;
-                 letter-spacing: .16em; text-transform: uppercase; }
-  header h1 { margin: 8px 0 0; font-size: 25px; font-weight: 560; letter-spacing: .02em; }
-  .lede { margin: 12px 0 0; font-size: 12.5px; line-height: 1.85;
-          color: rgba(196,214,240,.72); padding: 12px 14px; border-radius: 10px;
-          background: rgba(120,160,255,.06); border-left: 2px solid rgba(120,160,255,.35); }
-  .lede b { color: #cfe0ff; font-weight: 560; }
+  .wrap { max-width: 1160px; margin: 0 auto; }
 
-  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
-          gap: 12px; margin-top: 22px; }
-  .kpi { background: rgba(10,16,34,.8); border: 1px solid rgba(140,170,255,.15);
-         border-radius: 11px; padding: 13px 15px; }
-  .kpi b { display: block; font-size: 22px; font-weight: 600; color: #eaf2ff;
-           font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
-  .kpi span { display: block; margin-top: 3px; font-size: 11px; color: rgba(181,203,235,.6); }
-  .kpi small { display: block; margin-top: 5px; font-size: 10.5px;
-               color: rgba(150,190,255,.5); }
-  /* 口径对照：三套规模数字的含义解释 */
-  #calibers { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
-              gap: 10px; }
-  .cal { border-radius: 10px; padding: 11px 13px;
-         border: 1px solid rgba(140,170,255,.14); background: rgba(10,16,34,.62); }
-  .cal b { display: block; font-size: 12px; font-weight: 560; }
-  .cal span { display: block; margin-top: 4px; font-size: 14px; font-weight: 600;
-              color: #eaf2ff; font-variant-numeric: tabular-nums; }
-  .cal small { display: block; margin-top: 5px; font-size: 10.5px; line-height: 1.7;
-               color: rgba(160,190,235,.55); }
-  .cal.c1 { border-color: rgba(126,203,255,.3); } .cal.c1 b { color: #a9d8ff; }
-  .cal.c2 { border-color: rgba(179,255,127,.26); } .cal.c2 b { color: #cdf5a8; }
-  .cal.c3 { border-color: rgba(255,217,127,.26); } .cal.c3 b { color: #f0dcae; }
-  .calnote { max-width: 72ch; grid-column: 1 / -1; margin-top: 2px; padding: 10px 13px;
-             border-radius: 9px; font-size: 11px; line-height: 1.95;
-             color: rgba(170,196,230,.68); background: rgba(140,170,255,.05);
-             border: 1px solid rgba(140,170,255,.1); }
-  .calnote b { color: rgba(214,230,252,.9); }
-  /* L5 阈值灵敏度的小表 */
-  table.sens { width: 100%; border-collapse: collapse; margin-top: 6px;
-               font-size: 12px; font-variant-numeric: tabular-nums; }
-  table.sens th, table.sens td { padding: 6px 10px; text-align: right;
-                                 border-bottom: 1px solid rgba(140,170,255,.1); }
-  table.sens th { color: rgba(181,203,235,.6); font-weight: 500; font-size: 11px; }
-  table.sens td { color: #dfe8ff; }
-  table.sens th:first-child, table.sens td:first-child { text-align: left; }
-  /* L5 面板的 KPI 用暖色边框，与六层的常色区分开，强调"这是结论性的" */
-  #l5v { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr));
-         gap: 10px; margin-bottom: 10px; }
-  #l5v .kpi { border-color: rgba(255,178,127,.35); }
-  #l5v .kpi b { color: #ffcfa8; }
-  #l7r { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
-         gap: 10px; margin-bottom: 10px; }
-  #l7r .kpi { border-color: rgba(255,178,127,.30); }  /* 原为 .high 的绿，但它讲的是负面结论，改中性暖色 */
-  /* L9 关系召回：漏了这条会退化成"三个大卡片竖排"、占掉半屏——
-     截图逐屏核对时才发现。KPI 行必须与 L5/L7 用同一个网格布局。 */
-  #l9r { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr));
-         gap: 10px; margin-bottom: 10px; }
-  #l9r .kpi { border-color: rgba(150,200,255,.34); }
-  #l9r .kpi b { color: #b9d8ff; }
+  /* ── 页头 ───────────────────────────────────────────────────────────── */
+  .hero-top { display: flex; align-items: flex-start; justify-content: space-between;
+              gap: 24px; flex-wrap: wrap; }
+  header small { display: block; color: var(--pq-txt-2, rgba(198,201,213,.68));
+                 font-size: 11px; letter-spacing: .2em; text-transform: uppercase; }
+  header h1 { margin: 10px 0 0; font-size: clamp(32px, 4.6vw, 48px); line-height: 1.04;
+              font-weight: 400; letter-spacing: -.015em; color: var(--pq-txt); }
+  /* 离线声明：演示现场的第一条纪律，放在标题右侧而不是塞进正文 */
+  .badge { flex: 0 0 auto; margin-top: 6px; font-size: 11.5px; letter-spacing: .04em;
+           color: var(--pq-txt-2, rgba(198,201,213,.68));
+           border: 1px solid var(--pq-line, rgba(174,178,194,.13));
+           border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
+  /* `.lede`：旧版是「淡蓝底 + 左侧 2px 竖线 + 圆角」，看起来像贴上去的便签。
+     现在只用排版：一段克制的说明，无框、无竖线、无底色。 */
+  .lede { margin: 20px 0 0; max-width: 76ch; font-size: 13px; line-height: 1.9;
+          color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  .lede b { color: var(--pq-txt); font-weight: 600; }
 
-  section { margin-top: 34px; }
-  h2 { font-size: 19px; font-weight: 560; margin: 0 0 4px; color: #eaf2ff; }
-  .sub { font-size: 11.5px; color: rgba(181,203,235,.55); margin-bottom: 14px; }
+  /* ── 首屏读数：三个核心 + 辅助小字 ────────────────────────────────────
+     格线用 1px 分隔（editorial 的竖栏感），fig 本身透明，让 body 渐变透出来。 */
+  #kpis { margin-top: 34px; }
+  .figs { display: grid; grid-template-columns: repeat(3, 1fr);
+          border-top: 1px solid var(--pq-line); border-bottom: 1px solid var(--pq-line); }
+  .fig { padding: 24px 26px 22px; min-width: 0; }
+  .fig + .fig { border-left: 1px solid var(--pq-line); }
+  .fig:first-child { padding-left: 0; }
+  .fig:last-child { padding-right: 0; }
+  .fig .k { display: block; font-size: 10.5px; letter-spacing: .2em;
+            color: var(--pq-txt-2, rgba(198,201,213,.68)); margin-bottom: 14px; }
+  .fig .n { display: block; font-size: clamp(38px, 4.6vw, 56px); line-height: 1;
+            font-weight: 400; letter-spacing: -.02em; color: var(--pq-txt);
+            font-variant-numeric: lining-nums tabular-nums; }
+  .fig .n i { font-style: normal; font-size: .46em; margin-left: 2px;
+              opacity: .78; letter-spacing: 0; }
+  .fig .u { display: block; margin-top: 12px; font-size: 14px; color: var(--pq-txt); }
+  .fig em { display: block; margin-top: 7px; max-width: 34ch; font-style: normal;
+            font-size: 12.5px; line-height: 1.72;
+            color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  .fig em b { color: var(--pq-txt); font-weight: 600; }
+  /* 语义：青=正面结论与统计数字；陶土=负面/需注意 */
+  .fig.ok .n { color: var(--pq-cyan, #7cc0b6); }
+  .fig.warn .n { color: var(--pq-clay-ink, #dda07a); }
+  .fig.warn em b { color: var(--pq-clay-ink, #dda07a); }
 
-  /* ── 六层 ── */
-  /* 详情放在进度条下方而不是右侧：右侧列宽有限，长句子会折行把行高撑得参差。 */
-  .layer { display: grid; grid-template-columns: 132px 1fr 64px; align-items: center;
-           gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(140,170,255,.08); }
-  .layer:last-child { border-bottom: 0; }
-  .layer .nm { font-size: 12.5px; color: rgba(214,228,250,.9); }
-  .layer .nm i { display: block; font-style: normal; font-size: 10.5px;
-                 color: rgba(150,190,255,.5); }
+  /* 辅助小字：原来与核心结论等权平铺的那批数字，现在退到这一行 */
+  .minis { display: flex; flex-wrap: wrap; gap: 8px 30px; margin-top: 16px; }
+  .mini { font-size: 12px; color: var(--pq-txt-2, rgba(198,201,213,.68));
+          display: inline-flex; align-items: baseline; gap: 7px; }
+  .mini b { font-size: 15px; font-weight: 600; color: var(--pq-txt);
+            font-variant-numeric: tabular-nums; }
+  .mini span.mi { color: var(--pq-txt-2, rgba(198,201,213,.68)); font-size: 11.5px; }
+
+  /* ── 锚点目录 ────────────────────────────────────────────────────────
+     9 个 section 之间必须能跳转：演示时滚很久才找得到六层评测，
+     而它恰恰是最该先讲的内容。用原生 <a href="#…">，
+     键盘可聚焦、回车可激活，语义就是链接（不用 role=button 覆盖它）。 */
+  .toc-wrap { margin-top: 30px; }
+  .toc-k { display: block; font-size: 10.5px; letter-spacing: .2em;
+           color: var(--pq-txt-2, rgba(198,201,213,.68)); margin-bottom: 10px; }
+  /* 固定 3 列：9 项正好 3×3 填满。用 auto-fit 会排成 6+3，
+     最后一行空出的 3 格会露出容器的网格线底色，看着像缺了三项（实测截图）。 */
+  .toc { display: grid; grid-template-columns: repeat(3, 1fr);
+         gap: 1px; background: var(--pq-line); border: 1px solid var(--pq-line);
+         border-radius: 14px; overflow: hidden; }
+  .toc a { display: block; padding: 13px 15px 14px; background: #101118;
+           color: var(--pq-txt-2, rgba(198,201,213,.68)); text-decoration: none;
+           font-size: 12.5px; transition: background .18s ease, color .18s ease; }
+  .toc a b { display: inline-block; min-width: 22px; margin-right: 8px; font-weight: 400;
+             font-variant-numeric: tabular-nums; color: var(--pq-warm, #e0a469);
+             opacity: .5; transition: opacity .18s ease; }
+  /* 副标题：3 列比 6 列宽得多，只用「序号 + 名称」会显得空。
+     颜色用 --pq-txt-2 而不是更暗的 --pq-txt-3：11px 小字在深底上
+     需要 ≥4.5:1 才达 WCAG AA，--pq-txt-3（#a0a4b2 @ .5）实测只有 2.8:1。 */
+  .toc a i { display: block; margin: 4px 0 0 30px; font-style: normal;
+             font-size: 11px; letter-spacing: .01em;
+             color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  .toc a:hover { background: #171922; color: var(--pq-txt); }
+  .toc a:hover b { opacity: 1; }
+  /* 键盘聚焦反馈：焦点环由 lib/a11y.css 的全局 :focus-visible 提供（带 !important），
+     这里补一层背景变化，让"当前 tab 到了哪一项"在没有边框的情况下也看得出来。 */
+  .toc a:focus-visible { background: #1b1d27; color: #fff; }
+  /* 当前焦点用金色标出（颜色承担语义：金=此刻在看的东西） */
+  .toc a.active { background: #1b1d27; color: #fff;
+                  box-shadow: inset 0 -2px 0 var(--pq-warm, #e0a469); }
+  .toc a.active b { opacity: 1; }
+  .toc a.active i { color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+
+  /* ── 区块骨架 ──────────────────────────────────────────────────────── */
+  section { margin-top: 62px; scroll-margin-top: 24px; }
+  .sec-h { border-top: 1px solid var(--pq-line); padding-top: 18px; }
+  .eyebrow { display: block; font-size: 10.5px; letter-spacing: .2em;
+             color: var(--pq-warm, #e0a469); margin-bottom: 9px; }
+  h2 { font-size: clamp(22px, 2.4vw, 27px); font-weight: 400; margin: 0;
+       letter-spacing: -.012em; color: var(--pq-txt); }
+  .sub { margin: 9px 0 22px; max-width: 84ch; font-size: 12.5px; line-height: 1.78;
+         color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  .sub b, .sub code { color: var(--pq-txt); }
+  section.warn .eyebrow { color: var(--pq-clay-ink, #dda07a); }
+
+  /* ── 六层评测（主角）──────────────────────────────────────────────────
+     三列：层名 / 进度与说明 / 数值。数值用无衬线大字号，
+     与衬线标题形成对比——层次靠字号与字体族对比，不靠字重。 */
+  #layers { border-top: 1px solid var(--pq-line); }
+  .layer { display: grid; grid-template-columns: 152px 1fr 96px; align-items: center;
+           gap: 24px; padding: 19px 0; border-bottom: 1px solid var(--pq-line); }
+  .layer .nm { font-size: 14.5px; color: var(--pq-txt); }
+  .layer .nm b { display: inline-block; min-width: 30px; margin-right: 2px;
+                 font-weight: 400; font-size: 12.5px; letter-spacing: .1em;
+                 color: var(--pq-warm, #e0a469); }
+  .layer .nm i { display: block; margin-top: 3px; font-style: normal; font-size: 11.5px;
+                 color: var(--pq-txt-2, rgba(198,201,213,.68)); }
   .layer .mid { min-width: 0; }
-  .track { height: 8px; border-radius: 4px; background: rgba(140,170,255,.1);
+  .track { height: 10px; border-radius: 5px; background: rgba(174,178,194,.1);
            overflow: hidden; }
-  .track i { display: block; height: 100%; border-radius: 4px; transition: width .5s ease; }
-  .layer .dt { margin-top: 5px; font-size: 11px; line-height: 1.5;
-               color: rgba(160,196,246,.6); }
-  .layer .val { text-align: right; font-size: 13.5px; font-variant-numeric: tabular-nums;
-                color: rgba(214,228,250,.92); }
-  .layer .val em { font-style: normal; font-size: 11px; }
+  .track i { display: block; height: 100%; border-radius: 5px;
+             transition: width .5s ease; }
+  .layer .dt { margin-top: 8px; max-width: 78ch; font-size: 12.5px; line-height: 1.7;
+               color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  /* L2 是节点级、没有百分比：这一行不画进度条。
+     留一根空轨道会被读成"0%"或"数据缺失"（逐屏截图核对时发现的）。 */
+  .layer .dt:first-child { margin-top: 0; }
+  .layer .dt b { color: var(--pq-txt); font-weight: 600; }
+  .layer .val { text-align: right; font-size: 26px; line-height: 1.1;
+                font-variant-numeric: lining-nums tabular-nums; color: var(--pq-txt); }
+  .layer .val em { font-style: normal; font-size: 15px; color: var(--pq-txt); }
 
-  /* ── 治理对比 ── */
+  /* ── L5 / L7 / L9 的结论性 KPI ──────────────────────────────────────── */
+  #l5v, #l7r, #l9r { display: grid; gap: 12px; margin-bottom: 14px; }
+  #l5v { grid-template-columns: repeat(auto-fit, minmax(196px, 1fr)); }
+  #l7r { grid-template-columns: repeat(auto-fit, minmax(208px, 1fr)); }
+  /* L9 关系召回：漏了这条会退化成"三个大卡片竖排"、占掉半屏 */
+  #l9r { grid-template-columns: repeat(auto-fit, minmax(216px, 1fr)); }
+  .kpi { padding: 15px 17px 16px; border: 1px solid var(--pq-line);
+         border-radius: 13px; background: rgba(20,21,28,.55); min-width: 0; }
+  .kpi b { display: block; font-size: 27px; line-height: 1.12; font-weight: 400;
+           color: var(--pq-txt); font-variant-numeric: lining-nums tabular-nums; }
+  .kpi span { display: block; margin-top: 6px; font-size: 12.5px; line-height: 1.6;
+              color: var(--pq-txt); }
+  .kpi small { display: block; margin-top: 6px; font-size: 11.5px; line-height: 1.65;
+               color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  /* 这三块讲的都是"必须正视的读数"（PPV 49.7%、58.6% 是谓词错、关系召回约四成），
+     统一用低饱和陶土通道；不再用荧光橙，也不与青色的正面结论混用。 */
+  #l5v .kpi b, #l7r .kpi b, #l9r .kpi b { color: var(--pq-clay-ink, #dda07a); }
+
+  /* ── 口径对照：三套规模数字的含义解释（下沉到页尾）─────────────────
+     用**独立卡片**而不是"1px 网格面"：网格面技法要求格子填满整行，
+     而三个口径卡各占一列、下面还有一段跨行的注解，
+     空出的格子会露出容器底色，看着像一块灰板（实测截图确认）。 */
+  #calibers { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+              gap: 12px; }
+  .cal { padding: 15px 17px 16px; border: 1px solid var(--pq-line);
+         border-radius: 13px; background: rgba(20,21,28,.55); min-width: 0; }
+  .cal b { display: block; font-size: 12.5px; color: var(--pq-txt); font-weight: 600; }
+  .cal span { display: block; margin-top: 8px; font-size: 19px; color: var(--pq-cyan, #7cc0b6);
+              font-variant-numeric: lining-nums tabular-nums; }
+  .cal small { display: block; margin-top: 8px; font-size: 11.5px; line-height: 1.72;
+               color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+
+  /* ── 注释块 ──────────────────────────────────────────────────────────
+     `.calnote` 是「口径说明」，不是结论块，所以比 `.note` 更轻：
+     只用一条 32px 的中性细线做分节记号，无框、无底、无左侧竖线。
+     行宽守住 74ch —— 曾经排到一行 101 个汉字，逐屏截图核对时才发现。 */
+  .calnote { position: relative; margin: 22px 0 0; padding: 16px 0 0; max-width: 74ch;
+             border: 0; background: none; border-radius: 0;
+             grid-column: 1 / -1;
+             font-size: 13px; line-height: 1.9;
+             color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  .calnote::before { content: ""; position: absolute; left: 0; top: 0;
+                     width: 32px; height: 1px; background: rgba(174,178,194,.34); }
+  .calnote b { color: var(--pq-txt); font-weight: 600; }
+  .calnote code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                  font-size: .9em; padding: 1px 5px; border-radius: 4px;
+                  background: rgba(174,178,194,.1); color: var(--pq-txt); }
+
+  /* ── 数据表（阈值灵敏度 / 策略对比 / 档位 / 漏抽）────────────────────
+     限宽 900px：铺满 1160px 时"年份 → 漏率"要横跨整屏才读得到一行，
+     且右边缘比上面的注释文字超出一大截（逐屏截图核对时发现的）。
+     行高也收紧到 1.5：表格是数据，不需要正文那样的 1.7 行距。 */
+  table.sens { width: 100%; max-width: 900px; border-collapse: collapse; margin-top: 8px;
+               font-size: 12.5px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+  table.sens th, table.sens td { padding: 7px 12px; text-align: right;
+                                 border-bottom: 1px solid var(--pq-line); }
+  table.sens th { color: var(--pq-txt-2, rgba(198,201,213,.68)); font-weight: 400;
+                  font-size: 11.5px; letter-spacing: .02em; }
+  table.sens td { color: var(--pq-txt); }
+  table.sens tbody tr:last-child td { border-bottom: 0; }
+  table.sens th:first-child, table.sens td:first-child { text-align: left; }
+  table.sens tr:hover td { background: rgba(174,178,194,.045); }
+  /* `.strat` 是「过滤策略对比」表的标记类：它比阈值表多两列、首列更长，
+     单独给首列一点宽度，避免策略名与「← 现行 / ← 最优」标记挤在一起。
+     （cdp_verify_analytics_sections.py 用 `table.sens:not(.strat)` 区分两张表） */
+  table.sens.strat th:first-child, table.sens.strat td:first-child { width: 34%; }
+  table.sens.strat td:first-child { color: var(--pq-txt); }
+
+  /* ── 治理效果 ─────────────────────────────────────────────────────── */
   .gov { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
          gap: 12px; }
-  .gcard { background: rgba(10,16,34,.8); border: 1px solid rgba(140,170,255,.15);
-           border-radius: 11px; padding: 14px 16px; }
-  .gcard .t { font-size: 12px; color: rgba(181,203,235,.7); }
-  .gcard .n { display: flex; align-items: baseline; gap: 9px; margin-top: 8px;
-              font-variant-numeric: tabular-nums; }
-  .gcard .b { font-size: 15px; color: rgba(170,195,230,.62); text-decoration: line-through;
-              text-decoration-color: rgba(170,195,230,.3); }
-  .gcard .arrow { color: rgba(150,190,255,.4); font-size: 12px; }
-  .gcard .a { font-size: 22px; font-weight: 600; color: #eaf2ff; }
-  .gcard .d { margin-left: auto; font-size: 13px; font-weight: 560; color: #8ce0a8; }
-  .gcard .src { margin-top: 7px; font-size: 10.5px; color: rgba(150,190,255,.45); }
+  .gcard { background: rgba(20,21,28,.55); border: 1px solid var(--pq-line);
+           border-radius: 13px; padding: 16px 18px 17px; }
+  .gcard .t { font-size: 12.5px; color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  .gcard .n { display: flex; align-items: baseline; gap: 10px; margin-top: 10px;
+              font-variant-numeric: lining-nums tabular-nums; }
+  .gcard .b { font-size: 15px; color: var(--pq-txt-2, rgba(198,201,213,.68));
+              text-decoration: line-through;
+              text-decoration-color: rgba(174,178,194,.45); }
+  .gcard .arrow { color: var(--pq-txt-2, rgba(198,201,213,.68)); font-size: 12px; }
+  .gcard .a { font-size: 25px; color: var(--pq-txt); }
+  /* 提升 = 正面结论 ⇒ 青色；不变则无色差 */
+  .gcard .d { margin-left: auto; font-size: 13px; color: var(--pq-cyan, #7cc0b6); }
+  .gcard .src { margin-top: 9px; font-size: 11.5px; line-height: 1.7;
+                color: var(--pq-txt-2, rgba(198,201,213,.68)); }
 
-  /* ── 关系类型 ── */
-  .bar { display: grid; grid-template-columns: 168px 1fr 58px 62px; align-items: center;
-         gap: 12px; padding: 6px 0; }
-  .bar .nm { font-size: 12px; color: rgba(214,228,250,.88); overflow: hidden;
+  /* ── 横向条形（关系类型 / 端点命中）────────────────────────────────── */
+  .bar { display: grid; grid-template-columns: 176px 1fr 62px 66px; align-items: center;
+         gap: 14px; padding: 7px 0; }
+  .bar .nm { font-size: 12.5px; color: var(--pq-txt); overflow: hidden;
              text-overflow: ellipsis; white-space: nowrap; }
-  .bar .track { position: relative; }
-  .bar .n { text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums;
-            color: rgba(181,203,235,.7); }
-  .bar .r { text-align: right; font-size: 11.5px; font-variant-numeric: tabular-nums; }
-  .low { color: #ffb27f; } .mid { color: #7fb3ff; } .high { color: #8ce0a8; }
+  .bar .track { position: relative; height: 8px; }
+  .bar .n { text-align: right; font-size: 12px; font-variant-numeric: tabular-nums;
+            color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  .bar .r { text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  /* 质量色阶三档：青=正面结论 / 中性灰=中间 / 陶土=需注意。
+     中档刻意用 --pq-txt-2 而不是最亮的 --pq-txt：六层里唯一落在中档的是
+     L5 的 63.7%（通过率），它需要被解释而不是被强调——用最亮的白会让它
+     比 94.4% 那些青色数字更抢眼，语义正好相反。 */
+  .low { color: var(--pq-clay-ink, #dda07a); }
+  .mid { color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  .high { color: var(--pq-cyan, #7cc0b6); }
 
-  footer { margin-top: 40px; padding-top: 16px;
-           border-top: 1px solid rgba(140,170,255,.1);
-           font-size: 11.5px; line-height: 1.85; color: rgba(160,190,235,.5); }
-  footer code { color: rgba(190,214,246,.75); }
-  .err { color: #ffb27f; }
+  footer { margin-top: 70px; padding-top: 20px;
+           border-top: 1px solid var(--pq-line);
+           font-size: 11.5px; line-height: 1.95; max-width: 90ch;
+           color: var(--pq-txt-2, rgba(198,201,213,.68)); }
+  footer code { color: var(--pq-txt); }
+  .err { color: var(--pq-clay-ink, #dda07a); }
+
+  /* ── 响应式 ──────────────────────────────────────────────────────────
+     此前页面没有任何 @media：窄屏下三列读数会挤成竖排、六层的说明被压成窄条。 */
+  @media (max-width: 1240px) {
+    /* 页脚首行要让开左下角固定的「← 导航页」(left:14px, 宽约 90px) */
+    footer { padding-left: 106px; }
+  }
+  @media (max-width: 900px) {
+    body { padding: 36px 22px 88px; }
+    .figs { grid-template-columns: 1fr; }
+    .fig { padding: 20px 0; }
+    .fig + .fig { border-left: 0; border-top: 1px solid var(--pq-line); }
+    .fig:first-child { padding-top: 22px; }
+    .fig:last-child { padding-bottom: 22px; }
+    .toc { grid-template-columns: repeat(2, 1fr); }
+    .layer { grid-template-columns: 108px 1fr 82px; gap: 16px; padding: 16px 0; }
+    .layer .val { font-size: 22px; }
+    .bar { grid-template-columns: 124px 1fr 52px 56px; gap: 10px; }
+  }
+  @media (max-width: 620px) {
+    .toc { grid-template-columns: 1fr; }
+    .layer { grid-template-columns: 1fr auto; gap: 6px 14px; }
+    .layer .nm { grid-column: 1 / 2; }
+    .layer .val { grid-column: 2 / 3; grid-row: 1 / 2; }
+    .layer .mid { grid-column: 1 / -1; margin-top: 4px; }
+    .bar { grid-template-columns: 1fr 52px 56px; }
+    .bar .track { display: none; }
+    .gov { grid-template-columns: 1fr; }
+    table.sens { font-size: 11.5px; }
+    table.sens th, table.sens td { padding: 6px 6px; }
+  }
 
 /* ── 标题字体（由 tools/apply_fonts.py 注入）────────────────────────────
    fonts.css 是 tools/build_fonts.py 生成的子集字体，全部本地、零外部请求。
@@ -132,8 +318,10 @@ h1, h2, h3,
 .kick, .eyebrow, .note b, .fig .n, .kpi b, .card h2, .entry h3 {
   font-family: "Smiley Sans","Noto Serif SC","Playfair Display",Georgia,"Songti SC","SimSun",serif;
 }
-/* 标题在衬线下不需要那么粗——衬线本身已经提供笔画对比 */
-h1, h2 { font-weight: 700; letter-spacing: -.02em; }
+/* 标题在衬线下不需要那么粗——衬线本身已经提供笔画对比。
+   也不用 560 这类非常规字重：子集里多个字重共享同一份字形，
+   层次应该由**字号与衬线/无衬线的对比**承担。 */
+h1, h2 { font-weight: 400; letter-spacing: -.02em; }
 h3 { font-weight: 600; }
 /* 数字用 Playfair 的等高数字，避免跳动 */
 .fig .n, .kpi b, [data-count] { font-variant-numeric: lining-nums tabular-nums; }
@@ -147,14 +335,21 @@ h3 { font-weight: 600; }
      · 小标题（<b>为什么…</b> 之类）悬挂到左侧，形成一列。
    这样它与正文同源，但仍然可辨识为"这是一段需要单独强调的话"。 */
 .note{
-  margin: 44px 0 0; padding: 0; max-width: 74ch;
+  position: relative;
+  margin: 54px 0 0; padding: 26px 0 0; max-width: 74ch;
   border: 0; background: none; border-radius: 0;
-  color: var(--ink-2, rgba(203,218,241,.78)); font-size: 15px; line-height: 1.85;
+  color: var(--pq-txt-2, rgba(198,201,213,.78)); font-size: 15px; line-height: 1.85;
+}
+/* 分节记号：一条 44px 的暖金短横线。
+   它替代的是被用户点名否掉的「黑底框 + 左侧竖线」。之所以还需要一个记号：
+   把框线全部删干净之后，实测这一块在深色星云背景上完全融进正文，读不出边界。 */
+.note::before{
+  content: ""; position: absolute; left: 0; top: 0;
+  width: 56px; height: 2px; background: var(--pq-warm, var(--warm, #e0a469));
+  opacity: .9;
 }
 .note > p:first-child{
-  font-family: "Smiley Sans","Noto Serif SC",serif;
-  font-size: 19px; line-height: 1.6; color: #fff;
-  margin: 0 0 16px; letter-spacing: .004em;
+  margin: 0 0 14px;
 }
 .note > p + p{
   margin: 0; padding-top: 14px; position: relative;
@@ -162,27 +357,49 @@ h3 { font-weight: 600; }
 .note > p + p::before{
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
   background: linear-gradient(90deg,
-    rgba(var(--warmRGB,150,180,255),.42), rgba(140,170,255,.06) 62%, transparent);
+    rgba(224,164,105,.34), rgba(174,178,194,.07) 62%, transparent);
 }
 .note b{
+  display: block;
   font-family: "Smiley Sans","Noto Serif SC",serif;
-  font-weight: 400; color: var(--warm, #ffcfa8);
-  font-size: 15.5px; letter-spacing: .01em;
+  font-weight: 400; color: var(--pq-warm, var(--warm, #ffcfa8));
+  font-size: 17px; letter-spacing: .01em; margin: 0 0 5px;
 }
 .note strong{ color: #fff; font-weight: 600; }
 .note code{
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: .9em; padding: 1px 5px; border-radius: 3px;
-  background: rgba(140,170,255,.12); color: #cfe0ff;
+  background: rgba(174,178,194,.12); color: var(--pq-txt);
 }
 
-/* 2026-09 加：打破"全是蓝紫"。给强调、次强调、警戒各一个明确色相，
-   并规定它们各自只承担一种语义，不再混用。 */
+/* ── 配色体系（2026-09 统一）──────────────────────────────────────────────
+   用户反馈「全是蓝紫的配色」。上一版底层仍是同一族冷蓝在七档 alpha 上打转，
+   只在上面用几个 !important 盖暖色，于是页面同时存在两套色源。
+
+   这一版全页只留**两个有彩色**（外加一个负面通道）：
+     金   #e0a469 —— 主行动、命中、当前焦点（目录当前项、层号）
+     青   #7cc0b6 —— 正面结论、统计数字（规模、高分、治理提升）
+     陶土 #c07a4e / 文字档 #dda07a —— 负面与需注意（PPV、误留、漏抽、低通过率）
+     其余全部是中性灰阶（--pq-cool 现在是灰，不是蓝）。
+   低饱和陶土取代了原来的荧光橙 #ffb27f：同一个语义通道，但不再刺眼。 */
 :root{
-  --hue-cool: #7fb3ff;      /* 主色：冷蓝，结构性元素（分隔线、次级标签） */
-  --hue-cyan: #5fe0d0;      /* 次色：青，正面结论（召回、覆盖、通过） */
-  --hue-warm: #ffb27f;      /* 暖色：负面/需注意（误差、漏抽、风险） */
-  --hue-gold: #ffd9a0;      /* 金：强调数字、结论性指标 */
+  --pq-ink:#0b0c11;
+  --pq-surface:#14151c;
+  --pq-line:rgba(174,178,194,.13);
+  --pq-txt:#e4e6ec;
+  --pq-txt-2:rgba(198,201,213,.68);
+  --pq-txt-3:rgba(160,164,178,.5);
+  --pq-cool:#9aa0ae;        /* 结构性元素：中性灰，不再是蓝 */
+  --pq-warm:#e0a469;        /* 主行动与命中 */
+  --pq-warm-deep:#c9873f;
+  --pq-cyan:#7cc0b6;        /* 正面结论 */
+  /* 负面/需注意通道：低饱和陶土。`-ink` 是文字档，在 #0b0c11 上约 8.4:1 */
+  --pq-clay:#c07a4e;
+  --pq-clay-ink:#dda07a;
+  --hue-cool: var(--pq-cool);
+  --hue-cyan: var(--pq-cyan);
+  --hue-warm: var(--pq-warm);
+  --hue-gold: #edc79a;
 }
 </style>
 <link rel="stylesheet" href="./lib/a11y.css">
@@ -190,25 +407,82 @@ h3 { font-weight: 600; }
 </head>
 <body>
 <div class="wrap">
+
   <header>
-    <small>kg cosmos · graph analytics</small>
-    <h1>图谱分析面板</h1>
+    <div class="hero-top">
+      <div>
+        <small>kg cosmos · graph analytics</small>
+        <h1>图谱分析面板</h1>
+      </div>
+      <span class="badge">离线本地渲染 · 无外部请求</span>
+    </div>
     <p class="lede" id="lede"></p>
   </header>
 
-  <div class="kpis" id="kpis"></div>
+  <!-- 首屏：三个核心读数（其余规模数字降为辅助小字）。
+       原来 6 个 KPI 等权平铺，读者不知道先看哪个。 -->
+  <section id="s-top" aria-label="核心读数">
+    <div id="kpis"></div>
+  </section>
 
-  <!-- 三套规模数字并存，必须当场解释，否则会被读成前后矛盾 -->
-  <section>
-    <h2>口径对照</h2>
-    <div class="sub">本项目有三套并存的规模数字，含义不同、不可互相替代</div>
-    <div id="calibers"></div>
+  <!-- 锚点目录：9 个区块之间可跳转。六层评测原来埋在 top≈3171px，
+       演示时滚很久才找得到，而它是全页最重要的内容。 -->
+  <div class="toc-wrap">
+    <span class="toc-k">CONTENTS</span>
+    <nav class="toc" aria-label="本页目录">
+      <a href="#s-six"><b>01</b>六层评测<i>L1–L6 · 自洽型判定</i></a>
+      <a href="#s-l9"><b>02</b>L9 端点召回<i>六层之外的对照</i></a>
+      <a href="#l9rSec" class="toc-l9r"><b>03</b>L9 关系召回<i>区间读数：抽全了没有</i></a>
+      <a href="#l5vSec" class="toc-l5v"><b>04</b>L5 域内效度<i>200 条独立盲判</i></a>
+      <a href="#l7rSec" class="toc-l7r"><b>05</b>L7 角色违规归因<i>58 条独立判读</i></a>
+      <a href="#s-gov"><b>06</b>治理效果<i>T3 / T4 前后同口径</i></a>
+      <a href="#s-types"><b>07</b>关系类型分布<i>边数 ≥ 50 的类型</i></a>
+      <a href="#s-hits"><b>08</b>端点证据命中<i>两端 / 一端 / 都未命中</i></a>
+      <a href="#s-cal"><b>09</b>口径对照<i>三套并存的规模数字</i></a>
+    </nav>
+  </div>
+
+  <!-- ── 六层评测：全页主角，前置到第二屏 ── -->
+  <section id="s-six">
+    <div class="sec-h">
+      <span class="eyebrow">01 · L1–L6</span>
+      <h2>六层评测</h2>
+    </div>
+    <div class="sub" id="sixSub"></div>
+    <div id="layers"></div>
+  </section>
+
+  <!-- 唯一非自洽型指标：前六层都只判"图内部是否一致"，
+       回答不了"原文里的东西抽到没有"。L9 从原文段落出发回答它。 -->
+  <section id="s-l9">
+    <div class="sec-h">
+      <span class="eyebrow">02 · L9 · ENDPOINT</span>
+      <h2>L9 端点召回（六层之外）</h2>
+    </div>
+    <div class="sub" id="l9Sub"></div>
+    <div id="l9"></div>
+  </section>
+
+  <!-- L9 关系召回：端点召回 86.2% 看着不错，但原文明确断言的关系只有约四成进了图。
+       这是比端点召回更根本的读数。 -->
+  <section id="l9rSec" class="warn" hidden>
+    <div class="sec-h">
+      <span class="eyebrow">03 · L9 · RELATION</span>
+      <h2>L9 关系召回：抽全了没有</h2>
+    </div>
+    <div class="sub" id="l9rSub"></div>
+    <div id="l9r"></div>
+    <div id="l9rTiers"></div>
+    <div id="l9rMiss"></div>
   </section>
 
   <!-- L5 的域内效度：让"63.7% 不是质量"这个最重要的发现在面板上可见。
        不放这里，演示时屏幕上就只有一个会被误读的 63.7%。 -->
-  <section id="l5vSec" hidden>
-    <h2>L5 域内效度：63.7% 到底是什么</h2>
+  <section id="l5vSec" class="warn" hidden>
+    <div class="sec-h">
+      <span class="eyebrow">04 · L5 · BLIND AUDIT</span>
+      <h2>L5 域内效度：63.7% 到底是什么</h2>
+    </div>
     <div class="sub" id="l5vSub"></div>
     <div id="l5v"></div>
     <div id="l5vSens"></div>
@@ -216,52 +490,51 @@ h3 { font-weight: 600; }
 
   <!-- L7 的 role_violation 到底在说什么：58 条独立判读的归因。
        决定了论文里能不能把它写成"端点类型违规率"（实测 58.6% 是谓词问题）。 -->
-  <section id="l7rSec" hidden>
-    <h2>L7 角色违规归因：它到底在说什么</h2>
+  <section id="l7rSec" class="warn" hidden>
+    <div class="sec-h">
+      <span class="eyebrow">05 · L7 · ROLE AUDIT</span>
+      <h2>L7 角色违规归因：它到底在说什么</h2>
+    </div>
     <div class="sub" id="l7rSub"></div>
     <div id="l7r"></div>
   </section>
 
-  <!-- L9 关系召回：端点召回 86.2% 看着不错，但原文明确断言的关系只有约四成进了图。
-       这是比端点召回更根本的读数。 -->
-  <section id="l9rSec" hidden>
-    <h2>L9 关系召回：抽全了没有</h2>
-    <div class="sub" id="l9rSub"></div>
-    <div id="l9r"></div>
-    <div id="l9rTiers"></div>
-    <div id="l9rMiss"></div>
-  </section>
-
-  <section>
-    <h2>六层评测</h2>
-    <div class="sub" id="sixSub"></div>
-    <div id="layers"></div>
-  </section>
-
-  <!-- 唯一非自洽型指标：前六层都只判"图内部是否一致"，
-       回答不了"原文里的东西抽到没有"。L9 从原文段落出发回答它。 -->
-  <section>
-    <h2>L9 端点召回（六层之外）</h2>
-    <div class="sub" id="l9Sub"></div>
-    <div id="l9"></div>
-  </section>
-
-  <section>
-    <h2>治理效果（同口径前后对比）</h2>
+  <section id="s-gov">
+    <div class="sec-h">
+      <span class="eyebrow">06 · T3 / T4</span>
+      <h2>治理效果（同口径前后对比）</h2>
+    </div>
     <div class="sub" id="govSub"></div>
     <div class="gov" id="gov"></div>
   </section>
 
-  <section>
-    <h2>关系类型分布</h2>
+  <section id="s-types">
+    <div class="sec-h">
+      <span class="eyebrow">07 · BY RELATION</span>
+      <h2>关系类型分布</h2>
+    </div>
     <div class="sub" id="typeSub"></div>
     <div id="types"></div>
   </section>
 
-  <section>
-    <h2>端点证据命中</h2>
+  <section id="s-hits">
+    <div class="sec-h">
+      <span class="eyebrow">08 · EVIDENCE HIT</span>
+      <h2>端点证据命中</h2>
+    </div>
     <div class="sub">判别器判「三元组能否被原文支持」时，两个端点在证据句里的命中情况</div>
     <div id="hits"></div>
+  </section>
+
+  <!-- 三套规模数字并存，必须当场解释，否则会被读成前后矛盾。
+       它是**方法说明**而不是结论，所以从首屏下沉到这里。 -->
+  <section id="s-cal">
+    <div class="sec-h">
+      <span class="eyebrow">09 · CALIBERS</span>
+      <h2>口径对照</h2>
+    </div>
+    <div class="sub">本项目有三套并存的规模数字，含义不同、不可互相替代</div>
+    <div id="calibers"></div>
   </section>
 
   <footer id="foot"></footer>
@@ -289,13 +562,18 @@ const md = (s) => esc(s)
 
 const cls = (v) => v == null ? 'mid' : (v >= 90 ? 'high' : v >= 60 ? 'mid' : 'low');
 
-// 质量色阶：高=绿、中=蓝、低=橙。同一套色贯穿六层与关系类型，便于横向扫读。
+/* 质量色阶：高=青（正面结论）、中=中性灰、低=陶土（需注意）。
+   三者语义唯一，同一套色贯穿六层、关系类型与端点命中，便于横向扫读。
+   刻意**不再**使用冷蓝与荧光橙：全站配色只剩金 / 青 / 陶土 / 灰。 */
 function hue(v) {
-  if (v == null) return 'rgba(140,170,255,.55)';
-  if (v >= 90) return 'linear-gradient(90deg,#4fbf82,#8ce0a8)';
-  if (v >= 60) return 'linear-gradient(90deg,#4a7fd8,#7fb3ff)';
-  return 'linear-gradient(90deg,#d97a45,#ffb27f)';
+  if (v == null) return 'var(--pq-cool, #9aa0ae)';
+  if (v >= 90) return 'linear-gradient(90deg,#4d8f88,#7cc0b6)';
+  if (v >= 60) return 'linear-gradient(90deg,#5c6270,#9aa0ae)';
+  return 'linear-gradient(90deg,#8a5334,#c07a4e)';
 }
+
+/* 数量的百分比格式：所有区块共用一处，避免同一个数在不同区块显示成不同精度 */
+const pcOf = (x, d) => x == null ? '—' : (x * 100).toFixed(d == null ? 1 : d) + '%';
 
 function boot(D) {
   const m = D.meta, s = D.scale;
@@ -308,17 +586,52 @@ function boot(D) {
     + `生成脚本 <code>${esc(m.generated_by)}</code>。`
     + ` L3 的治理效果需按图结构查端点，本面板不重算，沿用报告数字并注明来源。`;
 
-  document.getElementById('kpis').innerHTML = [
-    [s.nodes, '节点', 'web/kg-data/nebula.json'],
-    [s.edges, '边', '概览层导出'],
-    // 社区数有两个口径：Louvain 检出 60 个，前端只导出最大的 18 个。
-    // 只显示一个数会与导航页的 18 冲突，所以两个都写。
-    [s.communities, 'Louvain 社区', `导出前 ${D.community_calibers.exported_to_frontend} 个 · 另 ${s.dust} 碎片`],
-    [s.modularity, '模块度', '社区结构显著'],
-    [D.supported_subgraph.edges, 'L5 支持子图 · 边', `${D.supported_subgraph.nodes} 节点`],
-    [D.supported_subgraph.dropped, '被 L5 筛掉', `占 ${(D.supported_subgraph.dropped / (D.supported_subgraph.edges + D.supported_subgraph.dropped) * 100).toFixed(1)}%`],
-  ].map(([v, l, n]) =>
-    `<div class="kpi"><b>${esc(v)}</b><span>${esc(l)}</span><small>${esc(n)}</small></div>`).join('');
+  // ── 首屏读数：三个核心（大）+ 其余规模数字（辅助小字）──
+  // 三个核心读数分别回答"图有多大""判别器判通过的东西有多少真的成立"
+  // "原文里的关系抽到没有"。其余规模数字不再与它们等权平铺。
+  const v5 = D.l5_validity || {};
+  const r9 = D.l9_relation_recall || {};
+  const rg = r9.recall_range || [];
+  const rangeTxt = rg.length === 2
+    ? `${(rg[0] * 100).toFixed(1)}–${(rg[1] * 100).toFixed(1)}%`
+    : pcOf(r9.recall_pair_all);
+  const cc = D.community_calibers || {};
+  const sub = D.supported_subgraph || {};
+  const droppedPct = sub.dropped != null && (sub.edges + sub.dropped) > 0
+    ? (sub.dropped / (sub.edges + sub.dropped) * 100).toFixed(1) : null;
+
+  const fig = (k, n, u, em, tone) =>
+    `<div class="fig ${tone || ''}">`
+    + `<span class="k">${esc(k)}</span>`
+    + `<b class="n">${n}</b>`
+    + `<span class="u">${esc(u)}</span>`
+    + `<em>${em}</em></div>`;
+
+  const mini = (n, l, note) =>
+    `<span class="mini"><b>${esc(n)}</b>${esc(l)}`
+    + (note ? `<span class="mi">${esc(note)}</span>` : '') + `</span>`;
+
+  document.getElementById('kpis').innerHTML =
+    `<div class="figs">`
+    + fig('SCALE · NODES / EDGES',
+          esc(s.nodes), '节点',
+          `概览层 ${esc(s.edges)} 条边 · ${esc(s.communities)} 个 Louvain 社区`
+          + `（导出 ${esc(cc.exported_to_frontend)} 个到前端）`, 'ok')
+    + fig('L5 · BLIND AUDIT',
+          pcOf(v5.true_support_rate).replace('%', '<i>%</i>'), '真实支持率',
+          `判通过的边里约一半不被原文支持。<b>63.7% 是通过率，不是质量。</b>`, 'warn')
+    + fig('L9 · RELATION RECALL',
+          esc(rangeTxt).replace('%', '<i>%</i>'), '关系召回区间（严格 → 别名最松）',
+          `端点召回 ${esc(pcOf(r9.endpoint_recall))}，但原文明确断言的关系`
+          + `<b>只有约四成进了图</b>。`, 'warn')
+    + `</div>`
+    + `<div class="minis">`
+    + mini(s.communities, 'Louvain 社区',
+           `导出 ${cc.exported_to_frontend} 个 · 另 ${s.dust} 碎片`)
+    + mini(s.modularity, '模块度', '社区结构显著')
+    + mini(sub.edges, 'L5 支持子图 · 边', `${sub.nodes} 节点`)
+    + mini(sub.dropped, '被 L5 筛掉', droppedPct ? `占 ${droppedPct}%` : '')
+    + `</div>`;
 
   // ── 口径对照：三套数字并存必须当场解释 ──
   const cal = m.calibers || {};
@@ -348,7 +661,7 @@ function boot(D) {
   if (v && v.ppv != null) {
     document.getElementById('l5vSec').hidden = false;
     const ag = v.annotator_agreement || {};
-    const pc = (x, d) => x == null ? '—' : (x * 100).toFixed(d == null ? 1 : d) + '%';
+    const pc = pcOf;
     const ci = v.ci || {};
     const ciTxt = k => {
       const c = ci[k];
@@ -386,8 +699,8 @@ function boot(D) {
           const isBase = /^A /.test(s.name);
           const isBest = /^H /.test(s.name);
           const tag = isBase ? ' ← 现行' : (isBest ? ' ← 最优' : '');
-          return `<tr${isBase ? ' style="background:rgba(255,178,127,.06)"' : ''}` +
-            `${isBest ? ' style="background:rgba(179,255,127,.06)"' : ''}>` +
+          return `<tr${isBase ? ' style="background:rgba(224,164,105,.06)"' : ''}` +
+            `${isBest ? ' style="background:rgba(124,192,182,.07)"' : ''}>` +
             `<td>${esc(s.name + tag)}</td><td>${(s.keep * 100).toFixed(1)}%</td>` +
             `<td>${(s.ppv * 100).toFixed(1)}%</td>` +
             `<td>${(s.recall * 100).toFixed(1)}%</td><td>${s.f1.toFixed(3)}</td></tr>`;
@@ -438,23 +751,18 @@ function boot(D) {
   }
 
   // ── L9 关系召回：比端点召回更根本的读数 ──
-  const r9 = D.l9_relation_recall;
   if (r9 && r9.recall_pair_all != null) {
     document.getElementById('l9rSec').hidden = false;
     const pcr = x => x == null ? '—' : (x * 100).toFixed(1) + '%';
     // 召回<b>报区间</b>（严格 vs 别名最松），不再只报单点——
     // 严格匹配会把 `LLMs` vs `Large Language Model` 这类写法差异判成漏。
-    const rg = r9.recall_range || [];
-    const rngTxt = rg.length === 2
-      ? `${(rg[0] * 100).toFixed(1)}–${(rg[1] * 100).toFixed(1)}%`
-      : pcr(r9.recall_pair_all);
     document.getElementById('l9rSub').innerHTML =
       `从固定种子的 ${r9.n_segment} 个原文段落出发，由独立判定者列出<b>明确断言</b>的关系，`
       + `再与图比对。金标 ${r9.n_gold_raw} 条，剔除端点非命名实体的 ${r9.n_dropped_non_entity} 条后`
       + `参评 <b>${r9.n_gold_entity_only}</b> 条。`;
     document.getElementById('l9r').innerHTML = [
       [pcr(r9.endpoint_recall), '端点召回（实体名抽到没有）', '看起来不错'],
-      [rngTxt, '关系召回（区间）', '严格 → 别名最松，四个档位见下'],
+      [rangeTxt, '关系召回（区间）', '严格 → 别名最松，四个档位见下'],
       [pcr(r9.recall_triple_all), '三元组严格命中', '端点与谓词都对'],
     ].map(([a, b, c]) =>
       `<div class="kpi"><b>${esc(a)}</b><span>${esc(b)}</span><small>${esc(c)}</small></div>`
@@ -526,7 +834,7 @@ function boot(D) {
         + yrs.map(y => {
             const v = ma.by_year[y], miss = v.gold - v.hit;
             const hot = Number(y) >= 2024;
-            return `<tr${hot ? ' style="background:rgba(255,140,140,.07)"' : ''}>`
+            return `<tr${hot ? ' style="background:rgba(192,122,78,.10)"' : ''}>`
               + `<td>${y}${hot ? ' ⚠' : ''}</td><td>${v.gold}</td><td>${v.hit}</td>`
               + `<td>${miss}</td><td>${(miss / v.gold * 100).toFixed(0)}%</td></tr>`;
           }).join('')
@@ -555,10 +863,10 @@ function boot(D) {
 
   document.getElementById('layers').innerHTML = D.six_layer.map(L => `
     <div class="layer">
-      <div class="nm">${esc(L.id)} ${esc(L.name)}<i>${esc(L.basis)}</i></div>
+      <div class="nm"><b>${esc(L.id)}</b>${esc(L.name)}<i>${esc(L.basis)}</i></div>
       <div class="mid">
-        <div class="track">${L.value == null ? ''
-          : `<i style="width:${L.value}%;background:${hue(L.value)}"></i>`}</div>
+        ${L.value == null ? ''
+          : `<div class="track"><i style="width:${L.value}%;background:${hue(L.value)}"></i></div>`}
         <div class="dt">${md(L.detail)}</div>
       </div>
       <div class="val ${L.value == null ? '' : cls(L.value)}">
@@ -574,7 +882,7 @@ function boot(D) {
       + `${l9.spans} 段、${l9.gold_entities} 个金标实体`;
     document.getElementById('l9').innerHTML = `
       <div class="layer">
-        <div class="nm">L9 端点召回<i>原文段落里出现、且应当抽出的实体，有多少进了图</i></div>
+        <div class="nm"><b>L9</b>端点召回<i>原文段落里出现、且应当抽出的实体，有多少进了图</i></div>
         <div class="mid">
           <div class="track"><i style="width:${(l9.endpoint_recall * 100).toFixed(1)}%;background:${hue(l9.endpoint_recall * 100)}"></i></div>
           <div class="dt">命中 ${l9.matched} / ${l9.gold_entities}
@@ -620,7 +928,8 @@ function boot(D) {
 
   const h = D.hit_distribution, tot = Object.values(h).reduce((a, b) => a + b, 0);
   const label = { both: '两端都命中', one: '仅一端命中', none: '两端都未命中' };
-  const color = { both: '#8ce0a8', one: '#7fb3ff', none: '#ffb27f' };
+  // 命中越好越"正面"：青 → 灰 → 陶土，与全页语义一致
+  const color = { both: '#7cc0b6', one: '#9aa0ae', none: '#c07a4e' };
   document.getElementById('hits').innerHTML = ['both', 'one', 'none']
     .filter(k => h[k] != null)
     .map(k => {
@@ -632,6 +941,27 @@ function boot(D) {
         <div class="r" style="color:${color[k]}">${p}%</div>
       </div>`;
     }).join('');
+
+  // ── 目录与区块同步 ──
+  // 两个用途：① 数据缺失时该区块整块 hidden，目录项也要收起来，
+  // 否则点进去是一片空白；② 滚动时把"此刻在读的区块"标成金色。
+  document.querySelectorAll('.toc a').forEach(a => {
+    const sec = document.querySelector(a.getAttribute('href'));
+    a.hidden = !sec || sec.hidden;
+  });
+  const secs = [...document.querySelectorAll('section[id]:not(#s-top)')];
+  const links = new Map([...document.querySelectorAll('.toc a')]
+    .map(a => [a.getAttribute('href').slice(1), a]));
+  if ('IntersectionObserver' in window) {
+    const seen = new Set();
+    const io = new IntersectionObserver(list => {
+      list.forEach(e => { e.isIntersecting ? seen.add(e.target.id) : seen.delete(e.target.id); });
+      let cur = null;
+      for (const s of secs) { if (seen.has(s.id)) { cur = s.id; break; } }
+      links.forEach((a, id) => a.classList.toggle('active', id === cur));
+    }, { rootMargin: '-16% 0px -58% 0px', threshold: 0 });
+    secs.forEach(s => { if (!s.hidden) io.observe(s); });
+  }
 
   window.__ready = true;
 }

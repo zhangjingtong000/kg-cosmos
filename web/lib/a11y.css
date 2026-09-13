@@ -14,7 +14,7 @@
 /* ── 1. 键盘焦点必须可见 ──
    默认样式在有背景色的按钮/链接上几乎看不见，而全站原本一个都没写。 */
 :focus-visible {
-  outline: 2px solid #7ecbff !important;
+  outline: 2px solid #e0a469 !important;
   outline-offset: 2px !important;
   border-radius: 3px;
 }
@@ -37,7 +37,7 @@
 #a11y-skip {
   position: fixed; left: -9999px; top: 8px; z-index: 2147483647;
   padding: 9px 15px; border-radius: 8px; font-size: 13px;
-  background: #0f1729; color: #dfe8ff; border: 1px solid #7ecbff;
+  background: #0f1729; color: #dfe8ff; border: 1px solid #e0a469;
   text-decoration: none;
 }
 #a11y-skip:focus { left: 12px; }
@@ -54,13 +54,13 @@
   font: 500 12px/1 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   color: rgba(214,230,252,.82); text-decoration: none;
   background: rgba(10,16,34,.82);
-  border: 1px solid rgba(140,170,255,.22);
+  border: 1px solid rgba(178,180,186,.22);
   backdrop-filter: blur(6px);
   transition: color .18s ease, border-color .18s ease, background .18s ease;
 }
 #a11y-home:hover {
   color: #fff; background: rgba(18,28,54,.92);
-  border-color: rgba(126,203,255,.55);
+  border-color: rgba(224,164,105,.55);
 }
 /* 星云页：左栏是满高列表、底部中央有操作提示，改挂右上角 */
 body.nebula #a11y-home {
@@ -72,7 +72,7 @@ body.nebula.inside #a11y-home { top: 54px; }
 /* ── 5. 键盘可达的元素要有可见的手型与可聚焦性 ── */
 [role="button"], [tabindex="0"] { cursor: pointer; }
 [role="button"]:focus-visible, [tabindex="0"]:focus-visible {
-  outline: 2px solid #7ecbff !important; outline-offset: 2px !important;
+  outline: 2px solid #e0a469 !important; outline-offset: 2px !important;
 }
 
 /* ── 6. 屏幕阅读器专用文本 ── */

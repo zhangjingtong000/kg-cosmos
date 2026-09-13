@@ -6,162 +6,290 @@
 <title>KG Cosmos · 方法能力与局限</title>
 <style>
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   html, body { margin: 0; min-height: 100%; }
   body {
-    background: radial-gradient(ellipse 120% 70% at 50% 0%, #0d1730 0%, #070c1a 45%, #04070f 100%);
-    color: #dfe8ff; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-    padding: 34px 30px 60px; line-height: 1.6;
+    /* 旧版是 #0d1730 → #04070f 的冷蓝径向渐变，"很蓝紫"的一半来自这里。
+       现在底色只从中性墨黑里分档，蓝紫色相全部移除。 */
+    background: radial-gradient(ellipse 120% 62% at 50% 0%, #15161d 0%, #0d0e13 46%, #08090c 100%);
+    color: var(--pq-txt, #e4e6ec);
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    padding: 40px 30px 56px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
   }
-  header { max-width: 1180px; margin: 0 auto 22px; }
-  header small { display: block; color: rgba(181,203,235,.55); font-size: 11px;
-                 letter-spacing: .16em; text-transform: uppercase; }
-  header h1 { margin: 8px 0 0; font-size: 25px; font-weight: 560; letter-spacing: .02em; }
-  .lede { margin: 12px 0 0; max-width: 900px; font-size: 12.5px; line-height: 1.85;
-          color: rgba(196,214,240,.72); padding: 12px 14px; border-radius: 10px;
-          background: rgba(120,160,255,.06); border-left: 2px solid rgba(120,160,255,.35); }
-  .lede b { color: #cfe0ff; font-weight: 560; }
-  .kpis { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 16px; }
-  .kpi { }
-  .kpi b { display: block; font-size: 20px; font-weight: 600; color: #eaf2ff;
-           font-variant-numeric: tabular-nums; }
-  .kpi span { font-size: 11px; color: rgba(181,203,235,.6); }
 
-  .bar { position: sticky; top: 0; z-index: 5; max-width: 1180px; margin: 0 auto 18px;
-         display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
-         padding: 12px 0; background: linear-gradient(#04070f 62%, rgba(4,7,15,0));
-         backdrop-filter: blur(6px); }
+  /* ── 配色（与其他页统一的单一色源）──────────────────────────────────────
+     金 #e0a469 = 主行动 / 命中 / 需要留意的局限
+     青 #7cc0b6 = 正面结论 / 统计数字
+     其余全部是中性灰阶。--pq-cool 现在是灰 (#9aa0ae)，不是蓝。 */
+  :root{
+    --pq-ink:#0b0c11;
+    --pq-surface:#14151c;
+    --pq-line:rgba(174,178,194,.13);
+    --pq-txt:#e4e6ec;
+    --pq-txt-2:rgba(198,201,213,.68);
+    --pq-txt-3:rgba(160,164,178,.5);
+    --pq-cool:#9aa0ae;
+    --pq-warm:#e0a469;
+    --pq-warm-deep:#c9873f;
+    --pq-cyan:#7cc0b6;
+  }
+
+  /* ── 页头：不再是一个横条，而是一个有左右落差的刊头 ─────────────────── */
+  .wrap { max-width: 1240px; margin: 0 auto; }
+  header { padding-bottom: 26px; }
+  .eyebrow { display: block; color: var(--pq-txt-3); font-size: 10.5px;
+             letter-spacing: .26em; text-transform: uppercase; }
+  h1 { margin: 14px 0 0; font-size: clamp(38px, 5.2vw, 62px); line-height: 1.02;
+       letter-spacing: -.035em; color: var(--pq-txt); }
+  h1 .tail { display: block; color: var(--pq-txt-2); font-size: .58em;
+             letter-spacing: -.01em; margin-top: 8px; }
+  /* 导语：左侧一条暖金短竖线做记号（.note 用的短横线是另一处记号，
+     两者形态不同，不会读成同一套装饰）。 */
+  .lede { position: relative; margin: 26px 0 0; padding-left: 18px; max-width: 74ch;
+          font-size: 14px; line-height: 1.95; color: var(--pq-txt-2); }
+  .lede::before { content: ""; position: absolute; left: 0; top: .45em; bottom: .45em;
+                  width: 2px; background: linear-gradient(180deg,
+                    var(--pq-warm), rgba(224,164,105,.08)); }
+  .lede b { color: var(--pq-txt); font-weight: 600; }
+
+  /* ── KPI：一个主数字 + 三个从属数字，落差本身就是层次 ─────────────────── */
+  .kpis { display: flex; align-items: flex-end; flex-wrap: wrap;
+          gap: 22px 40px; margin-top: 32px; }
+  .kpi b { display: block; font-size: 27px; line-height: 1; color: var(--pq-txt);
+           font-variant-numeric: lining-nums tabular-nums; }
+  .kpi span { display: block; margin-top: 7px; font-size: 10.5px;
+              letter-spacing: .14em; text-transform: uppercase; color: var(--pq-txt-3); }
+  .kpi:first-child b { font-size: 54px; color: var(--pq-cyan); }
+  .kpi:first-child span { color: var(--pq-txt-2); }
+  .kpi.wide b { font-size: 15px; line-height: 1.5; font-variant-numeric: normal;
+                color: var(--pq-txt-2); font-weight: 400; }
+  .kpi.wide span { margin-top: 4px; }
+
+  /* ── 目录：每一行是一个主题编号 + 标题 + 条数 ─────────────────────────── */
+  .toc { display: grid; grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+         gap: 0 26px; margin: 34px 0 0; padding: 18px 0 6px;
+         border-top: 1px solid var(--pq-line); }
+  .toc a { display: flex; align-items: baseline; gap: 10px; padding: 6px 0;
+           color: var(--pq-txt-2); text-decoration: none; font-size: 13px;
+           border-bottom: 1px solid rgba(174,178,194,.07); }
+  .toc a:last-child, .toc a:nth-last-child(2) { border-bottom-color: transparent; }
+  .toc a:hover .t { color: var(--pq-txt); }
+  .toc .no { flex: 0 0 auto; color: var(--pq-txt-3); font-size: 11px;
+             letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+  .toc .t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; }
+  .toc .n { flex: 0 0 auto; color: var(--pq-txt-3); font-size: 11px;
+            font-variant-numeric: tabular-nums; }
+  .toc a:hover .no, .toc a:hover .n { color: var(--pq-warm); }
+
+  /* ── 检索条：与页面同底色，滚动时压住下面的内容 ────────────────────────── */
+  .bar { position: sticky; top: 0; z-index: 6; display: flex; flex-wrap: wrap;
+         gap: 9px; align-items: center; margin: 22px 0 8px; padding: 14px 0 13px;
+         background: linear-gradient(rgba(8,9,12,.97) 66%, rgba(8,9,12,0));
+         backdrop-filter: blur(7px); }
   .bar input[type=search], .bar select, .bar button {
-    font: inherit; font-size: 12.5px; color: #dbe7ff;
-    background: rgba(12,19,38,.92); border: 1px solid rgba(140,170,255,.22);
-    border-radius: 8px; padding: 8px 10px; outline: none; }
+    font: inherit; font-size: 12.5px; color: var(--pq-txt);
+    background: rgba(20,21,28,.94); border: 1px solid rgba(174,178,194,.22);
+    border-radius: 9px; padding: 9px 11px; outline: none; }
   .bar input[type=search] { flex: 1 1 260px; min-width: 200px; }
-  .bar input[type=search]:focus, .bar select:focus { border-color: rgba(150,190,255,.6); }
+  /* 聚焦 = 此刻的主行动，用暖金，不用蓝 */
+  .bar input[type=search]:focus { border-color: rgba(224,164,105,.62); }
   .bar select { max-width: 240px; }
+  .bar select:focus { border-color: rgba(224,164,105,.5); }
   .bar button { cursor: pointer; }
-  .bar button:hover { border-color: rgba(150,190,255,.5); color: #fff; }
-  .hit { font-size: 11.5px; color: rgba(181,203,235,.62); margin-left: auto;
-         font-variant-numeric: tabular-nums; }
+  .bar button:hover { border-color: rgba(224,164,105,.55); color: #fff; }
+  .hit { font-size: 11.5px; color: var(--pq-txt-3); margin-left: auto;
+         font-variant-numeric: tabular-nums; letter-spacing: .04em; }
 
-  main { max-width: 1180px; margin: 0 auto;
-         display: grid; grid-template-columns: repeat(auto-fill, minmax(372px, 1fr));
-         gap: 13px; align-items: start; }
-  .card { background: rgba(10,16,34,.86); border: 1px solid rgba(140,170,255,.15);
-          border-radius: 11px; padding: 13px 15px 12px;
-          transition: border-color .16s ease, transform .16s ease, background .16s ease; }
-  .card:hover { border-color: rgba(150,190,255,.42); background: rgba(14,22,44,.92);
-                transform: translateY(-1px); }
-  /* 方法名占满剩余宽度并在过长时省略，维度胶囊固定在右侧不换行——
-     这样所有卡片的两端位置一致，扫读时能形成整齐的列。 */
-  .top { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
-  .subj { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
-          white-space: nowrap; font-size: 13.5px; font-weight: 560; color: #eaf2ff; }
-  .sep { flex: 0 0 auto; color: rgba(150,190,255,.45); font-size: 12px; }
-  .dim { flex: 0 0 auto; font-size: 11.5px; color: #a8c6ff; padding: 2px 7px;
-         border-radius: 20px; background: rgba(120,160,255,.13);
-         border: 1px solid rgba(140,170,255,.2); cursor: pointer;
-         white-space: nowrap; }
-  .dim:hover { background: rgba(120,160,255,.26); color: #fff; }
-  .dim.hot { color: #ffd9a0; background: rgba(255,190,110,.12);
-             border-color: rgba(255,190,110,.26); }
-  .desc { margin: 0 0 9px; font-size: 12.5px; line-height: 1.72; color: rgba(214,228,250,.9); }
-  .desc mark, .subj mark, .dim mark { background: rgba(255,214,120,.26); color: #fff;
-                                      border-radius: 3px; padding: 0 2px; }
-  .ev { margin: 0 0 9px; }
-  .ev summary { font-size: 11px; color: rgba(150,190,255,.8); cursor: pointer;
-                list-style: none; user-select: none; }
+  /* ── 分组：组标题大字 + 一条贯穿全宽的分隔线，组间大留白 ───────────────── */
+  .group { margin: 0 0 76px; }
+  .ghead { display: flex; align-items: baseline; gap: 16px;
+           margin-top: 34px; padding-top: 24px; border-top: 1px solid var(--pq-line); }
+  .group:first-of-type .ghead { margin-top: 8px; }
+  /* 组编号前一道暖金短横线：让每个分组的起点在滚动中有个明确的落点 */
+  .dash { flex: 0 0 auto; width: 22px; height: 2px; background: var(--pq-warm);
+          opacity: .62; transform: translateY(-6px); }
+  .no { flex: 0 0 auto; color: var(--pq-warm); opacity: .85;
+        font-size: clamp(34px, 3.6vw, 46px); line-height: .84;
+        font-variant-numeric: lining-nums tabular-nums; }
+  .gtitle { flex: 1 1 auto; min-width: 0; }
+  .gtitle h2 { margin: 0; font-size: clamp(21px, 2.3vw, 27px); color: var(--pq-txt); }
+  /* 组标题下面一行：条数标尺。它是这一页唯一的"图表"——
+     长度就是该组条目数，视觉上给每个分组一个可比较的数字落点。 */
+  .gmeta { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+  .gbar { display: block; flex: 0 0 138px; height: 2px; background: rgba(174,178,194,.12); }
+  .gbar i { display: block; height: 100%; background: var(--pq-warm); opacity: .72; }
+  .gmeta span { font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+                color: rgba(160,164,178,.4); font-variant-numeric: tabular-nums; }
+  .gtitle em { display: block; font-style: normal; margin-top: 8px;
+               color: rgba(160,164,178,.4); font-size: 10px;
+               letter-spacing: .24em; text-transform: uppercase; }
+  .gn { flex: 0 0 auto; color: var(--pq-txt-3); font-size: 11.5px;
+        font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+
+  /* 组内核心条目：两块并排，比下面的注记明显更重 */
+  /* 核心条目固定两列：三列会把卡片压成"又一堆小方块"，两列才有版面分量。 */
+  .hl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px 16px; margin: 26px 0 30px; align-items: stretch; }
+  .item { position: relative; padding: 16px 19px 13px;
+          background: linear-gradient(180deg, rgba(20,21,28,.88), rgba(15,16,22,.62));
+          border: 1px solid var(--pq-line); border-radius: 3px; }
+  /* 两张核心卡片里更靠前的一张用一层极淡的暖色起势，避免整组卡片完全同质 */
+  .hl .item:first-child { background: linear-gradient(180deg,
+    rgba(224,164,105,.055), rgba(15,16,22,.6) 62%); border-color: rgba(224,164,105,.2); }
+  /* 顶部一道短横线按语义分色：暖金 = 局限，青 = 正面性质。全页只有这两种色相。 */
+  .item::before { content: ""; position: absolute; left: 0; top: 0; width: 42px; height: 2px;
+                  background: var(--pq-warm); opacity: .78; }
+  .m { font-family: "Smiley Sans","Noto Serif SC","Playfair Display",Georgia,"Songti SC",serif;
+       font-size: 17px; line-height: 1.28; color: var(--pq-txt); letter-spacing: -.01em;
+       word-break: break-word; }
+  /* 维度标签不画胶囊：一屏几十个描边小圆角会变成噪声。
+     只留字，靠色阶与字距区分——它仍然可点（等于切换维度筛选）。 */
+  .tag { display: inline-block; margin-top: 8px; font-size: 10.5px; letter-spacing: .13em;
+         text-transform: uppercase; color: rgba(160,164,178,.5);
+         border: 0; background: none; padding: 0; cursor: pointer; white-space: nowrap; }
+  .tag:hover, .tag:focus-visible { color: var(--pq-warm); }
+  /* 键盘焦点环跟着页面走"金 = 当前焦点"，不用全站的蓝色 outline——
+     本页只允许两个色相，焦点色算主行动色。 */
+  .tag:focus-visible { outline: 2px solid rgba(224,164,105,.75) !important;
+                       outline-offset: 3px !important; }
+  /* 被两篇以上论文反复提到的维度（旧版的"热点"）仍然保留暖金标记 */
+  .tag.hot { color: rgba(224,164,105,.85); }
+  .item p { margin: 9px 0 0; font-size: 13.5px; line-height: 1.78; color: var(--pq-txt-2); }
+  .src { margin-top: 9px; font-size: 10.5px; color: rgba(160,164,178,.44); letter-spacing: .04em; }
+  .src .st { color: rgba(160,164,178,.44); margin-left: 8px; letter-spacing: .06em; }
+  .src .st.sus { color: rgba(224,164,105,.75); }
+
+  /* 组内其余条目：左侧一列固定宽度的条目名，右侧一行注记。密排、无卡片感。 */
+  .rest { margin: 0; }
+  .rest > summary { display: flex; align-items: center; gap: 12px; cursor: pointer;
+                    list-style: none; user-select: none; padding: 12px 0 11px;
+                    border-top: 1px solid var(--pq-line); font-size: 12px;
+                    color: var(--pq-txt-3); letter-spacing: .05em; }
+  .rest > summary::-webkit-details-marker { display: none; }
+  .rest > summary::before { content: "+"; flex: 0 0 auto; width: 13px; font-size: 13px;
+                            color: var(--pq-txt-3); text-align: center; }
+  .rest[open] > summary::before { content: "−"; color: var(--pq-warm); }
+  .rest > summary:hover { color: var(--pq-txt-2); }
+  .rest > summary:hover::before { color: var(--pq-warm); }
+  .rest > summary .cnt { margin-left: auto; font-variant-numeric: tabular-nums; }
+  .rows { padding: 6px 0 10px; border-top: 1px solid rgba(174,178,194,.06); }
+  /* 没有核心条目的组（例如 09）直接进注记表，这里补一点上边距，
+     否则表头会贴在组标题上。 */
+  .ghead + .rest { margin-top: 22px; }
+  /* 折叠提示：不抢戏，但要让读者知道"这里不是只有这些" */
+  .foldnote { margin: -16px 0 26px; font-size: 10.5px; line-height: 1.7;
+              color: rgba(160,164,178,.42); letter-spacing: .03em; max-width: 84ch; }
+  /* 隔行一条极淡的底纹，让密集注记有节拍；不用横线，避免读成表格。 */
+  .row { display: flex; align-items: baseline; gap: 13px; padding: 3px 8px 3px 0;
+         min-height: 20px; border-radius: 2px; }
+  .row:nth-child(2n) { background: rgba(174,178,194,.028); }
+  .row .s { flex: 0 0 140px; max-width: 140px; font-size: 12.5px; line-height: 1.65;
+            color: var(--pq-txt-2); font-family: "Smiley Sans","Noto Serif SC",serif;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .b { flex: 1 1 auto; min-width: 0; font-size: 12.5px; line-height: 1.7;
+            color: rgba(160,164,178,.62); }
+  .row .b .d { color: rgba(198,201,213,.44); margin-right: 9px; }
+  .row .b .d::after { content: "·"; margin-left: 9px; color: rgba(174,178,194,.3); }
+  .row:hover { background: rgba(224,164,105,.05); }
+  .row:hover .s { color: var(--pq-txt); }
+  .row:hover .b { color: var(--pq-txt-2); }
+  /* 「极简」密度：核心卡片只留结论与来源，注记行也只留一行。
+     默认「详读」把原文依据留在卡片和行内，可点开。 */
+  body[data-density="tight"] .item p { display: none; }
+  body[data-density="tight"] .item { padding: 13px 18px 11px; }
+  body[data-density="tight"] .row .b .src,
+  body[data-density="tight"] .row .ev { display: none; }
+  body[data-density="tight"] .row { padding: 2px 8px 2px 0; }
+
+  /* 原文依据：注记行里内联展开 */
+  .ev { margin-top: 5px; }
+  .ev summary { font-size: 10.5px; color: rgba(160,164,178,.55); cursor: pointer;
+                list-style: none; user-select: none; letter-spacing: .06em; }
   .ev summary::-webkit-details-marker { display: none; }
-  .ev summary::before { content: "▸ "; color: rgba(150,190,255,.55); }
+  .ev summary::before { content: "▸ "; }
   .ev[open] summary::before { content: "▾ "; }
-  .ev summary:hover { color: #cfe0ff; }
-  .ev blockquote { margin: 7px 0 0; padding: 9px 11px; font-size: 11.5px; line-height: 1.72;
-                   color: rgba(196,214,240,.72); background: rgba(6,10,22,.7);
-                   border-left: 2px solid rgba(120,160,255,.3); border-radius: 0 6px 6px 0;
-                   white-space: pre-wrap; word-break: break-word; }
-  .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-          padding-top: 9px; border-top: 1px solid rgba(140,170,255,.1); }
-  .paper { font-size: 11px; color: rgba(150,190,255,.78); }
-  .badge { font-size: 10px; padding: 1px 7px; border-radius: 20px;
-           border: 1px solid transparent; cursor: help; }
-  .badge.rej { color: rgba(150,180,220,.7); background: rgba(120,160,255,.08);
-               border-color: rgba(120,160,255,.16); }
-  .badge.sus { color: #ffd9a0; background: rgba(255,190,110,.1);
-               border-color: rgba(255,190,110,.24); }
-  .empty { max-width: 1180px; margin: 40px auto; text-align: center; font-size: 13px;
-           color: rgba(160,190,235,.55); }
-  footer { max-width: 1180px; margin: 34px auto 0; padding-top: 16px;
-           border-top: 1px solid rgba(140,170,255,.1);
-           font-size: 11.5px; line-height: 1.8; color: rgba(160,190,235,.52); }
-  footer code { color: rgba(190,214,246,.75); }
+  .ev summary:hover, .ev[open] summary { color: var(--pq-warm); }
+  .ev blockquote { margin: 9px 0 4px; padding: 10px 13px; font-size: 11.5px;
+                   line-height: 1.78; color: rgba(198,201,213,.6);
+                   background: rgba(11,12,17,.74); border-left: 1px solid rgba(224,164,105,.32);
+                   border-radius: 0 3px 3px 0; white-space: pre-wrap;
+                   word-break: break-word; max-width: 96ch; }
 
-/* ── 标题字体（由 tools/apply_fonts.py 注入）────────────────────────────
-   fonts.css 是 tools/build_fonts.py 生成的子集字体，全部本地、零外部请求。
-   只给标题用：正文子集不含正文用字，换上去会逐字回退反而更难看。 */
-h1, h2, h3,
-.kick, .eyebrow, .note b, .fig .n, .kpi b, .card h2, .entry h3 {
-  font-family: "Smiley Sans","Noto Serif SC","Playfair Display",Georgia,"Songti SC","SimSun",serif;
-}
-/* 标题在衬线下不需要那么粗——衬线本身已经提供笔画对比 */
-h1, h2 { font-weight: 700; letter-spacing: -.02em; }
-h3 { font-weight: 600; }
-/* 数字用 Playfair 的等高数字，避免跳动 */
-.fig .n, .kpi b, [data-count] { font-variant-numeric: lining-nums tabular-nums; }
+  mark { background: rgba(224,164,105,.26); color: #fff; border-radius: 2px; padding: 0 2px; }
+  .empty { text-align: center; margin: 80px auto; font-size: 13px; color: var(--pq-txt-3); }
 
-/* ── .note：边界声明 / 结论块（2026-09 重做）────────────────────────────
-   旧版是「深色底 + 左侧 2px 竖线 + 圆角」，读起来像贴在页面上的便签
-   （用户原话：「一个黑底框，以及左侧的一个竖线条」「像硬贴上去了」）。
-   新版去掉一切框线，改用**排版本身**做层次：
-     · 首句自动放大到 17px 并加衬线，充当引导句；
-     · 段间用 1px 渐隐细线分隔，不用外框；
-     · 小标题（<b>为什么…</b> 之类）悬挂到左侧，形成一列。
-   这样它与正文同源，但仍然可辨识为"这是一段需要单独强调的话"。 */
-.note{
-  margin: 44px 0 0; padding: 0; max-width: 74ch;
-  border: 0; background: none; border-radius: 0;
-  color: var(--ink-2, rgba(203,218,241,.78)); font-size: 15px; line-height: 1.85;
-}
-.note > p:first-child{
-  font-family: "Smiley Sans","Noto Serif SC",serif;
-  font-size: 19px; line-height: 1.6; color: #fff;
-  margin: 0 0 16px; letter-spacing: .004em;
-}
-.note > p + p{
-  margin: 0; padding-top: 14px; position: relative;
-}
-.note > p + p::before{
-  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
-  background: linear-gradient(90deg,
-    rgba(var(--warmRGB,150,180,255),.42), rgba(140,170,255,.06) 62%, transparent);
-}
-.note b{
-  font-family: "Smiley Sans","Noto Serif SC",serif;
-  font-weight: 400; color: var(--warm, #ffcfa8);
-  font-size: 15.5px; letter-spacing: .01em;
-}
-.note strong{ color: #fff; font-weight: 600; }
-.note code{
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: .9em; padding: 1px 5px; border-radius: 3px;
-  background: rgba(140,170,255,.12); color: #cfe0ff;
-}
+  /* 页脚：左内边距让开左下角 a11y.js 注入的「← 导航页」（left:14px，宽约 90px），
+     否则第一行开头会被它压掉。 */
+  footer { margin-top: 22px; padding: 20px 0 8px 112px; border-top: 1px solid var(--pq-line);
+           font-size: 11px; line-height: 1.9; color: var(--pq-txt-3); max-width: 104ch; }
+  footer code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .94em;
+                color: rgba(198,201,213,.66); }
 
-/* 2026-09 加：打破"全是蓝紫"。给强调、次强调、警戒各一个明确色相，
-   并规定它们各自只承担一种语义，不再混用。 */
-:root{
-  --hue-cool: #7fb3ff;      /* 主色：冷蓝，结构性元素（分隔线、次级标签） */
-  --hue-cyan: #5fe0d0;      /* 次色：青，正面结论（召回、覆盖、通过） */
-  --hue-warm: #ffb27f;      /* 暖色：负面/需注意（误差、漏抽、风险） */
-  --hue-gold: #ffd9a0;      /* 金：强调数字、结论性指标 */
-}
+  /* ── 标题字体（由 tools/apply_fonts.py 注入）────────────────────────────
+     fonts.css 是 tools/build_fonts.py 生成的子集字体，全部本地、零外部请求。 */
+  h1, h2, h3,
+  .kick, .eyebrow, .note b, .fig .n, .kpi b, .card h2, .entry h3,
+  .no, .m, .row .s {
+    font-family: "Smiley Sans","Noto Serif SC","Playfair Display",Georgia,"Songti SC","SimSun",serif;
+  }
+  h1, h2 { font-weight: 700; letter-spacing: -.03em; }
+  h3 { font-weight: 600; }
+  .fig .n, .kpi b, [data-count] { font-variant-numeric: lining-nums tabular-nums; }
+
+  /* ── .note：口径声明（第三版规则，禁止黑底框与左侧竖线）──────────────── */
+  .note{
+    position: relative;
+    margin: 54px 0 0; padding: 26px 0 0; max-width: 74ch;
+    border: 0; background: none; border-radius: 0;
+    color: var(--pq-txt-2); font-size: 15px; line-height: 1.85;
+  }
+  .note::before{
+    content: ""; position: absolute; left: 0; top: 0;
+    width: 56px; height: 2px; background: var(--pq-warm, var(--warm, #e0a469));
+    opacity: .9;
+  }
+  .note > p:first-child{ margin: 0 0 14px; }
+  .note > p + p{ margin: 0; padding-top: 14px; position: relative; }
+  .note > p + p::before{
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+    background: linear-gradient(90deg,
+      rgba(224,164,105,.34), rgba(174,178,194,.07) 62%, transparent);
+  }
+  .note b{
+    display: block;
+    font-family: "Smiley Sans","Noto Serif SC",serif;
+    font-weight: 400; color: var(--pq-warm, var(--warm, #ffcfa8));
+    font-size: 17px; letter-spacing: .01em; margin: 0 0 5px;
+  }
+  .note strong{ color: #fff; font-weight: 600; }
+  .note code{
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .9em; padding: 1px 5px; border-radius: 3px;
+    background: rgba(174,178,194,.1); color: #d6d9e2;
+  }
+
+  /* 窄屏：条目名列不再占固定宽度，核心卡片单列 */
+  @media (max-width: 720px) {
+    body { padding: 26px 18px 40px; }
+    .hl { grid-template-columns: 1fr; }
+    .row { display: block; padding: 5px 0; }
+    .row .s { max-width: none; white-space: normal; margin-bottom: 2px; }
+    footer { padding-left: 0; padding-bottom: 74px; }
+  }
 </style>
 <link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/fonts/fonts.css">
 </head>
 <body>
+<div class="wrap">
 <header>
-  <small>kg cosmos · method capability map</small>
-  <h1>方法能力与局限</h1>
+  <small class="eyebrow">kg cosmos · method capability map</small>
+  <h1>方法能力与局限<span class="tail">17 篇论文，178 个方法，243 条能力判断</span></h1>
   <p class="lede" id="lede"></p>
   <div class="kpis" id="kpis"></div>
+  <nav class="toc" id="toc" aria-label="主题索引"></nav>
 </header>
 
 <div class="bar">
@@ -169,28 +297,161 @@ h3 { font-weight: 600; }
   <select id="dimSel"><option value="">全部维度</option></select>
   <select id="subjSel"><option value="">全部方法</option></select>
   <button id="reset" type="button">重置</button>
+  <button id="density" type="button" aria-pressed="false" title="切换极简 / 详读">极简版式</button>
   <span class="hit" id="hit"></span>
 </div>
 
 <main id="grid"></main>
 <div class="empty" id="empty" hidden>没有匹配的记录</div>
 
+<div class="note">
+  <p><b>口径：这是一张「方法 → 能力维度」的清单，不是矛盾清单。</b>
+     这 243 条原本被抽成 <code>CONTRADICTS</code> 边，但 243 条只对应 242 个不同的
+     (方法, 维度) 对 —— 没有任何一对被两篇以上论文同时表态，也就是说，构成矛盾所需的
+     「两方」根本不存在。它们的真实语义是「某方法在某项能力上的表现或局限」，
+     故改作本视图。</p>
+  <p>每条记录都拖着一次原始判定：<strong>REJECTED</strong>（原文不支持它构成矛盾）或
+     <strong>SUSPECTED</strong>（灰区待复核）。既然前提不成立，本视图不把它当主信息，
+     只作为行末的一个小标记保留可追溯性。上游 <code>claims.json</code> 里还有一批
+     解析噪声（例如把表头列错位成了「Horse / Tiger」这样的条目），它们仍然在数据里，
+     本页不替上游遮盖，只是不再把它们摆到组内核心位置。</p>
+</div>
+
 <footer>
   数据：<code>data/quality/claims.json</code> → <code>tools/build_method_limits_data.py</code>。
-  原本由 T3.3 从 243 条 <code>CONTRADICTS</code> 边重建而来；
-  <code>tools/diag_claims.py</code> 判定它们不构成矛盾（243 条对应 242 个不同的
-  方法–维度对，没有任何一对被两篇以上论文同时表态），故改作本视图。
+  原始 <code>CONTRADICTS</code> 边的重建与判废见 <code>tools/diag_claims.py</code>；
+  本页的主题分组是按关键词自动归类的阅读辅助，不改变任何原始字段。
 </footer>
+</div>
 
 <script>
 const esc = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;');
 
-// 高频维度（出现 ≥2 次）给"热点"样式，让读者一眼看到被反复提及的能力维度
+/* 高频维度（出现 ≥2 次）给"热点"样式，让读者一眼看到被反复提及的能力维度 */
 const HOT = new Set();
 
 let DATA = null, ITEMS = [], view = [];
+
+/* ── 主题分组 ────────────────────────────────────────────────────────────
+   243 条平铺成一面等权重的砖墙是这一页原本的问题。这里按「方法名 + 能力维度」
+   的关键词把它们归到 8 个主题里，第一个命中的规则胜出。规则是**阅读辅助**：
+   它不改动任何原始字段，也不声称这是原文的分类体系。 */
+const GROUPS = [
+  { id: 'ext', no: '01', title: '抽取与图谱构建', en: 'extraction & construction',
+    re: /extract|schema|ontolog|triple|relation extraction|entity|tabular|table|web|corpus|document|chunk|\bocr\b|\bpdf\b|text|annotation|dataset|data quality|data scar|knowledge graph construction|knowledge base|knowledge storage|knowledge management|metadata|storage|pipeline|keyword|template|syntactic|semantic role|reference|knowlm|techgpt|survey|paper|citation|labell?ed|unlabelled/i },
+  { id: 'emb', no: '02', title: '表示学习与嵌入', en: 'representation & embedding',
+    re: /transe|mrup|proje|hake|torus|conve|convkb|\bple\b|embedding|embed|translational|bilinear|vector|geometric|manifold|sphere|scoring|link prediction|triple-based|relational model|quaternion|negative sampl|dimension|mapping function|quantiz|2d stack|\bsinc\b|rotat|expressiveness|entity alignment|class belief|cartesian|score/i },
+  { id: 'llm', no: '03', title: '大模型与提示工程', en: 'llm & prompting',
+    re: /large language model|\bllm|chatglm|kicgpt|prompt|instruct|fine-?tun|in-?context|zero-?shot|one-?shot|few-?shot|\bfsl\b|meta-?learn|pre-?trained language|small-scale large|hallucinat|training-free|knowledge induction|domain-specific expertise|language model|telephone number|\bntp\b/i },
+  { id: 'inf', no: '04', title: '推理与知识利用', en: 'reasoning & knowledge use',
+    re: /reason|infer|logic|rule|symbolic|path|multi-hop|question|query|knowledge utilization|knowledge transfer|inductive|commonsense|decision-making|explanation|explainab|interpretab|transparen|black-box|belief propagation|human-in-the-loop|feedback|\bsql\b/i },
+  { id: 'gnn', no: '05', title: '图神经网络与图结构', en: 'graph neural networks',
+    re: /\bgnn|gcn|graph neural|aggcn|attention|over-?smooth|random walk|\bnode|graph structure|graph convolutional|recurrent neural|neural network|deep model|neural model|\bdkn\b|atlop|bi-?directional|\bmlp\b/i },
+  { id: 'dyn', no: '06', title: '时序与动态图谱', en: 'temporal & dynamic',
+    re: /temporal|dynamic|\bdkg|\bskg|time|event|forecast|trend|stream|real-?time|new knowledge|evolving|retrain|re-training|static|shuffl|historical|news|social media/i },
+  { id: 'eval', no: '07', title: '评测、跨域与泛化', en: 'evaluation & generalization',
+    re: /evaluat|benchmark|metric|quality|noise|conflict|error|coverage|reproduc|baseline|generaliz|robust|adaptab|scalab|cross-|unseen|seen class|minority|machine translation|flexibility|computational|resource|memory|over-?fit|convergence|converge|spars|domain|complexity/i },
+  { id: 'onto', no: '08', title: '本体、语义与概念建模', en: 'ontology & semantics',
+    re: /semantic|concept|class\b|instance|archimate|disjoint|similarity|relatedness|cohesive|abstraction|taxonom|hierarch|logic pattern|relationship type/i },
+];
+const TAIL = { id: 'tail', no: '09', title: '其余单点记录', en: 'uncategorised' };
+
+/* 命中强度分三档：3 = 说法本身就在这个主题里，2 = 能力维度属于这个主题，
+   1 = 其余。Core 只收录 ≥2 的条目——第一轮截图里「Shuffling」「Born-In」
+   被塞进时序组，就是因为描述里偶然出现 "shuffling"/"temporal" 也算命中。
+   描述命中（tier 3）优先于维度命中：维度里有 "Overfitting" 这类泛词时，
+   靠它归类会把「Multiple shuffling processes …」这种条目留在错误的组里。 */
+const SUBJECT_FIRST = [
+  { re: /temporal|dynamic|\bdkg|\bskg|time-?sensitive|event|forecast|historical|trend|streaming|re-?training/i, id: 'dyn' },
+  { re: /large language model|\bllm|kicgpt|chatglm/i, id: 'llm' },
+  { re: /transe|mrup|proje|hake|torus|conve|convkb|\bple\b|embedding/i, id: 'emb' },
+  { re: /neural-symbolic|\bgnn|\bgcn|aggcn|atlop|\bdkn\b/i, id: 'gnn' },
+];
+
+function matchGroup(it) {
+  for (const r of SUBJECT_FIRST) if (r.re.test(it.subject)) return { id: r.id, tier: 3 };
+  const head = it.subject + ' | ' + it.dim;
+  for (const g of GROUPS) if (g.re.test(it.description || '')) return { id: g.id, tier: 3 };
+  for (const g of GROUPS) if (g.re.test(head)) return { id: g.id, tier: 2 };
+  return { id: 'tail', tier: 0 };
+}
+const GROUP_FN = new WeakMap();
+function groupOf(it) {
+  if (!GROUP_FN.has(it)) GROUP_FN.set(it, matchGroup(it));
+  return GROUP_FN.get(it).id;
+}
+
+/* 判定"这条说法是正面的"：用在两处，只留一个定义，避免两处正则走偏 */
+const PROP = /overcome|avoids?\b|require no|requires no|need no|needs no|does not rely|do not rely|is acceptable|addresses the limitation|address the limitation|independent of/i;
+const BOILER = /may face challenges related to|face challenges related to|may face limitations in terms of|face limitations in terms of|is a challenge that obstructs the direct application|is an obstacle to addressing|is poor at|lacks? interpretability/i;
+const JUNK = /^(dimension|x\b|x′|horse|tiger|study|table|image|model|node|information|machine|sql|entity|kg\b|tkg\b|noise|errors|conflicts|loss|metadata|scatter plot|telephone number)$/i;
+
+let NAMES = new Map();
+
+function isCore(it) {
+  const d = it.description || '';
+  if (BOILER.test(d)) return false;
+  if (JUNK.test(it.subject.trim())) return false;
+  if (it.subject.length <= 2) return false;
+  if (PROP.test(d)) return true;
+  if ((NAMES.get(it.subject) || 0) >= 2) return true;
+  return d.length >= 34 && !/^(method|these methods)/i.test(d);
+}
+
+function rank(it) {
+  const d = it.description || '';
+  const subj = it.subject;
+  let s = Math.min(90, (NAMES.get(subj) || 0) * 26);
+  /* 方法名本身落在本主题里（tier 3）的，比"维度恰好是这个词"的更该占头条位 */
+  if ((GROUP_FN.get(it) || { tier: 0 }).tier === 3) s += 22;
+  if (BOILER.test(d)) s -= 45;          // 框架句：套话，不给头条位
+  if (PROP.test(d)) s += 60;            // 明确性质：正面或明确结论
+  s += Math.min(40, d.length);          // 描述越具体越值得占位
+  /* 主体本身是通用词、维度又只是「Knowledge Reasoning」这类范畴名的，
+     单独看没有信息量，压下去——否则一组里会出现四张「Knowledge Graphs」。 */
+  if (/^(knowledge graphs?|large language model|reasoning|embeddings?|neural models?|deep models?|knowledge graph|model)$/i.test(subj)
+      && /^(knowledge reasoning|higher-order|knowledge graphs?|knowledge utilization|llms?|reasoning|embeddings?)$/i.test(it.dim)) s -= 55;
+  if (/reason|logic|infer|belief|path|utilization|question|query|logical pattern|higher-order|knowledge-level|knowledge level/i.test(it.dim)) s += 14;
+  return s;
+}
+
+/* 一组里不让同一个方法占两张卡片——这是第一轮截图里最刺眼的问题：
+   「Knowledge Graphs」在推理组连出四张，读起来像没写完。 */
+function pick(list, n) {
+  const picked = [], used = new Set();
+  for (const it of [...list].sort((a, b) => rank(b) - rank(a))) {
+    if (used.has(it.subject)) continue;
+    used.add(it.subject); picked.push(it);
+    if (picked.length === n) break;
+  }
+  return picked;
+}
+
+/* 同样的说法在一组里会出现三四次（上游按字段抓的）：
+   "Training-free methods need no fine-tuning" / "require no fine-tuning" / KICGPT……
+   核心卡片是版面的主角，重复会立刻读成"没做完"；所以把同义的说法折叠成一张，
+   并在卡片上写明折叠了几条。折叠掉的条目**仍然留在组尾的注记里**，一条都没删。 */
+const nos = (s) => (s || '').toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, ' ').trim();
+function similar(a, b) {
+  if (!a || !b) return false;
+  if (a.length > 8 && b.length > 8 && (a.includes(b) || b.includes(a))) return true;
+  const A = new Set(a.split(' ')), B = new Set(b.split(' '));
+  if (A.size < 3 || B.size < 3) return false;
+  let inter = 0;
+  for (const w of A) if (B.has(w)) inter++;
+  return inter / (A.size + B.size - inter) >= 0.75;
+}
+function fold(list) {
+  const kept = [];        // 不能写成 const kept = [], dups = 0：那会把 dups 也钉成常量
+  let dups = 0;
+  for (const it of list) {
+    if (kept.some(k => similar(nos(k.description), nos(it.description)))) { dups++; continue; }
+    kept.push(it);
+  }
+  return { kept, dups };
+}
 
 function highlight(text, q) {
   const safe = esc(text);
@@ -199,6 +460,67 @@ function highlight(text, q) {
     const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
     return safe.replace(re, '<mark>$1</mark>');
   } catch (_) { return safe; }
+}
+const clip = (s, q) => {
+  const t = esc(s || '（原文未给出描述）');
+  return t.length > 76 && !q ? t.slice(0, 76) + '…' : t;
+};
+const stOf = (it) =>
+  `<span class="st${it.status === 'SUSPECTED' ? ' sus' : ''}">${esc(it.status)}${it.confidence != null ? ' ' + Number(it.confidence).toFixed(2) : ''}</span>`;
+const evOf = (it) => it.evidence
+  ? `<details class="ev"><summary>原文依据</summary><blockquote>${esc(it.evidence)}${it.evidence.length >= 700 ? '…' : ''}</blockquote></details>` : '';
+
+function itemHTML(it, q) {
+  /* `card` 是为 tools/cdp_verify_method_limits.py 保留的类名别名：
+     那个校验脚本按 `#grid .card` 数卡片，改版不该让既有校验失效。
+     样式一律走 .item，别名不参与任何选择器。 */
+  return `<article class="item card" data-subject="${esc(it.subject)}" data-dim="${esc(it.dim)}">
+      <div class="m">${highlight(it.subject, q)}</div>
+      <span class="tag dim${HOT.has(it.dim) ? ' hot' : ''}" data-dim="${esc(it.dim)}" title="只看该维度"
+            tabindex="0" role="button">${highlight(it.dim, q)}</span>
+      <p>${highlight(it.description || '（原文未给出描述）', q)}</p>
+      ${it.evidence ? `<details class="ev"><summary>原文依据</summary><blockquote>${esc(it.evidence)}${it.evidence.length >= 700 ? '…' : ''}</blockquote></details>` : ''}
+      <div class="src">${esc(it.paper)} · p${esc(it.page)}${stOf(it)}</div>
+    </article>`;
+}
+
+function rowHTML(it, q) {
+  /* 同 .item：`card` 是给 tools/cdp_verify_method_limits.py 的别名，
+     保证「一条记录 = 一个 #grid .card」这条既有断言仍然成立。 */
+  return `<div class="row card" data-subject="${esc(it.subject)}" data-dim="${esc(it.dim)}">
+      <span class="s" title="${esc(it.subject)}">${highlight(it.subject, q)}</span>
+      <span class="b"><span class="d">${highlight(it.dim, q)}</span>${clip(it.description, q)}
+        <span class="src">${esc(it.paper)} · p${esc(it.page)}${stOf(it)}</span>${evOf(it)}</span>
+    </div>`;
+}
+
+function groupHTML(g, list, q, maxLen, total) {
+  /* 先按重要度取前 10 个不同方法的候选，折叠同义表述，最后只上 6 张卡片。
+     拿到 10 个再折，是为了折叠掉重复后仍然凑得满 6 张。 */
+  const { kept, dups } = fold(pick(list.filter(it => isCore(it)
+    && (GROUP_FN.get(it) || { tier: 0 }).tier >= 2), 10));
+  const hi = kept.slice(0, 6);
+  /* 只把真正上版的 6 张卡片排除，其余（含候选里第 7–10 位）全部回到注记表，
+     否则每组会悄悄丢掉几条——一条记录都不许掉。 */
+  const hiSet = new Set(hi);
+  const rest = list.filter(it => !hiSet.has(it));
+  return `<section class="group" id="g-${g.id}">
+      <div class="ghead">
+        <i class="dash" aria-hidden="true"></i>
+        <span class="no">${g.no}</span>
+        <span class="gtitle"><h2>${esc(g.title)}</h2>
+          <span class="gmeta"><i class="gbar"><i style="width:${Math.max(3, Math.round(list.length / maxLen * 100))}%"></i></i>
+            <span>${list.length} / ${total} 条记录</span></span>
+          <em>${esc(g.en)}</em></span>
+      </div>
+      ${hi.length ? `<div class="hl">${hi.map(it => itemHTML(it, q)).join('')}</div>` : ''}
+      ${dups ? `<p class="foldnote">以上为核心条目；同组内另有 ${dups} 条与之同义的表述已折叠，
+        它们仍在下面「该组其余条目」里。</p>` : '<p class="foldnote" hidden></p>'}
+      ${rest.length ? `<details class="rest"${list.length === rest.length ? ' open' : ''}>
+        <summary>该组其余条目<span class="cnt">${rest.length} 条</span></summary>
+        <div class="rows">${rest.map(it => rowHTML(it, q)).join('')}</div>
+      </details>` : ''}
+    </section>`;
 }
 
 function render() {
@@ -214,25 +536,25 @@ function render() {
     return (it.subject + ' ' + it.dim + ' ' + it.description).toLowerCase().includes(ql);
   });
 
+  const byGroup = new Map();
+  for (const it of view) {
+    const k = groupOf(it);
+    if (!byGroup.has(k)) byGroup.set(k, []);
+    byGroup.get(k).push(it);
+  }
+  const order = [...GROUPS, TAIL];
   const grid = document.getElementById('grid');
-  grid.innerHTML = view.map(it => `
-    <article class="card">
-      <div class="top">
-        <span class="subj" title="${esc(it.subject)}">${highlight(it.subject, q)}</span>
-        <span class="sep">→</span>
-        <span class="dim${HOT.has(it.dim) ? ' hot' : ''}" data-dim="${esc(it.dim)}"
-              title="只看该维度">${highlight(it.dim, q)}</span>
-      </div>
-      <p class="desc">${highlight(it.description || '（原文未给出描述）', q)}</p>
-      ${it.evidence ? `<details class="ev"><summary>查看原文依据</summary>
-        <blockquote>${esc(it.evidence)}${it.evidence.length >= 700 ? '…' : ''}</blockquote>
-      </details>` : ''}
-      <div class="meta">
-        <span class="paper">${esc(it.paper)} · p${esc(it.page)}</span>
-        <span class="badge ${it.status === 'SUSPECTED' ? 'sus' : 'rej'}"
-              title="该状态是「按'这条是不是矛盾'的假设」判定的：REJECTED = 原文不支持它构成矛盾；SUSPECTED = 落入灰区需复核。既然前提不成立，本视图不以此为主信息。">${esc(it.status)}${it.confidence != null ? ' ' + Number(it.confidence).toFixed(2) : ''}</span>
-      </div>
-    </article>`).join('');
+  const shown = order.filter(g => (byGroup.get(g.id) || []).length);
+  const maxLen = Math.max(1, ...shown.map(g => byGroup.get(g.id).length));
+  grid.innerHTML = shown
+    .map(g => groupHTML(g, byGroup.get(g.id), q, maxLen, view.length)).join('');
+
+  // 目录：条数随筛选实时变化，全为 0 的主题自动消失
+  document.getElementById('toc').innerHTML = order.map(g => {
+    const n = (byGroup.get(g.id) || []).length;
+    return n ? `<a href="#g-${g.id}"><span class="no">${g.no}</span>`
+      + `<span class="t">${esc(g.title)}</span><span class="n">${n}</span></a>` : '';
+  }).join('');
 
   document.getElementById('hit').textContent =
     view.length === ITEMS.length ? `共 ${ITEMS.length} 条` : `${view.length} / ${ITEMS.length} 条`;
@@ -242,25 +564,27 @@ function render() {
 function boot() {
   const m = DATA.meta;
   document.getElementById('lede').innerHTML =
-    `<b>为什么是「能力与局限」而不是「矛盾」：</b>${esc(m.note)}`
-    + ` 本视图按「方法 → 能力维度」组织：<b>${m.total}</b> 条记录、`
-    + `<b>${m.subjects}</b> 个方法、<b>${m.dimensions}</b> 个维度，来自 <b>${m.papers}</b> 篇论文。`;
+    `把 <b>${m.subjects}</b> 个方法在 <b>${m.dimensions}</b> 个能力维度上的表态，按主题归成 9 组读：`
+    + `每组先给被反复提到的核心条目，其余压成组尾的一行注记。`
+    + `这里的每一条都是「某方法在某项能力上的表现或局限」，而不是两个方法之间的冲突——`
+    + `原因见页末口径说明。`;
 
   document.getElementById('kpis').innerHTML = [
-    [m.total, '条记录'], [m.subjects, '个方法'], [m.dimensions, '个能力维度'],
+    [m.total, '条能力判断'], [m.subjects, '个方法'], [m.dimensions, '个能力维度'],
     [m.papers, '篇来源论文'],
-    [Object.entries(m.status_counts).map(([k, v]) => `${k} ${v}`).join(' · '), '原判定状态'],
-  ].map(([v, l]) => `<div class="kpi"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('');
+    [`REJECTED ${m.status_counts.REJECTED} · SUSPECTED ${m.status_counts.SUSPECTED}`, '原判定状态'],
+  ].map(([v, l], i) => `<div class="kpi${i === 4 ? ' wide' : ''}"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('');
 
-  // 展平成卡片项
+  /* 展平成条目项 */
   ITEMS = [];
   for (const d of DATA.dimensions) {
     if (d.count >= 2) HOT.add(d.name);
     for (const it of d.items) ITEMS.push(Object.assign({ dim: d.name }, it));
   }
-  // 排序：先热点维度，再按方法名，读起来有层次
-  ITEMS.sort((a, b) => (HOT.has(b.dim) - HOT.has(a.dim))
-    || a.dim.localeCompare(b.dim) || a.subject.localeCompare(b.subject));
+  NAMES = new Map();
+  for (const it of ITEMS) NAMES.set(it.subject, (NAMES.get(it.subject) || 0) + 1);
+  // 组内排序：先核心、再按方法名——注记行读起来也有顺序
+  ITEMS.sort((a, b) => a.subject.localeCompare(b.subject) || a.dim.localeCompare(b.dim));
 
   const dimCount = new Map();
   for (const it of ITEMS) dimCount.set(it.dim, (dimCount.get(it.dim) || 0) + 1);
@@ -284,13 +608,36 @@ function boot() {
     document.getElementById('subjSel').value = '';
     render();
   });
-  // 点卡片上的维度胶囊 = 只看该维度
-  document.getElementById('grid').addEventListener('click', (e) => {
-    const el = e.target.closest('.dim');
-    if (!el) return;
+  /* 同一批数据，两种读法：详读（默认，卡片带描述与来源）/ 极简（只留结论与标题）。
+     用按钮而不是自动折叠，是因为"降级处理"不是这一页想要的——
+     两种密度都必须好看，由读者自己选。 */
+  const db = document.getElementById('density');
+  db.addEventListener('click', () => {
+    const tight = !db.hasAttribute('aria-pressed') || db.getAttribute('aria-pressed') === 'false';
+    db.setAttribute('aria-pressed', String(tight));
+    document.body.dataset.density = tight ? 'tight' : 'full';
+    db.textContent = tight ? '详读版式' : '极简版式';
+  });
+  /* 点维度胶囊 = 只看该维度。
+     胶囊是新的 .tag 类，不在 a11y.js 的 SELECTORS（.chip/.capsule/.pill）里，
+     所以它在模板里自带 tabindex="0" + role="button"，并在这里补键盘等价操作——
+     键盘可达性不能因为换了类名而退步。 */
+  const grid = document.getElementById('grid');
+  function pickDim(el) {
     document.getElementById('dimSel').value = el.dataset.dim;
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  grid.addEventListener('click', (e) => {
+    const el = e.target.closest('.tag');
+    if (el) pickDim(el);
+  });
+  grid.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    const el = e.target.closest('.tag');
+    if (!el) return;
+    e.preventDefault();
+    pickDim(el);
   });
   addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {

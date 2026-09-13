@@ -76,7 +76,7 @@ scene.add(stars);
 // --- Graph ---
 const showcaseGraphData = [
   { pos:[-8,6,-3],   r:0.60, color:'#e8c170', label:'Deadlift' },
-  { pos:[-5,9,2],    r:0.55, color:'#7db8d4', label:'Hip Flexor' },
+  { pos:[-5,9,2],    r:0.55, color:'#b6b8be', label:'Hip Flexor' },
   { pos:[-1,11,-4],  r:0.62, color:'#c9a0dc', label:'Core Stability' },
   { pos:[4,10,1],    r:0.50, color:'#88c9a0', label:'Shoulder Press' },
   { pos:[9,7,3],     r:0.64, color:'#e8a870', label:'Bench Press' },
@@ -89,7 +89,7 @@ const showcaseGraphData = [
   { pos:[7,-6,-2],   r:0.54, color:'#c8b8a0', label:'Hamstrings' },
   { pos:[-5,4,9],    r:0.50, color:'#a0c0c8', label:'Lat Pulldown' },
   { pos:[3,2,10],    r:0.56, color:'#c8a8b8', label:'Romanian DL' },
-  { pos:[-9,-6,-5],  r:0.46, color:'#98b8c8', label:'Calves' },
+  { pos:[-9,-6,-5],  r:0.46, color:'#bbbdc3', label:'Calves' },
   { pos:[11,-2,7],   r:0.58, color:'#e8d488', label:'Overhead Press' },
   { pos:[-11,8,6],   r:0.52, color:'#c0a0e0', label:'Pull-up' },
   { pos:[0,-10,-3],  r:0.62, color:'#d8c090', label:'Leg Press' },
@@ -118,8 +118,8 @@ const showcaseEdges = [
 // the production implementation.
 const graphSelection = selectGraphProfile(location.search);
 const graphParams = new URLSearchParams(location.search);
-const REAL_GRAPH_COLORS = { Concept:'#c9a0dc', Method:'#7db8d4', System:'#e8c170', Component:'#88c9a0', Process:'#d4a0b0', Dataset:'#a0c0c8', Metric:'#e8a870', Person:'#c8a8b8', Organization:'#b8d0c0', Document:'#d8c090' };
-const FALLBACK_GRAPH_COLORS = ['#e8c170', '#7db8d4', '#c9a0dc', '#88c9a0', '#e8a870', '#d4a0b0'];
+const REAL_GRAPH_COLORS = { Concept:'#c9a0dc', Method:'#b6b8be', System:'#e8c170', Component:'#88c9a0', Process:'#d4a0b0', Dataset:'#a0c0c8', Metric:'#e8a870', Person:'#c8a8b8', Organization:'#b8d0c0', Document:'#d8c090' };
+const FALLBACK_GRAPH_COLORS = ['#e8c170', '#b6b8be', '#c9a0dc', '#88c9a0', '#e8a870', '#d4a0b0'];
 
 function colorForType(type) {
   if (REAL_GRAPH_COLORS[type]) return REAL_GRAPH_COLORS[type];
@@ -383,7 +383,7 @@ function edgeDepthStyle(distance) {
   // second expansion → contextual background, without losing the far layers
   // against the luminous starfield.
   if (distance === 0) return { alpha: 1.00, tint: '#ffd166' }; // focus → 1 hop
-  if (distance === 1) return { alpha: 0.78, tint: '#39c7ff' }; // 1 → 2 hops
+  if (distance === 1) return { alpha: 0.78, tint: '#b5b7bd' }; // 1 → 2 hops
   if (distance === 2) return { alpha: 0.58, tint: '#93959b' }; // 2 → 3 hops
   if (distance === 3) return { alpha: 0.42, tint: '#8e9096' }; // 3 → 4 hops
   return { alpha: 0.32, tint: '#76787e' };                     // context
