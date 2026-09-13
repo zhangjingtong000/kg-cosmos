@@ -1,22 +1,25 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   KG COSMOS — 背景与交互（2026-09 重做：实时 WebGL 深空）
+   KG COSMOS — 背景与交互（2026-09 重做：实时 WebGL 光场）
    ───────────────────────────────────────────────────────────────────────────
 
-   背景的实现方式换过五轮，把结论记在这里，免得以后又绕回去：
+   背景的实现方式换过四轮，把结论记在这里，免得以后又绕回去：
 
      v1–v3  WebGL 点云 / CSS 渐变"自己画星云" → 被否（噪点、彩色沙子）
      v4–v5  FLUX 生成 5 张星云图交叉淡化 → "五张图换着播"，不构成演化
-     v6     Wan2.2 I2V 链生成 121 帧序列按滚动驱动 → 只在滚动时才动，
-            停下就是一张死图；且"素材是不是真的"帮不了交互感
-     v7     抽象光场着色器（域扭曲丝缕）→ 被否：丝缕/绸缎方向整个不对，
-            用户要的是**深空**——星云 + 星空 + 探索感
-     v8     **现在：深空。绸缎全部删掉，语言回到"星云 + 星空"**
-            · 三大云系（青蓝 / 紫品红 / 暖金余烬）随滚动先后登场换景，
-              尘埃暗纹给云结构；云系核心带柔光；
-            · 四层视差星空：滚动时星层按深度错动 = 在深空里**飞行**；
-              少数带光晕的锚点星；约 8 秒一颗的偶发流星；
-            · 时间 t 让画面不滚动也在活（云漂 + 星星明灭 + 流星）；
-            · 鼠标提灯光晕 / hover 增亮 / 点击涟漪。
+     v6     Wan2.2 I2V 链生成 121 帧序列，canvas drawImage 按滚动驱动
+            → 流畅问题解决了，但它只在**滚动时**才动：停下滚动，画面就是
+              一张静止的图。这正是"缺一点交互 / 感觉是死的"的根源。
+     v7     **现在：单 pass WebGL 着色器，实时渲染的抽象光场**
+            · 时间 t 让画面**永远在缓慢流动**——不滚动它也活着；
+            · 滚动 p 是旅程参数：曝光、色温、光晕位置随之演化；
+            · 鼠标视差：光晕与丝缕层做不同幅度的位移（阻尼跟随）；
+            · 零素材、零请求、无级连续，拖进度条不存在换帧。
+
+   设计语言（吸取前面所有被否的教训）：
+     · 抽象光场，不是写实星云——大尺度柔和起伏 + 域扭曲后的纤维结构，
+       没有高频细节（那会变成"沙子"）；
+     · 深靛底（不是纯黑），光晕是**局部**的，暗角把四角留空；
+     · 青与暖金**始终共存**，只让比例随滚动变化——"统一"与"变化"同时成立。
 
    保留的机制（都是踩过坑的，别删）：
      · targetP/curP 阻尼：滚动停下后画面继续飘一会儿；
@@ -24,8 +27,6 @@
        不从 0 重播（用户报过这个 bug）；
      · REDUCED：prefers-reduced-motion 时时间冻结、只随滚动重绘；
      · #veil/#grade/#noise/#grain：文字区遮罩、色调、颗粒，保证正文可读。
-   （v7 的教训：滚动"冲刺"反馈——按滚动速度推近+增亮——被否，
-    上下滚动都显得突兀，已删，别再加回来。）
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -51,8 +52,8 @@ void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
 const FS = `
 precision highp float;
 uniform vec2  u_res;
-uniform float u_p;    /* 滚动旅程 0..1：滚动 = 在深空里飞行 */
-uniform float u_t;    /* 秒——时间驱动，让画面不滚动也在活 */
+uniform float u_p;    /* 滚动旅程 0..1 */
+uniform float u_t;    /* 秒——时间驱动，让画面不滚动也在流 */
 uniform vec2  u_m;    /* 鼠标（已阻尼），-1..1：视差 + 提灯光晕 */
 uniform float u_boost;/* 悬停可交互元素时 0..1：光晕增亮变暖 */
 uniform vec4  u_r[3]; /* 涟漪：xy=场坐标 z=年龄(秒) w=强度 */
@@ -69,155 +70,116 @@ float noise(vec2 p){
   return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-/* 云气：4 层，平滑蓬松——星云的"气体感"，绝不做高频细节（那会变沙子） */
+/* 只 4 层——再多就是"沙子"，要的是大尺度的柔和起伏 */
 float fbm(vec2 p){
   float v = 0.0, a = 0.5;
   for (int i = 0; i < 4; i++){ v += a * noise(p); p = p * 2.03 + vec2(1.3, 4.6); a *= 0.5; }
   return v;
 }
 
-/* 星空层：每格至多一颗星，位置/亮度/色温由 hash 决定；
-   不同层用不同视差系数 → 滚动时层层错动，飞行感来自这里。
-   闪烁是 2~5 秒级的缓慢明灭，不是乱闪。 */
-vec3 starLayer(vec2 uv, float scale, float thr, float size, float time){
-  vec2 g = uv * scale;
-  vec2 id = floor(g);
-  vec2 f = fract(g) - 0.5;
-  float h = hash(id);
-  if (h < thr) return vec3(0.0);
-  vec2 sp = (vec2(hash(id + 19.7), hash(id + 47.3)) - 0.5) * 0.8;
-  float d = length(f - sp);
-  float b = smoothstep(size, 0.0, d);
-  float lum = 0.30 + 0.70 * fract(h * 91.7);
-  float twk = 0.72 + 0.28 * sin(time * (0.6 + h * 2.4) + h * 61.0);
-  vec3 tint = mix(vec3(0.78, 0.86, 1.00), vec3(1.00, 0.82, 0.58),
-                  step(0.75, fract(h * 37.1)));            /* 少数暖星 */
-  return tint * b * lum * twk;
+/* 丝缕场：域扭曲（拿噪声扭噪声坐标）之后过一道 ridge，
+   "平的噪声"就变成网络状的细丝——抽象的光纤感，不是照片。 */
+float fil(vec2 p, float t){
+  vec2 q = vec2(fbm(p + vec2(0.0, t * 0.7)),
+                fbm(p + vec2(5.2, 1.3) - vec2(t * 0.55, 0.0)));
+  vec2 r = vec2(fbm(p + 1.8 * q + vec2(1.7, 9.2) + vec2(t * 0.30, 0.0)),
+                fbm(p + 1.8 * q + vec2(8.3, 2.8) - vec2(0.0, t * 0.26)));
+  float f = fbm(p + 2.1 * r);
+  f = 1.0 - abs(2.0 * f - 1.0);
+  f *= f;
+  return f;
 }
 
 void main(){
   vec2 c = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
   float p = u_p;
-  float t = u_t * 0.05;
-  vec2 par = u_m * vec2(0.050, 0.036);
+  float t = u_t * 0.065;
 
-  /* 相机：滚动 = 在深空里向前飞。所有层按各自深度取 cam 的不同比例，
-     星层最快、云系次之 → 屏幕一滚，整个空间立体地掠过去。 */
-  vec2 cam = vec2(0.55 * p, -1.10 * p) + vec2(sin(p * 2.1) * 0.10, 0.0);
+  /* —— 探索感的核心：镜头在大尺度场里**真实地平移 + 推近** ——
+     path 的幅度是刻意放大的：滚过一屏，场里的风景真切地换一幕，
+     而光源仍是屏幕锚定的同一对（青 + 暖金），视觉语言不断。 */
+  vec2 path = vec2(-0.62 + 1.75 * p, 0.38 - 1.15 * p);
+  float zoom = mix(1.30, 0.70, p);                         /* 推近（滚动冲刺已按用户要求删除） */
+  vec2 par = u_m * vec2(0.050, 0.036);                     /* 视差（阻尼来自 JS） */
+  vec2 base = (c + path) * zoom + par * zoom;
 
-  /* 深空底色：深蓝黑，不是纯黑 */
-  vec3 col = vec3(0.010, 0.016, 0.036) * (1.0 + 0.5 * p);
+  float body = fbm(base * 1.15 + vec2(0.0, t * 0.5));
+  float dens = smoothstep(0.34, 0.82, body);
 
-  /* —— 云系 A：青蓝星云（旅程前半的主角）——
-     尘埃暗纹用第二块 fbm 压暗，云才有结构而不是一团亮气。 */
-  vec2 uA = (c + cam * 0.40 + par * 0.35) * 1.05 + vec2(t * 0.30, 0.0);
-  float nA = fbm(uA);
-  float mA = smoothstep(0.34, 0.90, nA);
-  mA *= 0.50 + 0.50 * smoothstep(0.30, 0.75, fbm(uA * 1.8 + 7.3));
-  float ampA = 0.95 + 0.85 * (1.0 - smoothstep(0.30, 0.85, p));
-  vec3 colA = mix(vec3(0.03, 0.10, 0.28), vec3(0.16, 0.64, 0.75),
-                  smoothstep(0.40, 0.88, nA));
-  col += colA * mA * ampA;
+  /* 两层丝缕：远层大而淡、近层细而亮；视差幅度不同 → 纵深 */
+  float f1 = fil(base - par * 0.7, t);
+  float f2 = fil(base * 1.9 + vec2(3.1, 0.7) + par * 1.4, t * 1.25);
+  float l1 = pow(smoothstep(0.55, 0.98, f1), 1.5);
+  float l2 = pow(smoothstep(0.66, 0.99, f2), 1.35);
 
-  /* —— 云系 B：紫品红星云（中段浮现，绚丽色的来源之一）—— */
-  vec2 uB = (c + cam * 0.62 + par * 0.65) * 1.25 + vec2(4.7, 0.0) + vec2(-t * 0.25, t * 0.12);
-  float nB = fbm(uB);
-  float mB = smoothstep(0.44, 0.96, nB);
-  mB *= 0.50 + 0.50 * smoothstep(0.35, 0.80, fbm(uB * 1.7 + 13.1));
-  float ampB = smoothstep(0.12, 0.50, p) * (1.0 - 0.45 * smoothstep(0.72, 1.0, p));
-  vec3 colB = mix(vec3(0.09, 0.03, 0.22), vec3(0.78, 0.30, 0.80),
-                  smoothstep(0.46, 0.92, nB));
-  col += colB * mB * ampB;
+  /* 光源：屏幕锚定（首尾连续），滚动只改强度与色温 */
+  vec2 g1 = vec2(-0.34 + 0.30 * p, 0.20 - 0.26 * p) + u_m * 0.055
+          + vec2(sin(t * 0.50), cos(t * 0.42)) * 0.012;
+  vec2 g2 = vec2(0.44 - 0.14 * p, -0.30 + 0.42 * p) + u_m * 0.075
+          + vec2(cos(t * 0.36), 0.0) * 0.014;
+  float d1 = length(c - g1);
+  float d2 = length(c - g2);
+  float glow1 = smoothstep(0.90, 0.05, d1);
+  float glow2 = smoothstep(0.66, 0.04, d2);
 
-  /* —— 云系 C：暖金余烬云（末段的高潮）—— */
-  vec2 uC = (c + cam * 0.85 + par * 1.05) * 1.40 + vec2(9.2, 3.3) + vec2(t * 0.20, -t * 0.15);
-  float nC = fbm(uC);
-  float mC = smoothstep(0.38, 0.92, nC);
-  mC *= 0.55 + 0.45 * smoothstep(0.36, 0.82, fbm(uC * 1.6 + 3.9));
-  float ampC = smoothstep(0.35, 0.80, p) * 1.35;
-  vec3 colC = mix(vec3(0.30, 0.12, 0.04), vec3(1.00, 0.64, 0.24),
-                  smoothstep(0.42, 0.90, nC));
-  col += colC * mC * ampC;
+  float warm = smoothstep(0.12, 0.82, p);
 
-  /* 云系核心的柔光：高密度区加一点 bloom 感 */
-  col += colA * mA * mA * 0.35 + colB * mB * mB * 0.40 + colC * mC * mC * 0.45;
+  vec3 baseC = vec3(0.012, 0.016, 0.030);
+  vec3 teal  = vec3(0.20, 0.58, 0.62);
+  vec3 cyan  = vec3(0.30, 0.78, 0.86);   /* 旅程前半段的更亮青 */
+  vec3 indigo= vec3(0.22, 0.28, 0.52);
+  vec3 gold  = vec3(1.00, 0.58, 0.20);
+  vec3 ember = vec3(1.00, 0.42, 0.16);   /* 深处的余烬橙红 */
 
-  /* —— 星空：四层视差。近层又大又亮、带柔光晕 —— */
-  float starAmt = 0.80 + 0.55 * p;
-  vec2 s1 = c + cam * 0.55 + par * 0.5;
-  vec2 s2 = c + cam * 0.90 + par * 0.9;
-  vec2 s3 = c + cam * 1.30 + par * 1.4;
-  vec2 s4 = c + cam * 1.90 + par * 2.0;
-  vec3 st = starLayer(s1, 24.0, 0.90, 0.10, u_t)
-          + starLayer(s2, 13.0, 0.88, 0.085, u_t) * 1.6
-          + starLayer(s3, 7.0, 0.87, 0.070, u_t) * 2.4;
-  col += st * starAmt;
-  /* 最亮几颗（近层）：加一圈柔光晕，成为画面的"锚点星" */
-  vec3 g4 = vec3(0.0);
-  {
-    vec2 gg = s4 * 4.2;
-    vec2 id = floor(gg);
-    vec2 f = fract(gg) - 0.5;
-    float h = hash(id);
-    if (h > 0.90){
-      vec2 sp = (vec2(hash(id + 19.7), hash(id + 47.3)) - 0.5) * 0.8;
-      float d = length(f - sp);
-      float lum = 0.5 + 0.5 * fract(h * 91.7);
-      float twk = 0.75 + 0.25 * sin(u_t * (0.5 + h) + h * 61.0);
-      vec3 tint = mix(vec3(0.85, 0.90, 1.00), vec3(1.00, 0.80, 0.55),
-                      step(0.6, fract(h * 37.1)));
-      g4 = tint * (smoothstep(0.045, 0.0, d) * 1.6 + exp(-14.0 * d) * 0.35) * lum * twk;
-    }
-  }
-  col += g4 * starAmt;
+  vec3 col = baseC * (0.9 + 0.7 * p);
 
-  /* —— 流星：约 8 秒一颗的偶发，短的亮线划过（克制，但"活"）—— */
-  {
-    float mt = u_t * 0.125;
-    float slot = floor(mt);
-    float age = fract(mt);
-    if (hash(vec2(slot, 7.7)) < 0.55){          /* 有的周期干脆没有流星 */
-      vec2 mp = vec2(hash(vec2(slot, 1.3)) - 0.5, hash(vec2(slot, 9.1)) - 0.5) * 1.1;
-      vec2 dir = normalize(vec2(hash(vec2(slot, 3.1)) - 0.5,
-                                0.35 + hash(vec2(slot, 5.5)) - 0.5));
-      float head = age * 1.7 - 0.25;
-      vec2 pa = mp + dir * max(head - 0.55, 0.0);
-      vec2 pb = mp + dir * head;
-      vec2 ab = pb - pa;
-      float ab2 = max(dot(ab, ab), 0.0001);
-      float dline = length(c - (pa + ab * clamp(dot(c - pa, ab) / ab2, 0.0, 1.0)));
-      float life = smoothstep(0.0, 0.12, age) * (1.0 - smoothstep(0.55, 1.0, age));
-      col += vec3(0.85, 0.92, 1.00) * exp(-46.0 * dline) * life * 0.5 * starAmt;
-    }
-  }
+  /* 青光晕：前半盛、后半让位给暖金——比例变化，两色始终共存 */
+  float tealAmt = (0.12 + 0.20 * p) * (1.0 - 0.55 * smoothstep(0.55, 0.90, p));
+  col += indigo * glow1 * 0.10;
+  col += mix(teal, cyan, smoothstep(0.15, 0.45, p)) * glow1 * tealAmt * (0.40 + 0.60 * dens);
+
+  /* 丝缕被附近的光点亮；暖色空间限位在暖核附近。
+     旅程末段丝缕色向"余烬"加深——离开场时颜色也在走。 */
+  float wm = smoothstep(0.30, 0.85, glow2);
+  float e1 = glow1 * (0.38 + 0.62 * p) + glow2 * (0.10 + 0.60 * warm);
+  float e2 = glow1 * (0.28 + 0.50 * p) + glow2 * (0.08 + 0.55 * warm);
+  vec3 silkC = mix(mix(teal, cyan, smoothstep(0.15, 0.45, p)),
+                   mix(gold, ember, smoothstep(0.75, 1.00, p)), wm);
+  col += silkC * l1 * e1 * 0.60;
+  col += silkC * l2 * e2 * 0.40;
+
+  /* 丝缕上的高光"结"：沿线偶发的亮点，缓慢明灭——不是撒星星 */
+  float glint = pow(f2, 9.0);
+  col += silkC * glint * (0.5 + 0.8 * warm)
+       * (0.55 + 0.45 * sin(u_t * 1.6 + f1 * 40.0)) * 1.1;
+
+  /* 暖核热中心 */
+  col += gold * glow2 * glow2 * glow2 * warm * (0.14 + 0.34 * p);
 
   /* 鼠标"提灯"：跟随光晕；悬停按钮/入口/进度点时增亮变暖 */
   vec2 mc = u_m * 0.5 * vec2(u_res.x / min(u_res.x, u_res.y), 1.0);
   float aura = exp(-5.5 * length(c - mc));
-  col += vec3(0.30, 0.78, 0.86) * aura * (0.030 + 0.060 * u_boost)
-       + vec3(1.00, 0.58, 0.20) * aura * aura * u_boost * 0.10;
+  col += mix(cyan, gold, 0.4 + 0.5 * u_boost) * aura * (0.035 + 0.075 * u_boost);
 
   /* 涟漪：点击处向外扩散的柔光环 */
   for (int i = 0; i < 3; i++){
     vec4 r = u_r[i];
     if (r.w > 0.0 && r.z < 2.2){
       float dd = length(c - r.xy);
-      float ring = exp(-26.0 * abs(dd - r.z * 0.55)) * exp(-1.8 * r.z) * r.w;
-      col += mix(vec3(0.30, 0.78, 0.86), vec3(1.00, 0.64, 0.24),
-                 smoothstep(0.2, 0.85, p)) * ring * 0.5;
+      float ring = exp(-28.0 * abs(dd - r.z * 0.55)) * exp(-1.8 * r.z) * r.w;
+      col += mix(cyan, gold, warm) * ring * 0.5;
     }
   }
 
-  /* 曝光随 p 抬升：越深入越亮（cdp_verify_nav 的滚动亮度依据） */
-  col *= 0.66 + 0.50 * p;
+  /* 曝光随 p 抬升（滚动冲刺已按用户要求删除） */
+  col *= (0.62 + 0.45 * p);
 
-  /* 高光泛光 + 极细颗粒（防渐变色带，不是星星） */
-  col += max(col - 0.42, vec3(0.0)) * 0.55;
+  /* 极细颗粒，防大面积渐变色带；不是"星星点缀" */
   col += (hash(gl_FragCoord.xy + fract(u_t) * 61.7) - 0.5) * 0.011;
 
-  /* 暗角：四角保持"空" */
-  float vig = smoothstep(1.32, 0.30, length(c));
-  col *= 0.34 + 0.66 * vig;
+  /* 暗角：视线收拢，四角保持"空" */
+  float vig = smoothstep(1.30, 0.30, length(c));
+  col *= 0.32 + 0.68 * vig;
 
   /* 软 tonemap，防高光死白 */
   col = 1.0 - exp(-col * 1.7);
