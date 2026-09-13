@@ -5,7 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KG Cosmos · 学术文献知识图谱</title>
 <link rel="stylesheet" href="./lib/a11y.css">
+<link rel="stylesheet" href="./lib/fonts/fonts.css">
 <link rel="stylesheet" href="./lib/voyage.css">
+<style>
+/* ── 标题字体（由 tools/apply_fonts.py 注入）────────────────────────────
+   fonts.css 是 tools/build_fonts.py 生成的子集字体，全部本地、零外部请求。
+   只给标题用：正文子集不含正文用字，换上去会逐字回退反而更难看。 */
+h1, h2, h3,
+.kick, .eyebrow, .note b, .fig .n, .kpi b, .card h2, .entry h3 {
+  font-family: "Noto Serif SC","Playfair Display",Georgia,"Songti SC","SimSun",serif;
+}
+/* 标题在衬线下不需要那么粗——衬线本身已经提供笔画对比 */
+h1, h2 { font-weight: 700; letter-spacing: -.02em; }
+h3 { font-weight: 600; }
+/* 数字用 Playfair 的等高数字，避免跳动 */
+.fig .n, .kpi b, [data-count] { font-variant-numeric: lining-nums tabular-nums; }
+</style>
 </head>
 <body>
 

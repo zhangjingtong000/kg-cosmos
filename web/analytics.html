@@ -43,7 +43,7 @@
   .cal.c1 { border-color: rgba(126,203,255,.3); } .cal.c1 b { color: #a9d8ff; }
   .cal.c2 { border-color: rgba(179,255,127,.26); } .cal.c2 b { color: #cdf5a8; }
   .cal.c3 { border-color: rgba(255,217,127,.26); } .cal.c3 b { color: #f0dcae; }
-  .calnote { grid-column: 1 / -1; margin-top: 2px; padding: 10px 13px;
+  .calnote { max-width: 72ch; grid-column: 1 / -1; margin-top: 2px; padding: 10px 13px;
              border-radius: 9px; font-size: 11px; line-height: 1.95;
              color: rgba(170,196,230,.68); background: rgba(140,170,255,.05);
              border: 1px solid rgba(140,170,255,.1); }
@@ -63,7 +63,7 @@
   #l5v .kpi b { color: #ffcfa8; }
   #l7r { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
          gap: 10px; margin-bottom: 10px; }
-  #l7r .kpi { border-color: rgba(179,255,127,.28); }
+  #l7r .kpi { border-color: rgba(255,178,127,.30); }  /* 原为 .high 的绿，但它讲的是负面结论，改中性暖色 */
   /* L9 关系召回：漏了这条会退化成"三个大卡片竖排"、占掉半屏——
      截图逐屏核对时才发现。KPI 行必须与 L5/L7 用同一个网格布局。 */
   #l9r { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr));
@@ -72,7 +72,7 @@
   #l9r .kpi b { color: #b9d8ff; }
 
   section { margin-top: 34px; }
-  h2 { font-size: 14px; font-weight: 560; margin: 0 0 4px; color: #eaf2ff; }
+  h2 { font-size: 19px; font-weight: 560; margin: 0 0 4px; color: #eaf2ff; }
   .sub { font-size: 11.5px; color: rgba(181,203,235,.55); margin-bottom: 14px; }
 
   /* ── 六层 ── */
@@ -124,8 +124,22 @@
            font-size: 11.5px; line-height: 1.85; color: rgba(160,190,235,.5); }
   footer code { color: rgba(190,214,246,.75); }
   .err { color: #ffb27f; }
+
+/* ── 标题字体（由 tools/apply_fonts.py 注入）────────────────────────────
+   fonts.css 是 tools/build_fonts.py 生成的子集字体，全部本地、零外部请求。
+   只给标题用：正文子集不含正文用字，换上去会逐字回退反而更难看。 */
+h1, h2, h3,
+.kick, .eyebrow, .note b, .fig .n, .kpi b, .card h2, .entry h3 {
+  font-family: "Noto Serif SC","Playfair Display",Georgia,"Songti SC","SimSun",serif;
+}
+/* 标题在衬线下不需要那么粗——衬线本身已经提供笔画对比 */
+h1, h2 { font-weight: 700; letter-spacing: -.02em; }
+h3 { font-weight: 600; }
+/* 数字用 Playfair 的等高数字，避免跳动 */
+.fig .n, .kpi b, [data-count] { font-variant-numeric: lining-nums tabular-nums; }
 </style>
 <link rel="stylesheet" href="./lib/a11y.css">
+<link rel="stylesheet" href="./lib/fonts/fonts.css">
 </head>
 <body>
 <div class="wrap">
@@ -214,6 +228,18 @@ const esc = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;');
 
+/* 行内 Markdown 转换：**粗体** 与 `代码`。
+   数据与模板里都写了 Markdown 语法，但原先只做 HTML 转义，
+   于是屏幕上直接显示出 28 个字面星号与 4 个反引号（多代理实测）。
+   在这里转换，**不改数据文件** —— 那些标记在数据资产里，属于硬约束。
+
+   ⚠️ 它必须放在 esc 的**完整定义之后**：esc 是多行链式调用
+   （上一行末尾还有 .replace），插在中间会把链切断，boot() 直接挂掉，
+   页面变成"只有小节标题、内容全空"。这个坑踩过一次。 */
+const md = (s) => esc(s)
+  .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+  .replace(/`([^`]+)`/g, '<code>$1</code>');
+
 const cls = (v) => v == null ? 'mid' : (v >= 90 ? 'high' : v >= 60 ? 'mid' : 'low');
 
 // 质量色阶：高=绿、中=蓝、低=橙。同一套色贯穿六层与关系类型，便于横向扫读。
@@ -260,8 +286,8 @@ function boot(D) {
     return `<div class="cal ${cls}"><b>${esc(label)}</b><span>${esc(nums)}</span>`
       + `<small>${esc(v.meaning)}</small></div>`;
   }).join('')
-  + `<div class="calnote">${esc(cal.note || '')}`
-  + (D.community_calibers ? `<br>${esc(D.community_calibers.note)}` : '')
+  + `<div class="calnote">${md(cal.note || '')}`
+  + (D.community_calibers ? `<br>${md(D.community_calibers.note)}` : '')
   + (cal.l3_extracted_caliber
       ? `<br><b>L3 特别说明</b>：L3 有两个口径，务必并列引用 —— `
         + `闭合口径含从边反建的 ${cal.l3_extracted_caliber.backfilled_nodes} 个节点，`
@@ -296,7 +322,7 @@ function boot(D) {
     ];
     document.getElementById('l5v').innerHTML = kpis.map(([a, b, c]) =>
       `<div class="kpi"><b>${esc(a)}</b><span>${esc(b)}</span><small>${esc(c)}</small></div>`
-    ).join('') + `<div class="calnote">${esc(v.note)}<br><b>限度</b>：${esc(v.caveat)}</div>`;
+    ).join('') + `<div class="calnote">${md(v.note)}<br><b>限度</b>：${md(v.caveat)}</div>`;
 
     const sens = v.threshold_sensitivity || [];
     if (sens.length) {
@@ -319,7 +345,7 @@ function boot(D) {
             `<td>${(s.ppv * 100).toFixed(1)}%</td>` +
             `<td>${(s.recall * 100).toFixed(1)}%</td><td>${s.f1.toFixed(3)}</td></tr>`;
         }).join('') + `</tbody></table>` +
-        (v.positioning ? `<div class="calnote"><b>定位结论</b>：${esc(v.positioning)}</div>` : '')
+        (v.positioning ? `<div class="calnote"><b>定位结论</b>：${md(v.positioning)}</div>` : '')
       ) : '';
 
       document.getElementById('l5vSens').innerHTML =
@@ -352,7 +378,7 @@ function boot(D) {
     const pc7 = x => x == null ? '—' : (x * 100).toFixed(1) + '%';
     document.getElementById('l7rSec').hidden = false;
     document.getElementById('l7rSub').innerHTML =
-      `${r7.n} 条 \`role_violation\` 样本的独立判读（固定 seed，判读口径事先写好）`;
+      `${r7.n} 条 <code>role_violation</code> 样本的独立判读（固定 seed，判读口径事先写好）`;
     document.getElementById('l7r').innerHTML = [
       [pc7(r7.true_violation_rate), '真的端点类型违规', '组合确实说不通'],
       [pc7(r7.predicate_wrong_rate), '其实是谓词选错', '不是端点类型的错'],
@@ -360,8 +386,8 @@ function boot(D) {
     ].map(([a, b, c]) =>
       `<div class="kpi"><b>${esc(a)}</b><span>${esc(b)}</span><small>${esc(c)}</small></div>`
     ).join('')
-    + `<div class="calnote">${esc(r7.note || '')}<br>`
-    + `<b>结论</b>：${esc(r7.conclusion || '')}</div>`;
+    + `<div class="calnote">${md(r7.note || '')}<br>`
+    + `<b>结论</b>：${md(r7.conclusion || '')}</div>`;
   }
 
   // ── L9 关系召回：比端点召回更根本的读数 ──
@@ -369,14 +395,14 @@ function boot(D) {
   if (r9 && r9.recall_pair_all != null) {
     document.getElementById('l9rSec').hidden = false;
     const pcr = x => x == null ? '—' : (x * 100).toFixed(1) + '%';
-    // 召回**报区间**（严格 vs 别名最松），不再只报单点——
+    // 召回<b>报区间</b>（严格 vs 别名最松），不再只报单点——
     // 严格匹配会把 `LLMs` vs `Large Language Model` 这类写法差异判成漏。
     const rg = r9.recall_range || [];
     const rngTxt = rg.length === 2
       ? `${(rg[0] * 100).toFixed(1)}–${(rg[1] * 100).toFixed(1)}%`
       : pcr(r9.recall_pair_all);
     document.getElementById('l9rSub').innerHTML =
-      `从固定种子的 ${r9.n_segment} 个原文段落出发，由独立判定者列出**明确断言**的关系，`
+      `从固定种子的 ${r9.n_segment} 个原文段落出发，由独立判定者列出<b>明确断言</b>的关系，`
       + `再与图比对。金标 ${r9.n_gold_raw} 条，剔除端点非命名实体的 ${r9.n_dropped_non_entity} 条后`
       + `参评 <b>${r9.n_gold_entity_only}</b> 条。`;
     document.getElementById('l9r').innerHTML = [
@@ -386,9 +412,9 @@ function boot(D) {
     ].map(([a, b, c]) =>
       `<div class="kpi"><b>${esc(a)}</b><span>${esc(b)}</span><small>${esc(c)}</small></div>`
     ).join('')
-    + `<div class="calnote">${esc(r9.reading || '')}<br>`
-    + `<b>标注稳定性</b>：${esc(r9.stability_note || '')}<br>`
-    + `<b>限度</b>：${esc(r9.caveat || '')}</div>`;
+    + `<div class="calnote">${md(r9.reading || '')}<br>`
+    + `<b>标注稳定性</b>：${md(r9.stability_note || '')}<br>`
+    + `<b>限度</b>：${md(r9.caveat || '')}</div>`;
 
     // 四个档位的明细 + 产出构成：把"召回约一半"的解读限定住
     const tiers = r9.recall_tiers || {};
@@ -418,19 +444,19 @@ function boot(D) {
         + `<tr><td>其中通过 L5</td><td>${over.n_pass}（${(over.n_pass / over.n_edge * 100).toFixed(0)}%）</td></tr>`
         + `<tr><td>结构性边（Section/Figure/Table）</td><td>${over.n_structural}（${(over.structural_share * 100).toFixed(1)}%）</td></tr>`
         + `</tbody></table>`
-        + `<div class="calnote">${esc(over.reading || '')}<br>`
+        + `<div class="calnote">${md(over.reading || '')}<br>`
         + `<b>所以「关系召回约一半」要读作</b>：<b>金标列出的那几条里，约一半能在图中找到</b>；`
         + `而<b>不能</b>读成"图只覆盖了原文关系的一半"——图里每段有约 ${over.per_span_avg} 条边，`
         + `远超金标列出的 2–5 条。<b>不是抽取器漏了关系，而是金标本身列举不全。</b></div>`;
     }
     if (r9.local_reextract_rejected) {
       tierHtml += `<div class="calnote"><b>⚠️ 「重抽一遍」这条路已实测否决</b>：`
-        + `${esc(r9.local_reextract_rejected.note)}`
+        + `${md(r9.local_reextract_rejected.note)}`
         + `（复现：<code>${esc(r9.local_reextract_rejected.tool)}</code>）</div>`;
     }
     document.getElementById('l9rTiers').innerHTML = tierHtml;
 
-    // 漏抽归因：**可操作**的部分——漏抽不是均匀的，
+    // 漏抽归因：<b>可操作</b>的部分——漏抽不是均匀的，
     // 集中在特定谓词与 2024+ 的新论文上，所以补救成本远低于全量重抽。
     const ma = r9.miss_analysis;
     if (ma && ma.by_year) {
@@ -447,7 +473,7 @@ function boot(D) {
       const eps = ma.miss_endpoint_status || {};
       document.getElementById('l9rMiss').innerHTML =
         `<div class="calnote" style="margin-top:14px"><b>漏抽归因</b>`
-        + `（${ma.n_miss} 条未命中；这是**可操作**的部分）</div>`
+        + `（${ma.n_miss} 条未命中；这是<b>可操作</b>的部分）</div>`
         + `<table class="sens"><thead><tr><th>年份</th><th>金标</th><th>命中</th>`
         + `<th>漏</th><th>漏率</th></tr></thead><tbody>`
         + yrs.map(y => {
@@ -459,12 +485,12 @@ function boot(D) {
           }).join('')
         + `</tbody></table>`
         + `<div class="calnote">`
-        + `上表用**严格匹配**口径。换成别名口径后：`
+        + `上表用<b>严格匹配</b>口径。换成别名口径后：`
         + `2023 及以前漏 <b>30%</b>（不变），`
         + `<b>2024 及以后漏 55%</b>（原 68%）——`
-        + `说明新论文里有约 13 个百分点的"漏"其实是**写法差异**`
+        + `说明新论文里有约 13 个百分点的"漏"其实是<b>写法差异</b>`
         + `（金标写 <code>LLMs</code>、图里写 <code>Large Language Models</code>），`
-        + `不是真的没抽到。**但即便修正后，新论文仍明显差于老论文（55% vs 30%）。**<br>`
+        + `不是真的没抽到。<b>但即便修正后，新论文仍明显差于老论文（55% vs 30%）。</b><br>`
         + `漏得最多的谓词：${worstRel.map(x => `<b>${esc(x)}</b>（${rel[x]} 条）`).join('、')}；`
         + `而 <code>USES</code> 只漏 17%。<br>`
         + `<b>⚠️ 与上方「产出构成」的关系（两者不矛盾）</b>：`
@@ -472,7 +498,7 @@ function boot(D) {
         + `而产出构成显示「图里每段有约 19 条边，远超金标列出的 2–5 条」。`
         + `合起来是：<b>两边覆盖的是不同的集合</b>——`
         + `不能说"抽取器召回低"，也不能说"金标就是全的"。`
-        + `真要下结论，得先有一份**双方都认可**的关系金标，而这份金标目前不存在。`
+        + `真要下结论，得先有一份<b>双方都认可</b>的关系金标，而这份金标目前不存在。`
         + `</div>`;
     }
   }
@@ -486,7 +512,7 @@ function boot(D) {
       <div class="mid">
         <div class="track">${L.value == null ? ''
           : `<i style="width:${L.value}%;background:${hue(L.value)}"></i>`}</div>
-        <div class="dt">${esc(L.detail)}</div>
+        <div class="dt">${md(L.detail)}</div>
       </div>
       <div class="val ${L.value == null ? '' : cls(L.value)}">
         ${L.value == null ? `<em>${esc(L.figure || '见说明')}</em>` : L.value + '%'}
@@ -509,7 +535,7 @@ function boot(D) {
         </div>
         <div class="val ${cls(l9.endpoint_recall * 100)}">${(l9.endpoint_recall * 100).toFixed(1)}%</div>
       </div>
-      <div class="calnote">${esc(l9.note || '')}<br><b>限度</b>：${esc(l9.limitation || '')}</div>`;
+      <div class="calnote">${md(l9.note || '')}<br><b>限度</b>：${md(l9.limitation || '')}</div>`;
   } else {
     document.getElementById('l9Sub').textContent = '尚未产出（跑 tools/l9_recall.py）';
   }
@@ -531,7 +557,7 @@ function boot(D) {
 
   document.getElementById('typeSub').innerHTML =
     `共 ${D.by_type.rows.length} 种关系类型，下面列出边数 ≥ 50 的 ${D.by_type.rows.filter(r => r.n >= 50).length} 种`
-    + `（${esc(D.by_type.note)}）。通过率 = 该类中 entail_prob ≥ ${esc(D.by_type.threshold)} 的占比`;
+    + `（${md(D.by_type.note)}）。通过率 = 该类中 entail_prob ≥ ${esc(D.by_type.threshold)} 的占比`;
 
   document.getElementById('types').innerHTML = D.by_type.rows
     .filter(r => r.n >= 50)
