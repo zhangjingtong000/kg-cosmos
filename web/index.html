@@ -97,6 +97,10 @@ h3 { font-weight: 600; }
     <div class="sky" data-src="./assets/sky-3-deep.webp"></div>
     <div class="sky" data-src="./assets/sky-4-recede.webp"></div>
   </div>
+  <!-- 背景视频（2026-09）：用 FLUX img2img 逐帧演化出的闭环动画，滚动直接驱动
+       时间轴；末尾是溶回开头的，所以循环没有跳变。叠在星云图之上、#grade 之下。
+       没就绪时保持 opacity:0，完全交回下面那 5 层图。 -->
+  <video id="voyageVideo" muted playsinline preload="auto"></video>
   <div id="grade"></div>
   <div id="veil"></div>
   <div id="noise"></div>

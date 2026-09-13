@@ -68,22 +68,31 @@ function tick(now) {
   curP += (targetP - curP) * (REDUCED ? 1 : Math.min(1, dt * 3.4));
   const p = curP;
 
-  /* 交叉淡化：把 p 映射到 [0, N-1]，第 i 张的可见度 = 三角权重。
-     这样任何时刻最多两张同时可见，过渡必然连续。 */
-  const pos = p * (N - 1);
-  for (let i = 0; i < N; i++) {
-    const w = Math.max(0, 1 - Math.abs(pos - i));
-    const L = LENS[i] || LENS[0];
-    // 图内局部进度：进入时为 0，离开时为 1
-    const local = Math.min(1, Math.max(0, pos - i + 0.5));
-    const s = L.s0 + (L.s1 - L.s0) * local;
-    const x = L.x0 + (L.x1 - L.x0) * local;
-    const y = L.y0 + (L.y1 - L.y0) * local;
-    layers[i].style.opacity = w.toFixed(4);
-    layers[i].style.transform =
-      'scale(' + s.toFixed(4) + ') translate3d('
-      + (x - sx * 1.6).toFixed(2) + '%, '
-      + (y - sy * 1.2).toFixed(2) + '%, 0)';
+  if (videoOK) {
+    /* 视频模式：滚动直接驱动时间轴。素材末尾是溶回开头的，所以取
+       [0, duration - 1帧)，避免停在尾帧上。 */
+    if (video.readyState >= 2 && video.duration) {
+      const t = p * (video.duration - 1 / 30);
+      if (Math.abs(video.currentTime - t) > 1 / 60) video.currentTime = t;
+    }
+  } else {
+    /* 回退模式：交叉淡化。把 p 映射到 [0, N-1]，第 i 张的可见度 = 三角权重。
+       这样任何时刻最多两张同时可见，过渡必然连续。 */
+    const pos = p * (N - 1);
+    for (let i = 0; i < N; i++) {
+      const w = Math.max(0, 1 - Math.abs(pos - i));
+      const L = LENS[i] || LENS[0];
+      // 图内局部进度：进入时为 0，离开时为 1
+      const local = Math.min(1, Math.max(0, pos - i + 0.5));
+      const s = L.s0 + (L.s1 - L.s0) * local;
+      const x = L.x0 + (L.x1 - L.x0) * local;
+      const y = L.y0 + (L.y1 - L.y0) * local;
+      layers[i].style.opacity = w.toFixed(4);
+      layers[i].style.transform =
+        'scale(' + s.toFixed(4) + ') translate3d('
+        + (x - sx * 1.6).toFixed(2) + '%, '
+        + (y - sy * 1.2).toFixed(2) + '%, 0)';
+    }
   }
   sx += (mx - sx) * 0.045;
   sy += (my - sy) * 0.045;
@@ -111,6 +120,34 @@ readScroll();
 layers.forEach(el => {
   if (el.dataset.src) el.style.backgroundImage = 'url("' + el.dataset.src + '")';
 });
+
+/* ── 背景视频（2026-09）───────────────────────────────────────────────────
+   用户提了两次：「导航页后面的这个视频，还是没有做到末帧与首帧去连接」。
+   根因不是播放器，是素材 —— 原先那 5 张星云图各自独立生成（sky-3 是爆亮的
+   橙核、sky-4 却是暗蓝盘状星系），彼此不构成演化链，再怎么交叉淡化也只是
+   "五张图换着播"。现在换成一条用 FLUX img2img 逐帧演化出来的闭环视频。
+
+   这里是**探测式**接入：视频没就绪（文件缺失 / 解码失败 / 用户要求减少动效）
+   就完整回退到下面的 5 图层交叉淡化 —— 那套逻辑一行未动。
+   4 秒兜底之后永久放弃，不允许它半路插进来打断已经开始的动画。 */
+const video = document.getElementById('voyageVideo');
+let videoOK = false;
+
+if (video && !REDUCED) {
+  const giveUp = () => {
+    videoOK = false;
+    video.classList.remove('on');
+    try { video.removeAttribute('src'); video.load(); } catch (_) {}
+  };
+  video.addEventListener('loadeddata', () => {
+    if (video.duration > 0.5) { videoOK = true; video.classList.add('on'); }
+    else giveUp();
+  });
+  video.addEventListener('error', giveUp);
+  setTimeout(() => { if (!videoOK) giveUp(); }, 4000);
+  video.src = './assets/voyage.mp4';
+  video.load();
+}
 
 /* 等首图就绪再起动画，避免开场闪一下黑 */
 function preload(list) {
