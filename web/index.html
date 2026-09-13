@@ -1,256 +1,177 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KG Cosmos · 知识图谱构建与可视化</title>
-<style>
-  * { box-sizing: border-box; }
-  html, body { margin: 0; min-height: 100%; }
-  body {
-    background: radial-gradient(ellipse 130% 70% at 50% -10%, #101c3a 0%, #070c1a 48%, #04070f 100%);
-    color: #dfe8ff; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-    padding: 54px 34px 70px; line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-  .wrap { max-width: 1100px; margin: 0 auto; }
-  header { margin-bottom: 34px; }
-  header small { display: block; color: rgba(181,203,235,.5); font-size: 11px;
-                 letter-spacing: .2em; text-transform: uppercase; }
-  header h1 { margin: 10px 0 0; font-size: 30px; font-weight: 560; letter-spacing: .01em; }
-  header p { margin: 14px 0 0; max-width: 760px; font-size: 13px; line-height: 1.9;
-             color: rgba(190,212,242,.68); }
-  header p b { color: #cfe0ff; font-weight: 560; }
-  .facts { display: flex; flex-wrap: wrap; gap: 26px; margin-top: 22px; }
-  .fact b { display: block; font-size: 19px; font-weight: 600; color: #eaf2ff;
-            font-variant-numeric: tabular-nums; }
-  .fact span { font-size: 11px; color: rgba(181,203,235,.55); }
-
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(316px, 1fr));
-          gap: 16px; margin-top: 34px; }
-  a.card { display: block; text-decoration: none; color: inherit;
-           background: rgba(11,18,38,.82); border: 1px solid rgba(140,170,255,.16);
-           border-radius: 14px; padding: 18px 19px 17px; position: relative;
-           overflow: hidden; transition: border-color .18s, transform .18s, background .18s; }
-  a.card:hover { border-color: rgba(150,190,255,.5); background: rgba(16,25,50,.9);
-                 transform: translateY(-2px); }
-  a.card.primary { border-color: rgba(150,190,255,.34); }
-  a.card.primary::after { content: "主视图"; position: absolute; top: 15px; right: 15px;
-                          font-size: 9.5px; letter-spacing: .1em; color: #9fc4ff;
-                          border: 1px solid rgba(159,196,255,.34); border-radius: 20px;
-                          padding: 2px 8px; }
-  .art { height: 62px; margin-bottom: 14px; position: relative; }
-  .card h2 { margin: 0; font-size: 16px; font-weight: 560; color: #eaf2ff; }
-  .card .desc { margin: 7px 0 0; font-size: 12px; line-height: 1.75;
-                color: rgba(190,212,242,.62); min-height: 42px; }
-  .card .num { margin-top: 11px; padding-top: 10px;
-               border-top: 1px solid rgba(140,170,255,.1);
-               font-size: 11px; color: rgba(159,196,255,.8);
-               font-variant-numeric: tabular-nums; }
-  .card .go { position: absolute; right: 19px; bottom: 16px; font-size: 13px;
-              color: rgba(159,196,255,.55); transition: color .18s, transform .18s; }
-  a.card:hover .go { color: #cfe0ff; transform: translateX(3px); }
-
-  /* 每张卡片的示意图形都用纯 CSS 画，不引任何图片或图标库。
-     注意：示意图容器必须嵌在 .art **里面**（<div class="art"><div class="dots">…），
-     不能写成 <div class="art dots"> —— 那样 .dots 的 `position:absolute; inset:0`
-     会覆盖 .art 的定位，使示意图脱离文档流并铺满整张卡片：
-     卡片高度少 62px、圆点散落压住标题。这个坑是实测 rect 才发现的。 */
-  .dots { position: absolute; inset: 0; }
-  .dots i { position: absolute; border-radius: 50%; display: block; }
-  .ring { position: absolute; border-radius: 50%; border: 1px solid; }
-  .bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 5px; }
-  .bars i { flex: 1 1 0; border-radius: 2px 2px 0 0; }
-  .cells { position: absolute; inset: 0; display: grid;
-           grid-template-columns: repeat(6, 1fr); gap: 4px; }
-  .cells i { border-radius: 3px; background: rgba(120,160,255,.14); }
-  .cells i.on { background: rgba(140,190,255,.45); }
-  .rays { position: absolute; inset: 0; }
-  .rays i { position: absolute; left: 50%; top: 50%; height: 1px;
-            background: linear-gradient(90deg, rgba(140,190,255,.5), rgba(140,190,255,0));
-            transform-origin: 0 50%; }
-
-  h3.sec { margin: 44px 0 4px; font-size: 11px; letter-spacing: .14em;
-           text-transform: uppercase; color: rgba(181,203,235,.45); }
-  .legacy { margin-top: 12px; font-size: 11.5px; line-height: 2.1;
-            color: rgba(160,190,235,.5); }
-  .legacy a { color: rgba(159,196,255,.7); text-decoration: none;
-              border-bottom: 1px dashed rgba(159,196,255,.3); }
-  .legacy a:hover { color: #fff; }
-  /* 口径说明：三套数字并存必须当场解释，否则会被读成前后矛盾 */
-  .caliber { margin-top: 16px; padding: 11px 14px; max-width: 860px;
-             font-size: 11.5px; line-height: 2.0; border-radius: 10px;
-             color: rgba(170,196,230,.72);
-             background: rgba(140,170,255,.055);
-             border: 1px solid rgba(140,170,255,.12); }
-  .caliber b { color: rgba(214,230,252,.92); font-weight: 550; }
-  .caliber a { color: #9fc4ff; text-decoration: none; }
-  .caliber a:hover { text-decoration: underline; }
-  .caliber .c1, .caliber .c2, .caliber .c3 {
-             display: inline-block; margin: 0 2px; padding: 1px 7px; border-radius: 5px;
-             font-size: 10.5px; }
-  .caliber .c1 { background: rgba(126,203,255,.16); color: #a9d8ff; }
-  .caliber .c2 { background: rgba(179,255,127,.14); color: #cdf5a8; }
-  .caliber .c3 { background: rgba(255,217,127,.14); color: #f0dcae; }
-  .legacy .note { margin-top: 10px; padding-top: 9px; font-size: 11px; line-height: 1.85;
-                  color: rgba(150,190,255,.45);
-                  border-top: 1px solid rgba(140,170,255,.1); }
-  .legacy .note code { color: rgba(190,214,246,.7); }
-  .legacy sup { color: rgba(255,178,127,.85); font-size: 10px; }
-  footer { margin-top: 46px; padding-top: 18px;
-           border-top: 1px solid rgba(140,170,255,.1);
-           font-size: 11px; line-height: 1.9; color: rgba(150,190,255,.42); }
-  footer code { color: rgba(190,214,246,.7); }
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KG Cosmos · 学术文献知识图谱</title>
 <link rel="stylesheet" href="./lib/a11y.css">
+<link rel="stylesheet" href="./lib/voyage.css">
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <small>kg cosmos</small>
-    <h1>学术文献知识图谱 · 构建与可视化</h1>
-    <p>从 <b>17 篇 arXiv 综述</b>抽取实体与关系，经<b>端点归一化</b>、<b>实体聚类</b>、
-      <b>关系方向治理</b>与<b>证据支持度判别</b>后建成的知识图谱，以及围绕它的一组探索界面。
-      全部判别与评测在<b>本机 GPU 离线完成</b>。</p>
-    <div class="facts">
-      <div class="fact"><b>18780</b><span>实体（概览层）</span></div>
-      <div class="fact"><b>29120</b><span>关系（概览层）</span></div>
-      <div class="fact"><b>18</b><span>Louvain 社区</span></div>
-      <div class="fact"><b>94.4%</b><span>实体证据存在率</span></div>
-      <!-- 这里不能写"关系原文支持率"：63.7% 只是判别器**判通过的比例**，
-           独立盲判实测其中只有 49.7% 真被原文支持（真实支持率 40.0%）。
-           写成"支持率"是错的，而且它出现在第一屏。 -->
-      <div class="fact"><b>63.7%</b><span>L5 判通过 · PPV 49.7%</span></div>
-      <div class="fact"><b>¥0</b><span>全流程成本</span></div>
-    </div>
-    <!-- 项目里有三套不同的数字口径，不加说明就会被读成"前后矛盾"。
-         评委交叉核对页面时必然发现，所以在这里就把关系讲清楚。 -->
-    <div class="caliber">
-      <b>关于数字口径</b>：本项目有三套并存的规模数字，含义不同、不可互相替代 ——
-      <span class="c1">概览层图</span> <b>18780</b> 节点 / <b>29120</b> 边
-      （无向去重后的简化图，供三维界面渲染，社区数 18，
-      另有 <b>4080</b> 个未归入社区的碎片节点）；
-      <span class="c2">评测全集</span> <b>43867</b> 条边
-      （含方向与重复，六层指标在此口径上计算）；
-      <span class="c3">L5 判通过子集</span> <b>27954</b> 条边（通过率 63.7%）。
-      三者的换算与完整口径见 <a href="analytics.html">图谱分析面板</a>。
-      <br><b>另一个必须说清的口径</b>：<b>63.7% 是判别器判通过的比例，不是"被原文支持的比例"</b>。
-      200 条分层抽样的独立盲判实测：判通过的边里只有 <b>49.7%</b> 真被支持（PPV），
-      全图真实支持率约 <b>40.0%</b>。详见分析面板的「L5 域内效度」区。
-    </div>
-  </header>
 
-  <div class="grid">
-    <a class="card primary" href="kg-nebula.html">
-      <div class="art"><div class="dots">
-        <span class="ring" style="left:6px;top:6px;width:50px;height:50px;border-color:rgba(126,203,255,.5)"></span>
-        <i style="left:26px;top:24px;width:14px;height:14px;background:#7ecbff;box-shadow:0 0 12px #7ecbff"></i>
-        <i style="left:66px;top:14px;width:9px;height:9px;background:#b3ff7f;box-shadow:0 0 9px #b3ff7f"></i>
-        <i style="left:88px;top:40px;width:7px;height:7px;background:#ffd97f;box-shadow:0 0 8px #ffd97f"></i>
-        <i style="left:60px;top:48px;width:6px;height:6px;background:#ff9f7f;box-shadow:0 0 8px #ff9f7f"></i>
-      </div></div>
-      <h2>社区星云</h2>
-      <p class="desc">18 个 Louvain 社区的三维星云概览；进入社区后是内部实体云，
-        支持搜索、点选高亮、证据出处与着色维度切换。</p>
-      <div class="num">核心视图 · 可切换「社区 / 类型」分区与「度数 / PageRank」排序</div>
-      <span class="go">→</span>
-    </a>
+<a id="a11y-skip" class="a11y-skip" href="#ch-0">跳到正文</a>
 
-    <a class="card" href="pathqa.html">
-      <div class="art"><div class="rays">
-        <span class="ring" style="left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-color:rgba(140,190,255,.45)"></span>
-        <i style="width:70px;transform:rotate(-18deg)"></i>
-        <i style="width:62px;transform:rotate(28deg)"></i>
-        <i style="width:52px;transform:rotate(96deg)"></i>
-        <i style="width:66px;transform:rotate(200deg)"></i>
-        <i style="width:46px;transform:rotate(300deg)"></i>
-      </div></div>
-      <h2>问题子图</h2>
-      <p class="desc">输入一句问法，在图谱里定位相关实体并抽出 2 跳子图。
-        这是「图谱能否被用来回答问题」的最小外部效度检验。</p>
-      <div class="num">字面匹配 → BFS 2 跳 → 力导向 SVG</div>
-      <span class="go">→</span>
-    </a>
-
-    <a class="card" href="method-limits.html">
-      <div class="art"><div class="cells">
-        <i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i class="on"></i>
-        <i></i><i class="on"></i><i></i><i class="on"></i><i></i><i></i>
-        <i class="on"></i><i></i><i class="on"></i><i class="on"></i><i></i><i class="on"></i>
-      </div></div>
-      <h2>方法能力与局限</h2>
-      <p class="desc">243 条「某方法在某能力维度上的表现或局限」记录，
-        每条都带原文依据、来源论文与页码，可按维度或方法筛选。</p>
-      <div class="num">243 条 · 178 个方法 · 194 个能力维度</div>
-      <span class="go">→</span>
-    </a>
-
-    <a class="card" href="analytics.html">
-      <div class="art"><div class="bars">
-        <i style="height:93%;background:linear-gradient(180deg,#8ce0a8,#4fbf82)"></i>
-        <i style="height:69%;background:linear-gradient(180deg,#7fb3ff,#4a7fd8)"></i>
-        <i style="height:99%;background:linear-gradient(180deg,#8ce0a8,#4fbf82)"></i>
-        <i style="height:64%;background:linear-gradient(180deg,#7fb3ff,#4a7fd8)"></i>
-        <i style="height:100%;background:linear-gradient(180deg,#8ce0a8,#4fbf82)"></i>
-        <i style="height:52%;background:linear-gradient(180deg,#ffb27f,#d97a45)"></i>
-        <i style="height:76%;background:linear-gradient(180deg,#7fb3ff,#4a7fd8)"></i>
-      </div></div>
-      <h2>图谱分析面板</h2>
-      <p class="desc">六层评测、同口径治理前后对比、关系类型分布与端点命中分布。
-        面板上每个数字都可追溯回构建产物。</p>
-      <div class="num">L1 94.4% · L3 68.4%（抽取口径）· L4 99.5% · L5 63.7% 通过 · L6 100%</div>
-      <span class="go">→</span>
-    </a>
-
-    <a class="card" href="refs.html">
-      <div class="art"><div class="dots">
-        <i style="left:8px;top:18px;width:34px;height:22px;border-radius:4px;background:rgba(140,190,255,.35)"></i>
-        <i style="left:48px;top:12px;width:34px;height:22px;border-radius:4px;background:rgba(179,255,127,.3)"></i>
-        <i style="left:28px;top:38px;width:34px;height:22px;border-radius:4px;background:rgba(255,217,127,.3)"></i>
-      </div></div>
-      <h2>可视化标杆参考</h2>
-      <p class="desc">调研阶段收集的 25 张主流知识图谱可视化产品截图，
-        含交互机制标注，是界面设计的参照系。</p>
-      <div class="num">25 张 · 机制级标注</div>
-      <span class="go">→</span>
-    </a>
-  </div>
-
-  <h3 class="sec">探索过程中的其他原型（保留备查）</h3>
-  <div class="legacy">
-    <a href="community-atlas.html">社区图集（2D 分面）<sup>*</sup></a> ·
-    <a href="graph-2d.html">二维图<sup>*</sup></a> ·
-    <a href="force-explorer.html">力导向浏览器<sup>*</sup></a> ·
-    <a href="force-graph.html">力导向图<sup>*</sup></a> ·
-    <a href="index3d.html">三维原型</a> ·
-    <a href="index3d-force.html">三维力导向</a> ·
-    <a href="index3d-bounce.html">三维弹跳</a> ·
-    <a href="kg_galaxy.html">星系</a> ·
-    <a href="kg_space.html">空间</a> ·
-    <a href="prototype-semantic-filaments.html">语义纤维</a> ·
-    <a href="exploration.html">早期探索</a> ·
-    <a href="legacy-glass-nodes.html">玻璃节点原型</a> ·
-    <a href="official-1-blocks.html">官方样例 · blocks</a> ·
-    <a href="official-2-kg.html">官方样例 · 本项目数据</a> ·
-    <a href="official-3-text.html">官方样例 · text-nodes<sup>*</sup></a>
-    <div class="note">
-      <sup>*</sup> 标记者<b>需要联网</b>：它们依赖 <code>esm.sh</code> 的 CDN 资源，未做本地化；
-      断网时页面会给出明确提示而不是白屏。其余页面（含上方五张主卡片）均已验证<b>断网可用</b>，
-      可用 <code>python tools/cdp_verify_offline.py &lt;页面路径&gt;</code> 复核。
-    </div>
-  </div>
-
-  <footer>
-    数据管线：PyMuPDF 解析 → 分块 → LLM 抽取 → 端点归一化 → 实体聚类 → 关系治理 →
-    本地 Triplet Critic 证据判别 → 图数据库。
-    本页与全部子页面均为<b>原生 HTML/JS，无构建链、无外部依赖</b>（three.js 走 CDN）。
-    质量报告见仓库 <code>docs/L5_SIX_LAYER_REPORT.md</code>；
-    调研汇总见 <code>docs/MAINSTREAM_SOLUTIONS_SURVEY.md</code>。
-  </footer>
+<!-- 固定深空背景。三层环境光 + 稀疏星点 + 细噪点，全部 CSS，
+     不用 WebGL/Canvas —— 原因见 lib/voyage.js 顶部的说明。 -->
+<div id="stage" aria-hidden="true">
+  <div id="glow"><i></i><i></i><i></i></div>
+  <div id="stars"></div>
+  <div id="noise"></div>
+  <div id="veil"></div>
+  <div id="grain"></div>
 </div>
-<!-- 供 tools/cdp_shot.py 之类的自动化截图判断"可以抓帧了"。
-     本页没有异步数据，直接置位即可。 -->
-<script>window.__ready = true;</script>
+
+<main id="reel">
+
+  <!-- 00 · Hero -->
+  <section class="ch" id="ch-0">
+    <div class="in">
+      <p class="eyebrow">Knowledge Graph · 28 篇论文 · 本机离线产出</p>
+      <h1><span class="ln"><i class="thin">KG</i></span>
+          <span class="ln"><i class="heavy">COSMOS</i></span></h1>
+      <div class="facts" id="liveFacts"></div>
+      <p class="lead">
+        从 28 篇论文里抽出的知识图谱，带着<strong>六层可复现的评测</strong>与
+        <strong>三条独立的负结果</strong>。下面每一屏都在讲这张图的某个侧面。
+      </p>
+      <div class="cta">
+        <a class="btn" href="kg-nebula.html">进入主视图<span class="a">→</span></a>
+        <a class="btn ghost" href="analytics.html">看评测结论</a>
+      </div>
+    </div>
+    <div class="cue"><span class="t"></span><span>向下滚动</span></div>
+  </section>
+
+  <!-- 01 · 尺度 -->
+  <section class="ch" id="ch-1">
+    <div class="in">
+      <p class="kick">01 — 尺度</p>
+      <h2>一张<em>能量出误差</em>的图谱</h2>
+      <p class="lead">
+        这张图的价值不在于"把图跑出来了"，而在于它同时带着
+        <strong>六层可复现的评测</strong>与<strong>三条独立的负结果</strong>——
+        每个对外报出的数字都能追到产物文件，也包括那些不好看的。
+      </p>
+      <div class="grid">
+        <div class="fig"><span class="n" data-count="18780">0</span>
+          <span class="k">实体（概览层）</span><span class="d">Louvain 归入 60 个社区</span></div>
+        <div class="fig"><span class="n" data-count="29120">0</span>
+          <span class="k">关系（概览层）</span><span class="d">评测全集 43867 条边</span></div>
+        <div class="fig"><span class="n" data-count="94.4" data-dec="1">0<u>%</u></span>
+          <span class="k">实体证据存在率</span><span class="d">L1：名字出现在自己的引文里</span></div>
+        <div class="fig"><span class="n warm">¥0</span>
+          <span class="k">全流程云端支出</span><span class="d">判别与评测全部在本机完成</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 · 最要紧的结论 -->
+  <section class="ch" id="ch-2">
+    <div class="in">
+      <p class="kick">02 — 它真正量到了什么</p>
+      <h2>63.7% 后面那句<em>更该说的话</em></h2>
+      <p class="lead">
+        项目一度把「L5 = 63.7%」当作"关系证据支持度"对外报。做域内效度抽检后发现，
+        它只是<strong>判别器判通过的比例</strong>——200 条分层抽样、两个独立判定者
+        （一致率 86.7%，κ = 0.722）给出的真实读数是：
+      </p>
+      <div class="grid">
+        <div class="fig"><span class="n" data-count="40.0" data-dec="1">0<u>%</u></span>
+          <span class="k">三元组真被原文支持</span><span class="d">95%CI 34.1–46.0%</span></div>
+        <div class="fig"><span class="n" data-count="49.7" data-dec="1">0<u>%</u></span>
+          <span class="k">判别器 PPV</span><span class="d">判通过的边里约一半不成立</span></div>
+        <div class="fig"><span class="n" data-count="0.7074" data-dec="4">0</span>
+          <span class="k">域内加权 AUC</span><span class="d">官方校准集上是 0.9851</span></div>
+        <div class="fig"><span class="n" data-count="13960">0</span>
+          <span class="k">加权假阳性</span><span class="d">比真阳性（13778）还多</span></div>
+      </div>
+      <div class="note">
+        <p><b>为什么要把这个写出来。</b>它是项目里最不好看的一个结论——
+        现成的 NLI 模型换到本任务的数据分布上会明显退化。</p>
+        <p>但它同时是<strong>最可复现</strong>的一条：抽检清单、盲判界面、加权脚本、
+        标注者一致性检验全在仓库里，任何人都能重跑一遍。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 · 入口 -->
+  <section class="ch" id="ch-3">
+    <div class="in">
+      <p class="kick">03 — 入口</p>
+      <h2>四个入口</h2>
+      <div class="entries">
+        <a class="entry" href="kg-nebula.html">
+          <span class="ix">01</span>
+          <span><h3>社区星云 · 主视图</h3>
+          <p>18780 个实体按社区与类型分区排布的三维视图，支持度数 / PageRank 排序、
+             标签按深度遮挡、点选看证据并深链回原文 PDF 的高亮位置。</p></span>
+          <span class="mt"><b>核心</b><span class="go">→</span></span>
+        </a>
+        <a class="entry" href="analytics.html">
+          <span class="ix">02</span>
+          <span><h3>图谱分析面板</h3>
+          <p>六层评测、三套口径对照、L5 域内效度与阈值灵敏度、过滤策略对比、
+             L7 角色违规归因、L9 端点与关系召回。每个数字都可追溯到产物文件。</p></span>
+          <span class="mt">结论集中在此<span class="go">→</span></span>
+        </a>
+        <a class="entry" href="pathqa.html">
+          <span class="ix">03</span>
+          <span><h3>问题子图 PathQA</h3>
+          <p>给一个孤立的实体，从图里找出它与核心社区之间的通路并渲染成子图——
+             回答"这个节点是怎么被连进来的"。</p></span>
+          <span class="mt">字面匹配 → BFS 2 跳 → 力导向<span class="go">→</span></span>
+        </a>
+        <a class="entry" href="method-limits.html">
+          <span class="ix">04</span>
+          <span><h3>方法能力与局限</h3>
+          <p>243 条方法 × 178 个方法本体 × 194 个能力维度，逐条标注
+             "这张图能做什么、不能做什么"，避免把结构推断说成事实。</p></span>
+          <span class="mt">边界声明<span class="go">→</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 · 边界 -->
+  <section class="ch" id="ch-4">
+    <div class="in">
+      <p class="kick">04 — 边界</p>
+      <h2>它<em>不</em>声称自己是对的</h2>
+      <p class="lead">
+        前六层全部是自洽型判定——只说明图内部一致，回答不了"原文里的东西抽全了没有"。
+        所以补了 L9：从原文段落出发做独立标注。结果是分裂的：
+        <strong>端点召回 86.2%</strong>（实体名抽得还行），但
+        <strong>关系召回只有 42.9–57.1%</strong>。
+      </p>
+      <div class="note">
+        <p>而且这个区间必须这么报：关系抽取的评测本身比实体评测不可靠得多——
+        同一批段落标注两次会差 25%。</p>
+        <p><b>已知的下一步：</b>实测否决了"用本地模型重抽一遍"（本地产出只有云端的
+        1/5–1/10），所以这个短板目前<strong>没有便宜解法</strong>。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="foot">
+  <div class="fin">
+    <span>KG Cosmos · 项目</span>
+    <a href="index-classic.html">旧版导航页（保留备查）</a>
+    <a href="refs.html">参考与出处</a>
+    <a href="method-limits.html">方法边界</a>
+    <span class="rt">全部数据由本机 GPU 离线产出 · 无外部请求</span>
+  </div>
+</footer>
+
+<div id="rail" aria-hidden="true">
+  <span class="dot" data-i="0"></span>
+  <span class="dot" data-i="1"></span>
+  <span class="dot" data-i="2"></span>
+  <span class="dot" data-i="3"></span>
+  <span class="dot" data-i="4"></span>
+</div>
+
 <script src="./lib/a11y.js"></script>
+<script type="module" src="./lib/voyage.js"></script>
 </body>
 </html>
