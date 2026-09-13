@@ -23,7 +23,7 @@
 <style>
   html,body{margin:0;background:#010206;overflow:hidden}
   canvas{display:block;width:100vw;height:100vh}
-  #hud{position:fixed;left:12px;top:10px;color:#6f8cba;font:11px/1.6 ui-monospace,monospace;
+  #hud{position:fixed;left:12px;top:10px;color:#909298;font:11px/1.6 ui-monospace,monospace;
        z-index:9;pointer-events:none;text-shadow:0 0 8px #000}
 </style>
 </head>
@@ -133,7 +133,7 @@ function build(D){
     pos[i*3] = x2; pos[i*3+1] = y * (1 - YFLAT); pos[i*3+2] = z2;
 
     if(MODE === 'mono'){ tmp.set(0x9fc4ff); }
-    else if(MODE === 'type'){ tmp.set(colors[n.t] || '#8fb6ff'); }
+    else if(MODE === 'type'){ tmp.set(colors[n.t] || '#bcbec4'); }
     else { tmp.copy(commColor(n.c ?? 0, comms.length)); }
     // 枢纽混白：比例由 WHITE 控。上一版 0.55 太高，中心糊成一团白。
     const dnorm = Math.pow((n.d || 1) / maxD, 0.5);
@@ -200,9 +200,9 @@ function build(D){
     const c2 = cv.getContext('2d');
     const gr = c2.createRadialGradient(s/2,s/2,0, s/2,s/2,s/2);
     gr.addColorStop(0,   'rgba(255,246,232,.95)');
-    gr.addColorStop(0.18,'rgba(200,220,255,.42)');
-    gr.addColorStop(0.5, 'rgba(150,190,255,.12)');
-    gr.addColorStop(1,   'rgba(120,160,255,0)');
+    gr.addColorStop(0.18,'rgba(229,231,237,.42)');
+    gr.addColorStop(0.5, 'rgba(195,197,203,.12)');
+    gr.addColorStop(1,   'rgba(166,168,174,0)');
     c2.fillStyle = gr; c2.fillRect(0,0,s,s);
     const t = new THREE.CanvasTexture(cv);
     t.colorSpace = THREE.SRGBColorSpace;

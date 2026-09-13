@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>KG Cosmos · 知识图谱探索器</title>
 <style>
-  :root { --fg:#e6edff; --dim:#8e9dbf; --panel:rgba(9,13,28,.90); }
+  :root { --fg:#e6edff; --dim:#a4a6ac; --panel:rgba(9,13,28,.90); }
   * { box-sizing:border-box; }
   html,body { margin:0; height:100%; overflow:hidden; background:#05070f;
               font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif; color:var(--fg); }
@@ -24,7 +24,7 @@
   .fld { margin-bottom:11px; }
   .fld label { display:flex; justify-content:space-between; font-size:11px;
                color:var(--dim); margin-bottom:4px; }
-  .fld label b { color:#a8c4ff; font-weight:500; font-variant-numeric:tabular-nums; }
+  .fld label b { color:#ccced4; font-weight:500; font-variant-numeric:tabular-nums; }
   .fld select, .fld input[type=range] { width:100%; }
   .fld select { background:rgba(17,18,25,.9); color:var(--fg);
                 border:1px solid rgba(178,181,194,.25); border-radius:7px;
@@ -36,7 +36,7 @@
   .btns button:hover { background:rgba(159,161,167,.26); border-color:rgba(170,174,188,.6); }
   #stats { margin-top:12px; padding-top:10px; border-top:1px solid rgba(178,181,194,.12);
            font-size:11px; color:var(--dim); line-height:1.75; }
-  #stats b { color:#a8c4ff; font-variant-numeric:tabular-nums; }
+  #stats b { color:#ccced4; font-variant-numeric:tabular-nums; }
   #legend { margin-top:10px; }
   .lg { display:flex; align-items:center; gap:6px; font-size:11px; padding:2px 0;
         cursor:pointer; border-radius:4px; }
@@ -198,8 +198,8 @@ const TYPE_COLOR = {
 };
 let colorMode = 'community';
 const colorOf = n => colorMode === 'type'
-  ? (TYPE_COLOR[n.type] || '#9aa7c7')
-  : (n.community >= 0 ? COMM_COLOR[n.community % N_COMM] : '#4a5678');
+  ? (TYPE_COLOR[n.type] || '#afb1b7')
+  : (n.community >= 0 ? COMM_COLOR[n.community % N_COMM] : '#5a5c62');
 
 // ── 状态 ──
 let ALL_NODES = [], ALL_LINKS = [];

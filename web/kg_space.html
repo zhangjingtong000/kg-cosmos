@@ -38,9 +38,9 @@ const controls=new OrbitControls(camera,renderer.domElement);
 controls.enableDamping=true;controls.dampingFactor=.08;controls.minDistance=4;controls.maxDistance=50;
 controls.autoRotate=true;controls.autoRotateSpeed=.25;controls.target.set(0,0,0);
 
-scene.add(new THREE.AmbientLight('#334466',.7));
+scene.add(new THREE.AmbientLight('#46484e',.7));
 const key=new THREE.DirectionalLight('#ffffff',2);key.position.set(15,20,10);scene.add(key);
-scene.add(new THREE.DirectionalLight('#8899cc',1));
+scene.add(new THREE.DirectionalLight('#a1a3a9',1));
 
 // === KNOWLEDGE GRAPH ===
 const graphData=[
@@ -50,7 +50,7 @@ const graphData=[
   {pos:[4,10,1],r:.5,color:'#88c9a0',label:'Shoulder Press'},
   {pos:[9,7,3],r:.64,color:'#e8a870',label:'Bench Press'},
   {pos:[8,2,-4],r:.56,color:'#d4a0b0',label:'Triceps'},
-  {pos:[5,-3,5],r:.48,color:'#90b0d8',label:'Biceps Curl'},
+  {pos:[5,-3,5],r:.48,color:'#b5b7bd',label:'Biceps Curl'},
   {pos:[-1,-6,1],r:.66,color:'#c0b890',label:'Squat'},
   {pos:[-8,-2,6],r:.58,color:'#a8c8b0',label:'Quadriceps'},
   {pos:[-11,2,-3],r:.52,color:'#d0b8c8',label:'Lower Back'},

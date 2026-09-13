@@ -10,8 +10,8 @@
     --panel:rgba(11,17,34,.78);
     --stroke:rgba(178,181,194,.14);
     --text:#e8eefb;
-    --muted:#8698b8;
-    --dim:#5b6b88;
+    --muted:#9ea0a6;
+    --dim:#6f7177;
   }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
@@ -42,7 +42,7 @@
     /* 行高撑满视口：否则卡片高度退化成 auto，canvas 掉回 HTML 默认 150px，
        图被压扁、底部留一大片空白（已实测）。 */
     grid-auto-rows:minmax(212px,1fr);
-    scrollbar-width:thin;scrollbar-color:#243352 transparent;
+    scrollbar-width:thin;scrollbar-color:#3a3c42 transparent;
   }
   @media (max-width:1299px){#grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
   @media (max-width:860px) {#grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

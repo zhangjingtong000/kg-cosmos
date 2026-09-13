@@ -9,11 +9,11 @@
   body { background: #000; overflow: hidden; height: 100vh; font-family: "Inter","PingFang SC",system-ui,sans-serif; }
   canvas { display: block; }
   .node-label { color: rgba(255,255,255,0.85); font-size: 11px; letter-spacing: 0.03em; pointer-events: none; text-shadow: 0 0 8px rgba(0,0,0,0.8); white-space: nowrap; transition: all 0.3s ease; }
-  .node-label.focused { color: #fff; font-size: 13px; text-shadow: 0 0 14px rgba(150,180,255,0.9); }
+  .node-label.focused { color: #fff; font-size: 13px; text-shadow: 0 0 14px rgba(188,190,196,0.9); }
   .hint { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.25); font-size: 11px; letter-spacing: 0.04em; pointer-events: none; }
   .focus-indicator { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 13px; letter-spacing: 0.05em; pointer-events: none; opacity: 0; transition: opacity 0.4s; }
   .focus-indicator.visible { opacity: 1; }
-  .focus-indicator span { color: #aac8ff; }
+  .focus-indicator span { color: #cfd1d7; }
 </style>
 </head>
 <body>
@@ -66,7 +66,7 @@ const cScl = new Float32Array(cloudCount);
 const cRnd = new Float32Array(cloudCount * 3);
 
 const insideColor = new THREE.Color('#ea7914');
-const outsideColor = new THREE.Color('#6c67aa');
+const outsideColor = new THREE.Color('#72747a');
 const innerR = 10, outerR = 22;
 const maxRadius = outerR;
 
@@ -134,7 +134,7 @@ const graphData = [
   { pos:[4,10,1],    r:0.50, color:'#88c9a0', label:'Shoulder Press' },
   { pos:[9,7,3],     r:0.64, color:'#e8a870', label:'Bench Press' },
   { pos:[8,2,-4],    r:0.56, color:'#d4a0b0', label:'Triceps' },
-  { pos:[5,-3,5],    r:0.48, color:'#90b0d8', label:'Biceps Curl' },
+  { pos:[5,-3,5],    r:0.48, color:'#b5b7bd', label:'Biceps Curl' },
   { pos:[-1,-6,1],   r:0.66, color:'#c0b890', label:'Squat' },
   { pos:[-8,-2,6],   r:0.58, color:'#a8c8b0', label:'Quadriceps' },
   { pos:[-11,2,-3],  r:0.52, color:'#d0b8c8', label:'Lower Back' },
@@ -203,7 +203,7 @@ const nodeGroup = new THREE.Group(), labelGroup = new THREE.Group();
 // Lights
 scene.add(new THREE.AmbientLight('#222244', 0.6));
 const key = new THREE.DirectionalLight('#ffffff', 1.5); key.position.set(15, 20, 10); scene.add(key);
-scene.add(new THREE.DirectionalLight('#667799', 0.6));
+scene.add(new THREE.DirectionalLight('#7c7e84', 0.6));
 
 graphData.forEach((data, idx) => {
   const { pos, r, color } = data;

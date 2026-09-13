@@ -8,48 +8,48 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; min-height: 100%; }
   body {
-    background: radial-gradient(ellipse 130% 70% at 50% -10%, #101c3a 0%, #070c1a 48%, #04070f 100%);
+    background: radial-gradient(ellipse 130% 70% at 50% -10%, #3a3c42 0%, #070c1a 48%, #04070f 100%);
     color: #dfe8ff; font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
     padding: 54px 34px 70px; line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 1100px; margin: 0 auto; }
   header { margin-bottom: 34px; }
-  header small { display: block; color: rgba(181,203,235,.5); font-size: 11px;
+  header small { display: block; color: rgba(211,213,219,.5); font-size: 11px;
                  letter-spacing: .2em; text-transform: uppercase; }
   header h1 { margin: 10px 0 0; font-size: 30px; font-weight: 560; letter-spacing: .01em; }
   header p { margin: 14px 0 0; max-width: 760px; font-size: 13px; line-height: 1.9;
-             color: rgba(190,212,242,.68); }
-  header p b { color: #cfe0ff; font-weight: 560; }
+             color: rgba(220,222,228,.68); }
+  header p b { color: #d6d9e2; font-weight: 560; }
   .facts { display: flex; flex-wrap: wrap; gap: 26px; margin-top: 22px; }
   .fact b { display: block; font-size: 19px; font-weight: 600; color: #eaf2ff;
             font-variant-numeric: tabular-nums; }
-  .fact span { font-size: 11px; color: rgba(181,203,235,.55); }
+  .fact span { font-size: 11px; color: rgba(211,213,219,.55); }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(316px, 1fr));
           gap: 16px; margin-top: 34px; }
   a.card { display: block; text-decoration: none; color: inherit;
-           background: rgba(11,18,38,.82); border: 1px solid rgba(140,170,255,.16);
+           background: rgba(11,18,38,.82); border: 1px solid rgba(178,180,186,.16);
            border-radius: 14px; padding: 18px 19px 17px; position: relative;
            overflow: hidden; transition: border-color .18s, transform .18s, background .18s; }
-  a.card:hover { border-color: rgba(150,190,255,.5); background: rgba(16,25,50,.9);
+  a.card:hover { border-color: rgba(195,197,203,.5); background: rgba(16,25,50,.9);
                  transform: translateY(-2px); }
-  a.card.primary { border-color: rgba(150,190,255,.34); }
+  a.card.primary { border-color: rgba(195,197,203,.34); }
   a.card.primary::after { content: "主视图"; position: absolute; top: 15px; right: 15px;
-                          font-size: 9.5px; letter-spacing: .1em; color: #9fc4ff;
-                          border: 1px solid rgba(159,196,255,.34); border-radius: 20px;
+                          font-size: 9.5px; letter-spacing: .1em; color: #caccd2;
+                          border: 1px solid rgba(202,204,210,.34); border-radius: 20px;
                           padding: 2px 8px; }
   .art { height: 62px; margin-bottom: 14px; position: relative; }
   .card h2 { margin: 0; font-size: 16px; font-weight: 560; color: #eaf2ff; }
   .card .desc { margin: 7px 0 0; font-size: 12px; line-height: 1.75;
-                color: rgba(190,212,242,.62); min-height: 42px; }
+                color: rgba(220,222,228,.62); min-height: 42px; }
   .card .num { margin-top: 11px; padding-top: 10px;
-               border-top: 1px solid rgba(140,170,255,.1);
-               font-size: 11px; color: rgba(159,196,255,.8);
+               border-top: 1px solid rgba(178,180,186,.1);
+               font-size: 11px; color: rgba(202,204,210,.8);
                font-variant-numeric: tabular-nums; }
   .card .go { position: absolute; right: 19px; bottom: 16px; font-size: 13px;
-              color: rgba(159,196,255,.55); transition: color .18s, transform .18s; }
-  a.card:hover .go { color: #cfe0ff; transform: translateX(3px); }
+              color: rgba(202,204,210,.55); transition: color .18s, transform .18s; }
+  a.card:hover .go { color: #d6d9e2; transform: translateX(3px); }
 
   /* 每张卡片的示意图形都用纯 CSS 画，不引任何图片或图标库。
      注意：示意图容器必须嵌在 .art **里面**（<div class="art"><div class="dots">…），
@@ -63,28 +63,28 @@
   .bars i { flex: 1 1 0; border-radius: 2px 2px 0 0; }
   .cells { position: absolute; inset: 0; display: grid;
            grid-template-columns: repeat(6, 1fr); gap: 4px; }
-  .cells i { border-radius: 3px; background: rgba(120,160,255,.14); }
-  .cells i.on { background: rgba(140,190,255,.45); }
+  .cells i { border-radius: 3px; background: rgba(166,168,174,.14); }
+  .cells i.on { background: rgba(193,195,201,.45); }
   .rays { position: absolute; inset: 0; }
   .rays i { position: absolute; left: 50%; top: 50%; height: 1px;
-            background: linear-gradient(90deg, rgba(140,190,255,.5), rgba(140,190,255,0));
+            background: linear-gradient(90deg, rgba(193,195,201,.5), rgba(193,195,201,0));
             transform-origin: 0 50%; }
 
   h3.sec { margin: 44px 0 4px; font-size: 11px; letter-spacing: .14em;
-           text-transform: uppercase; color: rgba(181,203,235,.45); }
+           text-transform: uppercase; color: rgba(211,213,219,.45); }
   .legacy { margin-top: 12px; font-size: 11.5px; line-height: 2.1;
-            color: rgba(160,190,235,.5); }
-  .legacy a { color: rgba(159,196,255,.7); text-decoration: none;
-              border-bottom: 1px dashed rgba(159,196,255,.3); }
+            color: rgba(196,198,204,.5); }
+  .legacy a { color: rgba(202,204,210,.7); text-decoration: none;
+              border-bottom: 1px dashed rgba(202,204,210,.3); }
   .legacy a:hover { color: #fff; }
   /* 口径说明：三套数字并存必须当场解释，否则会被读成前后矛盾 */
   .caliber { margin-top: 16px; padding: 11px 14px; max-width: 860px;
              font-size: 11.5px; line-height: 2.0; border-radius: 10px;
-             color: rgba(170,196,230,.72);
-             background: rgba(140,170,255,.055);
-             border: 1px solid rgba(140,170,255,.12); }
+             color: rgba(203,205,211,.72);
+             background: rgba(178,180,186,.055);
+             border: 1px solid rgba(178,180,186,.12); }
   .caliber b { color: rgba(214,230,252,.92); font-weight: 550; }
-  .caliber a { color: #9fc4ff; text-decoration: none; }
+  .caliber a { color: #caccd2; text-decoration: none; }
   .caliber a:hover { text-decoration: underline; }
   .caliber .c1, .caliber .c2, .caliber .c3 {
              display: inline-block; margin: 0 2px; padding: 1px 7px; border-radius: 5px;
@@ -93,14 +93,14 @@
   .caliber .c2 { background: rgba(179,255,127,.14); color: #cdf5a8; }
   .caliber .c3 { background: rgba(255,217,127,.14); color: #f0dcae; }
   .legacy .note { margin-top: 10px; padding-top: 9px; font-size: 11px; line-height: 1.85;
-                  color: rgba(150,190,255,.45);
-                  border-top: 1px solid rgba(140,170,255,.1); }
-  .legacy .note code { color: rgba(190,214,246,.7); }
+                  color: rgba(195,197,203,.45);
+                  border-top: 1px solid rgba(178,180,186,.1); }
+  .legacy .note code { color: rgba(222,224,230,.7); }
   .legacy sup { color: rgba(255,178,127,.85); font-size: 10px; }
   footer { margin-top: 46px; padding-top: 18px;
-           border-top: 1px solid rgba(140,170,255,.1);
-           font-size: 11px; line-height: 1.9; color: rgba(150,190,255,.42); }
-  footer code { color: rgba(190,214,246,.7); }
+           border-top: 1px solid rgba(178,180,186,.1);
+           font-size: 11px; line-height: 1.9; color: rgba(195,197,203,.42); }
+  footer code { color: rgba(222,224,230,.7); }
 </style>
 <link rel="stylesheet" href="./lib/a11y.css">
 </head>
@@ -158,7 +158,7 @@
 
     <a class="card" href="pathqa.html">
       <div class="art"><div class="rays">
-        <span class="ring" style="left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-color:rgba(140,190,255,.45)"></span>
+        <span class="ring" style="left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-color:rgba(193,195,201,.45)"></span>
         <i style="width:70px;transform:rotate(-18deg)"></i>
         <i style="width:62px;transform:rotate(28deg)"></i>
         <i style="width:52px;transform:rotate(96deg)"></i>
@@ -188,12 +188,12 @@
     <a class="card" href="analytics.html">
       <div class="art"><div class="bars">
         <i style="height:93%;background:linear-gradient(180deg,#8ce0a8,#4fbf82)"></i>
-        <i style="height:69%;background:linear-gradient(180deg,#7fb3ff,#4a7fd8)"></i>
+        <i style="height:69%;background:linear-gradient(180deg,#e0a469,#a9763f)"></i>
         <i style="height:99%;background:linear-gradient(180deg,#8ce0a8,#4fbf82)"></i>
-        <i style="height:64%;background:linear-gradient(180deg,#7fb3ff,#4a7fd8)"></i>
+        <i style="height:64%;background:linear-gradient(180deg,#e0a469,#a9763f)"></i>
         <i style="height:100%;background:linear-gradient(180deg,#8ce0a8,#4fbf82)"></i>
         <i style="height:52%;background:linear-gradient(180deg,#ffb27f,#d97a45)"></i>
-        <i style="height:76%;background:linear-gradient(180deg,#7fb3ff,#4a7fd8)"></i>
+        <i style="height:76%;background:linear-gradient(180deg,#e0a469,#a9763f)"></i>
       </div></div>
       <h2>图谱分析面板</h2>
       <p class="desc">六层评测、同口径治理前后对比、关系类型分布与端点命中分布。
@@ -204,7 +204,7 @@
 
     <a class="card" href="refs.html">
       <div class="art"><div class="dots">
-        <i style="left:8px;top:18px;width:34px;height:22px;border-radius:4px;background:rgba(140,190,255,.35)"></i>
+        <i style="left:8px;top:18px;width:34px;height:22px;border-radius:4px;background:rgba(193,195,201,.35)"></i>
         <i style="left:48px;top:12px;width:34px;height:22px;border-radius:4px;background:rgba(179,255,127,.3)"></i>
         <i style="left:28px;top:38px;width:34px;height:22px;border-radius:4px;background:rgba(255,217,127,.3)"></i>
       </div></div>

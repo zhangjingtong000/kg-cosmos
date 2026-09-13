@@ -11,12 +11,12 @@
   canvas { position: fixed; inset: 0; display: block; }
   .label { color: rgba(239,246,255,.9); font-size: 12px; letter-spacing: .025em; text-align: center; white-space: nowrap; pointer-events: none; text-shadow: 0 2px 10px rgba(0,0,0,.95), 0 0 14px rgba(8,20,45,.9); }
   .label b { display: block; font-size: 13px; font-weight: 550; }
-  .label small { display: block; margin-top: 4px; color: rgba(202,220,244,.58); font-size: 10px; }
+  .label small { display: block; margin-top: 4px; color: rgba(229,231,237,.58); font-size: 10px; }
   .header { position: fixed; inset: 28px auto auto 32px; z-index: 3; color: rgba(232,241,255,.88); pointer-events: none; }
-  .header small { display: block; color: rgba(181,203,235,.54); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+  .header small { display: block; color: rgba(211,213,219,.54); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
   .header h1 { margin: 6px 0 0; font-size: 18px; font-weight: 520; letter-spacing: .04em; }
-  .hint { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); color: rgba(203,219,246,.42); font-size: 11px; letter-spacing: .05em; pointer-events: none; }
-  .status { position: fixed; left: 50%; top: 28px; transform: translate(-50%, -12px); color: rgba(236,245,255,.94); font-size: 13px; opacity: 0; transition: opacity .35s ease, transform .35s ease; pointer-events: none; text-shadow: 0 0 16px rgba(127,178,255,.65); }
+  .hint { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); color: rgba(228,230,236,.42); font-size: 11px; letter-spacing: .05em; pointer-events: none; }
+  .status { position: fixed; left: 50%; top: 28px; transform: translate(-50%, -12px); color: rgba(236,245,255,.94); font-size: 13px; opacity: 0; transition: opacity .35s ease, transform .35s ease; pointer-events: none; text-shadow: 0 0 16px rgba(181,183,189,.65); }
   .status.visible { opacity: 1; transform: translate(-50%, 0); }
 </style>
 </head>
@@ -80,8 +80,8 @@ function fitCloudOverviewToViewport() {
 }
 fitCloudOverviewToViewport();
 
-scene.add(new THREE.AmbientLight('#8aa8d8', 1.35));
-const rimLight = new THREE.PointLight('#b8d8ff', 24, 40); rimLight.position.set(-4, 8, 8); scene.add(rimLight);
+scene.add(new THREE.AmbientLight('#adafb5', 1.35));
+const rimLight = new THREE.PointLight('#dfe1e7', 24, 40); rimLight.position.set(-4, 8, 8); scene.add(rimLight);
 const warmLight = new THREE.PointLight('#ffca8a', 14, 35); warmLight.position.set(10, -5, 6); scene.add(warmLight);
 
 const cloudById = new Map();
@@ -148,8 +148,8 @@ function createCloud(cloud, index) {
   const color = new THREE.Color(cloud.color);
   const veils = [
     createNebulaVeil(color, index * 1.71 + .3, cloud.size, .44, .76 + random() * .56, -.12),
-    createNebulaVeil(color.clone().lerp(new THREE.Color('#d3e7ff'), .22), index * 2.37 + 3.9, cloud.size * .86, .27, 1.04 + random() * .42, .05),
-    createNebulaVeil(color.clone().lerp(new THREE.Color('#6b7fc1'), .20), index * 4.11 + 1.2, cloud.size * 1.08, .19, .64 + random() * .48, .17)
+    createNebulaVeil(color.clone().lerp(new THREE.Color('#eef0f6'), .22), index * 2.37 + 3.9, cloud.size * .86, .27, 1.04 + random() * .42, .05),
+    createNebulaVeil(color.clone().lerp(new THREE.Color('#86888e'), .20), index * 4.11 + 1.2, cloud.size * 1.08, .19, .64 + random() * .48, .17)
   ];
   veils.forEach(veil => group.add(veil));
 
@@ -200,9 +200,9 @@ updateLabelAnchors();
 // There is deliberately one path per cloud pair, never a visual edge per entity.
 const filamentObjects = [];
 function filamentProfile(strength) {
-  if (strength === 'strong') return { radius: .012, opacity: .18, dustOpacity: 1.05, count: 520, spread: .22, color: '#abc9ff', bend: 2.0 };
-  if (strength === 'medium') return { radius: .007, opacity: .10, dustOpacity: .62, count: 260, spread: .14, color: '#829bd2', bend: 1.25 };
-  return { radius: .004, opacity: .07, dustOpacity: .30, count: 100, spread: .09, color: '#637eae', bend: .85 };
+  if (strength === 'strong') return { radius: .012, opacity: .18, dustOpacity: 1.05, count: 520, spread: .22, color: '#d0d2d8', bend: 2.0 };
+  if (strength === 'medium') return { radius: .007, opacity: .10, dustOpacity: .62, count: 260, spread: .14, color: '#a1a3a9', bend: 1.25 };
+  return { radius: .004, opacity: .07, dustOpacity: .30, count: 100, spread: .09, color: '#82848a', bend: .85 };
 }
 
 function createFilamentDust(curve, profile, seedValue) {

@@ -201,7 +201,7 @@
   #pdfPane .pdf-head b { flex: 1 1 auto; min-width: 0; overflow: hidden;
                          text-overflow: ellipsis; white-space: nowrap;
                          font-size: 12.5px; font-weight: 520; color: #dfe8ff; }
-  #pdfPane .pdf-head a { flex: 0 0 auto; font-size: 11.5px; color: #9fc4ff;
+  #pdfPane .pdf-head a { flex: 0 0 auto; font-size: 11.5px; color: #caccd2;
                          text-decoration: none; border: 1px solid rgba(178,181,194, .26);
                          border-radius: 7px; padding: 4px 9px; }
   #pdfPane .pdf-head a:hover { border-color: rgba(205,207,213, .6); color: #fff; }
@@ -232,7 +232,7 @@
   #pdfPane .pdf-note { flex: 0 0 auto; padding: 6px 14px 9px; font-size: 10.5px;
                        color: rgba(170,174,188,.5); border-top: 1px solid rgba(178,181,194,.1); }
   /* 证据行里的"在原文中查看"入口 */
-  #detail .evlink { margin-left: 6px; font-size: 10.5px; color: #9fc4ff;
+  #detail .evlink { margin-left: 6px; font-size: 10.5px; color: #caccd2;
                     text-decoration: none; border-bottom: 1px dashed rgba(202,204,210, .4); }
   #detail .evlink:hover { color: #fff; border-bottom-color: rgba(255, 255, 255, .7); }
 </style>
@@ -348,8 +348,8 @@ function fitCloudOverviewToViewport() {
 }
 fitCloudOverviewToViewport();
 
-scene.add(new THREE.AmbientLight('#8aa8d8', 1.35));
-const rimLight = new THREE.PointLight('#b8d8ff', 24, 40); rimLight.position.set(-4, 8, 8); scene.add(rimLight);
+scene.add(new THREE.AmbientLight('#adafb5', 1.35));
+const rimLight = new THREE.PointLight('#dfe1e7', 24, 40); rimLight.position.set(-4, 8, 8); scene.add(rimLight);
 const warmLight = new THREE.PointLight('#ffca8a', 14, 35); warmLight.position.set(10, -5, 6); scene.add(warmLight);
 
 const cloudById = new Map();
@@ -430,8 +430,8 @@ function createCloud(cloud, index) {
   const color = new THREE.Color(cloud.color);
   const veils = [
     createNebulaVeil(color, index * 1.71 + .3, cloud.size, .44, .76 + random() * .56, -.12),
-    createNebulaVeil(color.clone().lerp(new THREE.Color('#d3e7ff'), .22), index * 2.37 + 3.9, cloud.size * .86, .27, 1.04 + random() * .42, .05),
-    createNebulaVeil(color.clone().lerp(new THREE.Color('#6b7fc1'), .20), index * 4.11 + 1.2, cloud.size * 1.08, .19, .64 + random() * .48, .17)
+    createNebulaVeil(color.clone().lerp(new THREE.Color('#eef0f6'), .22), index * 2.37 + 3.9, cloud.size * .86, .27, 1.04 + random() * .42, .05),
+    createNebulaVeil(color.clone().lerp(new THREE.Color('#86888e'), .20), index * 4.11 + 1.2, cloud.size * 1.08, .19, .64 + random() * .48, .17)
   ];
   veils.forEach(veil => group.add(veil));
 
@@ -568,9 +568,9 @@ function updateLabelOcclusion() {
 // There is deliberately one path per cloud pair, never a visual edge per entity.
 const filamentObjects = [];
 function filamentProfile(strength) {
-  if (strength === 'strong') return { radius: .012, opacity: .18, dustOpacity: 1.05, count: 520, spread: .22, color: '#abc9ff', bend: 2.0 };
-  if (strength === 'medium') return { radius: .007, opacity: .10, dustOpacity: .62, count: 260, spread: .14, color: '#829bd2', bend: 1.25 };
-  return { radius: .004, opacity: .07, dustOpacity: .30, count: 100, spread: .09, color: '#637eae', bend: .85 };
+  if (strength === 'strong') return { radius: .012, opacity: .18, dustOpacity: 1.05, count: 520, spread: .22, color: '#d0d2d8', bend: 2.0 };
+  if (strength === 'medium') return { radius: .007, opacity: .10, dustOpacity: .62, count: 260, spread: .14, color: '#a1a3a9', bend: 1.25 };
+  return { radius: .004, opacity: .07, dustOpacity: .30, count: 100, spread: .09, color: '#82848a', bend: .85 };
 }
 
 function createFilamentDust(curve, profile, seedValue) {
@@ -674,7 +674,7 @@ filamentObjects.forEach((item, index) => {
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
     uniforms: {
       uOpacity: { value: 0 },
-      uColor: { value: new THREE.Color('#cfe2ff') },
+      uColor: { value: new THREE.Color('#ebedf3') },
     },
     vertexShader: `void main(){ gl_PointSize = 11.0;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
@@ -780,7 +780,7 @@ function renderPreview(cloudId) {
      <div class="sec">跨社区关联 · 强度</div>
      ${nbrs.slice(0, 8).map(n => {
         const o = cloudById.get(n.other);
-        const col = o ? o.cloud.color : '#8fb4ff';      // 用目标社区自己的颜色
+        const col = o ? o.cloud.color : '#babcc2';      // 用目标社区自己的颜色
         const pct = Math.max(3, Math.round(100 * n.count / maxCnt));
         return '<div class="link">' +
           `<span class="dot" style="background:${col};color:${col}"></span>` +
@@ -1373,7 +1373,7 @@ const TYPE_COLORS = {
   Document: '#7c8fae', Location: '#7084a0',
   Material: '#8b8f9c',
 };
-const TYPE_FALLBACK = '#9fb6d8';
+const TYPE_FALLBACK = '#bdbfc5';
 
 const colorMode = { partition: 'community', ranking: 'degree' };
 
