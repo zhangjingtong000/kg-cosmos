@@ -13,34 +13,34 @@
 
   #top { position:fixed; left:22px; top:18px; z-index:10; pointer-events:none; }
   #top small { display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
-               color:rgba(180,200,235,.5); }
+               color:rgba(208,210,216,.5); }
   #top h1 { margin:4px 0 0; font-size:17px; font-weight:560; letter-spacing:.03em; }
 
   #panel { position:fixed; right:16px; top:16px; z-index:10; width:268px; padding:14px 16px;
-           border-radius:11px; background:var(--panel); border:1px solid rgba(140,170,255,.20);
+           border-radius:11px; background:var(--panel); border:1px solid rgba(178,181,194,.20);
            backdrop-filter:blur(9px); max-height:calc(100vh - 32px); overflow-y:auto; }
   #panel h2 { margin:0 0 9px; font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
-              color:rgba(180,200,235,.55); font-weight:600; }
+              color:rgba(208,210,216,.55); font-weight:600; }
   .fld { margin-bottom:11px; }
   .fld label { display:flex; justify-content:space-between; font-size:11px;
                color:var(--dim); margin-bottom:4px; }
   .fld label b { color:#a8c4ff; font-weight:500; font-variant-numeric:tabular-nums; }
   .fld select, .fld input[type=range] { width:100%; }
-  .fld select { background:rgba(10,16,34,.9); color:var(--fg);
-                border:1px solid rgba(140,170,255,.25); border-radius:7px;
+  .fld select { background:rgba(17,18,25,.9); color:var(--fg);
+                border:1px solid rgba(178,181,194,.25); border-radius:7px;
                 padding:6px 8px; font-size:12px; }
   .btns { display:flex; gap:7px; margin-top:4px; }
-  .btns button { flex:1; background:rgba(120,150,255,.14); color:var(--fg);
-                 border:1px solid rgba(140,170,255,.28); border-radius:7px;
+  .btns button { flex:1; background:rgba(159,161,167,.14); color:var(--fg);
+                 border:1px solid rgba(178,181,194,.28); border-radius:7px;
                  padding:7px 6px; font-size:11.5px; cursor:pointer; }
-  .btns button:hover { background:rgba(120,150,255,.26); border-color:rgba(150,190,255,.6); }
-  #stats { margin-top:12px; padding-top:10px; border-top:1px solid rgba(140,170,255,.12);
+  .btns button:hover { background:rgba(159,161,167,.26); border-color:rgba(170,174,188,.6); }
+  #stats { margin-top:12px; padding-top:10px; border-top:1px solid rgba(178,181,194,.12);
            font-size:11px; color:var(--dim); line-height:1.75; }
   #stats b { color:#a8c4ff; font-variant-numeric:tabular-nums; }
   #legend { margin-top:10px; }
   .lg { display:flex; align-items:center; gap:6px; font-size:11px; padding:2px 0;
         cursor:pointer; border-radius:4px; }
-  .lg:hover { background:rgba(120,150,255,.10); }
+  .lg:hover { background:rgba(159,161,167,.10); }
   .lg i { width:8px; height:8px; border-radius:50%; flex:0 0 auto; }
   .lg em { margin-left:auto; font-style:normal; color:var(--dim);
            font-variant-numeric:tabular-nums; }
@@ -49,19 +49,19 @@
   .scene-tooltip { display: none !important; }
 
   #tip { position:fixed; z-index:12; pointer-events:none; display:none;
-         background:rgba(6,10,24,.96); border:1px solid rgba(140,170,255,.34);
+         background:rgba(10,11,16,.96); border:1px solid rgba(178,181,194,.34);
          border-radius:8px; padding:8px 11px; font-size:12px; max-width:330px; line-height:1.65; }
   #tip b { color:#fff; font-size:13px; } #tip i { color:var(--dim); font-style:normal; }
   #tip u { color:#8fe3b0; text-decoration:none; }
 
   #hint { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:10;
-          font-size:11px; color:rgba(180,200,235,.45); letter-spacing:.03em; }
+          font-size:11px; color:rgba(208,210,216,.45); letter-spacing:.03em; }
   #load { position:fixed; inset:0; z-index:20; display:flex; align-items:center;
           justify-content:center; background:#05070f; font-size:13px; color:var(--dim);
           text-align:center; line-height:2; }
-  kbd { background:rgba(140,170,255,.16); border-radius:4px; padding:1px 6px; font-size:11px; }
+  kbd { background:rgba(178,181,194,.16); border-radius:4px; padding:1px 6px; font-size:11px; }
   #toast { position:fixed; left:50%; top:74px; transform:translate(-50%,-8px); z-index:15;
-           background:rgba(8,13,30,.94); border:1px solid rgba(140,170,255,.3);
+           background:rgba(8,13,30,.94); border:1px solid rgba(178,181,194,.3);
            border-radius:9px; padding:8px 16px; font-size:12px; opacity:0;
            transition:opacity .3s, transform .3s; pointer-events:none; }
   #toast.on { opacity:1; transform:translate(-50%,0); }
@@ -183,10 +183,18 @@ const N_COMM = 18;
 const COMM_COLOR = Array.from({ length: N_COMM }, (_, i) =>
   hsl2hex((i * 0.618033988749895) % 1, 0.62, 0.64));
 const TYPE_COLOR = {
-  Person:'#ff9f9f', Concept:'#7fb3ff', Method:'#7fffb3', Document:'#ffd97f',
-  Process:'#c77fff', System:'#7fffff', Artifact:'#ff9f7f', Component:'#b3ff7f',
-  Event:'#ff7fd9', Metric:'#7fd9ff', Dataset:'#d9ff7f', Organization:'#ffbf7f',
-  Location:'#9f7fff', Tool:'#7fffd9', Material:'#d9d9d9',
+  /* 与 pathqa.html 一致（2026-09 统一）。旧值是 15 个 HSL 亮度 75%、饱和度 100%
+     的荧光色，在深底上互相打架，正是"全是蓝紫 / 很丑"的直接来源。
+     新板从同一条「金 → 青」色相带上派生，饱和度压到 35–50%，
+     并按语义族归并：方法/工具/制品/组件/系统落在暖端，概念/过程/事件在中段，
+     度量/数据集在青端，只有 Document/Location 用低饱和雾蓝。 */
+  Method: '#e3b878', Tool: '#d8a869', Artifact: '#c9975f',
+  Component: '#bd8659', System: '#b0765f',
+  Person: '#cc8288', Organization: '#b1727f',
+  Concept: '#9c8bb0', Process: '#8d84a8', Event: '#a68fa8',
+  Metric: '#7aa9a4', Dataset: '#719c92',
+  Document: '#7c8fae', Location: '#7084a0',
+  Material: '#8b8f9c',
 };
 let colorMode = 'community';
 const colorOf = n => colorMode === 'type'
