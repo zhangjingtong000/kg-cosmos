@@ -24,7 +24,7 @@ PAGES = ['index.html', 'analytics.html', 'method-limits.html',
 LINK = '<link rel="stylesheet" href="./lib/fonts/fonts.css">'
 
 # 标题族：中文衬线在前，拉丁衬线兜数字与英文，最后回退到系统衬线
-TITLE_FONT = ('"Noto Serif SC","Playfair Display",'
+TITLE_FONT = ('"Smiley Sans","Noto Serif SC","Playfair Display",'
               'Georgia,"Songti SC","SimSun",serif')
 
 STYLE = f'''
@@ -36,7 +36,7 @@ h1, h2, h3,
   font-family: {TITLE_FONT};
 }}
 /* 标题在衬线下不需要那么粗——衬线本身已经提供笔画对比 */
-h1, h2 {{ font-weight: 700; letter-spacing: -.02em; }}
+h1, h2 {{ font-weight: 700; letter-spacing: -.005em; }}
 h3 {{ font-weight: 600; }}
 /* 数字用 Playfair 的等高数字，避免跳动 */
 .fig .n, .kpi b, [data-count] {{ font-variant-numeric: lining-nums tabular-nums; }}

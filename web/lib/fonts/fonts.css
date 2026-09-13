@@ -11,3 +11,14 @@
 @font-face{font-family:"Playfair Display";font-style:normal;font-weight:400;font-display:swap;src:url("./playfair-400-0.woff2") format("woff2");}
 @font-face{font-family:"Playfair Display";font-style:normal;font-weight:700;font-display:swap;src:url("./playfair-700-0.woff2") format("woff2");}
 @font-face{font-family:"Playfair Display";font-style:normal;font-weight:900;font-display:swap;src:url("./playfair-900-0.woff2") format("woff2");}
+
+/* 得意黑（Smiley Sans，SIL OFL 1.1，可商用）—— 标题专用。
+   倾斜、几何、笔画粗壮，带明显设计感；把标题从"普通宋体"里拉出来的关键。
+   完整字体 1.1 MB，未子集化（子集化需 fontTools，收益不足以抵消复杂度）。 */
+@font-face{
+  font-family:"Smiley Sans";
+  font-style:oblique;
+  font-weight:400 900;
+  font-display:swap;
+  src:url("./smiley-sans.woff2") format("woff2");
+}

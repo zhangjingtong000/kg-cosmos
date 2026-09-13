@@ -56,13 +56,60 @@
    只给标题用：正文子集不含正文用字，换上去会逐字回退反而更难看。 */
 h1, h2, h3,
 .kick, .eyebrow, .note b, .fig .n, .kpi b, .card h2, .entry h3 {
-  font-family: "Noto Serif SC","Playfair Display",Georgia,"Songti SC","SimSun",serif;
+  font-family: "Smiley Sans","Noto Serif SC","Playfair Display",Georgia,"Songti SC","SimSun",serif;
 }
 /* 标题在衬线下不需要那么粗——衬线本身已经提供笔画对比 */
 h1, h2 { font-weight: 700; letter-spacing: -.02em; }
 h3 { font-weight: 600; }
 /* 数字用 Playfair 的等高数字，避免跳动 */
 .fig .n, .kpi b, [data-count] { font-variant-numeric: lining-nums tabular-nums; }
+
+/* ── .note：边界声明 / 结论块（2026-09 重做）────────────────────────────
+   旧版是「深色底 + 左侧 2px 竖线 + 圆角」，读起来像贴在页面上的便签
+   （用户原话：「一个黑底框，以及左侧的一个竖线条」「像硬贴上去了」）。
+   新版去掉一切框线，改用**排版本身**做层次：
+     · 首句自动放大到 17px 并加衬线，充当引导句；
+     · 段间用 1px 渐隐细线分隔，不用外框；
+     · 小标题（<b>为什么…</b> 之类）悬挂到左侧，形成一列。
+   这样它与正文同源，但仍然可辨识为"这是一段需要单独强调的话"。 */
+.note{
+  margin: 44px 0 0; padding: 0; max-width: 74ch;
+  border: 0; background: none; border-radius: 0;
+  color: var(--ink-2, rgba(203,218,241,.78)); font-size: 15px; line-height: 1.85;
+}
+.note > p:first-child{
+  font-family: "Smiley Sans","Noto Serif SC",serif;
+  font-size: 19px; line-height: 1.6; color: #fff;
+  margin: 0 0 16px; letter-spacing: .004em;
+}
+.note > p + p{
+  margin: 0; padding-top: 14px; position: relative;
+}
+.note > p + p::before{
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+  background: linear-gradient(90deg,
+    rgba(var(--warmRGB,150,180,255),.42), rgba(140,170,255,.06) 62%, transparent);
+}
+.note b{
+  font-family: "Smiley Sans","Noto Serif SC",serif;
+  font-weight: 400; color: var(--warm, #ffcfa8);
+  font-size: 15.5px; letter-spacing: .01em;
+}
+.note strong{ color: #fff; font-weight: 600; }
+.note code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .9em; padding: 1px 5px; border-radius: 3px;
+  background: rgba(140,170,255,.12); color: #cfe0ff;
+}
+
+/* 2026-09 加：打破"全是蓝紫"。给强调、次强调、警戒各一个明确色相，
+   并规定它们各自只承担一种语义，不再混用。 */
+:root{
+  --hue-cool: #7fb3ff;      /* 主色：冷蓝，结构性元素（分隔线、次级标签） */
+  --hue-cyan: #5fe0d0;      /* 次色：青，正面结论（召回、覆盖、通过） */
+  --hue-warm: #ffb27f;      /* 暖色：负面/需注意（误差、漏抽、风险） */
+  --hue-gold: #ffd9a0;      /* 金：强调数字、结论性指标 */
+}
 </style>
 <link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/fonts/fonts.css">
