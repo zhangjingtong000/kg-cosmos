@@ -108,14 +108,21 @@ h3 { font-weight: 600; }
      · 小标题（<b>为什么…</b> 之类）悬挂到左侧，形成一列。
    这样它与正文同源，但仍然可辨识为"这是一段需要单独强调的话"。 */
 .note{
-  margin: 44px 0 0; padding: 0; max-width: 74ch;
+  position: relative;
+  margin: 54px 0 0; padding: 26px 0 0; max-width: 74ch;
   border: 0; background: none; border-radius: 0;
   color: var(--ink-2, rgba(203,218,241,.78)); font-size: 15px; line-height: 1.85;
 }
+/* 分节记号：一条 44px 的暖金短横线。
+   它替代的是被用户点名否掉的「黑底框 + 左侧竖线」。之所以还需要一个记号：
+   把框线全部删干净之后，实测这一块在深色星云背景上完全融进正文，读不出边界。 */
+.note::before{
+  content: ""; position: absolute; left: 0; top: 0;
+  width: 56px; height: 2px; background: var(--pq-warm, var(--warm, #e0a469));
+  opacity: .9;
+}
 .note > p:first-child{
-  font-family: "Smiley Sans","Noto Serif SC",serif;
-  font-size: 19px; line-height: 1.6; color: #fff;
-  margin: 0 0 16px; letter-spacing: .004em;
+  margin: 0 0 14px;
 }
 .note > p + p{
   margin: 0; padding-top: 14px; position: relative;
@@ -123,12 +130,13 @@ h3 { font-weight: 600; }
 .note > p + p::before{
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
   background: linear-gradient(90deg,
-    rgba(224,164,105,.4), rgba(174,178,194,.07) 62%, transparent);
+    rgba(224,164,105,.34), rgba(174,178,194,.07) 62%, transparent);
 }
 .note b{
+  display: block;
   font-family: "Smiley Sans","Noto Serif SC",serif;
-  font-weight: 400; color: var(--pq-warm);
-  font-size: 15.5px; letter-spacing: .01em;
+  font-weight: 400; color: var(--pq-warm, var(--warm, #ffcfa8));
+  font-size: 17px; letter-spacing: .01em; margin: 0 0 5px;
 }
 .note strong{ color: #fff; font-weight: 600; }
 .note code{
