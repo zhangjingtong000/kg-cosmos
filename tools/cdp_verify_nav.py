@@ -7,6 +7,15 @@
 这个 bug 只看截图容易被当成"视觉风格"，是实测 rect 才定位到的，
 所以在这里固化成断言。
 
+背景检查（第 1/2/2b 项）随背景实现换代更新：背景现在是 voyage.js 里的
+**实时 WebGL 光场**（时间自走 + 滚动驱动 + 鼠标视差），不再是帧序列，
+所以：
+  · 第 1 项改为验证 WebGL 上下文、无 GL 错误、首帧已画；
+  · 第 2 项（原"帧序列文件可达"）改为**时间自走断言**：不滚动的前提下
+    静置 1.8 秒，中心像素必须变化——这是"背景活着"的最低证据；
+  · 第 2b 项保持原语义：滚动时中心亮度单调上升（深度旅程确实存在），
+    只是改用 gl.readPixels 读像素。
+
 用法：
   python tools/cdp_verify_nav.py
 """
@@ -43,6 +52,20 @@ def ev(ws, expr):
     return res.get('result', {}).get('value')
 
 
+def read_center(ws):
+    """从 WebGL 画布读中心像素（readPixels，y 轴朝上无所谓，取单点）。"""
+    return ev(ws, """(() => {
+      const c = document.getElementById('voyageCanvas');
+      if (!c) return null;
+      const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+      if (!gl) return null;
+      const px = new Uint8Array(4);
+      gl.readPixels(Math.round(c.width / 2), Math.round(c.height / 2),
+                    1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+      return [px[0], px[1], px[2]];
+    })()""")
+
+
 def main():
     port = 9460 + (int(time.time() * 1000) % 40)
     proc = subprocess.Popen([
@@ -69,79 +92,116 @@ def main():
         cdp(ws, 'Runtime.enable')
         time.sleep(1.0)
 
-        # 1. 背景画布：必须存在、已启用，并且**真的画上了像素**
+        # 1. 背景画布：必须存在、WebGL 上下文健康、已启用（首帧已画）
         cv = ev(ws, """(() => {
           const c = document.getElementById('voyageCanvas');
           if (!c) return { has: false };
-          const ctx = c.getContext('2d');
-          // 画布中心 + 四分之一处各取一点，覆盖可能被裁掉的边角
+          const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+          if (!gl) return { has: true, gl: false };
           const pts = [[0.5, 0.5], [0.25, 0.35], [0.75, 0.65]];
           const px = pts.map(([fx, fy]) => {
-            const d = ctx.getImageData(Math.round(c.width * fx), Math.round(c.height * fy), 1, 1).data;
-            return [d[0], d[1], d[2], d[3]];
+            const d = new Uint8Array(4);
+            gl.readPixels(Math.round(c.width * fx), Math.round(c.height * fy),
+                          1, 1, gl.RGBA, gl.UNSIGNED_BYTE, d);
+            return [d[0], d[1], d[2]];
           });
-          return { has: true, w: c.width, h: c.height,
+          return { has: true, gl: true, w: c.width, h: c.height,
                    on: c.classList.contains('on'),
-                   op: +getComputedStyle(c).opacity, px: px };
+                   op: +getComputedStyle(c).opacity,
+                   err: gl.getError(), px: px };
         })()""")
-        print(f'[1] 背景画布: has={cv.get("has")} {cv.get("w")}x{cv.get("h")} '
-              f'on={cv.get("on")} opacity={cv.get("op")}')
+        print(f'[1] 背景画布: has={cv.get("has")} gl={cv.get("gl")} '
+              f'{cv.get("w")}x{cv.get("h")} on={cv.get("on")} op={cv.get("op")} '
+              f'err={cv.get("err")}')
         print(f'    中心/边角像素: {cv.get("px")}')
         if not cv.get('has'):
             fails.append('找不到 #voyageCanvas')
+        elif not cv.get('gl'):
+            fails.append('画布上没有 WebGL 上下文（背景降级成了静态渐变）')
         else:
             if not cv.get('on'):
-                fails.append('画布没有启用（第一帧没就绪，背景会是空的）')
+                fails.append('画布没有启用（首帧没画上，背景会是空的）')
             if cv.get('w', 0) < 100 or cv.get('h', 0) < 100:
                 fails.append(f'画布尺寸异常: {cv.get("w")}x{cv.get("h")}')
-            drawn = [p for p in (cv.get('px') or []) if p and p[3] > 0]
-            if not drawn:
-                fails.append('画布上没有任何像素 —— 帧序列没画上去')
-            # 注意：**不**检查"是否全黑" —— 第一帧本来就是深空星场（YAVG 16.7），
-            # 它就该是接近黑的。背景到底变没变，由下面的滚动对比来证明。
+            if cv.get('err') != 0:
+                fails.append(f'WebGL 报错: {cv.get("err")}')
+            # 注意：**不**检查"是否全黑" —— 首屏本来就是深靛底（不是纯黑），
+            # 背景真的在渲染由第 2 项（时间自走）与第 2b 项（滚动变亮）证明。
 
-        # 2. 帧序列资源可达（抽查首帧与末帧，确认不是 404）
-        seq = ev(ws, """(async () => {
-          const urls = ['./assets/voyage-frames/s001.webp',
-                        './assets/voyage-frames/s061.webp',
-                        './assets/voyage-frames/s121.webp'];
-          const out = [];
-          for (const u of urls) {
-            try {
-              const r = await fetch(u, { method: 'HEAD' });
-              out.push([u.split('/').pop(), r.status]);
-            } catch (e) { out.push([u.split('/').pop(), 'ERR']); }
-          }
-          return out;
-        })()""")
-        print(f'[2] 帧序列抽查: {seq}')
-        bad = [x for x in (seq or []) if x[1] != 200]
-        if bad:
-            fails.append(f'帧序列文件取不到: {bad}')
+        # 2. 时间自走断言：**不滚动**，静置 1.8 秒，中心像素必须自己变化。
+        #    背景是实时着色器（时间驱动），这是"页面是活的"的最低证据；
+        #    旧版帧序列只在滚动时才动，正是被用户抱怨"死板"的根源。
+        p_a = read_center(ws)
+        time.sleep(1.8)
+        p_b = read_center(ws)
+        if p_a and p_b:
+            diff = sum(abs(a - b) for a, b in zip(p_a, p_b))
+            print(f'[2] 时间自走: {p_a} → {p_b}  变化量 {diff}')
+            if diff < 3:
+                fails.append(f'不滚动时背景完全静止（变化量 {diff}）——时间驱动失效')
+        else:
+            fails.append('readPixels 读不到像素（WebGL 上下文异常）')
 
-        # 2b. 滚动驱动验证：往下滚，画布应该越来越亮（深空 → 星云 → 亮核）
+        # 2b. 滚动驱动验证：往下滚，背景必须真的在变（深入旅程）。
+        #     读法用 3×3 网格的均值而不是单点——戏剧化的旅程里
+        #     单点亮度天然波动（炽热丝缕扫过中心会瞬时拉高），
+        #     均值才是"整屏光量"的稳定估计。
+        def grid_mean():
+            px = ev(ws, """(() => {
+              const c = document.getElementById('voyageCanvas');
+              const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+              if (!gl) return null;
+              const out = [];
+              for (const [fx, fy] of [[0.3,0.35],[0.5,0.35],[0.7,0.35],
+                                      [0.3,0.55],[0.5,0.55],[0.7,0.55],
+                                      [0.3,0.75],[0.5,0.75],[0.7,0.75]]) {
+                const d = new Uint8Array(4);
+                gl.readPixels(Math.round(c.width * fx), Math.round(c.height * fy),
+                              1, 1, gl.RGBA, gl.UNSIGNED_BYTE, d);
+                out.push(d[0] + d[1] + d[2]);
+              }
+              return out;
+            })()""")
+            return round(sum(px) / (len(px) * 3), 1) if px else -1
         trail = []
         for frac in (0.0, 0.25, 0.5, 0.75, 1.0):
             ev(ws, 'scrollTo(0, Math.round((document.body.scrollHeight - innerHeight) * %s))' % frac)
             time.sleep(1.6)          # 等阻尼收敛（curP 约 1s 到位）
-            px = ev(ws, """(() => {
-              const c = document.getElementById('voyageCanvas');
-              const ctx = c.getContext('2d');
-              const d = ctx.getImageData(Math.round(c.width / 2), Math.round(c.height / 2), 1, 1).data;
-              return [d[0], d[1], d[2]];
-            })()""")
-            lum = round(sum(px) / 3, 1) if px else -1
+            lum = grid_mean()
             trail.append((frac, lum))
-            print(f'[2b] 滚动 {int(frac * 100):3d}%  中心像素 {px}  亮度 {lum}')
+            print(f'[2b] 滚动 {int(frac * 100):3d}%  整屏平均亮度 {lum}')
         lums = [l for _, l in trail]
         if lums[-1] - lums[0] < 20:
-            fails.append(f'滚动时背景几乎没变亮（{lums[0]} -> {lums[-1]}），帧序列没被驱动')
-        if any(lums[i + 1] - lums[i] < -12 for i in range(len(lums) - 1)):
+            fails.append(f'滚动时背景几乎没变亮（{lums[0]} -> {lums[-1]}），着色器没被滚动驱动')
+        if any(lums[i + 1] - lums[i] < -25 for i in range(len(lums) - 1)):
             bad = [(trail[i][0], trail[i][1], trail[i + 1][1]) for i in range(len(lums) - 1)
-                   if lums[i + 1] - lums[i] < -12]
-            fails.append(f'亮度出现回落（{bad}）—— 帧序列可能没按顺序推进')
+                   if lums[i + 1] - lums[i] < -25]
+            fails.append(f'整屏光量出现剧烈回落（{bad}）——旅程曝光曲线异常')
         ev(ws, 'scrollTo(0, 0)')
         time.sleep(1.2)
+
+        # 2c. 新交互回归：键盘 ↓ 跳到下一章；进度点点击跳到对应章节
+        ev(ws, """document.body.dispatchEvent(new KeyboardEvent('keydown',
+          {key: 'ArrowDown', bubbles: true, cancelable: true}))""")
+        time.sleep(2.4)              # 平滑滚动到位
+        k1 = ev(ws, """(() => {
+          const c = document.querySelectorAll('.ch')[1];
+          return { y: scrollY, top: c.offsetTop };
+        })()""")
+        print(f'[2c] 键盘 ↓: scrollY={k1["y"]} 目标={k1["top"]}')
+        if abs(k1['y'] - k1['top']) > 60:
+            fails.append('键盘 ↓ 没有跳到下一章节（键盘导航失效）')
+        ev(ws, "document.querySelector('#rail .dot[data-i=\"4\"]').click()")
+        time.sleep(2.6)
+        k2 = ev(ws, """(() => {
+          const c = document.querySelectorAll('.ch')[4];
+          return { y: scrollY, top: c.offsetTop };
+        })()""")
+        print(f'[2c] 点进度点 4: scrollY={k2["y"]} 目标={k2["top"]}')
+        if abs(k2['y'] - k2['top']) > 60:
+            fails.append('进度点点击没有跳到对应章节')
+        ev(ws, 'scrollTo(0, 0)')
+        time.sleep(1.0)
 
         # 3. 入口链接
         entries = ev(ws, """[...document.querySelectorAll('a.entry')].map(e => ({

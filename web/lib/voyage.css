@@ -1,12 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   KG COSMOS — 星云旅程背景
+   KG COSMOS — 背景分层、遮罩与文字对比度
    ───────────────────────────────────────────────────────────────────────────
-   背景是**五张 FLUX 生成的星云图**（web/assets/sky-*.png），
-   由 voyage.js 按滚动进度交叉淡化 + 缓慢缩放（Ken Burns）。
-   这里只负责分层、遮罩与文字对比度。
-
-   走过的弯路记在 voyage.js 顶部：用 WebGL/Canvas 自己画星云试了三版都失败，
-   最后还是靠本机 ComfyUI + FLUX 生成。
+   背景（2026-09 起）是 voyage.js 里的**实时 WebGL 光场**：时间自走、
+   滚动驱动旅程、鼠标视差。这里只负责分层、遮罩与文字对比度。
+   走过的弯路记在 voyage.js 顶部。
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root{
@@ -41,13 +38,34 @@ body{
 #stage{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
        background:#02040a}
 
-/* 背景画布：滚动驱动帧序列（见 voyage.js 顶部说明）。
-   它盖在 #skyLayers 之上、#grade/#veil 之下；第一帧就绪后加 .on 淡入。 */
+/* 背景画布：实时 WebGL 光场（见 voyage.js 顶部说明）。
+   第一帧画上后加 .on 淡入；WebGL 不可用时走 .nogl 静态渐变降级。 */
 #voyageCanvas{
   position:absolute;inset:0;width:100%;height:100%;display:block;
   opacity:0;transition:opacity .8s ease;pointer-events:none;
 }
 #voyageCanvas.on{opacity:1;}
+
+/* WebGL 不可用的降级：静态"深空光场"渐变（两个局部光晕 + 深靛底），
+   仍然不是纯黑、仍有留白，只是不动。 */
+#stage.nogl{background:
+  radial-gradient(58% 52% at 30% 34%, rgba(34,96,102,.50), transparent 72%),
+  radial-gradient(46% 42% at 66% 68%, rgba(96,66,26,.40), transparent 72%),
+  linear-gradient(180deg,#050810,#04060c 55%,#03050a)}
+
+/* 当前章节的幽灵数字：巨大、极淡、只描边——编号与背景形成呼应。
+   换章时退场再入场（voyage.js 的 setNum 触发重排重启 transition）。 */
+.chnum{
+  position:absolute;right:-0.04em;bottom:-0.18em;z-index:1;
+  font-family:"Smiley Sans","Noto Serif SC",Georgia,serif;
+  font-size:min(36vh,26vw);line-height:1;font-weight:700;
+  color:rgba(224,164,105,.030);
+  -webkit-text-stroke:1.5px rgba(224,164,105,.085);
+  pointer-events:none;user-select:none;
+  opacity:0;transform:translateY(5vh);
+  transition:opacity 1.1s ease,transform 1.1s cubic-bezier(.19,1,.22,1);
+}
+.chnum.in{opacity:1;transform:none}
 
 /* 文字区遮罩：随滚动加深（深入星云时正文更需要压暗才读得清） */
 #veil{
@@ -72,9 +90,10 @@ numOctaves='3' stitchTiles='stitch'/></filter>\
 <rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
 }
 
-/* 色温叠加：冷蓝 → 暖金，强度很低，只是把五张图的色调拉成一条线 */
+/* 色温叠加：很轻的一层，只把画面色调往一条线上拉（旧版 .55 会把
+   着色器的饱和暖金灰化成"土色"，减到 .30） */
 #grade{
-  position:absolute;inset:0;mix-blend-mode:soft-light;opacity:.55;
+  position:absolute;inset:0;mix-blend-mode:soft-light;opacity:.30;
   background:linear-gradient(180deg,
     rgba(var(--warmRGB),.32), rgba(var(--warmRGB),.06) 55%, rgba(0,0,0,.28));
 }
@@ -211,20 +230,37 @@ h2 em{font-style:normal;color:var(--accent);
 
 .cue{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:8px;
-  font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--ink-3)}
+  font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--ink-3);
+  transition:opacity .7s ease}
+.cue.gone{opacity:0;pointer-events:none}
 .cue .t{width:1px;height:40px;background:var(--line);position:relative;overflow:hidden}
 .cue .t::after{content:"";position:absolute;left:0;top:-40px;width:1px;height:40px;
   background:linear-gradient(180deg,transparent,var(--accent));
   animation:fall 2.2s cubic-bezier(.5,0,.5,1) infinite}
 @keyframes fall{0%{top:-40px}65%,100%{top:40px}}
 
-#rail{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:5;
-  display:flex;flex-direction:column;gap:14px}
-#rail .dot{width:5px;height:5px;border-radius:50%;background:rgba(193,195,201,.28);
+/* 进度点：真按钮（可点、可 Tab、有 aria-label），视觉仍是小圆点。
+   命中区 20px（可用性下限），圆点本体画在 ::after 上。 */
+#rail{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:5;
+  display:flex;flex-direction:column;gap:8px}
+#rail .dot{position:relative;width:20px;height:20px;padding:0;border:0;
+  background:transparent;border-radius:50%;cursor:pointer}
+#rail .dot::after{content:"";position:absolute;left:50%;top:50%;
+  width:5px;height:5px;margin:-2.5px 0 0 -2.5px;border-radius:50%;
+  background:rgba(193,195,201,.28);
   transition:background .5s ease,transform .5s cubic-bezier(.19,1,.22,1),
              box-shadow .5s}
-#rail .dot.on{background:var(--accent);transform:scale(1.9);
+#rail .dot:hover::after{background:rgba(193,195,201,.6);transform:scale(1.5)}
+#rail .dot.on::after{background:var(--accent);transform:scale(1.9);
   box-shadow:0 0 14px rgba(224,164,105,.8)}
+/* 悬停/聚焦时浮出章节名，从右侧滑入 */
+#rail .dot::before{content:attr(data-label);
+  position:absolute;right:26px;top:50%;transform:translate(6px,-50%);
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink-2);white-space:nowrap;opacity:0;
+  transition:opacity .35s ease,transform .35s cubic-bezier(.19,1,.22,1);
+  pointer-events:none}
+#rail .dot:hover::before,#rail .dot:focus-visible::before{opacity:1;transform:translate(0,-50%)}
 
 #foot{position:relative;z-index:2;padding:40px;background:rgba(2,4,10,.96);
       border-top:1px solid var(--line)}
@@ -234,9 +270,13 @@ h2 em{font-style:normal;color:var(--accent);
 .fin a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
 .fin .rt{margin-left:auto}
 
-.ch .in{opacity:0;transform:translateY(26px);
-  transition:opacity 1s ease,transform 1s cubic-bezier(.19,1,.22,1)}
-.ch.seen .in{opacity:1;transform:none}
+/* 章节入场：整块淡入升级为**逐层上浮**——每个子元素带 --i×90ms 的延迟，
+   --i 由 voyage.js 注入。reduced-motion 下 a11y.css 把过渡压到零，
+   下面再加一条把初态也解开，保证内容立即可见。 */
+.ch .in > *{opacity:0;transform:translateY(22px);
+  transition:opacity .8s ease,transform .8s cubic-bezier(.19,1,.22,1);
+  transition-delay:calc(var(--i,0) * 90ms)}
+.ch.seen .in > *{opacity:1;transform:none;transition-delay:calc(var(--i,0) * 90ms)}
 
 @media (max-width:760px){
   .ch .in{padding:0 22px}
@@ -247,10 +287,13 @@ h2 em{font-style:normal;color:var(--accent);
 }
 
 @media (prefers-reduced-motion:reduce){
-  .ch .in{opacity:1 !important;transform:none !important;transition:none !important}
+  .ch .in > *{opacity:1 !important;transform:none !important;transition:none !important}
+  .chnum{opacity:1;transform:none;transition:none}
+  .cue{transition:none}
   #glow i{animation:none}
   .cue .t::after{animation:none}
   .pulse{animation:none}
-  .btn,.btn::after,.entry,.entry::before,#rail .dot{transition:none}
+  .btn,.btn::after,.entry,.entry::before,#rail .dot::after,
+  #rail .dot::before{transition:none}
   #glow{transition:none}
 }

@@ -86,21 +86,16 @@ h3 { font-weight: 600; }
 
 <a id="a11y-skip" class="a11y-skip" href="#ch-0">跳到正文</a>
 
-<!-- 固定背景：五张 FLUX 生成的星云图，按滚动进度交叉淡化。
-     这些图由本机 ComfyUI + FLUX.1-schnell 生成（tools/gen_nebula_sequence.py），
-     全部在本地，页面零外部请求。 -->
+<!-- 固定背景：实时 WebGL 光场（voyage.js），时间自走 + 滚动驱动 + 鼠标视差。
+     零素材、零外部请求；WebGL 不可用时由 .nogl 降级为静态渐变。
+     叠层（grade/veil/noise/grain）负责色温与文字可读性。 -->
 <div id="stage" aria-hidden="true">
-  <!-- 背景图层：5 张常驻，只改 opacity/transform，不换 URL、不重新解码。
-       层数刻意保持 5 —— 每层跨越约 2 秒的滚动距离，穿越才是慢而连续的；
-       层数一多，每层只跨零点几秒，快速滚动时就会"之前的帧突然出现"。 -->
-  <!-- 背景画布：帧序列由滚动驱动，drawImage 画当前帧。
-       帧号没变时完全不重绘（这是"拖进度条不卡"的关键）。
-       素材是 Wan2.2 I2V 链生成的 20 秒真视频，段间首末帧物理闭合。 -->
   <canvas id="voyageCanvas"></canvas>
   <div id="grade"></div>
   <div id="veil"></div>
   <div id="noise"></div>
   <div id="grain"></div>
+  <span class="chnum" id="chnum">00</span>
 </div>
 
 <main id="reel">
@@ -245,13 +240,14 @@ h3 { font-weight: 600; }
   </div>
 </footer>
 
-<div id="rail" aria-hidden="true">
-  <span class="dot" data-i="0"></span>
-  <span class="dot" data-i="1"></span>
-  <span class="dot" data-i="2"></span>
-  <span class="dot" data-i="3"></span>
-  <span class="dot" data-i="4"></span>
-</div>
+<!-- 章节进度点：真按钮——点击平滑滚到对应章节，可 Tab、悬停浮出章节名 -->
+<nav id="rail" aria-label="章节导航">
+  <button class="dot" data-i="0" data-label="首页"    aria-label="第 1 屏 · 首页"></button>
+  <button class="dot" data-i="1" data-label="尺度"    aria-label="第 2 屏 · 尺度"></button>
+  <button class="dot" data-i="2" data-label="结论"    aria-label="第 3 屏 · 最要紧的结论"></button>
+  <button class="dot" data-i="3" data-label="入口"    aria-label="第 4 屏 · 入口"></button>
+  <button class="dot" data-i="4" data-label="边界"    aria-label="第 5 屏 · 边界"></button>
+</nav>
 
 <script src="./lib/a11y.js"></script>
 <script type="module" src="./lib/voyage.js"></script>
