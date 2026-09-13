@@ -90,19 +90,15 @@ h3 { font-weight: 600; }
      这些图由本机 ComfyUI + FLUX.1-schnell 生成（tools/gen_nebula_sequence.py），
      全部在本地，页面零外部请求。 -->
 <div id="stage" aria-hidden="true">
+  <!-- 背景图层：5 张常驻，只改 opacity/transform，不换 URL、不重新解码。
+       层数刻意保持 5 —— 每层跨越约 2 秒的滚动距离，穿越才是慢而连续的；
+       层数一多，每层只跨零点几秒，快速滚动时就会"之前的帧突然出现"。 -->
   <div id="voyageFrames">
     <div class="frm" data-src="./assets/voyage-frames/s01.webp"></div>
     <div class="frm" data-src="./assets/voyage-frames/s02.webp"></div>
     <div class="frm" data-src="./assets/voyage-frames/s03.webp"></div>
     <div class="frm" data-src="./assets/voyage-frames/s04.webp"></div>
     <div class="frm" data-src="./assets/voyage-frames/s05.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s06.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s07.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s08.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s09.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s10.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s11.webp"></div>
-    <div class="frm" data-src="./assets/voyage-frames/s12.webp"></div>
   </div>
     <div class="sky" data-src="./assets/sky-1-approach.webp"></div>
     <div class="sky" data-src="./assets/sky-2-enter.webp"></div>

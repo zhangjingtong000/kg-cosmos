@@ -56,10 +56,16 @@ function kf(t, pts) {
 
 /* 每张图的镜头曲线。同一时刻只有相邻两张在动：
    一张继续推进、一张开始拉远，交叠处自然形成"穿过"的观感。 */
-/* 镜头：每层都从 1.00 缓慢推到 1.08（Ken Burns）。
-   第一版给 5 层各手写了一组起止值，其实彼此差别很小；
-   12 层用同一条曲线更好维护，视觉上没有区别。 */
-const zoomAt = (local) => 1.0 + 0.08 * local;
+/* 镜头：每层一组自己的缩放与漂移起止值（这是第一版的做法，照抄回来）。
+   比"所有层共用一条缩放曲线"好在：相邻两层的推进方向不同，
+   交叉淡化时看起来像镜头在持续穿行，而不是同一张图反复放大。 */
+const LENS = [
+  { s0: 1.00, s1: 1.18, x0: 0,  x1: 0,  y0: 0,  y1: -2 },  // 远景 → 推近
+  { s0: 1.02, s1: 1.24, x0: 2,  x1: -1, y0: 1,  y1: -3 },  // 继续靠近
+  { s0: 1.04, s1: 1.30, x0: -2, x1: 2,  y0: 2,  y1: -2 },  // 进入
+  { s0: 1.06, s1: 1.34, x0: 0,  x1: 0,  y0: 2,  y1: -1 },  // 深处（扩张最猛）
+  { s0: 1.26, s1: 1.04, x0: -1, x1: 0,  y0: -1, y1: 0 }    // 拉远（反过来）
+];
 
 let last = 0;
 function tick(now) {
@@ -83,11 +89,15 @@ function tick(now) {
       const w = Math.max(0, 1 - Math.abs(pos - i));
       // 图内局部进度：进入时为 0，离开时为 1
       const local = Math.min(1, Math.max(0, pos - i + 0.5));
-      const s = zoomAt(local);
+      const L = LENS[i] || LENS[0];
+      const s = L.s0 + (L.s1 - L.s0) * local;
+      const x = L.x0 + (L.x1 - L.x0) * local;
+      const y = L.y0 + (L.y1 - L.y0) * local;
       layers[i].style.opacity = w.toFixed(4);
       layers[i].style.transform =
         'scale(' + s.toFixed(4) + ') translate3d('
-        + (-sx * 1.2).toFixed(2) + '%, ' + (-sy * 0.9).toFixed(2) + '%, 0)';
+        + (x - sx * 1.6).toFixed(2) + '%, '
+        + (y - sy * 1.2).toFixed(2) + '%, 0)';
     }
   }
   sx += (mx - sx) * 0.045;

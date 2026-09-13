@@ -80,8 +80,8 @@ def main():
         print(f'[1] 星云图层: {len(skies)} 张')
         for i, s in enumerate(skies):
             print(f"    #{i}  {s['src']:34s} bg={s['bg'][:34]}")
-        if len(skies) != 12:
-            fails.append(f'背景图层应为 12 张，实为 {len(skies)}')
+        if len(skies) != 5:
+            fails.append(f'背景图层应为 5 张，实为 {len(skies)}')
         for i, s in enumerate(skies):
             if not s['src']:
                 fails.append(f'第 {i} 张星云图层缺少 data-src')
