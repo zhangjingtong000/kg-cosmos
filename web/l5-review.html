@@ -22,9 +22,13 @@
   #pdfPane.open{width:min(46vw,720px);padding:10px 14px}
   .tri{font-size:20px;font-weight:600;margin:6px 0 2px;word-break:break-word}
   .tri .rel{color:var(--hl)}
-  /* 中文表述：比英文三元组弱一档，避免抢主视觉。
+  /* 中文表述：做成醒目的一行 —— 用户要求「人工判读全部翻译成中文」。
      实体名本身仍是英文原文（不能翻，判读要对着原文）。 */
-  .tri.zh{font-size:14px;font-weight:400;color:var(--dim);margin:0 0 8px}
+  .tri.zh{font-size:17px;font-weight:600;color:var(--hl);margin:2px 0 10px;
+          background:#14181f;border-left:3px solid var(--hl);padding:8px 12px;border-radius:0 6px 6px 0}
+  .tri.zh b{font-weight:400;color:var(--dim);font-size:12px;margin-right:8px;
+            letter-spacing:.06em}
+  .why{font-size:12px;color:var(--dim);margin:0 0 10px;line-height:1.7}
   .tag{display:inline-block;font-size:12px;padding:1px 8px;border:1px solid var(--line);
        border-radius:99px;color:var(--dim);margin-right:6px}
   .box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:12px 0}
@@ -180,7 +184,10 @@ function render() {
     <div class="hint">第 1 问：<b>就下面这段原文证据而言，这条三元组成立吗？</b>
       （只看原文，不要猜判别器怎么想；也不要因为「意思差不多」就判成立）。</div>
     <div class="tri">${esc(it.source)} <span class="rel">—[${esc(it.type_zh || it.type)}]→</span> ${esc(it.target)}</div>
-    ${it.hypothesis_zh ? `<div class="tri zh">中文：${esc(it.hypothesis_zh)}</div>` : ''}
+    ${it.hypothesis_zh ? `<div class="tri zh"><b>中文</b>${esc(it.hypothesis_zh)}</div>` : ''}
+    <div class="why">上面这行是中文表述。<b>实体名与下面的证据段落保留英文原文</b> ——
+      它们是论文里的专有名词与原文句子，翻译会破坏「每个结论都能回溯到原文那一句」，
+      判读时请对着英文原文判；关系类型、按钮与提示均为中文。</div>
     <details><summary>展开判别器读的那句（英文模板，与上面的三元组等价）</summary>
       <div class="quote dim">${esc(it.hypothesis)}</div></details>
     <div class="box"><h4>原文证据段落（英文原样，未作任何高亮）</h4>

@@ -11,7 +11,7 @@ Usage:
   python kg_extractor.py --file sample.txt --mode cloud --compare
 """
 
-import argparse, json, os, sys, time, base64, re, threading
+import argparse, json, os, sys, time, base64, re, threading, unicodedata
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Optional
@@ -1027,47 +1027,160 @@ def deduplicate_entities(entities: list[dict], mode: str = "local") -> list[dict
     return merged
 
 
-def _names_are_duplicates(a: str, b: str) -> bool:
-    """Conservatively detect name variants without collapsing related terms.
+# ── v6 的辅助判据（2026-09-14）──────────────────────────────────────────
+# 评测见 tools/l2_disambig_eval.py；改动记录见本函数 docstring。
 
-    2026-09-10 修复：子串规则原本没有任何长度保护，导致短缩写与任意包含
-    其字母序列的长名字被判为同一实体——实测 `norm('UI')='ui'` 是
-    `norm('build graph.py')='buildgraphpy'` 的子串（bUIldgraphpy），于是
-    "UI" 被当成 "build graph.py" 的变体。这类误合并同时污染抽取去重与
-    金标聚类，且越短的缩写（UI/RDF/AI/LLM）越容易中招。
+# 称谓/头衔：不参与首字母缩写匹配，否则 "Dr" 会匹配 "D. R. Radev"
+_TITLES = frozenset({
+    "dr", "mr", "mrs", "ms", "prof", "sir", "miss", "phd", "md",
+})
 
-    2026-09-11 借鉴调研：Neo4j 官方 `neo4j-graphrag-python` 的
-    `FuzzyMatchResolver` 用 RapidFuzz 的 `fuzz.WRatio`（阈值 0.8）做名称相似度，
-    实测比 difflib 快 4.4 倍、对真实实体名的判别也更稳。但**官方实现没有长度
-    保护**——同一对 `UI` / `build graph.py` 在 WRatio 下得 0.900，会被误合并
-    （我们的长度保护给出 0.286，正确拒绝）。故此处取两者之长：
-    RapidFuzz 的速度 + 自研的长度保护。
 
-    判据（子串路径）：短名足够长（≥5 字符），或公共前缀占长名 ≥0.4，或名称
-    接近等长（比例 ≥0.6，覆盖 BERT/BERTLarge 这类"简称+后缀"形态）。
+def _fold_flat(name: str) -> str:
+    """NFKD 折叠 + 小写 + 去非字母数字。
+
+    折叠重音是关键：`Rocktäschel` 与 `Rocktaschel` 是同一人，
+    原实现因 ä ≠ a 而漏合并（评测负例池里实测 18 对）。
     """
-    normalized_a = _normalize_for_match(a)
-    normalized_b = _normalize_for_match(b)
-    if not normalized_a or not normalized_b:
+    if not name:
+        return ""
+    n = unicodedata.normalize("NFKD", name)
+    n = "".join(ch for ch in n if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9]+", "", n.lower())
+
+
+def _tokens_lower(name: str):
+    """切成小写实词（去掉标点与括号内容）。"""
+    body = re.sub(r"\([^)]*\)", " ", name or "")
+    return [t for t in re.split(r"[^0-9A-Za-z]+", body.lower()) if t]
+
+
+def _is_initialism(short: str, long_: str) -> bool:
+    """短名是不是长名的首字母缩写。
+
+    例：`GNN` ← `Graph Neural Networks`；`KG` ← `Knowledge Graphs`；
+        `EMNLP` ← `Conference on Empirical Methods in Natural Language Processing`。
+
+    两条保护（实测必需）：
+      · 短名长度 2–8，且短名里没有小写混排（缩写通常全大写，但这里已折成小写，
+        所以改用「长度 + 首字母对齐」判断）；
+      · 跳过的实词 ≤1 个、且跳过比例 ≤40% —— 否则 `KG` 会匹配上
+        `Abstract Knowledge Graph`（跳过了 Abstract，比例 33% 侥幸通过，
+        所以要再要求**首词必须对齐**）。
+    """
+    sl = _fold_flat(short)
+    if not (2 <= len(sl) <= 8):
+        return False
+    toks = [t for t in _tokens_lower(long_) if t not in _TITLES]
+    if not (2 <= len(toks) <= 12):
+        return False
+    initials = "".join(t[0] for t in toks)
+    if initials != sl:
+        return False
+    # 首词首字母必须对齐（GNN/KG 都满足；Abstract Knowledge Graph 的 initials
+    # 是 akg，与 kg 不等，已经被上面挡掉——这条是双保险）
+    return toks[0][0] == sl[0]
+
+
+def _plural_same(fa: str, fb: str) -> bool:
+    """规范复数：只差一个 s / es（act/acts、class/classes）。"""
+    for x, y in ((fa, fb), (fb, fa)):
+        if x + "s" == y or x + "es" == y:
+            return True
+    return False
+
+
+def _paren_stripped(name: str):
+    """返回 (主名, 括注内容)。没有括注则括注为 None。"""
+    m = re.search(r"\(([^)]*)\)", name or "")
+    if not m:
+        return name or "", None
+    return (name[:m.start()] + name[m.end():]).strip(), m.group(1).strip().lower()
+
+
+def _word_boundary_contains(a: str, b: str) -> bool:
+    """a 的实词序列是否是 b 的实词序列的**连续子序列**（词边界对齐）。
+
+    这比字符级 startswith 严得多：`Tag` 的 tokens 是 ['tag']，
+    `Tagger` 是 ['tagger'] —— 子序列不成立，拒绝；
+    而 `BERT` ⊂ `BERT Large` 成立（['bert'] ⊂ ['bert','large']），接受。
+    """
+    ta, tb = _tokens_lower(a), _tokens_lower(b)
+    if not ta or not tb or len(ta) >= len(tb):
+        return False
+    for k in range(len(tb) - len(ta) + 1):
+        if tb[k:k + len(ta)] == ta:
+            return True
+    return False
+
+
+def _names_are_duplicates(a: str, b: str) -> bool:
+    """保守地判断两个名字是否同一实体的变体，避免把相关词折叠到一起。
+
+    ── 修订史 ──────────────────────────────────────────────────────────
+    2026-09-10：子串规则原本没有任何长度保护，导致 `norm('UI')='ui'` 是
+      `norm('build graph.py')='buildgraphpy'` 的子串，于是 "UI" 被判为其变体。
+    2026-09-11：借鉴 Neo4j 官方 `neo4j-graphrag-python` 的 `FuzzyMatchResolver`
+      （RapidFuzz `fuzz.WRatio`，阈值 0.8；实测比 difflib 快 4.4 倍）。
+      但官方**没有长度保护**——同一对 `UI`/`build graph.py` 在 WRatio 下得 0.900
+      会被误合并，我们的长度保护给 0.286 正确拒绝。故取两者之长。
+
+    2026-09-14（本版）：用 `tools/l2_disambig_eval.py` 建了评测后发现两件事 ——
+      · **误合并**：第三条「公共前缀 ≥0.4」**没有长度保护**（此前 docstring 声称
+        修过，实际只给前两条加了）。`tag` vs `tagger` → 3/6=0.5 ≥ 0.4 被合并；
+        `time` ⊂ `timestamp`、`graph` ⊂ `graphneuralnetwork` 同理。
+      · **漏合并更严重**：`P5b-abbrev-initials` n=1200、`P5a` n=6，**F1 全是 0.000**
+        ——判据完全认不出首字母缩写。`GNN`/`GCN`/`KG` 在论文里极常见，
+        认不出就全是重复实体。
+
+    现行判据（按先后）：
+      ① flat 相等（NFKD 折叠后同形）—— 覆盖大小写 / 标点 / 重音差异；
+      ② 首字母缩写（带首词对齐 + 跳过实词限制 + 称谓黑名单）；
+      ③ 规范复数（+s / +es）；
+      ④ 受限括注剥除（双方都有括注且不同则不剥）；
+      ⑤ 词边界包含（`BERT` ⊂ `BERT Large`）；
+      ⑥ 短名 ≥5 且占长名 ≥0.5 的后缀形态（`BERT`/`BERTLarge`）；
+      ⑦ 模糊相似度 ≥0.93。
+
+    **刻意不做**：首字母缩写只作候选、不进自动合并 —— 合并不可逆（T4.4）。
+    """
+    fa, fb = _fold_flat(a), _fold_flat(b)
+    if not fa or not fb:
         return False
 
-    if normalized_a in normalized_b or normalized_b in normalized_a:
-        shorter, longer = sorted((normalized_a, normalized_b), key=len)
-        if len(shorter) >= 5:
+    # ① flat 相等（含 NFKD 重音折叠）
+    if fa == fb:
+        return True
+
+    # ② 首字母缩写（双向都试：调用方不保证谁短谁长）
+    if _is_initialism(a, b) or _is_initialism(b, a):
+        return True
+
+    # ③ 规范复数
+    if _plural_same(fa, fb):
+        return True
+
+    # ④ 受限括注剥除
+    pa, ca = _paren_stripped(a)
+    pb, cb = _paren_stripped(b)
+    if ca is not None or cb is not None:
+        if _fold_flat(pa) and _fold_flat(pa) == _fold_flat(pb):
+            # 双方都有括注且内容不同 → 不剥（Washington (Person)/(State)）
+            if not (ca and cb and ca != cb):
+                return True
+
+    # ⑤⑥ 子串路径：收紧，删掉原来的裸"公共前缀 ≥0.4"
+    if fa in fb or fb in fa:
+        shorter, longer = (fa, fb) if len(fa) <= len(fb) else (fb, fa)
+        if _word_boundary_contains(a, b) or _word_boundary_contains(b, a):
             return True
-        if len(shorter) / len(longer) >= 0.6:
+        # 后缀形态：短名够长且占比够大（BERT / BERTLarge）
+        if len(shorter) >= 5 and len(shorter) / len(longer) >= 0.5:
             return True
-        common = 0
-        for x, y in zip(shorter, longer):
-            if x != y:
-                break
-            common += 1
-        if common / len(longer) >= 0.4:
-            return True
-        # 短缩写（<5 字符）：必须字母边界对齐才算变体，避免 bUIldgraphpy 类巧合。
         return False
 
-    return _similarity(normalized_a, normalized_b) >= 0.93
+    # ⑦ 模糊相似度
+    return _similarity(fa, fb) >= 0.93
 
 
 def _normalize_for_match(s: str) -> str:
