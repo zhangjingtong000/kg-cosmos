@@ -75,7 +75,7 @@ python tools/serve.py            # 前置检查 + 起服务
 详见 [`docs/L5_VALIDITY_REPORT.md`](docs/L5_VALIDITY_REPORT.md)。
 
 **L7 只在 `CREATED_BY` 上可用，而且那里有循环论证**：T3.1 已用**与 L7 同一套**
-规则改过 2348 条边（占合规数的 40.3%），所以 98.0% 里很大一部分是
+规则改过 2348 条边（占合规数的 40.3%）（口径说明见 docs/METRIC_CALIBERS.md：40.3% 的分子是 T3.1 改动总数 2348，含改错的 120 条；若只算「改动且现在合规」则为 43.3%，分母亦不同。），所以 98.0% 里很大一部分是
 "用同一套规则改完再检查"的必然结果。详见
 [`docs/L7_ENDPOINT_CONSTRAINTS.md`](docs/L7_ENDPOINT_CONSTRAINTS.md) 顶部的声明。
 
