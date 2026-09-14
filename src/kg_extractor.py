@@ -51,6 +51,51 @@ def _load_registry_env() -> None:
          r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
         (winreg.HKEY_CURRENT_USER, r"Environment"),
     ]
+
+# ── 关系类型的语义定义（2026-09-14）─────────────────────────────────────
+#
+# **为什么要这一块**：`COMBINED_PREFIX` 里原先只列 15 个**裸类型名**，
+# 而 L4 实测谓词 macro_f1 = 0.1724 —— 比「全猜 RELATED_TO」的基线 0.22 还差。
+# 模型拿不到「PART_OF 和 APPLIES_TO 到底差在哪」的信息，只能猜。
+#
+# 定义放在这里而不是 `ontology.py`：后者是**从本模块导入**的
+# （它自己的注释写明「真正的单一来源仍是 kg_extractor」），
+# 反向导入会循环。`ontology.py` 的 RELATION_ENDPOINT_CONSTRAINTS
+# 从这里取 semantics，保持单一来源。
+RELATION_SEMANTICS = {
+    "PART_OF": "source 是 target 的组成部分或子集（整体-部分），不是『属于某类别』",
+    "USES": "source 使用了 target 这个工具/方法/数据（施动者用被用物）",
+    "PRODUCES": "source 产出/生成 target（source 是生产者，target 是产物）",
+    "MEASURES": "source 度量/衡量 target 这个指标或对象",
+    "EVALUATES": "source 评测/检验 target 的效果或质量",
+    "COMPARES_WITH": "source 与 target 被相互比较（对称，双方并列）",
+    "SUPPORTS": "source 为 target 提供支持或证据（不是『使用』）",
+    "CONTRADICTS": "source 与 target 的结论相互矛盾（对称）",
+    "CAUSES": "source 导致 target（有因果与时序先后，不可反）",
+    "ENABLES": "source 使 target 成为可能（前置条件，不是直接因果）",
+    "APPLIES_TO": "source 是被应用的方法/技术，target 是它被应用的领域/任务",
+    "LOCATED_AT": "source 是有位置的实体，target 是它所在的地点/机构",
+    "CREATED_BY": "source 是创作者（人/机构），target 是被创作物。"
+                  "注意方向是 Author → Work，不是 Work → Author",
+    "CITES": "source 引用 target（学术引用，单向）",
+    "RELATED_TO": "**兜底类型，尽量不用**。仅当以上 14 类都不合适时才用",
+}
+
+
+def relation_types_block(bare: bool = False) -> str:
+    """生成 prompt 里的关系类型清单。
+
+    bare=True 时退回旧的裸列表（`KG_BARE_RELATION_TYPES=1`），
+    便于 A/B 对照与快速回滚。
+    """
+    if bare:
+        return ", ".join(RELATION_TYPES)
+    lines = []
+    for t in RELATION_TYPES:
+        sem = RELATION_SEMANTICS.get(t, "")
+        lines.append(f"{t}: {sem}" if sem else t)
+    return "\n".join(lines)
+
     for hive, path in locations:
         try:
             with winreg.OpenKey(hive, path) as key:
@@ -512,7 +557,7 @@ You are a Knowledge Graph Specialist. Read the text and extract both entities an
 Concept, Method, System, Component, Process, Artifact, Dataset, Metric, Tool, Material, Person, Organization, Location, Event, Document
 
 ---Relation Types (use ONLY these)---
-PART_OF, USES, PRODUCES, MEASURES, EVALUATES, COMPARES_WITH, SUPPORTS, CONTRADICTS, CAUSES, ENABLES, APPLIES_TO, LOCATED_AT, CREATED_BY, CITES, RELATED_TO
+__RELATION_BLOCK__
 
 ---Output Format---
 One entity per line, then one relation per line. NO markdown, NO JSON, no prose, no headings.
@@ -530,6 +575,16 @@ relation<|>SourceEntity<|>TargetEntity<|>RelationType<|>Brief explanation
 
 ---Text---
 """
+
+# 关系类型定义由常量表生成（不依赖输入文本，故仍满足 COMBINED_PREFIX
+# 的"字节级稳定、不含变量"纪律）。KG_BARE_RELATION_TYPES=1 可退回裸列表。
+if os.environ.get("KG_BARE_RELATION_TYPES", "0").strip().lower() in ("1", "true", "yes"):
+    COMBINED_PREFIX = COMBINED_PREFIX.replace(
+        "__RELATION_BLOCK__", relation_types_block(bare=True))
+else:
+    COMBINED_PREFIX = COMBINED_PREFIX.replace(
+        "__RELATION_BLOCK__", relation_types_block())
+assert "__RELATION_BLOCK__" not in COMBINED_PREFIX
 
 
 def build_combined_prompt(text: str) -> str:
