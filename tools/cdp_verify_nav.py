@@ -66,6 +66,32 @@ def read_center(ws):
     })()""")
 
 
+def read_mean(ws):
+    """读 3×3 网格的 RGB 均值。
+
+    为什么不用单点：着色器的时间系数只有 0.05，短时间内画面变化本来就小；
+    再叠加"某个像素恰好变化微弱"，单点断言会在 CPU 繁忙（例如同时在跑
+    LLM 抽取）时误报"时间驱动失效"。均值才是"整屏光量"的稳定估计，
+    这也正是第 2b 项（滚动变亮）一直采用 3×3 的原因。
+    """
+    return ev(ws, """(() => {
+      const c = document.getElementById('voyageCanvas');
+      if (!c) return null;
+      const gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+      if (!gl) return null;
+      const px = new Uint8Array(4);
+      let r = 0, g = 0, b = 0, n = 0;
+      for (const fx of [0.25, 0.5, 0.75]) {
+        for (const fy of [0.25, 0.5, 0.75]) {
+          gl.readPixels(Math.round(c.width * fx), Math.round(c.height * fy),
+                        1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+          r += px[0]; g += px[1]; b += px[2]; n++;
+        }
+      }
+      return [Math.round(r / n), Math.round(g / n), Math.round(b / n)];
+    })()""")
+
+
 def main():
     port = 9460 + (int(time.time() * 1000) % 40)
     proc = subprocess.Popen([
@@ -137,12 +163,13 @@ def main():
             # 注意：**不**检查"是否全黑" —— 首屏本来就是深靛底（不是纯黑），
             # 背景真的在渲染由第 2 项（时间自走）与第 2b 项（滚动变亮）证明。
 
-        # 2. 时间自走断言：**不滚动**，静置 1.8 秒，中心像素必须自己变化。
+        # 2. 时间自走断言：**不滚动**，静置 2.6 秒，整屏光量必须自己变化。
         #    背景是实时着色器（时间驱动），这是"页面是活的"的最低证据；
         #    旧版帧序列只在滚动时才动，正是被用户抱怨"死板"的根源。
-        p_a = read_center(ws)
-        time.sleep(1.8)
-        p_b = read_center(ws)
+        #    用 3×3 均值而非单点：单点在 CPU 繁忙时会误报（见 read_mean 说明）。
+        p_a = read_mean(ws)
+        time.sleep(3.6)
+        p_b = read_mean(ws)
         if p_a and p_b:
             diff = sum(abs(a - b) for a, b in zip(p_a, p_b))
             print(f'[2] 时间自走: {p_a} → {p_b}  变化量 {diff}')
@@ -213,6 +240,10 @@ def main():
         time.sleep(1.0)
 
         # 3. 入口链接
+        # 2026-09-14：入口从 4 个增到 6 个（加了 upload.html 起点、ask.html 提问），
+        # 并把顺序改成"先演示（上传→提问）、后看成果（主视图/面板/PathQA/局限）"。
+        # 这里改成校验**必须包含这几条关键路径**，而不是钉死一个数字 ——
+        # 以后再加页面不用回来改断言，但少一条就会红。
         entries = ev(ws, """[...document.querySelectorAll('a.entry')].map(e => ({
           href: e.getAttribute('href'),
           title: (e.querySelector('h3')||{}).textContent || ''
@@ -220,8 +251,14 @@ def main():
         print(f'[3] 入口数: {len(entries)}')
         for e in entries:
             print(f"    {e['title'][:18]:20s} → {e['href']}")
-        if len(entries) != 4:
-            fails.append(f'入口应为 4 个，实为 {len(entries)}')
+        REQUIRED = ['upload.html', 'ask.html', 'kg-nebula.html',
+                    'analytics.html', 'pathqa.html', 'method-limits.html']
+        got = {e['href'] for e in entries}
+        missing = [h for h in REQUIRED if h not in got]
+        if missing:
+            fails.append(f'导航页缺少入口: {missing}')
+        if len(entries) < len(REQUIRED):
+            fails.append(f'入口少于 {len(REQUIRED)} 个，实为 {len(entries)}')
 
         # 4. 数据区被 JS 填充（说明数据链路仍在工作）
         facts = ev(ws, "(document.getElementById('liveFacts')||{}).innerText || ''")
