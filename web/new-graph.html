@@ -234,9 +234,18 @@ function draw(data) {
 function render(data) {
   const nodes = data.nodes || [], edges = data.edges || [];
   const st = data.stats || {};
+  // 如实说明走的是哪条通道 —— 不能让界面写死一句话。
+  // （2026-09-14 修：原先硬编码「没有调用任何云端接口」，
+  //   但 mode=cloud 跑出来的图也被这么写，属于误导。）
+  const mode = data.mode || '';
+  const modeNote = mode === 'cloud'
+    ? '。抽取走的是云端 API（本篇实测 ¥0.44 / 8.5 分钟）。'
+    : mode === 'local'
+      ? '。抽取走本机模型，零 API 成本。'
+      : '。';
   document.getElementById('sub').textContent =
     `来自 ${data.source && data.source.name ? data.source.name : '你上传的文件'}`
-    + `。抽取在当前进程内完成，没有调用任何云端接口。`;
+    + modeNote;
   document.getElementById('srcpath').textContent = `/graph/${gid}`;
 
   const figs = [

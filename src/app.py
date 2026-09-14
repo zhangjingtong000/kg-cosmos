@@ -317,6 +317,9 @@ async def _run_upload(gid: str, pdf_path: Path, work_dir: Path,
 
         result = {
             "id": gid,
+            # 记下走的是哪条通道。new-graph.html 要按它如实说明
+            # 「走本机模型」还是「走云端 API」—— 不能让界面写死一句话。
+            "mode": mode,
             "source": {"id": gid, "name": filename, "kind": "pdf"},
             "nodes": [
                 {"name": n.get("name"), "type": n.get("type"),
