@@ -453,14 +453,30 @@ async def list_flags():
 
 @app.get("/graph/{graph_id}")
 async def get_graph(graph_id: str):
-    """Retrieve a previously extracted graph by ID."""
+    """Retrieve a previously extracted graph by ID.
+
+    内存里没有就回落到 `data/<id>/graph.json`。这让**后端重启后仍能查看
+    刚上传的图**（`_run_upload` 完成时会把结果写到那里）。
+
+    两处加固（2026-09-14）：
+      · 用 `utf-8-sig` 读 —— 它会自动吃掉 BOM。PowerShell 的
+        `Out-File -Encoding utf8` 默认写 BOM，而带 BOM 的 JSON 会让
+        `json.loads` 直接失败。这个坑我自己踩过一次。
+      · 解析失败时给**明确**的错误而不是裸 500 —— 前端 `new-graph.html`
+        会把 detail 显示给用户，说得出"产物损坏"比"取不到"有用得多。
+    """
     if graph_id not in graphs:
-        # Try loading from disk
         disk_path = DATA_DIR / graph_id / "graph.json"
-        if disk_path.exists():
-            graphs[graph_id] = json.loads(disk_path.read_text(encoding="utf-8"))
-        else:
+        if not disk_path.exists():
             raise HTTPException(404, f"Graph '{graph_id}' not found")
+        try:
+            graphs[graph_id] = json.loads(disk_path.read_text(encoding="utf-8-sig"))
+        except Exception as exc:
+            raise HTTPException(
+                500,
+                f"Graph '{graph_id}' 的产物文件无法解析"
+                f"（{disk_path}）：{type(exc).__name__}: {exc}",
+            )
     return graphs[graph_id]
 
 
