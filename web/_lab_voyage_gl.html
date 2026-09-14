@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>着色器背景试验</title>
+<style>
+  html,body{margin:0;height:100%;background:#04060c;overflow:hidden}
+  canvas{display:block;width:100vw;height:100vh}
+  #ui{position:fixed;left:14px;bottom:14px;color:#cfd6e4;font:12px/1.6 system-ui,sans-serif;
+      background:rgba(0,0,0,.45);padding:8px 12px;border-radius:8px}
+  input{width:260px;vertical-align:middle}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ui">进度 p = <b id="pv">0.00</b><br><input id="p" type="range" min="0" max="1" step="0.001" value="0"></div>
+<script>
+/* 抽象光场：两个平滑光斑 + 低频扰动，滚动进度 p 驱动它们的位置、强度与色温。
+   刻意**不做**写实星云 —— 不起高频细节，只做平滑的色彩过渡，
+   因为"设计感"来自克制而不是信息量。 */
+const cv = document.getElementById('c');
+const gl = cv.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'high-performance' });
+
+const VS = `
+attribute vec2 a;
+void main(){ gl_Position = vec4(a, 0.0, 1.0); }`;
+
+const FS = `
+precision highp float;
+uniform vec2  u_res;
+uniform float u_p;
+uniform float u_t;
+
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+
+float noise(vec2 p){
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  float a = hash(i), b = hash(i + vec2(1.0, 0.0));
+  float c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+/* 只用 3 层 —— 层数越多越像"噪点/沙子"，这里要的是大尺度的柔和起伏 */
+float fbm(vec2 p){
+  float v = 0.0, a = 0.5;
+  for (int i = 0; i < 3; i++){ v += a * noise(p); p *= 2.07; a *= 0.5; }
+  return v;
+}
+
+/* Domain warping：拿噪声去扭曲噪声的采样坐标，出来的不是"沙子"而是**纤维状结构**。
+   这是着色器里做"星云观感"的标准手法 —— 但它生成的是抽象的丝，不是写实照片，
+   正好落在"有设计感"而不是"像照片"这一侧。 */
+vec2 warp(vec2 p, float t){
+  vec2 q = vec2(fbm(p + vec2(0.0, t)),
+                fbm(p + vec2(5.2, 1.3) - vec2(t * 0.8, 0.0)));
+  vec2 r = vec2(fbm(p + 2.2 * q + vec2(1.7, 9.2) + vec2(t * 1.1, 0.0)),
+                fbm(p + 2.2 * q + vec2(8.3, 2.8) - vec2(0.0, t * 0.9)));
+  return p + 2.4 * r;
+}
+
+void main(){
+  vec2 res = u_res;
+  vec2 c = (gl_FragCoord.xy - 0.5 * res) / min(res.x, res.y);
+  float p = u_p;
+  float t = u_t * 0.05;
+
+  /* 两个光斑。位置随 p 缓缓移动，让"变化"是位移与强度，而不是换一张图。 */
+  vec2 g1 = vec2(-0.34 + 0.46 * p, 0.16 - 0.22 * p);
+  vec2 g2 = vec2( 0.46 - 0.34 * p, -0.26 + 0.36 * p);
+
+  /* 纤维状密度场 */
+  float fib = fbm(warp(c * 1.15, t));
+
+  float d1 = length(c - g1) + (fib - 0.5) * 0.62;
+  float d2 = length(c - g2) + (fib - 0.5) * 0.55;
+
+  /* 平滑衰减：radius 大、边缘软，"砸脸上"就是因为边缘硬、覆盖满 */
+  float l1 = smoothstep(1.08, 0.06, d1);
+  float l2 = smoothstep(0.95, 0.03, d2);
+
+  /* 用纤维密度给光晕内部做明暗分层 —— 这是"有结构"和"糊成一团"的区别 */
+  float body = smoothstep(0.32, 0.78, fib);
+
+  vec3 base = vec3(0.014, 0.018, 0.032);            /* 深靛，不是纯黑 */
+  vec3 teal = vec3(0.14, 0.52, 0.56);
+  vec3 gold = vec3(0.88, 0.62, 0.30);
+
+  /* 色温随 p 从青走到暖金，但两者始终共存，不会"变成另一个东西" */
+  float warm = smoothstep(0.20, 0.85, p);
+
+  vec3 col = base;
+  col += teal * l1 * (1.0 - 0.30 * warm) * (0.58 + 0.42 * p) * (0.62 + 0.38 * body);
+  col += gold * l2 * (0.26 + 0.74 * warm) * (0.40 + 0.60 * p) * (0.55 + 0.45 * body);
+
+  /* 纤维的高光边缘：让丝状结构"亮起来"，而不是平铺 */
+  col += teal * pow(body, 3.0) * l1 * 0.34;
+  col += gold * pow(body, 3.0) * l2 * 0.30 * warm;
+
+  /* 一点点极细颗粒，防止大面积渐变出现色带；不是"星星点缀" */
+  col += (hash(gl_FragCoord.xy * 0.7) - 0.5) * 0.010;
+
+  /* 暗角：把视线收拢到中心，也让四角保持"空" */
+  float vig = smoothstep(1.30, 0.20, length(c));
+  col *= 0.52 + 0.48 * vig;
+
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+function sh(type, src){
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+  return s;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS));
+gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) console.error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+
+const buf = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+const loc = gl.getAttribLocation(prog, 'a');
+gl.enableVertexAttribArray(loc);
+gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+const uRes = gl.getUniformLocation(prog, 'u_res');
+const uP   = gl.getUniformLocation(prog, 'u_p');
+const uT   = gl.getUniformLocation(prog, 'u_t');
+
+const slider = document.getElementById('p');
+const pv = document.getElementById('pv');
+let P = 0, target = 0, t0 = performance.now();
+
+function resize(){
+  const dpr = Math.min(1.5, devicePixelRatio || 1);
+  cv.width  = Math.round(innerWidth  * dpr);
+  cv.height = Math.round(innerHeight * dpr);
+  gl.viewport(0, 0, cv.width, cv.height);
+}
+addEventListener('resize', resize);
+resize();
+
+slider.addEventListener('input', () => { target = +slider.value; });
+
+function frame(now){
+  P += (target - P) * 0.08;                 /* 阻尼，和正式页一致 */
+  pv.textContent = P.toFixed(2);
+  slider.value = P;
+  gl.uniform2f(uRes, cv.width, cv.height);
+  gl.uniform1f(uP, P);
+  gl.uniform1f(uT, (now - t0) / 1000);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+window.__ready = true;
+</script>
+</body>
+</html>
