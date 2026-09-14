@@ -349,6 +349,61 @@ async def upload_tasks():
     return {"tasks": list(UPLOAD_TASKS.values())}
 
 
+# ── 人工标记：只落盘，不改图 ────────────────────────────────────────────
+# 对应项目功能清单 #3「图谱人工修正」，论文落点是「人机协同质量控制」。
+# 刻意**只记录不执行**：删边/合并会改变图规模，而六层评测的全部数字都绑定在
+# 当前规模上（README §5 明确要求跨口径比较前先确认口径）。一个"点一下就删边"
+# 的界面会让所有已发布指标失去可比性。这里把人工判断落盘成独立文件，
+# 供后续审核与批量处理——与 docs/KNOWN_DATA_DEFECTS.md §6 的原则一致。
+FLAGS_PATH = QUALITY / "human-flags.json"
+FLAG_KINDS = {"wrong_entity", "wrong_relation", "wrong_evidence"}
+
+
+class FlagRequest(BaseModel):
+    node: str
+    kind: str
+    view: Optional[str] = None
+    note: Optional[str] = None
+
+
+@app.post("/api/flag")
+async def add_flag(req: FlagRequest):
+    if req.kind not in FLAG_KINDS:
+        raise HTTPException(400, f"kind 必须是 {sorted(FLAG_KINDS)} 之一")
+    if not req.node.strip():
+        raise HTTPException(400, "node 不能为空")
+
+    flags = []
+    if FLAGS_PATH.exists():
+        try:
+            flags = json.loads(FLAGS_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            flags = []
+    flags.append({
+        "node": req.node.strip(),
+        "kind": req.kind,
+        "view": req.view,
+        "note": req.note,
+        "at": datetime.now().isoformat(),
+    })
+    QUALITY.mkdir(parents=True, exist_ok=True)
+    FLAGS_PATH.write_text(json.dumps(flags, ensure_ascii=False, indent=2),
+                          encoding="utf-8")
+    return {"total": len(flags), "saved_to": str(FLAGS_PATH.relative_to(ROOT))}
+
+
+@app.get("/api/flags")
+async def list_flags():
+    """列出已记录的人工标记。**注意：这些标记没有被应用到图上。**"""
+    if not FLAGS_PATH.exists():
+        return {"total": 0, "applied": False, "flags": []}
+    try:
+        flags = json.loads(FLAGS_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        flags = []
+    return {"total": len(flags), "applied": False, "flags": flags}
+
+
 @app.get("/graph/{graph_id}")
 async def get_graph(graph_id: str):
     """Retrieve a previously extracted graph by ID."""

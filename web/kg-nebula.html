@@ -252,6 +252,24 @@
 #kgExport .ok{color:#7cc0b6;border-color:rgba(124,192,182,.4)}
 @media (max-width:760px){#kgExport .lbl{display:none}}
 /* ==KG_EXPORT_V1_END== */
+
+/* ==KG_FLAG_V1== */
+#dbody .flagbar{margin:18px 0 4px;padding-top:14px;border-top:1px solid rgba(178,180,186,.16)}
+#dbody .flagbar .qh{display:block;font-size:11px;color:rgba(193,195,201,.46);
+  letter-spacing:.14em;text-transform:uppercase;margin-bottom:9px}
+#dbody .flagbar .btns{display:flex;gap:7px;flex-wrap:wrap}
+#dbody .flagbar button{
+  appearance:none;cursor:pointer;padding:6px 10px;border-radius:7px;
+  border:1px solid rgba(178,180,186,.18);background:rgba(255,255,255,.03);
+  color:rgba(203,218,241,.8);font:11.5px/1 inherit;letter-spacing:.02em;
+  transition:border-color .22s,color .22s,background .22s}
+#dbody .flagbar button:hover{border-color:rgba(224,164,105,.5);color:#fff}
+#dbody .flagbar button:focus-visible{outline:2px solid #e0a469;outline-offset:2px}
+#dbody .flagbar button[disabled]{opacity:.45;cursor:default}
+#dbody .flagbar .ok{color:#7cc0b6;border-color:rgba(124,192,182,.45)}
+#dbody .flagbar .no{color:#dda07a;border-color:rgba(221,160,122,.45)}
+#dbody .flagbar .msg{margin-top:9px;font-size:11px;color:rgba(193,195,201,.5);line-height:1.6}
+/* ==KG_FLAG_V1_END== */
 </style>
 <link rel="stylesheet" href="./lib/a11y.css">
 </head>
@@ -1105,7 +1123,16 @@ function renderInnerPreview(nodeIdx) {
         `<div class="sec">${escHtml(t)} · ${list.length}</div>
          ${list.slice(0, 6).map(o => `<div class="row"><span class="nm">${escHtml(o)}</span></div>`).join('')}`
       ).join('')}
-     ${evHtml}`;
+     ${evHtml}
+     <div class="flagbar" data-node="${escHtml(n.id)}">
+       <span class="qh">这条抽取对吗</span>
+       <div class="btns">
+         <button type="button" data-flag="wrong_entity">实体抽错了</button>
+         <button type="button" data-flag="wrong_relation">关系不成立</button>
+         <button type="button" data-flag="wrong_evidence">原文不支持</button>
+       </div>
+       <div class="msg">人工判断只**记录**，不自动改图 —— 改动图规模会让六层指标失去可比性。</div>
+     </div>`;
   detail.classList.add('open');
 }
 
@@ -2145,6 +2172,42 @@ addEventListener('resize', () => {
   });
 })();
 /* ==KG_EXPORT_V1_END== */
+
+/* ==KG_FLAG_V1== */
+/* 人工标记：只落盘、不改图。没有后端时如实告知，不假装记下了。 */
+(function () {
+  const dbody = document.getElementById('dbody');
+  if (!dbody) return;
+  dbody.addEventListener('click', async (ev) => {
+    const btn = ev.target.closest('.flagbar button[data-flag]');
+    if (!btn) return;
+    const bar = btn.closest('.flagbar');
+    const node = bar.dataset.node;
+    const kind = btn.dataset.flag;
+    const msg = bar.querySelector('.msg');
+    const all = [...bar.querySelectorAll('button')];
+    all.forEach(b => { b.disabled = true; });
+    try {
+      const r = await fetch('./api/flag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ node, kind, view: 'kg-nebula' }),
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      btn.classList.add('ok');
+      msg.textContent = `已记录「${node}」的 ${kind}（累计 ${j.total} 条待审核）。`
+        + ` 只记录，不自动改图。`;
+    } catch (e) {
+      btn.classList.add('no');
+      msg.textContent = '没能记下：' + (e && e.message ? e.message : e)
+        + '（后端未启动时不假装已保存）。';
+    } finally {
+      setTimeout(() => all.forEach(b => { b.disabled = false; }), 900);
+    }
+  });
+})();
+/* ==KG_FLAG_V1_END== */
 </script>
 <script src="./lib/a11y.js"></script>
 </body>
