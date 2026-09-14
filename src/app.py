@@ -159,10 +159,17 @@ async def upload_pdf(
 ):
     """上传 PDF，跑完整抽取管线，返回**本次这一篇**的图。
 
-    ⚠️ 前置条件：需要可用的模型后端。`mode=cloud` 会调用云端 LLM
-    （本项目账号余额已耗尽，实际不可用）；`mode=local` 走本机 Ollama。
-    界面上不把这个端点当作主推功能——它存在是为了让「上传→入图」这条链路
-    可被端到端测试，而不是假装零成本环境下能随时抽新论文。
+    前置条件：需要可用的模型后端。`mode=local` 走本机 Ollama（**零 API 成本**，
+    实测实体 F1 高于云端 55%，见 `docs/CHANNEL_ATTRIBUTION.md`）；
+    `mode=cloud` 调云端 LLM（本项目账号余额已耗尽，当前不可用）。
+
+    【2026-09-13 修订】此前这里写着「界面上不把这个端点当作主推功能」，
+    并把「零成本环境下不能随时抽新论文」当作既成事实 —— 那是被
+    「离线演示铁律」带偏的结论，而那条铁律并非项目方的要求：
+    本地通道零成本、一篇云端也只要 ¥0.013，真正烧钱的是调试期反复调用。
+    现在「上传 → 生成图谱」是演示主线，界面上有独立页面 `web/upload.html`。
+    因为抽取耗时以分钟计，界面不用本端点（同步、跑完才回），
+    而是用下面的 `/api/upload/start` + `/api/upload/status/{gid}` 拿真实进度。
 
     【2026-09-12 修】此前这里返回的是 `store.get_3d_data()`，
     即**整个图库**的 3D 数据（graph_store 里该调用没有按 graph_id 过滤），
@@ -232,6 +239,114 @@ async def upload_pdf(
 
     except Exception as e:
         raise HTTPException(500, f"Pipeline failed: {str(e)}")
+
+
+# ── 异步上传：给「上传页」用真实进度 ────────────────────────────────────
+# 为什么另开一对端点而不是改 /upload：
+#   /upload 是同步的（跑完才返回），适合脚本与回归测试，语义清晰，不动它。
+#   但界面上要让用户看见"图谱在生长"，就必须能在抽取过程中读到进度，
+#   所以这里加一对 start/status —— 进度由 pipeline.extract_graph 的
+#   on_progress 回调上报，是**真进度**，不是按耗时估算的假进度条。
+UPLOAD_TASKS: dict[str, dict] = {}
+
+
+def _progress_cb(gid: str):
+    def cb(stage: str, pct: float, detail: str = "") -> None:
+        t = UPLOAD_TASKS.get(gid)
+        if t is not None and t.get("state") == "running":
+            t["stage"] = stage
+            t["pct"] = round(pct, 1)
+            t["detail"] = detail
+    return cb
+
+
+async def _run_upload(gid: str, pdf_path: Path, work_dir: Path,
+                      filename: str, mode: str, max_chars: int) -> None:
+    task = UPLOAD_TASKS[gid]
+    try:
+        core = await asyncio.to_thread(
+            extract_graph, str(pdf_path), str(work_dir), gid, filename,
+            mode, max_chars, _progress_cb(gid),
+        )
+        nodes, edges = core["nodes"], core["edges"]
+        await asyncio.to_thread(build_store().store.import_data, nodes, edges)
+
+        result = {
+            "id": gid,
+            "source": {"id": gid, "name": filename, "kind": "pdf"},
+            "nodes": [
+                {"name": n.get("name"), "type": n.get("type"),
+                 "description": n.get("description"), "evidence": n.get("evidence", [])}
+                for n in nodes
+            ],
+            "edges": [
+                {"source": e.get("source"), "target": e.get("target"),
+                 "type": e.get("type"), "description": e.get("description"),
+                 "evidence": e.get("evidence", [])}
+                for e in edges
+            ],
+            "stats": {
+                "pdf_pages": core["parsed"]["total_pages"],
+                "chunks": core["chunked"]["total_chunks"],
+                "nodes": len(nodes),
+                "edges": len(edges),
+                "tables": len(core["chunked"].get("tables", [])),
+                "extraction_time_s": core["extraction_time_s"],
+                "images_found": core["images_found"],
+            },
+            "created_at": datetime.now().isoformat(),
+        }
+        graphs[gid] = result
+        (work_dir / "graph.json").write_text(
+            json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        task.update(state="done", pct=100.0, stage="graph", detail="已就绪",
+                    stats=result["stats"], redirect=f"./kg-nebula.html?src={gid}")
+    except Exception as exc:
+        task.update(state="error", stage="error",
+                    error=f"{type(exc).__name__}: {exc}")
+
+
+@app.post("/api/upload/start")
+async def upload_start(
+    file: UploadFile = File(...),
+    mode: str = Query("local", description="Model backend: local or cloud"),
+    max_chars: int = Query(500),
+):
+    """接收 PDF 并**立即返回**，抽取在后台跑；进度用 /api/upload/status/{gid} 查。"""
+    if not (file.filename or "").lower().endswith(".pdf"):
+        raise HTTPException(400, "只支持 PDF 文件")
+
+    gid = uuid.uuid4().hex[:8]
+    work_dir = DATA_DIR / gid
+    work_dir.mkdir(parents=True, exist_ok=True)
+    pdf_path = work_dir / file.filename
+    with open(pdf_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    UPLOAD_TASKS[gid] = {
+        "id": gid, "filename": file.filename, "mode": mode,
+        "state": "running", "stage": "queued", "pct": 0.0, "detail": "已入队",
+        "started_at": datetime.now().isoformat(),
+    }
+    asyncio.create_task(_run_upload(gid, pdf_path, work_dir,
+                                    file.filename, mode, max_chars))
+    return {"id": gid, "state": "running"}
+
+
+@app.get("/api/upload/status/{gid}")
+async def upload_status(gid: str):
+    """查询某次上传的进度。state ∈ running / done / error。"""
+    t = UPLOAD_TASKS.get(gid)
+    if t is None:
+        raise HTTPException(404, f"Upload task '{gid}' not found")
+    return t
+
+
+@app.get("/api/upload/tasks")
+async def upload_tasks():
+    """列出本次进程内所有上传任务（调试用）。"""
+    return {"tasks": list(UPLOAD_TASKS.values())}
 
 
 @app.get("/graph/{graph_id}")

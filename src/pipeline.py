@@ -36,9 +36,28 @@ def extract_graph(
     source_name: str,
     mode: str = "local",
     max_chars: int = 500,
+    on_progress=None,
 ) -> dict:
+    """跑完整抽取管线。
+
+    `on_progress(stage, pct, detail)` 是**可选**回调，用于「上传页」显示真实进度
+    （解析 → 分块 → 逐段抽取 → 归一 → 汇总）。不传就完全等于旧行为。
+    回调里的异常一律吞掉——进度上报绝不能反过来把抽取搞挂。
+    """
+    def report(stage: str, pct: float, detail: str = "") -> None:
+        if on_progress is None:
+            return
+        try:
+            on_progress(stage, max(0.0, min(100.0, pct)), detail)
+        except Exception:
+            pass
+
+    report("parse", 3.0, "解析 PDF")
     parsed = parse_pdf(pdf_path, work_dir)
+    report("chunk", 15.0, f"{parsed['total_pages']} 页")
     chunked = chunk_document(parsed, max_chars=max_chars)
+    total_chunks = len(chunked["chunks"])
+    report("extract", 20.0, f"{total_chunks} 段")
 
     model_text = MODELS[mode]["text"]
     model_vis = MODELS[mode]["vision"]
@@ -49,15 +68,23 @@ def extract_graph(
     style = os.environ.get("KG_EXTRACT_STYLE", "split").strip().lower()
     extract_fn = extract_chunk_once if style == "combined" else extract_chunk
 
+    done_chunks = 0
+
     def extract_one(chunk):
+        nonlocal done_chunks
         img_path = chunk["images"][0]["path"] if chunk["images"] else None
         try:
-            return chunk, extract_fn(
+            out = chunk, extract_fn(
                 chunk["text"], model_text, mode, model_vis, img_path,
                 content_kind=chunk.get("kind", "text"),
             ), None
         except Exception as exc:  # 单个 chunk 失败不拖垮全篇，但要留痕
-            return chunk, None, exc
+            out = chunk, None, exc
+        done_chunks += 1
+        # 抽取阶段占总进度 20% → 90%
+        report("extract", 20.0 + 70.0 * done_chunks / max(1, total_chunks),
+               f"{done_chunks}/{total_chunks} 段")
+        return out
 
     workers = max(1, int(os.environ.get("KG_EXTRACT_WORKERS", "1")))
     if workers > 1:
@@ -66,6 +93,7 @@ def extract_graph(
     else:
         results = [extract_one(ch) for ch in chunked["chunks"]]
 
+    report("norm", 92.0, "归一与去重")
     all_nodes, all_edges = [], []
     for chunk, res, exc in results:
         if res is None:

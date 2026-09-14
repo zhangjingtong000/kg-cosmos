@@ -90,7 +90,16 @@ def main():
         page = next(t for t in targets if t.get('type') == 'page')
         ws = websocket.create_connection(page['webSocketDebuggerUrl'], timeout=60)
         cdp(ws, 'Runtime.enable')
-        time.sleep(1.0)
+        # 必须等页面自报就绪再检查背景。
+        # voyage.js 是 ES module：要先下载、解析、编译着色器、画上首帧，才会置
+        # window.__ready。这里以前只 sleep(1.0)，在慢机器或首次冷启动时必然读到
+        # 空画布，表现成「画布没有启用 / 时间驱动失效 / 着色器没被滚动驱动」——
+        # 那是**检查得太早**，不是页面坏了。（2026-09-14 修）
+        for _ in range(300):
+            if ev(ws, 'window.__ready === true') is True:
+                break
+            time.sleep(0.1)
+        time.sleep(1.2)
 
         # 1. 背景画布：必须存在、WebGL 上下文健康、已启用（首帧已画）
         cv = ev(ws, """(() => {

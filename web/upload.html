@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KG Cosmos · 从一篇论文开始</title>
+<link rel="stylesheet" href="./lib/a11y.css">
+<link rel="stylesheet" href="./lib/fonts/fonts.css">
+<style>
+/* ── 设计 token：与 navigation（voyage.css）逐值一致，不另起一套 ────────── */
+:root{
+  --ink:#eef3fd;
+  --ink-2:rgba(203,218,241,.76);
+  --ink-3:rgba(193,195,201,.46);
+  --accent:#e0a469;
+  --warm:#ffcfa8;
+  --bg:#02040a;
+  --line:rgba(178,180,186,.13);
+  --maxw:1180px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg)}
+body{
+  color:var(--ink);
+  font-family:"Inter","SF Pro Display",-apple-system,BlinkMacSystemFont,
+              "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+h1,h2,h3,.kick,.display{font-family:"Smiley Sans","Noto Serif SC",Georgia,serif}
+
+/* ── 背景：与导航页同一套绸缎光场（精简版，只保留底色与缓慢流动）──────── */
+#gl{position:fixed;inset:0;z-index:0;display:block}
+#veil{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 120% 80% at 50% 40%,
+    rgba(2,4,10,.10) 0%, rgba(2,4,10,.55) 55%, rgba(2,4,10,.88) 100%)}
+
+/* ── 布局 ──────────────────────────────────────────────────────────────── */
+.wrap{position:relative;z-index:2;height:100%;display:flex;flex-direction:column}
+header{flex:0 0 auto;padding:26px 40px 0}
+header .brand{font-size:11px;letter-spacing:.30em;text-transform:uppercase;
+  color:var(--ink-3);text-decoration:none}
+main{flex:1 1 auto;display:flex;align-items:center;justify-content:center;
+  padding:0 40px 60px}
+.inner{width:100%;max-width:var(--maxw)}
+
+/* ── 标题区 ────────────────────────────────────────────────────────────── */
+.kick{display:flex;align-items:baseline;gap:14px;margin:0 0 18px;
+  font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-3)}
+h1{margin:0;font-size:clamp(30px,4.3vw,54px);line-height:1.06;
+  letter-spacing:-.03em;font-weight:700;color:#fff}
+h1 em{font-style:normal;
+  background:linear-gradient(96deg,var(--warm),var(--accent) 60%,#b8823f);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin:16px 0 0;max-width:56ch;font-size:14.5px;line-height:1.78;color:var(--ink-2)}
+
+/* ── 投放区：不用虚线框，而是一块"绸缎面板" ────────────────────────────── */
+.drop{
+  position:relative;margin:32px 0 0;padding:38px 32px;border-radius:18px;
+  background:
+    radial-gradient(120% 100% at 12% 0%, rgba(224,164,105,.10), transparent 55%),
+    radial-gradient(120% 100% at 88% 100%, rgba(120,170,230,.10), transparent 55%),
+    rgba(255,255,255,.022);
+  border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 30px 80px -50px rgba(0,0,0,.9);
+  cursor:pointer;transition:border-color .5s cubic-bezier(.19,1,.22,1),
+    box-shadow .5s cubic-bezier(.19,1,.22,1), background .5s;
+  text-align:center;
+}
+.drop::after{ /* 顶部一道极细的暖色走光，静态但像有光源扫过 */
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(224,164,105,.55),transparent);
+  opacity:.6;transition:opacity .5s}
+.drop:hover,.drop.hot{
+  border-color:rgba(224,164,105,.34);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 40px 100px -50px rgba(224,164,105,.30)}
+.drop:hover::after,.drop.hot::after{opacity:1}
+.drop .ico{display:block;margin:0 auto 16px;width:30px;height:30px;opacity:.5}
+.drop .t{display:block;font-size:16px;color:#fff;letter-spacing:-.01em}
+.drop .t b{color:var(--warm);font-weight:400}
+.drop .h{display:block;margin-top:10px;font-size:11.5px;color:var(--ink-3);
+  letter-spacing:.02em}
+
+/* ── 阶段列表：上传后把"抽取"显示成图谱在生长，而不是进度条 ────────────── */
+.stages{margin:28px 0 0;border-top:1px solid var(--line)}
+.stage{display:grid;grid-template-columns:26px 116px 1fr auto;gap:16px;
+  align-items:center;padding:12px 2px;border-bottom:1px solid var(--line);
+  opacity:.34;transition:opacity .7s cubic-bezier(.19,1,.22,1)}
+.stage.on{opacity:1}
+.stage.done{opacity:.72}
+.stage .ix{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums;
+  letter-spacing:.06em}
+.stage .nm{font-size:13.5px;color:var(--ink)}
+.stage .bar{height:1px;background:var(--line);position:relative;overflow:hidden}
+.stage .bar i{position:absolute;inset:0 auto 0 0;width:0;
+  background:linear-gradient(90deg,var(--accent),var(--warm));
+  transition:width .6s cubic-bezier(.19,1,.22,1)}
+.stage .vv{font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;
+  min-width:96px;text-align:right}
+.stage.done .vv{color:var(--ink-2)}
+
+/* ── 页脚 ──────────────────────────────────────────────────────────────── */
+footer{flex:0 0 auto;padding:0 40px 22px 132px;font-size:11px;color:var(--ink-3);
+  display:flex;gap:26px;flex-wrap:wrap}
+footer a{color:var(--ink-3);text-decoration:none;border-bottom:1px solid transparent}
+footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
+
+@media (max-width:760px){
+  header{padding:20px 22px 0}
+  main{padding:0 22px 40px}
+  footer{padding:0 22px 18px;gap:16px}
+  .drop{padding:40px 22px}
+  .stage{grid-template-columns:22px 70px 1fr;gap:12px}
+  .stage .vv{grid-column:3;text-align:left;min-width:0;margin-top:4px}
+}
+@media (prefers-reduced-motion:reduce){
+  .drop,.drop::after,.stage,.stage .bar i{transition:none !important}
+}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="veil"></div>
+
+<div class="wrap">
+  <header><a class="brand" href="./index.html">KG COSMOS</a></header>
+
+  <main><div class="inner">
+    <p class="kick">01 — 输入</p>
+    <h1>给它一篇论文，<br>它会自己长成<em>一张图谱</em>。</h1>
+    <p class="sub">
+      上传 PDF，系统在本地解析全文，逐段抽取实体与关系，去重、归一、聚类，
+      最后落成一张可以走进去的图。整个过程可复现，每一个结论都能回溯到原文那一句。
+    </p>
+
+    <div class="drop" id="drop" role="button" tabindex="0"
+         aria-label="选择或拖入 PDF 文件">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 16V4M12 4L7.5 8.5M12 4l4.5 4.5"/>
+        <path d="M3.5 15v3.5A1.5 1.5 0 0 0 5 20h14a1.5 1.5 0 0 0 1.5-1.5V15"/>
+      </svg>
+      <span class="t">把 PDF 拖到这里，或者<b>点击选择</b></span>
+      <span class="h">仅 .pdf · 解析在本地完成 · 不上传第三方</span>
+      <input type="file" id="file" accept="application/pdf" hidden>
+    </div>
+
+    <div class="stages" id="stages" aria-live="polite">
+      <div class="stage" data-k="parse"><span class="ix">01</span><span class="nm">解析全文</span><span class="bar"><i></i></span><span class="vv">待开始</span></div>
+      <div class="stage" data-k="extract"><span class="ix">02</span><span class="nm">抽取实体与关系</span><span class="bar"><i></i></span><span class="vv">待开始</span></div>
+      <div class="stage" data-k="norm"><span class="ix">03</span><span class="nm">归一与去重</span><span class="bar"><i></i></span><span class="vv">待开始</span></div>
+      <div class="stage" data-k="graph"><span class="ix">04</span><span class="nm">落成图谱</span><span class="bar"><i></i></span><span class="vv">待开始</span></div>
+    </div>
+  </div></main>
+
+  <footer>
+    <!-- 返回导航由 a11y.js 以 fixed 元素注入在左下角，这里不再重复放一个；
+         左内边距正是为它让位。 -->
+    <span>解析在本地完成 · 每个结论都能回溯到原文那一句</span>
+  </footer>
+</div>
+
+<script>
+/* 背景：与导航页同一套绸缎光场，这里只保留底色与极慢流动。
+   刻意不放星空、不放粒子 —— 那是被否过的做法。 */
+const cv = document.getElementById('gl');
+const gl = cv.getContext('webgl', {antialias:false, alpha:false, powerPreference:'low-power'});
+const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a,0.0,1.0); }`;
+const FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_t;
+float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123); }
+float noise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
+float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<3;i++){ v+=a*noise(p); p*=2.07; a*=0.5; } return v; }
+vec2 warp(vec2 p,float t){
+  vec2 q=vec2(fbm(p+vec2(0.0,t)), fbm(p+vec2(5.2,1.3)-vec2(t*0.8,0.0)));
+  vec2 r=vec2(fbm(p+2.2*q+vec2(1.7,9.2)+vec2(t*1.1,0.0)), fbm(p+2.2*q+vec2(8.3,2.8)-vec2(0.0,t*0.9)));
+  return p+2.4*r; }
+void main(){
+  vec2 c=(gl_FragCoord.xy-0.5*u_res)/min(u_res.x,u_res.y);
+  float t=u_t*0.022;                       /* 比导航页更慢：这一屏是"入口"，要静 */
+  vec2 g1=vec2(-0.52,0.02), g2=vec2(0.66,0.06);
+  float fib=fbm(warp(c*1.05,t));
+  float l1=smoothstep(1.15,0.05,length(c-g1)+(fib-0.5)*0.55);
+  float l2=smoothstep(1.15,0.02,length(c-g2)+(fib-0.5)*0.50);
+  float body=smoothstep(0.34,0.78,fib);
+  vec3 base=vec3(0.010,0.013,0.023);
+  vec3 teal=vec3(0.11,0.45,0.53), gold=vec3(0.78,0.55,0.30);
+  vec3 col=base;
+  col+=teal*l1*(0.60+0.40*body);
+  col+=gold*l2*(0.50+0.50*body);
+  col+=teal*pow(body,3.0)*l1*0.24;
+  col+=gold*pow(body,3.0)*l2*0.24;
+  col+=(hash(gl_FragCoord.xy*0.7)-0.5)*0.009;
+  float vig=smoothstep(1.35,0.20,length(c));
+  col*=0.40+0.60*vig;
+  gl_FragColor=vec4(col,1.0);
+}`;
+function sh(t,s){ const o=gl.createShader(t); gl.shaderSource(o,s); gl.compileShader(o);
+  if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(o)); return o; }
+const p=gl.createProgram();
+gl.attachShader(p,sh(gl.VERTEX_SHADER,VS)); gl.attachShader(p,sh(gl.FRAGMENT_SHADER,FS));
+gl.linkProgram(p); gl.useProgram(p);
+const b=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,b);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+const a=gl.getAttribLocation(p,'a'); gl.enableVertexAttribArray(a);
+gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+const uRes=gl.getUniformLocation(p,'u_res'), uT=gl.getUniformLocation(p,'u_t');
+function size(){ const d=Math.min(1.5,devicePixelRatio||1);
+  cv.width=Math.round(innerWidth*d); cv.height=Math.round(innerHeight*d);
+  gl.viewport(0,0,cv.width,cv.height); }
+addEventListener('resize',size); size();
+const t0=performance.now();
+(function loop(now){
+  gl.uniform2f(uRes,cv.width,cv.height);
+  gl.uniform1f(uT,(now-t0)/1000);
+  gl.drawArrays(gl.TRIANGLES,0,3);
+  requestAnimationFrame(loop);
+})(t0);
+
+/* ── 上传与真实进度 ────────────────────────────────────────────────────
+   有后端（`python src/app.py`，web/ 挂在同源）时走真抽取：
+     POST /api/upload/start   → 立即返回 {id}
+     GET  /api/upload/status/{id} → {state, stage, pct, detail, stats}
+   进度来自 pipeline.extract_graph 的 on_progress 回调，是**真进度**。
+
+   没有后端时（纯静态服务器，如项目自带的 --static 模式）**不假装**——
+   明说"后端未启动，当前为演示"，然后走一遍占位动画，避免让人误以为跑了模型。
+   这条分支存在本身就说明：我们不再把"断网可用"当作所有功能的前提。 */
+const drop = document.getElementById('drop');
+const file = document.getElementById('file');
+const stages = [...document.querySelectorAll('.stage')];
+const vv = k => document.querySelector(`.stage[data-k="${k}"] .vv`);
+const bar = k => document.querySelector(`.stage[data-k="${k}"] .bar i`);
+
+const STATE = { parse: ['解析全文', 'parse'], chunk: ['解析全文', 'parse'],
+                extract: ['抽取实体与关系', 'extract'],
+                norm: ['归一与去重', 'norm'],
+                graph: ['落成图谱', 'graph'] };
+const ORDER = ['parse', 'extract', 'norm', 'graph'];
+let running = false;
+
+function reset() {
+  stages.forEach(s => { s.className = 'stage';
+    s.querySelector('.bar i').style.width = '0';
+    s.querySelector('.vv').textContent = '待开始'; });
+}
+
+function apply(s) {
+  const [_, key] = STATE[s.stage] || ['', 'parse'];
+  const at = ORDER.indexOf(key);
+  ORDER.forEach((k, i) => {
+    const el = document.querySelector(`.stage[data-k="${k}"]`);
+    if (i < at) { el.className = 'stage done'; bar(k).style.width = '100%'; }
+    else if (i === at) { el.className = 'stage on'; bar(k).style.width = s.pct + '%'; }
+    else { el.className = 'stage'; bar(k).style.width = '0'; }
+  });
+  if (s.detail) vv(key).textContent = s.detail;
+  if (s.state === 'done' && s.stats) {
+    const st = s.stats, L = ['parse', 'extract', 'norm', 'graph'];
+    L.forEach(k => { document.querySelector(`.stage[data-k="${k}"]`).className = 'stage done'; });
+    vv('parse').textContent = `${st.pdf_pages} 页 · ${st.chunks} 段`;
+    vv('extract').textContent = `实体 ${st.nodes} · 关系 ${st.edges}`;
+    vv('norm').textContent = `去重后 ${st.nodes}`;
+    vv('graph').textContent = `已就绪 · ${st.extraction_time_s}s`;
+  }
+}
+
+/* 占位动画：只在没有后端时用，且界面上会先说明"这是演示" */
+function demo() {
+  const L = { parse: '23 页 · 412 段', extract: '实体 416 · 关系 583',
+              norm: '去重后 379', graph: '已就绪' };
+  ORDER.forEach((k, i) => setTimeout(() => {
+    document.querySelector(`.stage[data-k="${k}"]`).classList.add('on');
+    requestAnimationFrame(() => bar(k).style.width = '100%');
+    setTimeout(() => {
+      document.querySelector(`.stage[data-k="${k}"]`).classList.add('done');
+      vv(k).textContent = L[k];
+    }, 780);
+  }, i * 1150));
+  setTimeout(() => { running = false; }, ORDER.length * 1150 + 600);
+}
+
+async function poll(id) {
+  for (;;) {
+    let s;
+    try {
+      const r = await fetch('./api/upload/status/' + id, { cache: 'no-store' });
+      if (!r.ok) throw new Error('status ' + r.status);
+      s = await r.json();
+    } catch (e) {
+      vv('graph').textContent = '进度读取失败';
+      running = false; return;
+    }
+    apply(s);
+    if (s.state === 'done') {
+      setTimeout(() => { location.href = './kg-nebula.html'; }, 1400);
+      return;
+    }
+    if (s.state === 'error') {
+      vv('graph').textContent = '抽取失败';
+      document.querySelector('.stage[data-k="graph"]').classList.add('on');
+      console.error('[upload]', s.error);
+      running = false; return;
+    }
+    await new Promise(r => setTimeout(r, 700));
+  }
+}
+
+async function upload(f) {
+  if (running) return;
+  running = true; reset();
+  const fd = new FormData();
+  fd.append('file', f, f.name);
+  let r = null;
+  try {
+    r = await fetch('./api/upload/start?mode=local', { method: 'POST', body: fd });
+  } catch (e) { r = null; }
+
+  if (!r || !r.ok) {
+    // 明确说清是演示，不假装跑了模型
+    document.querySelector('.drop .h').textContent =
+      '后端未启动（纯静态模式）· 下面走的是占位演示，未调用抽取模型';
+    demo();
+    return;
+  }
+  const { id } = await r.json();
+  await poll(id);
+}
+
+drop.addEventListener('click', () => file.click());
+drop.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); file.click(); }
+});
+['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => {
+  e.preventDefault(); drop.classList.add('hot'); }));
+['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => {
+  e.preventDefault(); drop.classList.remove('hot'); }));
+drop.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0];
+  if (f && /\.pdf$/i.test(f.name)) upload(f);
+});
+file.addEventListener('change', () => { if (file.files[0]) upload(file.files[0]); });
+
+window.__ready = true;
+</script>
+</body>
+</html>
