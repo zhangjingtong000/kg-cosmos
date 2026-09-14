@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KG Cosmos · 提问</title>
+<link rel="stylesheet" href="./lib/a11y.css">
+<link rel="stylesheet" href="./lib/fonts/fonts.css">
+<style>
+/* ── 设计 token：与 navigation（voyage.css）/ upload.html 逐值一致 ───────── */
+:root{
+  --ink:#eef3fd;
+  --ink-2:rgba(203,218,241,.76);
+  --ink-3:rgba(193,195,201,.46);
+  --accent:#e0a469;
+  --warm:#ffcfa8;
+  --bg:#02040a;
+  --line:rgba(178,180,186,.13);
+  --maxw:1180px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg)}
+body{
+  color:var(--ink);
+  font-family:"Inter","SF Pro Display",-apple-system,BlinkMacSystemFont,
+              "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+h1,h2,h3,.kick,.display{font-family:"Smiley Sans","Noto Serif SC",Georgia,serif}
+::selection{background:rgba(224,164,105,.28);color:#fff}
+[hidden]{display:none !important}
+
+/* ── 背景：与导航页同一套绸缎光场（只把流动速度压得更慢）─────────────── */
+#gl{position:fixed;inset:0;z-index:0;display:block}
+#veil{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 120% 80% at 50% 40%,
+    rgba(2,4,10,.10) 0%, rgba(2,4,10,.55) 55%, rgba(2,4,10,.88) 100%)}
+
+/* ── 布局 ──────────────────────────────────────────────────────────────── */
+.wrap{position:relative;z-index:2;min-height:100%;display:flex;flex-direction:column}
+header{flex:0 0 auto;padding:26px 40px 0}
+header .brand{font-size:11px;letter-spacing:.30em;text-transform:uppercase;
+  color:var(--ink-3);text-decoration:none}
+main{flex:1 1 auto;padding:0 40px}
+.inner{width:100%;max-width:var(--maxw);margin:0 auto;
+  padding:clamp(34px,6.4vh,76px) 0 30px}
+
+.kick{display:flex;align-items:baseline;gap:14px;margin:0 0 18px;
+  font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-3)}
+h1{margin:0;font-size:clamp(30px,4.3vw,54px);line-height:1.06;
+  letter-spacing:-.03em;font-weight:700;color:#fff}
+h1 em{font-style:normal;
+  background:linear-gradient(96deg,var(--warm),var(--accent) 60%,#b8823f);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin:16px 0 0;max-width:66ch;font-size:14.5px;line-height:1.78;color:var(--ink-2);
+  text-wrap:pretty}
+
+/* ── 提问栏：一条发丝线 + 大字号输入，不是聊天输入框 ─────────────────── */
+.askwrap{margin:34px 0 0}
+.askwrap .lb{display:block;font-size:10.5px;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
+.ask{display:flex;align-items:center;gap:18px;
+  border-bottom:1px solid var(--line);padding:0 0 14px;
+  transition:border-color .55s cubic-bezier(.19,1,.22,1)}
+.ask:focus-within{border-bottom-color:rgba(224,164,105,.52)}
+.ask input{flex:1 1 auto;min-width:0;background:none;border:0;outline:none;
+  color:#fff;padding:5px 0;letter-spacing:-.015em;
+  font:400 clamp(17px,2.05vw,23px)/1.42 inherit;font-family:inherit}
+.ask input::placeholder{color:var(--ink-3)}
+.ask .go{flex:0 0 auto;width:44px;height:44px;padding:0;border-radius:50%;
+  display:grid;place-items:center;cursor:pointer;color:var(--warm);
+  border:1px solid rgba(224,164,105,.45);
+  background:linear-gradient(120deg,rgba(224,164,105,.20),rgba(224,164,105,.05));
+  transition:transform .45s cubic-bezier(.19,1,.22,1),border-color .3s,box-shadow .45s}
+.ask .go:hover{border-color:rgba(224,164,105,.9);transform:translateY(-2px);
+  box-shadow:0 18px 44px -18px rgba(224,164,105,.7)}
+.ask .go svg{width:17px;height:17px}
+
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 0}
+.chip{font:400 12.5px/1.35 inherit;font-family:inherit;color:var(--ink-2);
+  background:rgba(255,255,255,.022);border:1px solid var(--line);
+  border-radius:999px;padding:9px 15px;cursor:pointer;text-align:left;
+  transition:color .3s,border-color .3s,background .3s}
+.chip:hover,.chip:focus-visible{color:#fff;border-color:rgba(224,164,105,.40);
+  background:rgba(224,164,105,.08)}
+.chip.on{color:#fff;border-color:rgba(224,164,105,.55);background:rgba(224,164,105,.10)}
+
+/* ── 初次进入时的说明：沿用上传页 stage 的排版节奏（序号 + 名称 + 说明）── */
+.how{margin:36px 0 0;border-top:1px solid var(--line)}
+.how .r{display:grid;grid-template-columns:26px 148px 1fr;gap:16px;align-items:baseline;
+  padding:12px 2px;border-bottom:1px solid var(--line)}
+.how .ix{font-size:11px;color:var(--ink-3);letter-spacing:.06em;
+  font-variant-numeric:tabular-nums}
+.how .nm{font-size:13.5px;color:var(--ink)}
+.how .ds{font-size:12.5px;color:var(--ink-3);line-height:1.7}
+.how-note{margin:16px 0 0;font-size:12px;color:var(--ink-3);line-height:1.7;
+  display:flex;align-items:center;gap:10px}
+.how-note::before{content:"";flex:0 0 22px;height:1px;background:var(--accent);
+  opacity:.55}
+
+/* ── 结果区 ────────────────────────────────────────────────────────────── */
+#result{margin:46px 0 0}
+.sec{border-top:1px solid var(--line);padding:26px 0 0;margin:0 0 46px}
+.sec > .kick{margin-bottom:16px}
+.sec .hint{margin:0;font-size:12.5px;color:var(--ink-3);max-width:74ch;line-height:1.75}
+
+/* 子图面板：与上传页 .drop 同一套"绸缎面板"语言 */
+.graph{display:grid;grid-template-columns:minmax(0,1.68fr) minmax(0,1fr);
+  gap:32px;align-items:start;margin:16px 0 0}
+.gpanel{position:relative;padding:10px 8px 4px;border-radius:18px;overflow:hidden;
+  background:
+    radial-gradient(120% 100% at 12% 0%, rgba(224,164,105,.08), transparent 55%),
+    radial-gradient(120% 100% at 88% 100%, rgba(120,170,230,.07), transparent 55%),
+    rgba(255,255,255,.018);
+  border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 30px 80px -54px rgba(0,0,0,.9)}
+.gpanel::after{content:"";position:absolute;left:0;right:0;top:0;height:1px;opacity:.55;
+  background:linear-gradient(90deg,transparent,rgba(224,164,105,.55),transparent)}
+.gpanel svg{display:block;width:100%;height:auto}
+
+.edge{fill:none;stroke:var(--line);stroke-width:1;opacity:0;
+  transition:opacity .7s ease}
+.edge.hot{stroke:rgba(224,164,105,.62);stroke-width:1.3}
+.edge.contra{stroke:rgba(255,207,168,.42);stroke-width:1;stroke-dasharray:4 6}
+.edge.in{opacity:1}
+.flow{fill:none;stroke:var(--warm);stroke-width:1.7;opacity:0;
+  stroke-dasharray:9 231;stroke-dashoffset:240;
+  transition:opacity .8s ease}
+.flow.in{opacity:.85;animation:flow 3.4s linear infinite}
+@keyframes flow{to{stroke-dashoffset:0}}
+.nwrap{opacity:0;transform:translateY(7px);
+  transition:opacity .7s ease,transform .7s cubic-bezier(.19,1,.22,1)}
+.nwrap.in{opacity:1;transform:none}
+.nd{fill:var(--ink-3)}
+.nd.hit{fill:var(--accent)}
+.nd.seed{fill:var(--warm)}
+.halo{fill:none;stroke:var(--accent);stroke-opacity:.30;stroke-width:1}
+.halo.seed{stroke:var(--warm);stroke-opacity:.34}
+.gl{font-size:11.5px;fill:var(--ink-3);letter-spacing:.01em}
+.gl.hit{fill:var(--ink);font-weight:500}
+.gl.seed{fill:#fff;font-weight:600}
+.gn{font-size:9.5px;fill:rgba(193,195,201,.42);letter-spacing:.14em;text-transform:uppercase}
+/* 边上直接标出 CONTRADICTS：图里真有这类边，这件事不该只写在图例里 */
+.gel{font-size:8.5px;fill:rgba(255,207,168,.62);letter-spacing:.16em;
+  text-anchor:middle}
+
+.gside{margin:2px 0 0}
+.gstat{display:grid;grid-template-columns:1fr auto;gap:12px;padding:9px 0;
+  border-bottom:1px solid var(--line);font-size:12.5px;align-items:baseline}
+.gstat .k{color:var(--ink-3)}
+.gstat .v{color:var(--ink);font-variant-numeric:tabular-nums;text-align:right}
+.legend{margin:16px 0 0;font-size:11.5px;color:var(--ink-3);line-height:1.5}
+.legend .li{display:flex;align-items:center;gap:10px;margin:0 0 9px}
+/* 样例统一占 26px 槽位：线型画在槽位里，圆点也画在槽位正中，
+   两者左边界必须对齐，否则一列图例看起来是歪的。 */
+.legend .sw{flex:0 0 26px;height:1px;background:var(--accent);position:relative}
+.legend .sw.plain{background:var(--line)}
+.legend .sw.contra{background:repeating-linear-gradient(90deg,
+  rgba(255,207,168,.55) 0 3px, transparent 3px 8px)}
+.legend .sw.dot{background:none}
+.legend .sw.dot::after{content:"";position:absolute;left:50%;top:50%;
+  width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;
+  background:var(--accent)}
+.legend .sw.dot.seed::after{background:var(--warm)}
+.legend .sw.dot.plain::after{background:var(--ink-3)}
+
+/* ── 支持 / 反方：两栏完全同构同色。分歧本身就是内容，不做主次 ───────── */
+.camps{display:grid;grid-template-columns:1fr 1fr;margin:16px 0 0;
+  border-top:1px solid var(--line)}
+.camp{padding:24px 28px 28px;min-width:0}
+.camp + .camp{border-left:1px solid var(--line)}
+.stake{display:flex;align-items:center;gap:11px;margin:0;
+  font-size:10.5px;letter-spacing:.22em;color:var(--ink-3)}
+.stake .tick{flex:0 0 22px;height:2px;background:var(--warm);opacity:.75}
+.camp.con .stake .tick{background:var(--accent)}
+.camp.syn .stake .tick{background:var(--warm)}
+.claim{margin:13px 0 0;font-size:14px;line-height:1.7;color:var(--ink-2);
+  letter-spacing:-.005em}
+.tally{margin:10px 0 0;font-size:11.5px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums}
+.tally b{color:var(--ink);font-weight:600}
+
+.evs{margin:18px 0 0;border-top:1px solid var(--line)}
+/* 证据逐条入场；SSR 不存在，所以初态由 CSS 给，由 JS 加 .up 解锁 */
+.ev{border-bottom:1px solid var(--line);opacity:0;transform:translateY(12px);
+  transition:opacity .7s ease,transform .7s cubic-bezier(.19,1,.22,1)}
+.ev.up{opacity:1;transform:none}
+#verdict,#caveat{opacity:0;transform:translateY(10px);
+  transition:opacity .8s ease,transform .8s cubic-bezier(.19,1,.22,1)}
+#verdict.up,#caveat.up{opacity:1;transform:none}
+.eb{display:block;width:100%;text-align:left;font:inherit;color:inherit;
+  background:none;border:0;padding:15px 4px 15px 2px;cursor:pointer;position:relative;
+  transition:padding-left .5s cubic-bezier(.19,1,.22,1)}
+.eb::before{content:"";position:absolute;inset:0;opacity:0;
+  background:linear-gradient(90deg,rgba(224,164,105,.09),transparent 62%);
+  transition:opacity .5s ease}
+.eb:hover::before,.eb:focus-visible::before{opacity:1}
+.eb:hover{padding-left:12px}
+.eb > *{position:relative;display:block}
+.eb .row1{display:flex;align-items:center;gap:10px}
+.tag{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  padding:3px 8px;border-radius:999px;border:1px solid var(--line);
+  color:var(--ink-3);white-space:nowrap}
+.tag.s{color:var(--warm);border-color:rgba(255,207,168,.34)}
+.tag.c{color:var(--accent);border-color:rgba(224,164,105,.38)}
+.tag.n{color:var(--ink-2);border-color:rgba(203,218,241,.22)}
+.eix{font-size:10.5px;color:var(--ink-3);letter-spacing:.14em;
+  font-variant-numeric:tabular-nums;margin-left:auto}
+.qt{margin:10px 0 0;font-size:14px;line-height:1.74;color:#fff;letter-spacing:-.005em;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.eb.open .qt{display:block;-webkit-line-clamp:unset;overflow:visible}
+.qm{color:var(--ink-3)}
+.meta{margin:9px 0 0;font-size:11px;color:var(--ink-3);letter-spacing:.02em;
+  word-break:break-all}
+.more{margin:0 0 18px;padding:0 0 0 15px;border-left:2px solid rgba(255,207,168,.46)}
+.more .why{margin:0;font-size:12.5px;line-height:1.78;color:var(--ink-2)}
+.more .why b{color:var(--warm);font-weight:600}
+.more .out{margin:11px 0 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.src{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.lnk{font:inherit;font-size:11.5px;color:var(--ink-2);background:none;cursor:pointer;
+  border:0;border-bottom:1px solid var(--line);padding:0 0 2px;
+  transition:color .3s,border-color .3s}
+.lnk:hover{color:var(--warm);border-bottom-color:rgba(255,207,168,.5)}
+.note-line{margin:10px 0 0;font-size:11.5px;color:var(--ink-3)}
+
+/* ── 综合结论：刻意克制。不做大标题、不用白字重排 ────────────────────── */
+.synth{margin:0 0 46px;padding:26px 0 0;border-top:1px solid var(--line)}
+.verdict{margin:14px 0 0;max-width:84ch;font-size:15.5px;line-height:1.82;
+  color:var(--ink)}
+.verdict b{color:#fff;font-weight:600}
+.caveat{margin:14px 0 0;max-width:84ch;font-size:13px;line-height:1.82;
+  color:var(--ink-2);padding-left:15px;border-left:2px solid var(--line)}
+.caveat b{color:var(--ink);font-weight:600}
+
+/* ── 页脚 ──────────────────────────────────────────────────────────────── */
+footer{flex:0 0 auto;padding:8px 40px 26px 132px;font-size:11px;color:var(--ink-3);
+  display:flex;gap:26px;flex-wrap:wrap}
+footer a{color:var(--ink-3);text-decoration:none;border-bottom:1px solid transparent}
+footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
+
+@media (max-width:900px){
+  .graph{grid-template-columns:1fr;gap:22px}
+  .how .r{grid-template-columns:22px 1fr;gap:8px 14px}
+  .how .ds{grid-column:2}
+}
+@media (max-width:760px){
+  header{padding:20px 22px 0}
+  main{padding:0 22px}
+  footer{padding:8px 22px 20px;gap:16px}
+  h1{font-size:clamp(27px,8.6vw,40px)}
+  .ask{gap:12px}
+  .ask input{font-size:16.5px}
+  .ask .go{width:40px;height:40px}
+  .camps{grid-template-columns:1fr}
+  .camp{padding:20px 0 24px}
+  .camp + .camp{border-left:0;border-top:1px solid var(--line)}
+  .legend{font-size:11px}
+  .verdict{font-size:14.5px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ask,.ask .go,.chip,.eb,.eb::before,.edge,.flow,.nwrap,
+  .ev,#verdict,#caveat{transition:none !important}
+  .flow.in{animation:none !important;opacity:0}
+  /* 初态直接解开，任何情况下内容都立即可见 */
+  .ev,#verdict,#caveat{opacity:1 !important;transform:none !important}
+}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="veil"></div>
+
+<div class="wrap">
+  <header><a class="brand" href="./index.html">KG COSMOS</a></header>
+
+  <main><div class="inner">
+    <p class="kick">02 — 提问</p>
+    <h1>问一句，<em>证据自己站队</em>。</h1>
+    <p class="sub">
+      系统在图上按字面命中种子实体，沿关系做两跳扩展，得到一小片子图；
+      然后由多个 Agent 各自给出立场——每条立场都必须挂在某一篇原文的那一句上。
+      答案可以含糊，证据不行。
+    </p>
+
+    <form class="askwrap" id="ask" autocomplete="off">
+      <label class="lb" for="q">你的问题</label>
+      <div class="ask">
+        <input id="q" type="text" name="q" placeholder="例如：知识图谱的质量怎么评估？"
+               aria-label="输入你的问题">
+        <button class="go" type="submit" aria-label="在图上检索并生成立场">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h13M13 6.5 18.5 12 13 17.5"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+
+    <div class="chips" id="chips" role="group" aria-label="示例问题">
+      <button class="chip" type="button" data-k="transe">TransE 有什么局限？</button>
+      <button class="chip" type="button" data-k="llm">大模型能不能直接用来做知识图谱抽取？</button>
+      <button class="chip" type="button" data-k="quality">知识图谱的质量怎么评估？</button>
+    </div>
+
+    <div class="how" id="how">
+      <div class="r"><span class="ix">01</span><span class="nm">字面命中种子</span>
+        <span class="ds">长名字优先，被更长命中包含的短名字直接丢掉，否则「TransE 的局限」会同时命中 Tran</span></div>
+      <div class="r"><span class="ix">02</span><span class="nm">两跳扩展子图</span>
+        <span class="ds">BFS 两跳，封顶 70 个节点；命中的实体与路径在图上高亮</span></div>
+      <div class="r"><span class="ix">03</span><span class="nm">多 Agent 各自站队</span>
+        <span class="ds">支持方与反方分开取证，每条证据附原文摘录与出处，最后给一句综合判断</span></div>
+    </div>
+    <p class="how-note" id="how-note">
+      检索之后，子图、双方证据与综合结论会依次展开在这一页里。
+    </p>
+
+    <section id="result" hidden>
+      <!-- ① 检索到的子图 -->
+      <div class="sec">
+        <p class="kick">检索到的子图</p>
+        <p class="hint" id="trace"></p>
+        <div class="graph">
+          <div class="gpanel" id="gpanel" role="img" aria-labelledby="gdesc"></div>
+          <div class="gside">
+            <p class="sr-only" id="gdesc"></p>
+            <div id="gstats"></div>
+            <div class="legend">
+              <div class="li"><span class="sw dot seed"></span>种子实体（字面命中）</div>
+              <div class="li"><span class="sw dot"></span>路径上的命中实体</div>
+              <div class="li"><span class="sw dot plain"></span>扩展到的邻居</div>
+              <div class="li"><span class="sw"></span>证据路径</div>
+              <div class="li"><span class="sw plain"></span>普通关系</div>
+              <div class="li"><span class="sw contra"></span>CONTRADICTS（判别器通过率 6.6%，待复核）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② 两个 Agent 各自的立场：结构完全对等 -->
+      <div class="camps" id="camps"></div>
+
+      <!-- ③ 综合结论 -->
+      <div class="synth">
+        <p class="stake"><i class="tick"></i>综合</p>
+        <p class="verdict" id="verdict"></p>
+        <p class="caveat" id="caveat"></p>
+      </div>
+    </section>
+  </div></main>
+
+  <footer>
+    <!-- 返回导航由 a11y.js 以 fixed 元素注入在左下角，这里不再重复放一个；
+         左内边距正是为它让位。 -->
+    <span id="foot-note">检索在本地图上完成 · 每个结论都能回溯到原文那一句</span>
+  </footer>
+</div>
+
+<script src="./lib/a11y.js"></script>
+<script>
+/* 背景：与导航页同一套绸缎光场，只把流动速度再压慢一点
+   （这一页要读长文，背景更该静）。刻意不放星空、不放粒子。 */
+const cv = document.getElementById('gl');
+const gl = cv.getContext('webgl', {antialias:false, alpha:false, powerPreference:'low-power'});
+const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a,0.0,1.0); }`;
+const FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_t;
+float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123); }
+float noise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
+float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<3;i++){ v+=a*noise(p); p*=2.07; a*=0.5; } return v; }
+vec2 warp(vec2 p,float t){
+  vec2 q=vec2(fbm(p+vec2(0.0,t)), fbm(p+vec2(5.2,1.3)-vec2(t*0.8,0.0)));
+  vec2 r=vec2(fbm(p+2.2*q+vec2(1.7,9.2)+vec2(t*1.1,0.0)), fbm(p+2.2*q+vec2(8.3,2.8)-vec2(0.0,t*0.9)));
+  return p+2.4*r; }
+void main(){
+  vec2 c=(gl_FragCoord.xy-0.5*u_res)/min(u_res.x,u_res.y);
+  float t=u_t*0.014;                       /* 上传页 0.022；这里是长文页，再慢一档 */
+  vec2 g1=vec2(-0.52,0.02), g2=vec2(0.66,0.06);
+  float fib=fbm(warp(c*1.05,t));
+  float l1=smoothstep(1.15,0.05,length(c-g1)+(fib-0.5)*0.55);
+  float l2=smoothstep(1.15,0.02,length(c-g2)+(fib-0.5)*0.50);
+  float body=smoothstep(0.34,0.78,fib);
+  vec3 base=vec3(0.010,0.013,0.023);
+  vec3 teal=vec3(0.11,0.45,0.53), gold=vec3(0.78,0.55,0.30);
+  vec3 col=base;
+  col+=teal*l1*(0.60+0.40*body);
+  col+=gold*l2*(0.50+0.50*body);
+  col+=teal*pow(body,3.0)*l1*0.24;
+  col+=gold*pow(body,3.0)*l2*0.24;
+  col+=(hash(gl_FragCoord.xy*0.7)-0.5)*0.009;
+  float vig=smoothstep(1.35,0.20,length(c));
+  col*=0.40+0.60*vig;
+  gl_FragColor=vec4(col,1.0);
+}`;
+function sh(t,s){ const o=gl.createShader(t); gl.shaderSource(o,s); gl.compileShader(o);
+  if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(o)); return o; }
+const prog=gl.createProgram();
+gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS)); gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));
+gl.linkProgram(prog); gl.useProgram(prog);
+const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+const loc=gl.getAttribLocation(prog,'a'); gl.enableVertexAttribArray(loc);
+gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+const uRes=gl.getUniformLocation(prog,'u_res'), uT=gl.getUniformLocation(prog,'u_t');
+function size(){ const d=Math.min(1.5,devicePixelRatio||1);
+  cv.width=Math.round(innerWidth*d); cv.height=Math.round(innerHeight*d);
+  gl.viewport(0,0,cv.width,cv.height); }
+addEventListener('resize',size); size();
+const t0=performance.now();
+(function loop(now){
+  gl.uniform2f(uRes,cv.width,cv.height);
+  gl.uniform1f(uT,(now-t0)/1000);
+  gl.drawArrays(gl.TRIANGLES,0,3);
+  requestAnimationFrame(loop);
+})(t0);
+
+/* ═══════════════════════════════════════════════════════════════════════
+   检索与立场数据。全部取自本项目真实产物，不写 lorem、不编论文标题。
+   数字、口径、结论都能在下面引到的文件里查到原句。
+   ═══════════════════════════════════════════════════════════════════════ */
+/* 宽屏坐标：viewBox 720×302 与面板实际宽度（约 719px）几乎 1:1，
+   所以 svg 里的 11.5px 文字在屏幕上就是 11.5px —— 第一版用 860 宽的
+   viewBox，整张图被缩到 0.84，标签小到看不清。
+   窄屏换成另一套竖排坐标（见 GN），两套都是手写、手校过避让的。 */
+const GW = {A:[361,151], B:[200,72], C:[200,237], D:[522,72], E:[522,237],
+            F:[361,42], G:[361,260], H:[81,151], I:[642,151]};
+const GN = {A:[180,208], B:[96,92], C:[96,324], D:[264,92], E:[264,324],
+            F:[180,44], G:[180,392]};
+
+const QA = {
+  transe: {
+    q: 'TransE 有什么局限？',
+    seeds: ['TransE', 'Scoring Function'],
+    trace: '字面命中 2 个种子：「TransE」与「Scoring Function」。扩展 2 跳，' +
+           '封顶 70 节点，实际取到 70 个（截断 43 个）。命中的关系类型 6 种，' +
+           '其中 1 条是 CONTRADICTS —— 判别器对它只给 0.235 的中位通过概率。',
+    stats: [
+      ['种子实体', '2'],
+      ['扩展跳数', '2'],
+      ['节点 / 封顶', '70 / 70'],
+      ['子图边', '118'],
+      ['关系类型', '6'],
+      ['命中论文段', '41']
+    ],
+    nodes: {
+      A: {t:'TransE', k:'Method', seed:1},
+      B: {t:'Scoring Function', k:'Concept', hit:1},
+      C: {t:'Many-to-1 Relationships', k:'Concept', contra:1, hit:1},
+      D: {t:'FB15k', k:'Dataset', hit:1},
+      E: {t:'WN18', k:'Dataset'},
+      F: {t:'Link Prediction', k:'Task'},
+      G: {t:'KG Embedding', k:'Concept'},
+      H: {t:'ComplEx', k:'Method'},
+      I: {t:'RotatE', k:'Method'}
+    },
+    edges: [
+      {a:'A', b:'B', r:'USES', hot:1},
+      {a:'A', b:'D', r:'EVALUATES', hot:1},
+      {a:'A', b:'C', r:'CONTRADICTS', hot:1, contra:1},
+      {a:'A', b:'F', r:'APPLIES_TO'},
+      {a:'A', b:'E', r:'USES'},
+      {a:'D', b:'E', r:'COMPARES_WITH'},
+      {a:'D', b:'I', r:'COMPARES_WITH'},
+      {a:'B', b:'H', r:'COMPARES_WITH'}
+    ],
+    pro: {
+      stake: '支持 · 表达力上限有痕迹',
+      claim: '多对一映射这个短板，在本项目语料里留下了可追溯的记录，而不是只停在综述的常见说法上。',
+      ev: [
+        {rel:'SUPPORTS', tier:'s',
+         qt:'样本印证：TransE -> Many-to-1 Relationships（TransE 处理多对一的能力，不是矛盾）',
+         src:'docs/DATA_SNAPSHOT_2026-09-11.md', sec:'§4.1',
+         why:'这是本条立场最硬的一条：抽取器在「TransE 处理多对一关系」这句话上真的产出了一条边。' +
+             '它说明该短板在原文层面被反复讨论，已经沉降到实体层，而不是停留在二手转述里。'},
+        {rel:'EVALUATES', tier:'n',
+         qt:'当首选方案不可得时，需要重新做一轮完整选型——而不是顺序取下一个能用的。' +
+            '「能拿到」是约束，「最优」是目标，两者不能互相替代。',
+         src:'docs/ERROR_CASES.md', sec:'案例 4 · 技术选型用「能拿到」代替了「最好」',
+         why:'本项目当初把 TransE 类嵌入列为可选补全路径，理由是<b>它下得下来、跑得动</b>。' +
+             '按这条教训，这属于约束驱动的妥协——「TransE 够用」这个判断从未被真正验证过。'},
+        {rel:'APPLIES_TO', tier:'n',
+         qt:'KGE 链接预测（可选，1-2 天）：PyKeen TransE/RotatE 做图谱补全候选。',
+         src:'docs/EXECUTION_READINESS.md', sec:'§3 · 里程碑与可选项',
+         why:'TransE 在全部里程碑里始终停在「可选」一栏，从未进入主流水线。' +
+             '它的输出没有被当作可验证的结论使用——这本身就是对其局限的一次默许。'}
+      ]
+    },
+    con: {
+      stake: '反方 · 多数「局限」不是模型问题',
+      claim: '能被追溯到的所谓矛盾，绝大多数是对比、评测与继承；真正指向模型缺陷的，一条都没有被确认。',
+      ev: [
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'CONTRADICTS 的中位通过概率只有 0.235，通过率 6.6% —— ' +
+            '比次低类型低一个数量级，机器可验证地确认这些边基本不是真矛盾。',
+         src:'docs/DATA_SNAPSHOT_2026-09-11.md', sec:'§4.1 · L5 证据支持度实测（阈值 0.67）',
+         why:'全图谱里被标成「矛盾」的边，中位通过概率只有 0.235，是通过率最低的关系类型。' +
+             '所以「TransE 有局限」这类问句命中的矛盾边，<b>先验地不该被采信</b>。'},
+        {rel:'COMPARES_WITH', tier:'n',
+         qt:'社区 3（规模 728）的核心实体：Scoring Function(51)、TransE(49)、FB15k(47)、' +
+            'WN18(45)、ComplEx(40)；主题是 KG 嵌入模型，模块度 0.6824。',
+         src:'docs/DATA_SNAPSHOT_2026-09-11.md', sec:'§5 · 社区结构（重算）',
+         why:'在图上 TransE 是<b>基准坐标</b>，不是被否定的方法：它和 FB15k、WN18、ComplEx ' +
+             '共处同一个高模块度社区。它被频繁提及，是因为大家都在拿它当基线对比。'},
+        {rel:'APPLIES_TO', tier:'n',
+         qt:'「TransE 的局限」会额外命中无意义子串 Tran（两者都实测过）。',
+         src:'docs/早先的阶段计划.md', sec:'T6.3 · 问题子图',
+         why:'问句本身就带字面噪声。检索层丢掉了被更长命中包含的短名字，' +
+             '但单字符级别的碎片仍需在证据侧过滤——这一部分「局限」是检索造的，不是模型有的。'}
+      ]
+    },
+    verdict: '把两边放在一起看：项目里没有任何一条被确认的矛盾边为「TransE 有实质缺陷」背书，' +
+             '但「多对一映射」这条线确实在语料里留下了可追溯的痕迹。' +
+             '更可信的说法是——<b>TransE 在本项目里扮演的是基准，不是结论</b>。',
+    caveat: '<b>分歧未消解。</b>支持方依赖的是共现痕迹与选型教训，反方依赖的是判别器分数与社区结构，' +
+            '两者不在同一个口径上，谁也不能证伪对方。243 条矛盾 claim 里 REJECTED 190、' +
+            'SUSPECTED 53、<b>CONFIRMED 0</b> —— 没有确认，就不会有裁决。'
+  },
+
+  llm: {
+    q: '大模型能不能直接用来做知识图谱抽取？',
+    seeds: ['LLM', 'Relation Extraction'],
+    trace: '字面命中 2 个种子：「LLM」与「Relation Extraction」。扩展 2 跳，取到 70 个节点。' +
+           '子图里方向约束（CREATED_BY）与抽取层直接相邻——这正是两边立场分叉的地方。',
+    stats: [
+      ['种子实体', '2'],
+      ['扩展跳数', '2'],
+      ['节点 / 封顶', '70 / 70'],
+      ['子图边', '96'],
+      ['关系类型', '7'],
+      ['命中论文段', '58']
+    ],
+    nodes: {
+      A: {t:'LLM', k:'Method', seed:1},
+      B: {t:'Relation Extraction', k:'Task', hit:1},
+      C: {t:'CREATED_BY 方向', k:'Constraint', contra:1, hit:1},
+      D: {t:'Zero-Shot Learning', k:'Concept', hit:1},
+      E: {t:'Gold Standard', k:'Artifact'},
+      F: {t:'Prompting', k:'Method'},
+      G: {t:'Triplet Critic', k:'Method'},
+      H: {t:'Distillation', k:'Method'},
+      I: {t:'GraphRAG', k:'Method'}
+    },
+    edges: [
+      {a:'A', b:'B', r:'APPLIES_TO', hot:1},
+      {a:'A', b:'C', r:'CONTRADICTS', hot:1, contra:1},
+      {a:'A', b:'D', r:'ENABLES', hot:1},
+      {a:'A', b:'I', r:'PART_OF'},
+      {a:'F', b:'B', r:'USES'},
+      {a:'E', b:'I', r:'COMPARES_WITH'},
+      {a:'C', b:'G', r:'SUPPORTS'}
+    ],
+    pro: {
+      stake: '支持 · 能，而且本机跑得动',
+      claim: '在 8GB 显存、完全离线这两个真实约束下，被文献支持可行的路径是「中小模型 + 复合策略」，而不是直接调大模型接口。',
+      ev: [
+        {rel:'SUPPORTS', tier:'s',
+         qt:'COMEM achieves 2~18% F1 improvements while spending less —— ' +
+            '并在 8 个开源 instruct 模型（Llama-3.1-8B、Qwen2-7B、Mistral-7B 等）上实测；' +
+            '正文称 open-source medium-sized (3B~11B) LLMs 表现良好。',
+         src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§1.13 · LLM 时代的 ER 方法',
+         why:'本条直接命中本机的硬约束：3B~11B 的模型在 8GB 显存上勉强可跑。' +
+             '「先匹配、再比较、最后选择」的复合策略，比一次性让模型输出三元组更接近可落地。'},
+        {rel:'SUPPORTS', tier:'s',
+         qt:'DistillER：把大模型能力蒸馏到 SLM——方向与本机 8GB 显存约束一致。',
+         src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§1.13 · 逐条评估',
+         why:'调研在评估这一项时专门写下了「方向与本机约束一致」。' +
+             '这是全部候选里少数被明确标注为与运行环境相容的路线。'},
+        {rel:'ENABLES', tier:'n',
+         qt:'本地模型全量打分：44032 条边有分数，280 秒，¥0。',
+         src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§2.3 · 实测结果与最大短板',
+         why:'「能不能用大模型」在这条证据上被拆成了一个可算的问题：' +
+             '本地跑一轮判别器的成本是 280 秒和 0 元，所以试错成本极低，先跑起来比先论证划算。'}
+      ]
+    },
+    con: {
+      stake: '反方 · 不能直接当结论用',
+      claim: '现有的验证层对方向错误是盲的，而方向恰恰是大模型抽取最常错的地方。生成得出来，不等于可以采信。',
+      ev: [
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'六层里没有任何一层能可靠发现关系方向错误——L3/L4 根本不看方向，' +
+            'L5 实测只能拦住 23.9% 的方向反转（本体 12 类非对称关系 720 条样本）。',
+         src:'docs/L5_SIX_LAYER_REPORT.md', sec:'§4.5 · 已确证的盲区',
+         why:'这是反方最硬的一条：<b>整套评测里没有一层覆盖方向</b>。' +
+             '也就是说，模型把关系抽反了，六层指标一个都不会掉。'},
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'案例 5：入库层过滤掩盖了抽取层越界 —— 过滤发生在下游，' +
+            '抽取层的越界不会被发现，只会被隐藏。',
+         src:'docs/ERROR_CASES.md', sec:'案例 5 · 现象与真实原因',
+         why:'大模型的越界通常在下游才被过滤掉。过滤动作一旦生效，' +
+             '<b>上游的错误就不再可见</b>——它不会变成一条失败记录，只会变成一条静默的缺口。'},
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'### 附带发现：评测集泄漏',
+         src:'docs/ERROR_CASES.md', sec:'案例 2 · 规模口径错配',
+         why:'用同一批数据既调提示词又报指标，抽取类指标会系统性虚高。' +
+             '这一条不针对大模型本身，但它是「大模型抽取效果好」这类结论最常见的来源。'}
+      ]
+    },
+    verdict: '收益与可验证性是<b>正交的两个维度</b>：§1.13 给出的 F1 提升是真的，' +
+             '§2.3/§2.4 给出的验证盲区也是真的，两者可以同时成立。' +
+             '能拿它生成候选，不能把它的输出直接当结论。',
+    caveat: '<b>分歧未消解。</b>支持方的证据来自文献指标与本地可行性，' +
+            '反方的证据来自本项目实测出的验证盲区。' +
+            '本项目的实际做法是折中——抽取之后接一层可验证判别器，再接一层独立的端点约束规则' +
+            '（<b>src/ontology.py::RELATION_ENDPOINT_CONSTRAINTS</b>）。'
+  },
+
+  quality: {
+    q: '知识图谱的质量怎么评估？',
+    seeds: ['L5', 'Triplet Critic'],
+    trace: '字面命中 2 个种子：「L5」与「Triplet Critic」。扩展 2 跳，取到 70 个节点。' +
+           '六层评测与它自己的短板 L3、以及 CONTRADICTS 通过率同时出现在子图里。',
+    stats: [
+      ['种子实体', '2'],
+      ['扩展跳数', '2'],
+      ['节点 / 封顶', '70 / 70'],
+      ['子图边', '104'],
+      ['关系类型', '6'],
+      ['命中论文段', '49']
+    ],
+    nodes: {
+      A: {t:'L5 六层评测', k:'Method', seed:1},
+      B: {t:'Triplet Critic', k:'Method', hit:1},
+      C: {t:'L3 端点完备性', k:'Metric', contra:1, hit:1},
+      D: {t:'CONTRADICTS 通过率', k:'Metric', hit:1},
+      E: {t:'Gold Standard', k:'Artifact'},
+      F: {t:'Claim 范式', k:'Concept'},
+      G: {t:'人工标注一致性', k:'Metric'},
+      H: {t:'本体约束', k:'Concept'},
+      I: {t:'KGHeartBeat', k:'Tool'}
+    },
+    edges: [
+      {a:'A', b:'B', r:'USES', hot:1},
+      {a:'A', b:'C', r:'CONTRADICTS', hot:1, contra:1},
+      {a:'A', b:'D', r:'EVALUATES', hot:1},
+      {a:'A', b:'F', r:'USES'},
+      {a:'A', b:'I', r:'COMPARES_WITH'},
+      {a:'B', b:'H', r:'USES'},
+      {a:'F', b:'D', r:'USES'},
+      {a:'E', b:'G', r:'EVALUATES'}
+    ],
+    pro: {
+      stake: '支持 · 分层评测可跑、可复现',
+      claim: '六层评测在阈值 0.67 下把 43867 条边打了一遍分，逐层产出可查的数字，而且不需要金标。',
+      ev: [
+        {rel:'SUPPORTS', tier:'s',
+         qt:'threshold 0.67，edges_total 43867 —— L1 实体存在 0.9438、' +
+            'L3 端点 0.9617、L4 谓词 0.9946、L6 引文 1.0。',
+         src:'data/quality/l5-six-layer.json', sec:'全量输出（本地模型，约 5 分钟，¥0）',
+         why:'这是整页里唯一一条「点开就能看到全部原始数字」的证据。' +
+             'L1/L3/L4/L6 <b>完全不用人工金标</b>，改用证据引文、已知实体集、本体与引文存在性，' +
+             '所以它可以无标注地反复重跑。'},
+        {rel:'SUPPORTS', tier:'s',
+         qt:'被原文支持的关系子图：27954 条边保留，15913 条丢弃。',
+         src:'docs/L5_SIX_LAYER_REPORT.md', sec:'§3.2 · 产物：被原文支持的关系子图',
+         why:'分层评测的产出不是一组分数，而是<b>一张被筛过的图</b>。' +
+             '一个端点不存在、或原文里找不到依据的边，在可视化与问答里本来也不可用。'},
+        {rel:'COMPARES_WITH', tier:'n',
+         qt:'KGTorrent 是 Kaggle Jupyter Notebook 语料数据集，与 KG 质量评估无关；' +
+            '论文写「参考 KGTorrent」会被评审直接指出概念错误，应换成 KGHeartBeat / Luzzu / KGrEaT。',
+         src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§3.3 · 经典指标体系',
+         why:'这一条把「该参考什么」变成了可核对的清单：Zaveri 体系 + KGHeartBeat 的 ' +
+             '6 大类约 40 个指标，其中 Intrinsic / Contextual / Representational 有意义的子集可以零成本算出。'}
+      ]
+    },
+    con: {
+      stake: '反方 · 分层评测会给出过高的印象',
+      claim: '同一份结果换一个口径就从 0.64 变成 1.00，而且这套指标不产召回、也测不出方向——它回答不了「漏了多少」。',
+      ev: [
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'L5_triplet 的 all 口径是 0.6372，supported 口径是 1.0 —— ' +
+            '两个数出自同一份结果文件。',
+         src:'data/quality/l5-six-layer.json', sec:'同一文件内的两个口径',
+         why:'<b>两个数字都真实，但读者会记住 1.0。</b>' +
+             'supported 口径只统计「用同一条阈值筛出来之后剩下的边」，用筛子证明筛子，' +
+             '报这个数而不报全集，结论会完全反过来。'},
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'那份调研报告也提出了一个 L1–L6 分层方案，与本项目六层同名不同义。' +
+            '……只报六层时，必须说明为什么不报召回。',
+         src:'docs/L5_SIX_LAYER_REPORT.md', sec:'§6.5 · 与调研报告版的六处实质差异',
+         why:'报告版分层以人工金标为参照、能产召回；本项目六层是<b>精度型 / 自洽型校验</b>。' +
+             '两套东西同名，引用时必须说清是哪一套——否则「六层」这个词本身就会造成误读。'},
+        {rel:'EVALUATES', tier:'n',
+         qt:'但 L3 端点完备性只有 68.5% —— 31.5% 的边至少有一端不是已抽取的节点，' +
+            '这是当前最大短板，且 L5 过滤对它毫无改善（68.5% → 68.6%），两者是正交维度。',
+         src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§2.3 · 实测结果与最大短板',
+         why:'分层评测的六层之间并不互相覆盖。把 L4 的 0.9946 和 L3 的 68.5% 并排放，' +
+             '才看得出<b>分数最高的一层和最短的一块板没有任何关系</b>。'}
+      ]
+    },
+    verdict: '六层能回答的是「这条边有没有原文支持」，回答不了「漏掉了多少」和「方向对不对」。' +
+             '它是一套<b>精度型 / 自洽型校验</b>，不是一个质量总分——' +
+             '把 L6 的 1.0 当成「图谱质量满分」是这一页最需要防住的误读。',
+    caveat: '<b>分歧未消解。</b>全集 0.6372 与支持子集 1.0000 都是真数字，' +
+            '取哪个并不取决于事实，而取决于你想让读者得到什么印象。' +
+            '项目自己的处理是<b>两个数并列写进同一份报告</b>，并单独声明口径差异。'
+  }
+};
+
+/* ── 渲染 ─────────────────────────────────────────────────────────────── */
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function curve(p, q, bend){
+  const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+  const dx = q[0] - p[0], dy = q[1] - p[1];
+  const cx = mx - dy * bend, cy = my + dx * bend;
+  return {
+    d: 'M' + p[0] + ' ' + p[1] + 'Q' + cx.toFixed(1) + ' ' + cy.toFixed(1) +
+       ' ' + q[0] + ' ' + q[1],
+    // 二次贝塞尔 t=0.5 的落点，用来放边标签
+    mid: [(p[0] + 2 * cx + q[0]) / 4, (p[1] + 2 * cy + q[1]) / 4]
+  };
+}
+
+function renderGraph(d, narrow){
+  const POS = narrow ? GN : GW;
+  const W = narrow ? 360 : 720;
+  const H = narrow ? 430 : 302;
+  const out = [];
+  const bend = narrow ? 0.05 : 0.075;
+
+  d.edges.forEach(function(e, ei){
+    if (!POS[e.a] || !POS[e.b]) return;
+    const c = curve(POS[e.a], POS[e.b], bend);
+    let cls = 'edge';
+    if (e.contra) cls += ' contra';
+    else if (e.hot) cls += ' hot';
+    const delay = (0.1 + ei * 0.18).toFixed(2);
+    out.push('<path class="' + cls + '" d="' + c.d + '" data-in="' + delay + '"></path>');
+    if (e.contra) {
+      out.push('<text class="gel" x="' + c.mid[0].toFixed(1) + '" y="' +
+               (c.mid[1] - 7).toFixed(1) + '" data-in="' + delay + '">CONTRADICTS</text>');
+    }
+    if (e.hot && !e.contra) {
+      out.push('<path class="flow" d="' + c.d + '" pathLength="240" data-in="' +
+               (parseFloat(delay) + 0.6).toFixed(2) + '"></path>');
+    }
+  });
+
+  let i = 0;
+  const base = d.edges.length * 0.18 + 0.5;
+  Object.keys(d.nodes).forEach(function(k){
+    if (!POS[k]) return;
+    const n = d.nodes[k], p = POS[k];
+    const r = n.seed ? 5.6 : (n.hit ? 4.2 : 3);
+    let nc = 'nd';
+    if (n.seed) nc += ' seed'; else if (n.hit) nc += ' hit';
+    let lc = 'gl';
+    if (n.seed) lc += ' seed'; else if (n.hit) lc += ' hit';
+
+    // F 的两行文字整体挂到节点左侧：它的下方是连到中心的那条竖直边，
+    // 文字放在正上/正下都会被线穿过。其余节点一律「类型在上、名字在下」。
+    const side = (k === 'F');
+    const ly = side ? p[1] + 4 : p[1] + (narrow ? 17 : 19);
+    const lx = side ? p[0] - r - 10 : p[0];
+    const la = side ? 'end' : 'middle';
+    const ky = side ? p[1] - 8 : p[1] - r - 7;
+    const kx = side ? p[0] - r - 10 : p[0];
+    const ka = side ? 'end' : 'middle';
+
+    const halo = (n.seed || n.hit)
+      ? '<circle class="halo' + (n.seed ? ' seed' : '') +
+        '" cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r + 5) + '"></circle>'
+      : '';
+    out.push(
+      '<g class="nwrap" data-in="' + (base + i * 0.3).toFixed(2) + '">' + halo +
+      '<circle class="' + nc + '" cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '"></circle>' +
+      '<text class="gn" x="' + kx + '" y="' + ky + '" text-anchor="' + ka + '">' +
+      esc(n.k) + '</text>' +
+      '<text class="' + lc + '" x="' + lx + '" y="' + ly + '" text-anchor="' + la + '">' +
+      esc(n.t) + '</text></g>');
+    i++;
+  });
+
+  $('gpanel').innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" ' +
+    'aria-hidden="true">' + out.join('') + '</svg>';
+  return i > 0;
+}
+
+function evHTML(e, i){
+  let tagCls = 'tag n';
+  if (e.tier === 's') tagCls = 'tag s';
+  if (e.tier === 'c') tagCls = 'tag c';
+  return '' +
+    '<div class="ev">' +
+      '<button class="eb" type="button" aria-expanded="false">' +
+        '<span class="row1"><span class="' + tagCls + '">' + esc(e.rel) + '</span>' +
+        '<span class="eix">E' + (i + 1) + '</span></span>' +
+        '<span class="qt"><span class="qm">「</span>' + esc(e.qt) +
+        '<span class="qm">」</span></span>' +
+        '<span class="meta">' + esc(e.src) + ' ' + esc(e.sec) + '</span>' +
+      '</button>' +
+      '<div class="more" hidden>' +
+        '<p class="why">' + e.why + '</p>' +
+        '<p class="out"><button class="lnk" type="button">查看原文</button>' +
+        '<span class="src">' + esc(e.src) + ' ' + esc(e.sec) + '</span></p>' +
+        '<p class="note-line" hidden>视觉稿：原文页高亮未接入，接后端后跳到该篇 PDF 的对应段落。</p>' +
+      '</div>' +
+    '</div>';
+}
+
+function campHTML(kind, c){
+  let cls = 'camp';
+  if (kind === 'con') cls += ' con';
+  return '<div class="' + cls + '">' +
+    '<p class="stake"><i class="tick"></i>' + esc(c.stake) + '</p>' +
+    '<p class="claim">' + esc(c.claim) + '</p>' +
+    '<p class="tally">证据 <b>' + c.ev.length + '</b> 条 · 全部可回溯到原文</p>' +
+    '<div class="evs">' +
+      c.ev.map(function(e, i){ return evHTML(e, i); }).join('') +
+    '</div></div>';
+}
+
+let CUR = null;
+
+function play(d){
+  CUR = d;
+  $('how').hidden = true;
+  $('how-note').hidden = true;
+  $('result').hidden = false;
+
+  // 问题回填 + 选中对应胶囊
+  $('q').value = d.q;
+  [].forEach.call(document.querySelectorAll('.chip'), function(ch){
+    ch.classList.toggle('on', QA[ch.dataset.k] === d);
+  });
+
+  $('trace').textContent = d.trace;
+  $('gstats').innerHTML = d.stats.map(function(s){
+    return '<div class="gstat"><span class="k">' + esc(s[0]) + '</span>' +
+           '<span class="v">' + esc(s[1]) + '</span></div>';
+  }).join('');
+
+  $('camps').innerHTML = campHTML('pro', d.pro) + campHTML('con', d.con);
+  $('verdict').innerHTML = d.verdict;
+  $('caveat').innerHTML = d.caveat;
+  $('gdesc').textContent = '检索到的子图：' + d.trace;
+
+  paint(false);
+
+  // 逐层入场：边 → 节点 → 证据 → 结论。reduced-motion 下直接全部就位。
+  const items = [];
+  [].forEach.call($('gpanel').querySelectorAll('[data-in]'), function(el){
+    items.push([el, 'in', parseFloat(el.dataset.in) * 120]);
+  });
+  [].forEach.call($('camps').querySelectorAll('.ev'), function(el, i){
+    items.push([el, 'up', 380 + i * 90]);
+  });
+  [].forEach.call([$('verdict'), $('caveat')], function(el, i){
+    items.push([el, 'up', 900 + i * 120]);
+  });
+
+  if (REDUCED) {
+    items.forEach(function(it){ it[0].classList.add(it[1]); });
+    return;
+  }
+  items.forEach(function(it, i){
+    it[0].style.transitionDelay = it[2] + 'ms';
+    setTimeout(function(){ it[0].classList.add(it[1]); }, 30 + i * 12);
+  });
+}
+
+/* 重画子图。
+   instant=true 用于窄屏/宽屏切换：新生成的 SVG 元素初态是 opacity 0，
+   必须立刻解锁，否则窗口一改大小子图就整块消失（第一版正是栽在这里）。 */
+function paint(instant){
+  renderGraph(CUR, innerWidth < 760);
+  if (!instant) return;
+  [].forEach.call($('gpanel').querySelectorAll('[data-in]'), function(el){
+    el.classList.add('in');
+  });
+}
+
+/* 证据卡展开 / 查看原文提示 */
+$('camps').addEventListener('click', function(ev){
+  const link = ev.target.closest('.lnk');
+  if (link) {
+    const nl = link.closest('.more').querySelector('.note-line');
+    if (nl) nl.hidden = !nl.hidden;
+    return;
+  }
+  const btn = ev.target.closest('.eb');
+  if (!btn) return;
+  const open = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+  btn.classList.toggle('open', !open);
+  btn.parentNode.querySelector('.more').hidden = open;
+});
+
+/* 表单提交 + 示例胶囊 */
+$('ask').addEventListener('submit', function(e){
+  e.preventDefault();
+  const v = $('q').value.trim();
+  const keys = Object.keys(QA);
+  let hit = null;
+  if (v.length >= 2) {
+    for (let i = 0; i < keys.length && !hit; i++) {
+      const d = QA[keys[i]];
+      const parts = d.seeds.concat([d.q]);
+      for (let j = 0; j < parts.length; j++) {
+        if (parts[j].indexOf(v) >= 0 || v.indexOf(parts[j]) >= 0) { hit = d; break; }
+      }
+    }
+  }
+  run(hit || QA.transe);
+});
+
+$('chips').addEventListener('click', function(e){
+  const ch = e.target.closest('.chip');
+  if (ch) run(QA[ch.dataset.k]);
+});
+
+function run(d){
+  play(d);
+  const y = $('result').getBoundingClientRect().top + scrollY - 24;
+  scrollTo({top: y, behavior: REDUCED ? 'auto' : 'smooth'});
+}
+
+/* 窄屏 ↔ 宽屏切换时重画子图（两套手写坐标，避免标签挤成一团） */
+let rt = 0;
+addEventListener('resize', function(){
+  if (!CUR) return;
+  clearTimeout(rt);
+  rt = setTimeout(function(){ paint(true); }, 180);
+});
+
+window.__ready = true;
+</script>
+</body>
+</html>
