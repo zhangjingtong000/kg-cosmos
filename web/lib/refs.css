@@ -1,0 +1,59 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   refs.html 页面专属样式（共享部分见 lib/design.css）
+   ───────────────────────────────────────────────────────────────────────────
+   这一页是**阅读页**（L2）：正文密度高、配图多，所以光场压到几乎只留呼吸，
+   容器宽度比氛围页略窄，行距拉大。它不套用绸缎那种强动效，但材质同源。
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+header{max-width:var(--maxw);margin:0 auto;padding:64px var(--gutter) 28px;
+  border-bottom:1px solid var(--line)}
+main{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter) 100px}
+section{padding-top:52px}
+
+/* 节标题：全站统一的 .kick 记号（等宽感 + 发丝线） */
+section h2{
+  display:flex;align-items:baseline;gap:14px;
+  margin:0 0 10px;font-family:var(--font-sans);
+  font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;
+}
+section h2::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* 配图：左图右注，注文在右栏 */
+figure{
+  margin:0 0 40px;display:grid;
+  grid-template-columns:minmax(0,1fr) 340px;gap:32px;align-items:start;
+}
+figure img{
+  width:100%;height:auto;display:block;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);border-radius:10px;
+}
+figcaption{font-size:13.5px;line-height:1.72;color:var(--ink-2)}
+figcaption .t{display:block;margin-bottom:6px;font-weight:600;color:var(--ink);
+  font-family:var(--font-display)}
+figcaption .d{color:var(--ink-3)}
+figcaption .u{
+  display:inline-block;margin-top:9px;
+  font:400 11.5px/1.5 ui-monospace,"SFMono-Regular",Consolas,monospace;
+  color:var(--accent);word-break:break-all;opacity:.82;
+}
+figcaption code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;
+  padding:1px 5px;border-radius:3px;
+  background:rgba(178,181,194,.12);color:#d6d9e2;
+}
+
+/* 「重点图」记号：**顶部短横线**，不是左竖线。
+   （左竖线是用户点名否掉的：像硬贴上去的。全站已统一为短横线。） */
+figure.star{position:relative;padding-top:16px;border-top:0}
+figure.star::before{
+  content:"";position:absolute;left:0;top:0;width:56px;height:2px;
+  background:var(--accent);opacity:.85;
+}
+
+@media (max-width:900px){
+  figure{grid-template-columns:1fr;gap:14px}
+  header{padding-top:40px}
+  h1{font-size:26px}
+}

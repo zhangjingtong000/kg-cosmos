@@ -1,0 +1,184 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   KG Cosmos — 共享设计系统（design.css）
+   ───────────────────────────────────────────────────────────────────────────
+
+   **为什么要有这个文件**
+
+   此前全站有 4 处各自定义的 `:root`，值还对不上：
+     · 绸缎那 4 页（index/upload/ask/new-graph）：accent #e0a469 · bg #02040a
+     · refs.html：accent #8c2f1f（暗红）· ink #1a1a18（近黑）—— 浅色主题
+     · l5-review.html：bg #0f1115
+     · analytics / method-limits / pathqa：各自一套
+   结果是"看起来不像一家的"。这个文件是唯一的 token 来源。
+
+   **背景策略：不搞"全部绸缎"，而是同一套材质按职能分三级**
+
+   全站统一用同一套 WebGL 光场（见 lib/atmosphere.js），只调**速度与增益**：
+
+     · `--atmo-speed/--atmo-gain` = L0 氛围页：完整绸缎（入口/上传/问答/出图）
+     · L1 工作台（主视图 / PathQA）：降速降增益，不跟内容抢焦点
+     · L2 阅读页（分析面板 / 方法边界 / 参考文献 / 评审）：几乎只留呼吸
+
+   为什么不"全部绸缎"：主视图的 3D 场景本身就是主角，背景再强就是两个主角
+   打架；阅读页是密集文字，背景动会干扰阅读（我们为此反复调过 #veil）。
+   但**材质同源**，所以看上去仍是一家的 —— 统一的是语言，不是强度。
+
+   **底色纪律**：全站深色。`refs.html` 原本的浅色 `--paper` 已废弃。
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* 文字三档（近白 → 次要 → 三级） */
+  --ink:#eef3fd;
+  --ink-2:rgba(203,218,241,.76);
+  --ink-3:rgba(193,195,201,.46);
+
+  /* 强调：暖金是"动作/命中/焦点"，青是"正向指标" */
+  --accent:#e0a469;
+  --warm:#ffcfa8;
+  --cyan:#7cc0b6;
+  /* 负面/需注意（与 --accent 同族但更沉） */
+  --clay:#c07a4e;
+  --clay-2:#dda07a;
+
+  /* 底与线 */
+  --bg:#02040a;
+  --surface:#0b0e16;
+  --line:rgba(178,180,186,.13);
+
+  /* 版式 */
+  --maxw:1180px;
+  --gutter:40px;
+
+  /* 动效：全站同一条曲线，这是"看起来是一家的"的重要来源 */
+  --ease:cubic-bezier(.19,1,.22,1);
+  --dur:.5s;
+
+  /* 光场强度（由 atmosphere.js 读取，也用于 CSS 降级） */
+  --atmo-speed:1;
+  --atmo-gain:1;
+
+  /* 字体栈 */
+  --font-sans:"Inter","SF Pro Display",-apple-system,BlinkMacSystemFont,
+              "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --font-display:"Smiley Sans","Noto Serif SC",Georgia,serif;
+}
+
+/* ── 三级强度：给 <body> 或 <html> 加类即可 ────────────────────────────── */
+.atmo-l0{--atmo-speed:1;    --atmo-gain:1;}
+.atmo-l1{--atmo-speed:.5;   --atmo-gain:.55;}
+.atmo-l2{--atmo-speed:.22;  --atmo-gain:.30;}
+
+*,*::before,*::after{box-sizing:border-box}
+
+html,body{margin:0;padding:0;background:var(--bg)}
+body{
+  color:var(--ink);
+  font-family:var(--font-sans);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* 光场画布：固定铺满，永远在内容之下 */
+#atmo{
+  position:fixed;inset:0;z-index:0;display:block;pointer-events:none;
+  opacity:0;transition:opacity 1.1s var(--ease);
+}
+#atmo.on{opacity:1}
+/* 内容层必须自己抬起来（z-index:1 起） */
+.atmo-content{position:relative;z-index:1}
+
+/* 文字遮罩：让正文在光场上仍然可读。强度跟着光场走。 */
+#veil{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 120% 80% at 50% 38%,
+    rgba(2,4,10,calc(.10 * var(--atmo-gain) + .10)) 0%,
+    rgba(2,4,10,calc(.34 * var(--atmo-gain) + .24)) 55%,
+    rgba(2,4,10,calc(.52 * var(--atmo-gain) + .34)) 100%);
+}
+
+/* ── 排版记号（全站同一套）───────────────────────────────────────────── */
+
+/* 小标签：等宽感 + 发丝线收尾 */
+.kick{
+  display:flex;align-items:baseline;gap:14px;
+  margin:0 0 18px;font-size:10.5px;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.kick::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* 标题 */
+h1,h2,h3,.display{font-family:var(--font-display);font-weight:700;letter-spacing:-.02em}
+h1{margin:0;font-size:clamp(30px,4.3vw,56px);line-height:1.06;letter-spacing:-.03em;color:#fff}
+h1 em,h2 em{
+  font-style:normal;
+  background:linear-gradient(96deg,var(--warm),var(--accent) 60%,#b8823f);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+h2{margin:34px 0 14px;font-size:16px;color:var(--ink)}
+h3{margin:22px 0 10px;font-size:14px;color:var(--ink)}
+.lead{margin:16px 0 0;max-width:64ch;font-size:14.5px;line-height:1.8;color:var(--ink-2)}
+
+/* 结论块：用**顶部短横线**，不用左边竖线（全站统一，竖线已废弃） */
+.note{
+  position:relative;margin:44px 0 0;padding:24px 0 0;max-width:74ch;
+  border:0;background:none;color:var(--ink-2);font-size:14.5px;line-height:1.8;
+}
+.note::before{
+  content:"";position:absolute;left:0;top:0;width:56px;height:2px;
+  background:var(--accent);opacity:.85;
+}
+.note b{display:block;margin:0 0 8px;font-size:16px;color:var(--warm);font-weight:600}
+
+/* 数字组：大号数字 + 说明 */
+.figs{display:flex;gap:38px;flex-wrap:wrap;margin:24px 0 0;padding:18px 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.fig b{display:block;font-size:28px;font-weight:600;letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums;color:var(--ink)}
+.fig span{display:block;margin-top:5px;font-size:11.5px;color:var(--ink-3)}
+.fig.em b{color:var(--accent)}
+.fig.up b{color:var(--cyan)}
+.fig.dn b{color:var(--clay-2)}
+
+/* 按钮 */
+.btn{
+  display:inline-block;padding:9px 15px;border-radius:9px;
+  border:1px solid var(--line);background:none;color:var(--ink-2);
+  font:inherit;font-size:12.5px;text-decoration:none;cursor:pointer;
+  transition:border-color var(--dur) var(--ease),color var(--dur) var(--ease),
+             background var(--dur) var(--ease);
+}
+.btn:hover{border-color:rgba(224,164,105,.46);color:#fff;background:rgba(224,164,105,.05)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* 入口行：底部发丝线，hover 时箭头右移 */
+.entries{margin-top:16px;border-top:1px solid var(--line)}
+.entry{
+  display:flex;gap:18px;align-items:baseline;padding:16px 2px;
+  text-decoration:none;color:inherit;border-bottom:1px solid var(--line);
+  transition:background var(--dur) var(--ease);
+}
+.entry:hover{background:rgba(224,164,105,.035)}
+.entry .ix{font-size:11px;color:var(--ink-3);letter-spacing:.2em;font-weight:600;
+  font-variant-numeric:tabular-nums;min-width:26px}
+.entry h3{margin:0;font-family:var(--font-display);font-size:15px;color:var(--ink)}
+.entry p{margin:8px 0 0;font-size:13px;color:var(--ink-3);max-width:76ch;line-height:1.7}
+.entry .go{display:inline-block;margin-left:10px;color:var(--ink-3);
+  transition:transform var(--dur) var(--ease),color var(--dur) var(--ease)}
+.entry:hover .go{transform:translateX(6px);color:var(--accent)}
+
+/* 页脚 */
+.fin{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter) 26px 132px;
+  display:flex;flex-wrap:wrap;gap:12px 26px;font-size:11px;color:var(--ink-3)}
+.fin a{color:var(--ink-3);text-decoration:none;border-bottom:1px solid transparent;
+  transition:color var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+.fin a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
+
+/* ── 无障碍与降级 ───────────────────────────────────────────────────── */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none !important;animation:none !important}
+  #atmo{display:none}
+}
+@media (max-width:820px){
+  :root{--gutter:22px}
+  .fin{padding-left:22px}
+}

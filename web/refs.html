@@ -4,137 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>知识图谱可视化 · 标杆参考</title>
-<style>
-  :root{
-    --paper:#f7f5f1;
-    --ink:#1a1a18;
-    --rule:#d8d4cc;
-    --muted:#6b6862;
-    --accent:#8c2f1f;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;background:var(--paper);color:var(--ink);
-    font:16px/1.65 Georgia,"Songti SC","Noto Serif CJK SC",serif;
-  }
-  header{
-    max-width:1180px;margin:0 auto;padding:64px 40px 28px;
-    border-bottom:1px solid var(--rule);
-  }
-  h1{font-size:34px;line-height:1.2;margin:0 0 12px;font-weight:400;letter-spacing:-.01em}
-  .lede{max-width:760px;color:var(--muted);font-size:16px;margin:0}
-  .lede b{color:var(--ink);font-weight:400;border-bottom:2px solid var(--accent);padding-bottom:1px}
-  main{max-width:1180px;margin:0 auto;padding:0 40px 100px}
-  section{padding-top:52px}
-  h2{
-    font:600 12px/1 ui-monospace,"SFMono-Regular",Consolas,monospace;
-    letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
-    margin:0 0 6px;
-  }
-  .note{
-  position: relative;
-  margin: 54px 0 0; padding: 26px 0 0; max-width: 74ch;
-  border: 0; background: none; border-radius: 0;
-  color: var(--ink-2, rgba(203,218,241,.78)); font-size: 15px; line-height: 1.85;
-}
-/* 分节记号：一条 44px 的暖金短横线。
-   它替代的是被用户点名否掉的「黑底框 + 左侧竖线」。之所以还需要一个记号：
-   把框线全部删干净之后，实测这一块在深色星云背景上完全融进正文，读不出边界。 */
-.note::before{
-  content: ""; position: absolute; left: 0; top: 0;
-  width: 56px; height: 2px; background: var(--pq-warm, var(--warm, #e0a469));
-  opacity: .9;
-}
-figure{margin:0 0 40px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:32px;align-items:start}
-  figure img{
-    width:100%;height:auto;display:block;background:#fff;
-    border:1px solid var(--rule);
-  }
-  figcaption{font-size:14px;line-height:1.6}
-  figcaption .t{font-weight:600;display:block;margin-bottom:6px}
-  figcaption .d{color:var(--muted)}
-  figcaption .u{
-    display:inline-block;margin-top:8px;font:400 11.5px/1.5 ui-monospace,Consolas,monospace;
-    color:var(--accent);word-break:break-all;
-  }
-  .star{border-left:3px solid var(--accent);padding-left:18px}
-  @media (max-width:900px){
-    figure{grid-template-columns:1fr;gap:14px}
-    header,main{padding-left:22px;padding-right:22px}
-    h1{font-size:26px}
-  }
-
-/* ── 标题字体（由 tools/apply_fonts.py 注入）────────────────────────────
-   fonts.css 是 tools/build_fonts.py 生成的子集字体，全部本地、零外部请求。
-   只给标题用：正文子集不含正文用字，换上去会逐字回退反而更难看。 */
-h1, h2, h3,
-.kick, .eyebrow, .note b, .fig .n, .kpi b, .card h2, .entry h3 {
-  font-family: "Smiley Sans","Noto Serif SC","Playfair Display",Georgia,"Songti SC","SimSun",serif;
-}
-/* 标题在衬线下不需要那么粗——衬线本身已经提供笔画对比 */
-h1, h2 { font-weight: 700; letter-spacing: -.02em; }
-h3 { font-weight: 600; }
-/* 数字用 Playfair 的等高数字，避免跳动 */
-.fig .n, .kpi b, [data-count] { font-variant-numeric: lining-nums tabular-nums; }
-
-/* ── .note：边界声明 / 结论块（2026-09 重做）────────────────────────────
-   旧版是「深色底 + 左侧 2px 竖线 + 圆角」，读起来像贴在页面上的便签
-   （用户原话：「一个黑底框，以及左侧的一个竖线条」「像硬贴上去了」）。
-   新版去掉一切框线，改用**排版本身**做层次：
-     · 首句自动放大到 17px 并加衬线，充当引导句；
-     · 段间用 1px 渐隐细线分隔，不用外框；
-     · 小标题（<b>为什么…</b> 之类）悬挂到左侧，形成一列。
-   这样它与正文同源，但仍然可辨识为"这是一段需要单独强调的话"。 */
-.note{
-  margin: 44px 0 0; padding: 0; max-width: 74ch;
-  border: 0; background: none; border-radius: 0;
-  color: var(--ink-2, rgba(203,218,241,.78)); font-size: 15px; line-height: 1.85;
-}
-.note > p:first-child{
-  margin: 0 0 14px;
-}
-.note > p + p{
-  margin: 0; padding-top: 14px; position: relative;
-}
-.note > p + p::before{
-  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
-  background: linear-gradient(90deg,
-    rgba(224,164,105,.34), rgba(174,178,194,.07) 62%, transparent);
-}
-.note b{
-  display: block;
-  font-family: "Smiley Sans","Noto Serif SC",serif;
-  font-weight: 400; color: var(--pq-warm, var(--warm, #ffcfa8));
-  font-size: 17px; letter-spacing: .01em; margin: 0 0 5px;
-}
-.note strong{ color: #fff; font-weight: 600; }
-.note code{
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: .9em; padding: 1px 5px; border-radius: 3px;
-  background: rgba(178,181,194,.12); color: #d6d9e2;
-}
-
-/* 2026-09 加：打破"全是蓝紫"。给强调、次强调、警戒各一个明确色相，
-   并规定它们各自只承担一种语义，不再混用。 */
-:root{
-  /* 单一色彩来源（2026-09 统一）。此前每个页面各有一套色源，主色都是冷蓝；
-     这里把真值集中到 --pq-*，--hue-* 退化为别名。 */
-  --pq-ink:#0b0c11; --pq-surface:#14151c; --pq-line:rgba(174,178,194,.13);
-  --pq-txt:#e4e6ec; --pq-txt-2:rgba(198,201,213,.68); --pq-txt-3:rgba(160,164,178,.5);
-  --pq-cool:#9aa0ae; --pq-warm:#e0a469; --pq-warm-deep:#c9873f; --pq-cyan:#7cc0b6;
-  --hue-cool: var(--pq-cool);      /* 主色：冷蓝，结构性元素（分隔线、次级标签） */
-  --hue-cyan: var(--pq-cyan);      /* 次色：青，正面结论（召回、覆盖、通过） */
-  --hue-warm: #ffb27f;      /* 暖色：负面/需注意（误差、漏抽、风险） */
-  --hue-gold: #ffd9a0;      /* 金：强调数字、结论性指标 */
-}
-</style>
+<link rel="stylesheet" href="./lib/design.css">
 <link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/fonts/fonts.css">
+<link rel="stylesheet" href="./lib/refs.css">
+<!-- ==DESIGN_SYS== -->
 </head>
-<body>
+<body class="atmo-l2">
+<canvas id="atmo" aria-hidden="true"></canvas>
+<div id="veil" aria-hidden="true"></div>
+<div class="atmo-content">
 <header>
   <h1>一次该显示多少节点</h1>
-  <p class="lede">22 个产品的官方口径与实测效果。结论是：<b>没有任何一家把节点全画出来还指望看清</b>。它们靠的是标签预算、先聚合再渲染、以及把极端规模降级成密度视图。这也是我们分层的依据。</p>
+  <p class="lead">22 个产品的官方口径与实测效果。结论是：<b>没有任何一家把节点全画出来还指望看清</b>。它们靠的是标签预算、先聚合再渲染、以及把极端规模降级成密度视图。这也是我们分层的依据。</p>
 </header>
 <main>
 
@@ -276,5 +158,11 @@ h3 { font-weight: 600; }
 
 </main>
 <script src="./lib/a11y.js"></script>
+</div><!-- /.atmo-content -->
+<script type="module">
+  import { startAtmosphere } from './lib/atmosphere.js';
+  startAtmosphere();
+  window.__ready = true;
+</script>
 </body>
 </html>

@@ -285,10 +285,26 @@
     footer { padding-left: 0; padding-bottom: 74px; }
   }
 </style>
+<link rel="stylesheet" href="./lib/design.css">
+<link rel="stylesheet" href="./lib/a11y.css">
+<link rel="stylesheet" href="./lib/fonts/fonts.css">
+<style>
+/* ==DESIGN_SYS== */
+/* 让各页既有内容浮在光场之上。这样不必给它们逐个包一层容器 ——
+   analytics 981 行、kg-nebula 2214 行，能不动就不动。 */
+body > *:not(#atmo):not(#veil){position:relative;z-index:1}
+/* 光场与遮罩必须在最底 */
+#atmo{z-index:0}
+#veil{z-index:0;pointer-events:none}
+/* 各页顶部可能自带半透明条，统一压成同一条线 */
+#atmo + #veil ~ *{border-color:var(--line)}
+</style>
 <link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/fonts/fonts.css">
 </head>
-<body>
+<body class="atmo-l2">
+<canvas id="atmo" aria-hidden="true"></canvas>
+<div id="veil" aria-hidden="true"></div>
 <div class="wrap">
 <header>
   <small class="eyebrow">kg cosmos · method capability map</small>
@@ -683,5 +699,12 @@ fetch('./kg-data/method-limits.json')
   });
 </script>
 <script src="./lib/a11y.js"></script>
+
+<!-- ==DESIGN_SYS== -->
+<script type="module">
+  import { startAtmosphere } from './lib/atmosphere.js';
+  startAtmosphere();
+  /* 不设 window.__ready：各页可能自带更严格的就绪条件（kg-nebula 要等 3D 首帧），抢跑会让 CDP 回归在场景就绪前截图。 */
+</script>
 </body>
 </html>
