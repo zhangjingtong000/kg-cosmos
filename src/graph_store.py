@@ -213,7 +213,7 @@ class Neo4jStore:
     # Evidence records are stored as a list of JSON strings.  Re-uploads are
     # merged atomically in Cypher by list dedup (identical records are exact
     # duplicates of the same source location), so no read-modify-write exists.
-    def __init__(self, uri="bolt://localhost:7687", user="neo4j", password="password"):
+    def __init__(self, uri="bolt://localhost:7687", user="neo4j", password="kgdemo2026"):
         from neo4j import GraphDatabase
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
         self.driver.verify_connectivity()
