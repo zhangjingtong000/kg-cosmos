@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>export logic test</title></head>
+<body>
+<canvas id="c" width="200" height="120"></canvas>
+<div id="kgExport">
+  <span class="lbl">导出</span>
+  <button type="button" data-exp="png">PNG</button>
+  <button type="button" data-exp="json">JSON</button>
+  <button type="button" data-exp="gexf">GEXF</button>
+</div>
+<script>
+/* 与 kg-nebula.html 注入的那段**逐字一致**（只把 renderer/scene/camera 换成
+   本页的最小实现），用来在轻量环境里验证导出逻辑本身。 */
+const renderer = { domElement: document.getElementById('c'),
+                   render(){} };
+const scene = {}, camera = {};
+const data = {
+  nodes: [ {id:'e1', name:'TransE', t:'Method', d:12, c:3},
+           {id:'e2', name:'FB15k', t:'Dataset', d:9, c:3},
+           {id:'e3', name:'<b>危险</b> & "引号"', t:'Concept', d:1, c:-1} ],
+  edges: [ ['e1','e2','EVALUATES'], ['e2','e3','USES'], ['e1','missing','SHOULD_DROP'] ]
+};
+</script>
+<script>
+/* ==KG_EXPORT_V1== */
+(function () {
+  function stamp() {
+    const d = new Date(), p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
+  }
+  function save(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }
+  function xmlEsc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  }
+  function toGexf(d) {
+    const idx = new Map();
+    d.nodes.forEach((n, i) => idx.set(n.id, i));
+    const L = [];
+    L.push('<?xml version="1.0" encoding="UTF-8"?>');
+    L.push('<gexf xmlns="http://gexf.net/1.2" version="1.2">');
+    L.push('  <meta><creator>KG Cosmos</creator><description>' +
+           xmlEsc('导出当前视图 · ' + d.nodes.length + ' 节点 / ' + d.edges.length + ' 边') +
+           '</description></meta>');
+    L.push('  <graph mode="static" defaultedgetype="directed">');
+    L.push('    <attributes class="node">');
+    L.push('      <attribute id="0" title="type" type="string"/>');
+    L.push('      <attribute id="1" title="degree" type="integer"/>');
+    L.push('      <attribute id="2" title="community" type="integer"/>');
+    L.push('    </attributes>');
+    L.push('    <nodes>');
+    d.nodes.forEach((n, i) => {
+      L.push(`      <node id="${i}" label="${xmlEsc(n.name || n.id)}">`);
+      L.push('        <attvalues>');
+      L.push(`          <attvalue for="0" value="${xmlEsc(n.t || n.type || '')}"/>`);
+      L.push(`          <attvalue for="1" value="${Number(n.d || 0)}"/>`);
+      L.push(`          <attvalue for="2" value="${Number(n.c == null ? -1 : n.c)}"/>`);
+      L.push('        </attvalues>');
+      L.push('      </node>');
+    });
+    L.push('    </nodes>');
+    L.push('    <edges>');
+    let eid = 0;
+    for (const e of d.edges) {
+      const a = idx.get(e[0]), b = idx.get(e[1]);
+      if (a === undefined || b === undefined) continue;
+      L.push(`      <edge id="${eid++}" source="${a}" target="${b}"` +
+             (e[2] ? ` label="${xmlEsc(e[2])}"` : '') + '/>');
+    }
+    L.push('    </edges>');
+    L.push('  </graph>');
+    L.push('</gexf>');
+    return L.join('\n');
+  }
+  window.__toGexf = toGexf;
+
+  const bar = document.getElementById('kgExport');
+  if (!bar) return;
+  bar.addEventListener('click', ev => {
+    const btn = ev.target.closest('button[data-exp]');
+    if (!btn) return;
+    const kind = btn.dataset.exp;
+    try {
+      if (kind === 'png') {
+        renderer.render(scene, camera);
+        renderer.domElement.toBlob(b => {
+          if (!b) { window.__pngErr = 'toBlob 返回 null'; return; }
+          save(b, `kg-cosmos-${stamp()}.png`);
+        }, 'image/png');
+      } else if (kind === 'json') {
+        const payload = { exported_at: new Date().toISOString(),
+                          source: 'kg-nebula.html · 当前视图',
+                          nodes: data.nodes, edges: data.edges };
+        save(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }),
+             `kg-cosmos-${stamp()}.json`);
+      } else {
+        save(new Blob([toGexf(data)], { type: 'application/xml' }),
+             `kg-cosmos-${stamp()}.gexf`);
+      }
+    } catch (err) { window.__expErr = err.message; }
+  });
+})();
+/* ==KG_EXPORT_V1_END== */
+</script>
+</body></html>

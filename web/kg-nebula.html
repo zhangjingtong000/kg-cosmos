@@ -235,6 +235,23 @@
   #detail .evlink { margin-left: 6px; font-size: 10.5px; color: #caccd2;
                     text-decoration: none; border-bottom: 1px dashed rgba(202,204,210, .4); }
   #detail .evlink:hover { color: #fff; border-bottom-color: rgba(255, 255, 255, .7); }
+
+/* ==KG_EXPORT_V1== */
+#kgExport{position:fixed;right:18px;bottom:18px;z-index:40;display:flex;gap:6px;
+  align-items:center;font:11.5px/1 "Inter",system-ui,sans-serif}
+#kgExport .lbl{color:rgba(193,195,201,.46);letter-spacing:.18em;text-transform:uppercase;
+  margin-right:4px;font-size:9.5px}
+#kgExport button{
+  appearance:none;cursor:pointer;padding:7px 11px;border-radius:8px;
+  border:1px solid rgba(178,180,186,.16);background:rgba(10,14,26,.66);
+  color:rgba(203,218,241,.82);font:inherit;letter-spacing:.04em;
+  backdrop-filter:blur(8px);transition:border-color .25s,color .25s,background .25s}
+#kgExport button:hover{border-color:rgba(224,164,105,.46);color:#fff;
+  background:rgba(20,26,42,.82)}
+#kgExport button:focus-visible{outline:2px solid #e0a469;outline-offset:2px}
+#kgExport .ok{color:#7cc0b6;border-color:rgba(124,192,182,.4)}
+@media (max-width:760px){#kgExport .lbl{display:none}}
+/* ==KG_EXPORT_V1_END== */
 </style>
 <link rel="stylesheet" href="./lib/a11y.css">
 </head>
@@ -275,6 +292,16 @@
 <!-- 数据加载器必须在下面的 module 之前就位：
      module 里顶层就 `await KGData.kg(...)`，加载器没到会直接抛。 -->
 <script src="./lib/kg-api.js"></script>
+
+<!-- ==KG_EXPORT_V1== -->
+<div id="kgExport" role="group" aria-label="导出当前视图">
+  <span class="lbl">导出</span>
+  <button type="button" data-exp="png"  title="把当前三维视图存成 PNG">PNG</button>
+  <button type="button" data-exp="json" title="导出当前视图的节点与边（JSON）">JSON</button>
+  <button type="button" data-exp="gexf" title="导出 Gephi 可打开的 .gexf">GEXF</button>
+</div>
+<!-- ==KG_EXPORT_V1_END== -->
+
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -319,7 +346,9 @@ const PRE_DATA = (PRE_C !== null && clouds[+PRE_C])
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 1000);
 camera.position.set(0, 2.6, 50.2);
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true,
+  // 导出 PNG 需要它：否则渲染缓冲在合成后被清空，toBlob() 会拿到全透明图。
+  preserveDrawingBuffer: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.setClearColor(0x000000, 0);
@@ -2011,6 +2040,111 @@ addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
   labelRenderer.setSize(innerWidth, innerHeight);
 });
+
+/* ==KG_EXPORT_V1== */
+/* 导出当前视图：PNG / JSON / GEXF。
+   注意导出的是**当前数据**（data），搜索或聚焦后它就是子集 —— 这是有意的，
+   因为用户此刻看到的就是这个子集。 */
+(function () {
+  function stamp() {
+    const d = new Date(), p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
+  }
+  function save(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }
+  function flash(btn) {
+    btn.classList.add('ok');
+    const old = btn.textContent;
+    btn.textContent = '✓';
+    setTimeout(() => { btn.classList.remove('ok'); btn.textContent = old; }, 1100);
+  }
+  function xmlEsc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+  }
+  /* GEXF 1.2：节点 id 必须是数字索引，标签放 label；边用索引互指。 */
+  function toGexf(d) {
+    const idx = new Map();
+    d.nodes.forEach((n, i) => idx.set(n.id, i));
+    const L = [];
+    L.push('<?xml version="1.0" encoding="UTF-8"?>');
+    L.push('<gexf xmlns="http://gexf.net/1.2" version="1.2">');
+    L.push('  <meta><creator>KG Cosmos</creator><description>' +
+           xmlEsc('导出当前视图 · ' + d.nodes.length + ' 节点 / ' + d.edges.length + ' 边') +
+           '</description></meta>');
+    L.push('  <graph mode="static" defaultedgetype="directed">');
+    L.push('    <attributes class="node">');
+    L.push('      <attribute id="0" title="type" type="string"/>');
+    L.push('      <attribute id="1" title="degree" type="integer"/>');
+    L.push('      <attribute id="2" title="community" type="integer"/>');
+    L.push('    </attributes>');
+    L.push('    <nodes>');
+    d.nodes.forEach((n, i) => {
+      L.push(`      <node id="${i}" label="${xmlEsc(n.name || n.id)}">`);
+      L.push('        <attvalues>');
+      L.push(`          <attvalue for="0" value="${xmlEsc(n.t || n.type || '')}"/>`);
+      L.push(`          <attvalue for="1" value="${Number(n.d || 0)}"/>`);
+      L.push(`          <attvalue for="2" value="${Number(n.c == null ? -1 : n.c)}"/>`);
+      L.push('        </attvalues>');
+      L.push('      </node>');
+    });
+    L.push('    </nodes>');
+    L.push('    <edges>');
+    let eid = 0;
+    for (const e of d.edges) {
+      const a = idx.get(e[0]), b = idx.get(e[1]);
+      if (a === undefined || b === undefined) continue;   // 端点不在当前视图里就跳过
+      L.push(`      <edge id="${eid++}" source="${a}" target="${b}"` +
+             (e[2] ? ` label="${xmlEsc(e[2])}"` : '') + '/>');
+    }
+    L.push('    </edges>');
+    L.push('  </graph>');
+    L.push('</gexf>');
+    return L.join('\n');
+  }
+
+  const bar = document.getElementById('kgExport');
+  if (!bar) return;
+  bar.addEventListener('click', ev => {
+    const btn = ev.target.closest('button[data-exp]');
+    if (!btn) return;
+    const kind = btn.dataset.exp;
+    try {
+      if (kind === 'png') {
+        renderer.render(scene, camera);
+        renderer.domElement.toBlob(b => {
+          if (!b) { alert('PNG 导出失败：画布为空'); return; }
+          save(b, `kg-cosmos-${stamp()}.png`);
+          flash(btn);
+        }, 'image/png');
+      } else if (kind === 'json') {
+        const payload = {
+          exported_at: new Date().toISOString(),
+          source: 'kg-nebula.html · 当前视图',
+          nodes: data.nodes, edges: data.edges,
+        };
+        save(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }),
+             `kg-cosmos-${stamp()}.json`);
+        flash(btn);
+      } else {
+        save(new Blob([toGexf(data)], { type: 'application/xml' }),
+             `kg-cosmos-${stamp()}.gexf`);
+        flash(btn);
+      }
+    } catch (err) {
+      console.error('[export]', err);
+      alert('导出失败：' + err.message);
+    }
+  });
+})();
+/* ==KG_EXPORT_V1_END== */
 </script>
 <script src="./lib/a11y.js"></script>
 </body>
