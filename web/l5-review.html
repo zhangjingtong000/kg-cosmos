@@ -2,65 +2,63 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>L5 域内效度 · 盲判</title>
+<title>L5 盲判 · 两问式（无 premise 锚定）</title>
 <style>
   :root{--bg:#0f1115;--panel:#171a21;--line:#2a2f3a;--fg:#e6e9ef;--dim:#9aa3b2;
         --ok:#2ea043;--no:#d1495b;--un:#8e9096;--hl:#ffd84d}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);
        font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
-  header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;gap:16px;
+  header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;gap:14px;
          align-items:center;position:sticky;top:0;background:var(--bg);z-index:5;flex-wrap:wrap}
   header b{font-size:15px}
-  .bar{flex:1;height:8px;background:#22262f;border-radius:4px;overflow:hidden;min-width:160px}
+  .bar{flex:1;height:8px;background:#22262f;border-radius:4px;overflow:hidden;min-width:140px}
   .bar>i{display:block;height:100%;background:var(--ok);width:0}
   .dim{color:var(--dim)}
+  .warn{color:#ffb86b}
   main{display:flex;height:calc(100vh - 52px)}
-  #card{flex:1;overflow:auto;padding:20px 24px;max-width:920px}
-  #pdfPane{width:0;border-left:1px solid var(--line);overflow:auto;transition:width .18s;
-           background:#0b0d11}
+  #card{flex:1;overflow:auto;padding:20px 24px;max-width:980px}
+  #pdfPane{width:0;border-left:1px solid var(--line);overflow:auto;transition:width .18s;background:#0b0d11}
   #pdfPane.open{width:min(46vw,720px);padding:10px 14px}
   .tri{font-size:20px;font-weight:600;margin:6px 0 2px;word-break:break-word}
   .tri .rel{color:var(--hl)}
+  /* 中文表述：比英文三元组弱一档，避免抢主视觉。
+     实体名本身仍是英文原文（不能翻，判读要对着原文）。 */
+  .tri.zh{font-size:14px;font-weight:400;color:var(--dim);margin:0 0 8px}
   .tag{display:inline-block;font-size:12px;padding:1px 8px;border:1px solid var(--line);
        border-radius:99px;color:var(--dim);margin-right:6px}
-  .box{background:var(--panel);border:1px solid var(--line);border-radius:8px;
-       padding:12px 14px;margin:12px 0}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:12px 0}
   .box h4{margin:0 0 6px;font-size:12px;color:var(--dim);font-weight:600;letter-spacing:.04em}
   .quote{white-space:pre-wrap;word-break:break-word}
-  .hy{color:#ffd84d}
-  mark{background:#3a3410;color:var(--hl);padding:0 2px;border-radius:2px}
-  .btns{display:flex;gap:10px;margin:18px 0 8px;flex-wrap:wrap}
+  .btns{display:flex;gap:10px;margin:16px 0 6px;flex-wrap:wrap}
   button{font:inherit;padding:10px 18px;border-radius:8px;border:1px solid var(--line);
          background:#20242d;color:var(--fg);cursor:pointer}
   button:hover{border-color:#4a5568}
-  button.ok{border-color:var(--ok)}button.no{border-color:var(--no)}
-  button.un{border-color:var(--un)}
+  button.ok{border-color:var(--ok)}button.no{border-color:var(--no)}button.un{border-color:var(--un)}
   button.sel{background:#2b3140}
-  .reasons{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px}
-  .reasons button{padding:5px 10px;font-size:12px}
-  .nav{display:flex;gap:10px;align-items:center;margin-top:8px}
-  kbd{background:#22262f;border:1px solid var(--line);border-bottom-width:2px;
-      border-radius:4px;padding:0 5px;font-size:12px}
+  .q2{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 8px}
+  .q2 button{padding:7px 12px;font-size:13px}
+  .nav{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  kbd{background:#22262f;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;
+      padding:0 5px;font-size:12px}
   #pdfView{position:relative;text-align:center;margin-top:6px}
   #pdfTextLayer{position:absolute;left:0;top:0;line-height:1;pointer-events:none}
   #pdfTextLayer span{position:absolute;white-space:pre;color:transparent;transform-origin:0 0}
   #pdfTextLayer span.hl{background:rgba(255,216,77,.35);outline:1px solid rgba(255,216,77,.5)}
   a{color:#c2c4ca}
   .done{color:var(--ok)}
+  details{margin:4px 0 0}
+  summary{cursor:pointer;color:var(--dim);font-size:12px}
+  #fatal{display:none;background:#3a1216;border:1px solid #d1495b;padding:14px 18px;border-radius:8px;margin:24px}
+  .hint{background:#14181f;border-left:3px solid var(--hl);padding:8px 12px;margin:10px 0;font-size:13px}
 </style>
 <link rel="stylesheet" href="./lib/design.css">
 <link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/fonts/fonts.css">
 <style>
-/* ==DESIGN_SYS== */
-/* 让各页既有内容浮在光场之上。这样不必给它们逐个包一层容器 ——
-   analytics 981 行、kg-nebula 2214 行，能不动就不动。 */
 body > *:not(#atmo):not(#veil){position:relative;z-index:1}
-/* 光场与遮罩必须在最底 */
 #atmo{z-index:0}
 #veil{z-index:0;pointer-events:none}
-/* 各页顶部可能自带半透明条，统一压成同一条线 */
 #atmo + #veil ~ *{border-color:var(--line)}
 </style>
 </head>
@@ -68,12 +66,14 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
 <canvas id="atmo" aria-hidden="true"></canvas>
 <div id="veil" aria-hidden="true"></div>
 <header>
-  <b>L5 域内效度盲判</b>
+  <b>L5 盲判（两问式）</b>
+  <span class="dim" id="srcName">-</span>
   <span class="dim" id="pos">-</span>
   <span class="bar"><i id="prog"></i></span>
   <span class="dim" id="stat"></span>
-  <span class="dim">判据：<b>只看原文是否真的支持这条三元组</b>，不要猜模型怎么想</span>
+  <button onclick="exportLabels()">导出标注 JSON</button>
 </header>
+<div id="fatal"></div>
 <main>
   <div id="card"></div>
   <div id="pdfPane">
@@ -90,114 +90,173 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
 import * as pdfjsLib from './lib/pdfjs/pdf.min.mjs';
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('./lib/pdfjs/pdf.worker.min.mjs', location.href).href;
 
-let items = [], labels = {}, idx = 0, lastReason = '';
+/* ===================================================================
+   两问式盲判（替换旧版「premise 高亮 + 单问」）
+
+   旧版的两个毛病（实测于 web/l5-review.html 旧版 L154-159）：
+     ① 把「判别器读到的 premise」单独列一块并原文标黄，标注者被引导判
+        「这句 premise 支不支持」，而不是「原文支不支持这条边」= 前提锚定；
+     ② premise 是「同时含两端点的句子」，标黄位置直接泄漏了机器算的
+        端点命中层（both/one/none），而该层正是分层抽样变量 ⇒ 破盲。
+   本版：不下发也不显示 premise；证据段落原样给出（保留换行、零高亮）；
+        第二问只问「端点在证据里到底有没有出现」，由人独立给，
+        离线与机器算的命中层对照，用于校验标注质量（不是把答案喂给人）。
+   =================================================================== */
+
+let items = [], labels = {}, idx = 0, q1 = '', api = false, sheetName = 'validity';
+const LS = () => `l5-review-labels:${sheetName}`;
 const $ = (s) => document.querySelector(s);
-
-async function boot() {
-  const r = await fetch('/api/items').then((x) => x.json());
-  items = r.items; labels = r.labels || {};
-  const first = items.findIndex((it) => !labels[it.id]);
-  idx = first < 0 ? 0 : first;
-  render();
-}
-window.boot = boot;
-
 const esc = (s) => String(s || '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
-/** 在证据段落里把喂给判别器的那句话标出来 —— 让人一眼看到「模型看到的是什么」。
- *  ⚠ 不能直接 indexOf：证据段落里有换行/多空格，而 premise 是切句后用单空格
- *  拼起来的，字面必然对不上（实测对不上率接近 100%）。这里先把证据压平空白、
- *  同时记录「压平后字符 → 原文下标」的映射，命中后再映射回原文区间。 */
-function markPremise(evidence, premise) {
-  const ev = String(evidence || '');
-  const p = String(premise || '').replace(/\s+/g, ' ').trim();
-  if (!p) return esc(ev);
-  let flat = ''; const map = [];
-  for (let i = 0; i < ev.length; i++) {
-    if (/\s/.test(ev[i])) { if (flat && !flat.endsWith(' ')) { flat += ' '; map.push(i); } }
-    else { flat += ev[i]; map.push(i); }
-  }
-  const find = (needle) => {
-    if (!needle) return null;
-    const j = flat.indexOf(needle);
-    if (j < 0) return null;
-    const to = map[Math.min(j + needle.length, map.length) - 1] + 1;
-    return [map[j], to];
-  };
-  let r = find(p) || find(p.slice(0, 40));
-  if (!r) {                       // 退化：用最长的词单点定位，至少把位置指出来
-    for (const w of p.split(' ').filter((x) => x.length >= 6).sort((a, b) => b.length - a.length)) {
-      r = find(w); if (r) break;
-    }
-  }
-  if (!r) return esc(ev) + '\n\n（⚠ 前提句未能在这段证据里定位——PDF 抽文本与切句有差异）';
-  return esc(ev.slice(0, r[0])) + '<mark>' + esc(ev.slice(r[0], r[1])) + '</mark>' + esc(ev.slice(r[1]));
+function fatal(msg) {
+  const el = $('#fatal');
+  el.style.display = 'block';
+  el.innerHTML = `<b>清单没能加载</b><p>${esc(msg)}</p>
+    <p class="dim">可用数据源：<code>?sheet=./l5-data/&lt;名字&gt;-sheet.json</code>、
+    <code>/api/items</code>（需 <code>tools/l5_single_review.py</code> 起的 8097）、
+    <code>./l5-data/validity-sheet.json</code>。</p>
+    <p class="dim">生成清单：<code>python tools/l5_single_sample.py --hash ad690dfb --n 150 --pdf</code></p>`;
 }
+
+function parseSheet(payload, name, isApi) {
+  const arr = Array.isArray(payload) ? payload
+            : (payload && Array.isArray(payload.items) ? payload.items : null);
+  if (!arr) throw new Error('响应里没有 items 数组');
+  items = arr;
+  labels = isApi ? (payload.labels || {}) : {};
+  sheetName = name;
+}
+
+async function boot() {
+  const qs = new URLSearchParams(location.search).get('sheet');
+  const candidates = [];
+  if (qs) candidates.push({ url: qs, name: qs.split('/').pop().replace(/-sheet\.json$/, ''), isApi: false });
+  candidates.push({ url: '/api/items', name: 'validity', isApi: true });
+  candidates.push({ url: './l5-data/validity-sheet.json', name: 'validity', isApi: false });
+  const errs = [];
+  for (const c of candidates) {
+    try {
+      const r = await fetch(c.url, { cache: 'no-store' });
+      if (!r.ok) { errs.push(`${c.url} → HTTP ${r.status}`); continue; }
+      const j = await r.json();
+      parseSheet(j, c.name, c.isApi);
+      if (!items.length) { errs.push(`${c.url} → 0 条`); continue; }
+      api = c.isApi;
+      if (!api) {                                  // 静态模式：标签从本机存储恢复
+        try { labels = JSON.parse(localStorage.getItem(LS()) || '{}') || {}; } catch (e) { labels = {}; }
+      }
+      $('#srcName').textContent = `源：${c.url}（${items.length} 条）`;
+      const first = items.findIndex((it) => !labels[it.id]);
+      idx = first < 0 ? 0 : first;
+      render();
+      return;
+    } catch (e) { errs.push(`${c.url} → ${e.message}`); }
+  }
+  fatal(errs.join('；'));
+}
+window.boot = boot;
 
 function render() {
   const it = items[idx];
   const done = Object.keys(labels).length;
   $('#pos').textContent = `第 ${idx + 1} / ${items.length} 条  (${it.id})`;
   $('#prog').style.width = `${done / items.length * 100}%`;
-  const ok = Object.values(labels).filter((v) => v.verdict === 'support').length;
-  const no = Object.values(labels).filter((v) => v.verdict === 'reject').length;
-  const un = Object.values(labels).filter((v) => v.verdict === 'unclear').length;
-  $('#stat').textContent = `已标 ${done} · 支持 ${ok} / 不支持 ${no} / 说不清 ${un}`;
+  const c = (v) => Object.values(labels).filter((x) => x.verdict === v).length;
+  $('#stat').textContent = `已标 ${done} · 支持 ${c('support')} / 不支持 ${c('reject')} / 说不清 ${c('unclear')}`;
   const cur = labels[it.id] || {};
+  q1 = cur.verdict || '';
+  const q2shown = q1 === 'reject' || q1 === 'unclear';
+  const Q2 = [['both_asserted', '两端点都在，原文有明确断言'],
+              ['both_listed', '两端点都在，但只是并列罗列/无断言'],
+              ['one_endpoint', '只出现一个端点'],
+              ['no_endpoint', '两个端点都没出现'],
+              ['cannot_tell', '分不清']];
   $('#card').innerHTML = `
     <div>
-      <span class="tag">${esc(it.paper)} · 第 ${it.page} 页</span>
+      <span class="tag">${esc(it.paper)} · 第 ${esc(it.page)} 页</span>
       <span class="tag">${esc(it.type)} — ${esc(it.type_zh || '')}</span>
-      ${cur.verdict ? '<span class="tag done">已标：' + ({ support: '支持', reject: '不支持', unclear: '说不清' }[cur.verdict]) + '</span>' : ''}
+      ${q1 ? '<span class="tag done">已标</span>' : ''}
     </div>
-    <div class="tri">${esc(it.source)} <span class="rel">—[${esc(it.type)}]→</span> ${esc(it.target)}</div>
-    <div class="box"><h4>判别器实际读到的「假设」（hypothesis）</h4>
-      <div class="quote hy">${esc(it.hypothesis)}</div></div>
-    <div class="box"><h4>判别器实际读到的「前提」（premise，从下段证据里自动抽的一句）</h4>
-      <div class="quote">${esc(it.premise)}</div></div>
-    <div class="box"><h4>该边的完整证据段落（页内引文，已把前提句标黄）</h4>
-      <div class="quote">${markPremise(it.evidence, it.premise)}</div></div>
+    <div class="hint">第 1 问：<b>就下面这段原文证据而言，这条三元组成立吗？</b>
+      （只看原文，不要猜判别器怎么想；也不要因为「意思差不多」就判成立）。</div>
+    <div class="tri">${esc(it.source)} <span class="rel">—[${esc(it.type_zh || it.type)}]→</span> ${esc(it.target)}</div>
+    ${it.hypothesis_zh ? `<div class="tri zh">中文：${esc(it.hypothesis_zh)}</div>` : ''}
+    <details><summary>展开判别器读的那句（英文模板，与上面的三元组等价）</summary>
+      <div class="quote dim">${esc(it.hypothesis)}</div></details>
+    <div class="box"><h4>原文证据段落（英文原样，未作任何高亮）</h4>
+      <div class="quote">${esc(it.evidence)}</div></div>
     <div class="btns">
-      <button class="ok ${cur.verdict === 'support' ? 'sel' : ''}" onclick="label('support')">1 · 原文支持这条三元组</button>
-      <button class="no ${cur.verdict === 'reject' ? 'sel' : ''}" onclick="label('reject')">2 · 原文不支持</button>
-      <button class="un ${cur.verdict === 'unclear' ? 'sel' : ''}" onclick="label('unclear')">3 · 说不清 / 无法判定</button>
+      <button class="ok ${q1 === 'support' ? 'sel' : ''}" onclick="label('support')">1 · 原文支持这条边</button>
+      <button class="no ${q1 === 'reject' ? 'sel' : ''}" onclick="label('reject')">2 · 原文不支持</button>
+      <button class="un ${q1 === 'unclear' ? 'sel' : ''}" onclick="label('unclear')">3 · 说不清 / 无法判定</button>
     </div>
-    <div class="reasons">
-      <span class="dim">若判「不支持」，可选原因：</span>
-      ${[['evidence_unrelated', '证据与三元组无关（引错段）'], ['endpoint_missing', '端点不在证据里'],
-         ['direction_wrong', '方向反了'], ['predicate_wrong', '谓词不对'],
-         ['too_generic', '空泛/同义反复'], ['other', '其他']]
-        .map(([k, t]) => `<button class="${cur.reason === k ? 'sel' : ''}" onclick="reason('${k}')">${t}</button>`).join('')}
-    </div>
+    ${q2shown ? `<div class="hint">第 2 问：<b>证据段落里两个端点各出现了吗？</b>
+        （与第 1 问独立；「端点都在但关系不成立」说明抽取错了，「端点不在」说明引错了段）</div>
+      <div class="q2">${Q2.map(([k, t]) => `<button class="${cur.q2 === k ? 'sel' : ''}" onclick="q2set('${k}')">${t}</button>`).join('')}
+        <button onclick="q2set('skipped')">跳过第 2 问 (0)</button></div>` : ''}
     <div class="nav">
       <button onclick="go(-1)">← 上一条</button>
       <button onclick="go(1)">下一条 →</button>
       <button onclick="openPdfOf()">在原文中查看 (P)</button>
-      <span class="dim">快捷键：<kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 判定并自动下一条 ·
-        <kbd>P</kbd> 看原文 · <kbd>←</kbd><kbd>→</kbd> 翻页 · <kbd>Esc</kbd> 关原文</span>
+      <span class="dim">快捷键：<kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 第 1 问 ·
+        <kbd>4</kbd>–<kbd>8</kbd> 第 2 问 · <kbd>0</kbd> 跳过 · <kbd>P</kbd> 原文 ·
+        <kbd>←</kbd><kbd>→</kbd> 翻条 · <kbd>Esc</kbd> 关原文</span>
     </div>`;
   prepPdf();
 }
 
 function current() { return items[idx]; }
 
-async function label(v) {
+function persist() {
+  try { localStorage.setItem(LS(), JSON.stringify(labels)); } catch (e) { /* 隐私模式 */ }
+  if (api) {
+    const rec = labels[current().id];
+    if (rec) fetch('/api/label', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                   body: JSON.stringify(rec) }).catch(() => {});
+  }
+}
+function advance() { if (idx < items.length - 1) idx++; render(); }
+
+/* 第 1 问：边级真值。判「支持」时第 2 问自动记为 both_asserted（最常见情形），直接进下一条。 */
+function label(v) {
   const it = current();
-  labels[it.id] = { id: it.id, verdict: v, reason: v === 'reject' ? (lastReason || '') : '',
+  const prev = labels[it.id] || {};
+  labels[it.id] = { id: it.id, verdict: v, q1: v,
+                    q2: v === 'support' ? 'both_asserted' : (prev.q2 || ''),
                     ts: new Date().toISOString() };
-  lastReason = '';
-  fetch('/api/label', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(labels[it.id]) });
-  if (idx < items.length - 1) idx++;
-  render();
+  persist();
+  if (v === 'support') advance(); else render();
 }
 window.label = label;
-function reason(k) { lastReason = k; render(); }
-window.reason = reason;
+
+/* 第 2 问：证据级（端点在证据段落里出现了几个） */
+function q2set(k) {
+  const it = current();
+  const prev = labels[it.id] || { verdict: q1 || 'unclear' };
+  labels[it.id] = { ...prev, id: it.id, verdict: prev.verdict || q1 || 'unclear', q2: k,
+                    ts: new Date().toISOString() };
+  persist();
+  advance();
+}
+window.q2set = q2set;
+
 function go(d) { idx = Math.min(items.length - 1, Math.max(0, idx + d)); render(); }
 window.go = go;
 
-/* ---------------- pdf.js 原文定位（复用 kg-nebula.html 的自绘方案） ---------------- */
+function exportLabels() {
+  const arr = Object.values(labels);
+  const blob = new Blob([JSON.stringify({ sheet: sheetName, n: arr.length, labels: arr }, null, 2)],
+                        { type: 'application/json' });
+  const a = document.createElement('a');
+  const d = new Date().toISOString().slice(0, 10);
+  a.href = URL.createObjectURL(blob);
+  a.download = `l5-labels-${sheetName}-${d}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+window.exportLabels = exportLabels;
+
+/* ---------------- pdf.js 原文定位（证据段首句定位；不再用 premise） ---------------- */
 const pdfPane = $('#pdfPane'), pdfView = $('#pdfView'), pdfCanvas = $('#pdfCanvas');
 const pdfTextLayer = $('#pdfTextLayer');
 let pdfDoc = null, pdfSrc = '', pdfPage = 1, pdfSnip = '', token = 0, renderTask = null;
@@ -212,12 +271,17 @@ function highlight(spans, snip) {
   const norm = (s) => String(s || '').replace(/\s+/g, ' ').toLowerCase().trim();
   const target = norm(snip); if (!target) return 0;
   let full = ''; const owner = [];
-  spans.forEach((el, i) => { const t = norm(el.textContent); if (!t) return;
+  spans.forEach((el, i) => {
+    const t = norm(el.textContent); if (!t) return;
     if (full && !full.endsWith(' ')) { full += ' '; owner.push(-1); }
-    for (const ch of t) { full += ch; owner.push(i); } });
-  const mark = (from, len) => { const set = new Set();
+    for (const ch of t) { full += ch; owner.push(i); }
+  });
+  const mark = (from, len) => {
+    const set = new Set();
     for (let k = from; k < from + len; k++) if (owner[k] >= 0) set.add(owner[k]);
-    set.forEach((i) => spans[i].classList.add('hl')); return set.size; };
+    set.forEach((i) => spans[i].classList.add('hl'));
+    return set.size;
+  };
   const pos = full.indexOf(target);
   if (pos >= 0) return mark(pos, target.length);
   const words = target.split(' ').filter((w) => w.length >= 6).sort((a, b) => b.length - a.length);
@@ -227,9 +291,6 @@ function highlight(spans, snip) {
 async function renderPage() {
   if (!pdfDoc) return;
   const tk = ++token;
-  // 翻条/翻页会把新的 render() 排到同一个 canvas 上，pdf.js 会直接抛
-  // 「Cannot use the same canvas during multiple render() operations」。
-  // 必须先取消上一趟渲染并等它落地，再开新的。
   if (renderTask) {
     try { renderTask.cancel(); } catch (e) { /* 已结束 */ }
     try { await renderTask.promise; } catch (e) { /* 取消是预期路径 */ }
@@ -245,9 +306,7 @@ async function renderPage() {
   pdfCanvas.style.width = `${Math.floor(vp.width)}px`; pdfCanvas.style.height = `${Math.floor(vp.height)}px`;
   renderTask = page.render({ canvasContext: pdfCanvas.getContext('2d'), viewport: vp,
                              transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : null });
-  try {
-    await renderTask.promise;
-  } catch (e) {
+  try { await renderTask.promise; } catch (e) {
     if (!e || e.name !== 'RenderingCancelledException') throw e;
     return;
   }
@@ -273,27 +332,33 @@ async function renderPage() {
   const first = pdfTextLayer.querySelector('span.hl');
   if (first) pdfView.scrollTop = Math.max(0, first.offsetTop - pdfView.clientHeight / 3);
 }
-/** 切条时若 PDF 抽屉开着，就重新定位到新条目的页与句子。 */
-async function prepPdf() {
-  if (!pdfPane.classList.contains('open')) return;
-  await openPdfOf();
+async function prepPdf() { if (pdfPane.classList.contains('open')) await openPdfOf(); }
+
+/* 静态站（8000）从 ./l5-data/ 找 PDF；盲判服务（8097）从 ../data/corpus/ 找。 */
+function pdfCandidates(paper) {
+  return [`./l5-data/${paper}.pdf`, `../data/corpus/${paper}.pdf`];
 }
 async function openPdfOf() {
   const it = current();
-  pdfSnip = snippetOf(it.premise) || snippetOf(it.evidence);
-  $('#pdfOpen').href = new URL(`../data/corpus/${it.paper}.pdf#page=${it.page}`, location.href).href;
+  pdfSnip = snippetOf(it.evidence);
+  const cands = pdfCandidates(it.paper);
+  $('#pdfOpen').href = new URL(cands[0], location.href).href;
   $('#pdfName').textContent = `${it.paper} · 第 ${it.page} 页`;
   pdfPane.classList.add('open');
   pdfPage = Number(it.page) || 1;
-  try {
-    if (!pdfDoc || pdfSrc !== it.paper) {
-      pdfDoc = await pdfjsLib.getDocument(`../data/corpus/${it.paper}.pdf`).promise;
-      pdfSrc = it.paper;
-    }
-    await renderPage();
-  } catch (e) {
-    pdfTextLayer.innerHTML = ''; $('#pdfPageInfo').textContent = `加载失败：${e.message}`;
+  let err = null;
+  for (const c of cands) {
+    try {
+      if (!pdfDoc || pdfSrc !== c) {
+        pdfDoc = await pdfjsLib.getDocument(c).promise;
+        pdfSrc = c;
+      }
+      await renderPage();
+      return;
+    } catch (e) { pdfDoc = null; err = e; }
   }
+  pdfTextLayer.innerHTML = '';
+  $('#pdfPageInfo').textContent = `原文不在静态目录（${err ? err.message : '加载失败'}）`;
 }
 window.openPdfOf = openPdfOf;
 function closePdf() { pdfPane.classList.remove('open'); }
@@ -301,23 +366,27 @@ window.closePdf = closePdf;
 
 addEventListener('keydown', (e) => {
   if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-  if (e.key === '1') label('support');
-  else if (e.key === '2') label('reject');
-  else if (e.key === '3') label('unclear');
-  else if (e.key === 'ArrowRight') go(1);
-  else if (e.key === 'ArrowLeft') go(-1);
-  else if (e.key.toLowerCase() === 'p') openPdfOf();
-  else if (e.key === 'Escape') closePdf();
+  const k = e.key;
+  if (k === '1') label('support');
+  else if (k === '2') label('reject');
+  else if (k === '3') label('unclear');
+  else if (k === '4') q2set('both_asserted');
+  else if (k === '5') q2set('both_listed');
+  else if (k === '6') q2set('one_endpoint');
+  else if (k === '7') q2set('no_endpoint');
+  else if (k === '8') q2set('cannot_tell');
+  else if (k === '0') q2set('skipped');
+  else if (k === 'ArrowRight') go(1);
+  else if (k === 'ArrowLeft') go(-1);
+  else if (k.toLowerCase() === 'p') openPdfOf();
+  else if (k === 'Escape') closePdf();
 });
 
 boot();
 </script>
-
-<!-- ==DESIGN_SYS== -->
 <script type="module">
   import { startAtmosphere } from './lib/atmosphere.js';
   startAtmosphere();
-  /* 不设 window.__ready：各页可能自带更严格的就绪条件（kg-nebula 要等 3D 首帧），抢跑会让 CDP 回归在场景就绪前截图。 */
 </script>
 </body>
 </html>

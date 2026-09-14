@@ -20,6 +20,7 @@ import json
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -97,6 +98,34 @@ def main():
             print(f'   数据接口泄漏: {bad or "无"}')
             if bad:
                 fails.append(f'数据接口泄漏判别器字段 {bad}')
+
+        # ②b 静态路径也要盲态：/data/ 只应放行 corpus。
+        # 旧白名单把整棵 data/ 都映射出去，实测 GET /data/quality/l5-validity-key.json
+        # = 200 / 27300B（含 entail_prob/pass/hit）—— 一条 URL 就破盲。
+        for p in ('/data/quality/l5-validity-key.json',
+                  '/data/quality/relation-verify-all.json',
+                  '/tmp/l5-single/ad690dfb-design.json'):
+            code = None
+            try:
+                with urllib.request.urlopen(f'http://127.0.0.1:{PORT}{p}', timeout=3) as r:
+                    code = r.status
+            except urllib.error.HTTPError as e:
+                code = e.code
+            except Exception:
+                code = None
+            print(f'   静态路径 {p} → {code}')
+            if code != 404:
+                fails.append(f'静态路径未拦截 {p}（HTTP {code}，应 404）')
+        for p in ('/data/corpus/',):
+            code = None
+            try:
+                with urllib.request.urlopen(f'http://127.0.0.1:{PORT}{p}', timeout=3) as r:
+                    code = r.status
+            except urllib.error.HTTPError as e:
+                code = e.code
+            except Exception:
+                code = None
+            print(f'   原文目录 {p} → {code}（404 属正常，目录不可列）')
 
         # ③ 浏览器实测：判定 → 落盘
         port = 9750

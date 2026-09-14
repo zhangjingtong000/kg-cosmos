@@ -102,6 +102,17 @@ def _serve_json(path: Path):
         raise HTTPException(500, f"读取 {path.name} 失败: {e}")
 
 
+# 盲判保护名单：文件名里出现任一片段就拒绝经 HTTP 提供。
+# 这些文件含逐条判别器分数（entail_prob/pass/hit）、分层权重或探针 id —— 
+# 看到它们，人工盲判就不是盲的了。
+_BLIND_PROTECTED = (
+    "l5-validity-key", "l5-validity-labels", "l5-validity-design",
+    "l5-validity-report", "l5-validity-probe", "l5-validity-check",
+    "l5-validity-sample", "l5-annotator-agreement", "relation-verify-all",
+    "l5-single", "l5-labels",
+)
+
+
 @app.get("/health")
 async def health():
     """存活 + 数据面可用性。前端可据此决定走 API 还是回退静态文件。"""
@@ -143,9 +154,19 @@ async def api_kg(name: str):
 
 @app.get("/api/quality/{name}")
 async def api_quality(name: str):
-    """质量产物（data/quality/<name>.json），分析面板的可追溯来源。"""
+    """质量产物（data/quality/<name>.json），分析面板的可追溯来源。
+
+    【盲态】含盲判答案/分层/逐条分数的产物一律 404。8000 与 web/ 同源，
+    修复前实测 GET /api/quality/l5-validity-key.json = 200 / 18498B，
+    明文含 entail_prob/pass/hit/stratum —— 标注者一条 URL 就破盲，
+    人工盲判（L5 唯一可信的效度来源）当场作废。
+    运行手册：docs/L5_HUMAN_REVIEW_RUNBOOK.md
+    """
     if "/" in name or "\\" in name or ".." in name:
         raise HTTPException(400, "非法文件名")
+    low = name.lower()
+    if any(p in low for p in _BLIND_PROTECTED):
+        raise HTTPException(404, f"{name} 不对外提供（盲判答案/分层）")
     return _serve_json(QUALITY / name)
 
 

@@ -82,11 +82,14 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/", "/l5-review.html"):
             path = "/l5-review.html"
         # 盲判页要用 pdf.js 打开 data/corpus/<paper>.pdf（见 web/l5-review.html 的
-        # `../data/corpus/...`）。静态根是 web/，所以 /data/ 必须单独映射到项目根，
-        # 否则 PDF 抽屉会 404 —— 而「能翻到原文」正是这个界面存在的理由。
-        if path.startswith("/data/"):
+        # `../data/corpus/...`）。静态根是 web/，所以 /data/corpus/ 必须单独映射到
+        # 项目根，否则 PDF 抽屉会 404 —— 而「能翻到原文」正是这个界面存在的理由。
+        # ⚠ 只放行 data/corpus/：整棵 data/ 会让任何人在同一 origin 下取到
+        #   /data/quality/l5-validity-key.json（内含 entail_prob/pass/hit/stratum），
+        #   盲判当场作废。实测旧白名单该 URL 返回 200 / 27300B。
+        if path.startswith("/data/corpus/"):
             f = (ROOT / path.lstrip("/")).resolve()
-            allowed = str((ROOT / "data").resolve())
+            allowed = str((ROOT / "data" / "corpus").resolve())
         else:
             f = (WEB / path.lstrip("/")).resolve()
             allowed = str(WEB.resolve())

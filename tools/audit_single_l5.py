@@ -134,6 +134,10 @@ def evaluate(path, model, tok, device, sup_idx, limit=0, batch=32):
         edges = edges[:limit]
 
     premises, hyps, kinds, types = [], [], [], []
+    # records 与 premises/scores 一一对应。**必须留下逐条记录**：
+    # 55.0% / 59.5% 这类汇总数字无法人工复核，只有逐条的
+    # (premise, hypothesis, entail_prob) 才能生成盲判清单（见 --dump）。
+    records = []
     skipped = 0
     for e in edges:
         t = (e.get('type') or '').upper()
@@ -147,11 +151,23 @@ def evaluate(path, model, tok, device, sup_idx, limit=0, batch=32):
         if not sent:
             skipped += 1
             continue
+        hyp = tpl.format(s=e.get('source'), t=e.get('target'))
         premises.append(sent[:1400])
-        hyps.append(tpl.format(s=e.get('source'), t=e.get('target')))
+        hyps.append(hyp)
         kinds.append(kind)
         types.append(t)
+        paper = next((x.get('source_name') for x in evs if x.get('source_name')), None)
+        page = next((x.get('page') for x in evs if x.get('page')), None)
+        records.append({
+            'source': e.get('source'), 'target': e.get('target'), 'type': t,
+            'hypothesis': hyp, 'premise': sent, 'evidence': text, 'hit': kind,
+            'paper': Path(paper).stem if paper else None,   # 界面按 <paper>.pdf 找原文
+            'page': page,
+        })
     scores = infer(model, tok, device, sup_idx, premises, hyps, batch=batch)
+    for r, s in zip(records, scores):
+        r['entail_prob'] = float(s)
+        r['pass'] = bool(s >= THRESHOLD)
 
     supported = [s for s in scores if s >= THRESHOLD]
     by_type = defaultdict(list)
@@ -179,8 +195,31 @@ def evaluate(path, model, tok, device, sup_idx, limit=0, batch=32):
         'by_endpoint_in_sentence': {k: {'n': v[1],
                                         'support_rate': round(100.0 * v[0] / max(1, v[1]), 1)}
                                     for k, v in sorted(by_kind.items())},
+        'vote': 'pass_rate',        # 上面那些 support_rate 全是**判别器通过率**
+        'records': records,
     }
     return res, scores
+
+
+def dump_records(res, out_path, graph_path):
+    """把逐条 (premise, hypothesis, entail_prob) 落盘 → 人工盲判的**唯一**输入。
+
+    为什么必须落盘：`--dump` 之前，audit_single_l5.py 把 scores 算完就丢掉，
+    于是单篇的 55.0% / 59.5% **完全没有逐条凭证**，既不能抽样盲判，
+    也无法回答"这个数里有多少条其实不被支持"（全库已实测：PPV 仅 49.7%，
+    即通过率与支持率是两件事，见 docs/L5_VALIDITY_REPORT.md）。
+
+    这里落盘的是 **key 文件**（含 entail_prob / pass / hit），
+    绝不直接给标注者看；盲判清单由 tools/l5_single_sample.py 从中剥离生成。
+    """
+    out = Path(out_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    gkey = Path(graph_path).resolve().parent.name
+    with out.open('w', encoding='utf-8') as fh:
+        for i, r in enumerate(res['records']):
+            fh.write(json.dumps({'id': f'{gkey}-E{i:05d}', 'graph': gkey, **r},
+                                ensure_ascii=False) + '\n')
+    return out
 
 
 def show(r, label=''):
@@ -188,8 +227,15 @@ def show(r, label=''):
         print(f'\n{"=" * 74}\n{label}\n{"=" * 74}')
     print(f"  {r['path']}   通道 {r['mode'] or '（未记录）'}")
     print(f"  待判边 {r['edges_total']} · 实判 {r['edges_scored']} · 跳过 {r['edges_skipped']}")
-    print(f"  **L5 真实支持率 {r['support_rate']}%**（阈值 {THRESHOLD}）"
+    # ⚠️ 措辞必须准确：这是「判别器给出 ≥阈值的分数」的比例。
+    # 全库实测（docs/L5_VALIDITY_REPORT.md，200 条人工式盲判）该口径的
+    # **PPV 只有 49.7%**——把通过率写成"真实支持率"是口径错误，
+    # 单篇同样成立，所以这里直接改掉旧文案。
+    print(f"  **判别器通过率 {r['support_rate']}%**（阈值 {THRESHOLD}）"
           f"   中位 entail_prob = {r['median_prob']}")
+    print(f"     ↑ 这是「分数 ≥ 阈值」的比例，**不是**被原文支持的比例。"
+          f"全库实测该口径 PPV≈49.7%；")
+    print(f"       单篇的真实支持率必须人工盲判（python tools/l5_single_review.py）。")
     print(f"  端点都在同一句: {r['by_endpoint_in_sentence'].get('both')}")
     print(f"  只有一端在同一句: {r['by_endpoint_in_sentence'].get('one')}")
     print('  按关系类型（前 8）:')
@@ -205,6 +251,10 @@ def main():
     ap.add_argument('--batch', type=int, default=32)
     ap.add_argument('--device', default='cpu')
     ap.add_argument('--json', action='store_true')
+    ap.add_argument('--dump', default='',
+                    help='把逐条 premise/hypothesis/entail_prob 落盘（key 文件）。'
+                         '给 .jsonl 路径=单篇时写该文件；给目录=每篇写 <hash>-dump.jsonl。'
+                         '人工盲判必须先有它：python tools/l5_single_review.py')
     a = ap.parse_args()
 
     model, tok, device, sup = load_model(a.device)
@@ -214,15 +264,26 @@ def main():
         outs.append(r)
         if not a.json:
             show(r, Path(p).parent.name)
+        if a.dump:
+            dp = Path(a.dump)
+            gkey = Path(p).resolve().parent.name
+            if len(a.graphs) > 1 or dp.suffix.lower() != '.jsonl':
+                dp = dp / f'{gkey}-dump.jsonl'
+            f = dump_records(r, dp, p)
+            print(f'  逐条分数已落盘（**key 文件，勿给标注者看**）：{f}  {len(r["records"])} 条')
+        elif not a.json:
+            print('  ⚠ 未落盘逐条分数：要人工盲判单篇，必须加 --dump dir\\ '
+                  '（或直接用 python tools/l5_single_review.py 一键跑）')
 
     if a.json:
+        outs = [{k: v for k, v in r.items() if k != 'records'} for r in outs]
         print(json.dumps(outs, ensure_ascii=False, indent=2))
     elif a.compare and len(outs) == 2:
         A, B = outs
         print(f'\n{"=" * 74}\n并排对比\n{"=" * 74}')
         print(f'  {"指标":<20} {"A":>12} {"B":>12}')
         for label, key in (('待判边', 'edges_total'), ('实判边', 'edges_scored'),
-                           ('L5 支持率 %', 'support_rate'), ('中位概率', 'median_prob')):
+                           ('判别器通过率 %', 'support_rate'), ('中位概率', 'median_prob')):
             print(f'  {label:<20} {str(A.get(key)):>12} {str(B.get(key)):>12}')
     return 0
 
