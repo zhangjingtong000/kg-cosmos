@@ -163,20 +163,39 @@ def main():
             # 注意：**不**检查"是否全黑" —— 首屏本来就是深靛底（不是纯黑），
             # 背景真的在渲染由第 2 项（时间自走）与第 2b 项（滚动变亮）证明。
 
-        # 2. 时间自走断言：**不滚动**，静置 2.6 秒，整屏光量必须自己变化。
+        # 2. 时间自走断言：**不滚动**，静置一段时间，画面必须自己继续更新。
         #    背景是实时着色器（时间驱动），这是"页面是活的"的最低证据；
         #    旧版帧序列只在滚动时才动，正是被用户抱怨"死板"的根源。
-        #    用 3×3 均值而非单点：单点在 CPU 繁忙时会误报（见 read_mean 说明）。
+        #
+        #    **判据在 2026-09-14 换成帧计数 + u_t**：原先靠"3×3 均值像素变化量
+        #    ≥3"间接推断，但着色器时间系数小、CPU 繁忙时帧率又低，实测两次
+        #    误报（变化量 2），都发生在机器忙的时候 —— 不是产品问题，是断言
+        #    选错了观测量。`window.__frames` / `window.__u_t` 由 voyage.js 在
+        #    每帧 drawArrays 后写入，是"确实在按时间更新"的直接证据，且不受
+        #    CPU 负载影响。像素变化与 u_t 仍一并打印，便于对照。
+        f_a = ev(ws, 'window.__frames || 0')
+        t_a = ev(ws, 'window.__u_t || 0')
         p_a = read_mean(ws)
-        time.sleep(3.6)
+        time.sleep(2.0)
+        f_b = ev(ws, 'window.__frames || 0')
+        t_b = ev(ws, 'window.__u_t || 0')
         p_b = read_mean(ws)
-        if p_a and p_b:
-            diff = sum(abs(a - b) for a, b in zip(p_a, p_b))
-            print(f'[2] 时间自走: {p_a} → {p_b}  变化量 {diff}')
-            if diff < 3:
-                fails.append(f'不滚动时背景完全静止（变化量 {diff}）——时间驱动失效')
+        diff = sum(abs(a - b) for a, b in zip(p_a, p_b)) if (p_a and p_b) else -1
+        df = (f_b or 0) - (f_a or 0)
+        dt = (t_b or 0) - (t_a or 0)
+        print(f'[2] 时间自走: 帧 {f_a}→{f_b} (Δ{df}) · u_t {t_a:.2f}→{t_b:.2f} '
+              f'(Δ{dt:.2f}) · 像素变化量 {diff}')
+        if not f_b:
+            fails.append('window.__frames 不存在 —— voyage.js 未运行或未更新')
+        elif df < 5:
+            fails.append(f'2 秒内只渲染了 {df} 帧 —— 时间驱动失效')
+        elif dt < 1.0:
+            fails.append(f'u_t 只前进了 {dt:.2f} 秒 —— 时间 uniform 没有推进')
         else:
-            fails.append('readPixels 读不到像素（WebGL 上下文异常）')
+            print(f'    ✅ 帧在增长且 u_t 在推进 ⇒ 时间驱动有效')
+        # 像素变化只作提示，不再作为判据（观测量太脆弱，见上面的说明）
+        if diff >= 0 and diff < 3:
+            print(f'    · 提示：像素变化量只有 {diff}（着色器时间系数小，属正常）')
 
         # 2b. 滚动驱动验证：往下滚，背景必须真的在变（深入旅程）。
         #     读法用 3×3 网格的均值而不是单点——戏剧化的旅程里

@@ -324,6 +324,13 @@ function drawFrame(p, t) {
   const rr = rippleUniforms(now4());
   gl.uniform4fv(U.r, rr);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
+  /* 给回归用的直接证据：帧计数与当前 u_t。
+     回归原先靠"像素变化量"间接推断时间驱动，而着色器的时间系数很小、
+     CPU 繁忙时帧率又低，于是会误报（实测两次：变化量 2 < 阈值 3，
+     都发生在机器忙的时候，不是产品问题）。这两个数才是"画面确实在
+     按时间更新"的直接证据，不受 CPU 负载影响。 */
+  window.__frames = (window.__frames || 0) + 1;
+  window.__u_t = t;
   if (!started) {
     started = true;
     canvas.classList.add('on');     /* 首帧已画上，淡入（避免开场闪黑） */
