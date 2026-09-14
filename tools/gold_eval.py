@@ -109,6 +109,62 @@ def gold_sets(g):
     return ents, rels
 
 
+def rel_key(r):
+    s = r.get('source') or r.get('head')
+    t = r.get('target') or r.get('tail')
+    ty = r.get('type') or r.get('relation')
+    if s and t and ty:
+        return (fold(s), str(ty).upper(), fold(t))
+    return None
+
+
+def relation_golds(paper):
+    """关系层的**三档口径**。
+
+    为什么需要三档：`gold-*.json` 是**多数票**结果，而实测四人一致性
+    α = −0.0119、200 个关系单元里 135 个只有一票被丢弃。于是「抽取的边
+    不在金标里」既可能是真错、也可能是被多数票机制丢掉了。三档一起报，
+    才能看出结论对口径有多敏感。
+
+      · strict —— `gold.relations`（金标自身的多数票结果）
+      · mid    —— 四份标注里**至少 2 票**的边
+      · union  —— 四份标注里**至少 1 票**的边
+
+    **按 paper_id 选标注文件，不硬编码文件名**：实测 `annotation-{A,B,C,GLM}.json`
+    属于 `2012.00456v1`，而 `annotation2-{A,B,C,GLM}.json` 属于 `2401.04507v1`。
+    第一版硬编码了 `annotation-`，结果对第二篇拼出了空集、宽松档 F1 变成 0
+    （比严格档还低 —— 宽松档是严格档的超集，这在逻辑上不可能，正是靠这个
+    矛盾才发现的）。
+    """
+    g = load_gold(paper)
+    if g is None:
+        return None
+    out = {'strict': set(), 'mid': set(), 'union': set()}
+    for r in g.get('relations') or []:
+        k = rel_key(r)
+        if k:
+            out['strict'].add(k)
+
+    votes = {}
+    for p in sorted(GOLD.glob('annotation*.json')):
+        try:
+            d = json.loads(p.read_text(encoding='utf-8'))
+        except Exception:
+            continue
+        if d.get('paper_id') != paper:      # 只吃属于本篇的标注
+            continue
+        for r in d.get('relations') or []:
+            k = rel_key(r)
+            if k:
+                votes[k] = votes.get(k, 0) + 1
+    out['union'] = set(votes)
+    out['mid'] = {k for k, v in votes.items() if v >= 2}
+    out['_votes'] = votes
+    out['_annotators'] = [p.name for p in sorted(GOLD.glob('annotation*.json'))
+                          if (json.loads(p.read_text(encoding='utf-8')).get('paper_id') == paper)]
+    return out
+
+
 def prf(tp, fp, fn):
     p = tp / (tp + fp) if (tp + fp) else 0.0
     r = tp / (tp + fn) if (tp + fn) else 0.0
@@ -129,20 +185,33 @@ def eval_pair(paper, mode):
     tp_e = len(set(ge) & set(ce))
     fp_e = len(set(ce) - set(ge))
     fn_e = len(set(ge) - set(ce))
-    tp_r = len(gr & cr)
-    fp_r = len(cr - gr)
-    fn_r = len(gr - cr)
     pe, re_, fe = prf(tp_e, fp_e, fn_e)
-    pr, rr, fr = prf(tp_r, fp_r, fn_r)
+
+    # 关系层三档口径：金标 α=−0.0119、135/200 单票被丢，
+    # 「不在金标里」既可能是真错、也可能是多数票机制的产物。
+    rgs = relation_golds(paper) or {'strict': set(), 'mid': set(), 'union': set()}
+    rel_by_caliber = {}
+    for cal in ('strict', 'mid', 'union'):
+        gset = rgs.get(cal, set())
+        tp = len(gset & cr)
+        fp = len(cr - gset)
+        fn = len(gset - cr)
+        p_, r_, f_ = prf(tp, fp, fn)
+        rel_by_caliber[cal] = {'gold_n': len(gset), 'tp': tp, 'fp': fp, 'fn': fn,
+                              'P': p_, 'R': r_, 'F1': f_}
+
+    rel = rel_by_caliber['strict']
 
     return {
         'paper': paper, 'mode': mode, 'file': ch['path'],
         'pages': len(g.get('source_pages') or []) and
                  (g['source_pages'][1] - g['source_pages'][0] + 1) or None,
-        'gold': {'entities': len(ge), 'relations': len(gr)},
+        'gold': {'entities': len(ge), 'relations': len(rgs.get('strict', set()))},
         'pred': {'entities': len(ce), 'relations': len(cr)},
         'entity': {'tp': tp_e, 'fp': fp_e, 'fn': fn_e, 'P': pe, 'R': re_, 'F1': fe},
-        'relation': {'tp': tp_r, 'fp': fp_r, 'fn': fn_r, 'P': pr, 'R': rr, 'F1': fr},
+        'relation': {'tp': rel['tp'], 'fp': rel['fp'], 'fn': rel['fn'],
+                     'P': rel['P'], 'R': rel['R'], 'F1': rel['F1']},
+        'relation_calibers': rel_by_caliber,
         'gold_meta': {
             'annotators': g.get('annotators'),
             'method': g.get('method'),
@@ -188,15 +257,25 @@ def main():
         e, rr = r['entity'], r['relation']
         print(f"  实体  P={e['P']:<7} R={e['R']:<7} F1={e['F1']:<7}"
               f"(TP {e['tp']} / FP {e['fp']} / FN {e['fn']})")
-        print(f"  关系  P={rr['P']:<7} R={rr['R']:<7} F1={rr['F1']:<7}"
-              f"(TP {rr['tp']} / FP {rr['fp']} / FN {rr['fn']})")
+        print('  关系  三档口径并列（金标 α=−0.0119，结论对口径很敏感）：')
+        names = {'strict': '严格（多数票）', 'mid': '中间（≥2 票）',
+                 'union': '宽松（≥1 票）'}
+        for cal in ('strict', 'mid', 'union'):
+            c = (r.get('relation_calibers') or {}).get(cal)
+            if not c:
+                continue
+            print(f"    {names[cal]:<16} 金标 {c['gold_n']:>4} 条  "
+                  f"P={c['P']:<7} R={c['R']:<7} F1={c['F1']:<7}"
+                  f"(TP {c['tp']} / FP {c['fp']} / FN {c['fn']})")
 
     print('\n' + '─' * 78)
     print('⚠️ 必须一并说明的前提（否则数字会被误读）')
     print('─' * 78)
     print('  · 金标关系层的一致性极低：四人对关系标注的 Krippendorff α = −0.0119，')
-    print('    135/200 个关系单元只有一票、按规则被丢弃（majority vote）。')
-    print('    ⇒ 关系层的 P/R/F1 分母本身不稳，「抽少了」和「金标没收录」难以区分。')
+    print('    135/200 个关系单元只有一票、按多数票规则被丢弃。')
+    print('    ⇒ 「抽取的边不在金标里」既可能是真错，也可能是被多数票机制丢掉的。')
+    print('      所以上表并列三档：严格 / 中间（≥2 票）/ 宽松（≥1 票）。')
+    print('      **严格档的绝对数字不该单独引用**，要看三档的走势。')
     print('  · 实体层一致性尚可：α = 0.2312（别名感知 0.2849），多票单元占多数。')
     print('  · 金标只有 2 篇（2012.00456v1 / 2401.04507v1），样本量小，')
     print('    只能作方向性判断，不能当作全库结论。')
