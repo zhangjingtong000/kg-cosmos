@@ -196,10 +196,14 @@ python tools/re_extract_recent.py --apply  # 真跑（需本机 Ollama，约 4.6
 
 ## 4. 界面
 
-导航页有**四个入口**（`refs.html` 不在主导航，从页脚进入）。以下五张页面：
+导航页有**六个入口**，按演示顺序排列：先是「上传一篇论文」（整条链路的起点）
+与「提问 · 支持与反方」，再是四个查看成果的页面。
+（`refs.html` 不在主导航，从页脚进入。）以下列出七张页面：
 
 | 页面 | 做什么 |
 |---|---|
+| [`upload.html`](web/upload.html) | **起点**：上传 PDF → 本地解析 → 抽取 → 落成图谱；四个阶段显示**真实进度**（走 `POST /api/upload/start` + 轮询状态）。未启后端时会明说"这是占位演示、未调用模型"，不假装 |
+| [`ask.html`](web/ask.html) | **提问**：检索子图 → 支持与反方各自出示可回溯到原文的证据 → 综合结论；分歧消解不掉就如实说明 |
 | [`kg-nebula.html`](web/kg-nebula.html) | **主视图**：18 个 Louvain 社区的 3D 星云概览 → 下钻实体云 → 搜索/点选/证据面板/着色引擎（分区 × 排序）/原文 PDF 高亮 |
 | [`pathqa.html`](web/pathqa.html) | 问题子图：字面种子匹配 → 2 跳 BFS → 自写力导向布局 |
 | [`method-limits.html`](web/method-limits.html) | 方法能力与局限：243 张带原文依据的卡片 |
@@ -248,13 +252,25 @@ Louvain 实际检出 **60** 个社区，前端只导出规模最大的 **18** �
 ## 6. 验证
 
 ```bash
-python -m pytest tests -q          # 单元测试 74 项
-python tools/verify_all.py --fast  # 全量回归 15 项
+python -m pytest tests -q          # 单元测试
+python tools/verify_all.py --fast  # 全量回归 30 项
 ```
 
 回归覆盖：本体口径一致性、指标与数据快照的版本绑定（stale 检测）、
 主视图离线可用、**前后端连通（API 优先 + 静态回退）**、全站可访问性、
-各视图功能、PDF 高亮可断言性。清单见 [`RUNBOOK.md`](RUNBOOK.md) §5。
+各视图功能、PDF 高亮可断言性、**每个页面的 JS 语法（防白屏）**、
+**文档数字与产物一致**。清单见 [`RUNBOOK.md`](RUNBOOK.md) §5。
+
+两份配套文档：
+
+- **[`docs/verification.md`](docs/verification.md)** —— 功能验证台账：
+  每个功能记录「做了什么 / 怎么验证的 / 证据路径」，**论文的实现章节可直接回翻**。
+  含 §5 埋虫演习（第一轮 3/5 的失败原因 + 第二轮 5/5 的报错原文）、
+  §8 如实声明的短板、§9 尚未补齐的验证缺口。
+- **[`docs/KNOWN_DATA_DEFECTS.md`](docs/KNOWN_DATA_DEFECTS.md)** —— 已知数据缺陷清单：
+  4 条自环、3036 个孤立节点、`RELATED_TO` 作为"泛化收容所"造成的信息损失，
+  以及**为什么不批量修**（会破坏六层指标的可比性）。
+  同文档还记下一条正面证据：平均聚类系数是随机基线的 **914 倍**。
 
 ---
 
