@@ -247,7 +247,50 @@ async def upload_pdf(
 #   但界面上要让用户看见"图谱在生长"，就必须能在抽取过程中读到进度，
 #   所以这里加一对 start/status —— 进度由 pipeline.extract_graph 的
 #   on_progress 回调上报，是**真进度**，不是按耗时估算的假进度条。
+#
+# 【2026-09-14 修】任务状态**落盘**。
+#   此前 UPLOAD_TASKS 只存在内存里，于是后端一重启，跑到一半的抽取就
+#   静默消失，界面上只表现为"进度不动了"（我自己在验证别的功能时踩到：
+#   68/141 的任务丢了）。现在每次更新都写 data/upload-tasks/<gid>.json，
+#   启动时扫盘恢复；恢复出来的 running 任务一律标成 interrupted 并带上
+#   原因 —— 让界面能明确告诉用户"任务被中断了"，而不是永远转圈。
 UPLOAD_TASKS: dict[str, dict] = {}
+UPLOAD_TASKS_DIR = DATA_DIR / "upload-tasks"
+
+
+def _save_task(task: dict) -> None:
+    try:
+        UPLOAD_TASKS_DIR.mkdir(parents=True, exist_ok=True)
+        (UPLOAD_TASKS_DIR / f"{task['id']}.json").write_text(
+            json.dumps(task, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception as exc:      # 落盘失败不该影响抽取本身
+        print(f"[upload] 任务状态落盘失败: {exc}")
+
+
+def _load_tasks() -> None:
+    """启动时扫盘恢复。running 的一律标 interrupted（进程已不在了）。"""
+    if not UPLOAD_TASKS_DIR.exists():
+        return
+    n_int = 0
+    for f in sorted(UPLOAD_TASKS_DIR.glob("*.json")):
+        try:
+            t = json.loads(f.read_text(encoding="utf-8"))
+            if not t.get("id"):
+                continue
+            if t.get("state") == "running":
+                t["state"] = "interrupted"
+                t["error"] = "后端进程重启，该任务已中断（抽取无法从断点续跑，请重新提交）"
+                n_int += 1
+                _save_task(t)
+            UPLOAD_TASKS[t["id"]] = t
+        except Exception:
+            continue
+    if UPLOAD_TASKS:
+        print(f"[upload] 恢复 {len(UPLOAD_TASKS)} 个历史任务"
+              f"（其中 {n_int} 个标为 interrupted）")
+
+
+_load_tasks()
 
 
 def _progress_cb(gid: str):
@@ -257,6 +300,7 @@ def _progress_cb(gid: str):
             t["stage"] = stage
             t["pct"] = round(pct, 1)
             t["detail"] = detail
+            _save_task(t)
     return cb
 
 
@@ -301,10 +345,13 @@ async def _run_upload(gid: str, pdf_path: Path, work_dir: Path,
             json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
         task.update(state="done", pct=100.0, stage="graph", detail="已就绪",
-                    stats=result["stats"], redirect=f"./kg-nebula.html?src={gid}")
+                    stats=result["stats"],
+                    redirect=f"./new-graph.html?src={gid}")
+        _save_task(task)
     except Exception as exc:
         task.update(state="error", stage="error",
                     error=f"{type(exc).__name__}: {exc}")
+        _save_task(task)
 
 
 @app.post("/api/upload/start")

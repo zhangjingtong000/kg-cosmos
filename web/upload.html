@@ -295,12 +295,28 @@ async function poll(id) {
     }
     apply(s);
     if (s.state === 'done') {
-      setTimeout(() => { location.href = './kg-nebula.html'; }, 1400);
+      // 用后端给的 redirect（带 ?src=<gid>），而不是硬编码跳主视图 ——
+      // 这样"上传的是哪一篇"这件事能带到下一屏。
+      // 顺带把统计留在界面上：用户至少知道抽出了多少东西。
+      const hint = document.querySelector('.drop .h');
+      if (s.stats) {
+        hint.textContent = `已入库：${s.stats.nodes} 个实体 · `
+          + `${s.stats.edges} 条关系 · 用时 ${s.stats.extraction_time_s}s。正在打开图谱…`;
+      }
+      const dest = (s.redirect && String(s.redirect)).replace(/^\.\//, './');
+      setTimeout(() => { location.href = dest || './kg-nebula.html'; }, 2200);
       return;
     }
-    if (s.state === 'error') {
-      vv('graph').textContent = '抽取失败';
-      document.querySelector('.stage[data-k="graph"]').classList.add('on');
+    if (s.state === 'error' || s.state === 'interrupted') {
+      // interrupted：后端进程重启过，任务不可能再往下走。
+      // 明确告诉用户，而不是让进度条永远停在那里。
+      const st = document.querySelector('.stage[data-k="graph"]');
+      st.classList.add('on');
+      st.querySelector('.vv').textContent =
+        s.state === 'interrupted' ? '已中断' : '抽取失败';
+      document.querySelector('.drop .h').textContent = s.state === 'interrupted'
+        ? '后端进程重启过，这个任务已中断 —— 抽取无法从断点续跑，请重新拖入文件。'
+        : '抽取失败：' + (s.error || '未知错误');
       console.error('[upload]', s.error);
       running = false; return;
     }
