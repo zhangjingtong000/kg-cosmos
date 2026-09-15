@@ -210,14 +210,24 @@ async def api_quality(name: str):
 @app.post("/upload")
 async def upload_pdf(
     file: UploadFile = File(...),
-    mode: str = Query("cloud", description="Model backend: cloud or local"),
+    # ⚠️ **默认值从 "cloud" 改成 "local"（2026-09-15 修）**：
+    # `src/kg_extractor.py` 自 2026-09-11 起在 `KG_ALLOW_CLOUD` 未设时直接抛
+    # RuntimeError（云端密钥刻意不从注册表注入，防误调用扣费）。
+    # 所以**旧的默认值 "cloud" 会让任何不带参数的调用必然 500**。
+    # 同文件的 `/api/upload/start` 早就默认 "local"，这里是漏改的一处。
+    # 前端 `upload.html:341` 一直显式传 local，所以此前只影响 API / 脚本侧。
+    mode: str = Query("local", description="Model backend: cloud or local（默认 local；云端需先设 KG_ALLOW_CLOUD=1）"),
     max_chars: int = Query(500, description="Max chars per chunk"),
 ):
     """上传 PDF，跑完整抽取管线，返回**本次这一篇**的图。
 
     前置条件：需要可用的模型后端。`mode=local` 走本机 Ollama（**零 API 成本**，
     实测实体 F1 高于云端 55%，见 `docs/CHANNEL_ATTRIBUTION.md`）；
-    `mode=cloud` 调云端 LLM（本项目账号余额已耗尽，当前不可用）。
+    `mode=cloud` 调云端 LLM。**当前不可用**，两个独立原因：
+      ① 自 2026-09-11 起，云端密钥**刻意不从系统注册表自动注入**
+         （防任何 import 该模块的脚本误调用扣费），要显式设 `KG_ALLOW_CLOUD=1`；
+      ② 实测带 key 调用返回 **HTTP 401**。
+    此前这里写的是「账号余额已耗尽」—— 那是**推测**，不是实测到的原因，已改准。
 
     【2026-09-13 修订】此前这里写着「界面上不把这个端点当作主推功能」，
     并把「零成本环境下不能随时抽新论文」当作既成事实 —— 那是被
