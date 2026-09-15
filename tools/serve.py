@@ -118,31 +118,55 @@ def main():
     print('\n' + '=' * 60)
     if args.static:
         import http.server
-        import functools
         import os
-        # ⚠️ **2026-09-15 修一个破盲漏洞**：此前是 `directory=str(ROOT)`
-        # —— 根目录设成**仓库根**，于是 `/data/quality/l5-validity-key.json`
-        # **一条 URL 就能下载**（该文件含 200 条 × entail_prob/pass/hit/stratum）。
+        from urllib.parse import unquote
+
+        # ⚠️ **2026-09-15 修一个破盲漏洞**：此前根目录就是仓库根，
+        # 于是 `/data/quality/l5-validity-key.json` **一条 URL 就能下载**
+        # （实测 200 / 24498 字符）。该文件含 200 条 × (entail_prob/pass/hit/stratum)，
+        # 拿到就**当场作废 L5 人工盲判** —— 而那是本项目唯一可信的效度来源。
         #
-        # 这会让 **L5 人工盲判当场作废**，而那是本项目唯一可信的效度来源。
-        # 同一个洞项目**已经堵过两次**：
-        #   · `src/app.py:194-205`（`_BLIND_PROTECTED`，实测修复前 200 / 18498B）
-        #   · `tools/l5_validity_review.py:87-97`（实测旧白名单 200 / 27300B）
-        # **唯独这个静态入口没堵** —— 而 README 明说它是"断网演示用"的官方入口。
+        # 同一个洞项目**已经堵过两次**（`src/app.py:194-205`、`tools/l5_validity_review.py:87-97`），
+        # **唯独这个静态入口没堵**，而 README 明说它是"断网演示用"的官方入口。
         #
-        # 现在把根设成 `web/`（`SimpleHTTPRequestHandler.translate_path` 会把路径
-        # 规范化并**限制在该目录内**，所以 `../data/...` 取不到）。
-        # 代价：`kg-nebula.html` 里 `../data/corpus/<paper>.pdf` 那条 fallback 失效——
-        # 但 L5 盲判 PDF 的**第一优先路径是 `./l5-data/`**（`l5-review.html:346`），
-        # 那条仍然可用。
-        WEBDIR = ROOT / 'web'
-        os.chdir(WEBDIR)
-        handler = functools.partial(http.server.SimpleHTTPRequestHandler,
-                                    directory=str(WEBDIR))
+        # **第一版修法是错的**：把根改成 `ROOT/'web'`。那确实堵住了洞，
+        # **但打断了 14 个 CDP 脚本**（它们全都访问 `http://127.0.0.1:8098/web/...`），
+        # 回归当场红了 2 项。这正是"改了但没验证" —— 所以改成**精确拦截**：
+        # 根保持不变（`/web/` 路径照旧可用），只把仓库里的敏感目录挡掉。
+        BLOCKED_PREFIX = (
+            '/data/', '/src/', '/tools/', '/tests/', '/docs/',
+            '/.git/', '/.worktrees/', '/.superpowers/', '/tmp/', '/output/',
+        )
+        BLOCKED_EXACT = (
+            '/README.md', '/RUNBOOK.md', '/CONTRIBUTING.md', '/LICENSE',
+            '/requirements.txt', '/pyproject.toml', '/.gitignore',
+            '/.env', '/.env.example',
+        )
+        _real_translate = http.server.SimpleHTTPRequestHandler.translate_path
+
+        class GuardedHandler(http.server.SimpleHTTPRequestHandler):
+            """静态站处理器：挡掉仓库里的敏感路径，其余照旧。
+
+            挡法是把路径指到一个**不存在的文件**上 —— `SimpleHTTPRequestHandler`
+            随后自然返回 404，不必自己拼响应。
+            **注意**：判定要用**原始请求路径**，不能用 `translate_path` 的结果
+            （后者已经过规范化，且会受 `directory` 影响）。
+            """
+            def translate_path(self, path):
+                raw = unquote(path.split('?', 1)[0].split('#', 1)[0])
+                if raw.startswith(BLOCKED_PREFIX) or raw in BLOCKED_EXACT:
+                    return os.path.join(self.directory, '__blocked_by_serve__')
+                return _real_translate(self, path)
+
+        handler = GuardedHandler
+        os.chdir(ROOT)
+        # `directory` 通过类属性传给 handler（partial 与自定义类不能混用）
+        GuardedHandler.directory = str(ROOT)
         print(f'静态模式（无 API，前端自动回退 kg-data/*.json）')
-        print(f'  → http://127.0.0.1:{port}/          （导航页）')
-        print('  ⚠️ 根目录已限定为 web/ —— 仓库根下的 data/ 等内容**不再可访问**')
-        print('     （此前可经 /data/... 直达，会让 L5 人工盲判作废）')
+        print(f'  → http://127.0.0.1:{port}/web/')
+        print('  🔒 已拦截仓库敏感路径（/data/ /src/ /tools/ /docs/ …）')
+        print('     —— 此前 /data/quality/l5-validity-key.json 可被直接下载，'
+              '会让 L5 人工盲判作废')
         print('  Ctrl+C 停止\n')
         http.server.ThreadingHTTPServer(('127.0.0.1', port), handler).serve_forever()
     else:
