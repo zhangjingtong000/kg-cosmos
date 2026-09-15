@@ -120,10 +120,29 @@ def main():
         import http.server
         import functools
         import os
-        os.chdir(ROOT)
-        handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(ROOT))
+        # ⚠️ **2026-09-15 修一个破盲漏洞**：此前是 `directory=str(ROOT)`
+        # —— 根目录设成**仓库根**，于是 `/data/quality/l5-validity-key.json`
+        # **一条 URL 就能下载**（该文件含 200 条 × entail_prob/pass/hit/stratum）。
+        #
+        # 这会让 **L5 人工盲判当场作废**，而那是本项目唯一可信的效度来源。
+        # 同一个洞项目**已经堵过两次**：
+        #   · `src/app.py:194-205`（`_BLIND_PROTECTED`，实测修复前 200 / 18498B）
+        #   · `tools/l5_validity_review.py:87-97`（实测旧白名单 200 / 27300B）
+        # **唯独这个静态入口没堵** —— 而 README 明说它是"断网演示用"的官方入口。
+        #
+        # 现在把根设成 `web/`（`SimpleHTTPRequestHandler.translate_path` 会把路径
+        # 规范化并**限制在该目录内**，所以 `../data/...` 取不到）。
+        # 代价：`kg-nebula.html` 里 `../data/corpus/<paper>.pdf` 那条 fallback 失效——
+        # 但 L5 盲判 PDF 的**第一优先路径是 `./l5-data/`**（`l5-review.html:346`），
+        # 那条仍然可用。
+        WEBDIR = ROOT / 'web'
+        os.chdir(WEBDIR)
+        handler = functools.partial(http.server.SimpleHTTPRequestHandler,
+                                    directory=str(WEBDIR))
         print(f'静态模式（无 API，前端自动回退 kg-data/*.json）')
-        print(f'  → http://127.0.0.1:{port}/web/')
+        print(f'  → http://127.0.0.1:{port}/          （导航页）')
+        print('  ⚠️ 根目录已限定为 web/ —— 仓库根下的 data/ 等内容**不再可访问**')
+        print('     （此前可经 /data/... 直达，会让 L5 人工盲判作废）')
         print('  Ctrl+C 停止\n')
         http.server.ThreadingHTTPServer(('127.0.0.1', port), handler).serve_forever()
     else:
