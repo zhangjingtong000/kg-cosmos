@@ -1,0 +1,491 @@
+{
+  "unique_missing_names": 4754,
+  "missing_endpoint_slots": 15571,
+  "evidence_hit_names": 4425,
+  "evidence_hit_slots": 14764,
+  "inferable_type_names": 4103,
+  "safe_to_backfill_names": 4326,
+  "safe_to_backfill_slots": 14104,
+  "top_missing": [
+    {
+      "name": "Relations",
+      "count": 91,
+      "evidence_hit": 91,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "KGEM",
+      "count": 76,
+      "evidence_hit": 76,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Zero-Shot Image Classification",
+      "count": 48,
+      "evidence_hit": 0,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Knowledge",
+      "count": 45,
+      "evidence_hit": 45,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Temporal Knowledge Graph Completion",
+      "count": 45,
+      "evidence_hit": 43,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "Document-Level Relation Extraction",
+      "count": 44,
+      "evidence_hit": 44,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "Summary",
+      "count": 42,
+      "evidence_hit": 38,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Temporal Knowledge Graphs",
+      "count": 41,
+      "evidence_hit": 33,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "J. W.",
+      "count": 41,
+      "evidence_hit": 41,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "Da Silva Santos, L. B.",
+      "count": 41,
+      "evidence_hit": 41,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "Unseen Entity",
+      "count": 39,
+      "evidence_hit": 25,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Class Feature Paradigm",
+      "count": 39,
+      "evidence_hit": 39,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "DKG",
+      "count": 39,
+      "evidence_hit": 39,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "MR",
+      "count": 38,
+      "evidence_hit": 38,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "Experts",
+      "count": 36,
+      "evidence_hit": 17,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Seen Classes",
+      "count": 34,
+      "evidence_hit": 34,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Unseen Class",
+      "count": 34,
+      "evidence_hit": 34,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Few-Shot Knowledge Graph Completion",
+      "count": 33,
+      "evidence_hit": 33,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "Knowledge Graph Embedding Model",
+      "count": 33,
+      "evidence_hit": 2,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "GNN-Based Methods",
+      "count": 32,
+      "evidence_hit": 32,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Event Knowledge Graph",
+      "count": 31,
+      "evidence_hit": 24,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "KG-aware ZSL",
+      "count": 30,
+      "evidence_hit": 30,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Dr. E",
+      "count": 30,
+      "evidence_hit": 30,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "KG-Aware ZSL",
+      "count": 28,
+      "evidence_hit": 28,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "KG-aware FSL",
+      "count": 28,
+      "evidence_hit": 25,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "M",
+      "count": 28,
+      "evidence_hit": 28,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "H.",
+      "count": 28,
+      "evidence_hit": 28,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "Task",
+      "count": 27,
+      "evidence_hit": 27,
+      "guessed_type": "Process"
+    },
+    {
+      "name": "PCNN",
+      "count": 26,
+      "evidence_hit": 26,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "Mapping-based",
+      "count": 26,
+      "evidence_hit": 26,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Vehicle",
+      "count": 26,
+      "evidence_hit": 26,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Bilinear-COMP",
+      "count": 25,
+      "evidence_hit": 25,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "Class Feature",
+      "count": 25,
+      "evidence_hit": 25,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "Propagation-based",
+      "count": 24,
+      "evidence_hit": 24,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Open Relation Extraction",
+      "count": 24,
+      "evidence_hit": 24,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "SKG",
+      "count": 24,
+      "evidence_hit": 24,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "LLAMA2",
+      "count": 24,
+      "evidence_hit": 24,
+      "guessed_type": "System"
+    },
+    {
+      "name": "Cyc",
+      "count": 23,
+      "evidence_hit": 23,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "Entity Pair",
+      "count": 23,
+      "evidence_hit": 23,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "TKG",
+      "count": 23,
+      "evidence_hit": 23,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "NeOn-GPT",
+      "count": 23,
+      "evidence_hit": 23,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "SE",
+      "count": 22,
+      "evidence_hit": 22,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "HolEx",
+      "count": 22,
+      "evidence_hit": 22,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "Attention-CNN",
+      "count": 22,
+      "evidence_hit": 22,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "W. Y. Wang",
+      "count": 22,
+      "evidence_hit": 22,
+      "guessed_type": "Document"
+    },
+    {
+      "name": "KG-Aware FSL",
+      "count": 22,
+      "evidence_hit": 8,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "T",
+      "count": 22,
+      "evidence_hit": 22,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "STransE",
+      "count": 21,
+      "evidence_hit": 21,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "TranSparse-DT",
+      "count": 21,
+      "evidence_hit": 21,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "@10",
+      "count": 21,
+      "evidence_hit": 21,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "Temporal Knowledge Graph Reasoning",
+      "count": 21,
+      "evidence_hit": 21,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Hyperparameters",
+      "count": 21,
+      "evidence_hit": 21,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Finite Scalar Quantization",
+      "count": 21,
+      "evidence_hit": 15,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "Few-Shot Relation Extraction",
+      "count": 20,
+      "evidence_hit": 18,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Survey Tables",
+      "count": 20,
+      "evidence_hit": 20,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Survey Article",
+      "count": 20,
+      "evidence_hit": 20,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Optimization-based",
+      "count": 20,
+      "evidence_hit": 20,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "Seen Class",
+      "count": 20,
+      "evidence_hit": 20,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "M′",
+      "count": 20,
+      "evidence_hit": 20,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "path rule",
+      "count": 20,
+      "evidence_hit": 20,
+      "guessed_type": "Document"
+    },
+    {
+      "name": "Neural Coreference Resolution",
+      "count": 20,
+      "evidence_hit": 20,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "CNN/PCNN",
+      "count": 19,
+      "evidence_hit": 19,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "ERNIE 2.0",
+      "count": 19,
+      "evidence_hit": 19,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "M.",
+      "count": 19,
+      "evidence_hit": 19,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "Tabula",
+      "count": 19,
+      "evidence_hit": 19,
+      "guessed_type": "Component"
+    },
+    {
+      "name": "Class Attributes",
+      "count": 19,
+      "evidence_hit": 19,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Few-Shot Image Classification",
+      "count": 19,
+      "evidence_hit": 0,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "Bert",
+      "count": 19,
+      "evidence_hit": 19,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "EAAI",
+      "count": 19,
+      "evidence_hit": 19,
+      "guessed_type": "Document"
+    },
+    {
+      "name": "Pan Et Al. 2023",
+      "count": 19,
+      "evidence_hit": 19,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "R",
+      "count": 18,
+      "evidence_hit": 18,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "W.",
+      "count": 18,
+      "evidence_hit": 18,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "Dbpedia",
+      "count": 18,
+      "evidence_hit": 18,
+      "guessed_type": "Person"
+    },
+    {
+      "name": "Label",
+      "count": 18,
+      "evidence_hit": 18,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "Instruction Fine-Tuning Data",
+      "count": 18,
+      "evidence_hit": 18,
+      "guessed_type": "Dataset"
+    },
+    {
+      "name": "Zhang",
+      "count": 17,
+      "evidence_hit": 17,
+      "guessed_type": "Concept"
+    },
+    {
+      "name": "QLoRA",
+      "count": 17,
+      "evidence_hit": 17,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "VQGraph",
+      "count": 17,
+      "evidence_hit": 17,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "TransE-COMP",
+      "count": 16,
+      "evidence_hit": 16,
+      "guessed_type": "Method"
+    },
+    {
+      "name": "Propagation",
+      "count": 16,
+      "evidence_hit": 16,
+      "guessed_type": "Concept"
+    }
+  ]
+}

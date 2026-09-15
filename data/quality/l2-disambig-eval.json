@@ -1,0 +1,1141 @@
+{
+  "generated": "2026-09-14 20:30:23",
+  "evaluated_function": "src/kg_extractor.py::_names_are_duplicates",
+  "design": "规则可判定构造集（不用人工金标，避免标注不可靠与循环论证）",
+  "seed": 20260914,
+  "per_recipe_cap": 1200,
+  "name_pool": 15123,
+  "pool_note": "已排除 _backfilled，口径与 tools/l2_report.py 一致",
+  "counts": {
+    "positive": 4924,
+    "negative": 5104,
+    "total": 10028,
+    "by_recipe": {
+      "N1-disjoint": 1200,
+      "N2-shared-one-word": 1200,
+      "N3-same-paper": 1190,
+      "N4-substring-trap": 314,
+      "N5-shared-head": 1200,
+      "P1-case": 1200,
+      "P2-plural": 1200,
+      "P3-punct-space": 1200,
+      "P4-parenthesis": 118,
+      "P5a-abbrev-in-corpus": 6,
+      "P5b-abbrev-initials": 1200
+    },
+    "p5b_candidate_pool": 2922
+  },
+  "layers": {
+    "L-A 形态变体（大小写/复数/标点/括注）": {
+      "n": 3718,
+      "rules": [
+        "P3-punct-space",
+        "P1-case",
+        "P2-plural",
+        "P4-parenthesis"
+      ],
+      "has_positive": true,
+      "methods": {
+        "ours": {
+          "precision": 1.0,
+          "recall": 0.9992,
+          "f1": 0.9996,
+          "specificity": 0.0,
+          "fp_rate": 0.0,
+          "tp": 3715,
+          "fp": 0,
+          "fn": 3,
+          "tn": 0
+        },
+        "wratio_0.80": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "specificity": 0.0,
+          "fp_rate": 0.0,
+          "tp": 3718,
+          "fp": 0,
+          "fn": 0,
+          "tn": 0
+        },
+        "ratio_0.93": {
+          "precision": 1.0,
+          "recall": 0.8564,
+          "f1": 0.9226,
+          "specificity": 0.0,
+          "fp_rate": 0.0,
+          "tp": 3184,
+          "fp": 0,
+          "fn": 534,
+          "tn": 0
+        },
+        "exact": {
+          "precision": 1.0,
+          "recall": 0.6455,
+          "f1": 0.7846,
+          "specificity": 0.0,
+          "fp_rate": 0.0,
+          "tp": 2400,
+          "fp": 0,
+          "fn": 1318,
+          "tn": 0
+        },
+        "prefix": {
+          "precision": 1.0,
+          "recall": 0.9989,
+          "f1": 0.9995,
+          "specificity": 0.0,
+          "fp_rate": 0.0,
+          "tp": 3714,
+          "fp": 0,
+          "fn": 4,
+          "tn": 0
+        }
+      }
+    },
+    "L-B 缩写↔全称": {
+      "n": 1206,
+      "rules": [
+        "P5b-abbrev-initials",
+        "P5a-abbrev-in-corpus"
+      ],
+      "has_positive": true,
+      "methods": {
+        "ours": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 0.0,
+          "fp_rate": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1206,
+          "tn": 0
+        },
+        "wratio_0.80": {
+          "precision": 1.0,
+          "recall": 0.01,
+          "f1": 0.0197,
+          "specificity": 0.0,
+          "fp_rate": 0.0,
+          "tp": 12,
+          "fp": 0,
+          "fn": 1194,
+          "tn": 0
+        },
+        "ratio_0.93": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 0.0,
+          "fp_rate": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1206,
+          "tn": 0
+        },
+        "exact": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 0.0,
+          "fp_rate": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1206,
+          "tn": 0
+        },
+        "prefix": {
+          "precision": 1.0,
+          "recall": 0.0066,
+          "f1": 0.0132,
+          "specificity": 0.0,
+          "fp_rate": 0.0,
+          "tp": 8,
+          "fp": 0,
+          "fn": 1198,
+          "tn": 0
+        }
+      }
+    },
+    "L-C 负例·易（词面不相交/同域随机）": {
+      "n": 2390,
+      "rules": [
+        "N1-disjoint",
+        "N3-same-paper"
+      ],
+      "has_positive": false,
+      "methods": {
+        "ours": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 1.0,
+          "fp_rate": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 2390
+        },
+        "wratio_0.80": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 1.0,
+          "fp_rate": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 2390
+        },
+        "ratio_0.93": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 1.0,
+          "fp_rate": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 2390
+        },
+        "exact": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 1.0,
+          "fp_rate": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 2390
+        },
+        "prefix": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 1.0,
+          "fp_rate": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 2390
+        }
+      }
+    },
+    "L-D 负例·对抗（共享词/短名子串/共享前缀）": {
+      "n": 2714,
+      "rules": [
+        "N2-shared-one-word",
+        "N4-substring-trap",
+        "N5-shared-head"
+      ],
+      "has_positive": false,
+      "methods": {
+        "ours": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 0.986,
+          "fp_rate": 0.014,
+          "tp": 0,
+          "fp": 38,
+          "fn": 0,
+          "tn": 2676
+        },
+        "wratio_0.80": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 0.664,
+          "fp_rate": 0.336,
+          "tp": 0,
+          "fp": 912,
+          "fn": 0,
+          "tn": 1802
+        },
+        "ratio_0.93": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 0.9967,
+          "fp_rate": 0.0033,
+          "tp": 0,
+          "fp": 9,
+          "fn": 0,
+          "tn": 2705
+        },
+        "exact": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 1.0,
+          "fp_rate": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "tn": 2714
+        },
+        "prefix": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "specificity": 0.9746,
+          "fp_rate": 0.0254,
+          "tp": 0,
+          "fp": 69,
+          "fn": 0,
+          "tn": 2645
+        }
+      }
+    }
+  },
+  "layer_note": "L-A 是抽取去重的主战场；L-B 是独立缺口（首字母缩写无法由字符相似度覆盖）；L-C/L-D 按负例难度分开报告，L-D 含三项对抗构造。",
+  "p5b_caveat": "P5b 由严格首字母规则自动构造，是缩写可及性的上界构造，同一缩写可能对应多个全称，故只用于衡量『判据能否认出首字母缩写』，不可当作逐对真值。",
+  "methods": {
+    "ours": {
+      "overall": {
+        "precision": 0.9899,
+        "recall": 0.7545,
+        "f1": 0.8563,
+        "accuracy": 0.8756,
+        "tp": 3715,
+        "fp": 38,
+        "tn": 5066,
+        "fn": 1209
+      },
+      "per_recipe": {
+        "N1-disjoint": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1200,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N2-shared-one-word": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 5,
+          "tn": 1195,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N3-same-paper": {
+          "n": 1190,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1190,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N4-substring-trap": {
+          "n": 314,
+          "tp": 0,
+          "fp": 29,
+          "tn": 285,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N5-shared-head": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 4,
+          "tn": 1196,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P1-case": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P2-plural": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P3-punct-space": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P4-parenthesis": {
+          "n": 118,
+          "tp": 115,
+          "fp": 0,
+          "tn": 0,
+          "fn": 3,
+          "precision": 1.0,
+          "recall": 0.9746,
+          "f1": 0.9871
+        },
+        "P5a-abbrev-in-corpus": {
+          "n": 6,
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 6,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P5b-abbrev-initials": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 1200,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      }
+    },
+    "wratio_0.80": {
+      "overall": {
+        "precision": 0.8035,
+        "recall": 0.7575,
+        "f1": 0.7798,
+        "accuracy": 0.79,
+        "tp": 3730,
+        "fp": 912,
+        "tn": 4192,
+        "fn": 1194
+      },
+      "per_recipe": {
+        "N1-disjoint": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1200,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N2-shared-one-word": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 219,
+          "tn": 981,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N3-same-paper": {
+          "n": 1190,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1190,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N4-substring-trap": {
+          "n": 314,
+          "tp": 0,
+          "fp": 293,
+          "tn": 21,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N5-shared-head": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 400,
+          "tn": 800,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P1-case": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P2-plural": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P3-punct-space": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P4-parenthesis": {
+          "n": 118,
+          "tp": 118,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P5a-abbrev-in-corpus": {
+          "n": 6,
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 6,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P5b-abbrev-initials": {
+          "n": 1200,
+          "tp": 12,
+          "fp": 0,
+          "tn": 0,
+          "fn": 1188,
+          "precision": 1.0,
+          "recall": 0.01,
+          "f1": 0.0198
+        }
+      }
+    },
+    "ratio_0.93": {
+      "overall": {
+        "precision": 0.9972,
+        "recall": 0.6466,
+        "f1": 0.7845,
+        "accuracy": 0.8256,
+        "tp": 3184,
+        "fp": 9,
+        "tn": 5095,
+        "fn": 1740
+      },
+      "per_recipe": {
+        "N1-disjoint": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1200,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N2-shared-one-word": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 5,
+          "tn": 1195,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N3-same-paper": {
+          "n": 1190,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1190,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N4-substring-trap": {
+          "n": 314,
+          "tp": 0,
+          "fp": 0,
+          "tn": 314,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N5-shared-head": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 4,
+          "tn": 1196,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P1-case": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P2-plural": {
+          "n": 1200,
+          "tp": 769,
+          "fp": 0,
+          "tn": 0,
+          "fn": 431,
+          "precision": 1.0,
+          "recall": 0.6408,
+          "f1": 0.7811
+        },
+        "P3-punct-space": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P4-parenthesis": {
+          "n": 118,
+          "tp": 15,
+          "fp": 0,
+          "tn": 0,
+          "fn": 103,
+          "precision": 1.0,
+          "recall": 0.1271,
+          "f1": 0.2256
+        },
+        "P5a-abbrev-in-corpus": {
+          "n": 6,
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 6,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P5b-abbrev-initials": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 1200,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      }
+    },
+    "exact": {
+      "overall": {
+        "precision": 1.0,
+        "recall": 0.4874,
+        "f1": 0.6554,
+        "accuracy": 0.7483,
+        "tp": 2400,
+        "fp": 0,
+        "tn": 5104,
+        "fn": 2524
+      },
+      "per_recipe": {
+        "N1-disjoint": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1200,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N2-shared-one-word": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1200,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N3-same-paper": {
+          "n": 1190,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1190,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N4-substring-trap": {
+          "n": 314,
+          "tp": 0,
+          "fp": 0,
+          "tn": 314,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N5-shared-head": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1200,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P1-case": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P2-plural": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 1200,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P3-punct-space": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P4-parenthesis": {
+          "n": 118,
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 118,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P5a-abbrev-in-corpus": {
+          "n": 6,
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 6,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P5b-abbrev-initials": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 1200,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        }
+      }
+    },
+    "prefix": {
+      "overall": {
+        "precision": 0.9818,
+        "recall": 0.7559,
+        "f1": 0.8542,
+        "accuracy": 0.8733,
+        "tp": 3722,
+        "fp": 69,
+        "tn": 5035,
+        "fn": 1202
+      },
+      "per_recipe": {
+        "N1-disjoint": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1200,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N2-shared-one-word": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1200,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N3-same-paper": {
+          "n": 1190,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1190,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N4-substring-trap": {
+          "n": 314,
+          "tp": 0,
+          "fp": 69,
+          "tn": 245,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "N5-shared-head": {
+          "n": 1200,
+          "tp": 0,
+          "fp": 0,
+          "tn": 1200,
+          "fn": 0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P1-case": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P2-plural": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P3-punct-space": {
+          "n": 1200,
+          "tp": 1200,
+          "fp": 0,
+          "tn": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "P4-parenthesis": {
+          "n": 118,
+          "tp": 114,
+          "fp": 0,
+          "tn": 0,
+          "fn": 4,
+          "precision": 1.0,
+          "recall": 0.9661,
+          "f1": 0.9828
+        },
+        "P5a-abbrev-in-corpus": {
+          "n": 6,
+          "tp": 0,
+          "fp": 0,
+          "tn": 0,
+          "fn": 6,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0
+        },
+        "P5b-abbrev-initials": {
+          "n": 1200,
+          "tp": 8,
+          "fp": 0,
+          "tn": 0,
+          "fn": 1192,
+          "precision": 1.0,
+          "recall": 0.0067,
+          "f1": 0.0132
+        }
+      }
+    }
+  },
+  "ratio_threshold_scan": {
+    "threshold": 88,
+    "f1": 0.8386,
+    "precision": 0.9724,
+    "recall": 0.7372
+  },
+  "l4_whitelist_audit": {
+    "n_l4_entries": 9,
+    "n_false_pair": 2,
+    "n_head_word_is_abbr": 0,
+    "n_needs_human": 2,
+    "n_applicable": 7,
+    "false_pair_rate": 0.2857,
+    "criterion": "abbr 各字母须按序命中全称实词首字母；被跳过的实词 ≤1 且占比 ≤40%；且首个实词首字母必须与 abbr 首字母一致（可判定，无需人工）",
+    "caveat": "`head_word_is_abbr=True` 的行（缩写就是全称首词，如 `AAAI Conference on Artificial Intelligence`）属命名习惯，已从假配对统计中扣除，不计入 rate。",
+    "rows": [
+      {
+        "canonical": "Knowledge Graphs",
+        "full": "Knowledge Graphs",
+        "abbr": "KG",
+        "content_words": [
+          "Knowledge",
+          "Graphs"
+        ],
+        "skipped_content_words": [],
+        "matched_all_letters": true,
+        "head_word_is_abbr": false,
+        "needs_human": false,
+        "is_false_pair": false
+      },
+      {
+        "canonical": "EMNLP",
+        "full": "Conference on Empirical Methods in Natural Language Processing",
+        "abbr": "EMNLP",
+        "content_words": [
+          "Conference",
+          "Empirical",
+          "Methods",
+          "Natural",
+          "Language",
+          "Processing"
+        ],
+        "skipped_content_words": [
+          "Conference"
+        ],
+        "matched_all_letters": true,
+        "head_word_is_abbr": false,
+        "needs_human": true,
+        "is_false_pair": false
+      },
+      {
+        "canonical": "RNN",
+        "full": "Recurrent Neural Networks",
+        "abbr": "RNN",
+        "content_words": [
+          "Recurrent",
+          "Neural",
+          "Networks"
+        ],
+        "skipped_content_words": [],
+        "matched_all_letters": true,
+        "head_word_is_abbr": false,
+        "needs_human": false,
+        "is_false_pair": false
+      },
+      {
+        "canonical": "AAAI",
+        "full": "AAAI Conference on Artificial Intelligence",
+        "abbr": "AAAI",
+        "content_words": [
+          "AAAI",
+          "Conference",
+          "Artificial",
+          "Intelligence"
+        ],
+        "skipped_content_words": [
+          "Conference",
+          "Intelligence"
+        ],
+        "matched_all_letters": false,
+        "head_word_is_abbr": false,
+        "needs_human": true,
+        "is_false_pair": false
+      },
+      {
+        "canonical": "Graph Neural Networks",
+        "full": "Graph Neural Networks",
+        "abbr": "GNN",
+        "content_words": [
+          "Graph",
+          "Neural",
+          "Networks"
+        ],
+        "skipped_content_words": [],
+        "matched_all_letters": true,
+        "head_word_is_abbr": false,
+        "needs_human": false,
+        "is_false_pair": false
+      },
+      {
+        "canonical": "Graph Convolutional Networks",
+        "full": "Graph Convolutional Networks",
+        "abbr": "GCN",
+        "content_words": [
+          "Graph",
+          "Convolutional",
+          "Networks"
+        ],
+        "skipped_content_words": [],
+        "matched_all_letters": true,
+        "head_word_is_abbr": false,
+        "needs_human": false,
+        "is_false_pair": false
+      },
+      {
+        "canonical": "KG",
+        "full": "Abstract Knowledge Graph",
+        "abbr": "KG",
+        "content_words": [
+          "Abstract",
+          "Knowledge",
+          "Graph"
+        ],
+        "skipped_content_words": [
+          "Abstract"
+        ],
+        "matched_all_letters": true,
+        "head_word_is_abbr": false,
+        "needs_human": false,
+        "is_false_pair": true
+      },
+      {
+        "canonical": "Link Prediction",
+        "full": "Link Prediction",
+        "abbr": "LP",
+        "content_words": [
+          "Link",
+          "Prediction"
+        ],
+        "skipped_content_words": [],
+        "matched_all_letters": true,
+        "head_word_is_abbr": false,
+        "needs_human": false,
+        "is_false_pair": false
+      },
+      {
+        "canonical": "KG",
+        "full": "KG tasks",
+        "abbr": "KG",
+        "content_words": [
+          "KG",
+          "tasks"
+        ],
+        "skipped_content_words": [
+          "tasks"
+        ],
+        "matched_all_letters": false,
+        "head_word_is_abbr": false,
+        "needs_human": false,
+        "is_false_pair": true
+      }
+    ],
+    "l2_merge_rules": {
+      "pure-plural": 191
+    }
+  },
+  "multi_seed_stability": {
+    "ours": {
+      "f1_mean": 0.8554,
+      "f1_std": 0.0005,
+      "f1_values": [
+        0.8559,
+        0.8552,
+        0.8547,
+        0.8554,
+        0.8559
+      ]
+    },
+    "wratio_0.80": {
+      "f1_mean": 0.7775,
+      "f1_std": 0.0027,
+      "f1_values": [
+        0.7781,
+        0.7731,
+        0.7771,
+        0.7773,
+        0.7817
+      ]
+    },
+    "ratio_0.93": {
+      "f1_mean": 0.7837,
+      "f1_std": 0.0004,
+      "f1_values": [
+        0.7841,
+        0.7835,
+        0.783,
+        0.7837,
+        0.7841
+      ]
+    },
+    "exact": {
+      "f1_mean": 0.6554,
+      "f1_std": 0.0,
+      "f1_values": [
+        0.6554,
+        0.6554,
+        0.6554,
+        0.6554,
+        0.6554
+      ]
+    },
+    "prefix": {
+      "f1_mean": 0.8542,
+      "f1_std": 0.0,
+      "f1_values": [
+        0.8542,
+        0.8542,
+        0.8542,
+        0.8542,
+        0.8542
+      ]
+    }
+  },
+  "elapsed_sec": 2.25
+}

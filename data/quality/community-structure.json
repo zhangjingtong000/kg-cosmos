@@ -1,0 +1,2986 @@
+{
+  "nodes": 15315,
+  "edges": 21186,
+  "components": 3787,
+  "lcc": 10807,
+  "modularity": 0.6824,
+  "communities": 3853,
+  "sizes": [
+    1313,
+    896,
+    728,
+    655,
+    619,
+    458,
+    412,
+    388,
+    385,
+    354,
+    318,
+    317,
+    287,
+    281,
+    268,
+    254,
+    237,
+    233,
+    217,
+    186,
+    176,
+    169,
+    161,
+    159,
+    158,
+    114,
+    106,
+    105,
+    102,
+    94,
+    89,
+    86,
+    64,
+    52,
+    51,
+    39,
+    36,
+    29,
+    18,
+    17,
+    16,
+    13,
+    12,
+    12,
+    10,
+    10,
+    10,
+    10,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    7,
+    7,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5
+  ],
+  "top_degree": [
+    {
+      "name": "Knowledge Graphs",
+      "degree": 1011
+    },
+    {
+      "name": "Large Language Model",
+      "degree": 413
+    },
+    {
+      "name": "KG",
+      "degree": 181
+    },
+    {
+      "name": "ArXiv",
+      "degree": 177
+    },
+    {
+      "name": "Triple",
+      "degree": 169
+    },
+    {
+      "name": "Entity",
+      "degree": 145
+    },
+    {
+      "name": "Embeddings",
+      "degree": 139
+    },
+    {
+      "name": "Survey",
+      "degree": 136
+    },
+    {
+      "name": "Relation Extraction",
+      "degree": 123
+    },
+    {
+      "name": "EMNLP",
+      "degree": 118
+    },
+    {
+      "name": "Relation",
+      "degree": 117
+    },
+    {
+      "name": "Zero-Shot Learning",
+      "degree": 113
+    }
+  ],
+  "top_pagerank": [
+    {
+      "name": "Knowledge Graphs",
+      "score": 0.020203
+    },
+    {
+      "name": "Large Language Model",
+      "score": 0.008464
+    },
+    {
+      "name": "ArXiv",
+      "score": 0.00373
+    },
+    {
+      "name": "KG",
+      "score": 0.002903
+    },
+    {
+      "name": "Triple",
+      "score": 0.002895
+    },
+    {
+      "name": "Survey",
+      "score": 0.002416
+    },
+    {
+      "name": "EMNLP",
+      "score": 0.002331
+    },
+    {
+      "name": "Embeddings",
+      "score": 0.002273
+    },
+    {
+      "name": "Entity",
+      "score": 0.002248
+    },
+    {
+      "name": "Relation Extraction",
+      "score": 0.002195
+    },
+    {
+      "name": "Zero-Shot Learning",
+      "score": 0.001991
+    },
+    {
+      "name": "ACL",
+      "score": 0.001839
+    },
+    {
+      "name": "Link Prediction",
+      "score": 0.001827
+    },
+    {
+      "name": "Named Entity Recognition",
+      "score": 0.001827
+    },
+    {
+      "name": "AAAI",
+      "score": 0.001821
+    },
+    {
+      "name": "BERT",
+      "score": 0.001794
+    },
+    {
+      "name": "Knowledge Graph Embedding",
+      "score": 0.001759
+    },
+    {
+      "name": "Knowledge Graph Construction",
+      "score": 0.001752
+    },
+    {
+      "name": "Relation",
+      "score": 0.001732
+    },
+    {
+      "name": "Knowledge Graph Completion",
+      "score": 0.001656
+    },
+    {
+      "name": "Entities",
+      "score": 0.001555
+    },
+    {
+      "name": "Convolutional Neural Networks",
+      "score": 0.001527
+    },
+    {
+      "name": "Ontology",
+      "score": 0.001426
+    },
+    {
+      "name": "Model",
+      "score": 0.001414
+    },
+    {
+      "name": "Graph Neural Networks",
+      "score": 0.001355
+    },
+    {
+      "name": "Deep Learning",
+      "score": 0.001318
+    },
+    {
+      "name": "Scoring Function",
+      "score": 0.001314
+    },
+    {
+      "name": "Node",
+      "score": 0.001255
+    },
+    {
+      "name": "LLMs",
+      "score": 0.001248
+    },
+    {
+      "name": "TechGPT-2.0",
+      "score": 0.001208
+    },
+    {
+      "name": "TransE",
+      "score": 0.00116
+    },
+    {
+      "name": "RAKG",
+      "score": 0.001135
+    },
+    {
+      "name": "Graph Convolutional Networks",
+      "score": 0.001129
+    },
+    {
+      "name": "KG Completion",
+      "score": 0.001109
+    },
+    {
+      "name": "KGs",
+      "score": 0.001108
+    },
+    {
+      "name": "Knowledge Extraction",
+      "score": 0.001035
+    },
+    {
+      "name": "LSTM",
+      "score": 0.001023
+    },
+    {
+      "name": "Knowledge Acquisition",
+      "score": 0.001012
+    },
+    {
+      "name": "WordNet",
+      "score": 0.001008
+    },
+    {
+      "name": "Knowledge Base",
+      "score": 0.001007
+    },
+    {
+      "name": "ChatGPT",
+      "score": 0.001004
+    },
+    {
+      "name": "ICLR",
+      "score": 0.000965
+    },
+    {
+      "name": "DBpedia",
+      "score": 0.000962
+    },
+    {
+      "name": "Entity Alignment",
+      "score": 0.000961
+    },
+    {
+      "name": "COLING",
+      "score": 0.000959
+    },
+    {
+      "name": "Advances in Neural Information Processing Systems",
+      "score": 0.000957
+    },
+    {
+      "name": "RAG",
+      "score": 0.000944
+    },
+    {
+      "name": "FSL",
+      "score": 0.000942
+    },
+    {
+      "name": "Coreference Resolution",
+      "score": 0.000931
+    },
+    {
+      "name": "ACM Comput. Surv.",
+      "score": 0.000917
+    },
+    {
+      "name": "OpenAI",
+      "score": 0.000902
+    },
+    {
+      "name": "Machine Learning",
+      "score": 0.000894
+    },
+    {
+      "name": "ComplEx",
+      "score": 0.000887
+    },
+    {
+      "name": "Graph",
+      "score": 0.000877
+    },
+    {
+      "name": "CoRR",
+      "score": 0.000874
+    },
+    {
+      "name": "Auxiliary Information",
+      "score": 0.000838
+    },
+    {
+      "name": "IJCAI",
+      "score": 0.000836
+    },
+    {
+      "name": "Wikidata",
+      "score": 0.000833
+    },
+    {
+      "name": "Reasoning",
+      "score": 0.000816
+    },
+    {
+      "name": "FB15k",
+      "score": 0.000812
+    },
+    {
+      "name": "FB15k-237",
+      "score": 0.000784
+    },
+    {
+      "name": "Entity Typing",
+      "score": 0.000773
+    },
+    {
+      "name": "Temporal Knowledge Graph",
+      "score": 0.000772
+    },
+    {
+      "name": "Quantized Graph Representation",
+      "score": 0.000769
+    },
+    {
+      "name": "Neural Networks",
+      "score": 0.000769
+    },
+    {
+      "name": "Automatic Knowledge Graph Construction",
+      "score": 0.000764
+    },
+    {
+      "name": "Relation Classification",
+      "score": 0.000763
+    },
+    {
+      "name": "KGGen",
+      "score": 0.000761
+    },
+    {
+      "name": "RotatE",
+      "score": 0.000756
+    },
+    {
+      "name": "ISWC",
+      "score": 0.000752
+    },
+    {
+      "name": "Freebase",
+      "score": 0.000744
+    },
+    {
+      "name": "Edges",
+      "score": 0.000741
+    },
+    {
+      "name": "WWW",
+      "score": 0.000733
+    },
+    {
+      "name": "Few-Shot Learning",
+      "score": 0.000729
+    },
+    {
+      "name": "Class Encoding",
+      "score": 0.000723
+    },
+    {
+      "name": "A Comprehensive Survey on Automatic Knowledge Graph Construction",
+      "score": 0.00072
+    },
+    {
+      "name": "Natural Language Processing",
+      "score": 0.000713
+    },
+    {
+      "name": "WN18RR",
+      "score": 0.000712
+    },
+    {
+      "name": "KRL",
+      "score": 0.000712
+    },
+    {
+      "name": "NeurIPS",
+      "score": 0.000703
+    },
+    {
+      "name": "Relation Type",
+      "score": 0.000701
+    },
+    {
+      "name": "Knowledge Graph Reasoning",
+      "score": 0.000699
+    },
+    {
+      "name": "Figure 1",
+      "score": 0.000695
+    },
+    {
+      "name": "Table",
+      "score": 0.000695
+    },
+    {
+      "name": "Dataset",
+      "score": 0.000692
+    },
+    {
+      "name": "Methodology",
+      "score": 0.000692
+    },
+    {
+      "name": "Entity Linking",
+      "score": 0.000686
+    },
+    {
+      "name": "Proc. ACL",
+      "score": 0.00068
+    },
+    {
+      "name": "ConceptNet",
+      "score": 0.000676
+    },
+    {
+      "name": "RNN",
+      "score": 0.000675
+    },
+    {
+      "name": "Table 1",
+      "score": 0.000669
+    },
+    {
+      "name": "Facts",
+      "score": 0.000665
+    },
+    {
+      "name": "KDD",
+      "score": 0.000664
+    },
+    {
+      "name": "Fine-Tuning",
+      "score": 0.000659
+    },
+    {
+      "name": "KG Construction",
+      "score": 0.000654
+    },
+    {
+      "name": "Distant Supervision",
+      "score": 0.000654
+    },
+    {
+      "name": "Reinforcement Learning",
+      "score": 0.000653
+    },
+    {
+      "name": "Ontologies",
+      "score": 0.000644
+    },
+    {
+      "name": "Class",
+      "score": 0.000643
+    },
+    {
+      "name": "Information Extraction",
+      "score": 0.000638
+    }
+  ],
+  "community_cores": [
+    {
+      "id": 1,
+      "size": 1313,
+      "types": {
+        "Person": 123,
+        "Concept": 416,
+        "Document": 92,
+        "Metric": 32,
+        "Process": 143,
+        "Tool": 17,
+        "Dataset": 38,
+        "Method": 214,
+        "System": 93,
+        "Artifact": 74,
+        "Event": 13,
+        "Component": 36,
+        "Organization": 13,
+        "Location": 5,
+        "Material": 4
+      },
+      "core": [
+        {
+          "name": "Knowledge Graphs",
+          "degree": 468
+        },
+        {
+          "name": "Large Language Model",
+          "degree": 228
+        },
+        {
+          "name": "Survey",
+          "degree": 76
+        },
+        {
+          "name": "Relation Extraction",
+          "degree": 56
+        },
+        {
+          "name": "Knowledge Graph Construction",
+          "degree": 55
+        },
+        {
+          "name": "Knowledge Graph Completion",
+          "degree": 32
+        },
+        {
+          "name": "Knowledge Acquisition",
+          "degree": 30
+        },
+        {
+          "name": "Machine Learning",
+          "degree": 28
+        },
+        {
+          "name": "RAG",
+          "degree": 27
+        },
+        {
+          "name": "Natural Language Processing",
+          "degree": 25
+        },
+        {
+          "name": "Knowledge Extraction",
+          "degree": 25
+        },
+        {
+          "name": "Reasoning",
+          "degree": 24
+        },
+        {
+          "name": "Fine-Tuning",
+          "degree": 23
+        },
+        {
+          "name": "Quantized Graph Representation",
+          "degree": 20
+        },
+        {
+          "name": "Language Model",
+          "degree": 20
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "size": 896,
+      "types": {
+        "Document": 159,
+        "Method": 111,
+        "Person": 359,
+        "Event": 49,
+        "Artifact": 50,
+        "Concept": 83,
+        "Component": 19,
+        "Metric": 3,
+        "Process": 14,
+        "System": 25,
+        "Organization": 8,
+        "Dataset": 11,
+        "Location": 3,
+        "Material": 1,
+        "Tool": 1
+      },
+      "core": [
+        {
+          "name": "EMNLP",
+          "degree": 88
+        },
+        {
+          "name": "ACL",
+          "degree": 72
+        },
+        {
+          "name": "AAAI",
+          "degree": 67
+        },
+        {
+          "name": "COLING",
+          "degree": 37
+        },
+        {
+          "name": "Reinforcement Learning",
+          "degree": 26
+        },
+        {
+          "name": "A Comprehensive Survey on Automatic Knowledge Graph Construction",
+          "degree": 26
+        },
+        {
+          "name": "Proc. ACL",
+          "degree": 24
+        },
+        {
+          "name": "Relation Classification",
+          "degree": 23
+        },
+        {
+          "name": "EMNLP-IJCNLP",
+          "degree": 21
+        },
+        {
+          "name": "Distant Supervision",
+          "degree": 20
+        },
+        {
+          "name": "IEEE Transactions on Neural Networks and Learning Systems",
+          "degree": 19
+        },
+        {
+          "name": "2016",
+          "degree": 17
+        },
+        {
+          "name": "M. Sun",
+          "degree": 17
+        },
+        {
+          "name": "Z. Liu",
+          "degree": 17
+        },
+        {
+          "name": "CIKM",
+          "degree": 16
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "size": 728,
+      "types": {
+        "Concept": 232,
+        "Metric": 33,
+        "Document": 55,
+        "Person": 80,
+        "System": 21,
+        "Method": 178,
+        "Artifact": 20,
+        "Component": 50,
+        "Dataset": 22,
+        "Process": 30,
+        "Tool": 3,
+        "Event": 4
+      },
+      "core": [
+        {
+          "name": "Scoring Function",
+          "degree": 51
+        },
+        {
+          "name": "TransE",
+          "degree": 49
+        },
+        {
+          "name": "FB15k",
+          "degree": 47
+        },
+        {
+          "name": "WN18",
+          "degree": 45
+        },
+        {
+          "name": "Knowledge Graph Embedding",
+          "degree": 41
+        },
+        {
+          "name": "ComplEx",
+          "degree": 40
+        },
+        {
+          "name": "FB15k-237",
+          "degree": 40
+        },
+        {
+          "name": "RotatE",
+          "degree": 39
+        },
+        {
+          "name": "WN18RR",
+          "degree": 38
+        },
+        {
+          "name": "DistMult",
+          "degree": 33
+        },
+        {
+          "name": "ConvE",
+          "degree": 32
+        },
+        {
+          "name": "Graph Convolutional Networks",
+          "degree": 28
+        },
+        {
+          "name": "KRL",
+          "degree": 26
+        },
+        {
+          "name": "Representation Space",
+          "degree": 26
+        },
+        {
+          "name": "Neural Networks",
+          "degree": 25
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "size": 655,
+      "types": {
+        "Concept": 266,
+        "Process": 35,
+        "Artifact": 50,
+        "Method": 116,
+        "Component": 62,
+        "Document": 27,
+        "Person": 26,
+        "Metric": 30,
+        "Dataset": 26,
+        "Tool": 4,
+        "System": 11,
+        "Location": 1,
+        "Event": 1
+      },
+      "core": [
+        {
+          "name": "Triple",
+          "degree": 77
+        },
+        {
+          "name": "Entity",
+          "degree": 63
+        },
+        {
+          "name": "Relation",
+          "degree": 62
+        },
+        {
+          "name": "Entities",
+          "degree": 43
+        },
+        {
+          "name": "Node",
+          "degree": 40
+        },
+        {
+          "name": "Graph Neural Networks",
+          "degree": 32
+        },
+        {
+          "name": "Graph",
+          "degree": 24
+        },
+        {
+          "name": "Edges",
+          "degree": 24
+        },
+        {
+          "name": "Head Entity",
+          "degree": 23
+        },
+        {
+          "name": "Tail Entity",
+          "degree": 18
+        },
+        {
+          "name": "Unseen Entities",
+          "degree": 18
+        },
+        {
+          "name": "Facts",
+          "degree": 18
+        },
+        {
+          "name": "Path",
+          "degree": 17
+        },
+        {
+          "name": "Tail",
+          "degree": 15
+        },
+        {
+          "name": "Attention Mechanism",
+          "degree": 15
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "size": 619,
+      "types": {
+        "Concept": 206,
+        "Artifact": 49,
+        "System": 18,
+        "Component": 28,
+        "Method": 137,
+        "Process": 40,
+        "Person": 47,
+        "Document": 33,
+        "Dataset": 35,
+        "Metric": 12,
+        "Event": 5,
+        "Organization": 2,
+        "Location": 3,
+        "Material": 3,
+        "Tool": 1
+      },
+      "core": [
+        {
+          "name": "KG",
+          "degree": 77
+        },
+        {
+          "name": "Zero-Shot Learning",
+          "degree": 69
+        },
+        {
+          "name": "FSL",
+          "degree": 39
+        },
+        {
+          "name": "Class Encoding",
+          "degree": 34
+        },
+        {
+          "name": "WordNet",
+          "degree": 26
+        },
+        {
+          "name": "Class",
+          "degree": 26
+        },
+        {
+          "name": "Image Classification",
+          "degree": 26
+        },
+        {
+          "name": "Auxiliary Information",
+          "degree": 23
+        },
+        {
+          "name": "Unseen Classes",
+          "degree": 22
+        },
+        {
+          "name": "Classifier",
+          "degree": 20
+        },
+        {
+          "name": "Few-Shot Learning",
+          "degree": 19
+        },
+        {
+          "name": "Zero-shot Image Classification",
+          "degree": 19
+        },
+        {
+          "name": "Rules",
+          "degree": 18
+        },
+        {
+          "name": "Li Et Al.",
+          "degree": 17
+        },
+        {
+          "name": "Few-Shot Samples",
+          "degree": 16
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "size": 458,
+      "types": {
+        "Concept": 104,
+        "Document": 38,
+        "Tool": 3,
+        "Metric": 46,
+        "Process": 40,
+        "Method": 91,
+        "Artifact": 35,
+        "Dataset": 2,
+        "Component": 35,
+        "System": 13,
+        "Organization": 6,
+        "Person": 34,
+        "Event": 4,
+        "Material": 7
+      },
+      "core": [
+        {
+          "name": "Link Prediction",
+          "degree": 50
+        },
+        {
+          "name": "Graph Structure",
+          "degree": 20
+        },
+        {
+          "name": "Mole-BERT",
+          "degree": 18
+        },
+        {
+          "name": "Node Classification",
+          "degree": 17
+        },
+        {
+          "name": "KGEM Performance",
+          "degree": 17
+        },
+        {
+          "name": "KG Structure",
+          "degree": 17
+        },
+        {
+          "name": "HOG",
+          "degree": 16
+        },
+        {
+          "name": "One-Stage Learning",
+          "degree": 15
+        },
+        {
+          "name": "Multi-Stage Learning",
+          "degree": 15
+        },
+        {
+          "name": "Atom",
+          "degree": 15
+        },
+        {
+          "name": "SNEQ",
+          "degree": 14
+        },
+        {
+          "name": "Encoder",
+          "degree": 14
+        },
+        {
+          "name": "UniMoT",
+          "degree": 14
+        },
+        {
+          "name": "KG Completion",
+          "degree": 13
+        },
+        {
+          "name": "Structural Features",
+          "degree": 13
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "size": 412,
+      "types": {
+        "System": 41,
+        "Method": 39,
+        "Concept": 74,
+        "Person": 151,
+        "Document": 35,
+        "Organization": 4,
+        "Process": 8,
+        "Artifact": 22,
+        "Event": 14,
+        "Dataset": 12,
+        "Tool": 5,
+        "Component": 3,
+        "Location": 4
+      },
+      "core": [
+        {
+          "name": "DBpedia",
+          "degree": 34
+        },
+        {
+          "name": "Wikidata",
+          "degree": 31
+        },
+        {
+          "name": "Freebase",
+          "degree": 30
+        },
+        {
+          "name": "Deep Learning",
+          "degree": 28
+        },
+        {
+          "name": "IJCAI",
+          "degree": 24
+        },
+        {
+          "name": "WWW",
+          "degree": 19
+        },
+        {
+          "name": "ConceptNet",
+          "degree": 18
+        },
+        {
+          "name": "YAGO",
+          "degree": 18
+        },
+        {
+          "name": "Entity Matching",
+          "degree": 16
+        },
+        {
+          "name": "NELL",
+          "degree": 16
+        },
+        {
+          "name": "Semantic Web",
+          "degree": 16
+        },
+        {
+          "name": "HowNet",
+          "degree": 13
+        },
+        {
+          "name": "ACM Computing Surveys",
+          "degree": 13
+        },
+        {
+          "name": "ProBase",
+          "degree": 12
+        },
+        {
+          "name": "Autonomous Driving",
+          "degree": 11
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "size": 388,
+      "types": {
+        "Person": 98,
+        "Document": 33,
+        "Concept": 102,
+        "Artifact": 15,
+        "Event": 4,
+        "Component": 21,
+        "Process": 12,
+        "Method": 61,
+        "Metric": 6,
+        "System": 23,
+        "Tool": 6,
+        "Organization": 2,
+        "Location": 1,
+        "Dataset": 4
+      },
+      "core": [
+        {
+          "name": "Named Entity Recognition",
+          "degree": 52
+        },
+        {
+          "name": "BERT",
+          "degree": 42
+        },
+        {
+          "name": "Entity Typing",
+          "degree": 23
+        },
+        {
+          "name": "Entity Linking",
+          "degree": 21
+        },
+        {
+          "name": "Language Models Are Few-Shot Learners",
+          "degree": 20
+        },
+        {
+          "name": "Pre-Trained Language Models",
+          "degree": 16
+        },
+        {
+          "name": "Language Models Are Unsupervised Multitask Learners",
+          "degree": 16
+        },
+        {
+          "name": "NAACL",
+          "degree": 13
+        },
+        {
+          "name": "Entity Embeddings",
+          "degree": 12
+        },
+        {
+          "name": "K-BERT",
+          "degree": 11
+        },
+        {
+          "name": "Word2Vec",
+          "degree": 10
+        },
+        {
+          "name": "Person",
+          "degree": 10
+        },
+        {
+          "name": "Zheng Et Al.",
+          "degree": 9
+        },
+        {
+          "name": "Deep Learning Models",
+          "degree": 9
+        },
+        {
+          "name": "Chains of Reasoning Over Entities, Relations, and Text Using Recurrent Neural Networks",
+          "degree": 9
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "size": 385,
+      "types": {
+        "Person": 184,
+        "Document": 63,
+        "Concept": 41,
+        "System": 8,
+        "Organization": 15,
+        "Method": 35,
+        "Location": 2,
+        "Process": 12,
+        "Event": 4,
+        "Artifact": 13,
+        "Dataset": 2,
+        "Component": 5,
+        "Tool": 1
+      },
+      "core": [
+        {
+          "name": "ArXiv",
+          "degree": 96
+        },
+        {
+          "name": "A Survey On Multimodal Large Language Models",
+          "degree": 14
+        },
+        {
+          "name": "KG-BERT",
+          "degree": 14
+        },
+        {
+          "name": "FolkScope",
+          "degree": 10
+        },
+        {
+          "name": "SimKGC",
+          "degree": 10
+        },
+        {
+          "name": "Journal of Web Semantics",
+          "degree": 9
+        },
+        {
+          "name": "Time-aware Graph Embedding",
+          "degree": 9
+        },
+        {
+          "name": "Unifying Large Language Models and Knowledge Graphs: A Roadmap",
+          "degree": 9
+        },
+        {
+          "name": "Shirui Pan",
+          "degree": 9
+        },
+        {
+          "name": "Zero-shot and Few-shot Learning with Knowledge Graphs: A Comprehensive Survey",
+          "degree": 8
+        },
+        {
+          "name": "LLM-Based Methods",
+          "degree": 8
+        },
+        {
+          "name": "Bi-Link",
+          "degree": 7
+        },
+        {
+          "name": "LIMA",
+          "degree": 7
+        },
+        {
+          "name": "arXiv:2012.06236",
+          "degree": 7
+        },
+        {
+          "name": "TLogic",
+          "degree": 7
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "size": 354,
+      "types": {
+        "Document": 60,
+        "Method": 51,
+        "Person": 154,
+        "Process": 6,
+        "Concept": 34,
+        "System": 12,
+        "Event": 17,
+        "Material": 2,
+        "Artifact": 8,
+        "Dataset": 3,
+        "Component": 3,
+        "Organization": 2,
+        "Tool": 1,
+        "Metric": 1
+      },
+      "core": [
+        {
+          "name": "ICLR",
+          "degree": 33
+        },
+        {
+          "name": "Advances in Neural Information Processing Systems",
+          "degree": 31
+        },
+        {
+          "name": "Knowledge Base",
+          "degree": 24
+        },
+        {
+          "name": "NeurIPS",
+          "degree": 22
+        },
+        {
+          "name": "International Conference on Machine Learning",
+          "degree": 16
+        },
+        {
+          "name": "Nucleic Acids Research",
+          "degree": 13
+        },
+        {
+          "name": "NIPS",
+          "degree": 12
+        },
+        {
+          "name": "DRUM",
+          "degree": 11
+        },
+        {
+          "name": "Parameter-Efficient Transfer Learning for NLP",
+          "degree": 9
+        },
+        {
+          "name": "Translating Embeddings",
+          "degree": 9
+        },
+        {
+          "name": "VQ-GNN",
+          "degree": 8
+        },
+        {
+          "name": "KnowledgeGPT",
+          "degree": 8
+        },
+        {
+          "name": "Go for a Walk and Arrive at the Answer: Reasoning Over Paths in Knowledge Bases using Reinforcement Learning",
+          "degree": 7
+        },
+        {
+          "name": "Reasoning With Neural Tensor Networks For Knowledge Base Completion",
+          "degree": 7
+        },
+        {
+          "name": "DrugBank",
+          "degree": 7
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "size": 318,
+      "types": {
+        "Concept": 93,
+        "Dataset": 3,
+        "Method": 71,
+        "Person": 43,
+        "Metric": 4,
+        "Component": 30,
+        "System": 26,
+        "Document": 18,
+        "Process": 14,
+        "Artifact": 14,
+        "Event": 2
+      },
+      "core": [
+        {
+          "name": "Convolutional Neural Networks",
+          "degree": 48
+        },
+        {
+          "name": "LSTM",
+          "degree": 40
+        },
+        {
+          "name": "Knowledge Base Completion",
+          "degree": 12
+        },
+        {
+          "name": "Attention",
+          "degree": 11
+        },
+        {
+          "name": "AGGCN",
+          "degree": 9
+        },
+        {
+          "name": "Attention Is All You Need",
+          "degree": 9
+        },
+        {
+          "name": "BiLSTM",
+          "degree": 9
+        },
+        {
+          "name": "DSGAN",
+          "degree": 8
+        },
+        {
+          "name": "Position Embedding",
+          "degree": 8
+        },
+        {
+          "name": "CPL",
+          "degree": 8
+        },
+        {
+          "name": "Bi-LSTM",
+          "degree": 7
+        },
+        {
+          "name": "Discriminator",
+          "degree": 7
+        },
+        {
+          "name": "CRF",
+          "degree": 7
+        },
+        {
+          "name": "Generator",
+          "degree": 7
+        },
+        {
+          "name": "MINERVA",
+          "degree": 7
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "size": 317,
+      "types": {
+        "Method": 30,
+        "Location": 29,
+        "Event": 16,
+        "Organization": 22,
+        "Concept": 76,
+        "Artifact": 14,
+        "Person": 58,
+        "Metric": 12,
+        "Component": 10,
+        "Document": 34,
+        "Process": 8,
+        "System": 6,
+        "Tool": 1,
+        "Dataset": 1
+      },
+      "core": [
+        {
+          "name": "Figure 1",
+          "degree": 19
+        },
+        {
+          "name": "Springer",
+          "degree": 13
+        },
+        {
+          "name": "Entity Description Pattern",
+          "degree": 11
+        },
+        {
+          "name": "USA",
+          "degree": 11
+        },
+        {
+          "name": "John",
+          "degree": 10
+        },
+        {
+          "name": "Modeling Relational Data with Graph Convolutional Networks",
+          "degree": 10
+        },
+        {
+          "name": "Hierarchical Type Tree",
+          "degree": 9
+        },
+        {
+          "name": "James Cameron",
+          "degree": 9
+        },
+        {
+          "name": "Characteristic Set",
+          "degree": 8
+        },
+        {
+          "name": "PCSG Approach",
+          "degree": 8
+        },
+        {
+          "name": "Germany",
+          "degree": 8
+        },
+        {
+          "name": "Keyword Query",
+          "degree": 8
+        },
+        {
+          "name": "London",
+          "degree": 8
+        },
+        {
+          "name": "Titanic (1977 Film)",
+          "degree": 7
+        },
+        {
+          "name": "Country",
+          "degree": 7
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "size": 287,
+      "types": {
+        "Concept": 73,
+        "Person": 29,
+        "Document": 31,
+        "Artifact": 32,
+        "Event": 9,
+        "Method": 26,
+        "Process": 26,
+        "Metric": 5,
+        "System": 13,
+        "Component": 19,
+        "Dataset": 4,
+        "Tool": 19,
+        "Location": 1
+      },
+      "core": [
+        {
+          "name": "Methodology",
+          "degree": 32
+        },
+        {
+          "name": "Table",
+          "degree": 30
+        },
+        {
+          "name": "Open Research Knowledge Graph",
+          "degree": 26
+        },
+        {
+          "name": "Paper",
+          "degree": 20
+        },
+        {
+          "name": "Scholarly Knowledge Graph",
+          "degree": 18
+        },
+        {
+          "name": "Bibliographic Metadata",
+          "degree": 17
+        },
+        {
+          "name": "Table Extraction",
+          "degree": 16
+        },
+        {
+          "name": "GROBID",
+          "degree": 15
+        },
+        {
+          "name": "Article",
+          "degree": 14
+        },
+        {
+          "name": "Survey Table",
+          "degree": 13
+        },
+        {
+          "name": "Survey Articles",
+          "degree": 13
+        },
+        {
+          "name": "Reference Extraction",
+          "degree": 13
+        },
+        {
+          "name": "Literature Survey",
+          "degree": 12
+        },
+        {
+          "name": "Portable Document Format",
+          "degree": 11
+        },
+        {
+          "name": "User Interface",
+          "degree": 8
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "size": 281,
+      "types": {
+        "Method": 28,
+        "Document": 24,
+        "Organization": 2,
+        "Concept": 82,
+        "System": 16,
+        "Person": 52,
+        "Artifact": 13,
+        "Metric": 15,
+        "Dataset": 9,
+        "Process": 32,
+        "Event": 2,
+        "Component": 6
+      },
+      "core": [
+        {
+          "name": "Ontology",
+          "degree": 41
+        },
+        {
+          "name": "Schema",
+          "degree": 18
+        },
+        {
+          "name": "AutoSchemaKG",
+          "degree": 11
+        },
+        {
+          "name": "LKD-KGC",
+          "degree": 11
+        },
+        {
+          "name": "Data Type",
+          "degree": 10
+        },
+        {
+          "name": "Knowledge Engineering",
+          "degree": 10
+        },
+        {
+          "name": "Ontogenia",
+          "degree": 10
+        },
+        {
+          "name": "Scalability",
+          "degree": 9
+        },
+        {
+          "name": "OntoRAG",
+          "degree": 8
+        },
+        {
+          "name": "Ontology Construction",
+          "degree": 8
+        },
+        {
+          "name": "Property",
+          "degree": 8
+        },
+        {
+          "name": "Ontology Generation Using Large Language Models",
+          "degree": 8
+        },
+        {
+          "name": "Resources",
+          "degree": 7
+        },
+        {
+          "name": "EDC Framework",
+          "degree": 7
+        },
+        {
+          "name": "Driver Assistance",
+          "degree": 6
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "size": 268,
+      "types": {
+        "Concept": 95,
+        "Process": 25,
+        "Document": 15,
+        "Component": 11,
+        "Method": 24,
+        "Event": 3,
+        "System": 17,
+        "Person": 38,
+        "Dataset": 10,
+        "Material": 1,
+        "Artifact": 16,
+        "Metric": 10,
+        "Organization": 2,
+        "Tool": 1
+      },
+      "core": [
+        {
+          "name": "Model",
+          "degree": 28
+        },
+        {
+          "name": "Automatic Knowledge Graph Construction",
+          "degree": 24
+        },
+        {
+          "name": "RSN",
+          "degree": 17
+        },
+        {
+          "name": "Graphusion",
+          "degree": 16
+        },
+        {
+          "name": "Dataset",
+          "degree": 15
+        },
+        {
+          "name": "EntGPT",
+          "degree": 11
+        },
+        {
+          "name": "Relation Meta",
+          "degree": 10
+        },
+        {
+          "name": "Alignment",
+          "degree": 10
+        },
+        {
+          "name": "Meta-learning",
+          "degree": 10
+        },
+        {
+          "name": "Support Set",
+          "degree": 9
+        },
+        {
+          "name": "Gradient Meta",
+          "degree": 8
+        },
+        {
+          "name": "Meta Learner",
+          "degree": 8
+        },
+        {
+          "name": "MetaR",
+          "degree": 8
+        },
+        {
+          "name": "Query Set",
+          "degree": 8
+        },
+        {
+          "name": "Models",
+          "degree": 8
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "size": 254,
+      "types": {
+        "Concept": 81,
+        "Tool": 5,
+        "Method": 28,
+        "Person": 31,
+        "Dataset": 19,
+        "Process": 26,
+        "Artifact": 17,
+        "Location": 1,
+        "System": 17,
+        "Component": 12,
+        "Metric": 4,
+        "Event": 1,
+        "Organization": 8,
+        "Document": 2,
+        "Material": 2
+      },
+      "core": [
+        {
+          "name": "TechGPT-2.0",
+          "degree": 46
+        },
+        {
+          "name": "Ascend Server",
+          "degree": 16
+        },
+        {
+          "name": "Training",
+          "degree": 15
+        },
+        {
+          "name": "TechGPT-1.0",
+          "degree": 15
+        },
+        {
+          "name": "LLaMA",
+          "degree": 15
+        },
+        {
+          "name": "Researchers",
+          "degree": 14
+        },
+        {
+          "name": "Model Training",
+          "degree": 13
+        },
+        {
+          "name": "LoRA",
+          "degree": 11
+        },
+        {
+          "name": "Northeastern University",
+          "degree": 10
+        },
+        {
+          "name": "RUGE",
+          "degree": 9
+        },
+        {
+          "name": "ChatGLM",
+          "degree": 8
+        },
+        {
+          "name": "KnowLM-IE",
+          "degree": 8
+        },
+        {
+          "name": "Research Group",
+          "degree": 8
+        },
+        {
+          "name": "Mindformer",
+          "degree": 8
+        },
+        {
+          "name": "Chinese-Alpaca-2 (7B)",
+          "degree": 8
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "size": 237,
+      "types": {
+        "Method": 47,
+        "Concept": 94,
+        "Process": 27,
+        "Event": 1,
+        "System": 19,
+        "Document": 19,
+        "Component": 9,
+        "Metric": 5,
+        "Person": 10,
+        "Artifact": 5,
+        "Dataset": 1
+      },
+      "core": [
+        {
+          "name": "Embeddings",
+          "degree": 47
+        },
+        {
+          "name": "KG Reasoning",
+          "degree": 19
+        },
+        {
+          "name": "Logic",
+          "degree": 17
+        },
+        {
+          "name": "Query Answering",
+          "degree": 17
+        },
+        {
+          "name": "Logic Rules",
+          "degree": 16
+        },
+        {
+          "name": "Our Survey",
+          "degree": 16
+        },
+        {
+          "name": "KG Tasks",
+          "degree": 15
+        },
+        {
+          "name": "Symbolic Reasoning",
+          "degree": 12
+        },
+        {
+          "name": "KG Question Answering",
+          "degree": 9
+        },
+        {
+          "name": "Logic Reasoning",
+          "degree": 8
+        },
+        {
+          "name": "NeuralLP",
+          "degree": 8
+        },
+        {
+          "name": "ExpressGNN",
+          "degree": 7
+        },
+        {
+          "name": "Standard Deep End-to-End Model",
+          "degree": 7
+        },
+        {
+          "name": "Embedding-Based Reasoning",
+          "degree": 7
+        },
+        {
+          "name": "Theorem Proving",
+          "degree": 7
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "size": 233,
+      "types": {
+        "Method": 47,
+        "Concept": 67,
+        "Process": 24,
+        "Metric": 5,
+        "Person": 32,
+        "Component": 15,
+        "Artifact": 12,
+        "System": 10,
+        "Dataset": 8,
+        "Location": 1,
+        "Document": 8,
+        "Material": 1,
+        "Event": 2,
+        "Organization": 1
+      },
+      "core": [
+        {
+          "name": "LLMs",
+          "degree": 26
+        },
+        {
+          "name": "KGs",
+          "degree": 26
+        },
+        {
+          "name": "Ontologies",
+          "degree": 22
+        },
+        {
+          "name": "AD",
+          "degree": 13
+        },
+        {
+          "name": "Perception",
+          "degree": 12
+        },
+        {
+          "name": "Huang et al.",
+          "degree": 11
+        },
+        {
+          "name": "Scene Understanding",
+          "degree": 11
+        },
+        {
+          "name": "Temporal Information",
+          "degree": 10
+        },
+        {
+          "name": "Object Detection",
+          "degree": 10
+        },
+        {
+          "name": "Motion Planning",
+          "degree": 10
+        },
+        {
+          "name": "TKGs",
+          "degree": 9
+        },
+        {
+          "name": "DKGs",
+          "degree": 7
+        },
+        {
+          "name": "Validation",
+          "degree": 7
+        },
+        {
+          "name": "Lane Detection",
+          "degree": 6
+        },
+        {
+          "name": "Automated Vehicles",
+          "degree": 6
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "size": 217,
+      "types": {
+        "System": 10,
+        "Method": 28,
+        "Person": 73,
+        "Concept": 50,
+        "Process": 8,
+        "Document": 20,
+        "Metric": 4,
+        "Artifact": 10,
+        "Tool": 4,
+        "Component": 4,
+        "Event": 5,
+        "Dataset": 1
+      },
+      "core": [
+        {
+          "name": "KDD",
+          "degree": 23
+        },
+        {
+          "name": "A Survey on Knowledge Graph-Based Recommender Systems",
+          "degree": 13
+        },
+        {
+          "name": "Content Extraction",
+          "degree": 12
+        },
+        {
+          "name": "Open Information Extraction",
+          "degree": 11
+        },
+        {
+          "name": "Graph Model",
+          "degree": 10
+        },
+        {
+          "name": "Wong et al., 2021",
+          "degree": 8
+        },
+        {
+          "name": "Self-Supervised Quantized Representation Paper",
+          "degree": 8
+        },
+        {
+          "name": "Contrastive Graph Representations",
+          "degree": 8
+        },
+        {
+          "name": "IEEE Transactions on Knowledge and Data Engineering",
+          "degree": 8
+        },
+        {
+          "name": "Statistical Features",
+          "degree": 7
+        },
+        {
+          "name": "Universal Representation Learning",
+          "degree": 7
+        },
+        {
+          "name": "MetaPAD",
+          "degree": 7
+        },
+        {
+          "name": "Symbol-LLM",
+          "degree": 7
+        },
+        {
+          "name": "Maps",
+          "degree": 7
+        },
+        {
+          "name": "Knowledge Vault",
+          "degree": 6
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "size": 186,
+      "types": {
+        "Document": 23,
+        "Artifact": 12,
+        "Dataset": 4,
+        "Person": 48,
+        "Event": 12,
+        "Concept": 28,
+        "Organization": 9,
+        "Method": 16,
+        "System": 10,
+        "Process": 6,
+        "Location": 10,
+        "Tool": 5,
+        "Metric": 1,
+        "Component": 2
+      },
+      "core": [
+        {
+          "name": "Embedding Xpath Queries into SPARQL Queries",
+          "degree": 12
+        },
+        {
+          "name": "France",
+          "degree": 12
+        },
+        {
+          "name": "Bringing the XML and Semantic Web Worlds Closer: Transforming XML into RDF and Embedding XPath into SPARQL",
+          "degree": 11
+        },
+        {
+          "name": "Sven Groppe",
+          "degree": 11
+        },
+        {
+          "name": "Prompt",
+          "degree": 9
+        },
+        {
+          "name": "XPath",
+          "degree": 9
+        },
+        {
+          "name": "Jinghua Groppe",
+          "degree": 9
+        },
+        {
+          "name": "ACM",
+          "degree": 8
+        },
+        {
+          "name": "GPT-RE: In-context Learning for Relation Extraction using Large Language Models",
+          "degree": 7
+        },
+        {
+          "name": "In-Context Learning",
+          "degree": 7
+        },
+        {
+          "name": "Use Case",
+          "degree": 7
+        },
+        {
+          "name": "Participants",
+          "degree": 7
+        },
+        {
+          "name": "Research Trends for the Interplay between Large Language Models and Knowledge Graphs",
+          "degree": 6
+        },
+        {
+          "name": "ACE",
+          "degree": 6
+        },
+        {
+          "name": "Reformulating XPath queries and XSLT queries on XSLT views",
+          "degree": 6
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "size": 176,
+      "types": {
+        "Document": 13,
+        "Concept": 58,
+        "Method": 13,
+        "Component": 9,
+        "System": 17,
+        "Artifact": 16,
+        "Person": 20,
+        "Process": 19,
+        "Metric": 9,
+        "Event": 1,
+        "Dataset": 1
+      },
+      "core": [
+        {
+          "name": "ChatGPT",
+          "degree": 37
+        },
+        {
+          "name": "Relation Type",
+          "degree": 16
+        },
+        {
+          "name": "ChatIE",
+          "degree": 12
+        },
+        {
+          "name": "Human Expert",
+          "degree": 11
+        },
+        {
+          "name": "Ontology Design",
+          "degree": 9
+        },
+        {
+          "name": "Experiment",
+          "degree": 8
+        },
+        {
+          "name": "Domain Concept",
+          "degree": 8
+        },
+        {
+          "name": "None",
+          "degree": 8
+        },
+        {
+          "name": "Zero-Shot Information Extraction via Chatting with ChatGPT",
+          "degree": 8
+        },
+        {
+          "name": "Expert",
+          "degree": 8
+        },
+        {
+          "name": "Web Tables",
+          "degree": 7
+        },
+        {
+          "name": "Cross-Cutting",
+          "degree": 7
+        },
+        {
+          "name": "Category",
+          "degree": 6
+        },
+        {
+          "name": "Domain Specificity Score",
+          "degree": 5
+        },
+        {
+          "name": "Cámara, J.",
+          "degree": 5
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "size": 169,
+      "types": {
+        "Method": 17,
+        "Person": 62,
+        "Document": 32,
+        "Concept": 27,
+        "Event": 11,
+        "Component": 5,
+        "Artifact": 3,
+        "Organization": 2,
+        "Tool": 1,
+        "System": 5,
+        "Process": 1,
+        "Dataset": 2,
+        "Metric": 1
+      },
+      "core": [
+        {
+          "name": "ISWC",
+          "degree": 22
+        },
+        {
+          "name": "ACM Comput. Surv.",
+          "degree": 21
+        },
+        {
+          "name": "Towards Leveraging Commonsense Knowledge For Autonomous Driving",
+          "degree": 15
+        },
+        {
+          "name": "Semantics",
+          "degree": 11
+        },
+        {
+          "name": "A model for ontology-based scene description for context-aware driver assistance systems",
+          "degree": 8
+        },
+        {
+          "name": "CEUR Workshop Proceedings",
+          "degree": 8
+        },
+        {
+          "name": "ArchiMate Skills",
+          "degree": 7
+        },
+        {
+          "name": "Structural Properties as Proxy for Semantic Relevance in RDF Graph Sampling",
+          "degree": 5
+        },
+        {
+          "name": "A Study On Al-Based Approaches For High-Level Decision Making In Highway Autonomous Driving",
+          "degree": 5
+        },
+        {
+          "name": "Knowledge graph embedding for link prediction: A comparative analysis",
+          "degree": 5
+        },
+        {
+          "name": "Generating Compact Models For Traﬃc Scenarios To Estimate Driver Behavior Using Semantic Reasoning",
+          "degree": 5
+        },
+        {
+          "name": "Traversing Knowledge Graphs in Vector Space",
+          "degree": 4
+        },
+        {
+          "name": "Dynamic Monocular Machine Vision",
+          "degree": 4
+        },
+        {
+          "name": "Prototypical Features",
+          "degree": 4
+        },
+        {
+          "name": "Embedding Logical Queries on Knowledge Graphs",
+          "degree": 4
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "size": 161,
+      "types": {
+        "Person": 61,
+        "Method": 22,
+        "Concept": 15,
+        "Document": 26,
+        "Artifact": 13,
+        "System": 4,
+        "Process": 8,
+        "Component": 1,
+        "Event": 7,
+        "Tool": 3,
+        "Organization": 1
+      },
+      "core": [
+        {
+          "name": "Coreference Resolution",
+          "degree": 29
+        },
+        {
+          "name": "CoRR",
+          "degree": 23
+        },
+        {
+          "name": "The Llama 3 Herd of Models",
+          "degree": 11
+        },
+        {
+          "name": "From Local to Global: A Graph RAG Approach to Query-Focused Summarization",
+          "degree": 11
+        },
+        {
+          "name": "Semantic Role Labeling",
+          "degree": 9
+        },
+        {
+          "name": "Rule-Based Methods",
+          "degree": 8
+        },
+        {
+          "name": "BigScience Workshop",
+          "degree": 7
+        },
+        {
+          "name": "StanfordNLP",
+          "degree": 5
+        },
+        {
+          "name": "Iterative KG Refinement",
+          "degree": 5
+        },
+        {
+          "name": "NLTK",
+          "degree": 5
+        },
+        {
+          "name": "Latent Structure Perceptron with Feature Induction for Unrestricted Coreference Resolution",
+          "degree": 5
+        },
+        {
+          "name": "MapReduce",
+          "degree": 4
+        },
+        {
+          "name": "A Constraint-Based Hypergraph Partitioning Approach to Coreference Resolution",
+          "degree": 4
+        },
+        {
+          "name": "A Machine Learning Approach To Coreference Resolution Of Noun Phrases",
+          "degree": 4
+        },
+        {
+          "name": "VQSynery",
+          "degree": 4
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "size": 159,
+      "types": {
+        "Person": 20,
+        "Metric": 20,
+        "Document": 11,
+        "Artifact": 11,
+        "System": 10,
+        "Method": 22,
+        "Tool": 3,
+        "Process": 9,
+        "Event": 3,
+        "Dataset": 6,
+        "Material": 2,
+        "Concept": 35,
+        "Component": 5,
+        "Organization": 2
+      },
+      "core": [
+        {
+          "name": "RAKG",
+          "degree": 39
+        },
+        {
+          "name": "KGGen",
+          "degree": 26
+        },
+        {
+          "name": "GraphRAG",
+          "degree": 13
+        },
+        {
+          "name": "Accuracy",
+          "degree": 8
+        },
+        {
+          "name": "Standard Knowledge Graph",
+          "degree": 6
+        },
+        {
+          "name": "Graph Token Information Discrepancy",
+          "degree": 6
+        },
+        {
+          "name": "Table II",
+          "degree": 6
+        },
+        {
+          "name": "Entity Coverage",
+          "degree": 6
+        },
+        {
+          "name": "MINE Dataset",
+          "degree": 6
+        },
+        {
+          "name": "Relation Network Similarity",
+          "degree": 5
+        },
+        {
+          "name": "Evaluated Knowledge Graph",
+          "degree": 5
+        },
+        {
+          "name": "Case Study",
+          "degree": 5
+        },
+        {
+          "name": "Structural Information",
+          "degree": 5
+        },
+        {
+          "name": "Negative Log-Likelihood",
+          "degree": 4
+        },
+        {
+          "name": "Pre-Entities",
+          "degree": 4
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "size": 158,
+      "types": {
+        "Organization": 12,
+        "Metric": 10,
+        "Person": 42,
+        "Concept": 20,
+        "System": 5,
+        "Document": 27,
+        "Method": 15,
+        "Location": 10,
+        "Process": 4,
+        "Event": 8,
+        "Artifact": 2,
+        "Dataset": 3
+      },
+      "core": [
+        {
+          "name": "Liu et al.",
+          "degree": 17
+        },
+        {
+          "name": "Qwen",
+          "degree": 14
+        },
+        {
+          "name": "China",
+          "degree": 12
+        },
+        {
+          "name": "Gong Cheng",
+          "degree": 10
+        },
+        {
+          "name": "IEEE Trans. Knowl. Data Eng.",
+          "degree": 9
+        },
+        {
+          "name": "Qwen2.5 Technical Report",
+          "degree": 7
+        },
+        {
+          "name": "Shen et al.2",
+          "degree": 6
+        },
+        {
+          "name": "Multi-Facet Snippets Paper",
+          "degree": 6
+        },
+        {
+          "name": "BANDAR",
+          "degree": 6
+        },
+        {
+          "name": "Xiaxia Wang",
+          "degree": 6
+        },
+        {
+          "name": "C. Li",
+          "degree": 5
+        },
+        {
+          "name": "Yuzhong Qu",
+          "degree": 5
+        },
+        {
+          "name": "R0 Estimates",
+          "degree": 5
+        },
+        {
+          "name": "An Empirical Evaluation Of Techniques For Ranking Semantic Associations",
+          "degree": 5
+        },
+        {
+          "name": "Joseph et al.1",
+          "degree": 5
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "size": 114,
+      "types": {
+        "Event": 2,
+        "Concept": 42,
+        "Component": 6,
+        "Document": 5,
+        "Method": 18,
+        "System": 10,
+        "Person": 18,
+        "Process": 8,
+        "Organization": 1,
+        "Metric": 1,
+        "Artifact": 3
+      },
+      "core": [
+        {
+          "name": "Context Model",
+          "degree": 9
+        },
+        {
+          "name": "Sequence Neural Network-Based Prediction Methods",
+          "degree": 9
+        },
+        {
+          "name": "Events",
+          "degree": 9
+        },
+        {
+          "name": "Event KG",
+          "degree": 8
+        },
+        {
+          "name": "Vashishtha Et Al.",
+          "degree": 7
+        },
+        {
+          "name": "EvoKG",
+          "degree": 7
+        },
+        {
+          "name": "DyRep",
+          "degree": 6
+        },
+        {
+          "name": "Conditional Intensity Function",
+          "degree": 6
+        },
+        {
+          "name": "Social Networks",
+          "degree": 6
+        },
+        {
+          "name": "Objects",
+          "degree": 6
+        },
+        {
+          "name": "Node2VEC",
+          "degree": 6
+        },
+        {
+          "name": "Temporal Reasoning",
+          "degree": 5
+        },
+        {
+          "name": "EKG reasoning",
+          "degree": 5
+        },
+        {
+          "name": "Relation-Aware Graph Convolutional Network",
+          "degree": 5
+        },
+        {
+          "name": "Temporal Relations",
+          "degree": 5
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "size": 106,
+      "types": {
+        "Dataset": 1,
+        "Person": 48,
+        "Document": 17,
+        "System": 5,
+        "Event": 9,
+        "Location": 6,
+        "Concept": 11,
+        "Component": 2,
+        "Method": 4,
+        "Artifact": 2,
+        "Organization": 1
+      },
+      "core": [
+        {
+          "name": "Preprint",
+          "degree": 18
+        },
+        {
+          "name": "Language Models",
+          "degree": 16
+        },
+        {
+          "name": "Association For Computational Linguistics",
+          "degree": 11
+        },
+        {
+          "name": "DeepStruct",
+          "degree": 9
+        },
+        {
+          "name": "15th Conference Of The European Chapter Of The Association For Computational Linguistics",
+          "degree": 8
+        },
+        {
+          "name": "GraphMAE",
+          "degree": 7
+        },
+        {
+          "name": "Wei et al.",
+          "degree": 6
+        },
+        {
+          "name": "Jie Tang",
+          "degree": 5
+        },
+        {
+          "name": "Grouping-Based Summarization",
+          "degree": 5
+        },
+        {
+          "name": "AutoRE: Document-Level Relation Extraction with Large Language Models",
+          "degree": 5
+        },
+        {
+          "name": "Summarization",
+          "degree": 4
+        },
+        {
+          "name": "Spain",
+          "degree": 4
+        },
+        {
+          "name": "Extract, Define, Canonicalize",
+          "degree": 4
+        },
+        {
+          "name": "Findings Of The Association For Computational Linguistics: EMNLP 2024",
+          "degree": 4
+        },
+        {
+          "name": "Residual Graph Convolutional Network",
+          "degree": 3
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "size": 105,
+      "types": {
+        "Person": 10,
+        "System": 11,
+        "Document": 15,
+        "Method": 19,
+        "Concept": 28,
+        "Artifact": 10,
+        "Event": 2,
+        "Component": 1,
+        "Process": 4,
+        "Metric": 3,
+        "Tool": 1,
+        "Dataset": 1
+      },
+      "core": [
+        {
+          "name": "Rule",
+          "degree": 19
+        },
+        {
+          "name": "User",
+          "degree": 11
+        },
+        {
+          "name": "Machine Learning Methods",
+          "degree": 7
+        },
+        {
+          "name": "iSummary",
+          "degree": 6
+        },
+        {
+          "name": "Personalized Summary",
+          "degree": 5
+        },
+        {
+          "name": "Guo And Wang 2021",
+          "degree": 5
+        },
+        {
+          "name": "Query History",
+          "degree": 5
+        },
+        {
+          "name": "Personalized Summarization",
+          "degree": 4
+        },
+        {
+          "name": "Support Vector Machines",
+          "degree": 4
+        },
+        {
+          "name": "KIM",
+          "degree": 4
+        },
+        {
+          "name": "Table Classifier",
+          "degree": 4
+        },
+        {
+          "name": "Manual Rules",
+          "degree": 4
+        },
+        {
+          "name": "Query",
+          "degree": 4
+        },
+        {
+          "name": "User Interest",
+          "degree": 3
+        },
+        {
+          "name": "OWL 2",
+          "degree": 3
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "size": 102,
+      "types": {
+        "Method": 27,
+        "Event": 2,
+        "Process": 8,
+        "System": 10,
+        "Dataset": 4,
+        "Document": 5,
+        "Organization": 1,
+        "Concept": 22,
+        "Artifact": 10,
+        "Person": 12,
+        "Component": 1
+      },
+      "core": [
+        {
+          "name": "Entity Alignment",
+          "degree": 30
+        },
+        {
+          "name": "MTransE",
+          "degree": 8
+        },
+        {
+          "name": "Fusion",
+          "degree": 5
+        },
+        {
+          "name": "Rule-Based Classifier",
+          "degree": 5
+        },
+        {
+          "name": "BootEA",
+          "degree": 5
+        },
+        {
+          "name": "Error Accumulation",
+          "degree": 5
+        },
+        {
+          "name": "Proceedings of the VLDB Endowment",
+          "degree": 4
+        },
+        {
+          "name": "Rdf-ai",
+          "degree": 4
+        },
+        {
+          "name": "Active Learning",
+          "degree": 4
+        },
+        {
+          "name": "Cross-Lingual Knowledge Alignment",
+          "degree": 4
+        },
+        {
+          "name": "Search Personalization with Embeddings",
+          "degree": 4
+        },
+        {
+          "name": "JAPE",
+          "degree": 4
+        },
+        {
+          "name": "Ontology-Based Model",
+          "degree": 4
+        },
+        {
+          "name": "Attribute Embeddings",
+          "degree": 4
+        },
+        {
+          "name": "Lime",
+          "degree": 4
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "size": 94,
+      "types": {
+        "Component": 6,
+        "Person": 12,
+        "Concept": 40,
+        "System": 11,
+        "Method": 12,
+        "Document": 6,
+        "Process": 5,
+        "Artifact": 2
+      },
+      "core": [
+        {
+          "name": "Temporal Knowledge Graph",
+          "degree": 18
+        },
+        {
+          "name": "Dynamic Knowledge Graph",
+          "degree": 14
+        },
+        {
+          "name": "Know-evolve",
+          "degree": 10
+        },
+        {
+          "name": "Knowledge Evolution",
+          "degree": 7
+        },
+        {
+          "name": "Zep",
+          "degree": 6
+        },
+        {
+          "name": "Zep Paper",
+          "degree": 6
+        },
+        {
+          "name": "Explicitly Represented Time Information",
+          "degree": 6
+        },
+        {
+          "name": "Neighborhood Aggregator",
+          "degree": 5
+        },
+        {
+          "name": "DyERNIE",
+          "degree": 4
+        },
+        {
+          "name": "B/I-XYZ",
+          "degree": 4
+        },
+        {
+          "name": "Temporal Graph Attention Network",
+          "degree": 4
+        },
+        {
+          "name": "Temporal Knowledge Graph Embedding",
+          "degree": 4
+        },
+        {
+          "name": "Knowledge Dynamic",
+          "degree": 4
+        },
+        {
+          "name": "Biomedical Field",
+          "degree": 3
+        },
+        {
+          "name": "Event Sequence",
+          "degree": 3
+        }
+      ]
+    }
+  ]
+}

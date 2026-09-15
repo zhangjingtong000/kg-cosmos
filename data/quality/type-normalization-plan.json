@@ -1,0 +1,4521 @@
+{
+  "keys": 15313,
+  "conflict": 554,
+  "tie": 296,
+  "out_of_ontology": {
+    "system": 1
+  },
+  "plan": {
+    "knowledge graphs": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 15,
+        "Artifact": 4
+      },
+      "tie": false
+    },
+    "natural language processing": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 12,
+        "Method": 4
+      },
+      "tie": false
+    },
+    "country": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Location": 1
+      },
+      "tie": false
+    },
+    "translation vector": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "triple": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 9,
+        "Artifact": 3
+      },
+      "tie": false
+    },
+    "facts": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 2,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "knowledge base": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 8,
+        "Artifact": 2,
+        "Component": 2,
+        "System": 1
+      },
+      "tie": false
+    },
+    "question": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "model parameters": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Component": 1
+      },
+      "tie": false
+    },
+    "neural network": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "System": 1,
+        "Component": 1
+      },
+      "tie": false
+    },
+    "path": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 5,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "hamilton product": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "convolution operator": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "circular correlation": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "first-order logic": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "vector representation": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 4,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "learning": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "recommender systems": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "knowledge graph completion": {
+      "primary": "Process",
+      "votes": {
+        "Process": 5,
+        "Concept": 5,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "link prediction": {
+      "primary": "Method",
+      "votes": {
+        "Process": 4,
+        "Method": 5,
+        "Concept": 2,
+        "Metric": 1
+      },
+      "tie": false
+    },
+    "entity prediction": {
+      "primary": "Process",
+      "votes": {
+        "Process": 4,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "kg completion": {
+      "primary": "Process",
+      "votes": {
+        "Process": 3,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "question answering": {
+      "primary": "Process",
+      "votes": {
+        "Process": 6,
+        "System": 3,
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "semantic parsing": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "random walk": {
+      "primary": "Method",
+      "votes": {
+        "Process": 1,
+        "Method": 3
+      },
+      "tie": false
+    },
+    "kg reasoning": {
+      "primary": "Process",
+      "votes": {
+        "Process": 3,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "triple classification": {
+      "primary": "Process",
+      "votes": {
+        "Process": 4,
+        "Method": 3
+      },
+      "tie": false
+    },
+    "coreference resolution": {
+      "primary": "Process",
+      "votes": {
+        "Process": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "score function": {
+      "primary": "Component",
+      "votes": {
+        "Method": 1,
+        "Component": 2
+      },
+      "tie": false
+    },
+    "negative sampling": {
+      "primary": "Method",
+      "votes": {
+        "Method": 4,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "adversarial learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 3,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "tucker": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "hole": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "System": 1
+      },
+      "tie": false
+    },
+    "ntn": {
+      "primary": "Method",
+      "votes": {
+        "Method": 4,
+        "System": 1
+      },
+      "tie": false
+    },
+    "complex": {
+      "primary": "Method",
+      "votes": {
+        "Method": 5,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "tensor": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "transg": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "hyper": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "rnn": {
+      "primary": "Method",
+      "votes": {
+        "Method": 5,
+        "Component": 1
+      },
+      "tie": false
+    },
+    "sacn": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "graph convolutional networks": {
+      "primary": "Method",
+      "votes": {
+        "Method": 6,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "graph attention networks": {
+      "primary": "Method",
+      "votes": {
+        "Method": 5,
+        "System": 1
+      },
+      "tie": false
+    },
+    "go for a walk and arrive at the answer: reasoning over paths in knowledge bases using reinforcement learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "convolutional neural networks": {
+      "primary": "Method",
+      "votes": {
+        "Method": 8,
+        "System": 1
+      },
+      "tie": false
+    },
+    "embedding entities and relations for learning and inference in knowledge bases": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "differentiable learning of logical rules for knowledge base reasoning": {
+      "primary": "Document",
+      "votes": {
+        "Method": 2,
+        "Document": 3
+      },
+      "tie": false
+    },
+    "xu": {
+      "primary": "Person",
+      "votes": {
+        "Person": 1,
+        "Dataset": 1
+      },
+      "tie": true
+    },
+    "zhang et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 5,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "concept": {
+      "primary": "Person",
+      "votes": {
+        "Person": 3,
+        "Dataset": 1,
+        "Method": 1,
+        "Event": 2,
+        "Location": 1
+      },
+      "tie": false
+    },
+    "wei et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 4,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "user": {
+      "primary": "Person",
+      "votes": {
+        "Person": 6,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "figure 1": {
+      "primary": "Document",
+      "votes": {
+        "Document": 7,
+        "Artifact": 5
+      },
+      "tie": false
+    },
+    "figure 2": {
+      "primary": "Document",
+      "votes": {
+        "Document": 8,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "trouillon et al.": {
+      "primary": "Document",
+      "votes": {
+        "Document": 2,
+        "Person": 1
+      },
+      "tie": false
+    },
+    "wang et al.": {
+      "primary": "Person",
+      "votes": {
+        "Document": 3,
+        "Person": 6
+      },
+      "tie": false
+    },
+    "luo et al.": {
+      "primary": "Person",
+      "votes": {
+        "Document": 2,
+        "Person": 4
+      },
+      "tie": false
+    },
+    "documents": {
+      "primary": "Document",
+      "votes": {
+        "Document": 5,
+        "Artifact": 2
+      },
+      "tie": false
+    },
+    "guo et al.": {
+      "primary": "Person",
+      "votes": {
+        "Document": 1,
+        "Person": 2
+      },
+      "tie": false
+    },
+    "hypernetwork knowledge graph embeddings": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "learning structured embeddings of knowledge bases": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "a semantic matching energy function for learning with multi-relational data": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "machine learning": {
+      "primary": "Concept",
+      "votes": {
+        "Document": 1,
+        "Concept": 5,
+        "Method": 4
+      },
+      "tie": false
+    },
+    "a latent factor model for highly multi-relational data": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "simple embedding for link prediction in knowledge graphs": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "semi-supervised classification with graph convolutional networks": {
+      "primary": "Document",
+      "votes": {
+        "Document": 3,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "semantic web": {
+      "primary": "Document",
+      "votes": {
+        "Document": 5,
+        "Concept": 5
+      },
+      "tie": true
+    },
+    "learning entity and relation embeddings for knowledge graph completion": {
+      "primary": "Document",
+      "votes": {
+        "Document": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "glove": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Tool": 1
+      },
+      "tie": true
+    },
+    "modeling relational data with graph convolutional networks": {
+      "primary": "Document",
+      "votes": {
+        "Document": 3,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "complex embeddings for simple link prediction": {
+      "primary": "Document",
+      "votes": {
+        "Document": 5,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "relation embeddings": {
+      "primary": "Concept",
+      "votes": {
+        "Artifact": 1,
+        "Concept": 4
+      },
+      "tie": false
+    },
+    "query": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "learning attention-based embeddings for relation prediction in knowledge graphs": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "word2vec": {
+      "primary": "Tool",
+      "votes": {
+        "Tool": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "mean rank": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "node": {
+      "primary": "Component",
+      "votes": {
+        "Component": 7,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "edges": {
+      "primary": "Component",
+      "votes": {
+        "Component": 8,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "head": {
+      "primary": "Component",
+      "votes": {
+        "Component": 4,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "weight matrix": {
+      "primary": "Component",
+      "votes": {
+        "Component": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "mlp": {
+      "primary": "Component",
+      "votes": {
+        "Component": 3,
+        "Method": 3,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "arxiv": {
+      "primary": "System",
+      "votes": {
+        "System": 8,
+        "Document": 4,
+        "Organization": 3
+      },
+      "tie": false
+    },
+    "geneontology": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Dataset": 1
+      },
+      "tie": true
+    },
+    "wordnet": {
+      "primary": "Artifact",
+      "votes": {
+        "System": 1,
+        "Artifact": 3,
+        "Dataset": 2
+      },
+      "tie": false
+    },
+    "yago": {
+      "primary": "System",
+      "votes": {
+        "System": 4,
+        "Artifact": 2
+      },
+      "tie": false
+    },
+    "freebase": {
+      "primary": "System",
+      "votes": {
+        "System": 4,
+        "Artifact": 2
+      },
+      "tie": false
+    },
+    "nell": {
+      "primary": "System",
+      "votes": {
+        "System": 4,
+        "Dataset": 1
+      },
+      "tie": false
+    },
+    "dbpedia": {
+      "primary": "System",
+      "votes": {
+        "System": 5,
+        "Artifact": 2
+      },
+      "tie": false
+    },
+    "bert": {
+      "primary": "System",
+      "votes": {
+        "System": 3,
+        "Method": 2,
+        "Artifact": 1,
+        "Tool": 1,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "graph database": {
+      "primary": "System",
+      "votes": {
+        "System": 4,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "wikipedia": {
+      "primary": "System",
+      "votes": {
+        "System": 4,
+        "Organization": 1,
+        "Dataset": 1
+      },
+      "tie": false
+    },
+    "icann": {
+      "primary": "Event",
+      "votes": {
+        "Event": 1,
+        "Organization": 1
+      },
+      "tie": true
+    },
+    "aaai": {
+      "primary": "Event",
+      "votes": {
+        "Event": 5,
+        "Organization": 3
+      },
+      "tie": false
+    },
+    "www": {
+      "primary": "Event",
+      "votes": {
+        "Event": 6,
+        "Document": 2
+      },
+      "tie": false
+    },
+    "coling": {
+      "primary": "Event",
+      "votes": {
+        "Event": 4,
+        "Organization": 1
+      },
+      "tie": false
+    },
+    "2017": {
+      "primary": "Event",
+      "votes": {
+        "Event": 4,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "2018": {
+      "primary": "Event",
+      "votes": {
+        "Event": 5,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "table i": {
+      "primary": "Document",
+      "votes": {
+        "Document": 3,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "plain text": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Material": 1
+      },
+      "tie": true
+    },
+    "knowledge graph embedding by relational rotation in complex space": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "composition-based multi-relational graph convolutional networks": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "multi-grained named entity recognition": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "bootstrapping entity alignment with knowledge graph embedding": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "multi-view knowledge graph embedding for entity alignment": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "hybrid attention-based prototypical networks for noisy few-shot relation classification": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "a novel cascade binary tagging framework for relational triple extraction": {
+      "primary": "Document",
+      "votes": {
+        "Document": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "lin et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 3,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "nickel et al.": {
+      "primary": "Document",
+      "votes": {
+        "Person": 1,
+        "Document": 2
+      },
+      "tie": false
+    },
+    "chen et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 5,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "han et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 2,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "ma et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 3,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "sun et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 3,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "liu et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 4,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "ye et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "emnlp": {
+      "primary": "Event",
+      "votes": {
+        "Organization": 1,
+        "Event": 4
+      },
+      "tie": false
+    },
+    "knowledge graph embedding": {
+      "primary": "Method",
+      "votes": {
+        "Concept": 2,
+        "Method": 3
+      },
+      "tie": false
+    },
+    "scoring function": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Method": 2
+      },
+      "tie": false
+    },
+    "commonsense reasoning": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "artificial intelligence": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 7,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "graph structure": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Artifact": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "rdf": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 9,
+        "Artifact": 1,
+        "Document": 2,
+        "System": 1
+      },
+      "tie": false
+    },
+    "ontologies": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 2
+      },
+      "tie": true
+    },
+    "neural architecture": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "gnn": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "definitions": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "downstream applications": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "System": 1,
+        "Process": 1
+      },
+      "tie": false
+    },
+    "web ontology language": {
+      "primary": "Document",
+      "votes": {
+        "Concept": 1,
+        "Document": 3,
+        "Tool": 1
+      },
+      "tie": false
+    },
+    "relation set": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Dataset": 1
+      },
+      "tie": false
+    },
+    "vertex": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "edge set": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Component": 1
+      },
+      "tie": false
+    },
+    "natural language understanding": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Process": 1
+      },
+      "tie": false
+    },
+    "few-shot learning": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 4,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "metric learning": {
+      "primary": "Method",
+      "votes": {
+        "Concept": 1,
+        "Method": 2
+      },
+      "tie": false
+    },
+    "complex embeddings": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "linear transformation": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "consistency": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Metric": 2
+      },
+      "tie": false
+    },
+    "deep neural networks": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "e1": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "text descriptions": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Document": 3
+      },
+      "tie": true
+    },
+    "textual descriptions": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "expressiveness": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Metric": 1
+      },
+      "tie": true
+    },
+    "computational complexity": {
+      "primary": "Metric",
+      "votes": {
+        "Concept": 1,
+        "Metric": 2
+      },
+      "tie": false
+    },
+    "relation classification": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Method": 2,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "deep reinforcement learning": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "markov decision process": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "body": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "atom": {
+      "primary": "Component",
+      "votes": {
+        "Concept": 1,
+        "Component": 2,
+        "System": 1
+      },
+      "tie": false
+    },
+    "subject": {
+      "primary": "Component",
+      "votes": {
+        "Concept": 1,
+        "Component": 3
+      },
+      "tie": false
+    },
+    "generalization": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "knowledge graph reasoning": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Method": 1,
+        "Process": 2
+      },
+      "tie": false
+    },
+    "few-shot relational learning": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "zero-shot learning": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 5,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "threshold": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Metric": 1
+      },
+      "tie": false
+    },
+    "word embeddings": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "global relation graph": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "prototype vectors": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "interpretability": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 5,
+        "Metric": 1
+      },
+      "tie": false
+    },
+    "dynamic knowledge graph": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "knowledge evolution": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "knowledge embedding": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 4,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "answer": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "unified framework": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "predictions": {
+      "primary": "Artifact",
+      "votes": {
+        "Concept": 1,
+        "Process": 1,
+        "Artifact": 2
+      },
+      "tie": false
+    },
+    "reliability": {
+      "primary": "Metric",
+      "votes": {
+        "Concept": 1,
+        "Metric": 3
+      },
+      "tie": false
+    },
+    "expert systems": {
+      "primary": "System",
+      "votes": {
+        "Concept": 1,
+        "System": 2
+      },
+      "tie": false
+    },
+    "binary cross-entropy": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Metric": 1
+      },
+      "tie": true
+    },
+    "ground label": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "association rule mining": {
+      "primary": "Method",
+      "votes": {
+        "Concept": 1,
+        "Method": 2
+      },
+      "tie": false
+    },
+    "rule learning": {
+      "primary": "Method",
+      "votes": {
+        "Concept": 1,
+        "Process": 1,
+        "Method": 2
+      },
+      "tie": false
+    },
+    "noise reduction": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "relation extraction": {
+      "primary": "Process",
+      "votes": {
+        "Method": 3,
+        "Process": 6
+      },
+      "tie": false
+    },
+    "deep learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 5,
+        "Concept": 5
+      },
+      "tie": true
+    },
+    "relational learning": {
+      "primary": "Concept",
+      "votes": {
+        "Method": 1,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "entity typing": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Process": 1
+      },
+      "tie": false
+    },
+    "entity disambiguation": {
+      "primary": "Process",
+      "votes": {
+        "Method": 1,
+        "Process": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "entity alignment": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Process": 2
+      },
+      "tie": true
+    },
+    "loss function": {
+      "primary": "Component",
+      "votes": {
+        "Method": 1,
+        "Component": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "hermitian dot product": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "neural networks": {
+      "primary": "Concept",
+      "votes": {
+        "Method": 1,
+        "Concept": 3,
+        "System": 1
+      },
+      "tie": false
+    },
+    "attention mechanism": {
+      "primary": "Method",
+      "votes": {
+        "Method": 3,
+        "Concept": 3
+      },
+      "tie": true
+    },
+    "transfer learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "gan": {
+      "primary": "Method",
+      "votes": {
+        "Method": 3,
+        "Component": 1,
+        "System": 1
+      },
+      "tie": false
+    },
+    "multi-hop reasoning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "text generation": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Process": 1
+      },
+      "tie": false
+    },
+    "knowledge reasoning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Process": 1
+      },
+      "tie": false
+    },
+    "structural embedding": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "multi-head attention": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "tkrl": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "relation prediction": {
+      "primary": "Process",
+      "votes": {
+        "Method": 1,
+        "Process": 2
+      },
+      "tie": false
+    },
+    "embedding learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Process": 1
+      },
+      "tie": false
+    },
+    "rule mining": {
+      "primary": "Process",
+      "votes": {
+        "Method": 1,
+        "Process": 3
+      },
+      "tie": false
+    },
+    "rlvlr": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1,
+        "Tool": 1
+      },
+      "tie": true
+    },
+    "kale": {
+      "primary": "Method",
+      "votes": {
+        "Method": 3,
+        "System": 1
+      },
+      "tie": false
+    },
+    "ruge": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "System": 2
+      },
+      "tie": true
+    },
+    "itere": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "neural computation": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "data-driven learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "plogicnet": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "expressgnn": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "multi-label classification": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "dsrm": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "edkate": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "parameter sharing": {
+      "primary": "Concept",
+      "votes": {
+        "Method": 1,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "feature engineering": {
+      "primary": "Process",
+      "votes": {
+        "Method": 1,
+        "Process": 2
+      },
+      "tie": false
+    },
+    "feature selection": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Process": 1
+      },
+      "tie": false
+    },
+    "few-shot relation classification": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "hyte": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "System": 1
+      },
+      "tie": false
+    },
+    "bi-treelstm": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "hierarchical attention": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "markov logic network": {
+      "primary": "Method",
+      "votes": {
+        "Method": 3,
+        "System": 1
+      },
+      "tie": false
+    },
+    "masked language modeling": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "symbolic reasoning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 3,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "text classification": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "automatic knowledge graph construction": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "rule-based classifier": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "relational machine learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "three-way model": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "representation learning of knowledge graphs with entity descriptions": {
+      "primary": "Document",
+      "votes": {
+        "Method": 1,
+        "Document": 2
+      },
+      "tie": false
+    },
+    "jointly embedding knowledge graphs and logical rules": {
+      "primary": "Document",
+      "votes": {
+        "Method": 1,
+        "Document": 2
+      },
+      "tie": false
+    },
+    "iteratively learning embeddings and rules for knowledge graph reasoning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "information extraction": {
+      "primary": "Process",
+      "votes": {
+        "Method": 2,
+        "Process": 4,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "supervised learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 3,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "knowledge acquisition": {
+      "primary": "Process",
+      "votes": {
+        "Process": 3,
+        "Concept": 1,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "reasoning": {
+      "primary": "Process",
+      "votes": {
+        "Process": 5,
+        "Concept": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "alignment": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "projection": {
+      "primary": "Process",
+      "votes": {
+        "Process": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "vectorization": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "path-finding": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "embedding propagation": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "retrieval": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "semantic relation extraction": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "zero-shot recognition": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "in silico drug discovery": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "nobel prize": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Event": 1
+      },
+      "tie": true
+    },
+    "taxonomy": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 2,
+        "Concept": 2
+      },
+      "tie": true
+    },
+    "rules": {
+      "primary": "Method",
+      "votes": {
+        "Artifact": 1,
+        "Concept": 1,
+        "Method": 2
+      },
+      "tie": false
+    },
+    "open knowledge base": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "ontology": {
+      "primary": "Concept",
+      "votes": {
+        "Artifact": 2,
+        "Concept": 7
+      },
+      "tie": false
+    },
+    "position embeddings": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "mask": {
+      "primary": "Component",
+      "votes": {
+        "Artifact": 1,
+        "Component": 2
+      },
+      "tie": false
+    },
+    "text": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 3,
+        "Material": 1
+      },
+      "tie": false
+    },
+    "entity description": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "figure 10": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "external knowledge base": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 2,
+        "Component": 1
+      },
+      "tie": false
+    },
+    "knowledge graph embedding with hierarchical relation structure": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "relational data": {
+      "primary": "Dataset",
+      "votes": {
+        "Dataset": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "kg": {
+      "primary": "Concept",
+      "votes": {
+        "Dataset": 1,
+        "Concept": 4,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "support set": {
+      "primary": "Dataset",
+      "votes": {
+        "Dataset": 2,
+        "Component": 2
+      },
+      "tie": true
+    },
+    "query set": {
+      "primary": "Dataset",
+      "votes": {
+        "Dataset": 3,
+        "Component": 1
+      },
+      "tie": false
+    },
+    "wikidata": {
+      "primary": "System",
+      "votes": {
+        "Dataset": 3,
+        "System": 5,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "string": {
+      "primary": "Dataset",
+      "votes": {
+        "Dataset": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "nyt": {
+      "primary": "Dataset",
+      "votes": {
+        "Dataset": 2,
+        "Organization": 1
+      },
+      "tie": false
+    },
+    "amie": {
+      "primary": "Tool",
+      "votes": {
+        "Tool": 2,
+        "System": 1,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "openke": {
+      "primary": "Tool",
+      "votes": {
+        "Tool": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "opennre": {
+      "primary": "Tool",
+      "votes": {
+        "Tool": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "python": {
+      "primary": "Tool",
+      "votes": {
+        "Tool": 2,
+        "System": 1
+      },
+      "tie": false
+    },
+    "pykeen": {
+      "primary": "Tool",
+      "votes": {
+        "Tool": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "knowledge-based systems": {
+      "primary": "Document",
+      "votes": {
+        "System": 1,
+        "Document": 4
+      },
+      "tie": false
+    },
+    "neural models": {
+      "primary": "System",
+      "votes": {
+        "System": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "rsn": {
+      "primary": "System",
+      "votes": {
+        "System": 2,
+        "Method": 2
+      },
+      "tie": true
+    },
+    "transformer": {
+      "primary": "System",
+      "votes": {
+        "System": 4,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "compgcn": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "probase": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Dataset": 1
+      },
+      "tie": true
+    },
+    "conceptnet": {
+      "primary": "System",
+      "votes": {
+        "System": 3,
+        "Artifact": 1,
+        "Dataset": 1
+      },
+      "tie": false
+    },
+    "deeppath": {
+      "primary": "System",
+      "votes": {
+        "System": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "minerva": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "ntp": {
+      "primary": "System",
+      "votes": {
+        "System": 3,
+        "Metric": 1
+      },
+      "tie": false
+    },
+    "neurallp": {
+      "primary": "System",
+      "votes": {
+        "System": 2,
+        "Method": 2
+      },
+      "tie": true
+    },
+    "neural-num-lp": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "metar": {
+      "primary": "Method",
+      "votes": {
+        "System": 1,
+        "Method": 2
+      },
+      "tie": false
+    },
+    "joie": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "jape": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "relational database": {
+      "primary": "System",
+      "votes": {
+        "System": 3,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "aggcn": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "umls": {
+      "primary": "System",
+      "votes": {
+        "System": 2,
+        "Artifact": 1,
+        "Dataset": 1
+      },
+      "tie": false
+    },
+    "opencyc": {
+      "primary": "System",
+      "votes": {
+        "System": 3,
+        "Dataset": 1
+      },
+      "tie": false
+    },
+    "never-ending language learning": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "relationships": {
+      "primary": "Component",
+      "votes": {
+        "Component": 2,
+        "Concept": 2
+      },
+      "tie": true
+    },
+    "relation matrix": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "attention": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "candidate entities": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "lstm": {
+      "primary": "Method",
+      "votes": {
+        "Component": 1,
+        "Method": 3
+      },
+      "tie": false
+    },
+    "matching network": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "resnet": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "language model": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "Concept": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "never-ending language learner": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "2021": {
+      "primary": "Event",
+      "votes": {
+        "Event": 4,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "2020": {
+      "primary": "Event",
+      "votes": {
+        "Event": 5,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "signll": {
+      "primary": "Event",
+      "votes": {
+        "Event": 1,
+        "Organization": 1
+      },
+      "tie": true
+    },
+    "vldb": {
+      "primary": "Event",
+      "votes": {
+        "Event": 2,
+        "Organization": 1
+      },
+      "tie": false
+    },
+    "score": {
+      "primary": "Concept",
+      "votes": {
+        "Metric": 1,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "benchmark": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 2,
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "temporal consistency": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "unstructured text": {
+      "primary": "Concept",
+      "votes": {
+        "Material": 1,
+        "Concept": 2,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "output": {
+      "primary": "Artifact",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 2
+      },
+      "tie": false
+    },
+    "explanation": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "structured data": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "semi-automatic": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "human-in-the-loop": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "publication year": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Metric": 1
+      },
+      "tie": true
+    },
+    "semantics": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 5,
+        "Event": 2
+      },
+      "tie": false
+    },
+    "web": {
+      "primary": "System",
+      "votes": {
+        "Concept": 2,
+        "Location": 1,
+        "System": 3
+      },
+      "tie": false
+    },
+    "none": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "kim": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Person": 1
+      },
+      "tie": true
+    },
+    "paper": {
+      "primary": "Document",
+      "votes": {
+        "Document": 4,
+        "Artifact": 1,
+        "Material": 1
+      },
+      "tie": false
+    },
+    "figure 3": {
+      "primary": "Document",
+      "votes": {
+        "Document": 4,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "figure 4": {
+      "primary": "Document",
+      "votes": {
+        "Document": 3,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "tables": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "Artifact": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "literature review": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "human evaluation": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "lookup": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "search engines": {
+      "primary": "Tool",
+      "votes": {
+        "Tool": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "data quality": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "methodology": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "optimization": {
+      "primary": "Process",
+      "votes": {
+        "Concept": 1,
+        "Process": 2
+      },
+      "tie": false
+    },
+    "annotation": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "framework": {
+      "primary": "System",
+      "votes": {
+        "Concept": 1,
+        "System": 2
+      },
+      "tie": false
+    },
+    "textual context": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "video": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Material": 1
+      },
+      "tie": true
+    },
+    "natural language text": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "vectors": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 4,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "date": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Event": 1
+      },
+      "tie": true
+    },
+    "sparql": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Tool": 2,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "schema": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 5,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "datalog": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Tool": 1
+      },
+      "tie": true
+    },
+    "database": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "description logics": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "linked open data": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "knowledge resources": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "relatedness": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Metric": 1
+      },
+      "tie": true
+    },
+    "domain adaptation": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "pre-trained language models": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 4,
+        "System": 1
+      },
+      "tie": false
+    },
+    "electronics": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "machine reading comprehension": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "System": 1
+      },
+      "tie": false
+    },
+    "knowledge graph quality": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Metric": 1
+      },
+      "tie": true
+    },
+    "knowledge sources": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "knowledge graph embeddings": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Method": 2,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "niu et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 2,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "web pages": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "figure 5": {
+      "primary": "Document",
+      "votes": {
+        "Document": 3,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "figure 7": {
+      "primary": "Document",
+      "votes": {
+        "Document": 3,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "figure 8": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "advances in neural information processing systems": {
+      "primary": "Document",
+      "votes": {
+        "Document": 5,
+        "Event": 1
+      },
+      "tie": false
+    },
+    "inductive relation prediction by subgraph reasoning": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "matching networks for one shot learning": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "knowledge extraction": {
+      "primary": "Process",
+      "votes": {
+        "Process": 4,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "entity extraction": {
+      "primary": "Process",
+      "votes": {
+        "Process": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "event extraction": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "entity linking": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "integration": {
+      "primary": "Process",
+      "votes": {
+        "Process": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "open information extraction": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "fusion": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Event": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "evaluation": {
+      "primary": "Process",
+      "votes": {
+        "Process": 2,
+        "Concept": 1,
+        "Method": 2
+      },
+      "tie": true
+    },
+    "entity resolution": {
+      "primary": "Process",
+      "votes": {
+        "Process": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "comparison": {
+      "primary": "Process",
+      "votes": {
+        "Process": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "knowledge graph construction": {
+      "primary": "Process",
+      "votes": {
+        "Method": 1,
+        "Process": 6
+      },
+      "tie": false
+    },
+    "transformer-based models": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "graph neural networks": {
+      "primary": "Method",
+      "votes": {
+        "Method": 5,
+        "System": 4,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "model-based": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "multi-task learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "ontology alignment": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "data mining": {
+      "primary": "Concept",
+      "votes": {
+        "Method": 1,
+        "Process": 1,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "reinforcement learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "averaging": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "fsrl": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "symbolic knowledge engineering": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "contrastive learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 3,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "one-shot relational learning for knowledge graphs": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "long-tail relation extraction": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "image": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 3,
+        "Concept": 1,
+        "Material": 1
+      },
+      "tie": false
+    },
+    "sentence": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 2,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "kg embeddings": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "commonsense knowledge graph": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "event kg": {
+      "primary": "Concept",
+      "votes": {
+        "Artifact": 1,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "questions": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "logical rules": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "structure-augmented text representation learning for efficient knowledge graph completion": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "machine translation": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "graph transformer": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "meta learner": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "ace": {
+      "primary": "Organization",
+      "votes": {
+        "Organization": 2,
+        "Dataset": 1
+      },
+      "tie": false
+    },
+    "entity set": {
+      "primary": "Concept",
+      "votes": {
+        "Component": 1,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "subgraph": {
+      "primary": "Component",
+      "votes": {
+        "Component": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "candidate set": {
+      "primary": "Dataset",
+      "votes": {
+        "Dataset": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "videos": {
+      "primary": "Dataset",
+      "votes": {
+        "Dataset": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "training data": {
+      "primary": "Dataset",
+      "votes": {
+        "Dataset": 5,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "input samples": {
+      "primary": "Dataset",
+      "votes": {
+        "Dataset": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "similarity": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 5,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "margin loss": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "generalization ability": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 3,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "rdfox": {
+      "primary": "Tool",
+      "votes": {
+        "Tool": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "random noise": {
+      "primary": "Material",
+      "votes": {
+        "Material": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "embeddings": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 2
+      },
+      "tie": true
+    },
+    "logic reasoning": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "representation learning": {
+      "primary": "Method",
+      "votes": {
+        "Concept": 1,
+        "Process": 1,
+        "Method": 2
+      },
+      "tie": false
+    },
+    "labels": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "explainability": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 4,
+        "Metric": 1
+      },
+      "tie": false
+    },
+    "ai applications": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "robustness": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Metric": 2
+      },
+      "tie": false
+    },
+    "learning representation": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "cohen et al.": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Person": 1
+      },
+      "tie": true
+    },
+    "human": {
+      "primary": "Person",
+      "votes": {
+        "Person": 3,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "reasoning step": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "fine-tuning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Process": 2
+      },
+      "tie": true
+    },
+    "differentiable learning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "neural reasoning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "mln": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "kgs": {
+      "primary": "Concept",
+      "votes": {
+        "Dataset": 2,
+        "Concept": 3,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "confidence": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "table": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Artifact": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "pattern recognition": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "type": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "vocabulary": {
+      "primary": "Artifact",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 2
+      },
+      "tie": false
+    },
+    "data graph": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "node label": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "background": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "structured information": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "learning on graphs": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "route planning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "model fitting": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "node classification": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "rule extraction": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "2022": {
+      "primary": "Event",
+      "votes": {
+        "Event": 3,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "reasoning capabilities": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "data sources": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1,
+        "Dataset": 1
+      },
+      "tie": true
+    },
+    "architecture": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "rule": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "model": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "2009": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Event": 1
+      },
+      "tie": true
+    },
+    "semi-structured data": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Dataset": 1
+      },
+      "tie": true
+    },
+    "unstructured data": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Material": 1,
+        "Dataset": 1
+      },
+      "tie": false
+    },
+    "multi-modal knowledge graphs": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "textual data": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Material": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "drug information": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "actor": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Person": 1
+      },
+      "tie": false
+    },
+    "brand": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "bi-lstm": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "relation detection": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "meta-learning": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "category": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Component": 1
+      },
+      "tie": false
+    },
+    "descriptions": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "large-scale knowledge graph": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "data format": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "deep bidirectional transformers": {
+      "primary": "Component",
+      "votes": {
+        "Concept": 1,
+        "Component": 2
+      },
+      "tie": false
+    },
+    "language understanding": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Process": 1
+      },
+      "tie": false
+    },
+    "linked data": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "ji et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 2,
+        "Document": 1
+      },
+      "tie": false
+    },
+    "xu et al.": {
+      "primary": "Document",
+      "votes": {
+        "Person": 1,
+        "Document": 2
+      },
+      "tie": false
+    },
+    "pan et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "vashishtha et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "commun. acm": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Organization": 1
+      },
+      "tie": true
+    },
+    "information systems": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "supervised relation extraction": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "translation": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "forecasting": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "joint extraction": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "knowledge graph generation": {
+      "primary": "Process",
+      "votes": {
+        "Process": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "knowledge fusion": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "pipeline": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "pre-training": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "elmo": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Tool": 1
+      },
+      "tie": true
+    },
+    "graph embedding": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Concept": 2
+      },
+      "tie": true
+    },
+    "vector representations": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "probabilistic model": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "mention detection": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "encoder-decoder model": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "pre-trained models": {
+      "primary": "Concept",
+      "votes": {
+        "Method": 1,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "casrel": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "entity matching": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "simkgc": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "System": 1
+      },
+      "tie": false
+    },
+    "similarity computation": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "reconstruction": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "open academic graph": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Dataset": 1
+      },
+      "tie": true
+    },
+    "kggen": {
+      "primary": "System",
+      "votes": {
+        "System": 2,
+        "Method": 1
+      },
+      "tie": false
+    },
+    "extractor": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Tool": 1
+      },
+      "tie": true
+    },
+    "global representations": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "entity vector": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 2,
+        "Component": 1
+      },
+      "tie": false
+    },
+    "source kg": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Dataset": 1
+      },
+      "tie": true
+    },
+    "target kg": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Dataset": 1
+      },
+      "tie": true
+    },
+    "tucker decomposition-based temporal knowledge graph completion": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "input data": {
+      "primary": "Dataset",
+      "votes": {
+        "Dataset": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "word representations": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "bloom": {
+      "primary": "Tool",
+      "votes": {
+        "Tool": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "covid-19": {
+      "primary": "Event",
+      "votes": {
+        "Event": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "attention score": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "large language model": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 12,
+        "System": 3,
+        "Tool": 1
+      },
+      "tie": false
+    },
+    "downstream tasks": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Process": 1
+      },
+      "tie": false
+    },
+    "llms": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "System": 2
+      },
+      "tie": true
+    },
+    "semantic search": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "subject node": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "object node": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "text processing": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "embedding vector": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "contextualized representations": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "plms": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "personalized recommendation": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "efficiency": {
+      "primary": "Metric",
+      "votes": {
+        "Concept": 1,
+        "Metric": 4
+      },
+      "tie": false
+    },
+    "new knowledge": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "applications": {
+      "primary": "Concept",
+      "votes": {
+        "Document": 1,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "ekg reasoning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "case study": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Process": 1
+      },
+      "tie": false
+    },
+    "graph pruning": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "knowledge graph embedding models": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "natural language generation": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "pre-trained language model": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "information retrieval": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "rebel": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "cluster": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "kbqa": {
+      "primary": "Concept",
+      "votes": {
+        "System": 1,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "entity-relation triples": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "report": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "scalability": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 3,
+        "Concept": 2
+      },
+      "tie": false
+    },
+    "parameters": {
+      "primary": "Component",
+      "votes": {
+        "Component": 2,
+        "Concept": 1,
+        "Metric": 1
+      },
+      "tie": false
+    },
+    "gpt": {
+      "primary": "Tool",
+      "votes": {
+        "Tool": 1,
+        "Concept": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "hugging face": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Organization": 1
+      },
+      "tie": true
+    },
+    "gpt series": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "organizations": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Organization": 1
+      },
+      "tie": true
+    },
+    "long texts": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "triple extraction": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "people": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 2,
+        "Person": 1
+      },
+      "tie": false
+    },
+    "conversations": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "context window": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Component": 1
+      },
+      "tie": true
+    },
+    "rag": {
+      "primary": "Method",
+      "votes": {
+        "Concept": 2,
+        "Method": 4,
+        "System": 1
+      },
+      "tie": false
+    },
+    "xlnet": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "code": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "prompt": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 3,
+        "Component": 1
+      },
+      "tie": false
+    },
+    "batch size": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "learning rate": {
+      "primary": "Metric",
+      "votes": {
+        "Metric": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "entity description pattern": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "bai et al.": {
+      "primary": "Person",
+      "votes": {
+        "Person": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "original kg": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "computers": {
+      "primary": "Document",
+      "votes": {
+        "Document": 2,
+        "System": 1
+      },
+      "tie": false
+    },
+    "instruction tuning": {
+      "primary": "Method",
+      "votes": {
+        "Concept": 1,
+        "Method": 2
+      },
+      "tie": false
+    },
+    "representation": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 3,
+        "Artifact": 1
+      },
+      "tie": false
+    },
+    "interactivity": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "text segments": {
+      "primary": "Artifact",
+      "votes": {
+        "Artifact": 1,
+        "Document": 1
+      },
+      "tie": true
+    },
+    "experiment": {
+      "primary": "Event",
+      "votes": {
+        "Method": 1,
+        "Event": 2
+      },
+      "tie": false
+    },
+    "filtering": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "zero-shot information extraction": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "system": {
+      "primary": "system",
+      "votes": {
+        "system": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "chain-of-thought prompting": {
+      "primary": "Method",
+      "votes": {
+        "Method": 2,
+        "Concept": 1
+      },
+      "tie": false
+    },
+    "graph generation": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "contextual reasoning": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "node degree": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Metric": 1
+      },
+      "tie": true
+    },
+    "sub-graph": {
+      "primary": "Component",
+      "votes": {
+        "Component": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "models": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Artifact": 1
+      },
+      "tie": true
+    },
+    "llm integration": {
+      "primary": "Process",
+      "votes": {
+        "Process": 1,
+        "Concept": 1
+      },
+      "tie": true
+    },
+    "semantic modeling": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "planning": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "masked code modeling": {
+      "primary": "Method",
+      "votes": {
+        "Method": 1,
+        "Metric": 1
+      },
+      "tie": true
+    },
+    "edge et al.": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "Person": 1
+      },
+      "tie": true
+    },
+    "graphrag": {
+      "primary": "System",
+      "votes": {
+        "System": 1,
+        "Method": 1
+      },
+      "tie": true
+    },
+    "query-focused summarization": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Process": 1
+      },
+      "tie": true
+    },
+    "karma": {
+      "primary": "Document",
+      "votes": {
+        "Document": 1,
+        "System": 1
+      },
+      "tie": true
+    },
+    "competency question": {
+      "primary": "Concept",
+      "votes": {
+        "Concept": 1,
+        "Document": 1
+      },
+      "tie": true
+    }
+  }
+}

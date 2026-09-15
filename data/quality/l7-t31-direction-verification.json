@@ -1,0 +1,13 @@
+{
+  "paired": 2179,
+  "unmatched": 169,
+  "mean_before": 0.7205,
+  "mean_after": 0.7217,
+  "delta": 0.0011,
+  "up": 80,
+  "down": 44,
+  "same": 2055,
+  "pass_before": 1411,
+  "pass_after": 1414,
+  "threshold": 0.67
+}

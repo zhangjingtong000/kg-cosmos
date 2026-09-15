@@ -1,0 +1,534 @@
+{
+  "unique": 15708,
+  "rules": {
+    "R1 大小写": {
+      "groups": 163,
+      "pairs": 167,
+      "type_conflict": 52,
+      "short_involved": 6
+    },
+    "R2 复数": {
+      "groups": 494,
+      "pairs": 509,
+      "type_conflict": 246,
+      "short_involved": 6
+    },
+    "R3 标点空白": {
+      "groups": 171,
+      "pairs": 181,
+      "type_conflict": 58,
+      "short_involved": 7
+    }
+  },
+  "abbreviations": {
+    "extracted": 512,
+    "usable": 101,
+    "usable_pairs": [
+      {
+        "full": "Large Language Models",
+        "abbr": "LLM",
+        "count": 20
+      },
+      {
+        "full": "Findings",
+        "abbr": "EMNLP",
+        "count": 12
+      },
+      {
+        "full": "Knowledge Graphs",
+        "abbr": "KG",
+        "count": 11
+      },
+      {
+        "full": "Knowledge Graph",
+        "abbr": "KG",
+        "count": 8
+      },
+      {
+        "full": "Conference on Empirical Methods in Natural Language Processing",
+        "abbr": "EMNLP",
+        "count": 7
+      },
+      {
+        "full": "Findings",
+        "abbr": "ACL",
+        "count": 6
+      },
+      {
+        "full": "Mean Reciprocal Rank",
+        "abbr": "MRR",
+        "count": 6
+      },
+      {
+        "full": "Open Research Knowledge Graph",
+        "abbr": "ORKG",
+        "count": 5
+      },
+      {
+        "full": "Recurrent Neural Networks",
+        "abbr": "RNN",
+        "count": 5
+      },
+      {
+        "full": "Mean Rank",
+        "abbr": "MR",
+        "count": 5
+      },
+      {
+        "full": "International Joint Conference on Neural Networks",
+        "abbr": "IJCNN",
+        "count": 4
+      },
+      {
+        "full": "Named Entity Recognition",
+        "abbr": "NER",
+        "count": 4
+      },
+      {
+        "full": "Web Ontology Language",
+        "abbr": "OWL",
+        "count": 3
+      },
+      {
+        "full": "Graph Neural Networks",
+        "abbr": "GNN",
+        "count": 3
+      },
+      {
+        "full": "Graph Convolutional Networks",
+        "abbr": "GCN",
+        "count": 3
+      },
+      {
+        "full": "Natural Language Processing",
+        "abbr": "NLP",
+        "count": 3
+      },
+      {
+        "full": "Convolutional Neural Networks",
+        "abbr": "CNN",
+        "count": 3
+      },
+      {
+        "full": "Machine Reading Comprehension",
+        "abbr": "MRC",
+        "count": 3
+      },
+      {
+        "full": "Knowledge graphs",
+        "abbr": "KG",
+        "count": 3
+      },
+      {
+        "full": "Graph Neural Network",
+        "abbr": "GNN",
+        "count": 3
+      },
+      {
+        "full": "Path-Ranking Algorithm",
+        "abbr": "PRA",
+        "count": 2
+      },
+      {
+        "full": "Resource Description Framework",
+        "abbr": "RDF",
+        "count": 2
+      },
+      {
+        "full": "Graph Convolutional Network",
+        "abbr": "GCN",
+        "count": 2
+      },
+      {
+        "full": "Multi-Layer Perceptron",
+        "abbr": "MLP",
+        "count": 2
+      },
+      {
+        "full": "Markov Logic Networks",
+        "abbr": "MLN",
+        "count": 2
+      },
+      {
+        "full": "Computer Vision",
+        "abbr": "CV",
+        "count": 2
+      },
+      {
+        "full": "Knowledge Graph Embedding",
+        "abbr": "KGE",
+        "count": 2
+      },
+      {
+        "full": "Attention",
+        "abbr": "CLS",
+        "count": 2
+      },
+      {
+        "full": "Retrieval Augmented Generation",
+        "abbr": "RAG",
+        "count": 2
+      },
+      {
+        "full": "Findings",
+        "abbr": "EACL",
+        "count": 2
+      },
+      {
+        "full": "Retrieval-Augmented Generation",
+        "abbr": "RAG",
+        "count": 2
+      },
+      {
+        "full": "neural tensor network",
+        "abbr": "NTN",
+        "count": 1
+      },
+      {
+        "full": "Neural Logic Programming",
+        "abbr": "LP",
+        "count": 1
+      },
+      {
+        "full": "Resource description framework",
+        "abbr": "RDF",
+        "count": 1
+      },
+      {
+        "full": "Markov decision process",
+        "abbr": "MDP",
+        "count": 1
+      },
+      {
+        "full": "Monte Carlo Tree Search",
+        "abbr": "MCTS",
+        "count": 1
+      },
+      {
+        "full": "Neural Theorem Provers",
+        "abbr": "NTP",
+        "count": 1
+      },
+      {
+        "full": "Knowledge graph language model",
+        "abbr": "KGLM",
+        "count": 1
+      },
+      {
+        "full": "Variational Reasoning Network",
+        "abbr": "VRN",
+        "count": 1
+      },
+      {
+        "full": "Protein Data Bank",
+        "abbr": "PDB",
+        "count": 1
+      },
+      {
+        "full": "Portable Document Format",
+        "abbr": "PDF",
+        "count": 1
+      },
+      {
+        "full": "Optical Character Recognition",
+        "abbr": "OCR",
+        "count": 1
+      },
+      {
+        "full": "User Interface",
+        "abbr": "UI",
+        "count": 1
+      },
+      {
+        "full": "Support Vector Machine",
+        "abbr": "SVM",
+        "count": 1
+      },
+      {
+        "full": "Gated Graph Neural Network",
+        "abbr": "GGNN",
+        "count": 1
+      },
+      {
+        "full": "Transfer Graph Generation",
+        "abbr": "TGG",
+        "count": 1
+      },
+      {
+        "full": "Automatic Content Extraction",
+        "abbr": "ACE",
+        "count": 1
+      },
+      {
+        "full": "Knowledge graph",
+        "abbr": "KG",
+        "count": 1
+      },
+      {
+        "full": "Description Logics",
+        "abbr": "DL",
+        "count": 1
+      },
+      {
+        "full": "Existential Positive First-Order",
+        "abbr": "EPFO",
+        "count": 1
+      },
+      {
+        "full": "Deep learning",
+        "abbr": "DL",
+        "count": 1
+      },
+      {
+        "full": "Recurrent Transformers",
+        "abbr": "RETRA",
+        "count": 1
+      },
+      {
+        "full": "Knowledge base",
+        "abbr": "KB",
+        "count": 1
+      },
+      {
+        "full": "Google Knowledge Graph",
+        "abbr": "GKG",
+        "count": 1
+      },
+      {
+        "full": "Open Academic Graph",
+        "abbr": "OAG",
+        "count": 1
+      },
+      {
+        "full": "Encoder-decoder Model",
+        "abbr": "IMOJIE",
+        "count": 1
+      },
+      {
+        "full": "Metric-based Knowledge Transfer Model",
+        "abbr": "RSN",
+        "count": 1
+      },
+      {
+        "full": "Relation Siamese Net",
+        "abbr": "RSN",
+        "count": 1
+      },
+      {
+        "full": "Learning",
+        "abbr": "MIML",
+        "count": 1
+      },
+      {
+        "full": "Model-agnostic machine learning",
+        "abbr": "MAML",
+        "count": 1
+      },
+      {
+        "full": "Discriminative reasoning network",
+        "abbr": "DRN",
+        "count": 1
+      },
+      {
+        "full": "Event KG",
+        "abbr": "EKG",
+        "count": 1
+      },
+      {
+        "full": "Knowledge extraction",
+        "abbr": "KGE",
+        "count": 1
+      },
+      {
+        "full": "Graph Hawkes Neural Network",
+        "abbr": "GHNN",
+        "count": 1
+      },
+      {
+        "full": "EKG reasoning",
+        "abbr": "EKGR",
+        "count": 1
+      },
+      {
+        "full": "Neural Network Language Models",
+        "abbr": "NNLM",
+        "count": 1
+      },
+      {
+        "full": "Multi-modal Knowledge Graphs",
+        "abbr": "MMKG",
+        "count": 1
+      },
+      {
+        "full": "Knowledge Base",
+        "abbr": "KB",
+        "count": 1
+      },
+      {
+        "full": "Pre-trained Language Model",
+        "abbr": "PLM",
+        "count": 1
+      },
+      {
+        "full": "Graph Attention Network",
+        "abbr": "GAT",
+        "count": 1
+      },
+      {
+        "full": "Classification",
+        "abbr": "CLS",
+        "count": 1
+      },
+      {
+        "full": "Knowledge Graph Completion",
+        "abbr": "KGC",
+        "count": 1
+      },
+      {
+        "full": "Zero-shot learning",
+        "abbr": "ZSL",
+        "count": 1
+      },
+      {
+        "full": "Entity Description Pattern",
+        "abbr": "EDP",
+        "count": 1
+      },
+      {
+        "full": "Link Pattern",
+        "abbr": "LP",
+        "count": 1
+      },
+      {
+        "full": "Graph Attention Networks",
+        "abbr": "GAT",
+        "count": 1
+      },
+      {
+        "full": "Markov Decision Process",
+        "abbr": "MDP",
+        "count": 1
+      },
+      {
+        "full": "KG Enhanced Language Model",
+        "abbr": "KGEL",
+        "count": 1
+      },
+      {
+        "full": "Knowledge Base Question Answering",
+        "abbr": "KBQA",
+        "count": 1
+      },
+      {
+        "full": "Abstract Knowledge Graph",
+        "abbr": "KG",
+        "count": 1
+      },
+      {
+        "full": "Link Prediction",
+        "abbr": "LP",
+        "count": 1
+      },
+      {
+        "full": "European Regional Development Fund",
+        "abbr": "ERDF",
+        "count": 1
+      },
+      {
+        "full": "Generative Pre-Trained Transformer",
+        "abbr": "GPT",
+        "count": 1
+      },
+      {
+        "full": "World Wide Web",
+        "abbr": "WWW",
+        "count": 1
+      },
+      {
+        "full": "Large language models",
+        "abbr": "LLM",
+        "count": 1
+      },
+      {
+        "full": "Quantized Graph Representation",
+        "abbr": "QGR",
+        "count": 1
+      },
+      {
+        "full": "Anchor Selection and Assignment",
+        "abbr": "ASA",
+        "count": 1
+      },
+      {
+        "full": "Deep Graph Infomax",
+        "abbr": "DGI",
+        "count": 1
+      },
+      {
+        "full": "Masked Code Modeling",
+        "abbr": "MCM",
+        "count": 1
+      },
+      {
+        "full": "Graph Token Information Discrepancy",
+        "abbr": "GTID",
+        "count": 1
+      },
+      {
+        "full": "Knowledge Graph Construction",
+        "abbr": "KGC",
+        "count": 1
+      },
+      {
+        "full": "pre-trained language models",
+        "abbr": "PLM",
+        "count": 1
+      },
+      {
+        "full": "Retrieval augmented generation",
+        "abbr": "RAG",
+        "count": 1
+      },
+      {
+        "full": "Wikidata",
+        "abbr": "KG",
+        "count": 1
+      },
+      {
+        "full": "KG tasks",
+        "abbr": "KG",
+        "count": 1
+      },
+      {
+        "full": "Path Ranking Algorithm",
+        "abbr": "PRA",
+        "count": 1
+      },
+      {
+        "full": "Temporal KGR",
+        "abbr": "TKGR",
+        "count": 1
+      },
+      {
+        "full": "Model-Agnostic Meta-Learning",
+        "abbr": "MAML",
+        "count": 1
+      },
+      {
+        "full": "Generative Adversarial Network",
+        "abbr": "GAN",
+        "count": 1
+      },
+      {
+        "full": "COMPETENCY QUESTION",
+        "abbr": "CQ",
+        "count": 1
+      },
+      {
+        "full": "Large Language Model",
+        "abbr": "LLM",
+        "count": 1
+      }
+    ]
+  }
+}

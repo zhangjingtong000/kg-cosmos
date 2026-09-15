@@ -1,0 +1,33 @@
+{
+  "n": 30,
+  "agreement": 0.8667,
+  "expected_agreement": 0.52,
+  "cohen_kappa": 0.7222,
+  "rate_annotator1": 0.4,
+  "rate_annotator2": 0.4,
+  "both_unclear": 0,
+  "disagreements": [
+    {
+      "id": "V0010",
+      "first": "support",
+      "second": "reject"
+    },
+    {
+      "id": "V0102",
+      "first": "reject",
+      "second": "support"
+    },
+    {
+      "id": "V0108",
+      "first": "support",
+      "second": "reject"
+    },
+    {
+      "id": "V0167",
+      "first": "unclear",
+      "second": "support"
+    }
+  ],
+  "reading": "任务可稳定标注，40.0% 可作结论",
+  "note": "两个标注者都是 LLM（不同会话），不是人类标注者。κ 衡量的是\"这个判定任务能否被稳定复现\"，与标注者是不是人无关，但**不能**据此声称达到了人类金标的水准。"
+}

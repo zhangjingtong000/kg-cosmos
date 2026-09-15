@@ -1,0 +1,1758 @@
+{
+  "layer": "L7",
+  "criterion": "endpoint type constraint",
+  "table_source": "src/ontology.py",
+  "edges_total": 43867,
+  "by_type": {
+    "RELATED_TO": {
+      "kind": "unconstrained",
+      "reversal": "unjudgeable",
+      "semantics": "兜底关系：抽取器在两实体有联系但说不清属于哪一类时使用，没有可判定的方向语义。",
+      "basis": "data",
+      "evidence": "可判定 6625 条，最高格 Person→Person 仅 17.6%，需 13 个 source 类型才覆盖 99% —— 全图最分散的一类。verify_direction.py 亦列入 SYMMETRIC（模板反转后语义不变）。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Location",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Location",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 9598,
+      "n_unjudgeable": 2973,
+      "n_resolvable": 6625,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 0,
+      "n_reversed": 0,
+      "n_role_violation": 0,
+      "n_unconstrained": 6625,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": null,
+      "reversed_pairs": [],
+      "role_violation_pairs": [],
+      "reversed_samples": [],
+      "role_violation_samples": []
+    },
+    "CREATED_BY": {
+      "kind": "directed",
+      "reversal": "judgeable",
+      "semantics": "source 是创作者（作者/机构），target 是被创作物。沿用 T3.1 统一后的 Author → Work 约定，与 REL_TEMPLATE 的 \"{t} was created by {s}.\" 一致。",
+      "basis": "convention",
+      "evidence": "可判定 6241 条中 source 侧 Person/Organization 覆盖 94.7%、target 落 11 类产物占 95.7%。",
+      "source_core": [
+        "Organization",
+        "Person"
+      ],
+      "target_core": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Material",
+        "Method",
+        "Metric",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "source_allowed": [
+        "Organization",
+        "Person"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Material",
+        "Method",
+        "Metric",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 8755,
+      "n_unjudgeable": 2514,
+      "n_resolvable": 6241,
+      "n_compliant_directed": 5819,
+      "n_compliant_role": 0,
+      "n_reversed": 120,
+      "n_role_violation": 302,
+      "n_unconstrained": 0,
+      "direction_compliance": 0.9798,
+      "direction_coverage": 0.9516,
+      "role_compliance": 0.9507,
+      "reversed_pairs": [
+        [
+          [
+            "Method",
+            "Person"
+          ],
+          54
+        ],
+        [
+          [
+            "Document",
+            "Person"
+          ],
+          35
+        ],
+        [
+          [
+            "System",
+            "Person"
+          ],
+          15
+        ],
+        [
+          [
+            "Concept",
+            "Person"
+          ],
+          8
+        ],
+        [
+          [
+            "Component",
+            "Person"
+          ],
+          3
+        ],
+        [
+          [
+            "Dataset",
+            "Person"
+          ],
+          2
+        ],
+        [
+          [
+            "Tool",
+            "Person"
+          ],
+          1
+        ],
+        [
+          [
+            "Process",
+            "Person"
+          ],
+          1
+        ],
+        [
+          [
+            "Artifact",
+            "Person"
+          ],
+          1
+        ]
+      ],
+      "role_violation_pairs": [
+        [
+          [
+            "Person",
+            "Person"
+          ],
+          46
+        ],
+        [
+          [
+            "Method",
+            "Document"
+          ],
+          36
+        ],
+        [
+          [
+            "Person",
+            "Event"
+          ],
+          34
+        ],
+        [
+          [
+            "Event",
+            "Organization"
+          ],
+          29
+        ],
+        [
+          [
+            "Event",
+            "Person"
+          ],
+          24
+        ],
+        [
+          [
+            "System",
+            "Document"
+          ],
+          20
+        ],
+        [
+          [
+            "Organization",
+            "Person"
+          ],
+          9
+        ],
+        [
+          [
+            "Concept",
+            "Method"
+          ],
+          8
+        ],
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          8
+        ],
+        [
+          [
+            "Artifact",
+            "Document"
+          ],
+          5
+        ]
+      ],
+      "reversed_samples": [
+        {
+          "source": "Word2Vec",
+          "source_type": "Tool",
+          "target": "Mikolov et al.",
+          "target_type": "Person",
+          "type": "CREATED_BY",
+          "l5": 0.6381,
+          "description": "Word2Vec was created by Mikolov et al."
+        },
+        {
+          "source": "ComplEx-N3",
+          "source_type": "System",
+          "target": "Lacroix Et Al.",
+          "target_type": "Person",
+          "type": "CREATED_BY",
+          "l5": 0.2432,
+          "description": "ComplEx-N3 was proposed by Lacroix et al. in 2018"
+        },
+        {
+          "source": "RotatE",
+          "source_type": "Method",
+          "target": "Sun Et Al.",
+          "target_type": "Person",
+          "type": "CREATED_BY",
+          "l5": 0.785,
+          "description": "RotatE was proposed by Sun et al. in 2019"
+        },
+        {
+          "source": "QuatE",
+          "source_type": "Method",
+          "target": "Zhang Et Al.",
+          "target_type": "Person",
+          "type": "CREATED_BY",
+          "l5": 0.3678,
+          "description": "QuatE was proposed by Zhang et al. in 2019"
+        },
+        {
+          "source": "TransE",
+          "source_type": "Method",
+          "target": "Bordes et al.",
+          "target_type": "Person",
+          "type": "CREATED_BY",
+          "l5": 0.1197,
+          "description": "TransE was created by Bordes et al."
+        },
+        {
+          "source": "SME",
+          "source_type": "Method",
+          "target": "Bordes et al.",
+          "target_type": "Person",
+          "type": "CREATED_BY",
+          "l5": 0.1042,
+          "description": "SME was created by Bordes et al."
+        },
+        {
+          "source": "ROPs",
+          "source_type": "Method",
+          "target": "Yin et al.",
+          "target_type": "Person",
+          "type": "CREATED_BY",
+          "l5": 0.3412,
+          "description": "ROPs was created by Yin et al."
+        },
+        {
+          "source": "Inception Network",
+          "source_type": "Component",
+          "target": "Szegedy Et Al.",
+          "target_type": "Person",
+          "type": "CREATED_BY",
+          "l5": 0.3146,
+          "description": "The Inception network is attributed to Szegedy et al., 2016."
+        }
+      ],
+      "role_violation_samples": [
+        {
+          "source": "TransE",
+          "source_type": "Method",
+          "target": "Bordes et al., 2013",
+          "target_type": "Document",
+          "type": "CREATED_BY",
+          "l5": 0.8032,
+          "description": "TransE was introduced by Bordes et al., 2013."
+        },
+        {
+          "source": "Figure 1",
+          "source_type": "Document",
+          "target": "Mikolov et al. (2013)",
+          "target_type": "Document",
+          "type": "CREATED_BY",
+          "l5": 0.8975,
+          "description": "Figure 1 is drawn based on Mikolov et al. (2013)"
+        },
+        {
+          "source": "Figure 2",
+          "source_type": "Document",
+          "target": "Weston and Bordes (2014)",
+          "target_type": "Document",
+          "type": "CREATED_BY",
+          "l5": 0.6943,
+          "description": "Figure 2 is drawn based on Weston and Bordes (2014)"
+        },
+        {
+          "source": "Softmax Regression",
+          "source_type": "Method",
+          "target": "Toutanova And Chen",
+          "target_type": "Document",
+          "type": "CREATED_BY",
+          "l5": 0.4964,
+          "description": "Softmax regression is attributed to Toutanova and Chen, 2015."
+        },
+        {
+          "source": "Logistic Regression",
+          "source_type": "Method",
+          "target": "Trouillon Et Al.",
+          "target_type": "Document",
+          "type": "CREATED_BY",
+          "l5": 0.7823,
+          "description": "Logistic regression is attributed to Trouillon et al."
+        },
+        {
+          "source": "Krompaß Et Al.",
+          "source_type": "Document",
+          "target": "Domain Sampling",
+          "target_type": "Method",
+          "type": "CREATED_BY",
+          "l5": 0.9751,
+          "description": "Domain sampling was proposed by Krompaß et al."
+        },
+        {
+          "source": "Xie Et Al.",
+          "source_type": "Document",
+          "target": "Domain Sampling",
+          "target_type": "Method",
+          "type": "CREATED_BY",
+          "l5": 0.9025,
+          "description": "Domain sampling was also used by Xie et al."
+        },
+        {
+          "source": "Adversarial Learning",
+          "source_type": "Method",
+          "target": "Cai and Wang (2018)",
+          "target_type": "Document",
+          "type": "CREATED_BY",
+          "l5": 0.3127,
+          "description": "Cai and Wang (2018) proposed adversarial learning-based strategies."
+        }
+      ]
+    },
+    "USES": {
+      "kind": "directed",
+      "reversal": "unjudgeable",
+      "semantics": "source 使用/依赖 target 作为手段、数据或组件。",
+      "basis": "semantics",
+      "evidence": "可判定 4857 条：Method→Concept 821（16.9%）与 Concept→Method 168并存，Method/System/Process/Concept 在两侧都常见，类型定不了向。Person 在 source 侧 7.3%、target 侧仅 0.8%，故只排除「被使用物是人」这一种角色——但实测它多数是谓词误用（requires human experts）而非方向错误，所以只进角色审计、不进方向指标。Organization 与Material 作被使用物语义合法（使用数据提供方的数据、使用文本内容），**不排除**，否则会误杀「Federated learning combines features from different data providers」这类正确边。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Location",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 7339,
+      "n_unjudgeable": 2482,
+      "n_resolvable": 4857,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 4815,
+      "n_reversed": 0,
+      "n_role_violation": 42,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 0.9914,
+      "reversed_pairs": [],
+      "role_violation_pairs": [
+        [
+          [
+            "Dataset",
+            "Person"
+          ],
+          12
+        ],
+        [
+          [
+            "Method",
+            "Person"
+          ],
+          9
+        ],
+        [
+          [
+            "System",
+            "Person"
+          ],
+          8
+        ],
+        [
+          [
+            "Process",
+            "Person"
+          ],
+          4
+        ],
+        [
+          [
+            "Concept",
+            "Person"
+          ],
+          3
+        ],
+        [
+          [
+            "Artifact",
+            "Person"
+          ],
+          3
+        ],
+        [
+          [
+            "Material",
+            "Concept"
+          ],
+          1
+        ],
+        [
+          [
+            "Organization",
+            "Person"
+          ],
+          1
+        ],
+        [
+          [
+            "Person",
+            "Person"
+          ],
+          1
+        ]
+      ],
+      "reversed_samples": [],
+      "role_violation_samples": [
+        {
+          "source": "SME",
+          "source_type": "Method",
+          "target": "Liang and Forbus",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.5633,
+          "description": "Liang and Forbus used the plausibility score produced by SME."
+        },
+        {
+          "source": "Scholarly Knowledge Graph",
+          "source_type": "Concept",
+          "target": "Domain Expert",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.2817,
+          "description": "Creating a scholarly knowledge graph requires manual effort and domain experts"
+        },
+        {
+          "source": "Approach",
+          "source_type": "Method",
+          "target": "Human Expert",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.9412,
+          "description": "The approach requires manual effort and human experts."
+        },
+        {
+          "source": "Crowdsourcing",
+          "source_type": "Method",
+          "target": "Paper Authors",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.6771,
+          "description": "Crowdsourcing includes paper authors."
+        },
+        {
+          "source": "Crowdsourcing",
+          "source_type": "Method",
+          "target": "Domain Expert",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.5122,
+          "description": "Crowdsourcing includes domain experts."
+        },
+        {
+          "source": "Open Research Knowledge Graph",
+          "source_type": "System",
+          "target": "Paper Authors",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.1323,
+          "description": "ORKG includes paper authors in crowdsourcing."
+        },
+        {
+          "source": "Open Research Knowledge Graph",
+          "source_type": "System",
+          "target": "Domain Expert",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.2245,
+          "description": "ORKG includes domain experts in crowdsourcing."
+        },
+        {
+          "source": "Comparison",
+          "source_type": "Artifact",
+          "target": "Researchers",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.4311,
+          "description": "Comparisons can be revised, discussed, and annotated by many researchers."
+        }
+      ]
+    },
+    "PART_OF": {
+      "kind": "directed",
+      "reversal": "unjudgeable",
+      "semantics": "source 是 target 的组成部分/下级结构。",
+      "basis": "semantics",
+      "evidence": "可判定 4001 条，最高格 Concept→Concept 仅 17.3%；Document→Event 305 与 Method→Event 98 实为「发表于某会议」，Person→Organization 99 实为 affiliation，Person 也可作整体（成员是机构的一部分），故正反两侧同族，类型无法定方向。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Location",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Location",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 5816,
+      "n_unjudgeable": 1815,
+      "n_resolvable": 4001,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 3983,
+      "n_reversed": 0,
+      "n_role_violation": 18,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 0.9955,
+      "reversed_pairs": [],
+      "role_violation_pairs": [
+        [
+          [
+            "Person",
+            "Person"
+          ],
+          9
+        ],
+        [
+          [
+            "Concept",
+            "Person"
+          ],
+          7
+        ],
+        [
+          [
+            "Event",
+            "Person"
+          ],
+          1
+        ],
+        [
+          [
+            "Component",
+            "Person"
+          ],
+          1
+        ]
+      ],
+      "reversed_samples": [],
+      "role_violation_samples": [
+        {
+          "source": "Scientist",
+          "source_type": "Concept",
+          "target": "Person",
+          "target_type": "Person",
+          "type": "PART_OF",
+          "l5": 0.5888,
+          "description": "Scientists are a subset of person entities"
+        },
+        {
+          "source": "NAACL",
+          "source_type": "Event",
+          "target": "Sara Sabour",
+          "target_type": "Person",
+          "type": "PART_OF",
+          "l5": 0.3079,
+          "description": "RELATED_TO"
+        },
+        {
+          "source": "Tables",
+          "source_type": "Component",
+          "target": "Authors",
+          "target_type": "Person",
+          "type": "PART_OF",
+          "l5": 0.343,
+          "description": "Authors are appended as a column to the table"
+        },
+        {
+          "source": "Knowledge Graphs",
+          "source_type": "Concept",
+          "target": "Concept",
+          "target_type": "Person",
+          "type": "PART_OF",
+          "l5": 0.5393,
+          "description": "Concepts are elements that can be part of a knowledge graph."
+        },
+        {
+          "source": "Weizhuo Li",
+          "source_type": "Person",
+          "target": "Li Et Al.",
+          "target_type": "Person",
+          "type": "PART_OF",
+          "l5": 0.998,
+          "description": "Weizhuo Li is an author of Li et al."
+        },
+        {
+          "source": "Guilin Qi",
+          "source_type": "Person",
+          "target": "Li Et Al.",
+          "target_type": "Person",
+          "type": "PART_OF",
+          "l5": 0.8862,
+          "description": "Guilin Qi is an author of Li et al."
+        },
+        {
+          "source": "Qiu Ji",
+          "source_type": "Person",
+          "target": "Li Et Al.",
+          "target_type": "Person",
+          "type": "PART_OF",
+          "l5": 0.9839,
+          "description": "Qiu Ji is an author of Li et al."
+        },
+        {
+          "source": "Y. Lin",
+          "source_type": "Person",
+          "target": "Lin et al.",
+          "target_type": "Person",
+          "type": "PART_OF",
+          "l5": 0.9189,
+          "description": "Y. Lin is an author of Lin et al."
+        }
+      ]
+    },
+    "APPLIES_TO": {
+      "kind": "directed",
+      "reversal": "unjudgeable",
+      "semantics": "source 是被应用的方法/技术，target 是它被应用到的对象或领域。",
+      "basis": "semantics",
+      "evidence": "可判定 2521 条：source 侧 Method 1038（41.2%）/ Concept 635（25.2%）；target 侧 Concept 1423（56.4%）/ Process 424（16.8%）/ Method 256。Concept、Process、Method 在两侧都显著，任何切法都会把另一半合法用法误判——实测把 Concept 排除出源角色后，Concept→Process 的 98 条「知识图谱用于问答」全部被误报为方向反转。故不做方向判定。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Location",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 3850,
+      "n_unjudgeable": 1329,
+      "n_resolvable": 2521,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 2521,
+      "n_reversed": 0,
+      "n_role_violation": 0,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 1.0,
+      "reversed_pairs": [],
+      "role_violation_pairs": [],
+      "reversed_samples": [],
+      "role_violation_samples": []
+    },
+    "PRODUCES": {
+      "kind": "directed",
+      "reversal": "judgeable",
+      "semantics": "source 产出/生成 target（source 是生产者，target 是产物）。",
+      "basis": "semantics",
+      "evidence": "可判定 1519 条：source 侧 Method 438（28.8%）/ Concept 304（20.0%）/ System 210（13.8%）/ Process 172（11.3%）/ Person 115（7.6%）；target 侧 Concept 903（59.4%）/ Artifact 215（14.2%）。Component（6.8% vs 4.5%）、Document、Tool、Dataset 两侧占比接近，不进指纹——实测把 Component 放进去会把「Encoder and quantization produces quantized representation」这类正确边误报成反转。Concept 在 target 侧占比是 source 侧的 3 倍，故只进 target 指纹。",
+      "source_core": [
+        "Method",
+        "Person",
+        "Process",
+        "System"
+      ],
+      "target_core": [
+        "Artifact",
+        "Concept"
+      ],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Location",
+        "Material",
+        "Method",
+        "Metric",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 2213,
+      "n_unjudgeable": 694,
+      "n_resolvable": 1519,
+      "n_compliant_directed": 684,
+      "n_compliant_role": 789,
+      "n_reversed": 36,
+      "n_role_violation": 10,
+      "n_unconstrained": 0,
+      "direction_compliance": 0.95,
+      "direction_coverage": 0.474,
+      "role_compliance": 0.9933,
+      "reversed_pairs": [
+        [
+          [
+            "Concept",
+            "Process"
+          ],
+          14
+        ],
+        [
+          [
+            "Concept",
+            "Method"
+          ],
+          13
+        ],
+        [
+          [
+            "Concept",
+            "System"
+          ],
+          4
+        ],
+        [
+          [
+            "Artifact",
+            "Person"
+          ],
+          2
+        ],
+        [
+          [
+            "Artifact",
+            "Method"
+          ],
+          1
+        ],
+        [
+          [
+            "Concept",
+            "Person"
+          ],
+          1
+        ],
+        [
+          [
+            "Artifact",
+            "Process"
+          ],
+          1
+        ]
+      ],
+      "role_violation_pairs": [
+        [
+          [
+            "Event",
+            "Organization"
+          ],
+          6
+        ],
+        [
+          [
+            "Concept",
+            "Organization"
+          ],
+          2
+        ],
+        [
+          [
+            "Material",
+            "Organization"
+          ],
+          1
+        ],
+        [
+          [
+            "Document",
+            "Organization"
+          ],
+          1
+        ]
+      ],
+      "reversed_samples": [
+        {
+          "source": "Features Maps",
+          "source_type": "Artifact",
+          "target": "Convolutional Neural Networks",
+          "target_type": "Method",
+          "type": "PRODUCES",
+          "l5": 0.4152,
+          "description": "CNN produces feature maps through convolution operations."
+        },
+        {
+          "source": "Score",
+          "source_type": "Concept",
+          "target": "Convolutional Neural Networks",
+          "target_type": "Method",
+          "type": "PRODUCES",
+          "l5": 0.4898,
+          "description": "CNN produces a score from feature maps and filters."
+        },
+        {
+          "source": "Relation",
+          "source_type": "Concept",
+          "target": "Transformer",
+          "target_type": "Method",
+          "type": "PRODUCES",
+          "l5": 0.7559,
+          "description": "Transformer produces relation outputs."
+        },
+        {
+          "source": "Region-Based N-Dimensional Balls",
+          "source_type": "Concept",
+          "target": "Triple Classification",
+          "target_type": "Process",
+          "type": "PRODUCES",
+          "l5": 0.318,
+          "description": "The relaxation of embedding to n-balls turns triple classification into a geometric containment problem."
+        },
+        {
+          "source": "Results",
+          "source_type": "Concept",
+          "target": "Import Process",
+          "target_type": "Process",
+          "type": "PRODUCES",
+          "l5": 0.9133,
+          "description": "Results are reported for the import process."
+        },
+        {
+          "source": "Few-Shot Learning",
+          "source_type": "Concept",
+          "target": "Method Categorization",
+          "target_type": "Process",
+          "type": "PRODUCES",
+          "l5": 0.9484,
+          "description": "Few-shot learning presents the current method categorization."
+        },
+        {
+          "source": "Empirical Best",
+          "source_type": "Concept",
+          "target": "Training by Samples",
+          "target_type": "Process",
+          "type": "PRODUCES",
+          "l5": 0.7407,
+          "description": "Training by samples produces the empirical best hypothesis."
+        },
+        {
+          "source": "Knowledge Graphs",
+          "source_type": "Concept",
+          "target": "Concept",
+          "target_type": "Person",
+          "type": "PRODUCES",
+          "l5": 0.1081,
+          "description": "KGs often define concepts"
+        }
+      ],
+      "role_violation_samples": [
+        {
+          "source": "International Semantic Web Conference",
+          "source_type": "Event",
+          "target": "Springer",
+          "target_type": "Organization",
+          "type": "PRODUCES",
+          "l5": 0.4836,
+          "description": "Springer published the International Semantic Web Conference proceedings."
+        },
+        {
+          "source": "International Conference on Machine Learning",
+          "source_type": "Event",
+          "target": "PMLR",
+          "target_type": "Organization",
+          "type": "PRODUCES",
+          "l5": 0.7202,
+          "description": "PMLR published the International Conference on Machine Learning proceedings"
+        },
+        {
+          "source": "European Semantic Web Conference",
+          "source_type": "Event",
+          "target": "Springer",
+          "target_type": "Organization",
+          "type": "PRODUCES",
+          "l5": 0.4288,
+          "description": "Springer published the European Semantic Web Conference proceedings"
+        },
+        {
+          "source": "Joint European Conference on Machine Learning and Knowledge Discovery in Databases",
+          "source_type": "Event",
+          "target": "Springer",
+          "target_type": "Organization",
+          "type": "PRODUCES",
+          "l5": 0.7008,
+          "description": "Springer published the proceedings of the Joint European Conference on Machine Learning and Knowledge Discovery in Datab"
+        },
+        {
+          "source": "The ACM Web Conference 2022",
+          "source_type": "Event",
+          "target": "ACM",
+          "target_type": "Organization",
+          "type": "PRODUCES",
+          "l5": 0.9938,
+          "description": "ACM published The ACM Web Conference 2022 proceedings"
+        },
+        {
+          "source": "Vaccine",
+          "source_type": "Material",
+          "target": "Pharmaceutical A",
+          "target_type": "Organization",
+          "type": "PRODUCES",
+          "l5": 0.5073,
+          "description": "Pharmaceutical A produces vaccine products."
+        },
+        {
+          "source": "Large Language Model",
+          "source_type": "Concept",
+          "target": "Industry",
+          "target_type": "Organization",
+          "type": "PRODUCES",
+          "l5": 0.4784,
+          "description": "Various large language models come from the industry."
+        },
+        {
+          "source": "Large Language Model",
+          "source_type": "Concept",
+          "target": "Research Institutions",
+          "target_type": "Organization",
+          "type": "PRODUCES",
+          "l5": 0.5101,
+          "description": "Various large language models come from research institutions."
+        }
+      ]
+    },
+    "ENABLES": {
+      "kind": "directed",
+      "reversal": "unjudgeable",
+      "semantics": "source 使能 target（提供条件/能力，使 target 成立或发生）。",
+      "basis": "semantics",
+      "evidence": "可判定 739 条：Concept→Concept 162 与 Concept→Process 92 为主，Concept/Method/Process 两侧都常见；Person 侧仅 0.5%。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 999,
+      "n_unjudgeable": 260,
+      "n_resolvable": 739,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 739,
+      "n_reversed": 0,
+      "n_role_violation": 0,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 1.0,
+      "reversed_pairs": [],
+      "role_violation_pairs": [],
+      "reversed_samples": [],
+      "role_violation_samples": []
+    },
+    "CITES": {
+      "kind": "directed",
+      "reversal": "unjudgeable",
+      "semantics": "source 引用 target（引用者 → 被引用的文献/方法/作者）。",
+      "basis": "semantics",
+      "evidence": "可判定 639 条：Document→Person 79 与 Person→Document 69 并存，Document 与 Person 两侧都是常见角色，类型定不了向；target=Event 104 条实为「发表于某会议」，属谓词误用而非方向错，故保留在允许集内。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 967,
+      "n_unjudgeable": 328,
+      "n_resolvable": 639,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 638,
+      "n_reversed": 0,
+      "n_role_violation": 1,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 0.9984,
+      "reversed_pairs": [],
+      "role_violation_pairs": [
+        [
+          [
+            "Document",
+            "Location"
+          ],
+          1
+        ]
+      ],
+      "reversed_samples": [],
+      "role_violation_samples": [
+        {
+          "source": "Figure 11",
+          "source_type": "Document",
+          "target": "US",
+          "target_type": "Location",
+          "type": "CITES",
+          "l5": 0.7883,
+          "description": "Figure 11 illustrates the keyword query Titanic US"
+        }
+      ]
+    },
+    "MEASURES": {
+      "kind": "unconstrained",
+      "reversal": "unjudgeable",
+      "semantics": "source 度量/刻画 target。本图内至少四种读法混用：指标→概念（plausibility score measures …）、方法→指标（TransH has an MRR of 303，实为 has-value）、概念→指标（knowledge quality measures …）、以及「某指标的定义式」。方向不唯一，不做方向判定。",
+      "basis": "data",
+      "evidence": "可判定 537 条：Metric→Concept 55 与 Concept→Metric 43 几乎相等，Method→Metric 54 与 Method→Concept 54 并列 —— 正反两向的语义都成立，任何单向约束都会把另一半误报成方向错误。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Location",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Location",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 872,
+      "n_unjudgeable": 335,
+      "n_resolvable": 537,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 0,
+      "n_reversed": 0,
+      "n_role_violation": 0,
+      "n_unconstrained": 537,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": null,
+      "reversed_pairs": [],
+      "role_violation_pairs": [],
+      "reversed_samples": [],
+      "role_violation_samples": []
+    },
+    "LOCATED_AT": {
+      "kind": "directed",
+      "reversal": "judgeable",
+      "semantics": "source 是有位置的实体，target 是它所在的地点/场所/机构。",
+      "basis": "semantics",
+      "evidence": "可判定 590 条中 target=Event 241（venue）+ Location 136 + Organization 17 = 66.8%；反向（地点作 source）少见。注意 target=Document 65 条实为「在附录/第 III-C 节」，target=Concept 44 条实为数学空间隐喻（on a torus / vector space），二者语义扩张但方向未错，故保留在允许集内、只作弱合规。",
+      "source_core": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Material",
+        "Method",
+        "Metric",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_core": [
+        "Event",
+        "Location",
+        "Organization"
+      ],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Location",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Location",
+        "Organization",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 853,
+      "n_unjudgeable": 263,
+      "n_resolvable": 590,
+      "n_compliant_directed": 283,
+      "n_compliant_role": 306,
+      "n_reversed": 0,
+      "n_role_violation": 1,
+      "n_unconstrained": 0,
+      "direction_compliance": 1.0,
+      "direction_coverage": 0.4797,
+      "role_compliance": 0.9983,
+      "reversed_pairs": [],
+      "role_violation_pairs": [
+        [
+          [
+            "Method",
+            "Method"
+          ],
+          1
+        ]
+      ],
+      "reversed_samples": [],
+      "role_violation_samples": [
+        {
+          "source": "Fast Learning Algorithm",
+          "source_type": "Method",
+          "target": "Neural Computation",
+          "target_type": "Method",
+          "type": "LOCATED_AT",
+          "l5": 0.9862,
+          "description": "Fast learning algorithm was published in Neural Computation 2006"
+        }
+      ]
+    },
+    "SUPPORTS": {
+      "kind": "directed",
+      "reversal": "unjudgeable",
+      "semantics": "source 支持 target（证据/方法支持论断或流程）。",
+      "basis": "semantics",
+      "evidence": "可判定 560 条：Concept→Concept 101 且反向对 97（几乎自对称），两端均为「论断/方法/过程」，类型上无排他性。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 793,
+      "n_unjudgeable": 233,
+      "n_resolvable": 560,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 560,
+      "n_reversed": 0,
+      "n_role_violation": 0,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 1.0,
+      "reversed_pairs": [],
+      "role_violation_pairs": [],
+      "reversed_samples": [],
+      "role_violation_samples": []
+    },
+    "COMPARES_WITH": {
+      "kind": "symmetric",
+      "reversal": "unjudgeable",
+      "semantics": "source 与 target 互相比对，谁在左谁在右语义相同。",
+      "basis": "semantics",
+      "evidence": "可判定 374 条：Method↔Method 89/93、Concept↔Concept 59/56、System↔System 43/43 —— 同类互比为绝对主流，正反两向完全对称。verify_direction.py 亦把本类列入 SYMMETRIC。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 598,
+      "n_unjudgeable": 224,
+      "n_resolvable": 374,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 374,
+      "n_reversed": 0,
+      "n_role_violation": 0,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 1.0,
+      "reversed_pairs": [],
+      "role_violation_pairs": [],
+      "reversed_samples": [],
+      "role_violation_samples": []
+    },
+    "EVALUATES": {
+      "kind": "directed",
+      "reversal": "unjudgeable",
+      "semantics": "source 评测/报告 target 的效果或质量。注意「用数据集评估方法」在本图里既被写成「数据集 → 方法」也被写成「方法 → 数据集」，两种读法都合乎英文原文（dataset for evaluating methods）。",
+      "basis": "data",
+      "evidence": "可判定 302 条：Method→Dataset 91（30.1%）为最大单格，但 Dataset→Method 也有 2 条、Process→Method 3 条。实测按 core={Method,Document,Person}→{Dataset,Concept} 判出的 8 条「反转」经人工逐条核对**全部是假阳性**（FewRel 数据集用于评估方法、Evaluation 评估 Edge Prior 等，方向本身没错），故撤销方向指纹。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Method",
+        "Metric",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 454,
+      "n_unjudgeable": 152,
+      "n_resolvable": 302,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 296,
+      "n_reversed": 0,
+      "n_role_violation": 6,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 0.9801,
+      "reversed_pairs": [],
+      "role_violation_pairs": [
+        [
+          [
+            "Event",
+            "Method"
+          ],
+          2
+        ],
+        [
+          [
+            "System",
+            "Organization"
+          ],
+          1
+        ],
+        [
+          [
+            "Organization",
+            "Organization"
+          ],
+          1
+        ],
+        [
+          [
+            "Method",
+            "Event"
+          ],
+          1
+        ],
+        [
+          [
+            "Method",
+            "Material"
+          ],
+          1
+        ]
+      ],
+      "reversed_samples": [],
+      "role_violation_samples": [
+        {
+          "source": "AKBC",
+          "source_type": "Event",
+          "target": "Iterative KG Refinement",
+          "target_type": "Method",
+          "type": "EVALUATES",
+          "l5": 0.7475,
+          "description": "AKBC published and evaluated iterative KG refinement."
+        },
+        {
+          "source": "NIPS",
+          "source_type": "Event",
+          "target": "Translating Embeddings",
+          "target_type": "Method",
+          "type": "EVALUATES",
+          "l5": 0.872,
+          "description": "NIPS published and evaluated translating embeddings."
+        },
+        {
+          "source": "LSTM-RNN",
+          "source_type": "System",
+          "target": "ACE",
+          "target_type": "Organization",
+          "type": "EVALUATES",
+          "l5": 0.622,
+          "description": "LSTM-RNN achieves improvements on ACE datasets"
+        },
+        {
+          "source": "Drug Administrative Authorities",
+          "source_type": "Organization",
+          "target": "Pharmaceutical A",
+          "target_type": "Organization",
+          "type": "EVALUATES",
+          "l5": 0.7363,
+          "description": "Drug administrative authorities disqualified Pharmaceutical A's vaccine products."
+        },
+        {
+          "source": "Link Prediction",
+          "source_type": "Method",
+          "target": "Price Drop",
+          "target_type": "Event",
+          "type": "EVALUATES",
+          "l5": 0.9768,
+          "description": "Link prediction assesses the potential outcome of a price drop."
+        },
+        {
+          "source": "Controlled Experiments",
+          "source_type": "Method",
+          "target": "Data",
+          "target_type": "Material",
+          "type": "EVALUATES",
+          "l5": 0.8273,
+          "description": "Controlled experiments explore whether issues stem from data problems."
+        }
+      ]
+    },
+    "CAUSES": {
+      "kind": "directed",
+      "reversal": "unjudgeable",
+      "semantics": "source 是原因，target 是结果。语义不可逆，但两端类型重叠。",
+      "basis": "semantics",
+      "evidence": "可判定仅 196 条：Concept→Concept 50、Concept→Metric 24、Process→Concept 15、Concept→Process 10 —— Concept/Process 两侧都是常见角色，样本量也低于 200，不足以支撑方向指纹。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Material",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 280,
+      "n_unjudgeable": 84,
+      "n_resolvable": 196,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 195,
+      "n_reversed": 0,
+      "n_role_violation": 1,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 0.9949,
+      "reversed_pairs": [],
+      "role_violation_pairs": [
+        [
+          [
+            "Material",
+            "Metric"
+          ],
+          1
+        ]
+      ],
+      "reversed_samples": [],
+      "role_violation_samples": [
+        {
+          "source": "Energy",
+          "source_type": "Material",
+          "target": "Carbon Footprint",
+          "target_type": "Metric",
+          "type": "CAUSES",
+          "l5": 0.5336,
+          "description": "Reduced energy lowers carbon footprint."
+        }
+      ]
+    },
+    "CONTRADICTS": {
+      "kind": "symmetric",
+      "reversal": "unjudgeable",
+      "semantics": "source 与 target 互相矛盾，矛盾无方向。",
+      "basis": "semantics",
+      "evidence": "可判定 176 条：Concept→Concept 57，其反向对 55 —— 正反几乎相等，是本图对称性最干净的一类。verify_direction.py 亦列入 SYMMETRIC。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Method",
+        "Metric",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Method",
+        "Metric",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 243,
+      "n_unjudgeable": 67,
+      "n_resolvable": 176,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 176,
+      "n_reversed": 0,
+      "n_role_violation": 0,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 1.0,
+      "reversed_pairs": [],
+      "role_violation_pairs": [],
+      "reversed_samples": [],
+      "role_violation_samples": []
+    }
+  },
+  "reconcile_with_prototype": {
+    "prototype_compliance_rate": 0.9324,
+    "prototype_resolvable": 6241,
+    "prototype_compliant": 5819,
+    "prototype_reversed": 120,
+    "match_resolvable": true,
+    "match_compliant": true,
+    "match_reversed": true,
+    "direction_only_compliance": 0.9798
+  },
+  "total": {
+    "unconstrained": 7162,
+    "unjudgeable": 13753,
+    "compliant_role": 15392,
+    "compliant_directed": 6786,
+    "reversed": 156,
+    "role_violation": 381,
+    "out_of_ontology": 237
+  }
+}

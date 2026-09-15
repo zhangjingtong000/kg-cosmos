@@ -1,0 +1,3462 @@
+{
+  "paper_id": "2012.00456v1",
+  "source_pages": [
+    1,
+    12
+  ],
+  "excluded_from_page": null,
+  "out_of_range_dropped": 0,
+  "annotators": [
+    "A",
+    "B",
+    "C",
+    "GLM"
+  ],
+  "method": "multi-annotator independent labeling + majority vote + quote verification",
+  "entities": [
+    {
+      "name": "Creating a Scholarly Knowledge Graph from Survey Article Tables",
+      "type": "Concept",
+      "page": 1,
+      "quote": "Survey articles often contain manually curated and high-quality tabular\ninformation that summarizes ﬁndings published in the scientiﬁc litera-\nture.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Allard Oelen",
+      "type": "Person",
+      "page": 1,
+      "quote": "Allard Oelen1,2[0000−0001−9924−9153], Markus Stocker2[0000−0001−5492−3212], and",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Markus Stocker",
+      "type": "Person",
+      "page": 1,
+      "quote": "Allard Oelen1,2[0000−0001−9924−9153], Markus Stocker2[0000−0001−5492−3212], and",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Sören Auer",
+      "type": "Person",
+      "page": 1,
+      "quote": "S¨oren Auer2,1[0000−0002−0698−2864]",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "L3S Research Center",
+      "type": "Organization",
+      "page": 1,
+      "quote": "1 L3S Research Center, Leibniz University of Hannover, Germany",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Leibniz University of Hannover",
+      "type": "Organization",
+      "page": 1,
+      "quote": "1 L3S Research Center, Leibniz University of Hannover, Germany",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "TIB Leibniz Information Centre for Science and Technology",
+      "type": "Organization",
+      "page": 1,
+      "quote": "2 TIB Leibniz Information Centre for Science and Technology, Germany",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Germany",
+      "type": "Location",
+      "page": 1,
+      "quote": "2 TIB Leibniz Information Centre for Science and Technology, Germany",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Scholarly Communication",
+      "type": "Concept",
+      "page": 1,
+      "quote": "Keywords: Scholarly Communication · Scholarly Knowledge Graphs ·\nTabular Data Extraction",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Tabular Data Extraction",
+      "type": "Tool",
+      "page": 1,
+      "quote": "They concluded that Tabula4 is the most suitable open-source tool. Based of\nthese ﬁndings, we decided to use Tabula.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Microsoft Academic Graph",
+      "type": "System",
+      "page": 1,
+      "quote": "the Microsoft Academic Graph [8] or Crossref [15] mainly\nfocus on bibliographic metadata and not on the actual research contributions.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Crossref",
+      "type": "System",
+      "page": 1,
+      "quote": "the Microsoft Academic Graph [8] or Crossref [15] mainly\nfocus on bibliographic metadata and not on the actual research contributions.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Bibliographic Metadata",
+      "type": "Concept",
+      "page": 1,
+      "quote": "focus on bibliographic metadata and not on the actual research contributions.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Open Research Knowledge Graph",
+      "type": "System",
+      "page": 1,
+      "quote": "The Open Research Knowledge Graph (ORKG) [10] aims to build a knowledge\ngraph infrastructure that publishes the research contributions of scholarly pub-\nlications rather than only the metadata.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Research Contributions",
+      "type": "Concept",
+      "page": 1,
+      "quote": "focus on bibliographic metadata and not on the actual research contributions.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "arXiv",
+      "type": "System",
+      "page": 1,
+      "quote": "arXiv:2012. 00456v1  [cs. DL]  1 Dec 2020.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Paper Selection",
+      "type": "Process",
+      "page": 2,
+      "quote": "In the ﬁrst step, suitable survey papers are selected based on multiple criteria.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Table Extraction",
+      "type": "Process",
+      "page": 2,
+      "quote": "One aspect of the proposed methodology is table extraction from survey arti-",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Table Formatting",
+      "type": "Process",
+      "page": 2,
+      "quote": "3. Table formatting",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "reference extraction.py",
+      "type": "Process",
+      "page": 2,
+      "quote": "8 File 4 reference extraction. py from https://doi. org/10. 5281/zenodo. 3739427.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "build graph.py",
+      "type": "Process",
+      "page": 2,
+      "quote": "9 File 5 build graph. py from https://doi. org/10. 5281/zenodo.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Semantic Scholar",
+      "type": "System",
+      "page": 2,
+      "quote": "rather than, as other systems such as Semantic Scholar3, exclusively on\nautomated techniques to extract knowledge from scholarly articles.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Natural Language Processing",
+      "type": "Method",
+      "page": 2,
+      "quote": "automated extraction methods, for example Natural Language Processing\n(NLP), do not have suﬃcient accuracy",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Automated Extraction",
+      "type": "Method",
+      "page": 2,
+      "quote": "exclusively on automated techniques to extract knowledge from scholarly articles",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Crowdsourcing",
+      "type": "Concept",
+      "page": 1,
+      "quote": "The approach is to crowdsource struc-\ntured paper descriptions by including paper authors and domain experts.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Human-in-the-Loop Methodology",
+      "type": "Method",
+      "page": 1,
+      "quote": "In this work, we present a human-in-the-loop methodology used to\nbuild a scholarly knowledge graph leveraging literature survey articles.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Survey Table Import User Interface",
+      "type": "Component",
+      "page": 1,
+      "quote": "Based on the steps from our methodology, a web User Interace (UI) is created\nthat integrates all steps into a single interface.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Supervised Approach",
+      "type": "Method",
+      "page": 2,
+      "quote": "supervised approach to ﬁrstly extract data from survey articles and afterwards",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Literature Review",
+      "type": "Concept",
+      "page": 3,
+      "quote": "The terms\n“literature review” and “literature survey” are sometimes used interchangeably\nin the literature",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Literature Survey",
+      "type": "Concept",
+      "page": 3,
+      "quote": "We refer to the tables within review articles as literature surveys.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Portable Document Format",
+      "type": "Artifact",
+      "page": 1,
+      "quote": "tables and references are extracted from PDF arti-\ncles, tables are formatted and ﬁnally ingested into the knowledge graph.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Corrêa et al.",
+      "type": "Person",
+      "page": 3,
+      "quote": "Corrˆea et al. did a literature survey on table extraction tools [3]. They concluded that Tabula4 is the most suitable open-source tool.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "GROBID",
+      "type": "Tool",
+      "page": 3,
+      "quote": "tion tool GROBID [13]. GROBID focuses speciﬁcally on extracting bibliographic",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Lipinski et al.",
+      "type": "Person",
+      "page": 3,
+      "quote": "Lipinski et al. [17] compared GROBID to other\nPDF metadata extraction tools, and found out that GROBID performed best.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "ORKG Comparison",
+      "type": "Concept",
+      "page": 4,
+      "quote": "The ORKG provides tools that speciﬁcally\nfocus on building paper comparisons (i. e. , literature surveys), making it the most",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "SemAnn",
+      "type": "System",
+      "page": 4,
+      "quote": "[28] | SemAnn | Semi-Automatic | Scholarly articles | PDF | RDFb",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Web Tables",
+      "type": "System",
+      "page": 4,
+      "quote": "[16] | Web Tables | Automatic | Web tables | HTML | JSON",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "TableSeer",
+      "type": "System",
+      "page": 4,
+      "quote": "[18] | TableSeer | Automatic | Scholarly articles | PDF | Relational database",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "TEXUS",
+      "type": "System",
+      "page": 4,
+      "quote": "[25] | TEXUS | Automatic | Documents (application agnostic) | PDF",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Resource Description Framework",
+      "type": "Artifact",
+      "page": 4,
+      "quote": "a Knowledge Graph; b Resource Description Framework",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "JSON",
+      "type": "Artifact",
+      "page": 4,
+      "quote": "[16] | Web Tables | Automatic | Web tables | HTML | JSON",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "HTML",
+      "type": "Artifact",
+      "page": 4,
+      "quote": "[16] | Web Tables | Automatic | Web tables | HTML | JSON",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Relational Database",
+      "type": "Artifact",
+      "page": 4,
+      "quote": "[18] | TableSeer | Automatic | Scholarly articles | PDF | Relational database",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Wikidata",
+      "type": "System",
+      "page": 4,
+      "quote": "Microsoft Academic Graph, Wikidata [14] or ORKG. We chose ORKG as our",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Tabular Survey View",
+      "type": "Component",
+      "page": 4,
+      "quote": "ORKG automatically generates a similar tabular survey view as was originally",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "FAIR Data Principles",
+      "type": "Concept",
+      "page": 4,
+      "quote": "the literature surveys within\nORKG are compliant [23] with the FAIR data principles [34] thus making them\nFindable, Accessible, Interoperable and Reusable.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "ORKG Search Interface",
+      "type": "Component",
+      "page": 5,
+      "quote": "Via the ORKG search interface it is possible to search for speciﬁc compar-\nisons and to create dynamic custom comparison views.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "CSV",
+      "type": "Artifact",
+      "page": 5,
+      "quote": "The result of this step is a set of CSV ﬁles, in which each ﬁle represents\none survey table from a review article.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Data Quality",
+      "type": "Concept",
+      "page": 5,
+      "quote": "Data quality improves with human evaluation and, if needed, correction",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Human Evaluation",
+      "type": "Process",
+      "page": 5,
+      "quote": "Data quality improves with human evaluation and, if needed, correction",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Search Strategy",
+      "type": "Concept",
+      "page": 5,
+      "quote": "Search Strategy. Table 2 lists the search engines used to ﬁnd survey arti-",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Google Scholar",
+      "type": "Tool",
+      "page": 5,
+      "quote": "Google Scholar is chosen to ensure that survey papers from various ﬁelds\nare searched.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "ACM Digital Library",
+      "type": "Tool",
+      "page": 5,
+      "quote": "Additionally, ACM Digital Library has been selected because the",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Computer Science",
+      "type": "Concept",
+      "page": 5,
+      "quote": "ORKG currently focuses mainly on the Computer Science domain. The search is",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Inclusion Criteria",
+      "type": "Concept",
+      "page": 6,
+      "quote": "Papers that satisfy the inclusion criteria are selected for",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Optical Character Recognition",
+      "type": "Method",
+      "page": 6,
+      "quote": "we use, which is based on character extraction and does not use Optical Charac-\nter Recognition (OCR) needed to support image extraction [30]",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Tabula User Interface",
+      "type": "Component",
+      "page": 7,
+      "quote": "Each PDF article is uploaded via the Tabula user interface.",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Stream Extraction Method",
+      "type": "Method",
+      "page": 7,
+      "quote": "of extraction, namely “Stream” and “Lattice”. The Stream extraction method is\nbased on white space between columns",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Lattice Extraction Method",
+      "type": "Method",
+      "page": 7,
+      "quote": "The Stream extraction method is\nbased on white space between columns while Lattice is based on boundary lines",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Quality Assurance",
+      "type": "Process",
+      "page": 7,
+      "quote": "Part of the extraction step is quality assurance after the extraction.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "OpenRefine",
+      "type": "Tool",
+      "page": 7,
+      "quote": "and removing both columns and rows. We use OpenReﬁne [31] to perform bulk",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Digital Object Identifier",
+      "type": "Artifact",
+      "page": 8,
+      "quote": "publication month, publication year and the DOI7",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Reference List",
+      "type": "Concept",
+      "page": 8,
+      "quote": "from the paper’s reference list and then to connect the citation keys used in the",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Python",
+      "type": "Tool",
+      "page": 8,
+      "quote": "To perform\nthe process of adding references, we created a Python script. 8 This script ﬁrst",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Time-varying transmission dynamics of Novel Coronavirus Pneumonia in China",
+      "type": "Location",
+      "page": 9,
+      "quote": "Time-varying transmission dynamics of Novel Coronavirus Pneumonia in China",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Tao Liu",
+      "type": "Person",
+      "page": 9,
+      "quote": "Pneumonia in China\n Tao Liu",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "COVID-19",
+      "type": "Concept",
+      "page": 9,
+      "quote": "COVID-19 reproductive\nnumber",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Wuhan",
+      "type": "Location",
+      "page": 9,
+      "quote": "Joseph et al. 1 Wuhan 31 Dec '19 - 28 Jan '20",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Stochastic Markov Chain",
+      "type": "Method",
+      "page": 9,
+      "quote": "Stochastic Markov Chain. 2. 68",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "R0 Estimates",
+      "type": "Metric",
+      "page": 9,
+      "quote": "R0 estimates\nStudy date\n95% CI",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Hubei province",
+      "type": "Location",
+      "page": 9,
+      "quote": "Shen et al. 2 Hubei province",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Mathematical Model",
+      "type": "Method",
+      "page": 9,
+      "quote": "Mathematical model, dynamic. 6. 49",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Statistical Exponential Growth",
+      "type": "Method",
+      "page": 9,
+      "quote": "Statistical exponential Growth. 2. 90",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "SARS",
+      "type": "Concept",
+      "page": 9,
+      "quote": "Statistical exponential Growth,\nusing SARS generation.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "ORKG API",
+      "type": "Component",
+      "page": 9,
+      "quote": "a paper is added to the graph via the ORKG API. For each table, a comparison is",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Time Performance",
+      "type": "Concept",
+      "page": 12,
+      "quote": "5. 1 Time Performance",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Import Process",
+      "type": "Process",
+      "page": 6,
+      "quote": "In this section, we report the results of the import process for each step of the",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Selection Criteria",
+      "type": "Concept",
+      "page": 6,
+      "quote": "in those articles. Selection Criteria.",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Citation Key",
+      "type": "Concept",
+      "page": 8,
+      "quote": "with their publication year is used as a reference key. The citation key is used",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Reference Key",
+      "type": "Concept",
+      "page": 8,
+      "quote": "a value that contains the reference key from the original paper.",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Open Government Data",
+      "type": "Concept",
+      "page": 3,
+      "quote": "open government data are similar to the challenges in our research. This includes",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Knowledge Graph Infrastructure",
+      "type": "Concept",
+      "page": 1,
+      "quote": "graph infrastructure that publishes the research contributions of scholarly pub-",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "95% CI",
+      "type": "Metric",
+      "page": 9,
+      "quote": "Study date\n95% CI",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Abstract Table Representation",
+      "type": "Artifact",
+      "page": 4,
+      "quote": "[25] TEXUS Automatic Documents (application agnostic) PDF",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Five-Step Methodology",
+      "type": "Method",
+      "page": 5,
+      "quote": "methodology for the creation of a scholarly knowledge graph from survey tables",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Character Extraction",
+      "type": "Method",
+      "page": 6,
+      "quote": "based on character extraction and does not use Optical Charac-",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Settings File",
+      "type": "Artifact",
+      "page": 8,
+      "quote": "which lists the table numbers, a suitable title for",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Integrated Spreadsheet Editor",
+      "type": "Component",
+      "page": 9,
+      "quote": "an integrated spreadsheet editor",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Fully Automated Approach",
+      "type": "Method",
+      "page": 12,
+      "quote": "as opposed to a fully automated approach",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Fully Manual Approach",
+      "type": "Method",
+      "page": 12,
+      "quote": "Compared to a fully manual approach, the proposed",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Manual Selection Method",
+      "type": "Method",
+      "page": 7,
+      "quote": "Arguably, the manual selection method is most",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Relational Schema",
+      "type": "Artifact",
+      "page": 4,
+      "quote": "Relational schema",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Selected Papers File",
+      "type": "Artifact",
+      "page": 10,
+      "quote": "papers, the ORKG comparisons and the ingested papers. The selected papers ﬁle",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    }
+  ],
+  "relations": [
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Crowdsourcing",
+      "type": "USES",
+      "page": 1,
+      "quote": "by including paper authors and domain experts",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Microsoft Academic Graph",
+      "target": "Bibliographic Metadata",
+      "type": "RELATED_TO",
+      "page": 1,
+      "quote": "focus on bibliographic metadata and not on the actual research contributions",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Crossref",
+      "target": "Bibliographic Metadata",
+      "type": "RELATED_TO",
+      "page": 1,
+      "quote": "focus on bibliographic metadata and not on the actual research contributions",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Scholarly Knowledge Graph",
+      "type": "RELATED_TO",
+      "page": 1,
+      "quote": "aims to build a knowledge graph infrastructure",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "source": "Creating a Scholarly Knowledge Graph from Survey Article Tables",
+      "target": "Allard Oelen",
+      "type": "CREATED_BY",
+      "page": 1,
+      "quote": "Allard Oelen1,2",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Creating a Scholarly Knowledge Graph from Survey Article Tables",
+      "target": "Markus Stocker",
+      "type": "CREATED_BY",
+      "page": 1,
+      "quote": "Markus Stocker2",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Creating a Scholarly Knowledge Graph from Survey Article Tables",
+      "target": "Sören Auer",
+      "type": "CREATED_BY",
+      "page": 1,
+      "quote": "S¨oren Auer2,1",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "L3S Research Center",
+      "target": "Germany",
+      "type": "LOCATED_AT",
+      "page": 1,
+      "quote": "1 L3S Research Center, Leibniz University of Hannover, Germany",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Leibniz University of Hannover",
+      "target": "Germany",
+      "type": "LOCATED_AT",
+      "page": 1,
+      "quote": "1 L3S Research Center, Leibniz University of Hannover, Germany",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TIB Leibniz Information Centre for Science and Technology",
+      "target": "Germany",
+      "type": "LOCATED_AT",
+      "page": 1,
+      "quote": "2 TIB Leibniz Information Centre for Science and Technology, Germany",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "L3S Research Center",
+      "target": "Leibniz University of Hannover",
+      "type": "PART_OF",
+      "page": 1,
+      "quote": "L3S Research Center, Leibniz University of Hannover",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Semantic Scholar",
+      "target": "Automated Extraction",
+      "type": "USES",
+      "page": 2,
+      "quote": "exclusively on automated techniques to extract knowledge from scholarly articles",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Automated Extraction",
+      "target": "Natural Language Processing",
+      "type": "USES",
+      "page": 2,
+      "quote": "automated extraction methods, for example Natural Language Processing (NLP)",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "source": "Survey Table",
+      "target": "Survey Article",
+      "type": "PART_OF",
+      "page": 2,
+      "quote": "Tables in survey papers generally consist of high-quality research data",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Literature Survey",
+      "target": "Literature Review",
+      "type": "PART_OF",
+      "page": 3,
+      "quote": "Together with a (textual) analysis and explanation, they form the literature review.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Portable Document Format",
+      "type": "APPLIES_TO",
+      "page": 3,
+      "quote": "Extracting tables from PDF documents is a cumbersome process",
+      "votes": 2,
+      "voters": [
+        "A",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Corrêa",
+      "target": "Tabula",
+      "type": "EVALUATES",
+      "page": 3,
+      "quote": "They concluded that Tabula4 is the most suitable open-source tool.",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Reference Extraction",
+      "target": "Portable Document Format",
+      "type": "APPLIES_TO",
+      "page": 3,
+      "quote": "Another aspect of the proposed methodology is reference extraction from PDFs.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "GROBID",
+      "target": "Bibliographic Metadata",
+      "type": "PRODUCES",
+      "page": 3,
+      "quote": "on extracting bibliographic data from scholarly articles [19].",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "source": "Lipinski",
+      "target": "GROBID",
+      "type": "EVALUATES",
+      "page": 3,
+      "quote": "compared GROBID to other PDF metadata extraction tools",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "ORKG Comparison",
+      "type": "PRODUCES",
+      "page": 4,
+      "quote": "focus on building paper comparisons",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "FAIR Data Principles",
+      "type": "SUPPORTS",
+      "page": 4,
+      "quote": "with the FAIR data principles [34] thus making them",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "ORKG Search Interface",
+      "target": "Open Research Knowledge Graph",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "Via the ORKG search interface it is possible to search for",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Search Strategy",
+      "target": "Google Scholar",
+      "type": "USES",
+      "page": 5,
+      "quote": "Table 2 lists the search engines used to",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Paper Selection",
+      "target": "Google Scholar",
+      "type": "USES",
+      "page": 5,
+      "quote": "Google Scholar is chosen to ensure that survey papers from various",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Paper Selection",
+      "target": "ACM Digital Library",
+      "type": "USES",
+      "page": 5,
+      "quote": "Additionally, ACM Digital Library has been selected because the",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Computer Science",
+      "type": "APPLIES_TO",
+      "page": 5,
+      "quote": "the ORKG currently focuses mainly on the Computer Science domain",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "source": "Search Strategy",
+      "target": "ACM Digital Library",
+      "type": "USES",
+      "page": 6,
+      "quote": "ACM Digital Library Computer Science",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Paper Selection",
+      "target": "Inclusion Criteria",
+      "type": "USES",
+      "page": 6,
+      "quote": "Papers that satisfy the inclusion criteria are selected for",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Tabula",
+      "type": "USES",
+      "page": 7,
+      "quote": "we use Tabula to perform the table extraction",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Tabula User Interface",
+      "target": "Tabula",
+      "type": "PART_OF",
+      "page": 7,
+      "quote": "Each PDF article is uploaded via the Tabula user interface.",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Stream Extraction Method",
+      "target": "Lattice Extraction Method",
+      "type": "COMPARES_WITH",
+      "page": 7,
+      "quote": "The Stream extraction method is based on white space between columns while Lattice is based on boundary lines between columns.",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "source": "Quality Assurance",
+      "target": "Table Extraction",
+      "type": "PART_OF",
+      "page": 7,
+      "quote": "Part of the extraction step is quality assurance after the extraction.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "CSV",
+      "type": "PRODUCES",
+      "page": 7,
+      "quote": "The result of this step is a set of CSV",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Table Formatting",
+      "target": "OpenRefine",
+      "type": "USES",
+      "page": 7,
+      "quote": "to perform bulk operations on tables",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Reference Extraction",
+      "target": "GROBID",
+      "type": "USES",
+      "page": 8,
+      "quote": "to extract references from article, we use the PDF extraction tool GROBID.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Reference Extraction",
+      "target": "Bibliographic Metadata",
+      "type": "PRODUCES",
+      "page": 8,
+      "quote": "The citation key is used to automatically capture the bibliographic metadata for an article.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "GROBID",
+      "target": "Portable Document Format",
+      "type": "APPLIES_TO",
+      "page": 8,
+      "quote": "GROBID processes the full PDF article.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Reference Extraction",
+      "target": "Python",
+      "type": "USES",
+      "page": 8,
+      "quote": "we created a Python script",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "Scholarly Knowledge Graph",
+      "type": "PRODUCES",
+      "page": 8,
+      "quote": "is to build a knowledge graph from the previously created CSV",
+      "votes": 2,
+      "voters": [
+        "A",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "CSV",
+      "type": "USES",
+      "page": 8,
+      "quote": "is to build a knowledge graph from the previously created CSV",
+      "votes": 3,
+      "voters": [
+        "A",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Time-varying transmission dynamics of Novel Coronavirus Pneumonia in China",
+      "target": "Tao Liu",
+      "type": "CREATED_BY",
+      "page": 9,
+      "quote": "Tao Liu",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "ORKG API",
+      "type": "USES",
+      "page": 9,
+      "quote": "a paper is added to the graph via the ORKG API",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "ORKG API",
+      "target": "Open Research Knowledge Graph",
+      "type": "PART_OF",
+      "page": 9,
+      "quote": "a paper is added to the graph via the ORKG API",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "Python",
+      "type": "USES",
+      "page": 9,
+      "quote": "Next, a Python script9 is used to select all rows from the tables.",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "ORKG Comparison",
+      "type": "PRODUCES",
+      "page": 9,
+      "quote": "For each table, a comparison is created in ORKG.",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Research Contributions",
+      "type": "PRODUCES",
+      "page": 1,
+      "quote": "graph infrastructure that publishes the research contributions of scholarly pub-",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Automated Extraction",
+      "type": "USES",
+      "page": 2,
+      "quote": "primarily relies on synergistically combining crowdsourcing and automated ex-",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Semantic Scholar",
+      "type": "COMPARES_WITH",
+      "page": 2,
+      "quote": "as other systems such as Semantic Scholar3, exclusively on",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "Knowledge Graph",
+      "type": "PRODUCES",
+      "page": 8,
+      "quote": "The ﬁnal step is to build a knowledge graph from the previously created CSV",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "Scholarly Knowledge Graph",
+      "type": "PRODUCES",
+      "page": 2,
+      "quote": "This methodology is used to create a scholarly knowledge graph from",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Paper Selection",
+      "target": "Human-in-the-Loop Methodology",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "We now present a ﬁve-step methodology for the creation of a scholarly knowledge",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Human-in-the-Loop Methodology",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "We now present a ﬁve-step methodology for the creation of a scholarly knowledge",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Table Formatting",
+      "target": "Human-in-the-Loop Methodology",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "We now present a ﬁve-step methodology for the creation of a scholarly knowledge",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Reference Extraction",
+      "target": "Human-in-the-Loop Methodology",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "We now present a ﬁve-step methodology for the creation of a scholarly knowledge",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "Human-in-the-Loop Methodology",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "We now present a ﬁve-step methodology for the creation of a scholarly knowledge",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Table Formatting",
+      "target": "CSV",
+      "type": "APPLIES_TO",
+      "page": 7,
+      "quote": "The CSV ﬁles containing the extracted tables from the review articles should",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Survey Table Import User Interface",
+      "target": "Tabula",
+      "type": "USES",
+      "page": 9,
+      "quote": "the background, the same tools from the methodology are used to extract tables",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Survey Table Import User Interface",
+      "target": "GROBID",
+      "type": "USES",
+      "page": 9,
+      "quote": "(Tabula) and extract references (GROBID). The ﬁrst step is to upload a PDF",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Survey Table Import User Interface",
+      "target": "Open Research Knowledge Graph",
+      "type": "PART_OF",
+      "page": 10,
+      "quote": "extracted surveys from this work. In the future, this interface will therefore be",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Tabula",
+      "target": "Portable Document Format",
+      "type": "APPLIES_TO",
+      "page": 7,
+      "quote": "section, we use Tabula to perform the table extraction. Each PDF article is",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Scholarly Knowledge Graph",
+      "target": "Scholarly Communication",
+      "type": "RELATED_TO",
+      "page": 1,
+      "quote": "communication is mainly document-based and the communicated schol-",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Computer Science",
+      "type": "RELATED_TO",
+      "page": 5,
+      "quote": "ORKG currently focuses mainly on the Computer Science domain.",
+      "votes": 2,
+      "voters": [
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "Crowdsourcing",
+      "type": "COMPARES_WITH",
+      "page": 2,
+      "quote": "Compared to sole crowdsourcing, the",
+      "votes": 2,
+      "voters": [
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Survey Article",
+      "type": "APPLIES_TO",
+      "page": 3,
+      "quote": "One aspect of the proposed methodology is table extraction from survey arti-",
+      "votes": 2,
+      "voters": [
+        "C",
+        "GLM"
+      ]
+    }
+  ],
+  "disputed_entities": [
+    {
+      "name": "Abstract Table Representation",
+      "type": "Artifact",
+      "page": 4,
+      "quote": "[25] TEXUS Automatic Documents (application agnostic) PDF",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Five-Step Methodology",
+      "type": "Method",
+      "page": 5,
+      "quote": "methodology for the creation of a scholarly knowledge graph from survey tables",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Character Extraction",
+      "type": "Method",
+      "page": 6,
+      "quote": "based on character extraction and does not use Optical Charac-",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Settings File",
+      "type": "Artifact",
+      "page": 8,
+      "quote": "which lists the table numbers, a suitable title for",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Integrated Spreadsheet Editor",
+      "type": "Component",
+      "page": 9,
+      "quote": "an integrated spreadsheet editor",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Fully Automated Approach",
+      "type": "Method",
+      "page": 12,
+      "quote": "as opposed to a fully automated approach",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Fully Manual Approach",
+      "type": "Method",
+      "page": 12,
+      "quote": "Compared to a fully manual approach, the proposed",
+      "votes": 1,
+      "voters": [
+        "A"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Manual Selection Method",
+      "type": "Method",
+      "page": 7,
+      "quote": "Arguably, the manual selection method is most",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Systematic Workflow",
+      "type": "Process",
+      "page": 2,
+      "quote": "Fig. 1: Systematic workﬂow in which survey articles are used to build a scholarly",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Corrˆea",
+      "type": "Person",
+      "page": 3,
+      "quote": "Corrˆea et al. did a literature survey on table extraction tools [3].",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Relational Schema",
+      "type": "Artifact",
+      "page": 4,
+      "quote": "Relational schema",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Domain Expert",
+      "type": "Concept",
+      "page": 1,
+      "quote": "eﬀort and domain experts, and is therefore time-consuming and cumber-",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Semi-Structured Data",
+      "type": "Concept",
+      "page": 6,
+      "quote": "literature is presented in a semi-structured manner). 2.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Research Problem",
+      "type": "Concept",
+      "page": 9,
+      "quote": "Research problem",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Scholarly Information Systems",
+      "type": "Concept",
+      "page": 1,
+      "quote": "tion systems, e. g. , the Microsoft Academic Graph [8] or Crossref [15] mainly",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Research Question",
+      "type": "Concept",
+      "page": 2,
+      "quote": "How to eﬃciently populate a scholarly knowledge graph with",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Bibliographic Data",
+      "type": "Concept",
+      "page": 3,
+      "quote": "GROBID focuses speciﬁcally on extracting bibliographic",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Semantic Data",
+      "type": "Concept",
+      "page": 3,
+      "quote": "Publishing data as structured or semantic data is a well researched topic",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Selected Papers File",
+      "type": "Artifact",
+      "page": 10,
+      "quote": "papers, the ORKG comparisons and the ingested papers. The selected papers ﬁle",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Joseph et al.",
+      "type": "Person",
+      "page": 9,
+      "quote": "Joseph et al. 1\nWuhan\n31 Dec '19 - 28 Jan '20\nStochastic Markov Chain. 2. 68",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Shen et al.",
+      "type": "Person",
+      "page": 9,
+      "quote": "Shen et al. 2\nHubei province\n12-22 Jan. '20",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Liu et al.",
+      "type": "Person",
+      "page": 9,
+      "quote": "Liu et al. 3\nChina and overseas\n23. Jan '20",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    }
+  ],
+  "disputed_relations": [
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Research Contribution",
+      "type": "PRODUCES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Paper Selection",
+      "target": "Five-Step Methodology",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Five-Step Methodology",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Table Formatting",
+      "target": "Five-Step Methodology",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Reference Extraction",
+      "target": "Five-Step Methodology",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "Five-Step Methodology",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Five-Step Methodology",
+      "target": "Semantic Scholar",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Five-Step Methodology",
+      "target": "Scholarly Knowledge Graph",
+      "type": "PRODUCES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Portable Document Format",
+      "target": "Survey Article",
+      "type": "APPLIES_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Five-Step Methodology",
+      "target": "Tabula",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Tabular Survey View",
+      "type": "PRODUCES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Five-Step Methodology",
+      "target": "SemAnn",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Five-Step Methodology",
+      "target": "Web Tables",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Five-Step Methodology",
+      "target": "TableSeer",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Five-Step Methodology",
+      "target": "TEXUS",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Five-Step Methodology",
+      "target": "Survey Table",
+      "type": "APPLIES_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Human Evaluation",
+      "target": "Data Quality",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Character Extraction",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Tabula",
+      "target": "Stream Extraction Method",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Tabula",
+      "target": "Lattice Extraction Method",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Reference Extraction",
+      "target": "Reference List",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "Settings File",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "User Interface",
+      "target": "Tabula",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "User Interface",
+      "target": "GROBID",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "User Interface",
+      "target": "Scholarly Knowledge Graph",
+      "type": "PRODUCES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Integrated Spreadsheet Editor",
+      "target": "User Interface",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "User Interface",
+      "target": "Open Research Knowledge Graph",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Five-Step Methodology",
+      "target": "Fully Automated Approach",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Five-Step Methodology",
+      "target": "Fully Manual Approach",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Knowledge Graph Infrastructure",
+      "type": "PRODUCES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "CSV",
+      "type": "APPLIES_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "Survey Table",
+      "type": "USES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Reference Extraction",
+      "target": "Citation Key",
+      "type": "USES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Tabula",
+      "target": "Stream Extraction Method",
+      "type": "SUPPORTS",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Tabula",
+      "target": "Lattice Extraction Method",
+      "type": "SUPPORTS",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Stream Extraction Method",
+      "type": "USES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Lattice Extraction Method",
+      "type": "USES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Manual Selection Method",
+      "target": "Table Extraction",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Search Strategy",
+      "target": "Paper Selection",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Inclusion Criteria",
+      "target": "Selection Criteria",
+      "type": "RELATED_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Data Quality",
+      "target": "Human-in-the-Loop Methodology",
+      "type": "RELATED_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Systematic Workflow",
+      "target": "Human-in-the-Loop Methodology",
+      "type": "RELATED_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Survey Table Import User Interface",
+      "target": "Knowledge Graph",
+      "type": "PRODUCES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "ORKG Comparison",
+      "target": "Open Research Knowledge Graph",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Corrˆea",
+      "target": "Tabula",
+      "type": "EVALUATES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Paper Selection",
+      "target": "Survey Article",
+      "type": "PRODUCES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Natural Language Processing",
+      "target": "Automated Extraction",
+      "type": "RELATED_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Optical Character Recognition",
+      "target": "Table Extraction",
+      "type": "RELATED_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Statistical Exponential Growth",
+      "target": "SARS",
+      "type": "USES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Allard Oelen",
+      "target": "L3S Research Center",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Allard Oelen",
+      "target": "TIB Leibniz Information Centre for Science and Technology",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Markus Stocker",
+      "target": "TIB Leibniz Information Centre for Science and Technology",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Sören Auer",
+      "target": "TIB Leibniz Information Centre for Science and Technology",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Sören Auer",
+      "target": "L3S Research Center",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Survey Table",
+      "target": "Open Research Knowledge Graph",
+      "type": "APPLIES_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Survey Table",
+      "target": "Microsoft Academic Graph",
+      "type": "APPLIES_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Survey Table",
+      "target": "Wikidata",
+      "type": "APPLIES_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Scholarly Knowledge Graph",
+      "target": "Knowledge Graph",
+      "type": "RELATED_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Research Contributions",
+      "target": "Bibliographic Metadata",
+      "type": "RELATED_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Time-Varying Transmission Dynamics of Novel Coronavirus Pneumonia in China",
+      "target": "COVID-19",
+      "type": "RELATED_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "SemAnn",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Web Tables",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "TableSeer",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "TEXUS",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "FAIR Data Principles",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Natural Language Processing",
+      "target": "Automated Extraction",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Scholarly Knowledge Graph",
+      "target": "Survey Table",
+      "type": "USES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Survey Table",
+      "target": "Literature Survey",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "Data Quality",
+      "type": "ENABLES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Human Evaluation",
+      "target": "Data Quality",
+      "type": "ENABLES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Paper Selection",
+      "target": "Search Strategy",
+      "type": "USES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Stream",
+      "type": "USES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Lattice",
+      "type": "USES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Survey Table",
+      "type": "PRODUCES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Table Extraction",
+      "target": "Optical Character Recognition",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Reference Extraction",
+      "target": "Reference Key",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Citation Key",
+      "target": "Reference Key",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Digital Object Identifier",
+      "target": "Bibliographic Metadata",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "GROBID",
+      "target": "Bibliographic Data",
+      "type": "PRODUCES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Tabula",
+      "target": "Stream",
+      "type": "SUPPORTS",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Tabula",
+      "target": "Lattice",
+      "type": "SUPPORTS",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "ORKG Comparison",
+      "target": "Tabular Survey View",
+      "type": "PRODUCES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Selected Papers File",
+      "target": "ORKG Comparison",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Microsoft Academic Graph",
+      "target": "Scholarly Knowledge Graph",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Wikidata",
+      "target": "Scholarly Knowledge Graph",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "Survey Article",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "Literature Survey",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "Portable Document Format",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Survey Article",
+      "target": "Scholarly Knowledge Graph",
+      "type": "ENABLES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Literature Survey",
+      "target": "Scholarly Knowledge Graph",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Reference Extraction",
+      "target": "reference extraction.py",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "build graph.py",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Build Graph",
+      "target": "Comparison",
+      "type": "PRODUCES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Microsoft Academic Graph",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Crossref",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "Natural Language Processing",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "Open Research Knowledge Graph",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Literature Survey",
+      "target": "Open Research Knowledge Graph",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Comparison",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Comparison",
+      "target": "Literature Survey",
+      "type": "RELATED_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "SemAnn",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "Web Tables",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "TableSeer",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Human-in-the-Loop Methodology",
+      "target": "TEXUS",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "JSON",
+      "type": "PRODUCES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Resource Description Framework",
+      "type": "PRODUCES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Open Research Knowledge Graph",
+      "target": "Portable Document Format",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "SemAnn",
+      "target": "Portable Document Format",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "SemAnn",
+      "target": "Resource Description Framework",
+      "type": "PRODUCES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Web Tables",
+      "target": "HTML",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Web Tables",
+      "target": "JSON",
+      "type": "PRODUCES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TableSeer",
+      "target": "Portable Document Format",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TEXUS",
+      "target": "Portable Document Format",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "ORKG Search Interface",
+      "target": "Comparison",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Stream",
+      "target": "Tabula",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Lattice",
+      "target": "Tabula",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Lattice",
+      "target": "Stream",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Survey Table Import User Interface",
+      "target": "Portable Document Format",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Corrêa et al.",
+      "target": "Tabula",
+      "type": "EVALUATES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Lipinski et al.",
+      "target": "GROBID",
+      "type": "EVALUATES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Allard Oelen",
+      "target": "L3S Research Center",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Allard Oelen",
+      "target": "TIB Leibniz Information Centre for Science and Technology",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Markus Stocker",
+      "target": "TIB Leibniz Information Centre for Science and Technology",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Sören Auer",
+      "target": "TIB Leibniz Information Centre for Science and Technology",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Sören Auer",
+      "target": "L3S Research Center",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "L3S Research Center",
+      "target": "Leibniz University of Hannover",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Joseph et al.",
+      "target": "Wuhan",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Joseph et al.",
+      "target": "Stochastic Markov Chain",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Joseph et al.",
+      "target": "R0 Estimates",
+      "type": "MEASURES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Shen et al.",
+      "target": "Hubei Province",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Shen et al.",
+      "target": "R0 Estimates",
+      "type": "MEASURES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Liu et al.",
+      "target": "China",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Liu et al.",
+      "target": "Statistical Exponential Growth",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Liu et al.",
+      "target": "R0 Estimates",
+      "type": "MEASURES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Open Government Data",
+      "target": "Portable Document Format",
+      "type": "RELATED_TO",
+      "voters": [
+        "GLM"
+      ]
+    }
+  ],
+  "stats": {
+    "entity_candidates": 105,
+    "entity_accepted": 83,
+    "entity_disputed": 22,
+    "entity_quote_unverified": 0,
+    "relation_accepted": 65,
+    "relation_disputed": 135,
+    "mean_pairwise_jaccard": 0.6729,
+    "majority_agreement_rate": 0.7905,
+    "entity_final": 93,
+    "arbitrated_accepted": 10,
+    "arbitrated_rejected": 12,
+    "relation_final": 65,
+    "relation_single_vote_dropped": 135
+  },
+  "arbitration": {
+    "rules": "docs/GOLD_ARBITRATION_RULES.md",
+    "disputed_total": 22,
+    "accepted": [
+      "Abstract Table Representation",
+      "Five-Step Methodology",
+      "Character Extraction",
+      "Settings File",
+      "Integrated Spreadsheet Editor",
+      "Fully Automated Approach",
+      "Fully Manual Approach",
+      "Manual Selection Method",
+      "Relational Schema",
+      "Selected Papers File"
+    ],
+    "rejected": [
+      "Systematic Workflow",
+      "Corrˆea",
+      "Domain Expert",
+      "Semi-Structured Data",
+      "Research Problem",
+      "Scholarly Information Systems",
+      "Research Question",
+      "Bibliographic Data",
+      "Semantic Data",
+      "Joseph et al.",
+      "Shen et al.",
+      "Liu et al."
+    ],
+    "unresolved": []
+  }
+}

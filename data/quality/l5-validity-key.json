@@ -1,0 +1,1402 @@
+{
+  "V0001": {
+    "entail_prob": 0.5574,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "1|one"
+  },
+  "V0002": {
+    "entail_prob": 0.9835,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0003": {
+    "entail_prob": 0.1025,
+    "pass": false,
+    "hit": "one",
+    "type": "MEASURES",
+    "stratum": "0|one"
+  },
+  "V0004": {
+    "entail_prob": 0.9808,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0005": {
+    "entail_prob": 0.8977,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "4|one"
+  },
+  "V0006": {
+    "entail_prob": 0.3407,
+    "pass": false,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "0|both"
+  },
+  "V0007": {
+    "entail_prob": 0.6912,
+    "pass": true,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "3|one"
+  },
+  "V0008": {
+    "entail_prob": 0.3299,
+    "pass": false,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "0|one"
+  },
+  "V0009": {
+    "entail_prob": 0.9411,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0010": {
+    "entail_prob": 0.8149,
+    "pass": true,
+    "hit": "one",
+    "type": "PRODUCES",
+    "stratum": "4|one"
+  },
+  "V0011": {
+    "entail_prob": 0.3021,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "0|one"
+  },
+  "V0012": {
+    "entail_prob": 0.7714,
+    "pass": true,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "3|one"
+  },
+  "V0013": {
+    "entail_prob": 0.2996,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "0|one"
+  },
+  "V0014": {
+    "entail_prob": 0.6649,
+    "pass": false,
+    "hit": "one",
+    "type": "PRODUCES",
+    "stratum": "2|one"
+  },
+  "V0015": {
+    "entail_prob": 0.8919,
+    "pass": true,
+    "hit": "both",
+    "type": "CREATED_BY",
+    "stratum": "4|both"
+  },
+  "V0016": {
+    "entail_prob": 0.5508,
+    "pass": false,
+    "hit": "none",
+    "type": "COMPARES_WITH",
+    "stratum": "1|none"
+  },
+  "V0017": {
+    "entail_prob": 0.9748,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "4|one"
+  },
+  "V0018": {
+    "entail_prob": 0.9793,
+    "pass": true,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "4|one"
+  },
+  "V0019": {
+    "entail_prob": 0.4996,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "1|one"
+  },
+  "V0020": {
+    "entail_prob": 0.2864,
+    "pass": false,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "0|both"
+  },
+  "V0021": {
+    "entail_prob": 0.1017,
+    "pass": false,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "0|one"
+  },
+  "V0022": {
+    "entail_prob": 0.8228,
+    "pass": true,
+    "hit": "one",
+    "type": "PRODUCES",
+    "stratum": "4|one"
+  },
+  "V0023": {
+    "entail_prob": 0.3166,
+    "pass": false,
+    "hit": "none",
+    "type": "CREATED_BY",
+    "stratum": "0|none"
+  },
+  "V0024": {
+    "entail_prob": 0.9911,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "4|both"
+  },
+  "V0025": {
+    "entail_prob": 0.5214,
+    "pass": false,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "1|both"
+  },
+  "V0026": {
+    "entail_prob": 0.9351,
+    "pass": true,
+    "hit": "none",
+    "type": "PART_OF",
+    "stratum": "4|none"
+  },
+  "V0027": {
+    "entail_prob": 0.9623,
+    "pass": true,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "4|one"
+  },
+  "V0028": {
+    "entail_prob": 0.9942,
+    "pass": true,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "4|one"
+  },
+  "V0029": {
+    "entail_prob": 0.8068,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0030": {
+    "entail_prob": 0.7516,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "3|one"
+  },
+  "V0031": {
+    "entail_prob": 0.3486,
+    "pass": false,
+    "hit": "one",
+    "type": "ENABLES",
+    "stratum": "0|one"
+  },
+  "V0032": {
+    "entail_prob": 0.8144,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "4|one"
+  },
+  "V0033": {
+    "entail_prob": 0.8607,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0034": {
+    "entail_prob": 0.2508,
+    "pass": false,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "0|both"
+  },
+  "V0035": {
+    "entail_prob": 0.9881,
+    "pass": true,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "4|one"
+  },
+  "V0036": {
+    "entail_prob": 0.3364,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "0|one"
+  },
+  "V0037": {
+    "entail_prob": 0.2138,
+    "pass": false,
+    "hit": "none",
+    "type": "USES",
+    "stratum": "0|none"
+  },
+  "V0038": {
+    "entail_prob": 0.9565,
+    "pass": true,
+    "hit": "both",
+    "type": "ENABLES",
+    "stratum": "4|both"
+  },
+  "V0039": {
+    "entail_prob": 0.3528,
+    "pass": false,
+    "hit": "none",
+    "type": "CITES",
+    "stratum": "0|none"
+  },
+  "V0040": {
+    "entail_prob": 0.985,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0041": {
+    "entail_prob": 0.428,
+    "pass": false,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "1|both"
+  },
+  "V0042": {
+    "entail_prob": 0.3356,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "0|one"
+  },
+  "V0043": {
+    "entail_prob": 0.9998,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "4|one"
+  },
+  "V0044": {
+    "entail_prob": 0.8265,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "4|one"
+  },
+  "V0045": {
+    "entail_prob": 0.2145,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "0|one"
+  },
+  "V0046": {
+    "entail_prob": 0.4429,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "1|one"
+  },
+  "V0047": {
+    "entail_prob": 0.9248,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0048": {
+    "entail_prob": 0.6156,
+    "pass": false,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "2|one"
+  },
+  "V0049": {
+    "entail_prob": 0.9525,
+    "pass": true,
+    "hit": "both",
+    "type": "CITES",
+    "stratum": "4|both"
+  },
+  "V0050": {
+    "entail_prob": 0.4196,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "1|one"
+  },
+  "V0051": {
+    "entail_prob": 0.9745,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0052": {
+    "entail_prob": 0.6388,
+    "pass": false,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "2|one"
+  },
+  "V0053": {
+    "entail_prob": 0.8158,
+    "pass": true,
+    "hit": "both",
+    "type": "ENABLES",
+    "stratum": "4|both"
+  },
+  "V0054": {
+    "entail_prob": 0.2037,
+    "pass": false,
+    "hit": "both",
+    "type": "EVALUATES",
+    "stratum": "0|both"
+  },
+  "V0055": {
+    "entail_prob": 0.9217,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0056": {
+    "entail_prob": 0.9935,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0057": {
+    "entail_prob": 0.836,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0058": {
+    "entail_prob": 0.3894,
+    "pass": false,
+    "hit": "one",
+    "type": "MEASURES",
+    "stratum": "0|one"
+  },
+  "V0059": {
+    "entail_prob": 0.0292,
+    "pass": false,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "0|one"
+  },
+  "V0060": {
+    "entail_prob": 0.6603,
+    "pass": false,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "2|both"
+  },
+  "V0061": {
+    "entail_prob": 0.9134,
+    "pass": true,
+    "hit": "both",
+    "type": "CREATED_BY",
+    "stratum": "4|both"
+  },
+  "V0062": {
+    "entail_prob": 0.8095,
+    "pass": true,
+    "hit": "one",
+    "type": "SUPPORTS",
+    "stratum": "4|one"
+  },
+  "V0063": {
+    "entail_prob": 0.948,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0064": {
+    "entail_prob": 0.6847,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "3|both"
+  },
+  "V0065": {
+    "entail_prob": 0.8144,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "4|both"
+  },
+  "V0066": {
+    "entail_prob": 0.4524,
+    "pass": false,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "1|one"
+  },
+  "V0067": {
+    "entail_prob": 0.7504,
+    "pass": true,
+    "hit": "one",
+    "type": "SUPPORTS",
+    "stratum": "3|one"
+  },
+  "V0068": {
+    "entail_prob": 0.7457,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "3|one"
+  },
+  "V0069": {
+    "entail_prob": 0.5398,
+    "pass": false,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "1|one"
+  },
+  "V0070": {
+    "entail_prob": 0.3799,
+    "pass": false,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "0|one"
+  },
+  "V0071": {
+    "entail_prob": 0.469,
+    "pass": false,
+    "hit": "one",
+    "type": "APPLIES_TO",
+    "stratum": "1|one"
+  },
+  "V0072": {
+    "entail_prob": 0.893,
+    "pass": true,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "4|one"
+  },
+  "V0073": {
+    "entail_prob": 0.9366,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0074": {
+    "entail_prob": 0.5731,
+    "pass": false,
+    "hit": "both",
+    "type": "COMPARES_WITH",
+    "stratum": "1|both"
+  },
+  "V0075": {
+    "entail_prob": 0.8232,
+    "pass": true,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "4|one"
+  },
+  "V0076": {
+    "entail_prob": 0.5358,
+    "pass": false,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "1|both"
+  },
+  "V0077": {
+    "entail_prob": 0.9292,
+    "pass": true,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "4|one"
+  },
+  "V0078": {
+    "entail_prob": 0.0744,
+    "pass": false,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "0|both"
+  },
+  "V0079": {
+    "entail_prob": 0.8198,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "4|one"
+  },
+  "V0080": {
+    "entail_prob": 0.9736,
+    "pass": true,
+    "hit": "both",
+    "type": "PRODUCES",
+    "stratum": "4|both"
+  },
+  "V0081": {
+    "entail_prob": 0.5865,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "1|one"
+  },
+  "V0082": {
+    "entail_prob": 0.3707,
+    "pass": false,
+    "hit": "none",
+    "type": "LOCATED_AT",
+    "stratum": "0|none"
+  },
+  "V0083": {
+    "entail_prob": 0.9457,
+    "pass": true,
+    "hit": "one",
+    "type": "LOCATED_AT",
+    "stratum": "4|one"
+  },
+  "V0084": {
+    "entail_prob": 0.6325,
+    "pass": false,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "2|one"
+  },
+  "V0085": {
+    "entail_prob": 0.9115,
+    "pass": true,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "4|one"
+  },
+  "V0086": {
+    "entail_prob": 0.9436,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0087": {
+    "entail_prob": 0.7323,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "3|one"
+  },
+  "V0088": {
+    "entail_prob": 0.2224,
+    "pass": false,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "0|one"
+  },
+  "V0089": {
+    "entail_prob": 0.9561,
+    "pass": true,
+    "hit": "both",
+    "type": "ENABLES",
+    "stratum": "4|both"
+  },
+  "V0090": {
+    "entail_prob": 0.6824,
+    "pass": true,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "3|one"
+  },
+  "V0091": {
+    "entail_prob": 0.9565,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0092": {
+    "entail_prob": 0.64,
+    "pass": false,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "2|both"
+  },
+  "V0093": {
+    "entail_prob": 0.9647,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0094": {
+    "entail_prob": 0.9771,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0095": {
+    "entail_prob": 0.7895,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "3|one"
+  },
+  "V0096": {
+    "entail_prob": 0.9116,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0097": {
+    "entail_prob": 0.9826,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0098": {
+    "entail_prob": 0.4456,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "1|one"
+  },
+  "V0099": {
+    "entail_prob": 0.9518,
+    "pass": true,
+    "hit": "one",
+    "type": "APPLIES_TO",
+    "stratum": "4|one"
+  },
+  "V0100": {
+    "entail_prob": 0.6197,
+    "pass": false,
+    "hit": "none",
+    "type": "USES",
+    "stratum": "2|none"
+  },
+  "V0101": {
+    "entail_prob": 0.4638,
+    "pass": false,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "1|one"
+  },
+  "V0102": {
+    "entail_prob": 0.9535,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "4|both"
+  },
+  "V0103": {
+    "entail_prob": 0.8218,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0104": {
+    "entail_prob": 0.2732,
+    "pass": false,
+    "hit": "both",
+    "type": "CREATED_BY",
+    "stratum": "0|both"
+  },
+  "V0105": {
+    "entail_prob": 0.3831,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "0|one"
+  },
+  "V0106": {
+    "entail_prob": 0.921,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "4|both"
+  },
+  "V0107": {
+    "entail_prob": 0.2569,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "0|one"
+  },
+  "V0108": {
+    "entail_prob": 0.9424,
+    "pass": true,
+    "hit": "one",
+    "type": "APPLIES_TO",
+    "stratum": "4|one"
+  },
+  "V0109": {
+    "entail_prob": 0.3701,
+    "pass": false,
+    "hit": "none",
+    "type": "RELATED_TO",
+    "stratum": "0|none"
+  },
+  "V0110": {
+    "entail_prob": 0.8191,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "4|one"
+  },
+  "V0111": {
+    "entail_prob": 0.9344,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "4|one"
+  },
+  "V0112": {
+    "entail_prob": 0.8351,
+    "pass": true,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "4|one"
+  },
+  "V0113": {
+    "entail_prob": 0.8861,
+    "pass": true,
+    "hit": "both",
+    "type": "MEASURES",
+    "stratum": "4|both"
+  },
+  "V0114": {
+    "entail_prob": 0.8713,
+    "pass": true,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "4|one"
+  },
+  "V0115": {
+    "entail_prob": 0.3802,
+    "pass": false,
+    "hit": "both",
+    "type": "CREATED_BY",
+    "stratum": "0|both"
+  },
+  "V0116": {
+    "entail_prob": 0.9895,
+    "pass": true,
+    "hit": "both",
+    "type": "EVALUATES",
+    "stratum": "4|both"
+  },
+  "V0117": {
+    "entail_prob": 0.7602,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "3|both"
+  },
+  "V0118": {
+    "entail_prob": 0.8932,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "4|both"
+  },
+  "V0119": {
+    "entail_prob": 0.9755,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "4|both"
+  },
+  "V0120": {
+    "entail_prob": 0.9258,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "4|both"
+  },
+  "V0121": {
+    "entail_prob": 0.9996,
+    "pass": true,
+    "hit": "both",
+    "type": "LOCATED_AT",
+    "stratum": "4|both"
+  },
+  "V0122": {
+    "entail_prob": 0.6773,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "3|one"
+  },
+  "V0123": {
+    "entail_prob": 0.9467,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0124": {
+    "entail_prob": 0.8129,
+    "pass": true,
+    "hit": "both",
+    "type": "PRODUCES",
+    "stratum": "4|both"
+  },
+  "V0125": {
+    "entail_prob": 0.4384,
+    "pass": false,
+    "hit": "one",
+    "type": "PRODUCES",
+    "stratum": "1|one"
+  },
+  "V0126": {
+    "entail_prob": 0.6753,
+    "pass": true,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "3|one"
+  },
+  "V0127": {
+    "entail_prob": 0.5046,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "1|one"
+  },
+  "V0128": {
+    "entail_prob": 0.4014,
+    "pass": false,
+    "hit": "one",
+    "type": "CITES",
+    "stratum": "1|one"
+  },
+  "V0129": {
+    "entail_prob": 0.736,
+    "pass": true,
+    "hit": "one",
+    "type": "APPLIES_TO",
+    "stratum": "3|one"
+  },
+  "V0130": {
+    "entail_prob": 0.832,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0131": {
+    "entail_prob": 0.9359,
+    "pass": true,
+    "hit": "both",
+    "type": "CAUSES",
+    "stratum": "4|both"
+  },
+  "V0132": {
+    "entail_prob": 0.9471,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "4|one"
+  },
+  "V0133": {
+    "entail_prob": 0.9524,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "4|one"
+  },
+  "V0134": {
+    "entail_prob": 0.647,
+    "pass": false,
+    "hit": "both",
+    "type": "LOCATED_AT",
+    "stratum": "2|both"
+  },
+  "V0135": {
+    "entail_prob": 0.9097,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0136": {
+    "entail_prob": 0.9841,
+    "pass": true,
+    "hit": "both",
+    "type": "PRODUCES",
+    "stratum": "4|both"
+  },
+  "V0137": {
+    "entail_prob": 0.4068,
+    "pass": false,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "1|one"
+  },
+  "V0138": {
+    "entail_prob": 0.9355,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0139": {
+    "entail_prob": 0.7953,
+    "pass": true,
+    "hit": "both",
+    "type": "CREATED_BY",
+    "stratum": "3|both"
+  },
+  "V0140": {
+    "entail_prob": 0.9208,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "4|one"
+  },
+  "V0141": {
+    "entail_prob": 0.9981,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0142": {
+    "entail_prob": 0.9223,
+    "pass": true,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "4|one"
+  },
+  "V0143": {
+    "entail_prob": 0.9942,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0144": {
+    "entail_prob": 0.9965,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0145": {
+    "entail_prob": 0.9591,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0146": {
+    "entail_prob": 0.4829,
+    "pass": false,
+    "hit": "one",
+    "type": "ENABLES",
+    "stratum": "1|one"
+  },
+  "V0147": {
+    "entail_prob": 0.7497,
+    "pass": true,
+    "hit": "one",
+    "type": "APPLIES_TO",
+    "stratum": "3|one"
+  },
+  "V0148": {
+    "entail_prob": 0.9053,
+    "pass": true,
+    "hit": "one",
+    "type": "USES",
+    "stratum": "4|one"
+  },
+  "V0149": {
+    "entail_prob": 0.8359,
+    "pass": true,
+    "hit": "both",
+    "type": "SUPPORTS",
+    "stratum": "4|both"
+  },
+  "V0150": {
+    "entail_prob": 0.7245,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "3|both"
+  },
+  "V0151": {
+    "entail_prob": 0.652,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "2|one"
+  },
+  "V0152": {
+    "entail_prob": 0.8397,
+    "pass": true,
+    "hit": "both",
+    "type": "SUPPORTS",
+    "stratum": "4|both"
+  },
+  "V0153": {
+    "entail_prob": 0.2265,
+    "pass": false,
+    "hit": "both",
+    "type": "CONTRADICTS",
+    "stratum": "0|both"
+  },
+  "V0154": {
+    "entail_prob": 0.7389,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "3|both"
+  },
+  "V0155": {
+    "entail_prob": 0.9611,
+    "pass": true,
+    "hit": "both",
+    "type": "CREATED_BY",
+    "stratum": "4|both"
+  },
+  "V0156": {
+    "entail_prob": 0.9016,
+    "pass": true,
+    "hit": "both",
+    "type": "LOCATED_AT",
+    "stratum": "4|both"
+  },
+  "V0157": {
+    "entail_prob": 0.1566,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "0|one"
+  },
+  "V0158": {
+    "entail_prob": 0.49,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "1|one"
+  },
+  "V0159": {
+    "entail_prob": 0.6977,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "3|one"
+  },
+  "V0160": {
+    "entail_prob": 0.9512,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0161": {
+    "entail_prob": 0.9466,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "4|one"
+  },
+  "V0162": {
+    "entail_prob": 0.5803,
+    "pass": false,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "1|both"
+  },
+  "V0163": {
+    "entail_prob": 0.7755,
+    "pass": true,
+    "hit": "none",
+    "type": "PART_OF",
+    "stratum": "3|none"
+  },
+  "V0164": {
+    "entail_prob": 0.1664,
+    "pass": false,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "0|one"
+  },
+  "V0165": {
+    "entail_prob": 0.5562,
+    "pass": false,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "1|both"
+  },
+  "V0166": {
+    "entail_prob": 0.7222,
+    "pass": true,
+    "hit": "both",
+    "type": "SUPPORTS",
+    "stratum": "3|both"
+  },
+  "V0167": {
+    "entail_prob": 0.9053,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0168": {
+    "entail_prob": 0.9912,
+    "pass": true,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "4|one"
+  },
+  "V0169": {
+    "entail_prob": 0.9762,
+    "pass": true,
+    "hit": "one",
+    "type": "APPLIES_TO",
+    "stratum": "4|one"
+  },
+  "V0170": {
+    "entail_prob": 0.7995,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "3|one"
+  },
+  "V0171": {
+    "entail_prob": 0.5143,
+    "pass": false,
+    "hit": "one",
+    "type": "CITES",
+    "stratum": "1|one"
+  },
+  "V0172": {
+    "entail_prob": 0.7308,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "3|one"
+  },
+  "V0173": {
+    "entail_prob": 0.619,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "2|one"
+  },
+  "V0174": {
+    "entail_prob": 0.9966,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "4|both"
+  },
+  "V0175": {
+    "entail_prob": 0.3323,
+    "pass": false,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "0|both"
+  },
+  "V0176": {
+    "entail_prob": 0.8303,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "4|both"
+  },
+  "V0177": {
+    "entail_prob": 0.6576,
+    "pass": false,
+    "hit": "both",
+    "type": "EVALUATES",
+    "stratum": "2|both"
+  },
+  "V0178": {
+    "entail_prob": 0.87,
+    "pass": true,
+    "hit": "both",
+    "type": "PART_OF",
+    "stratum": "4|both"
+  },
+  "V0179": {
+    "entail_prob": 0.7931,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "3|one"
+  },
+  "V0180": {
+    "entail_prob": 0.7446,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "3|both"
+  },
+  "V0181": {
+    "entail_prob": 0.9188,
+    "pass": true,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "4|one"
+  },
+  "V0182": {
+    "entail_prob": 0.968,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0183": {
+    "entail_prob": 0.1478,
+    "pass": false,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "0|one"
+  },
+  "V0184": {
+    "entail_prob": 0.7478,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "3|both"
+  },
+  "V0185": {
+    "entail_prob": 0.8739,
+    "pass": true,
+    "hit": "both",
+    "type": "PRODUCES",
+    "stratum": "4|both"
+  },
+  "V0186": {
+    "entail_prob": 0.4552,
+    "pass": false,
+    "hit": "none",
+    "type": "COMPARES_WITH",
+    "stratum": "1|none"
+  },
+  "V0187": {
+    "entail_prob": 0.6018,
+    "pass": false,
+    "hit": "one",
+    "type": "APPLIES_TO",
+    "stratum": "2|one"
+  },
+  "V0188": {
+    "entail_prob": 0.9544,
+    "pass": true,
+    "hit": "one",
+    "type": "SUPPORTS",
+    "stratum": "4|one"
+  },
+  "V0189": {
+    "entail_prob": 0.8182,
+    "pass": true,
+    "hit": "both",
+    "type": "COMPARES_WITH",
+    "stratum": "4|both"
+  },
+  "V0190": {
+    "entail_prob": 0.8917,
+    "pass": true,
+    "hit": "none",
+    "type": "PART_OF",
+    "stratum": "4|none"
+  },
+  "V0191": {
+    "entail_prob": 0.9399,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0192": {
+    "entail_prob": 0.7632,
+    "pass": true,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "3|both"
+  },
+  "V0193": {
+    "entail_prob": 0.4631,
+    "pass": false,
+    "hit": "both",
+    "type": "RELATED_TO",
+    "stratum": "1|both"
+  },
+  "V0194": {
+    "entail_prob": 0.7405,
+    "pass": true,
+    "hit": "both",
+    "type": "PRODUCES",
+    "stratum": "3|both"
+  },
+  "V0195": {
+    "entail_prob": 0.9738,
+    "pass": true,
+    "hit": "one",
+    "type": "RELATED_TO",
+    "stratum": "4|one"
+  },
+  "V0196": {
+    "entail_prob": 0.8704,
+    "pass": true,
+    "hit": "both",
+    "type": "USES",
+    "stratum": "4|both"
+  },
+  "V0197": {
+    "entail_prob": 0.91,
+    "pass": true,
+    "hit": "both",
+    "type": "APPLIES_TO",
+    "stratum": "4|both"
+  },
+  "V0198": {
+    "entail_prob": 0.5469,
+    "pass": false,
+    "hit": "one",
+    "type": "PART_OF",
+    "stratum": "1|one"
+  },
+  "V0199": {
+    "entail_prob": 0.6843,
+    "pass": true,
+    "hit": "both",
+    "type": "PRODUCES",
+    "stratum": "3|both"
+  },
+  "V0200": {
+    "entail_prob": 0.4288,
+    "pass": false,
+    "hit": "one",
+    "type": "CREATED_BY",
+    "stratum": "1|one"
+  }
+}

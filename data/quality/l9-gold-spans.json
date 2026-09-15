@@ -1,0 +1,49 @@
+{
+  "seed": 20260912,
+  "annotator": "独立于抽取管线的逐段人工标注（2026-09-12）",
+  "annotation_rule": "只列段落中**明确的命名实体**：人名、机构、会议/期刊、方法/模型名、数据集、任务名、论文标题。不含泛指概念（如 'embedding models'、'knowledge graph'）与章节名（如 'Table II'、'Appendix C'）。引文式写法（'Teru et al.'）按项目的实体观保留。",
+  "note": "这是操作性金标，不是严格金标：段落按固定种子抽样，标注由不经过抽取管线的人/模型给出。它的作用是回答『原文里的东西抽到没有』——现有六层全部是自洽型判定，回答不了这个问题。",
+  "spans": [
+    {
+      "id": "1703.08098v9#0",
+      "entities": []
+    },
+    {
+      "id": "1703.08098v9#1",
+      "entities": [
+        "Tu Dinh Nguyen", "Dat Quoc Nguyen", "Dinh Phung", "Dai Quoc Nguyen",
+        "Thanh Vu", "NAACL-HLT", "Semantic Web",
+        "Convolutional Neural Network", "Capsule Network",
+        "Knowledge Base Completion", "Knowledge Graph Completion",
+        "Search Personalization"
+      ]
+    },
+    {
+      "id": "2002.00388v4#0",
+      "entities": ["KRL", "Safavi et al."]
+    },
+    {
+      "id": "2002.00388v4#1",
+      "entities": ["TransE", "DistMult", "Distance-based Scoring Function"]
+    },
+    {
+      "id": "2012.00456v1#0",
+      "entities": [
+        "Scholarly Communication", "Scholarly Knowledge Graphs",
+        "Tabular Data Extraction"
+      ]
+    },
+    {
+      "id": "2012.00456v1#1",
+      "entities": ["Semantics of Data"]
+    },
+    {
+      "id": "2112.10006v6#0",
+      "entities": ["WN18RR", "FB15k-237", "NELL-995", "Teru et al."]
+    },
+    {
+      "id": "2112.10006v6#1",
+      "entities": ["NUS-WIDE", "NUS-1000", "NUS-81", "Flickr"]
+    }
+  ]
+}

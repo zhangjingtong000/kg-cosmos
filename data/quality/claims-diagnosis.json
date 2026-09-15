@@ -1,0 +1,13 @@
+{
+  "total": 243,
+  "pattern_counts": {
+    "局限/否定（does not / failed to）": 77,
+    "其他": 130,
+    "替代/区分（instead of / rather than）": 10,
+    "对立（conflict 词）": 26
+  },
+  "conflict_marker_items": 26,
+  "cross_paper_pairs": 0,
+  "distinct_pairs": 242,
+  "verdict": "NO_CONTRADICTION_DATA"
+}

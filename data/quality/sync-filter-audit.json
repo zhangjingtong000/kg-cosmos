@@ -1,0 +1,1829 @@
+{
+  "nodes": 23716,
+  "edges_kept": 32225,
+  "skipped": {
+    "low_confidence": 10035,
+    "out_of_ontology": 237,
+    "self_loop": 91,
+    "dangling": 1279
+  },
+  "isolated_nodes": 3307,
+  "dangling_by_type": {
+    "PART_OF": 270,
+    "USES": 253,
+    "RELATED_TO": 207,
+    "APPLIES_TO": 150,
+    "MEASURES": 108,
+    "PRODUCES": 95,
+    "CREATED_BY": 48,
+    "COMPARES_WITH": 32,
+    "EVALUATES": 31,
+    "ENABLES": 28,
+    "SUPPORTS": 24,
+    "LOCATED_AT": 18,
+    "CITES": 10,
+    "CAUSES": 5
+  },
+  "dangling_samples": [
+    {
+      "type": "PART_OF",
+      "source": "Knowledge Graphs",
+      "target": "Real-world objects represented in knowledge graphs",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Relationship",
+      "target": "Real-world objects represented in knowledge graphs",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Embedding Models",
+      "target": "Real-world objects represented in knowledge graphs",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Knowledge Base",
+      "target": "Person Entity",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Knowledge Base",
+      "target": "Place Entity",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Person Entity",
+      "target": "Place Entity",
+      "missing": "source+target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "scientist",
+      "target": "person entity",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "Freebase",
+      "target": "Person Entity",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "West Et Al.",
+      "target": "Person Entity",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "E",
+      "target": "Entities",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "SE",
+      "target": "Translation",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "A node in a knowledge graph, represented by a vector vh or vt.",
+      "target": "Vectors",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "A node in a knowledge graph, represented by a vector vh or vt.",
+      "target": "Embedding Models",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Born In",
+      "target": "Many-to-1 Relationships",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Place of Birth",
+      "target": "1-to-Many Relationships",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "TransH",
+      "target": "Many-to-1 Relationships",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "TransH",
+      "target": "1-to-Many Relationships",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "TranSparse",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Word2Vec",
+      "target": "SE",
+      "missing": "target"
+    },
+    {
+      "type": "EVALUATES",
+      "source": "Luo Et Al.",
+      "target": "SE",
+      "missing": "target"
+    },
+    {
+      "type": "CREATED_BY",
+      "source": "SE",
+      "target": "Bordes et al.",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Relation-Aware Attention Mechanism",
+      "target": "Local Neighborhood Information",
+      "missing": "target"
+    },
+    {
+      "type": "ENABLES",
+      "source": "Layer-Wise Propagation",
+      "target": "An entity whose final representation is computed.",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Link Prediction",
+      "target": "probabilistic first-order logical rules",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "probabilistic first-order logical rules",
+      "target": "KG Reasoning",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "MR",
+      "target": "Filtered",
+      "missing": "source"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TransH",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TransH",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TransR",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TransR",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "CTransR",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "CTransR",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "KG2E",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "KG2E",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TransD",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TransD",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "lppTransD",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "lppTransD",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TransG",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TransG",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TranSparse",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TranSparse",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TranSparse-DT",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TranSparse-DT",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "CREATED_BY",
+      "source": "KBLRN",
+      "target": "Durán",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "MR",
+      "target": "WN18",
+      "missing": "source"
+    },
+    {
+      "type": "MEASURES",
+      "source": "MR",
+      "target": "FB15k",
+      "missing": "source"
+    },
+    {
+      "type": "MEASURES",
+      "source": "Gaifman",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "Hiri",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "Neural LP",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "R-GCN+",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "KBLRN",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "TEKE H",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "SSP",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "MR",
+      "target": "Table 4",
+      "missing": "source"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Yang et al.",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Nickel Et Al.",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Ravishankar et al.",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Kadlec et al.",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "CapsE",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "MR",
+      "target": "WN18RR",
+      "missing": "source"
+    },
+    {
+      "type": "MEASURES",
+      "source": "FB15k",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "WN18",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "FB15k-237",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "FB15k-237",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "WN18RR",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "WN18RR",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "IRN (Shen et al. , 2017)",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "IRN (Shen et al. , 2017)",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "KBGAN (Cai and Wang, 2018)",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "KBGAN (Cai and Wang, 2018)",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "DISTMULT (Yang et al. , 2015) [♦]",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "DISTMULT (Yang et al. , 2015) [♦]",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "ComplEx (Trouillon et al. , 2016) [♦]",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "ComplEx (Trouillon et al. , 2016) [♦]",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "ConvE (Dettmers et al. , 2018)",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "ConvE (Dettmers et al. , 2018)",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "ER-MLP (Dong et al. , 2014) [♠]",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "ER-MLP (Dong et al. , 2014) [♠]",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "HypER (Balaˇzevi´c et al. , 2019)",
+      "target": "MR",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "HypER (Balaˇzevi´c et al. , 2019)",
+      "target": "@10",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Large-Scale KGs",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "MR",
+      "target": "FB15k-237",
+      "missing": "source"
+    },
+    {
+      "type": "MEASURES",
+      "source": "@10",
+      "target": "FB15k-237",
+      "missing": "source"
+    },
+    {
+      "type": "MEASURES",
+      "source": "@10",
+      "target": "WN18RR",
+      "missing": "source"
+    },
+    {
+      "type": "CREATED_BY",
+      "source": "Ivana Balažević",
+      "target": "Hypernetwork knowledge graph embeddings",
+      "missing": "source"
+    },
+    {
+      "type": "CREATED_BY",
+      "source": "Alberto García-Durán",
+      "target": "Composing Relationships with Translations",
+      "missing": "source"
+    },
+    {
+      "type": "CREATED_BY",
+      "source": "Composing Relationships with Translations",
+      "target": "Alberto García-Durán",
+      "missing": "target"
+    },
+    {
+      "type": "CREATED_BY",
+      "source": "Combining Two and Three-Way Embedding Models for Link Prediction in Knowledge Bases",
+      "target": "Alberto García-Durán",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Directed Graph",
+      "target": "A node in a directed graph representation of knowledge.",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Knowledge Base",
+      "target": "Appendices F-A2",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Definitions and Notations",
+      "target": "Semantic Representations",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Definitions and Notations",
+      "target": "Essential Characteristics",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Formal Definitions",
+      "target": "Definitions and Notations",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Source Entity",
+      "target": "Query Entity",
+      "missing": "source+target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Query Entity",
+      "target": "Current Entity",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Source Entity",
+      "target": "Current Entity",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Query Relation",
+      "target": "Query Entity",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Text Corpus",
+      "target": "Source Entity",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Text Corpus",
+      "target": "Query Entity",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Scoring Function",
+      "target": "Source Entity",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Mapping Matrix",
+      "target": "Source Entity",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Hadamard Product",
+      "target": "Source Entity",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Concatenation",
+      "target": "Source Entity",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Gaussian Distribution",
+      "target": "Source Entity",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Representation Space",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "RL",
+      "target": "Knowledge Representation Learning",
+      "missing": "source"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Representation Space",
+      "target": "An element in a knowledge graph that is represented in KRL.",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Embedding Space",
+      "target": "Definability Of A Scoring Function",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Definability Of A Scoring Function",
+      "target": "Scoring Function",
+      "missing": "source"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Point-Wise Euclidean Space",
+      "target": "An item represented in embedding space.",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "TransE",
+      "target": "An item represented in embedding space.",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Semantic Matching Models",
+      "target": "Section III-B2",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Complex Vector Space",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "QuatE",
+      "target": "Hypercomplex Space",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Quaternion",
+      "target": "Hypercomplex Space",
+      "missing": "target"
+    },
+    {
+      "type": "COMPARES_WITH",
+      "source": "Scoring Equations",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Relation-Specific Manifold Parameter",
+      "target": "Point",
+      "missing": "source"
+    },
+    {
+      "type": "LOCATED_AT",
+      "source": "Relations",
+      "target": "Torus Space",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Scoring Function",
+      "target": "Similarity-Based Scoring Function",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "Similarity-Based Scoring Function",
+      "target": "Facts",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Distance-Based Scoring Function",
+      "target": "An element whose distance is calculated in distance-based scoring functions.",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Similarity-Based Scoring Function",
+      "target": "Semantic Matching",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "TransE",
+      "target": "L1 Constraint",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "L1 Constraint",
+      "target": "Scoring Function",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "ManifoldE",
+      "target": "Relation-Specific Manifold Parameter",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Relation-Specific Manifold Parameter",
+      "target": "Scoring Function",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Scoring Function",
+      "target": "Bilinear Matching Block",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Bilinear Matching Block",
+      "target": "Scoring Function",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "DistMult",
+      "target": "Bilinear Matching Block",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Holographic Embeddings",
+      "target": "ComplEx",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Bi-Directional Interaction",
+      "target": "An item involved in bi-directional interaction",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Neural Networks",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Linear/Bilinear Models",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "SE",
+      "target": "SME",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "SE",
+      "target": "DistMult",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "SE",
+      "target": "ANALOGY",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Relation-Specific Weight Matrix",
+      "target": "NTN",
+      "missing": "source"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "ConvE",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "ConvE",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Relations",
+      "target": "2D Matrix",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Mean Rank",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "ConvE",
+      "target": "Convolutional Filter",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "ConvKB",
+      "target": "Convolutional Filter",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Scoring Function",
+      "target": "Convolutional Filter",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Hypernetwork",
+      "target": "H",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "H",
+      "target": "1D Relation-Specific Convolutional Filter Generation",
+      "missing": "source"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "MLP-Based Models",
+      "target": "Triplet-Level Representations",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Recurrent Skip Mechanism",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Relational Path",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "BERT",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "KG-BERT",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Textual Descriptions",
+      "target": "D",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "D",
+      "target": "Entities",
+      "missing": "source"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Type Information",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Relations",
+      "target": "Semantic Types",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "KR-EAR",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Hierarchical Relation Structure",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "Confidence Score",
+      "target": "Relational Facts",
+      "missing": "source"
+    },
+    {
+      "type": "MEASURES",
+      "source": "Confidence Score",
+      "target": "Uncertain Information",
+      "missing": "source"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Confidence Score",
+      "target": "Relational Facts",
+      "missing": "source"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Probabilistic Soft Logic",
+      "target": "Confidence Score",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Gaussian Embeddings",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Encoding Model",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "KRL",
+      "target": "Confidence Score",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "ProjE",
+      "target": "Unified Embedding Space",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Rules",
+      "target": "X",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Rules",
+      "target": "Y",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Logical Disjunction",
+      "target": "Complex Formula",
+      "missing": "source"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Logical Disjunction",
+      "target": "Truth Value",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "CPL Reasoner",
+      "target": "LSTM",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Logic Connectives",
+      "target": "Truth Values",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Logic",
+      "target": "Truth Values",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Meta Relational Learning",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Long-Tail Phenomena",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Long-Tail Phenomena",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "MetaR",
+      "target": "Relation-Specific Meta Information",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Region-Based N-Dimensional Balls",
+      "target": "Fine-Grained Type Chains",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Fine-Grained Type Chains",
+      "target": "Tree-Structure Conceptual Clusterings",
+      "missing": "source"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Entity Position Detection",
+      "target": "Nested Named Entities",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Attention-Based Entity Classification",
+      "target": "Nested Named Entities",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Truth Values",
+      "target": "Logic Connectives",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Knowledge",
+      "target": "Logic",
+      "missing": "source"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "PLE",
+      "target": "Fine-Grained Named Entity Typing",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Prototype-Driven Label Embedding",
+      "target": "Zero-Shot Fine-Grained Named Entity Typing",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Embedding-Based Approaches",
+      "target": "Fine-Grained Named Entity Typing",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "label embedding",
+      "target": "Zero-Shot Fine-Grained Named Entity Typing",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Zero-Shot Fine-Grained Named Entity Typing",
+      "target": "Embedding-Based Approaches",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Task",
+      "target": "Entity Mention",
+      "missing": "source"
+    },
+    {
+      "type": "CREATED_BY",
+      "source": "Le",
+      "target": "End-to-End Neural Architecture",
+      "missing": "source"
+    },
+    {
+      "type": "SUPPORTS",
+      "source": "Distance-Based Axis Calibration",
+      "target": "Triple Alignment Verification",
+      "missing": "target"
+    },
+    {
+      "type": "SUPPORTS",
+      "source": "Translation Vector",
+      "target": "Triple Alignment Verification",
+      "missing": "target"
+    },
+    {
+      "type": "SUPPORTS",
+      "source": "Linear Transformation",
+      "target": "Triple Alignment Verification",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "distance-based axis calibration",
+      "target": "triple alignment verification",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "translation vectors",
+      "target": "triple alignment verification",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "linear transformations",
+      "target": "triple alignment verification",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "iterative alignment model",
+      "target": "unified representation space",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "unified representation space",
+      "target": "joint embedding framework",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Attentive Relation Extraction",
+      "target": "Neural Relation Extraction",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Attentive Relation Extraction",
+      "target": "Attention",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Deep Residual Relation Extraction",
+      "target": "Neural Relation Extraction",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Deep Residual Relation Extraction",
+      "target": "ResNet",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Adversarial Relation Extraction",
+      "target": "Neural Relation Extraction",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Adversarial Relation Extraction",
+      "target": "GAN",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Reinforcement Learning-Based Relation Extraction",
+      "target": "Neural Relation Extraction",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Reinforcement Learning-Based Relation Extraction",
+      "target": "Reinforcement Learning",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Coarse-To-Fine Knowledge-Aware Attention Mechanism",
+      "target": "Sentence-Based Relation Extraction",
+      "missing": "source"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Pipeline Approaches",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Cascade Binary Tagging Framework",
+      "target": "Entity Pair Overlapping",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Independent Encoders",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "SUPPORTS",
+      "source": "Contextual Representations",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Knowledge Graph Completion",
+      "target": "Node in a knowledge graph.",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "categories",
+      "target": "specific settings",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Ma",
+      "target": "Embedding Methods",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Time Scope",
+      "target": "τs",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Time Scope",
+      "target": "τe",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "wτ",
+      "target": "Pτ",
+      "missing": "source+target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Pτ",
+      "target": "h",
+      "missing": "source+target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Pτ",
+      "target": "r",
+      "missing": "source+target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Pτ",
+      "target": "t",
+      "missing": "source+target"
+    },
+    {
+      "type": "USES",
+      "source": "fτ",
+      "target": "Pτ",
+      "missing": "source+target"
+    },
+    {
+      "type": "USES",
+      "source": "fτ",
+      "target": "h",
+      "missing": "source+target"
+    },
+    {
+      "type": "USES",
+      "source": "fτ",
+      "target": "r",
+      "missing": "source+target"
+    },
+    {
+      "type": "USES",
+      "source": "fτ",
+      "target": "t",
+      "missing": "source+target"
+    },
+    {
+      "type": "USES",
+      "source": "fτ",
+      "target": "L1",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "fτ",
+      "target": "L2",
+      "missing": "source"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Entity Dynamics",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "GR",
+      "target": "Multichannel LSTM",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "AT",
+      "target": "PCNN",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "AT",
+      "target": "RNN",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "AT",
+      "target": "Selective Attention",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "AT",
+      "target": "Indicator Encoding",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "DSGAN",
+      "target": "RL",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Knowledge",
+      "target": "Language Representation",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Relations",
+      "target": "Knowledge Graphs",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Embedding-Based Regularization",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Collaborative Knowledge Graph",
+      "target": "Entity-Relation Graph",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Continuous Vector Space",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "MEASURES",
+      "source": "continuous vector space",
+      "target": "relations",
+      "missing": "target"
+    },
+    {
+      "type": "ENABLES",
+      "source": "reinforcement learning-based pathfinding and reasoning",
+      "target": "complex logical reasoning",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "reinforcement learning-based pathfinding and reasoning",
+      "target": "reasoning",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Reinforcement Learning",
+      "target": "Pathfinding",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "Pathfinding",
+      "target": "Reasoning",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Unified Framework of Graph Networks",
+      "target": "Graph Networks",
+      "missing": "source"
+    },
+    {
+      "type": "COMPARES_WITH",
+      "source": "Knowledge Representation",
+      "target": "Unified Framework of Graph Networks",
+      "missing": "target"
+    },
+    {
+      "type": "COMPARES_WITH",
+      "source": "Reasoning",
+      "target": "Unified Framework of Graph Networks",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Unstructured Text",
+      "target": "Knowledge",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Large-Scale Pre-Training",
+      "target": "Knowledge",
+      "missing": "target"
+    },
+    {
+      "type": "LOCATED_AT",
+      "source": "h",
+      "target": "complex space",
+      "missing": "source"
+    },
+    {
+      "type": "LOCATED_AT",
+      "source": "t",
+      "target": "complex space",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Hermitian dot product",
+      "target": "h",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Hermitian dot product",
+      "target": "t",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "conjugate operation",
+      "target": "h",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Re(h)",
+      "target": "h",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Im(h)",
+      "target": "h",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Linear Model",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "Bilinear Models",
+      "target": "Relations",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "SE",
+      "target": "Semantic Matching",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "ANALOGY",
+      "target": "SE",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "CrossE",
+      "target": "SE",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "SME",
+      "target": "SE",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "DistMult",
+      "target": "SE",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "HolE",
+      "target": "SE",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Binary Cross-Entropy Loss",
+      "target": "Loss Function",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Binary Cross-Entropy Loss",
+      "target": "Predictions",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Binary Cross-Entropy Loss",
+      "target": "Ground Label",
+      "missing": "source"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Structured Knowledge",
+      "target": "Unified Semantic Space",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Knowledge-Aware NLU",
+      "target": "Unified Semantic Space",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "Dataset",
+      "target": "Domain-Specific Datasets",
+      "missing": "target"
+    },
+    {
+      "type": "PART_OF",
+      "source": "OpenNRE",
+      "target": "RE",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Label Embeddings",
+      "target": "Zero-Shot Fine-Grained Named Entity Typing",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "S. Gao",
+      "target": "Zero-Shot Fine-Grained Named Entity Typing",
+      "missing": "target"
+    },
+    {
+      "type": "CREATED_BY",
+      "source": "M.",
+      "target": "Attention-Based Convolutional Neural Network For Semantic Relation Extraction",
+      "missing": "source"
+    },
+    {
+      "type": "CREATED_BY",
+      "source": "N. Nakashole",
+      "target": "CTPs: Contextual Temporal Profiles For Time Scoping Facts Using State Change Detection",
+      "missing": "target"
+    },
+    {
+      "type": "CREATED_BY",
+      "source": "T. M. Mitchell",
+      "target": "CTPs: Contextual Temporal Profiles For Time Scoping Facts Using State Change Detection",
+      "missing": "target"
+    },
+    {
+      "type": "LOCATED_AT",
+      "source": "CTPs: Contextual Temporal Profiles For Time Scoping Facts Using State Change Detection",
+      "target": "EMNLP",
+      "missing": "source"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "M. Brubaker",
+      "target": "P.",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Scholarly Knowledge Graph",
+      "target": "Knowledge",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Table Extraction",
+      "target": "PDF Files",
+      "missing": "target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Reference Extraction",
+      "target": "PDF Files",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "PDF Format",
+      "target": "PDF Files",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Extraction",
+      "target": "CSV Files",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "CSV Files",
+      "target": "Survey Table",
+      "missing": "source"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Table Formatting",
+      "target": "CSV Files",
+      "missing": "target"
+    },
+    {
+      "type": "RELATED_TO",
+      "source": "CSV Files",
+      "target": "Data",
+      "missing": "source"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "CSV File",
+      "target": "Tables",
+      "missing": "source"
+    },
+    {
+      "type": "USES",
+      "source": "Build Graph",
+      "target": "CSV Files",
+      "missing": "target"
+    },
+    {
+      "type": "USES",
+      "source": "User Interface",
+      "target": "PDF File",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "GROBID",
+      "target": "PDF File",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Joseph et al.1",
+      "target": "2.47-2.86",
+      "missing": "target"
+    },
+    {
+      "type": "COMPARES_WITH",
+      "source": "Table 2: Semantic Annotation Platform Summary",
+      "target": "Semantic Annotation Platform",
+      "missing": "source"
+    },
+    {
+      "type": "MEASURES",
+      "source": "Table 2: Semantic Annotation Platform Summary",
+      "target": "Machine Learning",
+      "missing": "source"
+    },
+    {
+      "type": "MEASURES",
+      "source": "Table 2: Semantic Annotation Platform Summary",
+      "target": "Manual Rules",
+      "missing": "source"
+    },
+    {
+      "type": "MEASURES",
+      "source": "Table 2: Semantic Annotation Platform Summary",
+      "target": "Bootstrap Ontology",
+      "missing": "source+target"
+    },
+    {
+      "type": "APPLIES_TO",
+      "source": "Extract Table",
+      "target": "Table 2: Semantic Annotation Platform Summary",
+      "missing": "target"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Selected Papers File",
+      "target": "Selected Papers",
+      "missing": "source"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Selected Papers File",
+      "target": "IDs",
+      "missing": "source"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Selected Papers File",
+      "target": "Paper Titles",
+      "missing": "source"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Selected Papers File",
+      "target": "Table References",
+      "missing": "source"
+    },
+    {
+      "type": "PRODUCES",
+      "source": "Selected Papers File",
+      "target": "Sources",
+      "missing": "source"
+    }
+  ]
+}

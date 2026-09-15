@@ -1,0 +1,107 @@
+[
+  {
+    "paper": "2012.00456v1",
+    "domain": "文献计量知识图谱",
+    "channel": "cloud",
+    "entities": {
+      "p": 0.2558,
+      "r": 0.9462,
+      "f1": 0.4027,
+      "tp": 88,
+      "fp": 256,
+      "fn": 5,
+      "type_errors": 22,
+      "boundary_errors": 26
+    },
+    "relations": {
+      "p": 0.0205,
+      "r": 0.2462,
+      "f1": 0.0379,
+      "tp": 16,
+      "fp": 761,
+      "fn": 47,
+      "direction_errors": 2
+    },
+    "significance": {
+      "noise_count": 77,
+      "noise_rate": 0.2238,
+      "kinds": {
+        "generic": 6,
+        "numbered": 26,
+        "meta-term": 45
+      }
+    },
+    "gold_entities": 93,
+    "gold_relations": 65
+  },
+  {
+    "paper": "2012.00456v1",
+    "domain": "文献计量知识图谱",
+    "channel": "local",
+    "entities": {
+      "p": 0.5177,
+      "r": 0.7849,
+      "f1": 0.6239,
+      "tp": 73,
+      "fp": 68,
+      "fn": 20,
+      "type_errors": 28,
+      "boundary_errors": 16
+    },
+    "relations": {
+      "p": 0.014,
+      "r": 0.0308,
+      "f1": 0.0192,
+      "tp": 2,
+      "fp": 141,
+      "fn": 63,
+      "direction_errors": 0
+    },
+    "significance": {
+      "noise_count": 15,
+      "noise_rate": 0.1064,
+      "kinds": {
+        "generic": 2,
+        "numbered": 9,
+        "meta-term": 4
+      }
+    },
+    "gold_entities": 93,
+    "gold_relations": 65
+  },
+  {
+    "paper": "2401.04507v1",
+    "domain": "LLM 系统项目",
+    "channel": "cloud",
+    "entities": {
+      "p": 0.2506,
+      "r": 0.9174,
+      "f1": 0.3937,
+      "tp": 100,
+      "fp": 299,
+      "fn": 9,
+      "type_errors": 33,
+      "boundary_errors": 46
+    },
+    "relations": {
+      "p": 0.0277,
+      "r": 0.3846,
+      "f1": 0.0517,
+      "tp": 25,
+      "fp": 873,
+      "fn": 35,
+      "direction_errors": 5
+    },
+    "significance": {
+      "noise_count": 12,
+      "noise_rate": 0.0301,
+      "kinds": {
+        "generic": 8,
+        "meta-term": 1,
+        "numbered": 3
+      }
+    },
+    "gold_entities": 109,
+    "gold_relations": 65
+  }
+]

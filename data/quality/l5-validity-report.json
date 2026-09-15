@@ -1,0 +1,171 @@
+{
+  "n_sheet": 200,
+  "n_labeled": 200,
+  "n_unclear": 2,
+  "population": 43867,
+  "source_labels": "D:\\kg-demo\\data\\quality\\l5-validity-labels.jsonl",
+  "true_support_rate": 0.4003,
+  "ppv": 0.4967,
+  "npv": 0.2298,
+  "recall": 0.7927,
+  "f1": 0.6107,
+  "weighted_accuracy": 0.5955,
+  "in_domain_auc": 0.7074,
+  "cohens_kappa": 0.2356,
+  "threshold_sensitivity": [
+    {
+      "threshold": 0.5,
+      "population_pass": 33915,
+      "pass_rate": 0.7731,
+      "ppv": 0.4787,
+      "recall": 0.4787,
+      "f1": 0.4787
+    },
+    {
+      "threshold": 0.6,
+      "population_pass": 30599,
+      "pass_rate": 0.6975,
+      "ppv": 0.4982,
+      "recall": 0.4982,
+      "f1": 0.4982
+    },
+    {
+      "threshold": 0.67,
+      "population_pass": 27957,
+      "pass_rate": 0.6373,
+      "ppv": 0.4967,
+      "recall": 0.4967,
+      "f1": 0.4967
+    },
+    {
+      "threshold": 0.75,
+      "population_pass": 24436,
+      "pass_rate": 0.557,
+      "ppv": 0.5331,
+      "recall": 0.5331,
+      "f1": 0.5331
+    },
+    {
+      "threshold": 0.8,
+      "population_pass": 21816,
+      "pass_rate": 0.4973,
+      "ppv": 0.567,
+      "recall": 0.567,
+      "f1": 0.567
+    }
+  ],
+  "probe_hit_none_support_rate": 0.0909,
+  "proxy_panel": [
+    {
+      "proxy": "hit=both → 预测支持",
+      "coverage": 0.4697,
+      "precision": 0.6129,
+      "agreement": 0.7071,
+      "kappa": 0.4069
+    },
+    {
+      "proxy": "hit≠none → 预测支持",
+      "coverage": 0.9444,
+      "precision": 0.4171,
+      "agreement": 0.4444,
+      "kappa": 0.058
+    },
+    {
+      "proxy": "自环/单字符/数字 → 预测不支持",
+      "coverage": 1.0,
+      "precision": 0.399,
+      "agreement": 0.399,
+      "kappa": 0.0
+    },
+    {
+      "proxy": "多论文独立提及(≥2篇) → 预测支持",
+      "coverage": 0.0859,
+      "precision": 0.2941,
+      "agreement": 0.5657,
+      "kappa": -0.0433
+    },
+    {
+      "proxy": "判别器 pass → 预测支持",
+      "coverage": 0.6414,
+      "precision": 0.4961,
+      "agreement": 0.596,
+      "kappa": 0.2356
+    }
+  ],
+  "fp_reason_distribution": {
+    "方向反了：premise 说 scoring metrics 分为 distance-based 与 similarity matching based，即后者是前者的子类，与 hypothesis 的主客关系颠倒": 1,
+    "端点不在：premise 只有作者名单与年份“Yongxin Zhu, Bocheng Li, Yifei Xin, and Linli Xu. 2024.”，target 作品标题未出现，无任何创作断言": 1,
+    "端点不在：premise 是“of LLM-based approaches…”的碎片，source 实体 ADONIS 未出现（ADONIS 只在 evidence 后文出现）": 1,
+    "谓词不对：premise 只说 KG 中隐含大量 first-order/temporal logical rules、位于 relations 与 events 之间，未断言规则“应用于”events（evidence 后文的应用对象是 KG embedding 模型）": 1,
+    "端点不在：premise 只是把 KG-aware ZSL 方法命名为 Propagation-based Paradigm，target 实体 Unseen Class 未出现，也无使用断言": 1,
+    "引错段/端点不在：premise 中仅出现“Chen”，紧邻标题的作者实为末位作者 H. Chen，source 实体 X. Chen 未在 premise 中出现": 1,
+    "端点不在：premise 讲 deep learning model 做 coreference resolution 的两阶段流程，target 实体 Named Entity Recognition 未出现（NER 仅在 evidence 末句出现）": 1,
+    "端点不在：premise 只截到 \\\"analysis to exploit the deep features.\\\"，Perturbations（perturbations）根本没出现在 premise 里，也无任何产出断言；完整 evidence 中的 perturbations 句被切在 premise 之外": 1,
+    "端点不在：premise 只说到 \\\"a one-vs-rest binary classifier is trained with Dtr\\\"，Classification Layer 出现在被切掉的后续句（Such a classifier is usually composed of ... classification layer(s)），premise 内无 PART_OF 断言": 1,
+    "谓词不对：premise 说 \\\"Wikidata is a collaboratively edited KG\\\"，这是 is-a（实例/子类）而非 PART_OF 的部分整体关系，类型选错": 1,
+    "端点不在：premise 只有 \\\"Multimodal medical code tokenizer.\\\" 一个标题片段，International Conference on Machine Learning（ICML）完全不在 premise 里，无任何断言": 1,
+    "谓词不对：premise 断言的是 DCGST \\\"has a bounded diameter\\\"（自身性质），并未断言 DCGST 使用 Diameter Bound 这一实体；evidence 里 \\\"a diameter bound of two hops\\\" 是查询给定参数而非 DCGST 所使用": 1,
+    "空泛同义反复：premise 是模型性能对比表，TransR (Lin et al., 2015b) 与 NTN (Socher et al., 2013) 只是各自带分数的表格行，除并列罗列外没有任何关于二者关系的断言": 1,
+    "端点不在：premise 只有作者名单与年份 \\\"Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019.\\\"，BERT 作品名出现在被切掉的下一句，premise 内无法确立作者—作品的创作关系": 1,
+    "空泛同义反复＋端点不在：premise 仅 \\\"Knowledge graphs.\\\" 两词，ACM Comput. Surv. 根本不在 premise 中，且原文（Hogan et al., 2022）是论文发表于该刊，part-of 方向本身也不成立": 1,
+    "端点不在：premise 中未出现 Handcrafted Linguistic Rules（主语被截断成 offered precision...），也未断言它支持 Knowledge Extraction": 1,
+    "谓词不对/端点不在：premise 是模型清单里的表行（AGGCN 由 GCN + multi-head attention + dense layers 组成），并未出现 premise 中的 AGGCN 对 Dense Layers 的 USES 断言对象端点，仅构成成分列举": 1,
+    "端点不在：premise 只提 TransE 保留了 scalability，未出现翻译模型类实体 Translation-Based Methods": 1,
+    "端点不在：premise 只截到作者 Etzioni，未出现 R. Bart": 1,
+    "谓词不对：premise 只是参考文献条目（[Li et al., 2016] 与作者名），论文与其引用标签之间不构成 PART_OF": 1,
+    "端点不在：premise 中作者名被截断为孤立的 \\\"F.\\\"，未出现完整的 Li, Y. F.，无法确认该端点": 1,
+    "空泛无断言：premise 只是论文标题 'Complex embeddings for simple link prediction.'，target 'International Conference on Machine Learning' 未出现，venue 信息(ICML)只在 evidence 中。": 1,
+    "空泛同义反复：premise 仅是 Index Terms 关键词并列（Knowledge Graph, Zero-shot Learning, ...），术语共现不等于断言二者相关。": 1,
+    "premise 在 'Geng et al.' 处直接截断，未给出任何谓词；'integrate class hierarchies' 属于其后的 evidence 内容，premise 本身不含 Class Hierarchies。": 1,
+    "方向反了：premise 说 relational path 由 entities 和 relations 交替组成，即 relations 是 path 的组成部分，而 hypothesis 断言 path 是 relations 的一部分。": 1,
+    "端点不在：premise 只是一串作者姓名（Jian Zhang, Zhangqi Wang, Haiping Zhu, ...）加年份，作品中 'Mars' 未出现，也无 created-by 断言。": 1,
+    "谓词不对：premise 说 cross-sentence/cross-paragraph contexts『impedes』各子任务、尤其是 relation extraction tasks（是障碍），而非被应用于这些任务。": 1,
+    "空泛同义反复：premise 是论文配图里的标签碎片（'Semantic Web CV, NLP, ML, Database Major KG forms ... KG construction ZSL/FSL Resources'），ML 与 KG construction 只是并列罗列，未断言应用关系。": 1,
+    "空泛同义反复：premise 仅为论文标题与作者名单的截断，除了标题里出现 Zero-shot and Few-shot Learning 字样外，没有任何关于该综述与 Zero-Shot Learning 之间关系的断言。": 1,
+    "端点不在：premise 只含章节标题 Knowledge Dynamic 与一句泛论 knowledge dynamics，DyERNIE 未出现在 premise 中（其仅在 evidence 更后文作为示例模型被列出），无任何二者关联的断言。": 1,
+    "端点不在：premise 只有标题 Language models are unsupervised multitask learners，Nick Ryder 未出现在 premise 中（他是 evidence 里另一篇论文 Language models are few-shot learners 的作者），premise 本身也无任何创作断言。": 1,
+    "端点不在：premise 是从长句切出的残缺列表片段 labeled data training, synthetic data generation...for improved accuracy in complex event relationships，未出现 Event Extraction 这一端点，也未指明任何主体使用了 labeled data。": 1,
+    "端点不在：premise 只给出 Knowledge engineering: Principles and methods 的题名与作者缩写，期刊名 Data & Knowledge Engineering 未出现在 premise 中（只出现在 evidence 的后续行），无 PART_OF 断言。": 1,
+    "空泛同义反复：premise 是图 2 中的碎片标签 A Boris France CONTEXT MISSING Fig. 2.，Boris 与 France 仅被并列摆放，没有任何关系断言，属于占位符式文本。": 1,
+    "端点不在：premise 只讲“提供可访问资源以帮助读者构建知识图谱系统”，全句没有出现 Qian Li": 1,
+    "方向反了：premise 说 examples 是 PromptNER 的四个组成部分之一，即 Examples 属于 PromptNER，而非 PromptNER 属于 Examples": 1,
+    "端点不在／谓词不对：premise 只说“解决 sample shortage 的办法是生成新数据”，并未把 Sample 作为该范式的产出物加以断言": 1,
+    "端点不在：premise 只断言 logic reasoning / commonsense reasoning 对高阶语境语义重要，未出现 source 实体 Models，也无“使用”关系": 1,
+    "端点不在：premise 仅是不成句的片段“into interpretability and improve the reliability of predicted knowledge”，没有出现 Knowledge Graphs，也无“应用于”的断言": 1,
+    "方向反了：premise 说车道拓扑变化是“due to forks and merges”，即 merges 导致 topology changes，而非 topology changes 导致 merges": 1,
+    "端点不在：premise 只给出 Bert 论文标题与 arXiv 编号，David Luan 出现在 evidence 中另一篇（GPT）论文的作者串里，与本 premise 无关": 1,
+    "端点不在：premise 仅是被截断的作者串“Michael Sejr Schlichtkrull, Thomas N.”，作品名 Modeling Relational Data with Graph Convolutional Networks 只存在于 evidence 中": 1,
+    "端点不在：premise 在“in Proc.”处被截断，目标实体“Proc. ACL”未出现（完整出处仅见于 evidence）": 1,
+    "谓词不对：premise 说的是“among these objects, which acquire its nodes via dependency patterns selection”，objects 并未产出 nodes，产出主体是别的构建过程": 1,
+    "谓词不对：premise 说许多 table forms 网页中“function as navigators”，是充当导航器，而非“使用 Navigators”": 1,
+    "方向反了：premise 中 SLRE [Guo et al., 2020] 表示 Guo 等人是 SLRE 的作者/提出者，hypothesis 却写成 Guo Et Al. 由 SLRE 创作，主客颠倒": 1,
+    "端点不在：premise 只提到“the bare metal approach”，source 实体 Bare Metal Solution 未出现（该表述仅在 evidence 后半段）": 1,
+    "空泛同义反复：premise 仅为符号表并列定义（ω 卷积滤波器、∗ 卷积算子），未断言 USES 关系": 1,
+    "谓词不对：premise 说的是使用 target entity 的特征空间中的邻近实体，并未断言 target entity 位于 feature space": 1,
+    "端点不在：premise 只有作者名单，作品标题位于 evidence 的下一句，premise 内无 target": 1,
+    "端点共现但无断言：premise 分别谈及 class attributes 与 class name 两类文本信息，从未把二者关联起来": 1,
+    "引错段：premise 讲的是 graph summarization 综述，Link Prediction 与 Pattern Coverage 两端点均未出现在 premise 中": 1,
+    "谓词不对：premise 只说微调过程中\\\"保持\\\"通用能力（to ensure the sustained general ability），未断言微调\\\"支持\\\"通用能力": 1,
+    "谓词不对：premise 中 \\\"given a keyword query Avatar DiCaprio\\\" 是把 Avatar DiCaprio 作为查询串整体举例，并未断言它与 Keyword Query 这一关系成立": 1,
+    "premise 是被截断的半句 \\\"Based on the quantized codes through intra-layer and inter-layer residuals, the.\\\"，只说明量化码经由层内/层间残差，并未断言 Quantized Codes 是 Intra-Layer Residuals 的组成部分": 1,
+    "端点不在：premise 只有作者列表与年份，作品标题（target）整段未出现": 1,
+    "空泛共现：premise 是论文标题加摘要首句，两个术语只是并列出现，未断言二者相关": 1,
+    "谓词不对：premise 只说 aims to learn fast adaptation，未断言产出": 1,
+    "端点不在：premise 中既无 Resources 也无 Strategy Viewpoint": 1,
+    "空泛并列：premise 只是 ConceptNet 关系类型的枚举，Relation 为泛指": 1,
+    "谓词不对：premise 说该 agent 用于把假正例重分配到负样本": 1,
+    "空泛同义反复：premise 仅提出 DCGST 问题，target 是 source 名称的组成部分": 1,
+    "端点错配：premise 中 NELL 只与 the Web 关联，Web pages 修饰的是 Google KG": 1,
+    "方向反了：premise 说训练三元组来自 WorldTree 语料，而非 WorldTree 产出三元组": 1
+  },
+  "ci": {
+    "true_support_rate": [
+      0.3407,
+      0.4597
+    ],
+    "ppv": [
+      0.4176,
+      0.5758
+    ]
+  }
+}

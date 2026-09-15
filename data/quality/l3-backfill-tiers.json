@@ -1,0 +1,12 @@
+{
+  "unique_missing": 4754,
+  "slots": 15571,
+  "tiers": {
+    "all": 15571,
+    "evidence_hit": 14764,
+    "evidence+shape": 13814,
+    "evidence+shape+occ2": 12037,
+    "evidence+shape+occ3": 10207,
+    "evidence+shape+occ5": 7582
+  }
+}

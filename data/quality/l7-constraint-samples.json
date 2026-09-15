@@ -1,0 +1,1281 @@
+{
+  "seed": 7,
+  "per_type": 20,
+  "by_type": {
+    "CREATED_BY": {
+      "n_reversed": 120,
+      "n_role_violation": 302,
+      "samples": [
+        {
+          "class": "reversed",
+          "source": "Nenov et al., 2015",
+          "source_type": "Document",
+          "target": "Boris Motik",
+          "target_type": "Person",
+          "l5": 0.9504,
+          "description": "Boris Motik is an author of Nenov et al., 2015"
+        },
+        {
+          "class": "reversed",
+          "source": "AGGCN",
+          "source_type": "System",
+          "target": "Wu et al.",
+          "target_type": "Person",
+          "l5": 0.3524,
+          "description": "AGGCN is attributed to Wu et al."
+        },
+        {
+          "class": "reversed",
+          "source": "Sun et al., 2019",
+          "source_type": "Document",
+          "target": "Zhi-Hong Deng",
+          "target_type": "Person",
+          "l5": 0.9645,
+          "description": "Sun et al., 2019 was created by Zhi-Hong Deng"
+        },
+        {
+          "class": "reversed",
+          "source": "Focused Distillation Method",
+          "source_type": "Method",
+          "target": "Zhou Et Al.",
+          "target_type": "Person",
+          "l5": 0.5939,
+          "description": "Zhou et al. proposed the focused distillation method"
+        },
+        {
+          "class": "reversed",
+          "source": "ROPs",
+          "source_type": "Method",
+          "target": "Yin et al.",
+          "target_type": "Person",
+          "l5": 0.3412,
+          "description": "ROPs was created by Yin et al."
+        },
+        {
+          "class": "reversed",
+          "source": "KBGAT",
+          "source_type": "Method",
+          "target": "Nathani Et Al.",
+          "target_type": "Person",
+          "l5": 0.9284,
+          "description": "KBGAT is attributed to Nathani et al."
+        },
+        {
+          "class": "reversed",
+          "source": "UniMoT",
+          "source_type": "Method",
+          "target": "Zhang Et Al.",
+          "target_type": "Person",
+          "l5": 0.5415,
+          "description": "UniMoT created by Zhang et al."
+        },
+        {
+          "class": "reversed",
+          "source": "MemoryPath",
+          "source_type": "Component",
+          "target": "Zheng Et Al.",
+          "target_type": "Person",
+          "l5": 0.4616,
+          "description": "CREATED_BY"
+        },
+        {
+          "class": "reversed",
+          "source": "Neural LP",
+          "source_type": "Method",
+          "target": "Yang et al.",
+          "target_type": "Person",
+          "l5": 0.4702,
+          "description": "Neural LP is created by Yang et al. (2017)"
+        },
+        {
+          "class": "reversed",
+          "source": "Nickel Et Al.",
+          "source_type": "Document",
+          "target": "Volker Tresp",
+          "target_type": "Person",
+          "l5": 0.8433,
+          "description": "Nickel et al. refers to the work authored by Volker Tresp"
+        },
+        {
+          "class": "reversed",
+          "source": "Embedding Entities and Relations for Learning and Inference in Knowledge Bases",
+          "source_type": "Method",
+          "target": "J. Gao",
+          "target_type": "Person",
+          "l5": 0.1951,
+          "description": "CREATED_BY"
+        },
+        {
+          "class": "reversed",
+          "source": "Inception Network",
+          "source_type": "Component",
+          "target": "Szegedy Et Al.",
+          "target_type": "Person",
+          "l5": 0.3146,
+          "description": "The Inception network is attributed to Szegedy et al., 2016."
+        },
+        {
+          "class": "reversed",
+          "source": "Graphusion",
+          "source_type": "System",
+          "target": "Yang et al.",
+          "target_type": "Person",
+          "l5": 0.9861,
+          "description": "Graphusion authored by Yang et al."
+        },
+        {
+          "class": "reversed",
+          "source": "RESIDE",
+          "source_type": "System",
+          "target": "Zhang Et Al.",
+          "target_type": "Person",
+          "l5": 0.6163,
+          "description": "RESIDE is proposed by Zhang et al."
+        },
+        {
+          "class": "reversed",
+          "source": "MAML",
+          "source_type": "Method",
+          "target": "Zhang Et Al.",
+          "target_type": "Person",
+          "l5": 0.0816,
+          "description": "CREATED_BY"
+        },
+        {
+          "class": "reversed",
+          "source": "TransE",
+          "source_type": "Method",
+          "target": "Bordes et al.",
+          "target_type": "Person",
+          "l5": 0.1197,
+          "description": "TransE was created by Bordes et al."
+        },
+        {
+          "class": "reversed",
+          "source": "WN18",
+          "source_type": "Dataset",
+          "target": "Bordes et al.",
+          "target_type": "Person",
+          "l5": 0.1385,
+          "description": "WN18 is attributed to Bordes et al. (2013) in the dataset table."
+        },
+        {
+          "class": "reversed",
+          "source": "Ontology",
+          "source_type": "Concept",
+          "target": "Huelsen Et Al.",
+          "target_type": "Person",
+          "l5": 0.8969,
+          "description": "Huelsen et al. developed an ontology for traffic intersections."
+        },
+        {
+          "class": "reversed",
+          "source": "Zhang, 2017",
+          "source_type": "Document",
+          "target": "Wen Zhang",
+          "target_type": "Person",
+          "l5": 0.999,
+          "description": "Wen Zhang is the author of Zhang, 2017."
+        },
+        {
+          "class": "reversed",
+          "source": "R-GCN",
+          "source_type": "Method",
+          "target": "Schlichtkrull Et Al.",
+          "target_type": "Person",
+          "l5": 0.4305,
+          "description": "R-GCN is attributed to Schlichtkrull et al., 2018."
+        },
+        {
+          "class": "role_violation",
+          "source": "D'Amato Et Al.",
+          "source_type": "Person",
+          "target": "Nicola Fanizzi",
+          "target_type": "Person",
+          "l5": 0.6074,
+          "description": "CREATED_BY"
+        },
+        {
+          "class": "role_violation",
+          "source": "NELL",
+          "source_type": "System",
+          "target": "Never-Ending Language Learner",
+          "target_type": "Component",
+          "l5": 0.9789,
+          "description": "CREATED_BY"
+        },
+        {
+          "class": "role_violation",
+          "source": "CQbyCQ",
+          "source_type": "System",
+          "target": "Saeedizade & Blomqvist",
+          "target_type": "Document",
+          "l5": 0.2781,
+          "description": "Framework demonstrated in 2024 work"
+        },
+        {
+          "class": "role_violation",
+          "source": "Y. Su",
+          "source_type": "Person",
+          "target": "X. Han",
+          "target_type": "Person",
+          "l5": 0.3389,
+          "description": "CREATED_BY"
+        },
+        {
+          "class": "role_violation",
+          "source": "Yelong Shen",
+          "source_type": "Person",
+          "target": "Yelong Shen",
+          "target_type": "Person",
+          "l5": 0.9907,
+          "description": "RELATED_TO"
+        },
+        {
+          "class": "role_violation",
+          "source": "A-MEM",
+          "source_type": "System",
+          "target": "Xu Et Al.",
+          "target_type": "Document",
+          "l5": 0.5543,
+          "description": "A-MEM was introduced by Xu et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "Knowledge Graphs",
+          "source_type": "Concept",
+          "target": "Survey Articles",
+          "target_type": "Concept",
+          "l5": 0.7445,
+          "description": "The knowledge graph is built from data extracted from survey articles."
+        },
+        {
+          "class": "role_violation",
+          "source": "SIC",
+          "source_type": "System",
+          "target": "Wiharja et al.",
+          "target_type": "Document",
+          "l5": 0.9798,
+          "description": "SIC is associated with Wiharja et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "Heiko Paulheim",
+          "source_type": "Person",
+          "target": "The Semantic Web",
+          "target_type": "Event",
+          "l5": 0.934,
+          "description": "Edited The Semantic Web"
+        },
+        {
+          "class": "role_violation",
+          "source": "Po-Sen Huang",
+          "source_type": "Person",
+          "target": "Po-Sen Huang",
+          "target_type": "Person",
+          "l5": 0.6068,
+          "description": "RELATED_TO"
+        },
+        {
+          "class": "role_violation",
+          "source": "Olaf Hartig",
+          "source_type": "Person",
+          "target": "The Semantic Web",
+          "target_type": "Event",
+          "l5": 0.9363,
+          "description": "Edited The Semantic Web"
+        },
+        {
+          "class": "role_violation",
+          "source": "Pasquale Lisena",
+          "source_type": "Person",
+          "target": "The Semantic Web",
+          "target_type": "Event",
+          "l5": 0.9243,
+          "description": "Edited The Semantic Web"
+        },
+        {
+          "class": "role_violation",
+          "source": "C. Hempelmann",
+          "source_type": "Person",
+          "target": "SemEval-2017 Task 7",
+          "target_type": "Event",
+          "l5": 0.7632,
+          "description": "C. Hempelmann authored SemEval-2017 Task 7"
+        },
+        {
+          "class": "role_violation",
+          "source": "TranSparse",
+          "source_type": "Method",
+          "target": "Ji et al., 2016",
+          "target_type": "Document",
+          "l5": 0.3794,
+          "description": "TranSparse is attributed to Ji et al., 2016"
+        },
+        {
+          "class": "role_violation",
+          "source": "TransOWL",
+          "source_type": "System",
+          "target": "d'Amato et al., 2021",
+          "target_type": "Document",
+          "l5": 0.888,
+          "description": "TransOWL is proposed by d'Amato et al., 2021."
+        },
+        {
+          "class": "role_violation",
+          "source": "FB15k",
+          "source_type": "Dataset",
+          "target": "Bordes et al., 2013",
+          "target_type": "Document",
+          "l5": 0.6163,
+          "description": "FB15k is attributed to Bordes et al., 2013 in Table 1"
+        },
+        {
+          "class": "role_violation",
+          "source": "AutoRE",
+          "source_type": "System",
+          "target": "Xue Et Al.",
+          "target_type": "Document",
+          "l5": 0.9333,
+          "description": "AutoRE associated with Xue et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "Metadata",
+          "source_type": "Artifact",
+          "target": "Reference Extraction",
+          "target_type": "Process",
+          "l5": 0.6708,
+          "description": "Metadata is captured by reference extraction"
+        },
+        {
+          "class": "role_violation",
+          "source": "Woo",
+          "source_type": "Person",
+          "target": "Kim",
+          "target_type": "Person",
+          "l5": 0.3178,
+          "description": "Woo and Kim are co-authors of Linknet."
+        },
+        {
+          "class": "role_violation",
+          "source": "Parameterized Knowledge",
+          "source_type": "Concept",
+          "target": "Corpora",
+          "target_type": "Dataset",
+          "l5": 0.2752,
+          "description": "Parameterized knowledge is learned from vast corpora."
+        }
+      ]
+    },
+    "PRODUCES": {
+      "n_reversed": 36,
+      "n_role_violation": 23,
+      "samples": [
+        {
+          "class": "reversed",
+          "source": "Mapping Setting",
+          "source_type": "Concept",
+          "target": "Class Encodings",
+          "target_type": "Process",
+          "l5": 0.8768,
+          "description": "One mapping setting maps input to class encoding"
+        },
+        {
+          "class": "reversed",
+          "source": "Large Language Model",
+          "source_type": "Concept",
+          "target": "Relationship Network Generation",
+          "target_type": "Process",
+          "l5": 0.6771,
+          "description": "Generates the relationship network."
+        },
+        {
+          "class": "reversed",
+          "source": "Knowledge Graphs",
+          "source_type": "Concept",
+          "target": "Concept",
+          "target_type": "Person",
+          "l5": 0.1081,
+          "description": "KGs often define concepts"
+        },
+        {
+          "class": "reversed",
+          "source": "Ontologies",
+          "source_type": "Concept",
+          "target": "Combinatorial Testing",
+          "target_type": "Method",
+          "l5": 0.7405,
+          "description": "Ontologies are converted to input models for combinatorial testing"
+        },
+        {
+          "class": "reversed",
+          "source": "Input",
+          "source_type": "Concept",
+          "target": "Encoding",
+          "target_type": "Process",
+          "l5": 0.8988,
+          "description": "Input is the initial encoding of image and question pair"
+        },
+        {
+          "class": "reversed",
+          "source": "Region-Based N-Dimensional Balls",
+          "source_type": "Concept",
+          "target": "Triple Classification",
+          "target_type": "Process",
+          "l5": 0.318,
+          "description": "The relaxation of embedding to n-balls turns triple classification into a geometric containment problem."
+        },
+        {
+          "class": "reversed",
+          "source": "Relation Embeddings",
+          "source_type": "Concept",
+          "target": "Knowledge Graph Embeddings",
+          "target_type": "Method",
+          "l5": 0.7873,
+          "description": "Relation embeddings are produced from KGE."
+        },
+        {
+          "class": "reversed",
+          "source": "Neural Networks",
+          "source_type": "Concept",
+          "target": "Data-Driven Learning",
+          "target_type": "Method",
+          "l5": 0.8891,
+          "description": "Neural networks produce data-driven learning."
+        },
+        {
+          "class": "reversed",
+          "source": "Knowledge Base",
+          "source_type": "Concept",
+          "target": "U-Net",
+          "target_type": "Method",
+          "l5": 0.6603,
+          "description": "U-Net produces candidates provided by the knowledge base"
+        },
+        {
+          "class": "reversed",
+          "source": "Empirical Best",
+          "source_type": "Concept",
+          "target": "Training by Samples",
+          "target_type": "Process",
+          "l5": 0.7407,
+          "description": "Training by samples produces the empirical best hypothesis."
+        },
+        {
+          "class": "reversed",
+          "source": "Entity Description Pattern",
+          "source_type": "Concept",
+          "target": "Link Prediction",
+          "target_type": "Method",
+          "l5": 0.8208,
+          "description": "Entity description pattern is chained into a link pattern"
+        },
+        {
+          "class": "reversed",
+          "source": "Chinese-Alpaca-2-16K (7B)",
+          "source_type": "Artifact",
+          "target": "Direct Inference Output",
+          "target_type": "Process",
+          "l5": 0.2793,
+          "description": "The model exhibited poor results in direct inference output."
+        },
+        {
+          "class": "reversed",
+          "source": "Groundings",
+          "source_type": "Concept",
+          "target": "Knowledge Graph Embeddings",
+          "target_type": "Method",
+          "l5": 0.8754,
+          "description": "Grounding generates additional triples for KGEs' training"
+        },
+        {
+          "class": "reversed",
+          "source": "Proxies",
+          "source_type": "Concept",
+          "target": "Rules",
+          "target_type": "Method",
+          "l5": 0.8519,
+          "description": "Some proxies extract rules to reproduce a model."
+        },
+        {
+          "class": "reversed",
+          "source": "Relation",
+          "source_type": "Concept",
+          "target": "Transformer",
+          "target_type": "Method",
+          "l5": 0.7559,
+          "description": "Transformer produces relation outputs."
+        },
+        {
+          "class": "reversed",
+          "source": "Relation Rules",
+          "source_type": "Concept",
+          "target": "Rule Mining",
+          "target_type": "Process",
+          "l5": 0.6221,
+          "description": "Rule mining determines logical rules."
+        },
+        {
+          "class": "reversed",
+          "source": "Score",
+          "source_type": "Concept",
+          "target": "Convolutional Neural Networks",
+          "target_type": "Method",
+          "l5": 0.4898,
+          "description": "CNN produces a score from feature maps and filters."
+        },
+        {
+          "class": "reversed",
+          "source": "Encrypted Gradient",
+          "source_type": "Artifact",
+          "target": "Collaborator",
+          "target_type": "Person",
+          "l5": 0.1291,
+          "description": "A collaborator calculates and aggregates encrypted gradients of each model."
+        },
+        {
+          "class": "reversed",
+          "source": "Text Embeddings",
+          "source_type": "Concept",
+          "target": "BERT",
+          "target_type": "System",
+          "l5": 0.7035,
+          "description": "Text embeddings are produced by pre-trained BERT."
+        },
+        {
+          "class": "reversed",
+          "source": "Score",
+          "source_type": "Concept",
+          "target": "Binary Classifiers",
+          "target_type": "Method",
+          "l5": 0.7978,
+          "description": "Scores of seen classes are predicted by binary classifiers"
+        },
+        {
+          "class": "role_violation",
+          "source": "Named Entity Recognition",
+          "source_type": "Method",
+          "target": "Donald Trump",
+          "target_type": "Person",
+          "l5": 0.5129,
+          "description": "Named entity recognition produces entities such as Donald Trump."
+        },
+        {
+          "class": "role_violation",
+          "source": "Vaccine",
+          "source_type": "Material",
+          "target": "Pharmaceutical A",
+          "target_type": "Organization",
+          "l5": 0.5073,
+          "description": "Pharmaceutical A produces vaccine products."
+        },
+        {
+          "class": "role_violation",
+          "source": "Psychology of Learning and Motivation",
+          "source_type": "Document",
+          "target": "Elsevier",
+          "target_type": "Organization",
+          "l5": 0.9893,
+          "description": "Elsevier is the publisher of Psychology of Learning and Motivation"
+        },
+        {
+          "class": "role_violation",
+          "source": "Relationship-Specific Performance Metric",
+          "source_type": "Metric",
+          "target": "Single Performance Score",
+          "target_type": "Metric",
+          "l5": 0.9726,
+          "description": "Metrics combined into a single score"
+        },
+        {
+          "class": "role_violation",
+          "source": "Named Entity Recognition",
+          "source_type": "Method",
+          "target": "New York",
+          "target_type": "Location",
+          "l5": 0.0871,
+          "description": "Named entity recognition produces entities such as New York."
+        },
+        {
+          "class": "role_violation",
+          "source": "Named Entity Recognition",
+          "source_type": "Method",
+          "target": "Location",
+          "target_type": "Location",
+          "l5": 0.9767,
+          "description": "Named entity recognition classifies discovered strings to general types such as location"
+        },
+        {
+          "class": "role_violation",
+          "source": "Joint European Conference on Machine Learning and Knowledge Discovery in Databases",
+          "source_type": "Event",
+          "target": "Springer",
+          "target_type": "Organization",
+          "l5": 0.7008,
+          "description": "Springer published the proceedings of the Joint European Conference on Machine Learning and Knowledge Discovery in Databases."
+        },
+        {
+          "class": "role_violation",
+          "source": "International Conference on Machine Learning",
+          "source_type": "Event",
+          "target": "PMLR",
+          "target_type": "Organization",
+          "l5": 0.7202,
+          "description": "PMLR published the International Conference on Machine Learning proceedings"
+        },
+        {
+          "class": "role_violation",
+          "source": "Ontology Learning",
+          "source_type": "Method",
+          "target": "Concept",
+          "target_type": "Person",
+          "l5": 0.887,
+          "description": "Ontology learning identifies concepts from text"
+        },
+        {
+          "class": "role_violation",
+          "source": "Adaptive Path Confidence",
+          "source_type": "Metric",
+          "target": "Triple",
+          "target_type": "Concept",
+          "l5": 0.8905,
+          "description": "Adaptive path confidence scores a local reasoning path deriving a triple"
+        },
+        {
+          "class": "role_violation",
+          "source": "Loss",
+          "source_type": "Metric",
+          "target": "Gradient",
+          "target_type": "Concept",
+          "l5": 0.5901,
+          "description": "Loss produces gradients"
+        },
+        {
+          "class": "role_violation",
+          "source": "ACL",
+          "source_type": "Event",
+          "target": "Attention-Based Bidirectional Long Short-Term Memory Networks for Relation Classification",
+          "target_type": "Document",
+          "l5": 0.9743,
+          "description": "ACL published the paper \"Attention-Based Bidirectional Long Short-Term Memory Networks for Relation Classification\""
+        },
+        {
+          "class": "role_violation",
+          "source": "International Conference on Machine Learning",
+          "source_type": "Event",
+          "target": "PMLR",
+          "target_type": "Organization",
+          "l5": 0.5773,
+          "description": "PMLR is the publisher of the International Conference on Machine Learning proceedings"
+        },
+        {
+          "class": "role_violation",
+          "source": "International Semantic Web Conference",
+          "source_type": "Event",
+          "target": "Springer",
+          "target_type": "Organization",
+          "l5": 0.4836,
+          "description": "Springer published the International Semantic Web Conference proceedings."
+        },
+        {
+          "class": "role_violation",
+          "source": "Named Entity Recognition",
+          "source_type": "Method",
+          "target": "Person",
+          "target_type": "Person",
+          "l5": 0.9763,
+          "description": "Named entity recognition classifies discovered strings to general types such as person"
+        },
+        {
+          "class": "role_violation",
+          "source": "Large Language Model",
+          "source_type": "Concept",
+          "target": "Research Institutions",
+          "target_type": "Organization",
+          "l5": 0.5101,
+          "description": "Various large language models come from research institutions."
+        },
+        {
+          "class": "role_violation",
+          "source": "The Web Conference",
+          "source_type": "Event",
+          "target": "Open Knowledge Enrichment for Long-Tail Entities",
+          "target_type": "Document",
+          "l5": 0.9375,
+          "description": "The Web Conference published the paper \"Open Knowledge Enrichment for Long-Tail Entities\""
+        },
+        {
+          "class": "role_violation",
+          "source": "Large Language Model",
+          "source_type": "Concept",
+          "target": "Industry",
+          "target_type": "Organization",
+          "l5": 0.4784,
+          "description": "Various large language models come from the industry."
+        },
+        {
+          "class": "role_violation",
+          "source": "The ACM Web Conference 2022",
+          "source_type": "Event",
+          "target": "ACM",
+          "target_type": "Organization",
+          "l5": 0.9938,
+          "description": "ACM published The ACM Web Conference 2022 proceedings"
+        },
+        {
+          "class": "role_violation",
+          "source": "European Semantic Web Conference",
+          "source_type": "Event",
+          "target": "Springer",
+          "target_type": "Organization",
+          "l5": 0.4288,
+          "description": "Springer published the European Semantic Web Conference proceedings"
+        }
+      ]
+    },
+    "APPLIES_TO": {
+      "n_reversed": 0,
+      "n_role_violation": 1,
+      "samples": [
+        {
+          "class": "role_violation",
+          "source": "Data",
+          "source_type": "Material",
+          "target": "Screening",
+          "target_type": "Process",
+          "l5": 0.5646,
+          "description": "Early accumulated data underwent screening."
+        }
+      ]
+    },
+    "USES": {
+      "n_reversed": 0,
+      "n_role_violation": 42,
+      "samples": [
+        {
+          "class": "role_violation",
+          "source": "Comparison",
+          "source_type": "Artifact",
+          "target": "Researchers",
+          "target_type": "Person",
+          "l5": 0.4311,
+          "description": "Comparisons can be revised, discussed, and annotated by many researchers."
+        },
+        {
+          "class": "role_violation",
+          "source": "User",
+          "source_type": "Person",
+          "target": "Friend",
+          "target_type": "Person",
+          "l5": 0.78,
+          "description": "Users are asked to find John's friends."
+        },
+        {
+          "class": "role_violation",
+          "source": "NELL-ZS",
+          "source_type": "Dataset",
+          "target": "Geng et al.",
+          "target_type": "Person",
+          "l5": 0.2098,
+          "description": "Geng et al. construct ontological schemas for NELL-ZS"
+        },
+        {
+          "class": "role_violation",
+          "source": "MUSE",
+          "source_type": "System",
+          "target": "User",
+          "target_type": "Person",
+          "l5": 0.5609,
+          "description": "MUSE uses user-defined ontology as its bootstrap ontology."
+        },
+        {
+          "class": "role_violation",
+          "source": "QASC",
+          "source_type": "Dataset",
+          "target": "Banerjee et al.",
+          "target_type": "Person",
+          "l5": 0.6253,
+          "description": "QASC is adopted by Banerjee et al. for evaluation."
+        },
+        {
+          "class": "role_violation",
+          "source": "Armadillo",
+          "source_type": "System",
+          "target": "User",
+          "target_type": "Person",
+          "l5": 0.1411,
+          "description": "Armadillo uses user-defined ontology as its bootstrap ontology."
+        },
+        {
+          "class": "role_violation",
+          "source": "Authority",
+          "source_type": "Organization",
+          "target": "John",
+          "target_type": "Person",
+          "l5": 0.2903,
+          "description": "John's nationality will be labeled by the authority."
+        },
+        {
+          "class": "role_violation",
+          "source": "Model Creation",
+          "source_type": "Process",
+          "target": "Concept",
+          "target_type": "Person",
+          "l5": 0.7598,
+          "description": "Model creation employs diverse concepts"
+        },
+        {
+          "class": "role_violation",
+          "source": "Approach",
+          "source_type": "Method",
+          "target": "Human Expert",
+          "target_type": "Person",
+          "l5": 0.9412,
+          "description": "The approach requires manual effort and human experts."
+        },
+        {
+          "class": "role_violation",
+          "source": "Crowdsourcing",
+          "source_type": "Method",
+          "target": "Domain Expert",
+          "target_type": "Person",
+          "l5": 0.5122,
+          "description": "Crowdsourcing includes domain experts."
+        },
+        {
+          "class": "role_violation",
+          "source": "aNLI",
+          "source_type": "Dataset",
+          "target": "Banerjee et al.",
+          "target_type": "Person",
+          "l5": 0.7426,
+          "description": "aNLI is adopted by Banerjee et al. for evaluation."
+        },
+        {
+          "class": "role_violation",
+          "source": "Model Creation",
+          "source_type": "Process",
+          "target": "Stakeholders",
+          "target_type": "Person",
+          "l5": 0.7686,
+          "description": "Model creation involves multiple stakeholders"
+        },
+        {
+          "class": "role_violation",
+          "source": "OpenBookQA",
+          "source_type": "Dataset",
+          "target": "Banerjee et al.",
+          "target_type": "Person",
+          "l5": 0.5905,
+          "description": "OpenBookQA is adopted by Banerjee et al. for evaluation."
+        },
+        {
+          "class": "role_violation",
+          "source": "Ont-O-Mat: Amilcare",
+          "source_type": "System",
+          "target": "User",
+          "target_type": "Person",
+          "l5": 0.5266,
+          "description": "Ont-O-Mat: Amilcare uses user-defined ontology as its bootstrap ontology."
+        },
+        {
+          "class": "role_violation",
+          "source": "OK-VQA",
+          "source_type": "Dataset",
+          "target": "Chen Et Al.",
+          "target_type": "Person",
+          "l5": 0.4453,
+          "description": "Chen et al. use OK-VQA for evaluating KG-aware zero-shot VQA."
+        },
+        {
+          "class": "role_violation",
+          "source": "Knowledge Graphs",
+          "source_type": "Concept",
+          "target": "Concept",
+          "target_type": "Person",
+          "l5": 0.6451,
+          "description": "Knowledge graphs use concepts to represent classes."
+        },
+        {
+          "class": "role_violation",
+          "source": "Graph Transformer",
+          "source_type": "System",
+          "target": "Bhowmik and Melo",
+          "target_type": "Person",
+          "l5": 0.7255,
+          "description": "Bhowmik and Melo use a variant of Graph Transformer encoder."
+        },
+        {
+          "class": "role_violation",
+          "source": "Graph",
+          "source_type": "Artifact",
+          "target": "Concept",
+          "target_type": "Person",
+          "l5": 0.7435,
+          "description": "A graph connects different concepts."
+        },
+        {
+          "class": "role_violation",
+          "source": "HAO Model",
+          "source_type": "Method",
+          "target": "Human",
+          "target_type": "Person",
+          "l5": 0.813,
+          "description": "The HAO model has humans and machines collaborate."
+        },
+        {
+          "class": "role_violation",
+          "source": "ARC",
+          "source_type": "Dataset",
+          "target": "Banerjee et al.",
+          "target_type": "Person",
+          "l5": 0.6339,
+          "description": "ARC is adopted by Banerjee et al. for evaluation."
+        }
+      ]
+    },
+    "PART_OF": {
+      "n_reversed": 0,
+      "n_role_violation": 18,
+      "samples": [
+        {
+          "class": "role_violation",
+          "source": "Z. Liu",
+          "source_type": "Person",
+          "target": "Lin et al.",
+          "target_type": "Person",
+          "l5": 0.8355,
+          "description": "Z. Liu is an author of Lin et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "Hierarchical Type Tree",
+          "source_type": "Concept",
+          "target": "Authors",
+          "target_type": "Person",
+          "l5": 0.0444,
+          "description": "Author is part of the hierarchical type tree."
+        },
+        {
+          "class": "role_violation",
+          "source": "Tables",
+          "source_type": "Component",
+          "target": "Authors",
+          "target_type": "Person",
+          "l5": 0.343,
+          "description": "Authors are appended as a column to the table"
+        },
+        {
+          "class": "role_violation",
+          "source": "Scientist",
+          "source_type": "Concept",
+          "target": "Person",
+          "target_type": "Person",
+          "l5": 0.5888,
+          "description": "Scientists are a subset of person entities"
+        },
+        {
+          "class": "role_violation",
+          "source": "S. Rao",
+          "source_type": "Person",
+          "target": "Lin et al.",
+          "target_type": "Person",
+          "l5": 0.9547,
+          "description": "S. Rao is an author of Lin et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "Knowledge Graphs",
+          "source_type": "Concept",
+          "target": "Concept",
+          "target_type": "Person",
+          "l5": 0.8383,
+          "description": "The KG contains respective concepts."
+        },
+        {
+          "class": "role_violation",
+          "source": "Weizhuo Li",
+          "source_type": "Person",
+          "target": "Li Et Al.",
+          "target_type": "Person",
+          "l5": 0.998,
+          "description": "Weizhuo Li is an author of Li et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "M. Sun",
+          "source_type": "Person",
+          "target": "Lin et al.",
+          "target_type": "Person",
+          "l5": 0.9207,
+          "description": "M. Sun is an author of Lin et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "H. Luan",
+          "source_type": "Person",
+          "target": "Lin et al.",
+          "target_type": "Person",
+          "l5": 0.8498,
+          "description": "H. Luan is an author of Lin et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "Y. Lin",
+          "source_type": "Person",
+          "target": "Lin et al.",
+          "target_type": "Person",
+          "l5": 0.9189,
+          "description": "Y. Lin is an author of Lin et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "S. Liu",
+          "source_type": "Person",
+          "target": "Lin et al.",
+          "target_type": "Person",
+          "l5": 0.8792,
+          "description": "S. Liu is an author of Lin et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "Guilin Qi",
+          "source_type": "Person",
+          "target": "Li Et Al.",
+          "target_type": "Person",
+          "l5": 0.8862,
+          "description": "Guilin Qi is an author of Li et al."
+        },
+        {
+          "class": "role_violation",
+          "source": "Knowledge Graphs",
+          "source_type": "Concept",
+          "target": "Concept",
+          "target_type": "Person",
+          "l5": 0.5393,
+          "description": "Concepts are elements that can be part of a knowledge graph."
+        },
+        {
+          "class": "role_violation",
+          "source": "Attribute",
+          "source_type": "Concept",
+          "target": "Concept",
+          "target_type": "Person",
+          "l5": 0.9686,
+          "description": "An attribute is a property of a concept"
+        },
+        {
+          "class": "role_violation",
+          "source": "Hierarchical Type Tree",
+          "source_type": "Concept",
+          "target": "Concept",
+          "target_type": "Person",
+          "l5": 0.4817,
+          "description": "Concept is part of the hierarchical type tree."
+        },
+        {
+          "class": "role_violation",
+          "source": "NAACL",
+          "source_type": "Event",
+          "target": "Sara Sabour",
+          "target_type": "Person",
+          "l5": 0.3079,
+          "description": "RELATED_TO"
+        },
+        {
+          "class": "role_violation",
+          "source": "Triple",
+          "source_type": "Concept",
+          "target": "Donald Trump",
+          "target_type": "Person",
+          "l5": 0.6363,
+          "description": "Donald Trump is part of a triple"
+        },
+        {
+          "class": "role_violation",
+          "source": "Qiu Ji",
+          "source_type": "Person",
+          "target": "Li Et Al.",
+          "target_type": "Person",
+          "l5": 0.9839,
+          "description": "Qiu Ji is an author of Li et al."
+        }
+      ]
+    },
+    "LOCATED_AT": {
+      "n_reversed": 0,
+      "n_role_violation": 1,
+      "samples": [
+        {
+          "class": "role_violation",
+          "source": "Fast Learning Algorithm",
+          "source_type": "Method",
+          "target": "Neural Computation",
+          "target_type": "Method",
+          "l5": 0.9862,
+          "description": "Fast learning algorithm was published in Neural Computation 2006"
+        }
+      ]
+    },
+    "EVALUATES": {
+      "n_reversed": 0,
+      "n_role_violation": 6,
+      "samples": [
+        {
+          "class": "role_violation",
+          "source": "Drug Administrative Authorities",
+          "source_type": "Organization",
+          "target": "Pharmaceutical A",
+          "target_type": "Organization",
+          "l5": 0.7363,
+          "description": "Drug administrative authorities disqualified Pharmaceutical A's vaccine products."
+        },
+        {
+          "class": "role_violation",
+          "source": "AKBC",
+          "source_type": "Event",
+          "target": "Iterative KG Refinement",
+          "target_type": "Method",
+          "l5": 0.7475,
+          "description": "AKBC published and evaluated iterative KG refinement."
+        },
+        {
+          "class": "role_violation",
+          "source": "NIPS",
+          "source_type": "Event",
+          "target": "Translating Embeddings",
+          "target_type": "Method",
+          "l5": 0.872,
+          "description": "NIPS published and evaluated translating embeddings."
+        },
+        {
+          "class": "role_violation",
+          "source": "Controlled Experiments",
+          "source_type": "Method",
+          "target": "Data",
+          "target_type": "Material",
+          "l5": 0.8273,
+          "description": "Controlled experiments explore whether issues stem from data problems."
+        },
+        {
+          "class": "role_violation",
+          "source": "Link Prediction",
+          "source_type": "Method",
+          "target": "Price Drop",
+          "target_type": "Event",
+          "l5": 0.9768,
+          "description": "Link prediction assesses the potential outcome of a price drop."
+        },
+        {
+          "class": "role_violation",
+          "source": "LSTM-RNN",
+          "source_type": "System",
+          "target": "ACE",
+          "target_type": "Organization",
+          "l5": 0.622,
+          "description": "LSTM-RNN achieves improvements on ACE datasets"
+        }
+      ]
+    },
+    "CITES": {
+      "n_reversed": 0,
+      "n_role_violation": 1,
+      "samples": [
+        {
+          "class": "role_violation",
+          "source": "Figure 11",
+          "source_type": "Document",
+          "target": "US",
+          "target_type": "Location",
+          "l5": 0.7883,
+          "description": "Figure 11 illustrates the keyword query Titanic US"
+        }
+      ]
+    },
+    "ENABLES": {
+      "n_reversed": 0,
+      "n_role_violation": 5,
+      "samples": [
+        {
+          "class": "role_violation",
+          "source": "Pre-Test",
+          "source_type": "Process",
+          "target": "Reviews",
+          "target_type": "Document",
+          "l5": 0.9681,
+          "description": "Pre-test served as foundation for reviews."
+        },
+        {
+          "class": "role_violation",
+          "source": "Bio2Token",
+          "source_type": "Method",
+          "target": "Biomolecular Complexes",
+          "target_type": "Material",
+          "l5": 0.9468,
+          "description": "Bio2Token holds potential for biomolecular complex design"
+        },
+        {
+          "class": "role_violation",
+          "source": "Hardware Capabilities",
+          "source_type": "Concept",
+          "target": "Researchers",
+          "target_type": "Person",
+          "l5": 0.6521,
+          "description": "Advancing hardware capabilities enabled researchers to make discoveries."
+        },
+        {
+          "class": "role_violation",
+          "source": "Navigli",
+          "source_type": "Person",
+          "target": "Relation Extraction",
+          "target_type": "Process",
+          "l5": 0.6416,
+          "description": "Navigli enhanced relation extraction."
+        },
+        {
+          "class": "role_violation",
+          "source": "Huguet Cabot",
+          "source_type": "Person",
+          "target": "Relation Extraction",
+          "target_type": "Process",
+          "l5": 0.4795,
+          "description": "Huguet Cabot enhanced relation extraction."
+        }
+      ]
+    },
+    "CAUSES": {
+      "n_reversed": 0,
+      "n_role_violation": 3,
+      "samples": [
+        {
+          "class": "role_violation",
+          "source": "Knowledge Graph Selection",
+          "source_type": "Process",
+          "target": "Human",
+          "target_type": "Person",
+          "l5": 0.178,
+          "description": "KG selection poses a challenge for humans."
+        },
+        {
+          "class": "role_violation",
+          "source": "Energy",
+          "source_type": "Material",
+          "target": "Carbon Footprint",
+          "target_type": "Metric",
+          "l5": 0.5336,
+          "description": "Reduced energy lowers carbon footprint."
+        },
+        {
+          "class": "role_violation",
+          "source": "Knowledge Graph Discovery",
+          "source_type": "Process",
+          "target": "Human",
+          "target_type": "Person",
+          "l5": 0.1173,
+          "description": "KG discovery poses a challenge for humans."
+        }
+      ]
+    }
+  }
+}

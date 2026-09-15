@@ -1,0 +1,177 @@
+{
+  "layer": "L7",
+  "relation": "CREATED_BY",
+  "criterion": "endpoint type constraint (reuses apply_created_by_fix.py)",
+  "author_types": [
+    "Organization",
+    "Person"
+  ],
+  "creatable_types": [
+    "Artifact",
+    "Component",
+    "Concept",
+    "Dataset",
+    "Document",
+    "Material",
+    "Method",
+    "Metric",
+    "Process",
+    "System",
+    "Tool"
+  ],
+  "edges_total": 8755,
+  "edges_resolvable": 6241,
+  "edges_unknown_endpoint": 2514,
+  "compliant": 5819,
+  "compliance_rate": 0.9324,
+  "source_violations": 330,
+  "target_violations": 269,
+  "violation_classes": {
+    "reversed": 120,
+    "citation_endpoint": 92,
+    "other": 210
+  },
+  "top_bad_pairs": [
+    [
+      [
+        "Method",
+        "Person"
+      ],
+      54
+    ],
+    [
+      [
+        "Person",
+        "Person"
+      ],
+      46
+    ],
+    [
+      [
+        "Method",
+        "Document"
+      ],
+      36
+    ],
+    [
+      [
+        "Document",
+        "Person"
+      ],
+      35
+    ],
+    [
+      [
+        "Person",
+        "Event"
+      ],
+      34
+    ],
+    [
+      [
+        "Event",
+        "Organization"
+      ],
+      29
+    ],
+    [
+      [
+        "Event",
+        "Person"
+      ],
+      24
+    ],
+    [
+      [
+        "System",
+        "Document"
+      ],
+      20
+    ],
+    [
+      [
+        "System",
+        "Person"
+      ],
+      15
+    ],
+    [
+      [
+        "Organization",
+        "Person"
+      ],
+      9
+    ],
+    [
+      [
+        "Concept",
+        "Method"
+      ],
+      8
+    ],
+    [
+      [
+        "Concept",
+        "Concept"
+      ],
+      8
+    ],
+    [
+      [
+        "Concept",
+        "Person"
+      ],
+      8
+    ],
+    [
+      [
+        "Artifact",
+        "Document"
+      ],
+      5
+    ],
+    [
+      [
+        "System",
+        "System"
+      ],
+      5
+    ],
+    [
+      [
+        "Concept",
+        "Artifact"
+      ],
+      5
+    ],
+    [
+      [
+        "Concept",
+        "System"
+      ],
+      5
+    ],
+    [
+      [
+        "Document",
+        "Method"
+      ],
+      4
+    ],
+    [
+      [
+        "Dataset",
+        "Document"
+      ],
+      4
+    ],
+    [
+      [
+        "Component",
+        "Method"
+      ],
+      4
+    ]
+  ],
+  "note": "本层只覆盖 CREATED_BY：其余 14 类的端点类型约束见 src/ontology.py 的 RELATION_ENDPOINT_CONSTRAINTS，逐类结果由 tools/l7_relation_constraints_audit.py 产出（其中 CREATED_BY 与本脚本对账一致）。违规分三类：方向颠倒（可自动反转）、引文式端点（端点质量问题）、其他（约束可能偏紧）。**分类已排除 Unknown 端点**（类型不可知，不判），三类之和等于 source+target 违规数。本脚本只报告，不改数据。"
+}

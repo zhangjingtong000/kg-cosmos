@@ -1,0 +1,122 @@
+{
+  "nodes": 18780,
+  "edges": 31308,
+  "self_loops": 4,
+  "self_loop_types": [
+    [
+      "PRODUCES",
+      2
+    ],
+    [
+      "RELATED_TO",
+      2
+    ]
+  ],
+  "isolated": 3036,
+  "isolated_pct": 16.17,
+  "rel_CONTRIBUTED_TO": 0,
+  "rel_RELATED_TO": 4635,
+  "rel_SAME_AS": 0,
+  "related_to_sampled": 400,
+  "related_to_alias_like": 13,
+  "related_to_alias_examples": [
+    [
+      "Unseen Classes",
+      "Seen Class"
+    ],
+    [
+      "VQA",
+      "OK-VQA"
+    ],
+    [
+      "Image Classification",
+      "Zero-shot Image Classification"
+    ],
+    [
+      "Object Recognition",
+      "Zero-Shot Object Recognition"
+    ],
+    [
+      "AwA",
+      "AwA2"
+    ],
+    [
+      "AwA1",
+      "AwA"
+    ],
+    [
+      "Zero-Shot QA Setting",
+      "Zero-Shot QA"
+    ],
+    [
+      "DBpedia50k",
+      "DBpedia"
+    ]
+  ],
+  "labels": [
+    [
+      "Person",
+      4703
+    ],
+    [
+      "Unknown",
+      3696
+    ],
+    [
+      "Concept",
+      3370
+    ],
+    [
+      "Method",
+      1823
+    ],
+    [
+      "Document",
+      1254
+    ],
+    [
+      "Process",
+      752
+    ],
+    [
+      "Artifact",
+      660
+    ],
+    [
+      "System",
+      596
+    ],
+    [
+      "Component",
+      481
+    ],
+    [
+      "Event",
+      354
+    ],
+    [
+      "Metric",
+      342
+    ],
+    [
+      "Dataset",
+      286
+    ],
+    [
+      "Organization",
+      195
+    ],
+    [
+      "Location",
+      134
+    ],
+    [
+      "Tool",
+      98
+    ],
+    [
+      "Material",
+      36
+    ]
+  ]
+}

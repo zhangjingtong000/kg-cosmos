@@ -1,0 +1,1103 @@
+{
+  "backfilled_total": 4304,
+  "heuristic_distribution": {
+    "entity-like": 3572,
+    "uncertain": 459,
+    "entity-title": 63,
+    "noise-lower": 55,
+    "noise-sentence": 64,
+    "entity-venue": 56,
+    "noise-long": 19,
+    "noise-junk": 16
+  },
+  "heuristic_noise_share": 0.0358,
+  "tiers": {
+    "occ5+": 837,
+    "occ2-4": 1690,
+    "occ1": 1777
+  },
+  "sample_size": 180,
+  "sample": [
+    {
+      "name": "BiLSTM/BERT",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "data format",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "Proc. ACL/IJCNLP",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "H. -V. Nguyen",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "Cs,Is",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "Aboulnaga, A.",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "Zhang & Soh, 2024",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "distribution storage",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "Proceedings Of The 2008 ACM SIGMOD International Conference On Management Of Data",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-venue"
+    },
+    {
+      "name": "owl:disjointWith",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-title"
+    },
+    {
+      "name": "Temporal Order Relationship",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "R. Joshi",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Common-Sense Relationships",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Finn Et. Al",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Code Sequence",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Relation Features",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Pre-LLM Era",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Span Graph",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Zirui Chen",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Statistical And Neural Methods",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Cameras",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Word Sequences",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Table VI",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "ChatGLM-like model",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Lina Yao",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Zhuoran Qiao",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Self-Explained Pre-Hoc Models",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Research Directions",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Bidirectional RNNs",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Preprogramming for Mechanical Translation",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Ruijiang Li",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "D. Huang",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "R. Jenatton",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Persistent Structured Memory",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Chengshuai Zhao",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "ECML PKDD 2010",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Hanxiao Liu",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Distributed Semantic Space",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "D. Klein",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Haotian Liu",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Hypothesis Set H",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Lexical Objects",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Entity Mappings",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "LM-based joint extraction",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Domain and Range Constraints",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Entity Synonym",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Zhu Et Al.",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "H. Hu",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Schema Axioms",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Predictive Score",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "DOM Tree Nodes",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "J. Yu",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "LLAMA2 Model",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "CNN-Based Models",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Bartscherer",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Laura M. Koesten",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "He Et Al. 2023",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "P. W. Battaglia",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Structure of Knowledge Graphs",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "noise-sentence"
+    },
+    {
+      "name": "Accuracy@0.01",
+      "tier": "occ1",
+      "occurrences": 1,
+      "heuristic": "noise-junk"
+    },
+    {
+      "name": "Accuracy@0.05",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "noise-junk"
+    },
+    {
+      "name": "unseen classes",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "ECML/PKDD",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "P. -W. Wang",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "equivalentClass",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "entity linking",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "ACL Workshop on CVSC",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-venue"
+    },
+    {
+      "name": "A Survey on Complex Knowledge Base Question Answering: Methods, Challenges and Solutions",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-title"
+    },
+    {
+      "name": "Federated Query Optimization",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Few-Shot Question Answering",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Local Graph Structures",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Entity-Relation Composition",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Conditional Knowledge",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Frequency-Related Structural Metrics",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Naive RAG",
+      "tier": "occ2-4",
+      "occurrences": 4,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Research Question 6",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Binary Relationships",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "ZSL Benchmarks",
+      "tier": "occ2-4",
+      "occurrences": 4,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Cheng",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Semantic Connection",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Temporal Encoder",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Tabula User Interface",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "G. K.",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Single-Token Entities",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "RDF-AI",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Historical Financial Events",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Cross-Knowledge Graph Attention Mechanism",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Deep Entity Features",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Web Search Engine",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "LLaMA2-7B",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Logical Relationship",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Entity Similarity",
+      "tier": "occ2-4",
+      "occurrences": 4,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Trans. Assoc. Comput. Linguistics",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "RNN-Based CO Model",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Rietveld Et Al. 2014",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Fully Automated Approach",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Low-resource Data",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Entity-Typed Triple",
+      "tier": "occ2-4",
+      "occurrences": 4,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Temporal-Aware Relational Embedding",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Object Visual Characteristics",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Bi-LSTM-CRF",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "KG Lookup",
+      "tier": "occ2-4",
+      "occurrences": 4,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Uni-Directional RNN",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Pre-deﬁned Logics",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Skip-gram",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "MSEJRKU",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Domain Specific KGs",
+      "tier": "occ2-4",
+      "occurrences": 4,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "LLM-Driven Paradigms",
+      "tier": "occ2-4",
+      "occurrences": 4,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Chowdhury Et Al.",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Medical Term",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Heterogeneous Graph Representation Features",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "C. Manning",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Product Image Dataset",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Sentence-Level True Positive Samples",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "OpenKG",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "CrossRef",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Sub-Symbolic Representation",
+      "tier": "occ2-4",
+      "occurrences": 2,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Many-to-Many Relationship",
+      "tier": "occ2-4",
+      "occurrences": 4,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "MIMIC II",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Tom Went To Heaven In 2008",
+      "tier": "occ2-4",
+      "occurrences": 3,
+      "heuristic": "noise-sentence"
+    },
+    {
+      "name": "Proceedings Of The 2017 Conference On Empirical Methods In Natural Language Processing",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-venue"
+    },
+    {
+      "name": "Ruffinelli Et Al. (2020)",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "high-order contextual semantics",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "Open-World Knowledge Graph Completion with Multiple Interaction Attention",
+      "tier": "occ5+",
+      "occurrences": 9,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "ConvE (Dettmers et al. , 2018)",
+      "tier": "occ5+",
+      "occurrences": 9,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "KG Completion (Unseen Entity)",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "uncertain"
+    },
+    {
+      "name": "Chains of Reasoning over Entities, Relations, and Text using Recurrent Neural Networks",
+      "tier": "occ5+",
+      "occurrences": 11,
+      "heuristic": "noise-sentence"
+    },
+    {
+      "name": "A Survey On Open Information Extraction From Rule-Based Model To Large Language Model",
+      "tier": "occ5+",
+      "occurrences": 11,
+      "heuristic": "entity-title"
+    },
+    {
+      "name": "Financial Information Extraction",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Baseline Method",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Translation-Based Completion Methods",
+      "tier": "occ5+",
+      "occurrences": 10,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Temporal Knowledge Graph Reasoning",
+      "tier": "occ5+",
+      "occurrences": 21,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Probabilistic Logic Reasoning With Graph Neural Networks",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Conditional Knowledge Extraction",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "General Purpose KGs",
+      "tier": "occ5+",
+      "occurrences": 9,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Temporal Knowledge Graph Prediction",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Entity Labels",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Cheng Et Al. 2017a",
+      "tier": "occ5+",
+      "occurrences": 7,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Complex Query Answering",
+      "tier": "occ5+",
+      "occurrences": 14,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "TKG",
+      "tier": "occ5+",
+      "occurrences": 23,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "CNN-Based Fusion Model",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Relative Attributes",
+      "tier": "occ5+",
+      "occurrences": 7,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Graph Structures",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Xu et al.",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "MIMLCNN",
+      "tier": "occ5+",
+      "occurrences": 13,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Iterative Guidance From Soft Rules",
+      "tier": "occ5+",
+      "occurrences": 7,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Worldtree V2",
+      "tier": "occ5+",
+      "occurrences": 9,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Core ontologies for safe autonomous driving",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Graph Node",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Latent Variable Models",
+      "tier": "occ5+",
+      "occurrences": 7,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "CoType",
+      "tier": "occ5+",
+      "occurrences": 8,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Propagation-based",
+      "tier": "occ5+",
+      "occurrences": 24,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "KG Construction Tasks",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Vqsynery",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Relation Extract",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Xlnet",
+      "tier": "occ5+",
+      "occurrences": 7,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Hallucination",
+      "tier": "occ5+",
+      "occurrences": 8,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Translation-Based Scoring Function",
+      "tier": "occ5+",
+      "occurrences": 7,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Financial Entities",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "KG Completion Models",
+      "tier": "occ5+",
+      "occurrences": 12,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "F. S. Khan",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Mutual Attention Model",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "TransAt",
+      "tier": "occ5+",
+      "occurrences": 13,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Wrapper Tool",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Iterative Entity Alignment",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Element",
+      "tier": "occ5+",
+      "occurrences": 7,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Joint Entity Recognition and Relation Extraction",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Neural Network-Based Encoding Models",
+      "tier": "occ5+",
+      "occurrences": 7,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Financial Events",
+      "tier": "occ5+",
+      "occurrences": 11,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Tabula",
+      "tier": "occ5+",
+      "occurrences": 19,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "W. Y. Wang",
+      "tier": "occ5+",
+      "occurrences": 22,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "ImageNet-FS",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Graph LSTM",
+      "tier": "occ5+",
+      "occurrences": 9,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Temporal Consistency Constraints",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "KG Query",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "ConT",
+      "tier": "occ5+",
+      "occurrences": 8,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Personalized KG Summary",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "VSSo",
+      "tier": "occ5+",
+      "occurrences": 5,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "KG Embedding Models",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "entity-like"
+    },
+    {
+      "name": "Knowledge Graphs for Enhancing Large Language Models in Entity Disambiguation",
+      "tier": "occ5+",
+      "occurrences": 6,
+      "heuristic": "noise-long"
+    }
+  ],
+  "note": "启发式只给出上界：noise 档几乎确定不是实体，entity-like 档仍可能混入泛指词。真精度需人工读 sample 清单逐条判定。本脚本不自动改数据。"
+}

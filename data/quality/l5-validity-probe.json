@@ -1,0 +1,67 @@
+{
+  "seed": 42,
+  "n": 40,
+  "threshold": 0.67,
+  "source": "D:\\kg-demo\\data\\quality\\relation-verify-all.json",
+  "probes": {
+    "P1_hypothesis_form": {
+      "current": {
+        "n": 40,
+        "mean": 0.6902,
+        "pass_rate": 0.65,
+        "_hyps_head": [
+          "Text-to-KG Extractor produces Knowledge Graphs.",
+          "P. Li is related to COLING.",
+          "Relational retrieval using a combination of path-constrained random walks was created by William W. Cohen."
+        ]
+      },
+      "nodot": {
+        "n": 40,
+        "mean": 0.6923,
+        "pass_rate": 0.6
+      },
+      "passive": {
+        "n": 40,
+        "mean": 0.6776,
+        "pass_rate": 0.65
+      },
+      "zh": {
+        "n": 40,
+        "mean": 0.7706,
+        "pass_rate": 0.725
+      },
+      "syn": {
+        "n": 40,
+        "mean": 0.7041,
+        "pass_rate": 0.65
+      }
+    },
+    "P2_premise_form": {
+      "ours_sentence": {
+        "n": 40,
+        "mean": 0.6902,
+        "pass_rate": 0.65
+      },
+      "full_paragraph": {
+        "n": 40,
+        "mean": 0.7251,
+        "pass_rate": 0.7
+      }
+    },
+    "P3_direction": {
+      "n": 40,
+      "flip_rate": 0.25,
+      "mean_delta": 0.1248
+    },
+    "P4_rule_based_fp_floor": {
+      "pass_total": 27954,
+      "selfloop_pass": 223,
+      "selfloop_asym_pass": 17,
+      "one_char_pass": 140,
+      "numeric_pass": 188,
+      "strict_floor": 17,
+      "loose_floor": 343
+    }
+  },
+  "p1_pass_rate_spread_pp": 12.5
+}

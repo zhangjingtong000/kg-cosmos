@@ -1,0 +1,744 @@
+{
+  "min_support": 30,
+  "dominance": 0.6,
+  "skipped_missing_type": 3820,
+  "by_type": {
+    "RELATED_TO": {
+      "n": 8760,
+      "dominant_pair": [
+        "Person",
+        "Person"
+      ],
+      "dominant_pct": 0.1332,
+      "reverse_pair_count": 1167,
+      "suspected_flipped": 0,
+      "suspected_flipped_pct": 0.0,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Person",
+            "Person"
+          ],
+          1167
+        ],
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          853
+        ],
+        [
+          [
+            "Method",
+            "Method"
+          ],
+          310
+        ],
+        [
+          [
+            "Unknown",
+            "Concept"
+          ],
+          309
+        ],
+        [
+          [
+            "Person",
+            "Concept"
+          ],
+          290
+        ]
+      ]
+    },
+    "CREATED_BY": {
+      "n": 8063,
+      "dominant_pair": [
+        "Person",
+        "Document"
+      ],
+      "dominant_pct": 0.3104,
+      "reverse_pair_count": 34,
+      "suspected_flipped": 34,
+      "suspected_flipped_pct": 0.0042,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Person",
+            "Document"
+          ],
+          2503
+        ],
+        [
+          [
+            "Person",
+            "Method"
+          ],
+          1239
+        ],
+        [
+          [
+            "Person",
+            "System"
+          ],
+          673
+        ],
+        [
+          [
+            "Person",
+            "Unknown"
+          ],
+          554
+        ],
+        [
+          [
+            "Unknown",
+            "Person"
+          ],
+          490
+        ]
+      ]
+    },
+    "USES": {
+      "n": 6707,
+      "dominant_pair": [
+        "Method",
+        "Concept"
+      ],
+      "dominant_pct": 0.1215,
+      "reverse_pair_count": 167,
+      "suspected_flipped": 167,
+      "suspected_flipped_pct": 0.0249,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Method",
+            "Concept"
+          ],
+          815
+        ],
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          447
+        ],
+        [
+          [
+            "Unknown",
+            "Concept"
+          ],
+          415
+        ],
+        [
+          [
+            "Method",
+            "Method"
+          ],
+          397
+        ],
+        [
+          [
+            "Method",
+            "Unknown"
+          ],
+          285
+        ]
+      ]
+    },
+    "PART_OF": {
+      "n": 5250,
+      "dominant_pair": [
+        "Concept",
+        "Concept"
+      ],
+      "dominant_pct": 0.1278,
+      "reverse_pair_count": 671,
+      "suspected_flipped": 0,
+      "suspected_flipped_pct": 0.0,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          671
+        ],
+        [
+          [
+            "Document",
+            "Event"
+          ],
+          303
+        ],
+        [
+          [
+            "Unknown",
+            "Concept"
+          ],
+          232
+        ],
+        [
+          [
+            "Method",
+            "Concept"
+          ],
+          232
+        ],
+        [
+          [
+            "Concept",
+            "Unknown"
+          ],
+          185
+        ]
+      ]
+    },
+    "APPLIES_TO": {
+      "n": 3517,
+      "dominant_pair": [
+        "Method",
+        "Concept"
+      ],
+      "dominant_pct": 0.1672,
+      "reverse_pair_count": 49,
+      "suspected_flipped": 49,
+      "suspected_flipped_pct": 0.0139,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Method",
+            "Concept"
+          ],
+          588
+        ],
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          346
+        ],
+        [
+          [
+            "Unknown",
+            "Concept"
+          ],
+          258
+        ],
+        [
+          [
+            "Method",
+            "Unknown"
+          ],
+          195
+        ],
+        [
+          [
+            "Method",
+            "Process"
+          ],
+          181
+        ]
+      ]
+    },
+    "PRODUCES": {
+      "n": 2053,
+      "dominant_pair": [
+        "Method",
+        "Concept"
+      ],
+      "dominant_pct": 0.1325,
+      "reverse_pair_count": 13,
+      "suspected_flipped": 13,
+      "suspected_flipped_pct": 0.0063,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Method",
+            "Concept"
+          ],
+          272
+        ],
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          204
+        ],
+        [
+          [
+            "Unknown",
+            "Concept"
+          ],
+          131
+        ],
+        [
+          [
+            "System",
+            "Concept"
+          ],
+          125
+        ],
+        [
+          [
+            "Process",
+            "Concept"
+          ],
+          109
+        ]
+      ]
+    },
+    "ENABLES": {
+      "n": 947,
+      "dominant_pair": [
+        "Concept",
+        "Concept"
+      ],
+      "dominant_pct": 0.1658,
+      "reverse_pair_count": 157,
+      "suspected_flipped": 0,
+      "suspected_flipped_pct": 0.0,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          157
+        ],
+        [
+          [
+            "Concept",
+            "Process"
+          ],
+          92
+        ],
+        [
+          [
+            "Method",
+            "Concept"
+          ],
+          71
+        ],
+        [
+          [
+            "Method",
+            "Process"
+          ],
+          57
+        ],
+        [
+          [
+            "Concept",
+            "Unknown"
+          ],
+          55
+        ]
+      ]
+    },
+    "CITES": {
+      "n": 862,
+      "dominant_pair": [
+        "Person",
+        "Event"
+      ],
+      "dominant_pct": 0.1148,
+      "reverse_pair_count": 0,
+      "suspected_flipped": 0,
+      "suspected_flipped_pct": 0.0,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Person",
+            "Event"
+          ],
+          99
+        ],
+        [
+          [
+            "Document",
+            "Person"
+          ],
+          79
+        ],
+        [
+          [
+            "Person",
+            "Document"
+          ],
+          69
+        ],
+        [
+          [
+            "Document",
+            "Method"
+          ],
+          45
+        ],
+        [
+          [
+            "Concept",
+            "Document"
+          ],
+          41
+        ]
+      ]
+    },
+    "LOCATED_AT": {
+      "n": 789,
+      "dominant_pair": [
+        "Method",
+        "Event"
+      ],
+      "dominant_pct": 0.1077,
+      "reverse_pair_count": 0,
+      "suspected_flipped": 0,
+      "suspected_flipped_pct": 0.0,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Method",
+            "Event"
+          ],
+          85
+        ],
+        [
+          [
+            "Unknown",
+            "Event"
+          ],
+          75
+        ],
+        [
+          [
+            "Document",
+            "Event"
+          ],
+          50
+        ],
+        [
+          [
+            "Organization",
+            "Location"
+          ],
+          40
+        ],
+        [
+          [
+            "Person",
+            "Location"
+          ],
+          31
+        ]
+      ]
+    },
+    "MEASURES": {
+      "n": 743,
+      "dominant_pair": [
+        "Method",
+        "Concept"
+      ],
+      "dominant_pct": 0.0727,
+      "reverse_pair_count": 9,
+      "suspected_flipped": 9,
+      "suspected_flipped_pct": 0.0121,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Method",
+            "Concept"
+          ],
+          54
+        ],
+        [
+          [
+            "Method",
+            "Metric"
+          ],
+          54
+        ],
+        [
+          [
+            "Metric",
+            "Concept"
+          ],
+          53
+        ],
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          52
+        ],
+        [
+          [
+            "Concept",
+            "Metric"
+          ],
+          43
+        ]
+      ]
+    },
+    "SUPPORTS": {
+      "n": 722,
+      "dominant_pair": [
+        "Concept",
+        "Concept"
+      ],
+      "dominant_pct": 0.133,
+      "reverse_pair_count": 96,
+      "suspected_flipped": 0,
+      "suspected_flipped_pct": 0.0,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          96
+        ],
+        [
+          [
+            "Concept",
+            "Process"
+          ],
+          49
+        ],
+        [
+          [
+            "Method",
+            "Concept"
+          ],
+          47
+        ],
+        [
+          [
+            "Method",
+            "Process"
+          ],
+          40
+        ],
+        [
+          [
+            "System",
+            "Concept"
+          ],
+          30
+        ]
+      ]
+    },
+    "COMPARES_WITH": {
+      "n": 543,
+      "dominant_pair": [
+        "Method",
+        "Method"
+      ],
+      "dominant_pct": 0.1639,
+      "reverse_pair_count": 89,
+      "suspected_flipped": 0,
+      "suspected_flipped_pct": 0.0,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Method",
+            "Method"
+          ],
+          89
+        ],
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          58
+        ],
+        [
+          [
+            "System",
+            "System"
+          ],
+          43
+        ],
+        [
+          [
+            "Unknown",
+            "Unknown"
+          ],
+          38
+        ],
+        [
+          [
+            "Method",
+            "Unknown"
+          ],
+          27
+        ]
+      ]
+    },
+    "EVALUATES": {
+      "n": 399,
+      "dominant_pair": [
+        "Method",
+        "Dataset"
+      ],
+      "dominant_pct": 0.2281,
+      "reverse_pair_count": 2,
+      "suspected_flipped": 2,
+      "suspected_flipped_pct": 0.005,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Method",
+            "Dataset"
+          ],
+          91
+        ],
+        [
+          [
+            "Unknown",
+            "Dataset"
+          ],
+          33
+        ],
+        [
+          [
+            "Document",
+            "Method"
+          ],
+          19
+        ],
+        [
+          [
+            "Document",
+            "Concept"
+          ],
+          18
+        ],
+        [
+          [
+            "System",
+            "Dataset"
+          ],
+          13
+        ]
+      ]
+    },
+    "CAUSES": {
+      "n": 270,
+      "dominant_pair": [
+        "Concept",
+        "Concept"
+      ],
+      "dominant_pct": 0.1778,
+      "reverse_pair_count": 48,
+      "suspected_flipped": 0,
+      "suspected_flipped_pct": 0.0,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          48
+        ],
+        [
+          [
+            "Concept",
+            "Metric"
+          ],
+          23
+        ],
+        [
+          [
+            "Method",
+            "Concept"
+          ],
+          19
+        ],
+        [
+          [
+            "Unknown",
+            "Concept"
+          ],
+          16
+        ],
+        [
+          [
+            "Process",
+            "Concept"
+          ],
+          15
+        ]
+      ]
+    },
+    "CONTRADICTS": {
+      "n": 227,
+      "dominant_pair": [
+        "Concept",
+        "Concept"
+      ],
+      "dominant_pct": 0.2511,
+      "reverse_pair_count": 57,
+      "suspected_flipped": 0,
+      "suspected_flipped_pct": 0.0,
+      "direction_fixed": false,
+      "top_pairs": [
+        [
+          [
+            "Concept",
+            "Concept"
+          ],
+          57
+        ],
+        [
+          [
+            "Method",
+            "Concept"
+          ],
+          28
+        ],
+        [
+          [
+            "Unknown",
+            "Concept"
+          ],
+          18
+        ],
+        [
+          [
+            "Process",
+            "Concept"
+          ],
+          12
+        ],
+        [
+          [
+            "Concept",
+            "Metric"
+          ],
+          10
+        ]
+      ]
+    }
+  },
+  "suspected_total": 274,
+  "suspected_with_high_l5": 0
+}

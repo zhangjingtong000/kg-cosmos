@@ -1,0 +1,1463 @@
+{
+  "files": 17,
+  "edges": 44160,
+  "unique_nodes": 15446,
+  "type_counts": {
+    "RELATED_TO": 9597,
+    "CREATED_BY": 9059,
+    "USES": 7339,
+    "PART_OF": 5808,
+    "APPLIES_TO": 3850,
+    "PRODUCES": 2211,
+    "ENABLES": 999,
+    "CITES": 967,
+    "MEASURES": 872,
+    "LOCATED_AT": 853,
+    "SUPPORTS": 793,
+    "COMPARES_WITH": 598,
+    "EVALUATES": 454,
+    "CAUSES": 280,
+    "CONTRADICTS": 243,
+    "CONTAINS": 9,
+    "Representation Learning": 5,
+    "Entity": 5,
+    "Stock": 5,
+    "Position": 5,
+    "Recommendation Systems": 4,
+    "Question Answering": 4,
+    "Triple": 4,
+    "Pure Symbolic Reasoning": 4,
+    "REPRESENTED_BY": 3,
+    "Relation Extraction": 3,
+    "Embedding": 3,
+    "Temporal Logical Reasoning": 3,
+    "Relation": 3,
+    "ADDRESSES": 3,
+    "PREDICTS": 3,
+    "NYT10": 3,
+    "Aminer COVID-19 Open Data": 3,
+    "External Knowledge Graph": 3,
+    "friend": 3,
+    "Short": 3,
+    "Entity Recognition": 2,
+    "Knowledge Representation": 2,
+    "Knowledge Graph": 2,
+    "Temporal Relational Dependency": 2,
+    "Torus Space": 2,
+    "Skew-Symmetry": 2,
+    "Composition": 2,
+    "HasPart": 2,
+    "RDF": 2,
+    "OWL": 2,
+    "OWL 2": 2,
+    "Semantic Net": 2,
+    "Literal": 2,
+    "HAS": 2,
+    "fuses": 2,
+    "DBpedia500k": 2,
+    "FB15k-237-OWE": 2,
+    "Logic Reasoning": 2,
+    "DistMult": 2,
+    "TensorLog": 2,
+    "COVID-19 Concepts": 2,
+    "C": 2,
+    "Attention Mechanisms": 2,
+    "CNN Structure": 2,
+    "Multi-Level CNN": 2,
+    "Donald Trump": 2,
+    "DEFINES": 2,
+    "Phar. A": 2,
+    "Phar. B": 2,
+    "Med. C": 2,
+    "Biotech D": 2,
+    "Triple Classification": 1,
+    "Heterogeneous Information": 1,
+    "Ontologies": 1,
+    "Semantics": 1,
+    "Multi-Lingual Knowledge": 1,
+    "Fact": 1,
+    "Entity Set": 1,
+    "Relation Set": 1,
+    "Entity Dynamics": 1,
+    "Natural Language Understanding": 1,
+    "Real-world Tasks": 1,
+    "NLU": 1,
+    "Denoted as [h], [r], [t] ∈Tn in torus space.": 1,
+    "Relational Translation": 1,
+    "2-Dimensional Polygon": 1,
+    "Symmetry": 1,
+    "Inversion": 1,
+    "Reflection": 1,
+    "extends": 1,
+    "KEE": 1,
+    "Google’s Knowledge Graph": 1,
+    "KL-ONE": 1,
+    "Cyc Project": 1,
+    "General Problem Solver": 1,
+    "SUMMARIZES": 1,
+    "Head Entity": 1,
+    "Tail Entity": 1,
+    "Relational Fact": 1,
+    "Node": 1,
+    "Edge": 1,
+    "Entity Attribute": 1,
+    "Data Property": 1,
+    "Data Type": 1,
+    "String": 1,
+    "Date": 1,
+    "Integer": 1,
+    "Decimal": 1,
+    "CONCATENATION": 1,
+    "Model Parameter": 1,
+    "Class Embedding": 1,
+    "Seen Class": 1,
+    "Unseen Class": 1,
+    "KG": 1,
+    "Class Belief": 1,
+    "introduced in": 1,
+    "requires": 1,
+    "category of": 1,
+    "study of": 1,
+    "investigates": 1,
+    "for": 1,
+    "have": 1,
+    "are": 1,
+    "Training Tasks": 1,
+    "Entity Pair": 1,
+    "Graph": 1,
+    "WEB19": 1,
+    "Wikipedia": 1,
+    "PUBLISHED_BY": 1,
+    "Relation-Specific Sphere": 1,
+    "Ontological Schema": 1,
+    "Composition Of Relations": 1,
+    "IterE": 1,
+    "ENHANCES": 1,
+    "OAG": 1,
+    "Huapu": 1,
+    "GEDMatch": 1,
+    "U. S. A.": 1,
+    "B": 1,
+    "Tree Structures": 1,
+    "LSTM Framework": 1,
+    "Word-Level Attention": 1,
+    "Attention-CNN": 1,
+    "Input Attention Mechanism": 1,
+    "Attention-Based Pooling": 1,
+    "GCNs": 1,
+    "Pre-Trained Models": 1,
+    "CONVERTED": 1,
+    "Attribute Alignment": 1,
+    "Entity Matching": 1,
+    "Entity Alignment": 1,
+    "Trump": 1,
+    "work_at": 1,
+    "live_in": 1,
+    "located_in": 1,
+    "DEFINED_BY": 1,
+    "DEMAND": 1,
+    "INTEND_TO_MEET": 1,
+    "OPTIMISTIC_COMMENT": 1,
+    "USE_MILITARY_FORCE": 1,
+    "CRITICIZE": 1,
+    "MAKE_STATEMENT": 1,
+    "Knowledge Graph Reasoning Methods": 1,
+    "Direction": 1,
+    "Long": 1
+  },
+  "related_to_share": 0.2173,
+  "pair_redundancy": {
+    "pairs_with_related_to": 9440,
+    "also_has_specific": 663
+  },
+  "weights": [
+    {
+      "type": "RELATED_TO",
+      "n": 9597,
+      "median": 1,
+      "mean": 1.039,
+      "max": 5,
+      "share_eq_1": 0.9697
+    },
+    {
+      "type": "CREATED_BY",
+      "n": 9059,
+      "median": 1,
+      "mean": 1.09,
+      "max": 4,
+      "share_eq_1": 0.9253
+    },
+    {
+      "type": "USES",
+      "n": 7339,
+      "median": 1,
+      "mean": 1.038,
+      "max": 4,
+      "share_eq_1": 0.9678
+    },
+    {
+      "type": "PART_OF",
+      "n": 5808,
+      "median": 1.0,
+      "mean": 1.091,
+      "max": 5,
+      "share_eq_1": 0.9415
+    },
+    {
+      "type": "APPLIES_TO",
+      "n": 3850,
+      "median": 1.0,
+      "mean": 1.05,
+      "max": 4,
+      "share_eq_1": 0.9603
+    },
+    {
+      "type": "PRODUCES",
+      "n": 2211,
+      "median": 1,
+      "mean": 1.024,
+      "max": 4,
+      "share_eq_1": 0.9792
+    },
+    {
+      "type": "ENABLES",
+      "n": 999,
+      "median": 1,
+      "mean": 1.006,
+      "max": 2,
+      "share_eq_1": 0.994
+    },
+    {
+      "type": "CITES",
+      "n": 967,
+      "median": 1,
+      "mean": 1.027,
+      "max": 3,
+      "share_eq_1": 0.9762
+    },
+    {
+      "type": "MEASURES",
+      "n": 872,
+      "median": 1.0,
+      "mean": 1.014,
+      "max": 3,
+      "share_eq_1": 0.9897
+    },
+    {
+      "type": "LOCATED_AT",
+      "n": 853,
+      "median": 1,
+      "mean": 1.04,
+      "max": 3,
+      "share_eq_1": 0.9637
+    },
+    {
+      "type": "SUPPORTS",
+      "n": 793,
+      "median": 1,
+      "mean": 1.018,
+      "max": 3,
+      "share_eq_1": 0.9861
+    },
+    {
+      "type": "COMPARES_WITH",
+      "n": 598,
+      "median": 1.0,
+      "mean": 1.023,
+      "max": 2,
+      "share_eq_1": 0.9766
+    },
+    {
+      "type": "EVALUATES",
+      "n": 454,
+      "median": 1.0,
+      "mean": 1.004,
+      "max": 2,
+      "share_eq_1": 0.9956
+    },
+    {
+      "type": "CAUSES",
+      "n": 280,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "CONTRADICTS",
+      "n": 243,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "CONTAINS",
+      "n": 9,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Representation Learning",
+      "n": 5,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Entity",
+      "n": 5,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Stock",
+      "n": 5,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Position",
+      "n": 5,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Recommendation Systems",
+      "n": 4,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Question Answering",
+      "n": 4,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Triple",
+      "n": 4,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Pure Symbolic Reasoning",
+      "n": 4,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "REPRESENTED_BY",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Relation Extraction",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Embedding",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Temporal Logical Reasoning",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Relation",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "ADDRESSES",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "PREDICTS",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "NYT10",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Aminer COVID-19 Open Data",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "External Knowledge Graph",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "friend",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Short",
+      "n": 3,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Entity Recognition",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Knowledge Representation",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Knowledge Graph",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Temporal Relational Dependency",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Torus Space",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Skew-Symmetry",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Composition",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "HasPart",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "RDF",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "OWL",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "OWL 2",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Semantic Net",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Literal",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "HAS",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "fuses",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "DBpedia500k",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "FB15k-237-OWE",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Logic Reasoning",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "DistMult",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "TensorLog",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "COVID-19 Concepts",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "C",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Attention Mechanisms",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "CNN Structure",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Multi-Level CNN",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Donald Trump",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "DEFINES",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Phar. A",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Phar. B",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Med. C",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Biotech D",
+      "n": 2,
+      "median": 1.0,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Triple Classification",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Heterogeneous Information",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Ontologies",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Semantics",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Multi-Lingual Knowledge",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Fact",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Entity Set",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Relation Set",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Entity Dynamics",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Natural Language Understanding",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Real-world Tasks",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "NLU",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Denoted as [h], [r], [t] ∈Tn in torus space.",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Relational Translation",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "2-Dimensional Polygon",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Symmetry",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Inversion",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Reflection",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "extends",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "KEE",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Google’s Knowledge Graph",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "KL-ONE",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Cyc Project",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "General Problem Solver",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "SUMMARIZES",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Head Entity",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Tail Entity",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Relational Fact",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Node",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Edge",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Entity Attribute",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Data Property",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Data Type",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "String",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Date",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Integer",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Decimal",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "CONCATENATION",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Model Parameter",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Class Embedding",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Seen Class",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Unseen Class",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "KG",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Class Belief",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "introduced in",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "requires",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "category of",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "study of",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "investigates",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "for",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "have",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "are",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Training Tasks",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Entity Pair",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Graph",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "WEB19",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Wikipedia",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "PUBLISHED_BY",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Relation-Specific Sphere",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Ontological Schema",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Composition Of Relations",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "IterE",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "ENHANCES",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "OAG",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Huapu",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "GEDMatch",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "U. S. A.",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "B",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Tree Structures",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "LSTM Framework",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Word-Level Attention",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Attention-CNN",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Input Attention Mechanism",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Attention-Based Pooling",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "GCNs",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Pre-Trained Models",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "CONVERTED",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Attribute Alignment",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Entity Matching",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Entity Alignment",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Trump",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "work_at",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "live_in",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "located_in",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "DEFINED_BY",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "DEMAND",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "INTEND_TO_MEET",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "OPTIMISTIC_COMMENT",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "USE_MILITARY_FORCE",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "CRITICIZE",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "MAKE_STATEMENT",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Knowledge Graph Reasoning Methods",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Direction",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    },
+    {
+      "type": "Long",
+      "n": 1,
+      "median": 1,
+      "mean": 1,
+      "max": 1,
+      "share_eq_1": 1.0
+    }
+  ]
+}

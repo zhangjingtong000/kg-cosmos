@@ -1,0 +1,147 @@
+{
+  "paper_id": "2012.00456v1",
+  "gold_entities": 93,
+  "channels": [
+    {
+      "mode": "cloud",
+      "note": "已入库云端快照",
+      "system": 344,
+      "gold": 93,
+      "size_ratio": 3.699,
+      "ablation": {
+        "strict-exact": {
+          "tp": 76,
+          "fp": 268,
+          "fn": 17,
+          "type_errors": 18,
+          "precision": 0.2209,
+          "recall": 0.8172,
+          "f1": 0.3478
+        },
+        "similarity": {
+          "tp": 88,
+          "fp": 256,
+          "fn": 5,
+          "type_errors": 22,
+          "precision": 0.2558,
+          "recall": 0.9462,
+          "f1": 0.4027
+        },
+        "type-aware": {
+          "tp": 72,
+          "fp": 272,
+          "fn": 21,
+          "type_errors": 0,
+          "precision": 0.2093,
+          "recall": 0.7742,
+          "f1": 0.3295
+        }
+      },
+      "fp": {
+        "total": 256,
+        "with_evidence": 256,
+        "name_in_evidence": 226,
+        "type_dist": {
+          "Concept": 77,
+          "Artifact": 34,
+          "Person": 10,
+          "Organization": 1,
+          "Location": 2,
+          "System": 14,
+          "Method": 16,
+          "Document": 42,
+          "Component": 19,
+          "Process": 18,
+          "Dataset": 5,
+          "Tool": 9,
+          "Metric": 6,
+          "Event": 3
+        }
+      },
+      "leakage": {
+        "arb_accepted": 10,
+        "hit_arb": 8,
+        "clean_gold_metrics": {
+          "tp": 80,
+          "fp": 264,
+          "fn": 3,
+          "type_errors": 19,
+          "precision": 0.2326,
+          "recall": 0.9639,
+          "f1": 0.3747
+        }
+      }
+    },
+    {
+      "mode": "local",
+      "note": "qwen3.5:9b",
+      "system": 141,
+      "gold": 93,
+      "size_ratio": 1.516,
+      "ablation": {
+        "strict-exact": {
+          "tp": 64,
+          "fp": 77,
+          "fn": 29,
+          "type_errors": 21,
+          "precision": 0.4539,
+          "recall": 0.6882,
+          "f1": 0.547
+        },
+        "similarity": {
+          "tp": 73,
+          "fp": 68,
+          "fn": 20,
+          "type_errors": 28,
+          "precision": 0.5177,
+          "recall": 0.7849,
+          "f1": 0.6239
+        },
+        "type-aware": {
+          "tp": 46,
+          "fp": 95,
+          "fn": 47,
+          "type_errors": 0,
+          "precision": 0.3262,
+          "recall": 0.4946,
+          "f1": 0.3932
+        }
+      },
+      "fp": {
+        "total": 68,
+        "with_evidence": 68,
+        "name_in_evidence": 65,
+        "type_dist": {
+          "System": 3,
+          "Document": 11,
+          "Person": 5,
+          "Organization": 3,
+          "Location": 1,
+          "Method": 4,
+          "Artifact": 7,
+          "Concept": 6,
+          "Material": 1,
+          "Process": 10,
+          "Dataset": 4,
+          "Component": 5,
+          "Tool": 3,
+          "Metric": 1,
+          "Event": 4
+        }
+      },
+      "leakage": {
+        "arb_accepted": 10,
+        "hit_arb": 7,
+        "clean_gold_metrics": {
+          "tp": 66,
+          "fp": 75,
+          "fn": 17,
+          "type_errors": 26,
+          "precision": 0.4681,
+          "recall": 0.7952,
+          "f1": 0.5893
+        }
+      }
+    }
+  ]
+}

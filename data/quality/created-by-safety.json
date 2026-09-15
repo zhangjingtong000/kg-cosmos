@@ -1,0 +1,18 @@
+{
+  "total": 9060,
+  "reverse": {
+    "total": 2684,
+    "post_merge_dup": 398,
+    "post_unique": 2286
+  },
+  "drop": {
+    "total": 165,
+    "has_alternative_relation": 4
+  },
+  "unknown_patterns": {
+    "其它": 5206,
+    "含引文式文本": 865,
+    "作品→作品": 84,
+    "作者→作者": 56
+  }
+}

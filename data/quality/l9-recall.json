@@ -1,0 +1,59 @@
+{
+  "spans": 7,
+  "gold_entities": 29,
+  "matched": 25,
+  "endpoint_recall": 0.8621,
+  "per_span": [
+    {
+      "id": "1703.08098v9#1",
+      "gold": 12,
+      "matched": 11,
+      "missed": [
+        "Convolutional Neural Network"
+      ]
+    },
+    {
+      "id": "2002.00388v4#0",
+      "gold": 2,
+      "matched": 1,
+      "missed": [
+        "Safavi et al."
+      ]
+    },
+    {
+      "id": "2002.00388v4#1",
+      "gold": 3,
+      "matched": 3,
+      "missed": []
+    },
+    {
+      "id": "2012.00456v1#0",
+      "gold": 3,
+      "matched": 2,
+      "missed": [
+        "Scholarly Knowledge Graphs"
+      ]
+    },
+    {
+      "id": "2012.00456v1#1",
+      "gold": 1,
+      "matched": 0,
+      "missed": [
+        "Semantics of Data"
+      ]
+    },
+    {
+      "id": "2112.10006v6#0",
+      "gold": 4,
+      "matched": 4,
+      "missed": []
+    },
+    {
+      "id": "2112.10006v6#1",
+      "gold": 4,
+      "matched": 4,
+      "missed": []
+    }
+  ],
+  "note": "操作性金标：段落由固定种子抽取，实体由独立于抽取管线的标注给出。不是严格金标，但能回答\"原文里的东西抽到没有\"。"
+}

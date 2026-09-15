@@ -1,0 +1,1082 @@
+{
+  "threshold": 0.67,
+  "per_type_sampled": 60,
+  "ontology_asymmetric": {
+    "types": [
+      "APPLIES_TO",
+      "CAUSES",
+      "CITES",
+      "CREATED_BY",
+      "ENABLES",
+      "EVALUATES",
+      "LOCATED_AT",
+      "MEASURES",
+      "PART_OF",
+      "PRODUCES",
+      "SUPPORTS",
+      "USES"
+    ],
+    "n": 720,
+    "mean_delta": 0.126,
+    "forward_win_pct": 74.17,
+    "threshold_flip": 172,
+    "threshold_flip_pct": 23.89
+  },
+  "ontology_symmetric": {
+    "types": [
+      "COMPARES_WITH",
+      "CONTRADICTS",
+      "RELATED_TO"
+    ],
+    "n": 180,
+    "mean_delta": 0.0373
+  },
+  "out_of_ontology": {
+    "n_types": 115,
+    "n": 195,
+    "mean_delta": 0.0156
+  },
+  "by_type": {
+    "2-Dimensional Polygon": {
+      "n": 1,
+      "mean_forward": 0.9913,
+      "mean_reverse": 0.9868,
+      "mean_delta": 0.0045,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "ADDRESSES": {
+      "n": 2,
+      "mean_forward": 0.3944,
+      "mean_reverse": 0.6541,
+      "mean_delta": -0.2597,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "APPLIES_TO": {
+      "n": 60,
+      "mean_forward": 0.8538,
+      "mean_reverse": 0.764,
+      "mean_delta": 0.0897,
+      "forward_win": 45,
+      "threshold_flip": 9
+    },
+    "Aminer COVID-19 Open Data": {
+      "n": 2,
+      "mean_forward": 0.9,
+      "mean_reverse": 0.9,
+      "mean_delta": 0.0,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "Attention Mechanisms": {
+      "n": 2,
+      "mean_forward": 0.7107,
+      "mean_reverse": 0.7107,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Attention-Based Pooling": {
+      "n": 1,
+      "mean_forward": 0.833,
+      "mean_reverse": 0.833,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Attention-CNN": {
+      "n": 1,
+      "mean_forward": 0.746,
+      "mean_reverse": 0.746,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Attribute Alignment": {
+      "n": 1,
+      "mean_forward": 0.8869,
+      "mean_reverse": 0.9094,
+      "mean_delta": -0.0226,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Biotech D": {
+      "n": 2,
+      "mean_forward": 0.8987,
+      "mean_reverse": 0.8987,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "CAUSES": {
+      "n": 60,
+      "mean_forward": 0.7251,
+      "mean_reverse": 0.6915,
+      "mean_delta": 0.0337,
+      "forward_win": 41,
+      "threshold_flip": 7
+    },
+    "CITES": {
+      "n": 60,
+      "mean_forward": 0.7933,
+      "mean_reverse": 0.7271,
+      "mean_delta": 0.0662,
+      "forward_win": 35,
+      "threshold_flip": 11
+    },
+    "CNN Structure": {
+      "n": 2,
+      "mean_forward": 0.9373,
+      "mean_reverse": 0.9373,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "COMPARES_WITH": {
+      "n": 60,
+      "mean_forward": 0.6075,
+      "mean_reverse": 0.5614,
+      "mean_delta": 0.0462,
+      "forward_win": 42,
+      "threshold_flip": 5
+    },
+    "CONCATENATION": {
+      "n": 1,
+      "mean_forward": 0.2882,
+      "mean_reverse": 0.3751,
+      "mean_delta": -0.0869,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "CONTAINS": {
+      "n": 9,
+      "mean_forward": 0.7646,
+      "mean_reverse": 0.8614,
+      "mean_delta": -0.0968,
+      "forward_win": 2,
+      "threshold_flip": 1
+    },
+    "CONTRADICTS": {
+      "n": 60,
+      "mean_forward": 0.369,
+      "mean_reverse": 0.318,
+      "mean_delta": 0.051,
+      "forward_win": 32,
+      "threshold_flip": 3
+    },
+    "CONTRIBUTED_TO": {
+      "n": 11,
+      "mean_forward": 0.8072,
+      "mean_reverse": 0.4579,
+      "mean_delta": 0.3493,
+      "forward_win": 9,
+      "threshold_flip": 9
+    },
+    "COVID-19 Concepts": {
+      "n": 2,
+      "mean_forward": 0.9579,
+      "mean_reverse": 0.9579,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "CREATED_BY": {
+      "n": 60,
+      "mean_forward": 0.8366,
+      "mean_reverse": 0.6657,
+      "mean_delta": 0.1709,
+      "forward_win": 41,
+      "threshold_flip": 24
+    },
+    "Class Belief": {
+      "n": 1,
+      "mean_forward": 0.8775,
+      "mean_reverse": 0.8775,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Class Embedding": {
+      "n": 1,
+      "mean_forward": 0.9049,
+      "mean_reverse": 0.6495,
+      "mean_delta": 0.2553,
+      "forward_win": 1,
+      "threshold_flip": 1
+    },
+    "Composition Of Relations": {
+      "n": 1,
+      "mean_forward": 0.9317,
+      "mean_reverse": 0.9877,
+      "mean_delta": -0.056,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Cyc Project": {
+      "n": 1,
+      "mean_forward": 0.8285,
+      "mean_reverse": 0.9741,
+      "mean_delta": -0.1456,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "DBpedia500k": {
+      "n": 2,
+      "mean_forward": 0.9532,
+      "mean_reverse": 0.9562,
+      "mean_delta": -0.0029,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "DEFINES": {
+      "n": 1,
+      "mean_forward": 0.9643,
+      "mean_reverse": 0.9007,
+      "mean_delta": 0.0636,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "Data Property": {
+      "n": 1,
+      "mean_forward": 0.8759,
+      "mean_reverse": 0.8759,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Data Type": {
+      "n": 1,
+      "mean_forward": 0.8015,
+      "mean_reverse": 0.8015,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Date": {
+      "n": 1,
+      "mean_forward": 0.8933,
+      "mean_reverse": 0.8933,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Decimal": {
+      "n": 1,
+      "mean_forward": 0.8933,
+      "mean_reverse": 0.8933,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Denoted as [h], [r], [t] ∈Tn in torus space.": {
+      "n": 1,
+      "mean_forward": 0.6588,
+      "mean_reverse": 0.4934,
+      "mean_delta": 0.1654,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "Direction": {
+      "n": 1,
+      "mean_forward": 0.9702,
+      "mean_reverse": 0.9702,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "DistMult": {
+      "n": 2,
+      "mean_forward": 0.718,
+      "mean_reverse": 0.718,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Donald Trump": {
+      "n": 2,
+      "mean_forward": 0.9243,
+      "mean_reverse": 0.8996,
+      "mean_delta": 0.0247,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "ENABLES": {
+      "n": 60,
+      "mean_forward": 0.8742,
+      "mean_reverse": 0.7748,
+      "mean_delta": 0.0994,
+      "forward_win": 53,
+      "threshold_flip": 10
+    },
+    "ENHANCES": {
+      "n": 1,
+      "mean_forward": 0.7893,
+      "mean_reverse": 0.9456,
+      "mean_delta": -0.1563,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "EVALUATES": {
+      "n": 60,
+      "mean_forward": 0.6594,
+      "mean_reverse": 0.5518,
+      "mean_delta": 0.1076,
+      "forward_win": 46,
+      "threshold_flip": 12
+    },
+    "Edge": {
+      "n": 1,
+      "mean_forward": 0.9527,
+      "mean_reverse": 0.9527,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Embedding": {
+      "n": 3,
+      "mean_forward": 0.3206,
+      "mean_reverse": 0.4712,
+      "mean_delta": -0.1507,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Entity": {
+      "n": 5,
+      "mean_forward": 0.9245,
+      "mean_reverse": 0.9245,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Entity Alignment": {
+      "n": 1,
+      "mean_forward": 0.8869,
+      "mean_reverse": 0.9094,
+      "mean_delta": -0.0226,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Entity Attribute": {
+      "n": 1,
+      "mean_forward": 0.8015,
+      "mean_reverse": 0.8015,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Entity Dynamics": {
+      "n": 1,
+      "mean_forward": 0.9513,
+      "mean_reverse": 0.9548,
+      "mean_delta": -0.0036,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Entity Matching": {
+      "n": 1,
+      "mean_forward": 0.8869,
+      "mean_reverse": 0.9094,
+      "mean_delta": -0.0226,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Entity Pair": {
+      "n": 1,
+      "mean_forward": 0.8264,
+      "mean_reverse": 0.8408,
+      "mean_delta": -0.0143,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Entity Recognition": {
+      "n": 1,
+      "mean_forward": 0.8312,
+      "mean_reverse": 0.8312,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Entity Set": {
+      "n": 1,
+      "mean_forward": 0.4266,
+      "mean_reverse": 0.6006,
+      "mean_delta": -0.1741,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "External Knowledge Graph": {
+      "n": 3,
+      "mean_forward": 0.8222,
+      "mean_reverse": 0.9334,
+      "mean_delta": -0.1112,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "FB15k-237-OWE": {
+      "n": 2,
+      "mean_forward": 0.5167,
+      "mean_reverse": 0.6206,
+      "mean_delta": -0.1039,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "GCNs": {
+      "n": 1,
+      "mean_forward": 0.9186,
+      "mean_reverse": 0.9186,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "GEDMatch": {
+      "n": 1,
+      "mean_forward": 0.9625,
+      "mean_reverse": 0.9625,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "General Problem Solver": {
+      "n": 1,
+      "mean_forward": 0.8803,
+      "mean_reverse": 0.599,
+      "mean_delta": 0.2813,
+      "forward_win": 1,
+      "threshold_flip": 1
+    },
+    "Google’s Knowledge Graph": {
+      "n": 1,
+      "mean_forward": 0.9896,
+      "mean_reverse": 0.5375,
+      "mean_delta": 0.4521,
+      "forward_win": 1,
+      "threshold_flip": 1
+    },
+    "HAS": {
+      "n": 1,
+      "mean_forward": 0.651,
+      "mean_reverse": 0.8957,
+      "mean_delta": -0.2447,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "HasPart": {
+      "n": 2,
+      "mean_forward": 0.9086,
+      "mean_reverse": 0.8772,
+      "mean_delta": 0.0314,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "Head Entity": {
+      "n": 1,
+      "mean_forward": 0.8427,
+      "mean_reverse": 0.8427,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Heterogeneous Information": {
+      "n": 1,
+      "mean_forward": 0.8977,
+      "mean_reverse": 0.8977,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Input Attention Mechanism": {
+      "n": 1,
+      "mean_forward": 0.833,
+      "mean_reverse": 0.833,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Integer": {
+      "n": 1,
+      "mean_forward": 0.8933,
+      "mean_reverse": 0.8933,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "IterE": {
+      "n": 1,
+      "mean_forward": 0.7037,
+      "mean_reverse": 0.7037,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "KG": {
+      "n": 1,
+      "mean_forward": 0.8775,
+      "mean_reverse": 0.8775,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "KL-ONE": {
+      "n": 1,
+      "mean_forward": 0.9743,
+      "mean_reverse": 0.9789,
+      "mean_delta": -0.0046,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Knowledge Graph": {
+      "n": 1,
+      "mean_forward": 0.4923,
+      "mean_reverse": 0.4912,
+      "mean_delta": 0.0011,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "Knowledge Graph Reasoning Methods": {
+      "n": 1,
+      "mean_forward": 0.9226,
+      "mean_reverse": 0.9226,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Knowledge Representation": {
+      "n": 2,
+      "mean_forward": 0.7368,
+      "mean_reverse": 0.7368,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "LOCATED_AT": {
+      "n": 60,
+      "mean_forward": 0.9188,
+      "mean_reverse": 0.535,
+      "mean_delta": 0.3837,
+      "forward_win": 58,
+      "threshold_flip": 34
+    },
+    "LSTM Framework": {
+      "n": 1,
+      "mean_forward": 0.8443,
+      "mean_reverse": 0.8443,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Literal": {
+      "n": 2,
+      "mean_forward": 0.8769,
+      "mean_reverse": 0.8769,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Logic Reasoning": {
+      "n": 2,
+      "mean_forward": 0.7413,
+      "mean_reverse": 0.9081,
+      "mean_delta": -0.1668,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Long": {
+      "n": 1,
+      "mean_forward": 0.8212,
+      "mean_reverse": 0.8212,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "MEASURES": {
+      "n": 60,
+      "mean_forward": 0.8217,
+      "mean_reverse": 0.7454,
+      "mean_delta": 0.0762,
+      "forward_win": 40,
+      "threshold_flip": 9
+    },
+    "Med. C": {
+      "n": 2,
+      "mean_forward": 0.8987,
+      "mean_reverse": 0.8987,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Model Parameter": {
+      "n": 1,
+      "mean_forward": 0.907,
+      "mean_reverse": 0.8138,
+      "mean_delta": 0.0932,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "Multi-Level CNN": {
+      "n": 2,
+      "mean_forward": 0.9272,
+      "mean_reverse": 0.9272,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Multi-Lingual Knowledge": {
+      "n": 1,
+      "mean_forward": 0.8977,
+      "mean_reverse": 0.8977,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "NLU": {
+      "n": 1,
+      "mean_forward": 0.7631,
+      "mean_reverse": 0.7631,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "NYT10": {
+      "n": 2,
+      "mean_forward": 0.4969,
+      "mean_reverse": 0.2719,
+      "mean_delta": 0.225,
+      "forward_win": 2,
+      "threshold_flip": 1
+    },
+    "Natural Language Understanding": {
+      "n": 1,
+      "mean_forward": 0.9591,
+      "mean_reverse": 0.9591,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Node": {
+      "n": 1,
+      "mean_forward": 0.9527,
+      "mean_reverse": 0.9527,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "OWL": {
+      "n": 2,
+      "mean_forward": 0.8164,
+      "mean_reverse": 0.6356,
+      "mean_delta": 0.1808,
+      "forward_win": 1,
+      "threshold_flip": 1
+    },
+    "OWL 2": {
+      "n": 2,
+      "mean_forward": 0.9161,
+      "mean_reverse": 0.6791,
+      "mean_delta": 0.237,
+      "forward_win": 2,
+      "threshold_flip": 1
+    },
+    "Ontologies": {
+      "n": 1,
+      "mean_forward": 0.8977,
+      "mean_reverse": 0.8977,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "PART_OF": {
+      "n": 60,
+      "mean_forward": 0.8713,
+      "mean_reverse": 0.6125,
+      "mean_delta": 0.2587,
+      "forward_win": 46,
+      "threshold_flip": 26
+    },
+    "PRODUCES": {
+      "n": 60,
+      "mean_forward": 0.8551,
+      "mean_reverse": 0.7293,
+      "mean_delta": 0.1258,
+      "forward_win": 49,
+      "threshold_flip": 9
+    },
+    "Phar. A": {
+      "n": 2,
+      "mean_forward": 0.9323,
+      "mean_reverse": 0.9323,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Phar. B": {
+      "n": 1,
+      "mean_forward": 0.9352,
+      "mean_reverse": 0.9352,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Position": {
+      "n": 4,
+      "mean_forward": 0.8253,
+      "mean_reverse": 0.8253,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Pre-Trained Models": {
+      "n": 1,
+      "mean_forward": 0.8097,
+      "mean_reverse": 0.8097,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Pure Symbolic Reasoning": {
+      "n": 4,
+      "mean_forward": 0.4899,
+      "mean_reverse": 0.5082,
+      "mean_delta": -0.0183,
+      "forward_win": 1,
+      "threshold_flip": 1
+    },
+    "Question Answering": {
+      "n": 4,
+      "mean_forward": 0.8705,
+      "mean_reverse": 0.8705,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "RELATED_TO": {
+      "n": 60,
+      "mean_forward": 0.747,
+      "mean_reverse": 0.7322,
+      "mean_delta": 0.0148,
+      "forward_win": 39,
+      "threshold_flip": 2
+    },
+    "REPRESENTED_BY": {
+      "n": 3,
+      "mean_forward": 0.9407,
+      "mean_reverse": 0.6287,
+      "mean_delta": 0.312,
+      "forward_win": 3,
+      "threshold_flip": 1
+    },
+    "Real-world Tasks": {
+      "n": 1,
+      "mean_forward": 0.9591,
+      "mean_reverse": 0.9591,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Recommendation Systems": {
+      "n": 4,
+      "mean_forward": 0.8705,
+      "mean_reverse": 0.8705,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Reflection": {
+      "n": 1,
+      "mean_forward": 0.8836,
+      "mean_reverse": 0.9285,
+      "mean_delta": -0.0449,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Relation": {
+      "n": 3,
+      "mean_forward": 0.9273,
+      "mean_reverse": 0.8693,
+      "mean_delta": 0.058,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "Relation Extraction": {
+      "n": 2,
+      "mean_forward": 0.8232,
+      "mean_reverse": 0.8232,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Relation Set": {
+      "n": 1,
+      "mean_forward": 0.6626,
+      "mean_reverse": 0.7492,
+      "mean_delta": -0.0866,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Relation-Specific Sphere": {
+      "n": 1,
+      "mean_forward": 0.794,
+      "mean_reverse": 0.794,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Relational Fact": {
+      "n": 1,
+      "mean_forward": 0.9527,
+      "mean_reverse": 0.9527,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Relational Translation": {
+      "n": 1,
+      "mean_forward": 0.7101,
+      "mean_reverse": 0.5785,
+      "mean_delta": 0.1316,
+      "forward_win": 1,
+      "threshold_flip": 1
+    },
+    "Representation Learning": {
+      "n": 5,
+      "mean_forward": 0.8905,
+      "mean_reverse": 0.8905,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "SUPPORTS": {
+      "n": 60,
+      "mean_forward": 0.7755,
+      "mean_reverse": 0.6798,
+      "mean_delta": 0.0957,
+      "forward_win": 44,
+      "threshold_flip": 17
+    },
+    "Seen Class": {
+      "n": 1,
+      "mean_forward": 0.8775,
+      "mean_reverse": 0.8775,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Semantic Net": {
+      "n": 2,
+      "mean_forward": 0.3865,
+      "mean_reverse": 0.6711,
+      "mean_delta": -0.2847,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Semantics": {
+      "n": 1,
+      "mean_forward": 0.8977,
+      "mean_reverse": 0.8977,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Short": {
+      "n": 2,
+      "mean_forward": 0.7548,
+      "mean_reverse": 0.7548,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Stock": {
+      "n": 4,
+      "mean_forward": 0.8253,
+      "mean_reverse": 0.8253,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "String": {
+      "n": 1,
+      "mean_forward": 0.8933,
+      "mean_reverse": 0.8933,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Tail Entity": {
+      "n": 1,
+      "mean_forward": 0.8427,
+      "mean_reverse": 0.8427,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Temporal Logical Reasoning": {
+      "n": 3,
+      "mean_forward": 0.9403,
+      "mean_reverse": 0.959,
+      "mean_delta": -0.0186,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Temporal Relational Dependency": {
+      "n": 2,
+      "mean_forward": 0.9538,
+      "mean_reverse": 0.9625,
+      "mean_delta": -0.0087,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "TensorLog": {
+      "n": 1,
+      "mean_forward": 0.9203,
+      "mean_reverse": 0.9203,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Torus Space": {
+      "n": 2,
+      "mean_forward": 0.6968,
+      "mean_reverse": 0.4684,
+      "mean_delta": 0.2284,
+      "forward_win": 2,
+      "threshold_flip": 2
+    },
+    "Training Tasks": {
+      "n": 1,
+      "mean_forward": 0.4069,
+      "mean_reverse": 0.9331,
+      "mean_delta": -0.5262,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Tree Structures": {
+      "n": 1,
+      "mean_forward": 0.8443,
+      "mean_reverse": 0.8443,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Triple": {
+      "n": 4,
+      "mean_forward": 0.34,
+      "mean_reverse": 0.5111,
+      "mean_delta": -0.1711,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Triple Classification": {
+      "n": 1,
+      "mean_forward": 0.8312,
+      "mean_reverse": 0.8312,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Trump": {
+      "n": 1,
+      "mean_forward": 0.8869,
+      "mean_reverse": 0.9094,
+      "mean_delta": -0.0226,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "USES": {
+      "n": 60,
+      "mean_forward": 0.8319,
+      "mean_reverse": 0.8275,
+      "mean_delta": 0.0044,
+      "forward_win": 36,
+      "threshold_flip": 4
+    },
+    "Unseen Class": {
+      "n": 1,
+      "mean_forward": 0.8775,
+      "mean_reverse": 0.8775,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "WEB19": {
+      "n": 1,
+      "mean_forward": 0.0263,
+      "mean_reverse": 0.1287,
+      "mean_delta": -0.1024,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "Wikipedia": {
+      "n": 1,
+      "mean_forward": 0.3205,
+      "mean_reverse": 0.3125,
+      "mean_delta": 0.008,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "Word-Level Attention": {
+      "n": 1,
+      "mean_forward": 0.735,
+      "mean_reverse": 0.735,
+      "mean_delta": 0.0,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "are": {
+      "n": 1,
+      "mean_forward": 0.9611,
+      "mean_reverse": 0.7802,
+      "mean_delta": 0.1809,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "extends": {
+      "n": 1,
+      "mean_forward": 0.9628,
+      "mean_reverse": 0.93,
+      "mean_delta": 0.0328,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "for": {
+      "n": 1,
+      "mean_forward": 0.9246,
+      "mean_reverse": 0.6369,
+      "mean_delta": 0.2877,
+      "forward_win": 1,
+      "threshold_flip": 1
+    },
+    "fuses": {
+      "n": 2,
+      "mean_forward": 0.9142,
+      "mean_reverse": 0.7861,
+      "mean_delta": 0.1281,
+      "forward_win": 2,
+      "threshold_flip": 0
+    },
+    "have": {
+      "n": 1,
+      "mean_forward": 0.5672,
+      "mean_reverse": 0.8942,
+      "mean_delta": -0.327,
+      "forward_win": 0,
+      "threshold_flip": 0
+    },
+    "located_in": {
+      "n": 1,
+      "mean_forward": 0.8876,
+      "mean_reverse": 0.8045,
+      "mean_delta": 0.0831,
+      "forward_win": 1,
+      "threshold_flip": 0
+    },
+    "requires": {
+      "n": 1,
+      "mean_forward": 0.9871,
+      "mean_reverse": 0.8574,
+      "mean_delta": 0.1297,
+      "forward_win": 1,
+      "threshold_flip": 0
+    }
+  },
+  "verdict": "L5 对方向敏感"
+}

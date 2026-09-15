@@ -1,0 +1,2160 @@
+{
+  "alias": {
+    "Relationships": "Relationship",
+    "Translation Vectors": "Translation Vector",
+    "Question": "Questions",
+    "Relation Vector": "Relation Vectors",
+    "Neural Network": "Neural Networks",
+    "Linear Models": "Linear Model",
+    "Vector Representations": "Vector Representation",
+    "Logical Rule": "Logical Rules",
+    "Translations": "Translation",
+    "Recommender Systems": "Recommender System",
+    "Link Predictions": "Link Prediction",
+    "Embedding Model": "Embedding Models",
+    "Structured Embedding": "Structured Embeddings",
+    "Method": "Methods",
+    "Concepts": "Concept",
+    "Organization": "Organizations",
+    "Experimental Result": "Experimental Results",
+    "Pre-Trained Vector": "Pre-trained Vectors",
+    "Question-Answer Pair": "Question-Answer Pairs",
+    "Domain-Specific KG": "Domain-specific KGs",
+    "Search Engines": "Search Engine",
+    "Author": "Authors",
+    "Knowledge Graph Embedding": "Knowledge Graph Embeddings",
+    "Scoring Functions": "Scoring Function",
+    "Encoding Models": "Encoding Model",
+    "Semantic Descriptions": "Semantic Description",
+    "Rule-Based Expert System": "Rule-Based Expert Systems",
+    "Formal Definition": "Formal Definitions",
+    "Linear Transformations": "Linear Transformation",
+    "Latent Feature": "Latent Features",
+    "Recurrent Network": "Recurrent Networks",
+    "Relation Paths": "Relation Path",
+    "Subjects": "Subject",
+    "Label Embedding": "Label Embeddings",
+    "Ontology-View Graph": "Ontology-View Graphs",
+    "Position Embedding": "Position Embeddings",
+    "Unified Frameworks": "Unified Framework",
+    "Prediction": "Predictions",
+    "Attribute Representation": "Attribute Representations",
+    "Neural Association Model": "Neural Association Models",
+    "Knowledge-Aware Graph Network": "Knowledge-Aware Graph Networks",
+    "Loss Functions": "Loss Function",
+    "Attention Mechanisms": "Attention Mechanism",
+    "Transformers": "Transformer",
+    "Semantic Embeddings": "Semantic Embedding",
+    "Inferences": "Inference",
+    "Conversation": "Conversations",
+    "Rule": "Rules",
+    "Texts": "Text",
+    "Embedding Vectors": "Embedding Vector",
+    "Strings": "STRING",
+    "Knowledge-Based System": "Knowledge-Based Systems",
+    "Language Models": "Language Model",
+    "Scores": "Score",
+    "Benchmarks": "Benchmark",
+    "Unstructured Texts": "Unstructured Text",
+    "Result": "Results",
+    "Literature Survey": "Literature Surveys",
+    "Comparisons": "Comparison",
+    "Paper Title": "Paper Titles",
+    "ORKG Comparison": "ORKG Comparisons",
+    "Web Table": "Web Tables",
+    "Heuristic": "Heuristics",
+    "Table": "Tables",
+    "Literature Reviews": "Literature Review",
+    "Attributes": "Attribute",
+    "RDF Triple": "RDF Triples",
+    "Few-shot Sample": "Few-Shot Samples",
+    "Mapping Function": "Mapping Functions",
+    "Annotations": "Annotation",
+    "Video": "Videos",
+    "Sub-Graphs": "Sub-Graph",
+    "Name": "Names",
+    "Food Ingredient": "Food Ingredients",
+    "Text-Aware Embedding": "Text-Aware Embeddings",
+    "Class Belief": "Class Beliefs",
+    "Propagation Model": "Propagation Models",
+    "Text Embedding": "Text Embeddings",
+    "Pre-Trained Language Model": "Pre-Trained Language Models",
+    "Few-Shot Triple": "Few-shot Triples",
+    "Classifier Parameter": "Classifier Parameters",
+    "Support Sample": "Support Samples",
+    "Evidence": "Evidences",
+    "Event": "Events",
+    "Learning Model": "Learning Models",
+    "Testing Triple": "Testing Triples",
+    "Training Triple": "Training Triples",
+    "Human Being": "Human Beings",
+    "Class Encoding": "Class Encodings",
+    "Training Task": "Training Tasks",
+    "Transformer-Based Model": "Transformer-Based Models",
+    "Entity Embedding": "Entity Embeddings",
+    "Residual Graph Convolutional Network": "Residual Graph Convolutional Networks",
+    "Graph Convolution Network": "Graph Convolution Networks",
+    "Sentences": "Sentence",
+    "KG Embedding": "KG Embeddings",
+    "Prediction Model": "Prediction Models",
+    "Ontological Schema": "Ontological Schemas",
+    "Chatbot": "Chatbots",
+    "Information System": "Information Systems",
+    "Pre-Trained Model": "Pre-Trained Models",
+    "Fusion Model": "Fusion Models",
+    "Objects": "Object",
+    "Input Feature": "Input features",
+    "Random noises": "Random Noise",
+    "Subgraphs": "Subgraph",
+    "Original KGs": "Original KG",
+    "Grounding": "Groundings",
+    "Intersections": "Intersection",
+    "Reasoning Steps": "Reasoning Step",
+    "System": "Systems",
+    "Data Graphs": "Data Graph",
+    "Hypernode": "Hypernodes",
+    "Obstacle": "Obstacles",
+    "Traffic Sign": "Traffic Signs",
+    "Driving Task": "Driving Tasks",
+    "Automated Vehicle": "Automated Vehicles",
+    "Graph Bridging Network": "Graph Bridging Networks",
+    "Data Source": "Data Sources",
+    "Architectures": "Architecture",
+    "Model": "Models",
+    "KG Representation": "KG Representations",
+    "Project": "Projects",
+    "Enterprise Support KG": "Enterprise Support KGs",
+    "Statistical Feature": "Statistical Features",
+    "Soccer Player": "Soccer Players",
+    "Type Label": "Type Labels",
+    "Probabilistic Graph": "Probabilistic Graphs",
+    "RE Task": "RE Tasks",
+    "Graph Embeddings": "Graph Embedding",
+    "Word Representation": "Word Representations",
+    "Sense-Based Embedding": "Sense-Based Embeddings",
+    "Token": "Tokens",
+    "Clusters": "CluSTeR",
+    "Large Knowledge Graph": "Large Knowledge Graphs",
+    "Relational Graph": "Relational graphs",
+    "Semantic Diffusion Mechanism": "Semantic Diffusion Mechanisms",
+    "Hand-Craft Template": "Hand-Craft Templates",
+    "GCN Model": "GCN Models",
+    "Lime": "LIMES",
+    "Description Attribute": "Description Attributes",
+    "Event Node": "Event Nodes",
+    "Translation-Based Method": "Translation-Based Methods",
+    "Neural-Symbolic Method": "Neural-Symbolic Methods",
+    "Machine Performance": "Machine Performances",
+    "Acquisition": "Acquisitions",
+    "Embedded Vector": "Embedded Vectors",
+    "Large Model": "Large Models",
+    "Chat version": "Chat Versions",
+    "Chat Model": "Chat Models",
+    "Experiments": "Experiment",
+    "Instruction": "Instructions",
+    "Film": "Films",
+    "Group Steiner Tree": "Group Steiner Trees",
+    "Shortest Path": "Shortest Paths",
+    "Characteristic Set": "Characteristic Sets",
+    "Query Log": "Query Logs",
+    "KG Search Engine": "KG Search Engines",
+    "External Source": "External Sources",
+    "KG-enhanced LLM": "KG-Enhanced LLMs",
+    "NLP Task": "NLP Tasks",
+    "Example": "Examples",
+    "Product Description": "Product Descriptions",
+    "Property Name": "Property Names",
+    "Calculation": "Calculations",
+    "Raw Image": "Raw Images",
+    "Optimiser": "Optimisers",
+    "Unlabelled Graph": "Unlabelled Graphs",
+    "Review": "Reviews",
+    "Negative Sampler": "Negative Samplers",
+    "Modeling Language Element": "Modeling Language Elements",
+    "Quantitative Value": "Quantitative Values",
+    "Use Case": "Use Cases",
+    "Domain Description": "Domain Descriptions",
+    "Prompt-Based Interaction": "Prompt-Based Interactions",
+    "Input Source": "Input Sources",
+    "Unused Element": "Unused Elements",
+    "Molecular Graph": "Molecular Graphs",
+    "Dimension": "Dimensions",
+    "Target Graph": "Target Graphs",
+    "Relationship Network": "Relationship Networks",
+    "Multi-Agent LLM": "Multi-Agent LLMs",
+    "Text Chunk": "Text Chunks",
+    "Schema-Level Framework": "Schema-Level Frameworks",
+    "Instance-Level Framework": "Instance-Level Frameworks",
+    "Hybrid Framework": "Hybrid Frameworks",
+    "Graph-Level Model": "Graph-Level Models",
+    "Competency Questions": "Competency Question",
+    "Ontology Design Pattern": "Ontology Design Patterns",
+    "Prompt-Driven Architecture": "Prompt-Driven Architectures",
+    "Modular Pipeline": "Modular Pipelines",
+    "KG": "Knowledge Graphs",
+    "Conference on Empirical Methods in Natural Language Processing": "EMNLP",
+    "Recurrent Neural Networks": "RNN",
+    "AAAI Conference on Artificial Intelligence": "AAAI",
+    "GNN": "Graph Neural Networks",
+    "GCN": "Graph Convolutional Networks",
+    "Abstract Knowledge Graph": "KG",
+    "LP": "Link Prediction",
+    "KG Tasks": "KG"
+  },
+  "summary": {
+    "l1_groups": 0,
+    "l2_groups": 191,
+    "l4_pairs": 9,
+    "abbr_extracted": 510
+  },
+  "audit": [
+    {
+      "layer": "L1",
+      "action": "skip-sensitive",
+      "key": "complex",
+      "members": [
+        "ComplEx",
+        "Complex",
+        "ComplEX"
+      ]
+    },
+    {
+      "layer": "L1",
+      "action": "skip-short",
+      "key": "r2",
+      "members": [
+        "R2",
+        "𝒓𝟐"
+      ]
+    },
+    {
+      "layer": "L1",
+      "action": "skip-short",
+      "key": "e1",
+      "members": [
+        "e1",
+        "E1"
+      ]
+    },
+    {
+      "layer": "L1",
+      "action": "skip-short",
+      "key": "r1",
+      "members": [
+        "r1",
+        "R1",
+        "𝒓𝟏"
+      ]
+    },
+    {
+      "layer": "L1",
+      "action": "skip-short",
+      "key": "e2",
+      "members": [
+        "e2",
+        "E2"
+      ]
+    },
+    {
+      "layer": "L1",
+      "action": "skip-short",
+      "key": "e3",
+      "members": [
+        "e3",
+        "E3"
+      ]
+    },
+    {
+      "layer": "L1",
+      "action": "skip-short",
+      "key": "kim",
+      "members": [
+        "KIM",
+        "Kim"
+      ]
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Relationship",
+      "aliases": [
+        "Relationships"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Translation Vector",
+      "aliases": [
+        "Translation Vectors"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Questions",
+      "aliases": [
+        "Question"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Relation Vectors",
+      "aliases": [
+        "Relation Vector"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Neural Networks",
+      "aliases": [
+        "Neural Network"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Linear Model",
+      "aliases": [
+        "Linear Models"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Vector Representation",
+      "aliases": [
+        "Vector Representations"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Logical Rules",
+      "aliases": [
+        "Logical Rule"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Translation",
+      "aliases": [
+        "Translations"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Recommender System",
+      "aliases": [
+        "Recommender Systems"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Link Prediction",
+      "aliases": [
+        "Link Predictions"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Embedding Models",
+      "aliases": [
+        "Embedding Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Structured Embeddings",
+      "aliases": [
+        "Structured Embedding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "skip-sensitive",
+      "key": "complex",
+      "members": [
+        "ComplEx",
+        "Complex",
+        "ComplEX"
+      ]
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Methods",
+      "aliases": [
+        "Method"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Concept",
+      "aliases": [
+        "Concepts"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Organizations",
+      "aliases": [
+        "Organization"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Experimental Results",
+      "aliases": [
+        "Experimental Result"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Pre-trained Vectors",
+      "aliases": [
+        "Pre-Trained Vector"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Question-Answer Pairs",
+      "aliases": [
+        "Question-Answer Pair"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Domain-specific KGs",
+      "aliases": [
+        "Domain-Specific KG"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Search Engine",
+      "aliases": [
+        "Search Engines"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Authors",
+      "aliases": [
+        "Author"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Knowledge Graph Embeddings",
+      "aliases": [
+        "Knowledge Graph Embedding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Scoring Function",
+      "aliases": [
+        "Scoring Functions"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Encoding Model",
+      "aliases": [
+        "Encoding Models"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Semantic Description",
+      "aliases": [
+        "Semantic Descriptions"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Rule-Based Expert Systems",
+      "aliases": [
+        "Rule-Based Expert System"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Formal Definitions",
+      "aliases": [
+        "Formal Definition"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "skip-short",
+      "key": "r2",
+      "members": [
+        "R2",
+        "𝒓𝟐"
+      ]
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Linear Transformation",
+      "aliases": [
+        "Linear Transformations"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Latent Features",
+      "aliases": [
+        "Latent Feature"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Recurrent Networks",
+      "aliases": [
+        "Recurrent Network"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Relation Path",
+      "aliases": [
+        "Relation Paths"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "skip-short",
+      "key": "e1",
+      "members": [
+        "e1",
+        "E1"
+      ]
+    },
+    {
+      "layer": "L2",
+      "action": "skip-short",
+      "key": "r1",
+      "members": [
+        "r1",
+        "R1",
+        "𝒓𝟏"
+      ]
+    },
+    {
+      "layer": "L2",
+      "action": "skip-short",
+      "key": "e2",
+      "members": [
+        "e2",
+        "E2"
+      ]
+    },
+    {
+      "layer": "L2",
+      "action": "skip-short",
+      "key": "e3",
+      "members": [
+        "e3",
+        "E3"
+      ]
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Subject",
+      "aliases": [
+        "Subjects"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Label Embeddings",
+      "aliases": [
+        "Label Embedding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Ontology-View Graphs",
+      "aliases": [
+        "Ontology-View Graph"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Position Embeddings",
+      "aliases": [
+        "Position Embedding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Unified Framework",
+      "aliases": [
+        "Unified Frameworks"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Predictions",
+      "aliases": [
+        "Prediction"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Attribute Representations",
+      "aliases": [
+        "Attribute Representation"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Neural Association Models",
+      "aliases": [
+        "Neural Association Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Knowledge-Aware Graph Networks",
+      "aliases": [
+        "Knowledge-Aware Graph Network"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Loss Function",
+      "aliases": [
+        "Loss Functions"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Attention Mechanism",
+      "aliases": [
+        "Attention Mechanisms"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Transformer",
+      "aliases": [
+        "Transformers"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Semantic Embedding",
+      "aliases": [
+        "Semantic Embeddings"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Inference",
+      "aliases": [
+        "Inferences"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Conversations",
+      "aliases": [
+        "Conversation"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Rules",
+      "aliases": [
+        "Rule"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Text",
+      "aliases": [
+        "Texts"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Embedding Vector",
+      "aliases": [
+        "Embedding Vectors"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "STRING",
+      "aliases": [
+        "Strings"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Knowledge-Based Systems",
+      "aliases": [
+        "Knowledge-Based System"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Language Model",
+      "aliases": [
+        "Language Models"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Score",
+      "aliases": [
+        "Scores"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Benchmark",
+      "aliases": [
+        "Benchmarks"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Unstructured Text",
+      "aliases": [
+        "Unstructured Texts"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Results",
+      "aliases": [
+        "Result"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Literature Surveys",
+      "aliases": [
+        "Literature Survey"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Comparison",
+      "aliases": [
+        "Comparisons"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Paper Titles",
+      "aliases": [
+        "Paper Title"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "ORKG Comparisons",
+      "aliases": [
+        "ORKG Comparison"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Web Tables",
+      "aliases": [
+        "Web Table"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "skip-short",
+      "key": "kim",
+      "members": [
+        "KIM",
+        "Kim"
+      ]
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Heuristics",
+      "aliases": [
+        "Heuristic"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Tables",
+      "aliases": [
+        "Table"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Literature Review",
+      "aliases": [
+        "Literature Reviews"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Attribute",
+      "aliases": [
+        "Attributes"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "RDF Triples",
+      "aliases": [
+        "RDF Triple"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Few-Shot Samples",
+      "aliases": [
+        "Few-shot Sample"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Mapping Functions",
+      "aliases": [
+        "Mapping Function"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Annotation",
+      "aliases": [
+        "Annotations"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Videos",
+      "aliases": [
+        "Video"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Sub-Graph",
+      "aliases": [
+        "Sub-Graphs"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Names",
+      "aliases": [
+        "Name"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Food Ingredients",
+      "aliases": [
+        "Food Ingredient"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Text-Aware Embeddings",
+      "aliases": [
+        "Text-Aware Embedding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Class Beliefs",
+      "aliases": [
+        "Class Belief"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Propagation Models",
+      "aliases": [
+        "Propagation Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Text Embeddings",
+      "aliases": [
+        "Text Embedding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Pre-Trained Language Models",
+      "aliases": [
+        "Pre-Trained Language Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Few-shot Triples",
+      "aliases": [
+        "Few-Shot Triple"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Classifier Parameters",
+      "aliases": [
+        "Classifier Parameter"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Support Samples",
+      "aliases": [
+        "Support Sample"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Evidences",
+      "aliases": [
+        "Evidence"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Events",
+      "aliases": [
+        "Event"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Learning Models",
+      "aliases": [
+        "Learning Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Testing Triples",
+      "aliases": [
+        "Testing Triple"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Training Triples",
+      "aliases": [
+        "Training Triple"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Human Beings",
+      "aliases": [
+        "Human Being"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Class Encodings",
+      "aliases": [
+        "Class Encoding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Training Tasks",
+      "aliases": [
+        "Training Task"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Transformer-Based Models",
+      "aliases": [
+        "Transformer-Based Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Entity Embeddings",
+      "aliases": [
+        "Entity Embedding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Residual Graph Convolutional Networks",
+      "aliases": [
+        "Residual Graph Convolutional Network"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Graph Convolution Networks",
+      "aliases": [
+        "Graph Convolution Network"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Sentence",
+      "aliases": [
+        "Sentences"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "KG Embeddings",
+      "aliases": [
+        "KG Embedding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Prediction Models",
+      "aliases": [
+        "Prediction Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Ontological Schemas",
+      "aliases": [
+        "Ontological Schema"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Chatbots",
+      "aliases": [
+        "Chatbot"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Information Systems",
+      "aliases": [
+        "Information System"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Pre-Trained Models",
+      "aliases": [
+        "Pre-Trained Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Fusion Models",
+      "aliases": [
+        "Fusion Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Object",
+      "aliases": [
+        "Objects"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Input features",
+      "aliases": [
+        "Input Feature"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Random Noise",
+      "aliases": [
+        "Random noises"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Subgraph",
+      "aliases": [
+        "Subgraphs"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Original KG",
+      "aliases": [
+        "Original KGs"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Groundings",
+      "aliases": [
+        "Grounding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Intersection",
+      "aliases": [
+        "Intersections"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Reasoning Step",
+      "aliases": [
+        "Reasoning Steps"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Systems",
+      "aliases": [
+        "System"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Data Graph",
+      "aliases": [
+        "Data Graphs"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Hypernodes",
+      "aliases": [
+        "Hypernode"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Obstacles",
+      "aliases": [
+        "Obstacle"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Traffic Signs",
+      "aliases": [
+        "Traffic Sign"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Driving Tasks",
+      "aliases": [
+        "Driving Task"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Automated Vehicles",
+      "aliases": [
+        "Automated Vehicle"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Graph Bridging Networks",
+      "aliases": [
+        "Graph Bridging Network"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Data Sources",
+      "aliases": [
+        "Data Source"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Architecture",
+      "aliases": [
+        "Architectures"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Models",
+      "aliases": [
+        "Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "KG Representations",
+      "aliases": [
+        "KG Representation"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Projects",
+      "aliases": [
+        "Project"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Enterprise Support KGs",
+      "aliases": [
+        "Enterprise Support KG"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Statistical Features",
+      "aliases": [
+        "Statistical Feature"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Soccer Players",
+      "aliases": [
+        "Soccer Player"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Type Labels",
+      "aliases": [
+        "Type Label"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Probabilistic Graphs",
+      "aliases": [
+        "Probabilistic Graph"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "RE Tasks",
+      "aliases": [
+        "RE Task"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Graph Embedding",
+      "aliases": [
+        "Graph Embeddings"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Word Representations",
+      "aliases": [
+        "Word Representation"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Sense-Based Embeddings",
+      "aliases": [
+        "Sense-Based Embedding"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Tokens",
+      "aliases": [
+        "Token"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "CluSTeR",
+      "aliases": [
+        "Clusters"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Large Knowledge Graphs",
+      "aliases": [
+        "Large Knowledge Graph"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Relational graphs",
+      "aliases": [
+        "Relational Graph"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Semantic Diffusion Mechanisms",
+      "aliases": [
+        "Semantic Diffusion Mechanism"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Hand-Craft Templates",
+      "aliases": [
+        "Hand-Craft Template"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "GCN Models",
+      "aliases": [
+        "GCN Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "LIMES",
+      "aliases": [
+        "Lime"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Description Attributes",
+      "aliases": [
+        "Description Attribute"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Event Nodes",
+      "aliases": [
+        "Event Node"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Translation-Based Methods",
+      "aliases": [
+        "Translation-Based Method"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Neural-Symbolic Methods",
+      "aliases": [
+        "Neural-Symbolic Method"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Machine Performances",
+      "aliases": [
+        "Machine Performance"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Acquisitions",
+      "aliases": [
+        "Acquisition"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Embedded Vectors",
+      "aliases": [
+        "Embedded Vector"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Large Models",
+      "aliases": [
+        "Large Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Chat Versions",
+      "aliases": [
+        "Chat version"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Chat Models",
+      "aliases": [
+        "Chat Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Experiment",
+      "aliases": [
+        "Experiments"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Instructions",
+      "aliases": [
+        "Instruction"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Films",
+      "aliases": [
+        "Film"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Group Steiner Trees",
+      "aliases": [
+        "Group Steiner Tree"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Shortest Paths",
+      "aliases": [
+        "Shortest Path"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Characteristic Sets",
+      "aliases": [
+        "Characteristic Set"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Query Logs",
+      "aliases": [
+        "Query Log"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "KG Search Engines",
+      "aliases": [
+        "KG Search Engine"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "External Sources",
+      "aliases": [
+        "External Source"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "KG-Enhanced LLMs",
+      "aliases": [
+        "KG-enhanced LLM"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "NLP Tasks",
+      "aliases": [
+        "NLP Task"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Examples",
+      "aliases": [
+        "Example"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Product Descriptions",
+      "aliases": [
+        "Product Description"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Property Names",
+      "aliases": [
+        "Property Name"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Calculations",
+      "aliases": [
+        "Calculation"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Raw Images",
+      "aliases": [
+        "Raw Image"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Optimisers",
+      "aliases": [
+        "Optimiser"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Unlabelled Graphs",
+      "aliases": [
+        "Unlabelled Graph"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Reviews",
+      "aliases": [
+        "Review"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Negative Samplers",
+      "aliases": [
+        "Negative Sampler"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Modeling Language Elements",
+      "aliases": [
+        "Modeling Language Element"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Quantitative Values",
+      "aliases": [
+        "Quantitative Value"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Use Cases",
+      "aliases": [
+        "Use Case"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Domain Descriptions",
+      "aliases": [
+        "Domain Description"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Prompt-Based Interactions",
+      "aliases": [
+        "Prompt-Based Interaction"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Input Sources",
+      "aliases": [
+        "Input Source"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Unused Elements",
+      "aliases": [
+        "Unused Element"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Molecular Graphs",
+      "aliases": [
+        "Molecular Graph"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Dimensions",
+      "aliases": [
+        "Dimension"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Target Graphs",
+      "aliases": [
+        "Target Graph"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Relationship Networks",
+      "aliases": [
+        "Relationship Network"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Multi-Agent LLMs",
+      "aliases": [
+        "Multi-Agent LLM"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Text Chunks",
+      "aliases": [
+        "Text Chunk"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Schema-Level Frameworks",
+      "aliases": [
+        "Schema-Level Framework"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Instance-Level Frameworks",
+      "aliases": [
+        "Instance-Level Framework"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Hybrid Frameworks",
+      "aliases": [
+        "Hybrid Framework"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Graph-Level Models",
+      "aliases": [
+        "Graph-Level Model"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Competency Question",
+      "aliases": [
+        "Competency Questions"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Ontology Design Patterns",
+      "aliases": [
+        "Ontology Design Pattern"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Prompt-Driven Architectures",
+      "aliases": [
+        "Prompt-Driven Architecture"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L2",
+      "action": "merge",
+      "canonical": "Modular Pipelines",
+      "aliases": [
+        "Modular Pipeline"
+      ],
+      "rule": "pure-plural"
+    },
+    {
+      "layer": "L4",
+      "action": "merge",
+      "canonical": "Knowledge Graphs",
+      "aliases": [
+        "KG"
+      ],
+      "evidence_count": 11,
+      "full": "Knowledge Graphs",
+      "abbr": "KG"
+    },
+    {
+      "layer": "L4",
+      "action": "merge",
+      "canonical": "EMNLP",
+      "aliases": [
+        "Conference on Empirical Methods in Natural Language Processing"
+      ],
+      "evidence_count": 7,
+      "full": "Conference on Empirical Methods in Natural Language Processing",
+      "abbr": "EMNLP"
+    },
+    {
+      "layer": "L4",
+      "action": "merge",
+      "canonical": "RNN",
+      "aliases": [
+        "Recurrent Neural Networks"
+      ],
+      "evidence_count": 5,
+      "full": "Recurrent Neural Networks",
+      "abbr": "RNN"
+    },
+    {
+      "layer": "L4",
+      "action": "merge",
+      "canonical": "AAAI",
+      "aliases": [
+        "AAAI Conference on Artificial Intelligence"
+      ],
+      "evidence_count": 4,
+      "full": "AAAI Conference on Artificial Intelligence",
+      "abbr": "AAAI"
+    },
+    {
+      "layer": "L4",
+      "action": "merge",
+      "canonical": "Graph Neural Networks",
+      "aliases": [
+        "GNN"
+      ],
+      "evidence_count": 3,
+      "full": "Graph Neural Networks",
+      "abbr": "GNN"
+    },
+    {
+      "layer": "L4",
+      "action": "merge",
+      "canonical": "Graph Convolutional Networks",
+      "aliases": [
+        "GCN"
+      ],
+      "evidence_count": 3,
+      "full": "Graph Convolutional Networks",
+      "abbr": "GCN"
+    },
+    {
+      "layer": "L4",
+      "action": "merge",
+      "canonical": "KG",
+      "aliases": [
+        "Abstract Knowledge Graph"
+      ],
+      "evidence_count": 1,
+      "full": "Abstract Knowledge Graph",
+      "abbr": "KG"
+    },
+    {
+      "layer": "L4",
+      "action": "merge",
+      "canonical": "Link Prediction",
+      "aliases": [
+        "LP"
+      ],
+      "evidence_count": 1,
+      "full": "Link Prediction",
+      "abbr": "LP"
+    },
+    {
+      "layer": "L4",
+      "action": "merge",
+      "canonical": "KG",
+      "aliases": [
+        "KG Tasks"
+      ],
+      "evidence_count": 1,
+      "full": "KG tasks",
+      "abbr": "KG"
+    }
+  ]
+}

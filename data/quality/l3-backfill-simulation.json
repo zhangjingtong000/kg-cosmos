@@ -1,0 +1,11 @@
+{
+  "backfill_names": 4304,
+  "l3_before_pct": 68.44,
+  "l3_after_pct": 96.17,
+  "l1_before_pct": 92.8,
+  "l1_after_without_evidence_pct": 72.24,
+  "l1_after_with_evidence_pct": 94.39,
+  "new_nodes_self_evidenced": 4304,
+  "remaining_gap_edges": 1681,
+  "remaining_gap_names": 450
+}

@@ -1,0 +1,37 @@
+{
+  "source": "SciREX (allenai/SciREX, ACL 2020, 人工标注)",
+  "mode": "local",
+  "max_chars": 500,
+  "caveat": "SciREX 的 NER 是短语级标注（含提及），本项目只抽\"值得进图\"的实体，召回天然偏低；不应把低召回直接读成抽取质量差。",
+  "results": [
+    {
+      "doc_id": "18168aea48a22f6fe2fe407c0ff70083cba225a7",
+      "n_words": 4271,
+      "gold_ner": 165,
+      "pred_nodes": 120,
+      "pred_edges": 148,
+      "elapsed_s": 1059.0,
+      "tp": 70,
+      "fp": 47,
+      "fn": 95,
+      "P": 0.5983,
+      "R": 0.4242,
+      "F1": 0.4965,
+      "type_acc_on_tp": 1.0,
+      "sample_fp": [
+        "Image Restoration",
+        "gradient vanishing",
+        "ill-posed inverse problem",
+        "corruption distributions",
+        "computer vision tasks",
+        "corrupted images",
+        "clean ones",
+        "super - resolution",
+        "compression artifacts reduction",
+        "input",
+        "output",
+        "residual of the problem"
+      ]
+    }
+  ]
+}

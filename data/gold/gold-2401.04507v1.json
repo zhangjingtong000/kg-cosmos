@@ -1,0 +1,4320 @@
+{
+  "paper_id": "2401.04507v1",
+  "source_pages": [
+    1,
+    10
+  ],
+  "excluded_from_page": 9,
+  "out_of_range_dropped": 0,
+  "annotators": [
+    "A",
+    "B",
+    "C",
+    "GLM"
+  ],
+  "method": "multi-annotator independent labeling + majority vote + quote verification",
+  "entities": [
+    {
+      "name": "TechGPT-2.0-alpaca-hf",
+      "type": "System",
+      "page": 1,
+      "quote": "3Model weights are available at https://huggingface. co/neukg/TechGPT-2. 0-alpaca-hf and https://huggingface. co/neukg/TechGPT-2. 0-atom-hf",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Northeastern University",
+      "type": "Organization",
+      "page": 1,
+      "quote": "Northeastern University\nShenYang, China",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "ShenYang, China",
+      "type": "Location",
+      "page": 1,
+      "quote": "Northeastern University\nShenYang, China",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Wang Jiaqi",
+      "type": "Person",
+      "page": 1,
+      "quote": "Wang Jiaqi*, Chang Yuying*, Li Zhong*, An Ning*, Ma Qi*, Hei Lei*, Luo Haibo, Lu Yifei, Ren Feiliang",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Chang Yuying",
+      "type": "Person",
+      "page": 1,
+      "quote": "Wang Jiaqi*, Chang Yuying*, Li Zhong*, An Ning*, Ma Qi*, Hei Lei*, Luo Haibo, Lu Yifei, Ren Feiliang",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Li Zhong",
+      "type": "Person",
+      "page": 1,
+      "quote": "Wang Jiaqi*, Chang Yuying*, Li Zhong*, An Ning*, Ma Qi*, Hei Lei*, Luo Haibo, Lu Yifei, Ren Feiliang",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "An Ning",
+      "type": "Person",
+      "page": 1,
+      "quote": "Wang Jiaqi*, Chang Yuying*, Li Zhong*, An Ning*, Ma Qi*, Hei Lei*, Luo Haibo, Lu Yifei, Ren Feiliang",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Ma Qi",
+      "type": "Person",
+      "page": 1,
+      "quote": "Wang Jiaqi*, Chang Yuying*, Li Zhong*, An Ning*, Ma Qi*, Hei Lei*, Luo Haibo, Lu Yifei, Ren Feiliang",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Hei Lei",
+      "type": "Person",
+      "page": 1,
+      "quote": "Wang Jiaqi*, Chang Yuying*, Li Zhong*, An Ning*, Ma Qi*, Hei Lei*, Luo Haibo, Lu Yifei, Ren Feiliang",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Luo Haibo",
+      "type": "Person",
+      "page": 1,
+      "quote": "Wang Jiaqi*, Chang Yuying*, Li Zhong*, An Ning*, Ma Qi*, Hei Lei*, Luo Haibo, Lu Yifei, Ren Feiliang",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Lu Yifei",
+      "type": "Person",
+      "page": 1,
+      "quote": "Wang Jiaqi*, Chang Yuying*, Li Zhong*, An Ning*, Ma Qi*, Hei Lei*, Luo Haibo, Lu Yifei, Ren Feiliang",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Ren Feiliang",
+      "type": "Person",
+      "page": 1,
+      "quote": "Wang Jiaqi*, Chang Yuying*, Li Zhong*, An Ning*, Ma Qi*, Hei Lei*, Luo Haibo, Lu Yifei, Ren Feiliang",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Knowledge Graph Construction Task Dataset",
+      "type": "Concept",
+      "page": 1,
+      "quote": "the knowledge graph construction task dataset totals 38. 8W instances. The general RTE task data and general NER",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Named Entity Recognition (NER)",
+      "type": "Concept",
+      "page": 1,
+      "quote": "including named entity\nrecognition (NER) and relationship triple extraction (RTE) tasks in NLP applications",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Relationship Triple Extraction (RTE)",
+      "type": "Concept",
+      "page": 1,
+      "quote": "including named entity\nrecognition (NER) and relationship triple extraction (RTE) tasks in NLP applications",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Large Language Models (LLMs)",
+      "type": "Concept",
+      "page": 1,
+      "quote": "Large language models have exhibited robust performance across diverse natural language process-\ning tasks.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Natural Language Processing (NLP)",
+      "type": "Concept",
+      "page": 1,
+      "quote": "With the rapid development in the field of natural language processing (NLP), Large Language Models (LLMs) have",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "QLoRA Weight",
+      "type": "Method",
+      "page": 1,
+      "quote": "We\noffer two 7B large language model weights and a QLoRA weight specialized for processing lengthy\ntexts.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Huawei Ascend 910A Server",
+      "type": "Organization",
+      "page": 1,
+      "quote": "texts. Notably, TechGPT-2. 0 is trained on Huawei’s Ascend server. Inheriting all functionalities from",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "TechGPT-1.0",
+      "type": "System",
+      "page": 1,
+      "quote": "TechGPT-1. 0, it exhibits robust text processing capabilities, particularly in the domains of medicine",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Instruction Tuning Paradigm",
+      "type": "Concept",
+      "page": 1,
+      "quote": "TechGPT-2. 0 projects. These projects encompass the release of three 7B-scale instruction fine-tuning models and a",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "400W Instruction Fine-tuning Dataset",
+      "type": "Dataset",
+      "page": 1,
+      "quote": "named entity recognition and entity relationship triplet extraction. The 400W instruction fine-tuning dataset encompasses",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "HuggingFace",
+      "type": "Organization",
+      "page": 1,
+      "quote": "Model weights are available at https://huggingface. co/neukg/TechGPT-2. 0-alpaca-hf and https://huggingface. co/neukg/TechGPT-2. 0-atom-hf",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "ModelScope",
+      "type": "Organization",
+      "page": 2,
+      "quote": "communities like HuggingFace, ModelScope, and WiseModel for downloads and firsthand experiences. Alternatively,",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "WiseModel",
+      "type": "Organization",
+      "page": 2,
+      "quote": "communities like HuggingFace, ModelScope, and WiseModel for downloads and firsthand experiences. Alternatively,",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Transfer Learning",
+      "type": "Method",
+      "page": 2,
+      "quote": "has gained substantial focus on pre-training language models. The concept of pre-training originated from transfer",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Computer Vision (CV)",
+      "type": "Concept",
+      "page": 2,
+      "quote": "The concept of pre-training originated from transfer\nlearning [1] in Computer Vision (CV) tasks.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Incremental Pre-training",
+      "type": "Process",
+      "page": 2,
+      "quote": "has gained substantial focus on pre-training language models. The concept of pre-training originated from transfer",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Transformer",
+      "type": "Method",
+      "page": 2,
+      "quote": "pre-training techniques involve training Transformer\n[2] models on large-scale corpora",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Neural Network Language Models (NNLM)",
+      "type": "Method",
+      "page": 2,
+      "quote": "Early pre-training methods were static, such as Neural Network Language Models\n(NNLM) [3] and Word2Vec [4].",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Word2Vec",
+      "type": "Method",
+      "page": 2,
+      "quote": "(NNLM) [3] and Word2Vec [4]. However, static methods struggled to adapt to diverse semantic contexts. Consequently,",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "BERT",
+      "type": "System",
+      "page": 2,
+      "quote": "dynamic pre-training techniques, such as BERT [5] and XLNet [6], were introduced. As hardware capabilities rapidly",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "XLNet",
+      "type": "System",
+      "page": 2,
+      "quote": "dynamic pre-training techniques, such as BERT [5] and XLNet [6], were introduced. As hardware capabilities rapidly",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "GPT-1",
+      "type": "System",
+      "page": 2,
+      "quote": "development trajectories. From the initial attempts with GPT-1 [7] and GPT-2 [8] to the substantial leap in model",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "GPT-2",
+      "type": "System",
+      "page": 2,
+      "quote": "development trajectories. From the initial attempts with GPT-1 [7] and GPT-2 [8] to the substantial leap in model",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "GPT-3",
+      "type": "System",
+      "page": 2,
+      "quote": "capabilities achieved by GPT-3 [9], and further advancements seen in GPT-4 [10], which supports multimodal input and",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "GPT-4",
+      "type": "System",
+      "page": 2,
+      "quote": "capabilities achieved by GPT-3 [9], and further advancements seen in GPT-4 [10], which supports multimodal input and",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "ChatGPT",
+      "type": "System",
+      "page": 2,
+      "quote": "The emergence of ChatGPT, in particular, further substantiates the allure of large-scale language models.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "LLAMA2-Alpaca",
+      "type": "System",
+      "page": 2,
+      "quote": "large-scale pre-training language models are called large language models, such as LLaMA [11] (65B), GPT-3 (175B),",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "BLOOM",
+      "type": "System",
+      "page": 2,
+      "quote": "BLOOM [12] (176B), and PaLM [13] (540B).",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "PaLM",
+      "type": "System",
+      "page": 2,
+      "quote": "BLOOM [12] (176B), and PaLM [13] (540B).",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "ChatGLM3",
+      "type": "System",
+      "page": 2,
+      "quote": "deployment threshold of the previous two generations of models, ChatGLM3 also extends the context length of the base",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Alibaba Cloud",
+      "type": "Organization",
+      "page": 2,
+      "quote": "Alibaba Cloud has developed the Qwen [16] series of general-purpose question-answering large models, encompassing",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Qwen",
+      "type": "System",
+      "page": 2,
+      "quote": "Alibaba Cloud has developed the Qwen [16] series of general-purpose question-answering large models, encompassing",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Agent",
+      "type": "Concept",
+      "page": 2,
+      "quote": "demonstrate effective plugin invocation and are upgradeable to an Agent. The rapid development of LLMs has sparked significant interest in harnessing their potential across various natural and",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "NVIDIA",
+      "type": "Organization",
+      "page": 2,
+      "quote": "process on the Ascend server and traditional NVIDIA graphics cards.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Reinforcement Learning based on Human Feedback (RLHF)",
+      "type": "Method",
+      "page": 3,
+      "quote": "Reinforcement Learning based on\nHuman Feedback [17] (RLHF) to better align the final task with human preferences.",
+      "votes": 2,
+      "voters": [
+        "A",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Prompt Engineering",
+      "type": "Concept",
+      "page": 3,
+      "quote": "sequence; (2) fine-tuning on small-scale data, incorporating prompt engineering and Reinforcement Learning based on",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "LIMA",
+      "type": "System",
+      "page": 3,
+      "quote": "almost all of LLM’s knowledge is learned during pre-training, and high-quality responses can be generated with limited",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Full Fine Tuning (FFT)",
+      "type": "Method",
+      "page": 3,
+      "quote": "(1) Full Fine Tuning (FFT), which involves training all parameters with the entire dataset; (2) Parameter-Efficient Fine",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Parameter-Efficient Fine Tuning (PEFT)",
+      "type": "Method",
+      "page": 3,
+      "quote": "(1) Full Fine Tuning (FFT), which involves training all parameters with the entire dataset; (2) Parameter-Efficient Fine",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Catastrophic Forgetting",
+      "type": "Concept",
+      "page": 3,
+      "quote": "Catastrophic forgetting [20], where fine-tuning on\nspecific data may enhance performance in that domain but potentially degrade capabilities",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Prompt Tuning",
+      "type": "Method",
+      "page": 3,
+      "quote": "Some popular EFT strategies include: (1) Prompt Tuning [21], which maintains the base model’s parameters",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Prefix Tuning",
+      "type": "Method",
+      "page": 3,
+      "quote": "Prefix Tuning [22], based on the observation from Prompt Engineering that adding appropriate conditions in the prompt",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "LoRA",
+      "type": "Method",
+      "page": 3,
+      "quote": "and Decoder networks of the Transformer. (3) LoRA [23], takes a completely different technical pathway from",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Quantization",
+      "type": "Method",
+      "page": 3,
+      "quote": "Full Fine Tuning, the introduction of QLoRA is primarily driven by the quantization aspect. Quantization is a method",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "BELLE",
+      "type": "System",
+      "page": 4,
+      "quote": "0 employs a Chat model from BELLE as the original framework, and multiple models were explored",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "MindSpore",
+      "type": "Tool",
+      "page": 4,
+      "quote": "Mindspore and Mindformer libraries for debugging. Both toolkits and the Ascend server firmware exclusively",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "MindFormers",
+      "type": "Tool",
+      "page": 4,
+      "quote": "Mindspore and Mindformer libraries for debugging. Both toolkits and the Ascend server firmware exclusively",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "ChatGLM2",
+      "type": "System",
+      "page": 4,
+      "quote": "an investigation ensued, exploring models like LLAMA, LLAMA2[11], ChatGLM, ChatGLM2, PanGuAlpha[26],",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "PanGuAlpha",
+      "type": "System",
+      "page": 4,
+      "quote": "an investigation ensued, exploring models like LLAMA, LLAMA2[11], ChatGLM, ChatGLM2, PanGuAlpha[26],",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Baichuan2",
+      "type": "System",
+      "page": 4,
+      "quote": "Baichuan, Baichuan2[27], Qwen, Internlm [28], and others supported by Mindformer. Among these, the LLAMA-like",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "InternLM",
+      "type": "System",
+      "page": 4,
+      "quote": "Baichuan, Baichuan2[27], Qwen, Internlm [28], and others supported by Mindformer. Among these, the LLAMA-like",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "HFL",
+      "type": "Organization",
+      "page": 4,
+      "quote": "Chinese LLAMA2 model released by HFL and the Atom model jointly released by the Llama Chinese community",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "AtomEcho",
+      "type": "Organization",
+      "page": 4,
+      "quote": "Chinese LLAMA2 model released by HFL and the Atom model jointly released by the Llama Chinese community",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Llama Chinese community",
+      "type": "Organization",
+      "page": 4,
+      "quote": "Chinese LLAMA2 model released by HFL and the Atom model jointly released by the Llama Chinese community",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Chinese-Alpaca-2 (7B)",
+      "type": "System",
+      "page": 4,
+      "quote": "Chinese LLAMA2 model by HFL, assessments were conducted on the Chat version of the Chinese-Alpaca-2 (7B)",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Chinese-Alpaca-2-16K (7B)",
+      "type": "System",
+      "page": 4,
+      "quote": "model and the Chinese-Alpaca-2-16K (7B) model, particularly focusing on long text. Anticipating capabilities related to",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Atom-7B-Chat",
+      "type": "System",
+      "page": 4,
+      "quote": "NER task, but lacking proficiency in answering RTE task questions. Ultimately, the decision was made to employ Chinese-Alpaca-2 (7B) and Atom-7B-Chat as the initial models for the",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Position Interpolation",
+      "type": "Method",
+      "page": 4,
+      "quote": "The model underwent fine-tuning with QLoRA[24] using the position interpolation method\nto enhance its capacity for long-text processing.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Long Text Problem",
+      "type": "Concept",
+      "page": 1,
+      "quote": "to process 4k text, facilitating further research and experimentation on long-text problems. It is noteworthy that,",
+      "votes": 3,
+      "voters": [
+        "A",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "KnowLM-IE Dataset",
+      "type": "Dataset",
+      "page": 5,
+      "quote": "community, such as the KnowLM-IE [29] dataset provided in the KnowLM open-source project. Additionally, part of",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Remote Supervision",
+      "type": "Method",
+      "page": 5,
+      "quote": "domains includes some nested NER data. It is noteworthy that the KnowLM-IE dataset is annotated through remote",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Medical QA Data",
+      "type": "Dataset",
+      "page": 6,
+      "quote": "medicine and law, encompassing 100,000 instances of medical QA data and approximately 30,000 instances of legal",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Legal QA Data",
+      "type": "Dataset",
+      "page": 6,
+      "quote": "QA data. The legal QA data encompasses legal case sorting and legal consultation QA data, while the medical QA data",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "ModelArts",
+      "type": "Tool",
+      "page": 6,
+      "quote": "leveraging the Modelarts tool to establish communication. Given the necessity for detailed model operations, we opted",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "NPU",
+      "type": "Component",
+      "page": 7,
+      "quote": "NPUs each (32G) for training. The specific versions used include Ascend server firmware CANN version 6. 3 rc2,",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "CANN",
+      "type": "Tool",
+      "page": 7,
+      "quote": "NPUs each (32G) for training. The specific versions used include Ascend server firmware CANN version 6. 3 rc2,",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "MindRecord",
+      "type": "Artifact",
+      "page": 7,
+      "quote": "Mindrecord format is imperative. Throughout this conversion process, additional instructions are incorporated into the",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "LLAMA1-Alpaca",
+      "type": "System",
+      "page": 7,
+      "quote": "command format akin to that of LLAMA1-Alpaca. When employing Mindformer for training, data conversion into the",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Attention Mechanism",
+      "type": "Component",
+      "page": 8,
+      "quote": "Due to the attention mechanism’s limitation in the Transformer",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Direct Extrapolation",
+      "type": "Method",
+      "page": 8,
+      "quote": "challenge has become a focal point in current research, with mainstream methods encompassing direct extrapolation",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "RoPE",
+      "type": "Method",
+      "page": 8,
+      "quote": "0 project, our model employs the RoPE[30] method, relying on relative",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "RAG",
+      "type": "Method",
+      "page": 8,
+      "quote": "endeavors, including RAG[31], Agent, tool calling, and multi-modality studies.",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Ascend Server",
+      "type": "System",
+      "page": 1,
+      "quote": "Notably, TechGPT-2. 0 is trained on Huawei’s Ascend server. Inheriting all functionalities from",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "General RTE Task Data",
+      "type": "Dataset",
+      "page": 5,
+      "quote": "The 400W instruction fine-tuning dataset encompasses\n15W instances of general RTE task data, 15W instances of general NER data, and 6. 8W instances of domain RTE\ntask data.",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "General NER Data",
+      "type": "Dataset",
+      "page": 5,
+      "quote": "The 400W instruction fine-tuning dataset encompasses\n15W instances of general RTE task data, 15W instances of general NER data, and 6. 8W instances of domain RTE\ntask data.",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Domain RTE Task Data",
+      "type": "Dataset",
+      "page": 5,
+      "quote": "15W instances of general RTE task data, 15W instances of general NER data, and 6. 8W instances of domain RTE",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Domain NER Task Data",
+      "type": "Dataset",
+      "page": 5,
+      "quote": "data and domain NER task data partly originate from open-source instruction fine-tuning datasets within the Chinese",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "General Dialogue Data",
+      "type": "Dataset",
+      "page": 5,
+      "quote": "compilation encompasses approximately 3 million instances of general dialogue data and spans over ten diverse tasks,",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Chinese-English Translation Task Data",
+      "type": "Dataset",
+      "page": 5,
+      "quote": "of Chinese-English translation task data. Other task data consists of 15W title expansion summaries, 20W abstract",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Value Alignment Data",
+      "type": "Dataset",
+      "page": 6,
+      "quote": "1,000 instances of unanswerable question data and 0. 3,000 instances of value alignment data. Notably, the unanswerable",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Unanswerable Question Data",
+      "type": "Dataset",
+      "page": 6,
+      "quote": "were collected, encompassing value alignment data, hallucinations, and unanswerable question data. This comprises",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "RLHF",
+      "type": "Method",
+      "page": 3,
+      "quote": "fine-tuning on small-scale data, incorporating prompt engineering and Reinforcement Learning based on",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Hallucination",
+      "type": "Concept",
+      "page": 1,
+      "quote": "adeptness in handling hallucinations, unanswerable queries, and lengthy texts.",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Overfitting",
+      "type": "Concept",
+      "page": 7,
+      "quote": "configuration file may prematurely fit the model, leading to overfitting problems characterized by sensitivity to some",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Chinese Open-Source Model Community",
+      "type": "Organization",
+      "page": 1,
+      "quote": "it serves as a LLM accessible for research within the Chinese open-source model community.",
+      "votes": 2,
+      "voters": [
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "TechGPT-2.0-atom-hf",
+      "type": "Artifact",
+      "page": 1,
+      "quote": "3Model weights are available at https://huggingface. co/neukg/TechGPT-2. 0-alpaca-hf and https://huggingface. co/neukg/TechGPT-2. 0-atom-hf",
+      "votes": 2,
+      "voters": [
+        "C",
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Toxicity Test",
+      "type": "Metric",
+      "page": 8,
+      "quote": "construction task results, toxicity tests, comparative experiments, and related evaluations, will be conducted to further",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Data Collection and Processing",
+      "type": "Process",
+      "page": 1,
+      "quote": "and RTE. Furthermore, we will furnish comprehensive insights into data collection and processing, share experiences in",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Manual Annotation",
+      "type": "Process",
+      "page": 2,
+      "quote": "This data undergoes collation and manual annotation by our group’s researchers.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Long Text Processing",
+      "type": "Concept",
+      "page": 4,
+      "quote": "long text processing in the TechGPT-2.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Multi-modality",
+      "type": "Concept",
+      "page": 8,
+      "quote": "endeavors, including RAG[31], Agent, tool calling, and multi-modality studies.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Tool Calling",
+      "type": "Concept",
+      "page": 8,
+      "quote": "endeavors, including RAG[31], Agent, tool calling, and multi-modality studies.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Unanswerable Query",
+      "type": "Concept",
+      "page": 1,
+      "quote": "adeptness in handling hallucinations, unanswerable queries, and lengthy texts.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Encoder",
+      "type": "Component",
+      "page": 3,
+      "quote": "Encoder and Decoder networks of the Transformer. (3) LoRA [23], takes a completely different technical pathway from",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Decoder",
+      "type": "Component",
+      "page": 3,
+      "quote": "Encoder and Decoder networks of the Transformer. (3) LoRA [23], takes a completely different technical pathway from",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Chinese LLaMA2",
+      "type": "System",
+      "page": 4,
+      "quote": "Chinese LLAMA2 model released by HFL and the Atom model jointly released by the Llama Chinese community",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    },
+    {
+      "name": "Nested NER",
+      "type": "Concept",
+      "page": 5,
+      "quote": "domains includes some nested NER data. It is noteworthy that the KnowLM-IE dataset is annotated through remote",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "arbitrated": true,
+      "clause": "§3"
+    }
+  ],
+  "relations": [
+    {
+      "source": "TechGPT-2.0",
+      "target": "Knowledge Graph Construction",
+      "type": "APPLIES_TO",
+      "page": 1,
+      "quote": "large language models specifically in knowledge graph construction tasks, including named entity",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "QLoRA",
+      "type": "USES",
+      "page": 1,
+      "quote": "offer two 7B large language model weights and a QLoRA weight specialized for processing lengthy",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Northeastern University",
+      "type": "CREATED_BY",
+      "page": 1,
+      "quote": "Wang Jiaqi*, Chang Yuying*, Li Zhong*, An Ning*, Ma Qi*, Hei Lei*, Luo Haibo, Lu Yifei, Ren Feiliang\nNortheastern University",
+      "votes": 3,
+      "voters": [
+        "A",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Northeastern University",
+      "target": "ShenYang",
+      "type": "LOCATED_AT",
+      "page": 1,
+      "quote": "Northeastern University\nShenYang, China",
+      "votes": 2,
+      "voters": [
+        "A",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "TechGPT-1.0",
+      "type": "RELATED_TO",
+      "page": 1,
+      "quote": "TechGPT-1. 0, it exhibits robust text processing capabilities, particularly in the domains of medicine",
+      "votes": 2,
+      "voters": [
+        "A",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Named Entity Recognition",
+      "target": "Knowledge Graph Construction",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "named entity recognition and entity relationship triplet extraction. The 400W instruction fine-tuning dataset encompasses",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Relationship Triple Extraction",
+      "target": "Knowledge Graph Construction",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "named entity recognition and entity relationship triplet extraction. The 400W instruction fine-tuning dataset encompasses",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Knowledge Graph Construction",
+      "target": "Knowledge Graph",
+      "type": "USES",
+      "page": 1,
+      "quote": "the knowledge graph employed for constructing the subtask dataset encompasses open-source",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "LLAMA2",
+      "type": "USES",
+      "page": 4,
+      "quote": "models. Consequently, the decision was made to designate LLAMA2 as the original model for the TechGPT-2. 0 project.",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Position Interpolation",
+      "type": "USES",
+      "page": 4,
+      "quote": "TechGPT-2. 0 project. The model underwent fine-tuning with QLoRA[24] using the position interpolation method",
+      "votes": 3,
+      "voters": [
+        "A",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Position Interpolation",
+      "target": "RoPE",
+      "type": "USES",
+      "page": 8,
+      "quote": "model structure, requiring only a few adjustments in RoPE. This design choice renders the extended model compatible",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Direct Extrapolation",
+      "target": "Position Interpolation",
+      "type": "COMPARES_WITH",
+      "page": 8,
+      "quote": "distance for attention score computation. Direct extrapolation, due to its potential for greater confusion issues,",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "QLoRA",
+      "target": "Quantization",
+      "type": "USES",
+      "page": 3,
+      "quote": "QLoRA is a quantized version of LoRA, further reducing the bit",
+      "votes": 3,
+      "voters": [
+        "A",
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "QLoRA",
+      "target": "LoRA",
+      "type": "RELATED_TO",
+      "page": 3,
+      "quote": "QLoRA is a quantized version of LoRA, further reducing the bit",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Prompt Tuning",
+      "target": "Parameter-Efficient Fine Tuning",
+      "type": "PART_OF",
+      "page": 3,
+      "quote": "Some popular EFT strategies include: (1) Prompt Tuning [21], which maintains the base model’s parameters",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Prefix Tuning",
+      "target": "Parameter-Efficient Fine Tuning",
+      "type": "PART_OF",
+      "page": 3,
+      "quote": "Prefix Tuning [22], based on the observation from Prompt Engineering that adding appropriate conditions in the prompt",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Parameter-Efficient Fine Tuning",
+      "target": "Full Fine Tuning",
+      "type": "RELATED_TO",
+      "page": 3,
+      "quote": "domains. PEFT aims to address the aforementioned issues associated with FFT and is currently a prevalent fine-tuning",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Prompt Engineering",
+      "target": "Prefix Tuning",
+      "type": "ENABLES",
+      "page": 3,
+      "quote": "Prefix Tuning [22], based on the observation from Prompt Engineering that adding appropriate conditions in the prompt",
+      "votes": 2,
+      "voters": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "source": "LIMA",
+      "target": "Pre-training",
+      "type": "SUPPORTS",
+      "page": 3,
+      "quote": "almost all of LLM’s knowledge is learned during pre-training, and high-quality responses can be generated with limited",
+      "votes": 3,
+      "voters": [
+        "A",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Pre-training",
+      "target": "Transfer Learning",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "The concept of pre-training originated from transfer",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "ChatGPT",
+      "target": "Large Language Model",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "The emergence of ChatGPT, in particular, further substantiates the allure of large-scale language models.",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "GPT-3",
+      "target": "Large Language Model",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "large-scale pre-training language models are called large language models, such as LLaMA [11] (65B), GPT-3 (175B),",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "LLaMA",
+      "target": "Large Language Model",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "large-scale pre-training language models are called large language models, such as LLaMA [11] (65B), GPT-3 (175B),",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "BLOOM",
+      "target": "Large Language Model",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "BLOOM [12] (176B), and PaLM [13] (540B).",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "PaLM",
+      "target": "Large Language Model",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "BLOOM [12] (176B), and PaLM [13] (540B).",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Qwen",
+      "target": "Alibaba Cloud",
+      "type": "CREATED_BY",
+      "page": 2,
+      "quote": "Alibaba Cloud has developed the Qwen [16] series of general-purpose question-answering large models, encompassing",
+      "votes": 3,
+      "voters": [
+        "A",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "ChatGLM3",
+      "target": "ChatGLM",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "ChatGLM3 also extends the context length of the base",
+      "votes": 2,
+      "voters": [
+        "A",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Chinese-Alpaca-2 (7B)",
+      "target": "HFL",
+      "type": "CREATED_BY",
+      "page": 4,
+      "quote": "Chinese LLAMA2 model by HFL, assessments were conducted on the Chat version of the Chinese-Alpaca-2 (7B)",
+      "votes": 2,
+      "voters": [
+        "A",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Chinese-Alpaca-2-16K (7B)",
+      "target": "Chinese-Alpaca-2 (7B)",
+      "type": "RELATED_TO",
+      "page": 4,
+      "quote": "model and the Chinese-Alpaca-2-16K (7B) model, particularly focusing on long text. Anticipating capabilities related to",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Atom-7B-Chat",
+      "target": "LLAMA2",
+      "type": "RELATED_TO",
+      "page": 4,
+      "quote": "efficiency in processing Chinese text. Simultaneously, this approach preserves the original LLAMA2 model’s ability",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-1.0",
+      "target": "BELLE",
+      "type": "USES",
+      "page": 4,
+      "quote": "0 employs a Chat model from BELLE as the original framework, and multiple models were explored",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "MindSpore",
+      "type": "USES",
+      "page": 4,
+      "quote": "Mindspore and Mindformer libraries for debugging. Both toolkits and the Ascend server firmware exclusively",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "KnowLM-IE",
+      "target": "KnowLM",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "community, such as the KnowLM-IE [29] dataset provided in the KnowLM open-source project. Additionally, part of",
+      "votes": 3,
+      "voters": [
+        "A",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "KnowLM-IE",
+      "target": "Remote Supervision",
+      "type": "USES",
+      "page": 5,
+      "quote": "domains includes some nested NER data. It is noteworthy that the KnowLM-IE dataset is annotated through remote",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Chinese-Alpaca-2 (7B)",
+      "target": "Atom-7B-Chat",
+      "type": "COMPARES_WITH",
+      "page": 5,
+      "quote": "Chinese-Alpaca-2 (7B) exhibits slightly better overall capabilities, particularly in tasks such as",
+      "votes": 3,
+      "voters": [
+        "A",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Chinese-Alpaca-2 (7B)",
+      "target": "LLAMA2-Alpaca",
+      "type": "RELATED_TO",
+      "page": 7,
+      "quote": "(7B) adheres to the same Chinese Alpaca command format as LLAMA2-Alpaca, while Atom-7B-Chat adopts a",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Atom-7B-Chat",
+      "target": "LLAMA1-Alpaca",
+      "type": "RELATED_TO",
+      "page": 7,
+      "quote": "command format akin to that of LLAMA1-Alpaca. When employing Mindformer for training, data conversion into the",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "RAG",
+      "type": "RELATED_TO",
+      "page": 8,
+      "quote": "endeavors, including RAG[31], Agent, tool calling, and multi-modality studies.",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "Attention Mechanism",
+      "target": "Transformer",
+      "type": "PART_OF",
+      "page": 8,
+      "quote": "Due to the attention mechanism’s limitation in the Transformer",
+      "votes": 4,
+      "voters": [
+        "A",
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "QLoRA",
+      "target": "Long Text Problem",
+      "type": "APPLIES_TO",
+      "page": 8,
+      "quote": "instead, the QLoRA method extended the TechGPT model’s window to up to 12K length.",
+      "votes": 2,
+      "voters": [
+        "A",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Baichuan2",
+      "target": "Baichuan",
+      "type": "RELATED_TO",
+      "page": 4,
+      "quote": "Baichuan, Baichuan2[27], Qwen, Internlm [28], and others supported by Mindformer. Among these, the LLAMA-like",
+      "votes": 2,
+      "voters": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Chinese-Alpaca-2 (7B)",
+      "type": "USES",
+      "page": 4,
+      "quote": "the decision was made to employ Chinese-Alpaca-2 (7B) and Atom-7B-Chat as the initial models for the",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Atom-7B-Chat",
+      "type": "USES",
+      "page": 4,
+      "quote": "the decision was made to employ Chinese-Alpaca-2 (7B) and Atom-7B-Chat as the initial models for the",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Ascend Server",
+      "type": "USES",
+      "page": 7,
+      "quote": "The TechGPT-2. 0 project employs the Huawei Ascend 910A server, Mindspore computing framework, and Mindformer",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Mindformer",
+      "type": "USES",
+      "page": 7,
+      "quote": "The TechGPT-2. 0 project employs the Huawei Ascend 910A server, Mindspore computing framework, and Mindformer",
+      "votes": 3,
+      "voters": [
+        "B",
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-1.0",
+      "target": "TechGPT-2.0",
+      "type": "RELATED_TO",
+      "page": 1,
+      "quote": "advance research on the amalgamation of knowledge graphs and large models, we initiated the TechGPT-1. 0 and",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Prompt Tuning",
+      "target": "Parameter-Efficient Fine Tuning (PEFT)",
+      "type": "PART_OF",
+      "page": 3,
+      "quote": "Some popular EFT strategies include: (1) Prompt Tuning [21], which maintains the base model’s parameters",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Prefix Tuning",
+      "target": "Parameter-Efficient Fine Tuning (PEFT)",
+      "type": "PART_OF",
+      "page": 3,
+      "quote": "Some popular EFT strategies include: (1) Prompt Tuning [21], which maintains the base model’s parameters",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "LoRA",
+      "target": "Parameter-Efficient Fine Tuning (PEFT)",
+      "type": "PART_OF",
+      "page": 3,
+      "quote": "and Decoder networks of the Transformer. (3) LoRA [23], takes a completely different technical pathway from",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Full Fine Tuning (FFT)",
+      "target": "Catastrophic Forgetting",
+      "type": "CAUSES",
+      "page": 3,
+      "quote": "due to the volume of parameters being equivalent to pre-training; (2) Catastrophic forgetting [20], where fine-tuning on",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Named Entity Recognition (NER)",
+      "target": "Knowledge Graph Construction",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "The focus of the TechGPT project lies in the knowledge graph construction task, comprising two primary subtasks:",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Relationship Triple Extraction (RTE)",
+      "target": "Knowledge Graph Construction",
+      "type": "PART_OF",
+      "page": 5,
+      "quote": "named entity recognition and entity relationship triplet extraction. The 400W instruction fine-tuning dataset encompasses",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Agent",
+      "type": "APPLIES_TO",
+      "page": 8,
+      "quote": "endeavors, including RAG[31], Agent, tool calling, and multi-modality studies.",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "HuggingFace",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "communities like HuggingFace, ModelScope, and WiseModel for downloads and firsthand experiences.",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "ModelScope",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "communities like HuggingFace, ModelScope, and WiseModel for downloads and firsthand experiences.",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "WiseModel",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "communities like HuggingFace, ModelScope, and WiseModel for downloads and firsthand experiences.",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Llama Chinese Community",
+      "target": "Atom-7B-Chat",
+      "type": "PRODUCES",
+      "page": 4,
+      "quote": "Chinese LLAMA2 model released by HFL and the Atom model jointly released by the Llama Chinese community",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Instruction Tuning",
+      "target": "RLHF",
+      "type": "USES",
+      "page": 3,
+      "quote": "Human Feedback [17] (RLHF) to better align the final task with human preferences.",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "Instruction Tuning",
+      "target": "Prompt Engineering",
+      "type": "USES",
+      "page": 3,
+      "quote": "fine-tuning on small-scale data, incorporating prompt engineering and Reinforcement Learning based on",
+      "votes": 2,
+      "voters": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "source": "CANN",
+      "target": "Ascend Server",
+      "type": "PART_OF",
+      "page": 7,
+      "quote": "Ascend server firmware CANN version 6. 3 rc2,",
+      "votes": 2,
+      "voters": [
+        "B",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Chinese Open-Source Model Community",
+      "type": "SUPPORTS",
+      "page": 1,
+      "quote": "it serves as a LLM accessible for research within the Chinese open-source model community.",
+      "votes": 2,
+      "voters": [
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "ShenYang",
+      "target": "China",
+      "type": "LOCATED_AT",
+      "page": 1,
+      "quote": "ShenYang, China",
+      "votes": 2,
+      "voters": [
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "Pre-training",
+      "target": "Transformer",
+      "type": "USES",
+      "page": 2,
+      "quote": "When applied to NLP, pre-training techniques involve training Transformer",
+      "votes": 2,
+      "voters": [
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "ChatGLM",
+      "target": "Chinese Open-Source Model Community",
+      "type": "RELATED_TO",
+      "page": 2,
+      "quote": "the past one year. Among them, ChatGLM [14, 15] is one of the most effective open-source base models in the Chinese",
+      "votes": 2,
+      "voters": [
+        "C",
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "RoPE",
+      "type": "USES",
+      "page": 8,
+      "quote": "0 project, our model employs the RoPE[30] method, relying on relative",
+      "votes": 2,
+      "voters": [
+        "C",
+        "GLM"
+      ]
+    }
+  ],
+  "disputed_entities": [
+    {
+      "name": "Medical RET Data",
+      "type": "Dataset",
+      "page": 5,
+      "quote": "This includes 1. 8W instances of medical RET data and 20W instances of domain NER data.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "General Task and Dialogue Data",
+      "type": "Dataset",
+      "page": 5,
+      "quote": "model’s proficiency across various tasks by amassing an extensive corpus of general task and dialogue data. This",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Loss",
+      "type": "Metric",
+      "page": 4,
+      "quote": "fine-tuning. Unfortunately, during subsequent fine-tuning, the loss consistently increased sharply, preventing model",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Toxicity Test",
+      "type": "Metric",
+      "page": 8,
+      "quote": "construction task results, toxicity tests, comparative experiments, and related evaluations, will be conducted to further",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Training Efficiency",
+      "type": "Metric",
+      "page": 6,
+      "quote": "and matching configurations, the training efficiency with 5 servers was found to be lower than that achieved with 4",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Data Collection and Processing",
+      "type": "Process",
+      "page": 1,
+      "quote": "and RTE. Furthermore, we will furnish comprehensive insights into data collection and processing, share experiences in",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Manual Annotation",
+      "type": "Process",
+      "page": 2,
+      "quote": "This data undergoes collation and manual annotation by our group’s researchers.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Long Text Processing",
+      "type": "Concept",
+      "page": 4,
+      "quote": "long text processing in the TechGPT-2.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Multi-modality",
+      "type": "Concept",
+      "page": 8,
+      "quote": "endeavors, including RAG[31], Agent, tool calling, and multi-modality studies.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Tool Calling",
+      "type": "Concept",
+      "page": 8,
+      "quote": "endeavors, including RAG[31], Agent, tool calling, and multi-modality studies.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Unanswerable Query",
+      "type": "Concept",
+      "page": 1,
+      "quote": "adeptness in handling hallucinations, unanswerable queries, and lengthy texts.",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Beijing",
+      "type": "Location",
+      "page": 3,
+      "quote": "The capital of China is Beijing",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Encoder",
+      "type": "Component",
+      "page": 3,
+      "quote": "Encoder and Decoder networks of the Transformer. (3) LoRA [23], takes a completely different technical pathway from",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Decoder",
+      "type": "Component",
+      "page": 3,
+      "quote": "Encoder and Decoder networks of the Transformer. (3) LoRA [23], takes a completely different technical pathway from",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Model Weights",
+      "type": "Artifact",
+      "page": 1,
+      "quote": "offer two 7B large language model weights and a QLoRA weight specialized for processing lengthy",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Checkpoint",
+      "type": "Artifact",
+      "page": 4,
+      "quote": "The checkpoint before convergence was utilized for reasoning, showcasing specific abilities only in the",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Chinese Alpaca Command Format",
+      "type": "Artifact",
+      "page": 7,
+      "quote": "(7B) adheres to the same Chinese Alpaca command format as LLAMA2-Alpaca, while Atom-7B-Chat adopts a",
+      "votes": 1,
+      "voters": [
+        "B"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "GitHub",
+      "type": "System",
+      "page": 1,
+      "quote": "model training. Our code is available at https://github. com/neukg/TechGPT-2. 0 1 2 3",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "GPT Series",
+      "type": "System",
+      "page": 2,
+      "quote": "The GPT series, representing a paradigm in LLMs, have undergone multiple versions of iterations and shown significant",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Chinese LLaMA2",
+      "type": "System",
+      "page": 4,
+      "quote": "Chinese LLAMA2 model released by HFL and the Atom model jointly released by the Llama Chinese community",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Nested NER",
+      "type": "Concept",
+      "page": 5,
+      "quote": "domains includes some nested NER data. It is noteworthy that the KnowLM-IE dataset is annotated through remote",
+      "votes": 1,
+      "voters": [
+        "C"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Medicine",
+      "type": "Concept",
+      "page": 1,
+      "quote": "it exhibits robust text processing capabilities, particularly in the domains of medicine\nand law.",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Law",
+      "type": "Concept",
+      "page": 1,
+      "quote": "it exhibits robust text processing capabilities, particularly in the domains of medicine\nand law.",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Geographical Areas",
+      "type": "Concept",
+      "page": 1,
+      "quote": "enabling it to process texts in\nvarious domains such as geographical areas, transportation, organizations, literary works, biology, nat-",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Transportation",
+      "type": "Concept",
+      "page": 1,
+      "quote": "enabling it to process texts in\nvarious domains such as geographical areas, transportation, organizations, literary works, biology, nat-",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Literary Works",
+      "type": "Concept",
+      "page": 1,
+      "quote": "enabling it to process texts in\nvarious domains such as geographical areas, transportation, organizations, literary works, biology, nat-",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Biology",
+      "type": "Concept",
+      "page": 1,
+      "quote": "enabling it to process texts in\nvarious domains such as geographical areas, transportation, organizations, literary works, biology, nat-",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Natural Sciences",
+      "type": "Concept",
+      "page": 1,
+      "quote": "enabling it to process texts in\nvarious domains such as geographical areas, transportation, organizations, literary works, biology, nat-",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Astronomical Objects",
+      "type": "Concept",
+      "page": 1,
+      "quote": "enabling it to process texts in\nvarious domains such as geographical areas, transportation, organizations, literary works, biology, nat-",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Architecture",
+      "type": "Concept",
+      "page": 1,
+      "quote": "ural sciences, astronomical objects, and architecture. These enhancements also fortified the model’s",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Title Expansion Summaries",
+      "type": "Dataset",
+      "page": 6,
+      "quote": "Other task data consists of 15W title expansion summaries, 20W abstract",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Abstract Abbreviation Titles",
+      "type": "Dataset",
+      "page": 6,
+      "quote": "20W abstract\nabbreviation titles, 1W code instruction fine-tuning instances",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Code Instruction Fine-Tuning Data",
+      "type": "Dataset",
+      "page": 6,
+      "quote": "1W code instruction fine-tuning instances, 10W keyword extraction instances",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Keyword Extraction Data",
+      "type": "Dataset",
+      "page": 6,
+      "quote": "1W code instruction fine-tuning instances, 10W keyword extraction instances",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Subject Area Identification Data",
+      "type": "Dataset",
+      "page": 6,
+      "quote": "10W keyword extraction instances, and 3W subject area\nidentification instances, among others.",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Springboard Machine",
+      "type": "Tool",
+      "page": 6,
+      "quote": "communication with five Ascend\n910A servers was facilitated through a springboard machine.",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    },
+    {
+      "name": "Retrieval-Augmented Generation (RAG)",
+      "type": "Method",
+      "page": 8,
+      "quote": "including RAG[31], Agent, tool calling, and multi-modality studies.",
+      "votes": 1,
+      "voters": [
+        "GLM"
+      ],
+      "quote_verified": true
+    }
+  ],
+  "disputed_relations": [
+    {
+      "source": "TechGPT-2.0",
+      "target": "Huawei Ascend 910A Server",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Huawei Ascend 910A Server",
+      "target": "Huawei",
+      "type": "CREATED_BY",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Chinese-Alpaca-2 (7B)",
+      "target": "TechGPT-2.0",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Atom-7B-Chat",
+      "target": "TechGPT-2.0",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Position Interpolation",
+      "target": "Long Text Problem",
+      "type": "APPLIES_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "LoRA",
+      "target": "Parameter-Efficient Fine Tuning",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Prompt Tuning",
+      "target": "Prefix Tuning",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Prefix Tuning",
+      "target": "Transformer",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Reinforcement Learning based on Human Feedback",
+      "target": "Instruction Tuning",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Full Fine Tuning",
+      "target": "Catastrophic Forgetting",
+      "type": "CAUSES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "LoRA",
+      "target": "Full Fine Tuning",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Pre-training",
+      "target": "Transformer",
+      "type": "APPLIES_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "BERT",
+      "target": "Pre-training",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Word2Vec",
+      "target": "Neural Network Language Models",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "GPT-2",
+      "target": "GPT-1",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "GPT-3",
+      "target": "GPT-2",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "GPT-4",
+      "target": "GPT-3",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "ChatGLM",
+      "target": "Large Language Model",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Qwen",
+      "target": "Large Language Model",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Atom",
+      "target": "AtomEcho",
+      "type": "CREATED_BY",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Atom",
+      "target": "Llama Chinese community",
+      "type": "CREATED_BY",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Chinese-Alpaca-2 (7B)",
+      "target": "LLAMA2",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "MindFormers",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "MindFormers",
+      "target": "LLAMA2",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "MindFormers",
+      "target": "Baichuan2",
+      "type": "SUPPORTS",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "MindFormers",
+      "target": "Qwen",
+      "type": "SUPPORTS",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "MindFormers",
+      "target": "InternLM",
+      "type": "SUPPORTS",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "MindFormers",
+      "target": "PanGuAlpha",
+      "type": "SUPPORTS",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Huawei Ascend 910A Server",
+      "target": "LLAMA2",
+      "type": "SUPPORTS",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Huawei Ascend 910A Server",
+      "target": "LLaMA",
+      "type": "SUPPORTS",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "ModelArts",
+      "target": "Huawei Ascend 910A Server",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "400W Instruction Fine-tuning Dataset",
+      "type": "USES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Medical QA Data",
+      "target": "400W Instruction Fine-tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Legal QA Data",
+      "target": "400W Instruction Fine-tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "MindFormers",
+      "target": "MindRecord",
+      "type": "PRODUCES",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Agent",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "RoPE",
+      "target": "Transformer",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "ChatGLM2",
+      "target": "ChatGLM",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "NVIDIA",
+      "target": "Huawei Ascend 910A Server",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "Instruction Tuning",
+      "target": "Large Language Model",
+      "type": "APPLIES_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "CANN",
+      "target": "Huawei Ascend 910A Server",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "NPU",
+      "target": "Huawei Ascend 910A Server",
+      "type": "PART_OF",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "LLaMA",
+      "target": "LLAMA2",
+      "type": "RELATED_TO",
+      "voters": [
+        "A"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Model Weights",
+      "type": "PRODUCES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "QLoRA Weight",
+      "type": "PRODUCES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Parameter-Efficient Fine Tuning (PEFT)",
+      "target": "Full Fine Tuning (FFT)",
+      "type": "RELATED_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "LoRA",
+      "target": "Full Fine Tuning (FFT)",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Position Interpolation",
+      "target": "Long Text Processing",
+      "type": "ENABLES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "QLoRA",
+      "target": "Long Text Processing",
+      "type": "ENABLES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "RAG",
+      "type": "APPLIES_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Tool Calling",
+      "type": "APPLIES_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Multi-modality",
+      "type": "APPLIES_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "KnowLM",
+      "target": "KnowLM-IE Dataset",
+      "type": "PRODUCES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "KnowLM-IE Dataset",
+      "target": "Remote Supervision",
+      "type": "USES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "General RTE Task Data",
+      "target": "400W Instruction Fine-tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "General NER Data",
+      "target": "400W Instruction Fine-tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Domain RTE Task Data",
+      "target": "400W Instruction Fine-tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Domain NER Task Data",
+      "target": "400W Instruction Fine-tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Medical RET Data",
+      "target": "400W Instruction Fine-tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Model Weights",
+      "target": "HuggingFace",
+      "type": "LOCATED_AT",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Northeastern University",
+      "target": "ShenYang, China",
+      "type": "LOCATED_AT",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Ascend Server",
+      "target": "Huawei",
+      "type": "CREATED_BY",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Alibaba Cloud",
+      "target": "Qwen",
+      "type": "PRODUCES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "HFL",
+      "target": "Chinese-Alpaca-2 (7B)",
+      "type": "PRODUCES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "AtomEcho",
+      "target": "Atom-7B-Chat",
+      "type": "RELATED_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Wang Jiaqi",
+      "target": "Northeastern University",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Chang Yuying",
+      "target": "Northeastern University",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Li Zhong",
+      "target": "Northeastern University",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "An Ning",
+      "target": "Northeastern University",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Ma Qi",
+      "target": "Northeastern University",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Hei Lei",
+      "target": "Northeastern University",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Luo Haibo",
+      "target": "Northeastern University",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Lu Yifei",
+      "target": "Northeastern University",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Ren Feiliang",
+      "target": "Northeastern University",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Encoder",
+      "target": "Transformer",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Decoder",
+      "target": "Transformer",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "NPU",
+      "target": "Ascend Server",
+      "type": "PART_OF",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Toxicity Test",
+      "target": "TechGPT-2.0",
+      "type": "EVALUATES",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "Large Language Model (LLM)",
+      "target": "Knowledge Graph Construction",
+      "type": "APPLIES_TO",
+      "voters": [
+        "B"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Named Entity Recognition",
+      "type": "APPLIES_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Relationship Triple Extraction",
+      "type": "APPLIES_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Hallucination",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Large Language Model",
+      "target": "Knowledge Graph",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "GitHub",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "TechGPT-2.0-alpaca-hf",
+      "type": "PRODUCES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "TechGPT-2.0-atom-hf",
+      "type": "PRODUCES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Transfer Learning",
+      "target": "Computer Vision",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Neural Network Language Model",
+      "target": "Word2Vec",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "BERT",
+      "target": "XLNet",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "GPT-1",
+      "target": "GPT Series",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "GPT-2",
+      "target": "GPT Series",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "GPT-3",
+      "target": "GPT Series",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "GPT-4",
+      "target": "GPT Series",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "ChatGLM3",
+      "target": "ChatGLM",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Large Language Model",
+      "target": "Natural Language Processing",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Instruction Tuning",
+      "target": "Pre-training",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Catastrophic Forgetting",
+      "target": "Full Fine Tuning",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "LoRA",
+      "target": "Prompt Tuning",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "LoRA",
+      "target": "Prefix Tuning",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Quantization",
+      "target": "QLoRA",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Mindspore",
+      "target": "Mindformer",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "LLaMA",
+      "target": "ChatGLM",
+      "type": "COMPARES_WITH",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "LLaMA2",
+      "target": "Mindformer",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "InternLM",
+      "target": "Mindformer",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Qwen",
+      "target": "Mindformer",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "ChatGLM",
+      "target": "Knowledge Graph Construction",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "ChatGLM",
+      "target": "LoRA",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "HFL",
+      "target": "Chinese LLaMA2",
+      "type": "PRODUCES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "AtomEcho",
+      "target": "Atom-7B-Chat",
+      "type": "PRODUCES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Chinese LLaMA2",
+      "target": "LLaMA2",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Chinese-Alpaca-2 (7B)",
+      "target": "Chinese LLaMA2",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "QLoRA",
+      "target": "Position Interpolation",
+      "type": "USES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "KnowLM-IE",
+      "target": "Relationship Triple Extraction",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Value Alignment",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Medical QA Data",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Legal QA Data",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Medical QA Data",
+      "target": "Legal QA Data",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Modelarts",
+      "target": "Huawei",
+      "type": "CREATED_BY",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Ascend 910A Server",
+      "type": "USES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Ascend 910A Server",
+      "target": "Huawei",
+      "type": "CREATED_BY",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "CANN",
+      "target": "Ascend 910A Server",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Mindspore",
+      "target": "CANN",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Mindformer",
+      "target": "Mindrecord",
+      "type": "PRODUCES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Named Entity Recognition",
+      "target": "Relationship Triple Extraction",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Direct Extrapolation",
+      "target": "Long Text Problem",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Position Interpolation",
+      "target": "Long Text Problem",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "QLoRA",
+      "target": "Long Text Problem",
+      "type": "RELATED_TO",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Knowledge Graph Construction",
+      "type": "EVALUATES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Instruction Tuning",
+      "type": "USES",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Nested NER",
+      "target": "Named Entity Recognition",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "Instruction Tuning",
+      "target": "Fine-Tuning",
+      "type": "PART_OF",
+      "voters": [
+        "C"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Named Entity Recognition (NER)",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Relationship Triple Extraction (RTE)",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Medicine",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Law",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Geographical Areas",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Transportation",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Literary Works",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Biology",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Natural Sciences",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Astronomical Objects",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Architecture",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Hallucination",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Long Text Problem",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "TechGPT",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-1.0",
+      "target": "TechGPT",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Ascend 910A",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Retrieval-Augmented Generation (RAG)",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Large Language Models (LLMs)",
+      "target": "Pre-training",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Transfer Learning",
+      "target": "Pre-training",
+      "type": "RELATED_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Transfer Learning",
+      "target": "Computer Vision (CV)",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Large Language Models (LLMs)",
+      "target": "Instruction Fine-Tuning",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Full Fine Tuning (FFT)",
+      "target": "Instruction Fine-Tuning",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Parameter-Efficient Fine Tuning (PEFT)",
+      "target": "Instruction Fine-Tuning",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Reinforcement Learning based on Human Feedback (RLHF)",
+      "target": "Large Language Models (LLMs)",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Ascend Server",
+      "target": "LLaMA",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Ascend Server",
+      "target": "ChatGLM",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Ascend Server",
+      "target": "LLAMA2",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Mindformer",
+      "target": "LLAMA2",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Mindformer",
+      "target": "ChatGLM2",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Mindformer",
+      "target": "Baichuan2",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Atom-7B-Chat",
+      "target": "AtomEcho",
+      "type": "CREATED_BY",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Atom-7B-Chat",
+      "target": "Llama Chinese Community",
+      "type": "CREATED_BY",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Chinese-Alpaca-2 (7B)",
+      "target": "Named Entity Recognition (NER)",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0",
+      "target": "Chinese-Alpaca-2-16K (7B)",
+      "type": "EVALUATES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Chinese-Alpaca-2-16K (7B)",
+      "target": "Named Entity Recognition (NER)",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Position Interpolation",
+      "target": "RoPE",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Attention Mechanism",
+      "target": "Long Text Problem",
+      "type": "CAUSES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Medical QA Data",
+      "target": "Medicine",
+      "type": "RELATED_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Legal QA Data",
+      "target": "Law",
+      "type": "RELATED_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Instruction Fine-Tuning Dataset",
+      "target": "TechGPT-2.0",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "General RTE Task Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "General NER Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Domain RTE Task Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Domain NER Task Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "General Dialogue Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Chinese-English Translation Task Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Title Expansion Summaries",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Abstract Abbreviation Titles",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Code Instruction Fine-Tuning Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Keyword Extraction Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Subject Area Identification Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Value Alignment Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Unanswerable Question Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Medical QA Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Legal QA Data",
+      "target": "Instruction Fine-Tuning Dataset",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "KnowLM-IE",
+      "target": "Domain RTE Task Data",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "KnowLM-IE",
+      "target": "Domain NER Task Data",
+      "type": "SUPPORTS",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Mindformer",
+      "target": "Mindrecord",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "NPU",
+      "target": "Ascend 910A",
+      "type": "PART_OF",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "ModelArts",
+      "target": "Ascend Server",
+      "type": "APPLIES_TO",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0-Alpaca-hf",
+      "target": "HuggingFace",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "TechGPT-2.0-Atom-hf",
+      "target": "HuggingFace",
+      "type": "LOCATED_AT",
+      "voters": [
+        "GLM"
+      ]
+    },
+    {
+      "source": "Chinese-Alpaca-2 (7B)",
+      "target": "LLAMA2-Alpaca",
+      "type": "USES",
+      "voters": [
+        "GLM"
+      ]
+    }
+  ],
+  "stats": {
+    "entity_candidates": 135,
+    "entity_accepted": 98,
+    "entity_disputed": 37,
+    "entity_quote_unverified": 0,
+    "relation_accepted": 65,
+    "relation_disputed": 194,
+    "mean_pairwise_jaccard": 0.7308,
+    "majority_agreement_rate": 0.7259,
+    "entity_final": 109,
+    "arbitrated_accepted": 11,
+    "arbitrated_rejected": 26,
+    "relation_final": 65,
+    "relation_single_vote_dropped": 194
+  },
+  "arbitration": {
+    "rules": "docs/GOLD_ARBITRATION_RULES.md",
+    "disputed_total": 37,
+    "accepted": [
+      "Toxicity Test",
+      "Data Collection and Processing",
+      "Manual Annotation",
+      "Long Text Processing",
+      "Multi-modality",
+      "Tool Calling",
+      "Unanswerable Query",
+      "Encoder",
+      "Decoder",
+      "Chinese LLaMA2",
+      "Nested NER"
+    ],
+    "rejected": [
+      "Medical RET Data",
+      "General Task and Dialogue Data",
+      "Loss",
+      "Training Efficiency",
+      "Beijing",
+      "Model Weights",
+      "Checkpoint",
+      "Chinese Alpaca Command Format",
+      "GitHub",
+      "GPT Series",
+      "Medicine",
+      "Law",
+      "Geographical Areas",
+      "Transportation",
+      "Literary Works",
+      "Biology",
+      "Natural Sciences",
+      "Astronomical Objects",
+      "Architecture",
+      "Title Expansion Summaries",
+      "Abstract Abbreviation Titles",
+      "Code Instruction Fine-Tuning Data",
+      "Keyword Extraction Data",
+      "Subject Area Identification Data",
+      "Springboard Machine",
+      "Retrieval-Augmented Generation (RAG)"
+    ],
+    "unresolved": []
+  }
+}

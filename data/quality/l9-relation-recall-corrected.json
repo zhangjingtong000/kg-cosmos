@@ -1,0 +1,12 @@
+{
+  "n_gold": 42,
+  "L1_strict_triple": 18,
+  "L2_alias_triple": 21,
+  "L2b_exact_pair": 20,
+  "L3_alias_pair": 24,
+  "recall_range": [
+    0.4286,
+    0.5714
+  ],
+  "note": "严格匹配会把别名写法（LLMs vs Large Language Model）判成漏，从而低估召回。实测云端从金标所在的三段里各抽了 19–30 条边，而金标只列了 2–5 条 ⇒ 单点数字不可靠，应报区间。"
+}

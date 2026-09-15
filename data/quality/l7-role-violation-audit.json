@@ -1,0 +1,75 @@
+{
+  "n": 58,
+  "by_relation": {
+    "USES": {
+      "predicate_wrong": 15,
+      "true_violation": 5
+    },
+    "PRODUCES": {
+      "false_positive": 5,
+      "predicate_wrong": 12,
+      "true_violation": 3
+    },
+    "PART_OF": {
+      "true_violation": 11,
+      "predicate_wrong": 7
+    }
+  },
+  "total": {
+    "predicate_wrong": 34,
+    "true_violation": 19,
+    "false_positive": 5
+  },
+  "false_positive_rate": 0.0862,
+  "predicate_wrong_rate": 0.5862,
+  "true_violation_rate": 0.3276,
+  "batch_b": {
+    "n": 11,
+    "by_relation": {
+      "APPLIES_TO": {
+        "false_positive": 1
+      },
+      "CAUSES": {
+        "false_positive": 2,
+        "predicate_wrong": 1
+      },
+      "CITES": {
+        "true_violation": 1
+      },
+      "ENABLES": {
+        "false_positive": 5
+      },
+      "LOCATED_AT": {
+        "true_violation": 1
+      }
+    },
+    "total": {
+      "false_positive": 8,
+      "predicate_wrong": 1,
+      "true_violation": 2
+    },
+    "false_positive_rate": 0.7273,
+    "note": "这 5 类各自的 role_violation 本就很少（APPLIES_TO 1 / CAUSES 3 / CITES 1 / ENABLES 5 / LOCATED_AT 1），所以只有 11 条样本，CI 很宽；但 ENABLES 的 5 条**全部**是假阳性且成因一致，这个信号是明确的。"
+  },
+  "quality_imbalance": {
+    "batch_a_fp_rate": 0.0862,
+    "batch_b_fp_rate": 0.7273,
+    "reading": "两批假阳性率差一个数量级 ⇒ 15 类约束表**内部质量不均**：USES / PRODUCES / PART_OF 基本可用；ENABLES / CAUSES / APPLIES_TO 的允许集太严。"
+  },
+  "tautological_constraints": {
+    "relations": [
+      "MEASURES",
+      "RELATED_TO"
+    ],
+    "note": "这些关系两侧允许集都是全集，role_compliance 是**恒等式**、不提供质量信息。审计表里它们已显示为 n/a 而非 100%（处理正确）。其余\"零违规\"的类有具体限制，100% 表示确实没违规。"
+  },
+  "conclusion": "约束假阳性率：前三类 8.6%、后五类 72.7% ⇒ 内部质量不均；role_violation 里 59% 实为谓词选错，该指标名应读作\"端点类型或谓词问题\"。",
+  "proposes": [
+    "PRODUCES：target 纳入 Person/Location（NER 的产出就是实体）；source 纳入 Event（会议发表论文）与 Metric（Loss 产生 Gradient）",
+    "ENABLES：两端都纳入 Person/Document/Material（人被使能、文献被使能、物质被使能都是正常用法）",
+    "CAUSES：target 纳入 Person（\"某事对人是挑战\"是正常用法）",
+    "APPLIES_TO：source 纳入 Material（数据/物料作为被处理对象）",
+    "报告里把 role_violation 改称\"端点类型或谓词问题\""
+  ],
+  "caveat": "第一批 58 条、第二批 11 条；两批都是单一独立判定者、seed=7。第二批样本量小，比例估计的置信区间很宽，但\"ENABLES 五条全是假阳性且成因一致\"这一点是明确的。"
+}
