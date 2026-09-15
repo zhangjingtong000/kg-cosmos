@@ -15,6 +15,13 @@ venv/
 /.superpowers/
 /.worktrees/
 
+# 本地环境变量（含 API 密钥）—— 模板是 .env.example，那个要进版本控制。
+# 2026-09-15 补：此前没有这条规则，而项目新加了 .env 加载机制（tools/serve.py），
+# 一旦有人真的建了 .env 并 git add -A，密钥就会进仓库。
+.env
+.env.local
+.env.*.local
+
 # Standalone visual reference project; maintained in its own Git repository.
 /isgalaxias/
 

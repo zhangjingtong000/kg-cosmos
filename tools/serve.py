@@ -24,6 +24,7 @@ _HERE = _Path(__file__).resolve()
 ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import argparse
 import json
+import os
 import socket
 import sys
 from pathlib import Path
@@ -32,6 +33,40 @@ ROOT = Path(str(ROOT))
 WEB = ROOT / 'web'
 KG_DATA = WEB / 'kg-data'
 QUALITY = ROOT / 'data' / 'quality'
+
+
+def load_dotenv():
+    """把仓库根下的 `.env` 读进 `os.environ`（**已存在的不覆盖**）。
+
+    **为什么需要它**：项目此前**没有任何加载 `.env` 的代码** ——
+    所有 `os.environ.get(...)` 读的都是**真实环境变量**。
+    所以 `.env.example`（本会话新加的模板）拷成 `.env` 也**不会生效**，
+    它只是一份文档。这个函数把那条路接通。
+
+    **为什么放在 `serve.py` 而不是 `app.py`**：`serve.py` 是 README 与
+    RUNBOOK 里写的**唯一入口**（两种模式都经它），放这里两种模式都能受益。
+
+    **为什么"已存在的不覆盖"**：`.env` 是**默认值来源**，不是**命令。
+    命令行/系统里显式设的环境变量优先级应当更高** —— 否则
+    `KG_NEO4J_PASSWORD=xxx python tools/serve.py` 会被 `.env` 里的旧值盖掉。
+
+    依赖 `python-dotenv`（已安装）。**没装时不报错**，只提示一句 ——
+    因为 `.env` 是可选的，不该阻塞启动。
+    """
+    env_path = ROOT / '.env'
+    if not env_path.exists():
+        return
+    try:
+        from dotenv import load_dotenv as _ld
+    except ImportError:
+        print(f'⚠️ 发现 {env_path.name}，但未安装 python-dotenv，已忽略它')
+        print('   （装：E:\\Python313\\python.exe -m pip install python-dotenv）')
+        return
+    n_before = len(os.environ)
+    _ld(env_path, override=False)          # override=False ⇒ 已存在的不覆盖
+    added = len(os.environ) - n_before
+    print(f'·  已加载 {env_path.name}（新增 {added} 个变量；已存在的不覆盖）')
+
 
 # 页面跑起来真正需要的数据文件（缺了会白屏或报错，所以列为硬性检查）
 REQUIRED = [
@@ -97,8 +132,36 @@ def check(port):
         neo = s.connect_ex(('127.0.0.1', 7687)) == 0
     print(f'  {"✅ Neo4j 在跑" if neo else "·  Neo4j 未运行（不影响界面演示）"}')
 
+    # ── 本地模型（Ollama）────────────────────────────────────────────────
+    # **2026-09-15 补**：此前这个检查**完全没有** —— 而上传与问答都要用它。
+    # 演示现场"传了半天没反应"最常见的原因就是 Ollama 没起来，
+    # 而 `serve.py` 是唯一入口，它不说就没人说。
+    #
+    # **故意不做"自动拉起"**：起服务是有副作用的动作（占显存、改系统状态），
+    # 不该由一个"检查"函数顺手做掉。**明确告诉人怎么起**就够了。
+    print('\n[本地模型（上传与问答要用）]')
+    ollama_host = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434')
+    ollama_up = False
+    try:
+        import urllib.request
+        with urllib.request.urlopen(f'{ollama_host}/api/tags', timeout=3) as r:
+            tags = json.loads(r.read().decode('utf-8'))
+        models = [m.get('name') for m in (tags.get('models') or [])]
+        ollama_up = True
+        want = os.environ.get('KG_QA_MODEL', 'qwen3.5:9b')
+        has_qwen = any(str(m).startswith(want.split(':')[0]) for m in models)
+        print(f'  ✅ Ollama 在跑（{len(models)} 个模型）')
+        print(f'  {"✅" if has_qwen else "· "} 抽取/问答模型 {want}'
+              f'{" 已就绪" if has_qwen else " 未找到（抽取会失败，问答会降级为纯规则）"}')
+    except Exception:
+        print(f'  ❌ Ollama 未运行（{ollama_host}）')
+        print('     ⚠️ **上传抽取与多 Agent 问答都要用它**；界面能开，但这两件会失败或降级')
+        print('     起法：另开一个终端执行 `ollama serve`（模型会自动加载）')
+
     print()
     print('结论：' + ('可以启动' if ok else '有阻塞项，见上面 ❌'))
+    if not ollama_up:
+        print('      （Ollama 未起不算阻塞 —— 但演示上传/问答前请先起它）')
     return ok
 
 
@@ -108,6 +171,10 @@ def main():
     ap.add_argument('--port', type=int, default=None)
     ap.add_argument('--check', action='store_true', help='只做检查，不启动')
     args = ap.parse_args()
+
+    # **在任何检查之前**加载 .env —— 否则 `.env` 里设的 KG_NEO4J_* /
+    # OLLAMA_HOST / KG_QA_MODEL 都不会被下面的检查看到（检查会误报"未配置"）。
+    load_dotenv()
 
     port = args.port or (8098 if args.static else 8000)
     if not check(port):
