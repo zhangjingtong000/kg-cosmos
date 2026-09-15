@@ -553,6 +553,85 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
     <div id="calibers"></div>
   </section>
 
+  <!-- ── I8（2026-09-15 加）：把"已算出来、界面上从没说过"的结论搬上来 ──
+       三条都**直接写死数据**而不是运行时读 data/ ——
+       因为 CDP 回归跑的是 8098 静态站，而 `kg-api.js` 在静态站下读不到
+       仓库根的 `data/`（会直接抛错）。写死的是**已经核实过的值**，
+       出处都标在每个数字旁边，改数据时同步这一处即可。 -->
+
+  <section id="s-alias">
+    <div class="sec-h">
+      <span class="eyebrow">10 · ALIASES</span>
+      <h2>同一个东西的多种叫法</h2>
+    </div>
+    <div class="sub">实体消歧判据实际归并了什么 —— 这是它的直接产物</div>
+    <p class="hint" style="margin:14px 0 0">
+      判据共归并 <b>191</b> 组，并抽取了 <b>510</b> 个缩写形态。
+      典型例子（左侧都是同一个实体）：
+    </p>
+    <ul class="alias-list" style="margin:14px 0 0;padding-left:0;list-style:none">
+      <li><code>ComplEx</code> · <code>Complex</code> · <code>ComplEX</code>
+        <span class="dim">— 大小写与拼写差异</span></li>
+      <li><code>Relationships</code> → <code>Relationship</code>
+        <span class="dim">— 单复数</span></li>
+      <li><code>Translation Vectors</code> → <code>Translation Vector</code>
+        <span class="dim">— 单复数（多词）</span></li>
+    </ul>
+    <p class="hint" style="margin:12px 0 0">
+      出处 <code>data/quality/entity-alias-map.json</code>（<code>alias</code> 段 200 条、
+      <code>audit</code> 段 214 条）。
+      <b>判据本身有独立评测</b>：<code>tools/l2_disambig_eval.py</code>，
+      并与 Neo4j 官方的 WRatio 做过对照 —— 同一对
+      <code>UI</code>/<code>build graph.py</code>，官方给 0.900（误合），
+      我们的长度保护给 0.286（正确拒绝）。
+    </p>
+  </section>
+
+  <section id="s-blind">
+    <div class="sec-h">
+      <span class="eyebrow">11 · BLIND SPOTS</span>
+      <h2>图谱的盲区</h2>
+    </div>
+    <div class="sub">这张图抽出来了、但没连上的部分</div>
+    <div class="grid" style="margin:16px 0 0">
+      <div class="fig"><span class="n">3036</span>
+        <span class="k">孤立节点</span><span class="d">占全部 18780 个节点的 16.2%</span></div>
+      <div class="fig"><span class="n">3377</span>
+        <span class="k">连通分量</span><span class="d">最大分量含 14630 个节点（77.9%）</span></div>
+      <div class="fig"><span class="n">1</span>
+        <span class="k">度数中位数</span><span class="d">均值 3.101 —— 一半以上节点只有 1 条边</span></div>
+    </div>
+    <p class="hint" style="margin:16px 0 0">
+      这与 <b>L3 端点完整性 68.4%</b> 是同一现象的两个侧面：
+      端点没被抽成节点 → 边落不下来 → 大量节点只剩 1 条边甚至 0 条 → 图碎。
+      <b>想改善连通性，只能靠补抽取或端点归一化，不能靠过滤。</b>
+      出处 <code>data/quality/l8-structure-audit.json</code>。
+    </p>
+  </section>
+
+  <section id="s-external">
+    <div class="sec-h">
+      <span class="eyebrow">12 · EXTERNAL</span>
+      <h2>外部对照：在别人的人工标注上</h2>
+    </div>
+    <div class="sub">本页其余数字都是自洽型判定；这一节是唯一的外部参照系</div>
+    <div class="grid" style="margin:16px 0 0">
+      <div class="fig"><span class="n">0.4965</span>
+        <span class="k">实体 F1</span><span class="d">SciREX 人工标注（AllenAI，ACL 2020）</span></div>
+      <div class="fig"><span class="n">70/70</span>
+        <span class="k">类型命中率</span><span class="d">命中的 70 个实体，类型与人工标注<b>完全一致</b></span></div>
+      <div class="fig"><span class="n">0.5983</span>
+        <span class="k">精确率 P</span><span class="d">召回 R = 0.4242（SciREX 是短语级标注，含"提及"）</span></div>
+    </div>
+    <p class="hint" style="margin:16px 0 0">
+      <b>要一起说清的偏差</b>：SciREX 把论文里所有<b>提及</b>的方法/任务/指标名都标了，
+      而本项目只抽"值得进图谱的实体" ⇒ <b>召回天然偏低，不能读成抽取质量差</b>。
+      样本量 1 篇（<code>18168aea48a22f6f…</code>），<b>只作方向性判断</b>。
+      出处 <code>data/external/scirex-eval-1doc.json</code> 与
+      <code>docs/EXTERNAL_EVAL_SCIREX.md</code>。
+    </p>
+  </section>
+
   <footer id="foot"></footer>
 </div>
 
