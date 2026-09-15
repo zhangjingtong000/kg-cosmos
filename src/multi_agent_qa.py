@@ -298,7 +298,9 @@ def answer(question, nodes, edges, use_llm=True):
     result['conclusion'] = synth or ('支持方：%s\n反对方：%s' % (sup, opp))
 
     # 置信度：从综合文本里抽，抽不到就按反对方是否有收获粗判
-    m = re.search(r'置信度[：:\s]*(高|中|低)', result['conclusion'])
+    # 正则要容忍模型的各种写法：`置信度：高` / `置信度 高` / `置信度为高`
+    # / `置信度是高`（第一次实测模型写的就是「置信度为高」，旧正则漏了）
+    m = re.search(r'置信度[：:\s是为]{0,2}\s*(高|中|低)', result['conclusion'])
     if m:
         result['confidence'] = m.group(1)
     else:
