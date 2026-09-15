@@ -297,9 +297,12 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
     </form>
 
     <div class="chips" id="chips" role="group" aria-label="示例问题">
-      <button class="chip" type="button" data-k="transe">TransE 有什么局限？</button>
-      <button class="chip" type="button" data-k="llm">大模型能不能直接用来做知识图谱抽取？</button>
-      <button class="chip" type="button" data-k="quality">知识图谱的质量怎么评估？</button>
+      <button class="chip" type="button" data-k="transe"
+              data-q="What are the limitations of TransE for knowledge graph embedding?">TransE 有什么局限？</button>
+      <button class="chip" type="button" data-k="llm"
+              data-q="Can large language models be used for knowledge graph construction?">大模型能不能直接用来做知识图谱抽取？</button>
+      <button class="chip" type="button" data-k="quality"
+              data-q="How to evaluate the quality of a knowledge graph?">知识图谱的质量怎么评估？</button>
     </div>
 
     <div class="how" id="how">
@@ -427,6 +430,94 @@ const GW = {A:[361,151], B:[200,72], C:[200,237], D:[522,72], E:[522,237],
             F:[361,42], G:[361,260], H:[81,151], I:[642,151]};
 const GN = {A:[180,208], B:[96,92], C:[96,324], D:[264,92], E:[264,324],
             F:[180,44], G:[180,392]};
+
+/* ══════════════════════════════════════════════════════════════════════
+   真后端接线（2026-09-14）
+
+   此前这一页是**硬编码的三个问答**（下面的 QA 常量），评审实测：
+   全文件 0 次 fetch、18 条"证据"全部指向项目自己的 docs/、0 条指向论文原文。
+   而 `/chat` 也只是子串匹配原型 —— 也就是说"多 Agent 问答"在交付物里不存在。
+
+   现在接 `POST /api/qa`（src/multi_agent_qa.py）：检索 → 支持取证 /
+   反对取证（并行、互不可见）→ 综合。**每条证据都带论文文件名与页码**。
+
+   QA 常量保留为**离线兜底**：后端未启动时用它，并明确标注是演示数据。
+   ══════════════════════════════════════════════════════════════════════ */
+const ASK_GID = (new URLSearchParams(location.search)).get('src') || 'ad690dfb';
+
+function shortName(s){ return String(s || '').replace(/\.pdf$/i, ''); }
+
+/* 把 /api/qa 的返回适配成 renderGraph/play 期望的形状 */
+function adaptQA(resp){
+  const ev = resp.evidence || [];
+  const nodes = {}, key = {}, edges = [];
+  let id = 0;
+  function nodeOf(name, kind, extra){
+    if (!(name in key)) {
+      const k = String.fromCharCode(65 + (id % 26)) + (id >= 26 ? Math.floor(id/26) : '');
+      key[name] = k; id++;
+      nodes[k] = Object.assign({t: name, k: kind || ''}, extra || {});
+    }
+    return key[name];
+  }
+  const CIT = {};
+  const seedsArr = resp.retrieval.seeds || [];
+  ev.forEach(function(it){
+    const c = (it.citations || [])[0] || {};
+    const a = nodeOf(it.source, seedsArr.indexOf(it.source) >= 0 ? 'Method' : '');
+    const b = nodeOf(it.target, 'Concept');
+    if (seedsArr.indexOf(it.source) >= 0) nodes[a].seed = 1;
+    if (seedsArr.indexOf(it.target) >= 0) nodes[b].seed = 1;
+    if (!c.quote) { nodes[a].weak = 1; nodes[b].weak = 1; }
+    if (String(it.type).toUpperCase() === 'CONTRADICTS') { nodes[a].contra = 1; nodes[b].contra = 1; }
+    edges.push({a: a, b: b, r: it.type, hot: 1,
+                contra: String(it.type).toUpperCase() === 'CONTRADICTS' ? 1 : undefined});
+    CIT[a + '|' + b] = c;
+  });
+
+  /* 两方证据：都来自同一批可核验证据，但**引文出处写成论文名+页码**，
+     不再指向项目自己的文档。 */
+  function camp(role, items, stake){
+    const list = (items || []).slice(0, 6).map(function(it){
+      const c = (it.citations || [])[0] || {};
+      return {
+        rel: it.type,
+        tier: c.quote ? 's' : 'n',
+        qt: c.quote ? ('「' + c.quote.slice(0, 160) + '」') : ('（该边在原文里找不到引文）' + it.claim),
+        src: c.paper ? (shortName(c.paper) + ' · 第 ' + c.page + ' 页') : '（无引文）',
+        sec: '',
+        why: it.claim
+      };
+    });
+    return {stake: stake, claim: role, ev: list.length ? list : [
+      {rel: '—', tier: 'n', qt: '（无）', src: '—', sec: '', why: '这一侧没有找到证据。'}
+    ]};
+  }
+  const ag = {};
+  (resp.agents || []).forEach(function(x){ ag[x.role] = x.text; });
+
+  return {
+    q: resp.question,
+    seeds: resp.retrieval.seeds || [],
+    trace: resp.retrieval.reason + '　｜　证据 ' + ev.length + ' 条，其中 ' +
+           ev.filter(function(x){ return x.has_quote; }).length + ' 条带论文原文引文。',
+    stats: [
+      ['种子实体', String((resp.retrieval.seeds || []).length)],
+      ['子图节点', String(resp.retrieval.n_nodes)],
+      ['子图边', String(resp.retrieval.n_edges)],
+      ['证据条数', String(ev.length)],
+      ['带原文引文', String(ev.filter(function(x){ return x.has_quote; }).length)],
+      ['置信度', resp.confidence || '—']
+    ],
+    nodes: nodes, edges: edges,
+    pro: camp(ag['支持方'] || '（支持方 Agent 未运行）', ev.filter(function(x){ return x.has_quote; }).slice(0, 6), '支持 · 有原文引文的一侧'),
+    con: camp(ag['反对方'] || '（反对方 Agent 未运行）', ev.filter(function(x){ return !x.has_quote || String(x.type).toUpperCase() === 'CONTRADICTS'; }).slice(0, 6), '反对 · 引文缺失或类型为矛盾'),
+    verdict: esc(resp.conclusion || '').replace(/\n/g, '<br>'),
+    caveat: resp.degraded
+      ? '⚠️ 本地模型不可用，已降级为纯规则检索 —— 上面没有模型参与判断。'
+      : '证据均取自论文原文（标注文件名与页码）；支持方与反对方是两次独立调用，互不可见。'
+  };
+}
 
 const QA = {
   transe: {
@@ -890,27 +981,50 @@ $('camps').addEventListener('click', function(ev){
   btn.parentNode.querySelector('.more').hidden = open;
 });
 
-/* 表单提交 + 示例胶囊 */
+/* 表单提交 + 示例胶囊 —— **接真后端**（2026-09-14 改）。
+
+此前这两处都是"拿输入去匹配硬编码的 QA 常量"，最像问答、实则最不像：
+输入什么都会落到三个预设之一。现在调 POST /api/qa 跑真正的四 Agent 流程；
+后端不在时才退回预设数据，并**明确标注这是演示数据**。 */
+async function askReal(question){
+  const note = $('trace');
+  $('how').hidden = true;
+  $('how-note').hidden = true;
+  $('result').hidden = false;
+  if (note) note.textContent = '正在检索子图并取证…（本地模型需要几十秒）';
+
+  try {
+    const r = await fetch('./api/qa', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({graph_id: ASK_GID, question: question, use_llm: true})
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const resp = await r.json();
+    run(adaptQA(resp));
+  } catch (err) {
+    run(QA.transe);
+    const c = $('caveat');
+    if (c) c.innerHTML = '⚠️ 后端不可用（' + esc(String(err.message || err)) +
+      '），下面显示的是**内置演示数据**，不是本次提问的检索结果。' +
+      '启动后端后本页会走真的多 Agent 问答。';
+  }
+}
+window.askReal = askReal;
+
 $('ask').addEventListener('submit', function(e){
   e.preventDefault();
   const v = $('q').value.trim();
-  const keys = Object.keys(QA);
-  let hit = null;
-  if (v.length >= 2) {
-    for (let i = 0; i < keys.length && !hit; i++) {
-      const d = QA[keys[i]];
-      const parts = d.seeds.concat([d.q]);
-      for (let j = 0; j < parts.length; j++) {
-        if (parts[j].indexOf(v) >= 0 || v.indexOf(parts[j]) >= 0) { hit = d; break; }
-      }
-    }
-  }
-  run(hit || QA.transe);
+  if (v.length >= 2) askReal(v);
 });
 
 $('chips').addEventListener('click', function(e){
   const ch = e.target.closest('.chip');
-  if (ch) run(QA[ch.dataset.k]);
+  if (ch) {
+    const q = ch.dataset.q || ch.textContent.trim();
+    $('q').value = q;
+    askReal(q);
+  }
 });
 
 function run(d){

@@ -37,12 +37,22 @@ def extract_graph(
     mode: str = "local",
     max_chars: int = 500,
     on_progress=None,
+    text: str = None,
 ) -> dict:
     """跑完整抽取管线。
 
     `on_progress(stage, pct, detail)` 是**可选**回调，用于「上传页」显示真实进度
     （解析 → 分块 → 逐段抽取 → 归一 → 汇总）。不传就完全等于旧行为。
     回调里的异常一律吞掉——进度上报绝不能反过来把抽取搞挂。
+
+    `text` 是**可选**的纯文本入口（2026-09-14 加）。传了它就跳过 PDF 解析，
+    把整段文本当成"一页"喂给同一个分块器 —— 其余步骤（分块 / 抽取 / 归一 /
+    端点规范化 / 证据合并）**完全不变**。
+
+    **为什么需要它**：用开源人工标注数据集做外部对照评测时，数据集给的是
+    **已解析的文本**（SciREX 的 `words` 列表），不是 PDF。没有这个入口就没法
+    在自己的管线上跑别人的数据，也就永远拿不到外部对照 —— 而这正是评审
+    反复指出的缺口（「全文没有任何与外部系统/公开基准的可比结果」）。
     """
     def report(stage: str, pct: float, detail: str = "") -> None:
         if on_progress is None:
@@ -52,8 +62,18 @@ def extract_graph(
         except Exception:
             pass
 
-    report("parse", 3.0, "解析 PDF")
-    parsed = parse_pdf(pdf_path, work_dir)
+    if text is not None:
+        # 构造与 parse_pdf 同构的 parsed，单页承载全部文本。
+        # chunk_document 只读 pages[].text / num / images，所以这样就够了。
+        report("parse", 3.0, "纯文本输入（跳过 PDF 解析）")
+        parsed = {
+            "file": source_name,
+            "total_pages": 1,
+            "pages": [{"num": 1, "text": text, "images": []}],
+        }
+    else:
+        report("parse", 3.0, "解析 PDF")
+        parsed = parse_pdf(pdf_path, work_dir)
     report("chunk", 15.0, f"{parsed['total_pages']} 页")
     chunked = chunk_document(parsed, max_chars=max_chars)
     total_chunks = len(chunked["chunks"])

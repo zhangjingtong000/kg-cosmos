@@ -90,6 +90,17 @@ class ChatResponse(BaseModel):
     sources: list[dict] = []
 
 
+class QARequest(BaseModel):
+    """多 Agent 问答的请求。
+
+    `use_llm=False` 时只跑检索 Agent（纯规则），用于离线/无模型环境 ——
+    结果里会标 `degraded: true`，不假装有模型参与。
+    """
+    graph_id: str
+    question: str
+    use_llm: bool = True
+
+
 # ── 数据面：把前端要用的 JSON 暴露成 HTTP ──────────────────
 # 白名单而非通配，避免把整个目录结构暴露出去。
 
@@ -475,6 +486,30 @@ async def list_flags():
     return {"total": len(flags), "applied": False, "flags": flags}
 
 
+def _ensure_graph(graph_id: str):
+    """取图：内存优先，没有就回落到 `data/<id>/graph.json`。
+
+    抽成函数是因为 `/graph/{id}` 与 `/api/qa` **都需要**这个回退 ——
+    后端一重启内存就空了，而磁盘上的图还在。`/api/qa` 第一版只查内存，
+    重启后直接 404，**而同一时刻 `/graph/ad690dfb` 却能正常返回** ——
+    这种"同一个东西，两个端点一个能用一个不能用"最容易骗过测试。
+    """
+    if graph_id not in graphs:
+        disk_path = DATA_DIR / graph_id / "graph.json"
+        if not disk_path.exists():
+            raise HTTPException(404, f"Graph '{graph_id}' not found")
+        try:
+            # utf-8-sig 会吃掉 BOM（PowerShell 的 Out-File -Encoding utf8 会写 BOM）
+            graphs[graph_id] = json.loads(disk_path.read_text(encoding="utf-8-sig"))
+        except Exception as exc:
+            raise HTTPException(
+                500,
+                f"Graph '{graph_id}' 的产物文件无法解析"
+                f"（{disk_path}）：{type(exc).__name__}: {exc}",
+            )
+    return graphs[graph_id]
+
+
 @app.get("/graph/{graph_id}")
 async def get_graph(graph_id: str):
     """Retrieve a previously extracted graph by ID.
@@ -489,19 +524,7 @@ async def get_graph(graph_id: str):
       · 解析失败时给**明确**的错误而不是裸 500 —— 前端 `new-graph.html`
         会把 detail 显示给用户，说得出"产物损坏"比"取不到"有用得多。
     """
-    if graph_id not in graphs:
-        disk_path = DATA_DIR / graph_id / "graph.json"
-        if not disk_path.exists():
-            raise HTTPException(404, f"Graph '{graph_id}' not found")
-        try:
-            graphs[graph_id] = json.loads(disk_path.read_text(encoding="utf-8-sig"))
-        except Exception as exc:
-            raise HTTPException(
-                500,
-                f"Graph '{graph_id}' 的产物文件无法解析"
-                f"（{disk_path}）：{type(exc).__name__}: {exc}",
-            )
-    return graphs[graph_id]
+    return _ensure_graph(graph_id)
 
 
 @app.get("/graph/{graph_id}/explorer")
@@ -579,6 +602,35 @@ async def chat(req: ChatRequest):
         answer = "Based on the knowledge graph:\n" + "\n".join(f"- {p}" for p in parts)
 
     return ChatResponse(answer=answer, sources=relevant_edges[:10])
+
+
+@app.post("/api/qa")
+async def api_qa(req: QARequest):
+    """**多 Agent 问答**：检索 → 支持取证 / 反对取证（并行、互不可见）→ 综合。
+
+    与上面那个 `/chat` 原型的区别，正是它存在的理由：
+
+    · `/chat`  —— 子串匹配 + 邻边拼接，**不调模型**，只回一句边列表；
+    · `/api/qa` —— 四个 Agent 分工：检索是**纯规则可复现**的，
+      支持方与反对方**各自独立**读同一批证据（不共享中间结论），
+      综合方只看到两方交上来的东西。
+
+    **证据一律指向论文原文**：每条都带 `paper`（论文文件名）、`page`、
+    `quote`（原文片段）。这一点是刻意的 —— 评审指出旧 ask.html
+    「18 条证据全部指向项目自己的文档，0 条指向论文原文」，
+    所以这里从数据结构上就不给"引用自己文档"留位置。
+
+    模型用本地 Ollama；不可用时自动降级为纯规则检索，并在结果里
+    标 `degraded: true`。
+    """
+    g = _ensure_graph(req.graph_id)   # 内存优先，带磁盘回退
+    try:
+        import multi_agent_qa
+        return multi_agent_qa.answer(
+            req.question, g.get("nodes") or [], g.get("edges") or [],
+            use_llm=req.use_llm)
+    except ImportError:
+        raise HTTPException(500, "multi_agent_qa 模块不可用")
 
 
 @app.get("/stats")
