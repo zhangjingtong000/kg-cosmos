@@ -37,6 +37,16 @@ import networkx as nx
 sys.path.insert(0, str(ROOT / "src"))
 from graph_store import Neo4jStore  # noqa: E402
 
+# 本体关系类型：**从 `kg_extractor` 导入，不在这里再抄一份** ——
+# 本项目在"同一份名单写两处"上已经栽过一次（`graph_store.ALLOWED_RELATION_TYPES`
+# 停在 15，导致新增的 `PUBLISHED_IN` 被静默改写成 `RELATED_TO`，扩展的数据增益为 0）。
+# 导入失败时退化为 None，此时跳过"字段错位修正"而不是猜。
+try:
+    from kg_extractor import RELATION_TYPES  # noqa: E402
+    LEGAL_RELATIONS = set(RELATION_TYPES)
+except Exception:                            # noqa: BLE001
+    LEGAL_RELATIONS = set()
+
 OUT = ROOT / "web/kg-data"
 QUALITY = ROOT / "data/quality"
 
@@ -55,7 +65,26 @@ def parse_args():
     ap.add_argument("--max-communities", type=int, default=60,
                     help="最多导出多少个社区（按规模降序），其余归入尘埃层")
     ap.add_argument("--max-edges", type=int, default=30000)
+    # ── 2026-09-15 加：不依赖 Neo4j 的数据源 ──────────────────────────────
+    #
+    # **为什么要它**：P7（争议视图）需要 `CONTRADICTS` 进概览数据，而
+    # **项目的 Neo4j 实例已经不在了**（全盘只剩 Desktop 的模板 conf，
+    # `Data\dbmss` 是空的）。
+    #
+    # 但核实发现：**`data/corpus/graphs/*.json` 里就是全量** ——
+    # 17 篇合计 **43867 条边**（与"评测全集"一致），
+    # 且 **`CONTRADICTS` 有 243 条**（每篇都有）。
+    # ⇒ **根本不需要 Neo4j**，从 JSON 汇总即可。
+    #
+    # ⚠️ **口径差异必须写明**：JSON 快照是 **43867 条**（治理前全量），
+    # 而此前从 Neo4j 导出的是 **31308 条**（治理后）。
+    # 所以两种来源产出的概览**规模会不同**，不能混着引用
+    # （本项目已经吃过多次"一个名字两个口径"的亏，见 docs/METRIC_CALIBERS.md）。
+    ap.add_argument("--from-json", action="store_true",
+                    help="从 data/corpus/graphs/*.json 汇总读（不依赖 Neo4j；"
+                         "口径是治理前全量 43867 条，而非 Neo4j 的 31308 条）")
     return ap.parse_args()
+
 
 
 ARGS = parse_args()
@@ -72,11 +101,94 @@ def fib_sphere(i, n):
             math.cos(phi))
 
 
+def load_from_json():
+    """从 `data/corpus/graphs/*.json` 汇总出 (nodes, edges)，**不依赖 Neo4j**。
+
+    17 篇快照合计 **43867 条边**（与"评测全集"一致），含 `CONTRADICTS` 243 条。
+
+    **合并口径**：
+      · 节点按 `name` 跨篇去重（同名视为同一实体）；
+        `type` 取第一次出现的（与 Neo4j 侧 `query_nodes` 的语义一致）。
+      · 边**全收集**（不跨篇去重）—— 因为 `build_nebula_data` 后面自己会
+        按 `(端点对, type)` 去重（那个键是 2026-09-15 修过的：原本不含 type，
+        会吃掉 9.3% 的边，其中就包括 CONTRADICTS）。
+
+    ⚠️ **口径提醒**：这里的边是**治理前全量（43867）**，
+    而此前从 Neo4j 导出的是**治理后（31308）**。两者产出的概览规模会不同。
+
+    ## 2026-09-15 新增：修正 189 条「`type` / `description` 错位」
+
+    从 JSON 重建时暴露了 **237 条非法边**（本体只有 16 类），分三类：
+      · **① 字段错位 189 条**（80%）—— `type` 里是**概念名**，
+        **`description` 里才是合法关系类型**：
+            {"type": "Triple Classification", "description": "RELATED_TO"}
+        涉及 5/17 篇。
+      · **② 越界谓词 40 条**（22 种：`CONTAINS` / `REPRESENTED_BY` / `friend` …）——
+        这类在 **Neo4j 侧会被 `safe_relation_type` 改写成 `RELATED_TO`**，
+        所以从 Neo4j 导出时看不见；JSON 是**入库前**快照，因此带着原样。
+      · **③ 其余 8 条**。
+
+    **对 ① 的处理是保守的**：**只在 `description` 恰好是一个合法类型时**才换过来
+    —— 不做任何"猜类型"的动作。换了几条会打印出来，便于核对。
+    （按 `docs/ARCHIVE_POLICY.md`：这是**读取侧的兼容处理，不改动原始文件** ——
+    那 189 条错位仍完整保留在 `data/corpus/graphs/` 里作为档案。）
+    """
+    gdir = ROOT / "data/corpus/graphs"
+    files = sorted(gdir.glob("*.json"))
+    if not files:
+        raise SystemExit(f"没有找到图快照：{gdir}")
+
+    by_name = {}
+    edges = []
+    n_swapped = 0
+    n_rewritten = 0
+    for f in files:
+        try:
+            d = json.loads(f.read_text(encoding="utf-8-sig"))
+        except Exception as exc:
+            print(f"  ⚠️ 跳过 {f.name}：{type(exc).__name__}: {exc}")
+            continue
+        for n in (d.get("nodes") or []):
+            nm = n.get("name") or n.get("id")
+            if nm and nm not in by_name:
+                by_name[nm] = {"name": nm, "type": n.get("type") or "Concept"}
+        for e in (d.get("edges") or []):
+            t = str(e.get("type") or "")
+            desc = str(e.get("description") or "").strip()
+            if t not in LEGAL_RELATIONS and desc in LEGAL_RELATIONS:
+                # ① 字段错位：description 里才是真类型。保守换回，并留痕。
+                e = dict(e)
+                e["type"], e["description"] = desc, t
+                e["_swapped_from"] = t          # 留痕：原 type 是什么
+                n_swapped += 1
+            elif t not in LEGAL_RELATIONS:
+                # ② 越界谓词：**与 Neo4j 侧的 `safe_relation_type` 行为保持一致**
+                #    —— 那边会在入库时把它改写成 `RELATED_TO`。
+                #    这里不改的话，概览会带着 47 条"类型是概念名"的边，
+                #    与生产口径不一致（本项目已经吃过多次"一个名字两个口径"的亏）。
+                e = dict(e)
+                e["_rewritten_from"] = t
+                e["type"] = "RELATED_TO"
+                n_rewritten += 1
+            edges.append(e)
+
+    print(f"  从 {len(files)} 篇快照汇总"
+          f"（口径：治理前全量，非 Neo4j 的治理后 31308）")
+    print(f"  ⚠️ 修正字段错位 {n_swapped} 条（type/description 互换，"
+          f"只在 description 恰为合法类型时）")
+    print(f"  ⚠️ 改写越界谓词 {n_rewritten} 条 → RELATED_TO"
+          f"（与 Neo4j 侧 safe_relation_type 的行为一致）")
+    return list(by_name.values()), edges
+
+
 def main():
-    store = Neo4jStore(uri="bolt://localhost:7687", user="neo4j", password="kgdemo2026")
-    nodes = store.query_nodes()
-    edges = store.query_edges()
-    store.close()
+    if ARGS.from_json:
+        nodes, edges = load_from_json()
+    else:
+        store = Neo4jStore(uri="bolt://localhost:7687", user="neo4j", password="kgdemo2026")
+        nodes = store.query_nodes()
+        edges = store.query_edges()
+        store.close()
     print(f"载入 {len(nodes)} 节点 / {len(edges)} 边")
 
     G = nx.Graph()
