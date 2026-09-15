@@ -51,6 +51,8 @@ ONTOLOGY_RELS = {
     "PART_OF", "USES", "PRODUCES", "MEASURES", "EVALUATES", "COMPARES_WITH",
     "SUPPORTS", "CONTRADICTS", "CAUSES", "ENABLES", "APPLIES_TO", "LOCATED_AT",
     "CREATED_BY", "CITES", "RELATED_TO",
+    # 2026-09-14 本体扩展：论文 -> 发表场所（此前缺失，导致 venue 被误套成 PART_OF）
+    "PUBLISHED_IN",
 }
 ONTOLOGY_TYPES = {
     "Concept", "Method", "System", "Component", "Process", "Artifact",

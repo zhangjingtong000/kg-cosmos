@@ -79,6 +79,11 @@ RELATION_SEMANTICS = {
                   "注意方向是 Author → Work，不是 Work → Author",
     "CITES": "source 引用 target（学术引用，单向）",
     "RELATED_TO": "**兜底类型，尽量不用**。仅当以上 14 类都不合适时才用",
+    # 2026-09-14 新增：补上「论文 → 发表场所」。此前本体没有这一类，
+    # 模型只能把「发表于」硬套成 PART_OF / LOCATED_AT（见 RELATION_TYPES 的注释）。
+    "PUBLISHED_IN": "source 是论文/作品，target 是它发表的会议、期刊或出版场所。"
+                    "**注意**：这是「论文发表于会议」，不是「论文是会议的一部分」，"
+                    "也不要写成 LOCATED_AT（那会变成「论文位于某地」）",
 }
 
 
@@ -188,6 +193,18 @@ RELATION_TYPES = [
     "PART_OF", "USES", "PRODUCES", "MEASURES", "EVALUATES",
     "COMPARES_WITH", "SUPPORTS", "CONTRADICTS", "CAUSES", "ENABLES",
     "APPLIES_TO", "LOCATED_AT", "CREATED_BY", "CITES", "RELATED_TO",
+    # 2026-09-14 新增。学术图谱里最常见的关系之一，此前本体里**没有**，
+    # 于是「论文/作者 ↔ 发表场所」被硬套成 PART_OF / LOCATED_AT / CREATED_BY：
+    #     TuckER   —[PART_OF]→ EMNLP-IJCNLP   （「Tucker 是 EMNLP 的一部分」不通）
+    #     TransNet —[LOCATED_AT]→ IJCAI
+    #     R. Das   —[CREATED_BY]→ EACL        （「R. Das 由 EACL 创作」完全错）
+    # 实测规模见 `data/quality/venue-rewrite-plan.json`：可改写 1019 条
+    # （PART_OF 745 + LOCATED_AT 274）、待判 129 条（CREATED_BY）。
+    #
+    # ⚠️ **加上它会让 L4（谓词是否在本体内）的分母变化** —— 原来判「越界」的
+    # 谓词现在合规了。改前改后的 L4 必须两套口径一起留档
+    # （`docs/KNOWN_DATA_DEFECTS.md §6` 的原则），否则六层指标失去可比性。
+    "PUBLISHED_IN",
 ]
 
 

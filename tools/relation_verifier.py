@@ -79,6 +79,8 @@ REL_TEMPLATE = {
     "CREATED_BY": "{t} was created by {s}.",
     "CITES": "{s} cites {t}.",
     "RELATED_TO": "{s} is related to {t}.",
+    # 2026-09-14 本体扩展：论文 -> 发表场所
+    "PUBLISHED_IN": "{s} was published in {t}.",
 }
 
 

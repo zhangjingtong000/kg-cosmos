@@ -127,6 +127,41 @@ def _constraint(semantics, kind, source_core, target_core, source_allowed,
 
 
 RELATION_ENDPOINT_CONSTRAINTS = {
+    # ── 2026-09-14 新增：补上「论文 → 发表场所」这一类 ──────────────────
+    #
+    # **为什么之前没有**：学术图谱里最常见的关系之一，本体却漏了。
+    # 抽取器只能把「发表于」硬套进最接近的类型，实测污染三类：
+    #     PART_OF     827 条   TuckER —[PART_OF]→ EMNLP-IJCNLP
+    #     LOCATED_AT  323 条   TransNet —[LOCATED_AT]→ IJCAI
+    #     CREATED_BY  192 条   R. Das —[CREATED_BY]→ EACL
+    # 规模与逐条清单见 `data/quality/venue-rewrite-plan.json`。
+    #
+    # venue 端点在数据里的实际类型分布（实测 1019 条可改写边）：
+    #     Event 811 · Document 124 · Unknown 78 · 类型未知 6
+    # 所以 target_allowed 取 {Event, Document, Organization, Location} ——
+    # 前两个覆盖 91.8%，后两个是 venue 可能被标成的类型（学会/地点）。
+    "PUBLISHED_IN": _constraint(
+        semantics="source 是论文/作品，target 是它发表的会议、期刊或出版场所。"
+                  "这是「论文发表于会议」，**不是**「论文是会议的一部分」"
+                  "（那会写成 PART_OF），也**不是**「论文位于某地」（LOCATED_AT）。",
+        kind="directed",
+        # ⚠️ **方向的适用边界**：论文与期刊/论文集**同型**（都是 Document），
+        # 只有会议（Event）作为 target 时才分得开。所以 core 取 {Event}
+        # 以保证指纹不相交（自检要求：有指纹就必须标 judgeable），
+        # 但**实际只有 Event 类 venue 的方向可判**，Document 类判不了 ——
+        # 这一点写进 evidence，避免被读成"这一类方向全都可判"。
+        source_core=_WORK,
+        target_core=frozenset({"Event"}),
+        source_allowed=_WORK,
+        target_allowed=frozenset({"Event", "Document", "Organization", "Location"}),
+        basis="ontology-extension",
+        evidence="本体扩展的动因实测：被误套为 PART_OF 745 条、LOCATED_AT 274 条、"
+                 "CREATED_BY 129 条（其中 target 命中 venue 判据）；"
+                 "venue 端点类型 Event 811 / Document 124，占 91.8%。"
+                 "**方向可判性有边界**：Document 类 venue（期刊/论文集）与论文同型，"
+                 "方向指纹判不了；只有 Event 类 venue（811 条，占 79.6%）可判。",
+        reversal="judgeable",
+    ),
     # ── 方向真正可判的（core 与 core 不相交，方向由类型唯一决定）──
     "CREATED_BY": _constraint(
         semantics="source 是创作者（作者/机构），target 是被创作物。"
@@ -611,6 +646,10 @@ REL_HYPOTHESIS_TEMPLATE = {
     "CREATED_BY": "{t} was created by {s}.",
     "CITES": "{s} cites {t}.",
     "RELATED_TO": "{s} is related to {t}.",
+    # 2026-09-14 新增（本体扩展）。方向是 论文 → 发表场所。
+    # 动词用 published in / appeared in —— 与 PART_OF（is part of）刻意区分开，
+    # 否则 NLI 会把两类混为一谈。
+    "PUBLISHED_IN": "{s} was published in {t}.",
 }
 
 # 名词短语形态（与官方校准集 en_triplet_entailment.tsv 同形：
@@ -635,6 +674,8 @@ REL_PHRASE_TEMPLATE = {
     "CREATED_BY": "{s} created {t}",
     "CITES": "{s} cites {t}",
     "RELATED_TO": "{s} related to {t}",
+    # 2026-09-14 本体扩展。与 PART_OF（`{s} part of {t}`）刻意区别开。
+    "PUBLISHED_IN": "{s} published in {t}",
 }
 
 

@@ -54,6 +54,9 @@ REL_TEMPLATE = {
     "CREATED_BY": "{t} was created by {s}.",
     "CITES": "{s} cites {t}.",
     "RELATED_TO": "{s} is related to {t}.",
+    # 2026-09-14 本体扩展（唯一来源仍是 src/ontology.py 的 REL_HYPOTHESIS_TEMPLATE，
+    # 这里只是同步一份供本脚本离线使用；check_ontology_consistency.py 会逐字校验）
+    "PUBLISHED_IN": "{s} was published in {t}.",
 }
 
 # 模板语义近似对称的关系：反转后句子含义基本不变，不能用来判断方向敏感性
