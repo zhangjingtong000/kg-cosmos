@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KG Cosmos · 论文管理</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: radial-gradient(ellipse 120% 62% at 50% 0%, #15161d 0%, #0d0e13 46%, #08090c 100%);
+    color: var(--pq-txt, #e4e6ec);
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    padding: 40px 30px 56px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  :root{
+    --pq-ink:#0b0c11; --pq-surface:#14151c;
+    --pq-line:rgba(174,178,194,.13);
+    --pq-txt:#e4e6ec; --pq-txt-2:rgba(198,201,213,.68); --pq-txt-3:rgba(160,164,178,.5);
+    --pq-cool:#9aa0ae; --pq-warm:#e0a469; --pq-cyan:#7cc0b6;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; }
+  header { padding-bottom: 22px; border-bottom: 1px solid var(--pq-line); }
+  h1 { margin: 0 0 8px; font-size: 26px; font-weight: 560; letter-spacing: .01em; }
+  .eyebrow { font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+             color: var(--pq-txt-3); margin: 0 0 10px; }
+  .lead { margin: 0; color: var(--pq-txt-2); font-size: 13.5px; max-width: 78ch; }
+  .stats { display: flex; gap: 26px; margin: 20px 0 0; flex-wrap: wrap; }
+  .stat .v { font-size: 25px; color: var(--pq-cyan); font-weight: 560;
+             font-variant-numeric: tabular-nums; }
+  .stat .k { display: block; font-size: 11.5px; color: var(--pq-txt-3); margin-top: 2px; }
+
+  .ctl { display: flex; gap: 12px; align-items: center; margin: 22px 0 14px; flex-wrap: wrap; }
+  input[type="search"] {
+    flex: 1 1 300px; min-width: 200px; background: var(--pq-surface);
+    border: 1px solid var(--pq-line); border-radius: 9px; padding: 9px 13px;
+    color: var(--pq-txt); font-size: 13px; font-family: inherit;
+  }
+  input[type="search"]:focus-visible { outline: 2px solid var(--pq-warm); outline-offset: 1px; }
+  .tog { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px;
+         color: var(--pq-txt-2); cursor: pointer; user-select: none; }
+  .tog input { accent-color: var(--pq-warm); width: 15px; height: 15px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    text-align: left; padding: 9px 10px; font-size: 11px; font-weight: 500;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--pq-txt-3);
+    border-bottom: 1px solid var(--pq-line); white-space: nowrap;
+  }
+  thead th.num { text-align: right; }
+  tbody tr { border-bottom: 1px solid rgba(174,178,194,.07); }
+  tbody tr:hover { background: rgba(255,255,255,.022); }
+  td { padding: 10px; vertical-align: top; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; color: var(--pq-txt-2); }
+  td.id { font-family: ui-monospace, Consolas, monospace; font-size: 12px;
+          color: var(--pq-txt-2); white-space: nowrap; }
+  td.title { color: var(--pq-txt); }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px;
+          border: 1px solid; white-space: nowrap; }
+  .pill.ok { color: var(--pq-cyan); border-color: rgba(124,192,182,.42); }
+  .pill.no { color: var(--pq-txt-3); border-color: var(--pq-line); }
+  a.go { color: var(--pq-warm); text-decoration: none; font-size: 12px; white-space: nowrap; }
+  a.go:hover { text-decoration: underline; }
+  a.go:focus-visible { outline: 2px solid var(--pq-warm); outline-offset: 2px; border-radius: 3px; }
+  .dim { color: var(--pq-txt-3); font-size: 12px; }
+  footer { margin-top: 30px; padding-top: 16px; border-top: 1px solid var(--pq-line);
+           color: var(--pq-txt-3); font-size: 12px; }
+  .empty { padding: 26px 10px; color: var(--pq-txt-3); font-size: 13px; }
+</style>
+<!-- a11y.css：全站统一的键盘聚焦环与正文排版约定。
+     ⚠️ **新页面必须引它** —— a11y 检查里有一条专门盯这个
+     （`cdp_verify_a11y.py` 的"每页都加载 a11y.css"），
+     而这条检查只有在 `PAGES` 名单里加了这个页面时才会覆盖到它。 -->
+<link rel="stylesheet" href="./lib/a11y.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Corpus · 语料清单</p>
+    <h1>论文管理</h1>
+    <p class="lead">
+      「<b>一篇论文</b>」的定义来自 <code>data/corpus/_manifest.json</code> ——
+      它的 <code>id</code> 同时是 <code>data/corpus/graphs/&lt;id&gt;.json</code> 的文件名，
+      也是每条证据里 <code>src</code> 去掉 <code>.pdf</code> 之后的值。
+      <b>清单与图快照实测完美对应（0 个孤儿）</b>，另有一批论文只下载、还没入库。
+    </p>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="ctl">
+    <label for="q" class="dim">搜索</label>
+    <input type="search" id="q" placeholder="按标题或 arXiv id 过滤（例如 embedding / 2302）"
+           aria-label="按标题或 arXiv id 过滤">
+    <label class="tog" for="only">
+      <input type="checkbox" id="only"> 只看已入库
+    </label>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>arXiv id</th>
+        <th>年</th>
+        <th>状态</th>
+        <th class="num">节点</th>
+        <th class="num">关系</th>
+        <th class="num">社区</th>
+        <th>标题</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div class="empty" id="empty" hidden>没有匹配的论文。</div>
+
+  <footer>
+    数据由 <code>tools/build_corpus_index.py</code> 生成 →
+    <code>web/kg-data/corpus-index.json</code>。
+    「社区」列 = 这篇论文的实体出现在哪几个社区（可从主视图按社区查看）。
+  </footer>
+</div>
+
+<!-- a11y.js 会注入「← 导航页」（全站统一，键盘可达）与动效开关 -->
+<script src="./lib/a11y.js"></script>
+<script src="./lib/demo-rail.js"></script>
+<script>
+(function () {
+  'use strict';
+  var DATA = null;
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function render() {
+    if (!DATA) return;
+    var q = (document.getElementById('q').value || '').trim().toLowerCase();
+    var only = document.getElementById('only').checked;
+    var rows = DATA.papers.filter(function (p) {
+      if (only && !p.in_graph) return false;
+      if (!q) return true;
+      return (p.title || '').toLowerCase().indexOf(q) >= 0
+          || (p.id || '').toLowerCase().indexOf(q) >= 0;
+    });
+
+    var html = rows.map(function (p) {
+      var link = p.in_graph
+        ? '<a class="go" href="./kg-nebula.html" title="进入主视图（三维星云）">进入主视图 ↗</a>'
+        : '<span class="dim">未入库</span>';
+      return '<tr>'
+        + '<td class="id">' + esc(p.id) + '</td>'
+        + '<td class="num">' + esc(p.year) + '</td>'
+        + '<td><span class="pill ' + (p.in_graph ? 'ok' : 'no') + '">'
+        + (p.in_graph ? '已入库' : '只下载') + '</span></td>'
+        + '<td class="num">' + (p.nodes == null ? '—' : p.nodes) + '</td>'
+        + '<td class="num">' + (p.edges == null ? '—' : p.edges) + '</td>'
+        + '<td class="num">' + (p.communities ? p.communities.length : 0) + '</td>'
+        + '<td class="title">' + esc(p.title) + '</td>'
+        + '<td>' + link + '</td>'
+        + '</tr>';
+    }).join('');
+
+    document.getElementById('rows').innerHTML = html;
+    document.getElementById('empty').hidden = rows.length > 0;
+  }
+
+  fetch('./kg-data/corpus-index.json')
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (!d) throw new Error('corpus-index.json 没取到');
+      DATA = d;
+      var s = d.stats || {};
+      document.getElementById('stats').innerHTML =
+        '<div class="stat"><span class="v">' + (s.total || 0) + '</span>'
+        + '<span class="k">清单论文</span></div>'
+        + '<div class="stat"><span class="v">' + (s.in_graph || 0) + '</span>'
+        + '<span class="k">已入库</span></div>'
+        + '<div class="stat"><span class="v">' + (s.downloaded_only || 0) + '</span>'
+        + '<span class="k">只下载未入库</span></div>';
+      document.getElementById('q').addEventListener('input', render);
+      document.getElementById('only').addEventListener('change', render);
+      render();
+      window.__ready = true;
+    })
+    .catch(function (e) {
+      document.getElementById('rows').innerHTML =
+        '<tr><td colspan="8" class="empty">加载失败：' + esc(e.message) + '</td></tr>';
+      window.__ready = true;
+    });
+})();
+</script>
+</body>
+</html>

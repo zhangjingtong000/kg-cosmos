@@ -489,6 +489,21 @@ fetch('./kg-data/nebula.json')
     const n = (D.nodes || []).length;
     const e = (D.edges || []).length;
     const c = (D.communities || []).length;
+    // ── 2026-09-15：把概览层的两个规模数字也改成**实测值** ────────────────
+    // 它们此前写死在 HTML 的 `data-count` 里（`18780` / `29120`），
+    // 而概览口径在 P7 之后已变成 `19427` / `30000` —— **界面上印着过期数字**。
+    // 这与 `check_doc_numbers.py` 盯 README 的道理一样，只是守门脚本不查 HTML。
+    // 动画由 `IntersectionObserver` 在滚到那一屏时才触发，
+    // 而这里读 `nebula.json` 只要几百毫秒 ⇒ 更新来得及；
+    // 同时直接写 `textContent`，以防该屏已经被播过一遍。
+    const setFig = (id, v) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.dataset.count = String(v);
+      el.textContent = Number(v).toLocaleString();
+    };
+    setFig('figNodes', n);
+    setFig('figEdges', e);
     lf.innerHTML =
       '<span class="it"><span class="v">' + n.toLocaleString() + '</span>'
       + '<span class="l">实体 · 真实抽取</span></span>'

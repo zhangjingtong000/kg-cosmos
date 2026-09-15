@@ -25,7 +25,11 @@ import websocket
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
 BASE = 'http://127.0.0.1:8098/web'
 PAGES = ['index.html', 'kg-nebula.html', 'analytics.html',
-         'method-limits.html', 'pathqa.html', 'refs.html']
+         'method-limits.html', 'pathqa.html', 'refs.html',
+         # K2（2026-09-15）：论文管理页。**新页面必须加进这份名单** ——
+         # 否则"每页都有可聚焦的返回入口"这条检查根本不覆盖它，
+         # 而这正是本项目栽过的坑（demo-rail 注入时漏过 3 个页面）。
+         'corpus.html']
 
 
 def cdp_open(url, port_base=9940, emulate_reduced=False):

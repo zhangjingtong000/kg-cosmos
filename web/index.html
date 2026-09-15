@@ -152,10 +152,10 @@ h3 { font-weight: 600; }
         每个对外报出的数字都能追到产物文件，也包括那些不好看的。
       </p>
       <div class="grid">
-        <div class="fig"><span class="n" data-count="18780">0</span>
+        <div class="fig"><span class="n" id="figNodes" data-count="19427">0</span>
           <span class="k">实体（概览层）</span><span class="d">Louvain 归入 60 个社区</span></div>
-        <div class="fig"><span class="n" data-count="29120">0</span>
-          <span class="k">关系（概览层）</span><span class="d">评测全集 43867 条边</span></div>
+        <div class="fig"><span class="n" id="figEdges" data-count="30000">0</span>
+          <span class="k">关系（概览层）</span><span class="d">导出上限 30000；评测全集 43867 条边</span></div>
         <div class="fig"><span class="n" data-count="94.4" data-dec="1">0<u>%</u></span>
           <span class="k">实体证据存在率</span><span class="d">L1：名字出现在自己的引文里</span></div>
         <div class="fig"><span class="n warm">¥0</span>
@@ -216,7 +216,7 @@ h3 { font-weight: 600; }
         <a class="entry" href="kg-nebula.html">
           <span class="ix">03</span>
           <span><h3>社区星云 · 主视图</h3>
-          <p>18780 个实体按社区与类型分区排布的三维视图，支持度数 / PageRank 排序、
+          <p>近两万个实体按社区与类型分区排布的三维视图，支持度数 / PageRank 排序、
              标签按深度遮挡、点选看证据并深链回原文 PDF 的高亮位置。</p></span>
           <span class="mt"><b>核心</b><span class="go">→</span></span>
         </a>
@@ -240,6 +240,17 @@ h3 { font-weight: 600; }
           <p>243 条方法 × 178 个方法本体 × 194 个能力维度，逐条标注
              "这张图能做什么、不能做什么"，避免把结构推断说成事实。</p></span>
           <span class="mt">边界声明<span class="go">→</span></span>
+        </a>
+        <!-- K2（2026-09-15）：论文管理。此前"一篇论文"这个概念在界面上不存在 ——
+             而它在数据里有明确定义（_manifest.json 的 id），且与图快照、证据链
+             完美对应。这一页把它显式化，并如实标出"只下载未入库"的那批。 -->
+        <a class="entry" href="corpus.html">
+          <span class="ix">07</span>
+          <span><h3>论文管理 · 语料清单</h3>
+          <p>28 篇论文的清单：标题、年份、检索式、是否已入库、抽出了多少实体与关系、
+             它们的实体分布在哪些社区。<b>含 11 篇只下载、尚未入库的</b> ——
+             不把"计划中的语料"说成"已覆盖的语料"。</p></span>
+          <span class="mt">语料边界<span class="go">→</span></span>
         </a>
       </div>
     </div>
