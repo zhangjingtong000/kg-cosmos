@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-15 19:20:52",
+  "generated": "2026-09-15 19:43:37",
   "note": "数据源指纹 + 各指标读数。数据变了而指标没重跑时，python tools/metric_provenance.py 会把它们标为 stale。",
   "sources": {
     "graphs": {
@@ -22,9 +22,9 @@
     },
     "force_full": {
       "files": 1,
-      "bytes": 3626587,
-      "newest_mtime": "2026-09-12 16:06:32",
-      "sha1_16": "90f00a9bb30dc132"
+      "bytes": 3714942,
+      "newest_mtime": "2026-09-15 19:33:54",
+      "sha1_16": "bf5596b5657ebb24"
     }
   },
   "metrics": {
@@ -152,28 +152,28 @@
       "artifact": "l8-structure-audit.json",
       "path": "random_baseline.clustering_ratio_vs_random",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-15 19:13:12"
+      "artifact_mtime": "2026-09-15 19:39:17"
     },
     "L8_largest_component_pct": {
       "value": 73.67,
       "artifact": "l8-structure-audit.json",
       "path": "connectivity.largest_component_pct",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-15 19:13:12"
+      "artifact_mtime": "2026-09-15 19:39:17"
     },
     "L8_isolated_nodes": {
       "value": 3891,
       "artifact": "l8-structure-audit.json",
       "path": "connectivity.isolated_nodes",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-15 19:13:12"
+      "artifact_mtime": "2026-09-15 19:39:17"
     },
     "L8_nodes": {
       "value": 19427,
       "artifact": "l8-structure-audit.json",
       "path": "scale.nodes",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-15 19:13:12"
+      "artifact_mtime": "2026-09-15 19:39:17"
     },
     "L9_endpoint_recall": {
       "value": 0.8621,

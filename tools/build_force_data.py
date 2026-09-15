@@ -24,7 +24,9 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(ROOT / "src"))
-from graph_store import Neo4jStore  # noqa: E402
+sys.path.insert(0, str(ROOT / "tools"))          # 为了 import graph_source
+from graph_store import Neo4jStore  # noqa: E402,F401  （保留导入：向后兼容）
+from graph_source import load_graph  # noqa: E402
 
 OUT = ROOT / "web/kg-data"
 
@@ -34,6 +36,10 @@ def parse_args():
     ap.add_argument("--full", action="store_true", help="导出全量")
     ap.add_argument("--top", type=int, default=0, help="按度数取前 N 个节点")
     ap.add_argument("--tag", default="", help="输出文件名后缀")
+    # 2026-09-15：数据源从 Neo4j 换成 data/corpus/graphs/*.json。
+    # 默认与 filaments.json 一致地做治理还原（否则社区着色会对不上）。
+    ap.add_argument("--no-governed", action="store_true",
+                    help="不做 entity_filter 治理还原（与 filaments 保持一致时不要用）")
     return ap.parse_args()
 
 
@@ -41,10 +47,12 @@ ARGS = parse_args()
 
 
 def main():
-    store = Neo4jStore(uri="bolt://localhost:7687", user="neo4j", password="kgdemo2026")
-    nodes = store.query_nodes()
-    edges = store.query_edges()
-    store.close()
+    # ── 数据源（2026-09-15）──────────────────────────────────────────────
+    # 这是**第四个**原先硬依赖 Neo4j 的脚本（另外三个是 build_nebula_data /
+    # build_filament_data / build_community_details）。那个实例已不存在
+    # ⇒ 统一走 `tools/graph_source.py`（从 data/corpus/graphs/*.json 读）。
+    # **默认开治理还原**，与 filaments.json 保持一致 —— 否则社区着色会对不上。
+    nodes, edges = load_graph(governed=not ARGS.no_governed)
     print(f"载入 {len(nodes)} 节点 / {len(edges)} 边")
 
     # 度数（按去重后的无向边计）
