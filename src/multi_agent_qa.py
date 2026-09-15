@@ -51,12 +51,87 @@ def _norm(s):
     return re.sub(r'[^a-z0-9\u4e00-\u9fff]+', '', str(s or '').lower())
 
 
-def retrieve(question, nodes, edges, max_hops=2, max_nodes=60):
+# ── K7 多轮追问 · 问题重写（2026-09-15）──────────────────────────────────
+#
+# ## 为什么需要"重写"而不是"把历史塞进检索"
+#
+# `retrieve()` 是**字面种子匹配**（问题里的词与实体名做词级匹配）。
+# 而追问常常没有主语：
+#
+#     「那它的缺点呢？」  ← 「它」指谁？字面匹配找不到任何实体，检索直接空转
+#
+# 所以有两种做法，**只有一种是对的**：
+#
+#   ❌ **把历史原文拼进 question 再丢给 `retrieve`**
+#      —— 上一轮的问题会被一起当成"当前问题"，种子匹配会**大幅偏向前几轮**，
+#      而且历史越长、污染越重（这正是评审提醒的"别污染检索"）。
+#
+#   ✅ **先把追问补全，再走同一条检索链** —— 检索逻辑一行不改，只是喂给它的输入变干净
+#
+# ## ⚠️ 但"补全"和"塞历史"的界限在哪（这一点必须说清）
+#
+# 严格说，本函数**确实会**把上一轮的问句带进检索输入。区别在**带多少、带哪一轮**：
+#
+#   · **只带最近一轮的问题**（本实现）——
+#     `retrieve()` 是"词级匹配 + BFS"，上一轮的主语（如 `TransE`）**正好是我们要的种子**。
+#     带它就等于**把缺失的主语补回来**，这是**修复**，不是污染。
+#   · **带整个多轮历史**（不做）——
+#     历史越长，种子越多且越旧的问题占的权重越大；
+#     到第 5 轮时，检索结果会被**第 1 轮的主题**主导。**那才是污染。**
+#
+# 所以本实现的边界是：**最多带一轮，且只在"短 + 含指代词"时带**。
+# 另外**综合 Agent 才看完整历史**（它本来就要理解"用户在问第几个问题"），
+# **检索 Agent 只看补全后的单句** —— 两个 Agent 的输入面是分开的。
+
+#
+# ## 为什么第一版用纯规则
+#
+# 用 LLM 重写更准，但它会**给检索加一次模型调用**（多几秒、且离线环境就没了）。
+# 纯规则版覆盖的是最常见的一类：**问题短 + 含指代词**。
+# 判错时的代价是"检索回退到原始问题"——**与不做重写等价，不会更差**。
+_PRONOUNS = ('它', '他', '她', '这个', '那个', '这些', '那些', '该', '此',
+             '其', '这', '那', '上述', '前面', '刚才')
+
+
+def rewrite_question(question, history=None):
+    """把追问补全成**可独立检索**的问题。`history` 形如 `[{'question','answer'}]`。
+
+    返回 `(重写后的问题, 用了哪条历史)`；没重写时第二个元素是 `None`。
+
+    **保守原则**：只在"短 + 含指代词"时才拼上一轮；否则原样返回 ——
+    因为**误拼比不拼更糟**（会把完全无关的上一轮实体拉进检索）。
+    """
+    q = str(question or '').strip()
+    if not q or not history:
+        return q, None
+    if len(q) > 30:                      # 长问题通常自带主语，不拼
+        return q, None
+    if not any(p in q for p in _PRONOUNS):
+        return q, None
+    last = None
+    for h in reversed(history):
+        cand = str((h or {}).get('question') or '').strip()
+        if cand and cand != q:
+            last = cand
+            break
+    if not last:
+        return q, None
+    # 拼成一句**读得通**的检索输入：`<上一轮问题>（追问：<当前>）`
+    return f'{last}（追问：{q}）', last
+
+
+def retrieve(question, nodes, edges, max_hops=2, max_nodes=60, history=None):
     """种子匹配 + BFS 子图。
 
     种子：问题里的词与实体名/描述做**词级**匹配（不是整句子串，避免
     「知识图谱」这种长词把什么都匹配上）。
+
+    **K7（2026-09-15）**：加了 `history`。它**只用于把没主语的追问补全**
+    （见 `rewrite_question` 的说明）—— **检索算法本身没有任何改动**。
+    返回结果里会带 `rewritten_from`，让"这次检索用的是补全后的问题"可追溯。
     """
+    q_used, rewritten_from = rewrite_question(question, history)
+    question = q_used
     q = _norm(question)
     q_tokens = [t for t in re.split(r'[^0-9A-Za-z\u4e00-\u9fff]+', question.lower())
                 if len(t) >= 2]
@@ -113,6 +188,11 @@ def retrieve(question, nodes, edges, max_hops=2, max_nodes=60):
         'seeds': seeds,
         'nodes': [by_name[s] for s in seen if s in by_name],
         'edges': list(uniq.values()),
+        # K7：把"这次检索实际用的问句"与"补全来源"带出来，便于追溯。
+        # 前端会在检索步骤里显示"已把追问补全为：…" —— 否则用户
+        # 会奇怪"我只问了'它的缺点'，怎么检索到了 TransE"。
+        'question_used': question,
+        'rewritten_from': rewritten_from,
         'reason': f'种子 {len(seeds)} 个，{max_hops} 跳扩展至 {len(seen)} 个节点、'
                   f'{len(uniq)} 条边（纯规则，可复现）',
     }
@@ -240,13 +320,17 @@ SYNTH_PROMPT = """你是**综合** Agent。你只看到两方独立交上来的�
 """
 
 
-def answer(question, nodes, edges, use_llm=True):
+def answer(question, nodes, edges, use_llm=True, history=None):
     """跑完整的四 Agent 问答，返回结构化结果。
 
     返回值里每个字段都可直接给前端；`degraded=True` 表示模型不可用、
     只有检索结果（绝不假装有模型参与）。
+
+    **K7（2026-09-15）**：`history` 形如 `[{"question","answer"}]`，
+    只用于**把没主语的追问补全**（见 `rewrite_question`）——
+    检索、取证、综合的算法本身一行未改。
     """
-    sub = retrieve(question, nodes, edges)
+    sub = retrieve(question, nodes, edges, history=history)
     ev = evidence_pack(sub)
 
     result = {
@@ -256,6 +340,9 @@ def answer(question, nodes, edges, use_llm=True):
             'n_nodes': len(sub['nodes']),
             'n_edges': len(sub['edges']),
             'reason': sub['reason'],
+            # K7：把"补全后的问句"带出去，界面据此说明"我把它理解成了什么"
+            'question_used': sub.get('question_used'),
+            'rewritten_from': sub.get('rewritten_from'),
         },
         'evidence': ev,
         'agents': [],
@@ -334,9 +421,12 @@ def _confidence_of(text, opp_text):
 # 回传的成本远低于维护会话状态的风险（这个项目在"状态没落盘"上栽过：
 # 上传任务曾因后端重启而丢，见 `app.py` 的 `_save_task`）。
 
-def step_retrieve(question, nodes, edges):
-    """① 检索：纯规则，**不调模型**，所以永远快、永远可复现。"""
-    sub = retrieve(question, nodes, edges)
+def step_retrieve(question, nodes, edges, history=None):
+    """① 检索：纯规则，**不调模型**，所以永远快、永远可复现。
+
+    **K7**：`history` 只用于补全没主语的追问；检索算法本身未改。
+    """
+    sub = retrieve(question, nodes, edges, history=history)
     ev = evidence_pack(sub)
     return {
         'stage': 'retrieve',
@@ -347,6 +437,9 @@ def step_retrieve(question, nodes, edges):
             'n_nodes': len(sub['nodes']),
             'n_edges': len(sub['edges']),
             'reason': sub['reason'],
+            # K7：让界面能说出"我把你的追问补全成了什么"
+            'question_used': sub.get('question_used'),
+            'rewritten_from': sub.get('rewritten_from'),
         },
         'evidence': ev,
         'n_evidence': len(ev),

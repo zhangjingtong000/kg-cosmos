@@ -136,6 +136,9 @@ class QARequest(BaseModel):
     graph_id: str
     question: str
     use_llm: bool = True
+    # K7 多轮追问：历史由前端回传（后端不存 session）。
+    # 形如 `[{"question": "...", "answer": "..."}]`，**只用于补全没主语的追问**。
+    history: list[dict] = []
 
 
 class QAStepRequest(BaseModel):
@@ -160,6 +163,15 @@ class QAStepRequest(BaseModel):
     evidence: list[dict] = []
     support: str = ''
     oppose: str = ''
+    # K7 多轮追问（2026-09-15）。**历史由前端回传，后端不存 session** ——
+    # 与 `evidence`/`support`/`oppose` 同一个设计理由（见上方的 docstring）：
+    # 回传几十 KB 比维护会话状态安全得多，而这个项目在上传任务上已经栽过
+    # 一次"后端重启丢任务"。
+    #
+    # ⚠️ **它只喂给检索的"问题补全"，不进检索算法本身**（见
+    # `multi_agent_qa.rewrite_question` 的说明）：没有主语的追问
+    # （「那它的缺点呢？」）字面匹配不到任何实体，检索会空转。
+    history: list[dict] = []
 
 
 # ── 数据面：把前端要用的 JSON 暴露成 HTTP ──────────────────
@@ -703,7 +715,7 @@ async def api_qa(req: QARequest):
         import multi_agent_qa
         return multi_agent_qa.answer(
             req.question, g.get("nodes") or [], g.get("edges") or [],
-            use_llm=req.use_llm)
+            use_llm=req.use_llm, history=req.history)
     except ImportError:
         raise HTTPException(500, "multi_agent_qa 模块不可用")
 
@@ -724,7 +736,7 @@ async def api_qa_step(req: QAStepRequest):
         raise HTTPException(500, "multi_agent_qa 模块不可用")
 
     if req.step == 'retrieve':
-        return M.step_retrieve(req.question, nodes, edges)
+        return M.step_retrieve(req.question, nodes, edges, history=req.history)
     if req.step in ('support', 'oppose'):
         return M.step_agents(req.question, req.evidence, req.step)
     if req.step == 'synth':

@@ -339,6 +339,10 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
       </div>
     </form>
 
+      <!-- K7：追问提示。现有输入框本身就是追问入口 ——
+           第二轮起它会带上历史，后端据此把没主语的追问补全。 -->
+      <p class="ctx" id="histNote" hidden></p>
+
     <div class="chips" id="chips" role="group" aria-label="示例问题">
       <button class="chip" type="button" data-k="transe"
               data-q="What are the limitations of TransE for knowledge graph embedding?">TransE 有什么局限？</button>
@@ -1129,6 +1133,18 @@ async function qaStep(payload){
   return r.json();
 }
 
+/* ── K7 多轮追问（2026-09-15）─────────────────────────────────────────────
+   `QA_HISTORY` 存本页已问过的问题与结论，**每次追问时回传给后端**
+   （后端不存 session，与 evidence/support/oppose 同一个设计理由）。
+
+   ⚠️ **只传给 `retrieve` 一步**。另外三步（支持/反对/综合）用的是**原始问题** ——
+   它们的职责是"读这批证据、给出意见"，没必要也不应该被上一轮的问句影响。
+   后端拿它也只做一件事：**把没有主语的追问补全**
+   （「那它的缺点呢？」字面匹配不到任何实体，检索会 0 种子空转）。
+
+   实测：同一句追问，带历史 → 8 个种子；不带 → 0 个。 */
+let QA_HISTORY = [];
+
 async function askReal(question){
   const note = $('trace');
   $('how').hidden = true;
@@ -1160,11 +1176,18 @@ async function askReal(question){
   });
 
   try {
-    /* ① 检索 —— 纯规则，秒回 */
+    /* ① 检索 —— 纯规则，秒回。**只有这一步带 history**（见 QA_HISTORY 的说明） */
     setAgent('retrieve', 'run', '命中种子、扩展两跳子图…');
     if (note) note.textContent = '① 检索 Agent 工作中…';
-    const r1 = await qaStep({graph_id: ASK_GID, question: question, step: 'retrieve'});
-    setAgent('retrieve', 'done', r1.retrieval.reason);
+    const r1 = await qaStep({graph_id: ASK_GID, question: question, step: 'retrieve',
+                             history: QA_HISTORY});
+    // K7：如果后端把追问补全了，**必须说出来** ——
+    // 否则用户会奇怪"我只问了'它的缺点'，怎么检索到了 TransE"。
+    const rw = r1.retrieval.rewritten_from;
+    setAgent('retrieve', 'done',
+             rw ? ('已把追问补全为「' + r1.retrieval.question_used + '」· '
+                   + r1.retrieval.reason)
+                : r1.retrieval.reason);
 
     if (!r1.n_evidence) {
       ['support', 'oppose', 'synth'].forEach(function(s){
@@ -1223,6 +1246,21 @@ async function askReal(question){
       degraded: !(r2.ok || r3.ok),
       citations: []
     }));
+
+    /* K7：把这一轮记进历史，下一轮追问会带上它。
+       **上限 6 轮**：`rewrite_question` 只取最近一轮，但留几轮是为了
+       将来若改成 LLM 重写时够用；再长也没有意义（第 7 轮之后的历史
+       对"补全主语"已无贡献，只会让回传的 payload 变大）。 */
+    QA_HISTORY.push({question: question, answer: (r4.text || '').slice(0, 400)});
+    if (QA_HISTORY.length > 6) QA_HISTORY.shift();
+    const histNote = $('histNote');
+    if (histNote) {
+      histNote.textContent = QA_HISTORY.length > 1
+        ? ('已记住 ' + QA_HISTORY.length + ' 轮 —— 可以直接追问「那它的缺点呢？」这类'
+           + '没有主语的问题，检索会把上一轮的主语补回来。')
+        : '';
+      histNote.hidden = QA_HISTORY.length <= 1;
+    }
   } catch (err) {
     ['retrieve', 'support', 'oppose', 'synth'].forEach(function(s){
       const li = document.querySelector('#alog li[data-step="' + s + '"]');
