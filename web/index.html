@@ -15,6 +15,20 @@ h1, h2, h3,
 .kick, .eyebrow, .note b, .fig .n, .kpi b, .card h2, .entry h3 {
   font-family: "Smiley Sans","Noto Serif SC","Playfair Display",Georgia,"Songti SC","SimSun",serif;
 }
+
+/* ── 首屏「独有强项」条（2026-09-15 加）───────────────────────────────
+   放在 lead 之后、CTA 之前。用左侧一道暖色发丝线，与页面既有的
+   「引用块」语言一致（不引入新的视觉词汇）；字号比 lead 略小，
+   避免与主描述抢层级。 */
+.edge {
+  margin: 18px 0 0;
+  max-width: 62ch;
+  padding-left: 14px;
+  border-left: 2px solid var(--accent, #e0a469);
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--ink-2, rgba(203,218,241,.76));
+}
 /* 标题在衬线下不需要那么粗——衬线本身已经提供笔画对比 */
 h1, h2 { font-weight: 700; letter-spacing: -.02em; }
 h3 { font-weight: 600; }
@@ -110,6 +124,14 @@ h3 { font-weight: 600; }
       <p class="lead">
         从 28 篇论文里抽出的知识图谱，带着<strong>六层可复现的评测</strong>与
         <strong>三条独立的负结果</strong>。下面每一屏都在讲这张图的某个侧面。
+      </p>
+      <!-- 独有强项（2026-09-15 加，来自商业对标结论）。
+           此前这两个强项只活在 docs/ 里，界面上一个字没提 ——
+           而它们恰好是本项目"最直观、也最差异化"的东西。 -->
+      <p class="edge">
+        对标 <strong>Neo4j Bloom · Microsoft GraphRAG · Scite · Zotero</strong> 之后：
+        <strong>证据逐条回溯到论文原文那一句</strong>、<strong>把分歧保留成矛盾视图</strong>
+        这两项，<strong>在对标表里是独一份的</strong>。
       </p>
       <div class="cta">
         <a class="btn" href="kg-nebula.html">进入主视图<span class="a">→</span></a>
