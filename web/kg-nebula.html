@@ -1131,6 +1131,20 @@ function renderInnerPreview(nodeIdx) {
     byType.get(r.type).push(r.other);
   });
   const evs = evidenceTable && evidenceTable[n.id];
+  // ── K3/G5（2026-09-15）：把这个实体**出现在哪几篇论文**说清楚 ──────────
+  // 数据本来就在 `evidence-*.json` 里（每条证据带 `src`），此前只用来渲染
+  // "证据出处"，**没有汇总成"跨了几篇"** —— 而"这个实体是不是只在一篇里出现过"
+  // 恰好是判断它可信度的最直接线索。
+  //
+  // ⚠️ **判据不能用 `> 1`**：实测社区 0 的 1200 个实体里 **1108 个只跨 1 篇**、
+  // 92 个跨 2 篇。只显示多篇的话，绝大多数实体（包括 `TransE` 这种枢纽）
+  // **一个字都不显示** —— 而"只出现在一篇里、没被别的论文佐证"恰恰是要说的。
+  const srcs = [...new Set((evs || []).map(e => String(e.src || '')))].filter(Boolean);
+  const srcHtml = srcs.length
+    ? `<div class="sec">来源论文${srcs.length > 1 ? ` · 跨 ${srcs.length} 篇` : ''}</div>` +
+      srcs.map(s => `<div class="row"><span class="nm">${escHtml(s.replace(/\.pdf$/i, ''))}</span>`
+        + `<span class="dg">${(evs || []).filter(e => e.src === s).length} 处</span></div>`).join('')
+    : '';
   const evHtml = evs && evs.length
     ? '<div class="sec">证据出处</div>' + evs.map(e => {
         const snip = pdfSearchSnippet(e.text);
@@ -1148,9 +1162,10 @@ function renderInnerPreview(nodeIdx) {
     `<h2 style="color:${cloud ? cloud.color : '#d6d9e2'}">${escHtml(n.id)}</h2>
      <div class="sub">${escHtml(n.t || '实体')} · 社区内关联 ${rels.length} 条<br>
        ${escHtml(cloud ? cloud.name : '')}</div>
-     ${[...byType.entries()].slice(0, 5).map(([t, list]) =>
+     ${srcHtml}
+     ${[...byType.entries()].map(([t, list]) =>
         `<div class="sec">${escHtml(t)} · ${list.length}</div>
-         ${list.slice(0, 6).map(o => `<div class="row"><span class="nm">${escHtml(o)}</span></div>`).join('')}`
+         ${list.map(o => `<div class="row"><span class="nm">${escHtml(o)}</span></div>`).join('')}`
       ).join('')}
      ${evHtml}
      <div class="flagbar" data-node="${escHtml(n.id)}">
