@@ -64,6 +64,33 @@ h1 em{font-style:normal;
 .ctx.miss{border-left-color:var(--clay,#c07a4e);background:rgba(192,122,78,.08)}
 .ctx a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(224,164,105,.4)}
 
+/* ── Agent 工作台：让「多个 Agent 在分工」看得见 ─────────────────────
+   四种状态：等待（灰）· 工作中（暖金 + 呼吸）· 完成（白）· 失败（陶土）。
+   这里刻意让「工作中」有个缓慢的呼吸动画 —— 观众能看出"它现在正在读"，
+   而不是一个静态的列表。reduced-motion 下不呼吸，只换颜色。 */
+.alog{list-style:none;margin:14px 0 0;padding:0;max-width:74ch}
+.alog li{display:flex;gap:12px;align-items:baseline;padding:9px 2px;
+  border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink-3);
+  transition:color .45s cubic-bezier(.19,1,.22,1)}
+.alog li .ai{font-variant-numeric:tabular-nums;color:var(--ink-3);flex:0 0 auto}
+.alog li .an{font-weight:600;flex:0 0 88px;color:var(--ink-3);
+  transition:color .45s cubic-bezier(.19,1,.22,1)}
+.alog li .ad{color:var(--ink-3);line-height:1.6}
+.alog li.run{color:var(--ink-2)}
+.alog li.run .an,.alog li.run .ai{color:var(--accent)}
+.alog li.run .ad{color:var(--warm,#ffcfa8)}
+.alog li.run .ai::after{content:"";display:inline-block;width:6px;height:6px;
+  margin-left:6px;border-radius:50%;background:var(--accent);
+  animation:apulse 1.5s ease-in-out infinite}
+@keyframes apulse{0%,100%{opacity:.25}50%{opacity:1}}
+.alog li.done{color:var(--ink-2)}
+.alog li.done .an{color:var(--ink)}
+.alog li.done .ai{color:var(--cyan,#7cc0b6)}
+.alog li.bad .an,.alog li.bad .ai{color:var(--clay,#c07a4e)}
+@media (prefers-reduced-motion:reduce){
+  .alog li.run .ai::after{animation:none;opacity:1}
+}
+
 /* ── 提问栏：一条发丝线 + 大字号输入，不是聊天输入框 ─────────────────── */
 .askwrap{margin:34px 0 0}
 .askwrap .lb{display:block;font-size:10.5px;letter-spacing:.26em;
@@ -331,6 +358,22 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
     </p>
 
     <section id="result" hidden>
+      <!-- ⓿ Agent 工作台：把「多个 Agent 在分工」这件事显示出来。
+           此前三个 Agent 的结果是一次性摆出来的，观众只看到"一次问答
+           给了两段文字"，看不出有分工 —— 等于把主要看点表达没了。
+           现在每步一行，逐个点亮，能看出谁在工作、谁还没轮到。 -->
+      <div class="sec" id="agentsec">
+        <p class="kick">Agent 工作台</p>
+        <ol class="alog" id="alog">
+          <li data-step="retrieve"><span class="ai">①</span><span class="an">检索 Agent</span><span class="ad">等待…</span></li>
+          <li data-step="support"><span class="ai">②</span><span class="an">支持 Agent</span><span class="ad">等待…</span></li>
+          <li data-step="oppose"><span class="ai">③</span><span class="an">反对 Agent</span><span class="ad">等待…</span></li>
+          <li data-step="synth"><span class="ai">④</span><span class="an">综合 Agent</span><span class="ad">等待…</span></li>
+        </ol>
+        <p class="hint" id="alognote">支持与反对是**两次独立调用**，互不可见；
+          综合方只看到两方交上来的东西，不接触原始证据。</p>
+      </div>
+
       <!-- ① 检索到的子图 -->
       <div class="sec">
         <p class="kick">检索到的子图</p>
@@ -1034,6 +1077,33 @@ $('camps').addEventListener('click', function(ev){
 此前这两处都是"拿输入去匹配硬编码的 QA 常量"，最像问答、实则最不像：
 输入什么都会落到三个预设之一。现在调 POST /api/qa 跑真正的四 Agent 流程；
 后端不在时才退回预设数据，并**明确标注这是演示数据**。 */
+/* ── Agent 工作台：一步一行，逐个点亮 ─────────────────────────────────
+   这是「多 Agent」这个看点的主要表达方式。此前三个 Agent 的结果是
+   一次性摆出来的，观众只看到"一次问答给了两段文字"，看不出有分工。
+
+   每步单独发一个请求（`POST /api/qa/step`），所以界面上能真的看到
+   "① 检索完成 → ② 支持方在读 → ③ 反对方在独立读 → ④ 综合"这个过程。 */
+function setAgent(step, state, detail){
+  const li = document.querySelector('#alog li[data-step="' + step + '"]');
+  if (!li) return;
+  li.className = state || '';
+  if (detail != null) {
+    const d = li.querySelector('.ad');
+    if (d) d.textContent = detail;
+  }
+}
+window.setAgent = setAgent;
+
+async function qaStep(payload){
+  const r = await fetch('./api/qa/step', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
 async function askReal(question){
   const note = $('trace');
   $('how').hidden = true;
@@ -1054,22 +1124,85 @@ async function askReal(question){
       '此前这里默认指向另一篇论文，用户看到的不是自己的东西 —— 已改掉。';
     $('gstats').innerHTML = '';
     if ($('gdesc')) $('gdesc').textContent = '';
+    if ($('agentsec')) $('agentsec').hidden = true;
     paint(false);
     return;
   }
+  if ($('agentsec')) $('agentsec').hidden = false;
 
-  if (note) note.textContent = '正在检索子图并取证…（本地模型需要几十秒）';
+  ['retrieve', 'support', 'oppose', 'synth'].forEach(function(s){
+    setAgent(s, '', '等待…');
+  });
 
   try {
-    const r = await fetch('./api/qa', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({graph_id: ASK_GID, question: question, use_llm: true})
+    /* ① 检索 —— 纯规则，秒回 */
+    setAgent('retrieve', 'run', '命中种子、扩展两跳子图…');
+    if (note) note.textContent = '① 检索 Agent 工作中…';
+    const r1 = await qaStep({graph_id: ASK_GID, question: question, step: 'retrieve'});
+    setAgent('retrieve', 'done', r1.retrieval.reason);
+
+    if (!r1.n_evidence) {
+      ['support', 'oppose', 'synth'].forEach(function(s){
+        setAgent(s, '', '未执行（没有检索到证据）');
+      });
+      run(adaptQA({
+        question: question, retrieval: r1.retrieval, evidence: [],
+        agents: [], conclusion: '图谱里没有与这个问题相关的证据。',
+        confidence: '—', degraded: false, citations: []
+      }));
+      return;
+    }
+
+    /* ②③ 支持与反对 —— **两次独立调用**，界面上能看到它们先后在读 */
+    setAgent('support', 'run', '正在读 ' + r1.n_evidence + ' 条证据…');
+    if (note) note.textContent = '② 支持 Agent 正在读证据…';
+    const r2 = await qaStep({
+      graph_id: ASK_GID, question: question, step: 'support', evidence: r1.evidence
     });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const resp = await r.json();
-    run(adaptQA(resp));
+    setAgent('support', r2.ok ? 'done' : 'bad',
+             r2.ok ? '已给出支持意见' : '模型无响应');
+
+    setAgent('oppose', 'run', '**独立**读同一批证据，找反证…');
+    if (note) note.textContent = '③ 反对 Agent 独立取证…';
+    const r3 = await qaStep({
+      graph_id: ASK_GID, question: question, step: 'oppose', evidence: r1.evidence
+    });
+    setAgent('oppose', r3.ok ? 'done' : 'bad',
+             r3.ok ? (/未发现反证/.test(r3.text || '') ? '未发现反证（如实报告）'
+                                                       : '已给出反对意见')
+                   : '模型无响应');
+
+    /* ④ 综合 —— 只看两方交上来的东西 */
+    setAgent('synth', 'run', '只看两方交上来的意见…');
+    if (note) note.textContent = '④ 综合 Agent 汇总结论…';
+    const r4 = await qaStep({
+      graph_id: ASK_GID, question: question, step: 'synth',
+      support: r2.text || '', oppose: r3.text || ''
+    });
+    setAgent('synth', r4.ok ? 'done' : 'bad',
+             r4.ok ? ('结论已给出 · 置信度 ' + (r4.confidence || '—')) : '模型无响应');
+
+    if (note) note.textContent = r1.retrieval.reason + '　｜　证据 ' + r1.n_evidence +
+      ' 条，其中 ' + r1.n_with_quote + ' 条带论文原文引文。';
+
+    run(adaptQA({
+      question: question,
+      retrieval: r1.retrieval,
+      evidence: r1.evidence,
+      agents: [
+        {role: '支持方', text: r2.text || '（支持方 Agent 无输出）'},
+        {role: '反对方', text: r3.text || '（反对方 Agent 无输出）'}
+      ],
+      conclusion: r4.text || '',
+      confidence: r4.confidence || '',
+      degraded: !(r2.ok || r3.ok),
+      citations: []
+    }));
   } catch (err) {
+    ['retrieve', 'support', 'oppose', 'synth'].forEach(function(s){
+      const li = document.querySelector('#alog li[data-step="' + s + '"]');
+      if (li && li.className === 'run') li.className = 'bad';
+    });
     run(QA.transe);
     const c = $('caveat');
     if (c) c.innerHTML = '⚠️ 后端不可用（' + esc(String(err.message || err)) +

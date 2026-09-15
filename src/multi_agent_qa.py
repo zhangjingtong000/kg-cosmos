@@ -298,11 +298,93 @@ def answer(question, nodes, edges, use_llm=True):
     result['conclusion'] = synth or ('支持方：%s\n反对方：%s' % (sup, opp))
 
     # 置信度：从综合文本里抽，抽不到就按反对方是否有收获粗判
-    # 正则要容忍模型的各种写法：`置信度：高` / `置信度 高` / `置信度为高`
-    # / `置信度是高`（第一次实测模型写的就是「置信度为高」，旧正则漏了）
-    m = re.search(r'置信度[：:\s是为]{0,2}\s*(高|中|低)', result['conclusion'])
-    if m:
-        result['confidence'] = m.group(1)
-    else:
-        result['confidence'] = '低' if (opp and '未发现反证' not in opp) else '中'
+    result['confidence'] = _confidence_of(result['conclusion'], opp)
     return result
+
+
+def _confidence_of(text, opp_text):
+    """从综合文本里抽置信度。
+
+    正则要容忍模型的各种写法：`置信度：高` / `置信度 高` / `置信度为高` /
+    `置信度是高`（第一次实测模型写的就是「置信度为高」，旧正则漏了，
+    结果 confidence 落到兜底分支显示成「中」，而模型明明说的是「高」）。
+    """
+    m = re.search(r'置信度[：:\s是为]{0,2}\s*(高|中|低)', text or '')
+    if m:
+        return m.group(1)
+    return '低' if (opp_text and '未发现反证' not in opp_text) else '中'
+
+
+# ════════════════════════════════════════════════════════════════════════
+# 分步接口：让「多个 Agent 在分工」这件事在界面上看得见
+# ════════════════════════════════════════════════════════════════════════
+#
+# **为什么要拆**：多 Agent 问答是本项目最主要的看点，而 `answer()` 把
+# ②③④ 的结果**一次性**返回 —— 观众看到的只是"一次问答给了两段文字"，
+# 看不出有分工，等于把这个看点表达没了。
+#
+# 拆成四步之后，界面可以一步一行状态：
+#
+#     ① 检索 Agent   命中 12 个种子 → 2 跳 → 60 节点 / 86 边（纯规则，不调模型）
+#     ② 支持 Agent   正在读 18 条证据…
+#     ③ 反对 Agent   独立读同一批证据…（不共享支持方的中间结论）
+#     ④ 综合 Agent   只看两方交上来的东西
+#
+# **步骤之间无状态**：证据由前端回传，后端不存 session —— 证据只有几十 KB，
+# 回传的成本远低于维护会话状态的风险（这个项目在"状态没落盘"上栽过：
+# 上传任务曾因后端重启而丢，见 `app.py` 的 `_save_task`）。
+
+def step_retrieve(question, nodes, edges):
+    """① 检索：纯规则，**不调模型**，所以永远快、永远可复现。"""
+    sub = retrieve(question, nodes, edges)
+    ev = evidence_pack(sub)
+    return {
+        'stage': 'retrieve',
+        'agent': '检索 Agent',
+        'note': '纯规则：种子匹配 + 2 跳 BFS，未调用模型，结果可复现',
+        'retrieval': {
+            'seeds': sub['seeds'],
+            'n_nodes': len(sub['nodes']),
+            'n_edges': len(sub['edges']),
+            'reason': sub['reason'],
+        },
+        'evidence': ev,
+        'n_evidence': len(ev),
+        'n_with_quote': sum(1 for x in ev if x.get('has_quote')),
+    }
+
+
+def step_agents(question, evidence, role):
+    """②③ 支持方 / 反对方 —— **各自独立**读同一批证据。
+
+    分两次调用而不是一次跑两个，是为了让界面能分别显示
+    「支持方正在读…」与「反对方正独立地读…」。**"独立"是这个看点的核心**：
+    一次返回两段，观众分不清它们是两次独立判断，还是同一段话拆成两半。
+    """
+    ev = evidence or []
+    block = _fmt_evidence(ev)
+    if role == 'support':
+        txt = _ollama(SUPPORT_PROMPT.format(q=question, ev=block))
+        return {'stage': 'agents', 'agent': '支持 Agent', 'role': '支持方',
+                'note': '读全部证据，找**支持**答案的边',
+                'text': txt, 'ok': txt is not None}
+    if role == 'oppose':
+        txt = _ollama(OPPOSE_PROMPT.format(q=question, ev=block))
+        return {'stage': 'agents', 'agent': '反对 Agent', 'role': '反对方',
+                'note': '**独立**读同一批证据（不共享支持方的中间结论），找反证；'
+                        '找不到就如实说「未发现反证」，不编',
+                'text': txt, 'ok': txt is not None}
+    raise ValueError("role 必须是 'support' 或 'oppose'")
+
+
+def step_synth(question, support, oppose):
+    """④ 综合：**只看两方交上来的东西**，不接触原始证据。"""
+    txt = _ollama(SYNTH_PROMPT.format(
+        q=question, sup=support or '（无）', opp=oppose or '（无）'))
+    return {
+        'stage': 'synth', 'agent': '综合 Agent',
+        'note': '只看到两方交上来的意见，不接触原始证据',
+        'text': txt or ('支持方：%s\n反对方：%s' % (support, oppose)),
+        'confidence': _confidence_of(txt, oppose),
+        'ok': txt is not None,
+    }

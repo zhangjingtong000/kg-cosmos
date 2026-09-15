@@ -101,6 +101,30 @@ class QARequest(BaseModel):
     use_llm: bool = True
 
 
+class QAStepRequest(BaseModel):
+    """**分步**多 Agent 问答的请求 —— 让"多个 Agent 在分工"在界面上看得见。
+
+    本项目最主要的看点是多 Agent 问答，而一次性返回全部结果，观众只会看到
+    "一次问答给了两段文字"，看不出有分工。拆成四步后界面可以一步一行状态。
+
+    step 取值：
+      · `retrieve` —— 纯规则检索（不调模型）
+      · `support`  —— 支持方读证据
+      · `oppose`   —— 反对方**独立**读同一批证据
+      · `synth`    —— 综合方只看两方交上来的东西
+
+    步骤之间**无状态**：`evidence` / `support` / `oppose` 由前端回传，
+    后端不存 session。证据只有几十 KB，回传比维护会话状态安全得多 ——
+    这个项目在上传任务上已经栽过一次（后端重启丢任务，后加 `_save_task`）。
+    """
+    graph_id: str
+    question: str
+    step: str = 'retrieve'
+    evidence: list[dict] = []
+    support: str = ''
+    oppose: str = ''
+
+
 # ── 数据面：把前端要用的 JSON 暴露成 HTTP ──────────────────
 # 白名单而非通配，避免把整个目录结构暴露出去。
 
@@ -631,6 +655,30 @@ async def api_qa(req: QARequest):
             use_llm=req.use_llm)
     except ImportError:
         raise HTTPException(500, "multi_agent_qa 模块不可用")
+
+
+@app.post("/api/qa/step")
+async def api_qa_step(req: QAStepRequest):
+    """**分步**多 Agent 问答：每一步单独一个请求，界面上就能逐行显示进度。
+
+    `ask.html` 依次调四次：retrieve → support → oppose → synth。
+    每步之间无状态，证据由前端回传（见 `QAStepRequest` 的说明）。
+    """
+    g = _ensure_graph(req.graph_id)
+    nodes = g.get("nodes") or []
+    edges = g.get("edges") or []
+    try:
+        import multi_agent_qa as M
+    except ImportError:
+        raise HTTPException(500, "multi_agent_qa 模块不可用")
+
+    if req.step == 'retrieve':
+        return M.step_retrieve(req.question, nodes, edges)
+    if req.step in ('support', 'oppose'):
+        return M.step_agents(req.question, req.evidence, req.step)
+    if req.step == 'synth':
+        return M.step_synth(req.question, req.support, req.oppose)
+    raise HTTPException(400, f"未知的 step：{req.step}（应为 retrieve/support/oppose/synth）")
 
 
 @app.get("/stats")
