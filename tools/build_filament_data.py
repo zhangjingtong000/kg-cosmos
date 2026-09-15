@@ -35,7 +35,9 @@ from pathlib import Path
 import networkx as nx
 
 sys.path.insert(0, str(ROOT / "src"))
-from graph_store import Neo4jStore  # noqa: E402
+sys.path.insert(0, str(ROOT / "tools"))          # 为了 import graph_source
+from graph_store import Neo4jStore  # noqa: E402,F401  （保留导入：向后兼容/直接 API 调用者）
+from graph_source import load_graph  # noqa: E402
 
 OUT = ROOT / "web/kg-data"
 
@@ -54,6 +56,10 @@ def parse_args():
     ap.add_argument("--strong", type=int, default=60, help="strong 档的最小跨社区关系数")
     ap.add_argument("--medium", type=int, default=20, help="medium 档的最小跨社区关系数")
     ap.add_argument("--max-links", type=int, default=120)
+    # 2026-09-15：数据源从 Neo4j 换成 data/corpus/graphs/*.json。
+    # 默认开治理还原（界面不该显示被清理掉的坏边）；要治理前全量加 --no-governed。
+    ap.add_argument("--no-governed", action="store_true",
+                    help="不做 entity_filter 治理还原（导出治理前全量口径）")
     return ap.parse_args()
 
 
@@ -61,10 +67,15 @@ ARGS = parse_args()
 
 
 def main():
-    store = Neo4jStore(uri="bolt://localhost:7687", user="neo4j", password="kgdemo2026")
-    nodes = store.query_nodes()
-    edges = store.query_edges()
-    store.close()
+    # ── 数据源（2026-09-15）──────────────────────────────────────────────
+    # 原先**硬依赖 Neo4j**（`Neo4jStore(uri="bolt://localhost:7687")`），
+    # 而**那个实例已经不在了**（全盘只剩 Desktop 的模板 conf）⇒ 本脚本跑不起来
+    # ⇒ 主视图的 filaments.json 无法重建。
+    # 现在统一走 `tools/graph_source.py`，从 `data/corpus/graphs/*.json` 读。
+    #
+    # `--governed` 默认开：主视图是**给人看的界面**，不该显示被治理清理掉的坏边。
+    # 想要治理前全量口径可显式传 `--no-governed`。
+    nodes, edges = load_graph(governed=not ARGS.no_governed)
     print(f"载入 {len(nodes)} 节点 / {len(edges)} 边")
 
     G = nx.Graph()
@@ -211,7 +222,9 @@ def main():
         "meta": {
             "communities": len(top), "nodes": sum(len(c) for c in top),
             "links": len(links), "crossPairs": len(cross),
-            "source": "Neo4j 治理后图库 + Louvain",
+            "source": ("data/corpus/graphs/*.json 汇总 + Louvain"
+                   + ("（已做 entity_filter 治理还原）"
+                      if not ARGS.no_governed else "（治理前全量口径）")),
             "cameraZ": round(cam_z, 1),
             "cameraZPortrait": round(cam_z * 2.1, 1),
             "bounds": {"x": [round(min(xs), 1), round(max(xs), 1)],

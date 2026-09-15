@@ -1,20 +1,20 @@
 {
   "meta": {
     "communities": 18,
-    "nodes": 11016,
+    "nodes": 11193,
     "links": 120,
     "crossPairs": 150,
-    "source": "Neo4j 治理后图库 + Louvain",
-    "cameraZ": 53.2,
-    "cameraZPortrait": 111.7,
+    "source": "data/corpus/graphs/*.json 汇总 + Louvain（已做 entity_filter 治理还原）",
+    "cameraZ": 50.9,
+    "cameraZPortrait": 107.0,
     "bounds": {
       "x": [
-        -11.7,
-        13.5
+        -12.0,
+        14.8
       ],
       "y": [
-        -13.8,
-        13.0
+        -12.7,
+        12.8
       ]
     }
   },
@@ -22,127 +22,261 @@
     {
       "id": "c0",
       "name": "Triple",
-      "summary": "Link Prediction / Relation / Knowledge Graph Embeddings",
+      "summary": "Knowledge Graph Embeddings / Link Prediction / Relation",
       "position": [
-        9.14,
-        -8.83,
+        9.78,
+        -8.67,
         -1.0
       ],
       "size": 3.4,
       "color": "#7ecbff",
-      "entityCount": 1384,
+      "entityCount": 1439,
       "topType": "Unknown",
       "typeCount": {
-        "Unknown": 361,
-        "Concept": 343,
-        "Method": 227,
-        "Person": 94,
-        "Document": 84,
-        "Metric": 70,
-        "Component": 68,
-        "Process": 40,
-        "Artifact": 28,
-        "Dataset": 26,
-        "System": 25,
-        "Event": 7,
-        "Tool": 7,
-        "Location": 3,
+        "Unknown": 428,
+        "Concept": 325,
+        "Method": 220,
+        "Person": 95,
+        "Component": 71,
+        "Document": 71,
+        "Metric": 65,
+        "Process": 55,
+        "Dataset": 32,
+        "System": 30,
+        "Artifact": 30,
+        "Tool": 10,
+        "Event": 4,
+        "Location": 2,
         "Organization": 1
       },
       "core": [
         {
           "id": "Triple",
-          "degree": 185
-        },
-        {
-          "id": "Link Prediction",
-          "degree": 137
-        },
-        {
-          "id": "Relation",
-          "degree": 133
+          "degree": 188
         },
         {
           "id": "Knowledge Graph Embeddings",
-          "degree": 128
+          "degree": 167
+        },
+        {
+          "id": "Link Prediction",
+          "degree": 139
+        },
+        {
+          "id": "Relation",
+          "degree": 137
         },
         {
           "id": "Scoring Function",
-          "degree": 119
+          "degree": 127
         },
         {
           "id": "Knowledge Graph Completion",
-          "degree": 102
+          "degree": 107
         },
         {
           "id": "TransE",
-          "degree": 101
-        },
-        {
-          "id": "Neural Networks",
-          "degree": 78
-        },
-        {
-          "id": "FB15k",
-          "degree": 74
-        },
-        {
-          "id": "ComplEx",
-          "degree": 71
-        }
-      ]
-    },
-    {
-      "id": "c1",
-      "name": "Zero-Shot Learning",
-      "summary": "Entities / KG Completion / FSL",
-      "position": [
-        -11.29,
-        9.91,
-        -0.5
-      ],
-      "size": 3.24,
-      "color": "#d7a7ff",
-      "entityCount": 1168,
-      "topType": "Unknown",
-      "typeCount": {
-        "Unknown": 295,
-        "Concept": 262,
-        "Method": 152,
-        "Person": 83,
-        "Dataset": 78,
-        "Artifact": 62,
-        "Process": 54,
-        "Component": 46,
-        "Document": 45,
-        "System": 45,
-        "Event": 17,
-        "Metric": 14,
-        "Organization": 7,
-        "Location": 4,
-        "Tool": 3,
-        "Material": 1
-      },
-      "core": [
-        {
-          "id": "Zero-Shot Learning",
-          "degree": 144
-        },
-        {
-          "id": "Entities",
-          "degree": 119
+          "degree": 103
         },
         {
           "id": "KG Completion",
           "degree": 92
         },
         {
-          "id": "FSL",
-          "degree": 77
+          "id": "Neural Networks",
+          "degree": 83
         },
         {
-          "id": "WordNet",
-          "degree": 74
+          "id": "FB15k",
+          "degree": 73
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "name": "ArXiv",
+      "summary": "AAAI / EMNLP / COLING",
+      "position": [
+        -11.41,
+        9.34,
+        -0.5
+      ],
+      "size": 3.27,
+      "color": "#d7a7ff",
+      "entityCount": 1264,
+      "topType": "Person",
+      "typeCount": {
+        "Person": 447,
+        "Unknown": 249,
+        "Document": 184,
+        "Method": 102,
+        "Concept": 79,
+        "Artifact": 58,
+        "Event": 48,
+        "System": 25,
+        "Organization": 22,
+        "Process": 14,
+        "Location": 13,
+        "Component": 10,
+        "Dataset": 9,
+        "Tool": 2,
+        "Metric": 2
+      },
+      "core": [
+        {
+          "id": "ArXiv",
+          "degree": 191
+        },
+        {
+          "id": "AAAI",
+          "degree": 126
+        },
+        {
+          "id": "EMNLP",
+          "degree": 123
+        },
+        {
+          "id": "COLING",
+          "degree": 52
+        },
+        {
+          "id": "IJCAI",
+          "degree": 49
+        },
+        {
+          "id": "IEEE Transactions on Neural Networks and Learning Systems",
+          "degree": 44
+        },
+        {
+          "id": "Reinforcement Learning",
+          "degree": 44
+        },
+        {
+          "id": "A Comprehensive Survey on Automatic Knowledge Graph Construction",
+          "degree": 40
+        },
+        {
+          "id": "Distant Supervision",
+          "degree": 40
+        },
+        {
+          "id": "NeurIPS",
+          "degree": 36
+        }
+      ]
+    },
+    {
+      "id": "c2",
+      "name": "Knowledge Graphs",
+      "summary": "Question Answering / Property / Relational Facts",
+      "position": [
+        -2.03,
+        -12.67,
+        0.0
+      ],
+      "size": 3.03,
+      "color": "#ffd27a",
+      "entityCount": 958,
+      "topType": "Concept",
+      "typeCount": {
+        "Concept": 251,
+        "Unknown": 209,
+        "Method": 121,
+        "Person": 83,
+        "Process": 76,
+        "Document": 56,
+        "System": 56,
+        "Artifact": 40,
+        "Component": 24,
+        "Dataset": 18,
+        "Metric": 12,
+        "Tool": 5,
+        "Event": 3,
+        "Organization": 2,
+        "Location": 1,
+        "Material": 1
+      },
+      "core": [
+        {
+          "id": "Knowledge Graphs",
+          "degree": 1356
+        },
+        {
+          "id": "Question Answering",
+          "degree": 45
+        },
+        {
+          "id": "Property",
+          "degree": 34
+        },
+        {
+          "id": "Relational Facts",
+          "degree": 27
+        },
+        {
+          "id": "Enterprise Modeling",
+          "degree": 22
+        },
+        {
+          "id": "Knowledge-Aware Applications",
+          "degree": 21
+        },
+        {
+          "id": "Multi-Task Learning",
+          "degree": 19
+        },
+        {
+          "id": "Entity Description Pattern",
+          "degree": 18
+        },
+        {
+          "id": "Evaluation",
+          "degree": 18
+        },
+        {
+          "id": "Extractive KG Summarization",
+          "degree": 18
+        }
+      ]
+    },
+    {
+      "id": "c3",
+      "name": "Zero-Shot Learning",
+      "summary": "FSL / Knowledge Extraction / Auxiliary Information",
+      "position": [
+        8.42,
+        8.96,
+        0.5
+      ],
+      "size": 2.89,
+      "color": "#a7e3b5",
+      "entityCount": 801,
+      "topType": "Unknown",
+      "typeCount": {
+        "Unknown": 251,
+        "Concept": 186,
+        "Method": 111,
+        "Component": 41,
+        "Process": 41,
+        "Dataset": 38,
+        "Artifact": 35,
+        "Person": 27,
+        "Document": 24,
+        "System": 18,
+        "Metric": 16,
+        "Event": 7,
+        "Organization": 4,
+        "Material": 1,
+        "Tool": 1
+      },
+      "core": [
+        {
+          "id": "Zero-Shot Learning",
+          "degree": 150
+        },
+        {
+          "id": "FSL",
+          "degree": 80
         },
         {
           "id": "Knowledge Extraction",
@@ -153,482 +287,207 @@
           "degree": 60
         },
         {
-          "id": "DBpedia",
-          "degree": 60
+          "id": "Class Encodings",
+          "degree": 53
         },
         {
-          "id": "Wikidata",
-          "degree": 59
-        },
-        {
-          "id": "Freebase",
-          "degree": 55
-        }
-      ]
-    },
-    {
-      "id": "c2",
-      "name": "AAAI",
-      "summary": "EMNLP / Entity Alignment / COLING",
-      "position": [
-        -1.83,
-        -13.84,
-        0.0
-      ],
-      "size": 3.17,
-      "color": "#ffd27a",
-      "entityCount": 1080,
-      "topType": "Person",
-      "typeCount": {
-        "Person": 369,
-        "Unknown": 209,
-        "Document": 153,
-        "Method": 107,
-        "Concept": 68,
-        "Artifact": 54,
-        "Event": 46,
-        "System": 29,
-        "Dataset": 15,
-        "Process": 11,
-        "Component": 11,
-        "Organization": 4,
-        "Tool": 2,
-        "Metric": 2
-      },
-      "core": [
-        {
-          "id": "AAAI",
-          "degree": 124
-        },
-        {
-          "id": "EMNLP",
-          "degree": 119
-        },
-        {
-          "id": "Entity Alignment",
-          "degree": 59
-        },
-        {
-          "id": "COLING",
+          "id": "Class",
           "degree": 52
         },
         {
-          "id": "IJCAI",
-          "degree": 48
+          "id": "Few-Shot Learning",
+          "degree": 50
         },
         {
-          "id": "A Comprehensive Survey on Automatic Knowledge Graph Construction",
-          "degree": 47
+          "id": "Natural Language Processing",
+          "degree": 50
         },
         {
-          "id": "Knowledge Graph Reasoning",
-          "degree": 46
+          "id": "Attribute",
+          "degree": 41
         },
         {
-          "id": "Reinforcement Learning",
-          "degree": 43
-        },
-        {
-          "id": "Distant Supervision",
-          "degree": 42
-        },
-        {
-          "id": "IEEE Transactions on Neural Networks and Learning Systems",
-          "degree": 42
-        }
-      ]
-    },
-    {
-      "id": "c3",
-      "name": "Knowledge Graphs",
-      "summary": "Kgs / Machine Learning / Ontologies",
-      "position": [
-        9.2,
-        11.48,
-        0.5
-      ],
-      "size": 3.11,
-      "color": "#a7e3b5",
-      "entityCount": 1012,
-      "topType": "Concept",
-      "typeCount": {
-        "Concept": 254,
-        "Unknown": 199,
-        "Method": 127,
-        "Person": 95,
-        "Process": 92,
-        "Document": 57,
-        "System": 56,
-        "Artifact": 46,
-        "Component": 36,
-        "Dataset": 16,
-        "Metric": 15,
-        "Event": 6,
-        "Tool": 6,
-        "Organization": 5,
-        "Location": 1,
-        "Material": 1
-      },
-      "core": [
-        {
-          "id": "Knowledge Graphs",
-          "degree": 1332
-        },
-        {
-          "id": "Kgs",
-          "degree": 73
-        },
-        {
-          "id": "Machine Learning",
-          "degree": 59
-        },
-        {
-          "id": "Ontologies",
+          "id": "Classifier",
           "degree": 39
-        },
-        {
-          "id": "Automated Driving",
-          "degree": 35
-        },
-        {
-          "id": "Symbolic Reasoning",
-          "degree": 28
-        },
-        {
-          "id": "Relational Facts",
-          "degree": 27
-        },
-        {
-          "id": "Artificial Intelligence",
-          "degree": 22
-        },
-        {
-          "id": "Scene Understanding",
-          "degree": 22
-        },
-        {
-          "id": "Multi-Task Learning",
-          "degree": 19
         }
       ]
     },
     {
       "id": "c4",
       "name": "Large Language Model",
-      "summary": "Knowledge Graph Construction / LLMs / RAG",
+      "summary": "LLMs / Language Model / Reasoning",
       "position": [
-        -10.77,
-        -7.47,
+        -10.73,
+        -9.66,
         1.0
       ],
-      "size": 2.98,
+      "size": 2.87,
       "color": "#f3a6b9",
-      "entityCount": 860,
+      "entityCount": 774,
       "topType": "Concept",
       "typeCount": {
-        "Concept": 186,
-        "Unknown": 154,
-        "Person": 132,
-        "Method": 120,
-        "Process": 76,
-        "Document": 53,
+        "Concept": 177,
+        "Unknown": 143,
+        "Person": 114,
+        "Method": 92,
+        "Process": 66,
+        "Document": 40,
         "System": 36,
         "Artifact": 34,
         "Metric": 18,
-        "Component": 18,
-        "Dataset": 14,
-        "Event": 6,
+        "Dataset": 17,
+        "Component": 11,
+        "Event": 9,
+        "Organization": 7,
         "Location": 5,
         "Tool": 4,
-        "Organization": 3,
         "Material": 1
       },
       "core": [
         {
           "id": "Large Language Model",
-          "degree": 468
-        },
-        {
-          "id": "Knowledge Graph Construction",
-          "degree": 113
+          "degree": 481
         },
         {
           "id": "LLMs",
-          "degree": 87
+          "degree": 93
+        },
+        {
+          "id": "Language Model",
+          "degree": 71
+        },
+        {
+          "id": "Reasoning",
+          "degree": 50
         },
         {
           "id": "RAG",
           "degree": 48
         },
         {
-          "id": "KG-BERT",
-          "degree": 38
+          "id": "Fine-Tuning",
+          "degree": 40
         },
         {
-          "id": "Entity Recognition",
-          "degree": 30
-        },
-        {
-          "id": "Entity Disambiguation",
-          "degree": 25
-        },
-        {
-          "id": "Parameters",
-          "degree": 23
+          "id": "Knowledge Representation",
+          "degree": 35
         },
         {
           "id": "Prompt",
           "degree": 23
         },
         {
-          "id": "Enterprise Modeling",
+          "id": "Artificial Intelligence",
           "degree": 22
+        },
+        {
+          "id": "Natural Language",
+          "degree": 18
         }
       ]
     },
     {
       "id": "c5",
-      "name": "Embeddings",
-      "summary": "Rules / Advances in Neural Information Processing Systems / Logic Rules",
+      "name": "Relation Extraction",
+      "summary": "Named Entity Recognition / BERT / Knowledge Acquisition",
       "position": [
-        0.64,
-        12.96,
+        -1.2,
+        12.78,
         -1.0
       ],
-      "size": 2.85,
+      "size": 2.86,
       "color": "#9fd8ff",
-      "entityCount": 730,
-      "topType": "Concept",
+      "entityCount": 772,
+      "topType": "Unknown",
       "typeCount": {
-        "Concept": 165,
-        "Unknown": 146,
-        "Person": 123,
-        "Method": 106,
-        "Document": 72,
-        "Process": 28,
-        "System": 27,
-        "Component": 20,
-        "Event": 13,
-        "Artifact": 11,
-        "Metric": 7,
-        "Dataset": 6,
-        "Tool": 4,
-        "Organization": 2
+        "Unknown": 174,
+        "Concept": 170,
+        "Method": 112,
+        "Person": 111,
+        "Document": 46,
+        "Process": 39,
+        "Artifact": 31,
+        "System": 25,
+        "Tool": 19,
+        "Component": 17,
+        "Event": 8,
+        "Dataset": 8,
+        "Metric": 6,
+        "Material": 3,
+        "Location": 2,
+        "Organization": 1
       },
       "core": [
         {
-          "id": "Embeddings",
-          "degree": 158
+          "id": "Relation Extraction",
+          "degree": 147
         },
         {
-          "id": "Rules",
-          "degree": 68
+          "id": "Named Entity Recognition",
+          "degree": 132
         },
         {
-          "id": "Advances in Neural Information Processing Systems",
-          "degree": 42
+          "id": "BERT",
+          "degree": 102
         },
         {
-          "id": "Logic Rules",
-          "degree": 38
+          "id": "Knowledge Acquisition",
+          "degree": 61
         },
         {
-          "id": "Logical Rules",
-          "degree": 35
+          "id": "Coreference Resolution",
+          "degree": 55
         },
         {
-          "id": "NeurIPS",
-          "degree": 35
+          "id": "Entity Typing",
+          "degree": 48
         },
         {
-          "id": "Training",
-          "degree": 31
+          "id": "Pre-Trained Language Models",
+          "degree": 48
         },
         {
-          "id": "Unseen Entity",
-          "degree": 28
+          "id": "Entity Linking",
+          "degree": 44
         },
         {
-          "id": "Query Answering",
-          "degree": 25
+          "id": "Text",
+          "degree": 40
         },
         {
-          "id": "Rule Mining",
-          "degree": 24
+          "id": "Entity Recognition",
+          "degree": 30
         }
       ]
     },
     {
       "id": "c6",
-      "name": "Survey",
-      "summary": "RNN / Temporal Knowledge Graph / Facts",
-      "position": [
-        -11.71,
-        0.84,
-        -0.5
-      ],
-      "size": 2.77,
-      "color": "#c7b3ff",
-      "entityCount": 650,
-      "topType": "Concept",
-      "typeCount": {
-        "Concept": 182,
-        "Unknown": 145,
-        "Method": 90,
-        "Person": 75,
-        "Process": 35,
-        "Document": 35,
-        "System": 34,
-        "Component": 14,
-        "Artifact": 14,
-        "Event": 9,
-        "Dataset": 7,
-        "Organization": 6,
-        "Metric": 4
-      },
-      "core": [
-        {
-          "id": "Survey",
-          "degree": 156
-        },
-        {
-          "id": "RNN",
-          "degree": 53
-        },
-        {
-          "id": "Temporal Knowledge Graph",
-          "degree": 52
-        },
-        {
-          "id": "Facts",
-          "degree": 50
-        },
-        {
-          "id": "Dynamic Knowledge Graph",
-          "degree": 35
-        },
-        {
-          "id": "Temporal Knowledge Graphs",
-          "degree": 35
-        },
-        {
-          "id": "Temporal Knowledge Graph Completion",
-          "degree": 30
-        },
-        {
-          "id": "Event Extraction",
-          "degree": 29
-        },
-        {
-          "id": "Temporal Information",
-          "degree": 27
-        },
-        {
-          "id": "Events",
-          "degree": 25
-        }
-      ]
-    },
-    {
-      "id": "c7",
-      "name": "Models",
-      "summary": "Quantized Graph Representation / Interpretability / Mole-BERT",
-      "position": [
-        13.48,
-        -2.34,
-        0.0
-      ],
-      "size": 2.74,
-      "color": "#ffc79a",
-      "entityCount": 621,
-      "topType": "Concept",
-      "typeCount": {
-        "Concept": 156,
-        "Unknown": 118,
-        "Method": 85,
-        "Person": 71,
-        "Artifact": 35,
-        "Process": 34,
-        "Document": 34,
-        "Component": 33,
-        "Metric": 30,
-        "System": 9,
-        "Material": 7,
-        "Dataset": 5,
-        "Event": 2,
-        "Location": 1,
-        "Organization": 1
-      },
-      "core": [
-        {
-          "id": "Models",
-          "degree": 135
-        },
-        {
-          "id": "Quantized Graph Representation",
-          "degree": 45
-        },
-        {
-          "id": "Interpretability",
-          "degree": 35
-        },
-        {
-          "id": "Mole-BERT",
-          "degree": 32
-        },
-        {
-          "id": "Encoder",
-          "degree": 30
-        },
-        {
-          "id": "Dr. E",
-          "degree": 27
-        },
-        {
-          "id": "SSQR",
-          "degree": 25
-        },
-        {
-          "id": "HOG",
-          "degree": 22
-        },
-        {
-          "id": "VQGraph",
-          "degree": 22
-        },
-        {
-          "id": "Codebook",
-          "degree": 21
-        }
-      ]
-    },
-    {
-      "id": "c8",
       "name": "Convolutional Neural Networks",
       "summary": "Graph Convolutional Networks / LSTM / Attention Mechanism",
       "position": [
-        -3.99,
-        -7.34,
-        0.5
+        -11.99,
+        1.73,
+        -0.5
       ],
-      "size": 2.63,
-      "color": "#9fe0c8",
-      "entityCount": 523,
+      "size": 2.73,
+      "color": "#c7b3ff",
+      "entityCount": 632,
       "topType": "Unknown",
       "typeCount": {
-        "Unknown": 161,
-        "Concept": 115,
-        "Method": 89,
-        "Person": 39,
-        "System": 30,
-        "Component": 29,
-        "Artifact": 18,
-        "Process": 14,
-        "Metric": 11,
-        "Document": 10,
-        "Dataset": 5,
+        "Unknown": 208,
+        "Concept": 127,
+        "Method": 99,
+        "Person": 47,
+        "System": 32,
+        "Component": 32,
+        "Artifact": 22,
+        "Document": 21,
+        "Process": 21,
+        "Metric": 12,
+        "Event": 5,
+        "Dataset": 4,
         "Tool": 1,
-        "Event": 1
+        "Organization": 1
       },
       "core": [
         {
@@ -652,61 +511,66 @@
           "degree": 37
         },
         {
+          "id": "Zhang Et Al.",
+          "degree": 36
+        },
+        {
+          "id": "CIKM",
+          "degree": 29
+        },
+        {
           "id": "Position Embeddings",
           "degree": 28
         },
         {
-          "id": "Neural Relation Extraction",
-          "degree": 23
-        },
-        {
           "id": "AGGCN",
-          "degree": 22
+          "degree": 23
         },
         {
           "id": "Entity Pair",
           "degree": 22
-        },
-        {
-          "id": "PCNN",
-          "degree": 19
         }
       ]
     },
     {
-      "id": "c9",
+      "id": "c7",
       "name": "Entity",
-      "summary": "Node / RAKG / Graph",
+      "summary": "Entities / Node / RAKG",
       "position": [
-        8.22,
-        4.9,
-        1.0
+        14.85,
+        -1.46,
+        0.0
       ],
-      "size": 2.52,
-      "color": "#ffb3c7",
-      "entityCount": 434,
+      "size": 2.72,
+      "color": "#ffc79a",
+      "entityCount": 630,
       "topType": "Concept",
       "typeCount": {
-        "Concept": 106,
-        "Unknown": 76,
-        "Method": 49,
-        "Person": 40,
-        "Metric": 31,
-        "Artifact": 29,
-        "Component": 27,
-        "Process": 27,
-        "Document": 17,
-        "System": 12,
-        "Dataset": 10,
+        "Concept": 162,
+        "Unknown": 130,
+        "Method": 84,
+        "Person": 47,
+        "Artifact": 40,
+        "Component": 36,
+        "Metric": 36,
+        "Document": 24,
+        "Process": 24,
+        "System": 17,
+        "Dataset": 14,
         "Tool": 4,
-        "Organization": 3,
-        "Material": 2,
-        "Event": 1
+        "Event": 3,
+        "Location": 3,
+        "Material": 3,
+        "Organization": 3
       },
       "core": [
         {
           "id": "Entity",
-          "degree": 162
+          "degree": 163
+        },
+        {
+          "id": "Entities",
+          "degree": 117
         },
         {
           "id": "Node",
@@ -726,132 +590,350 @@
         },
         {
           "id": "Edges",
-          "degree": 53
+          "degree": 52
         },
         {
           "id": "KGGen",
-          "degree": 46
+          "degree": 41
         },
         {
-          "id": "RSN",
-          "degree": 30
+          "id": "KG-BERT",
+          "degree": 38
         },
         {
           "id": "Concept",
-          "degree": 29
+          "degree": 30
+        }
+      ]
+    },
+    {
+      "id": "c8",
+      "name": "Models",
+      "summary": "Quantized Graph Representation / Interpretability / Subgraph",
+      "position": [
+        -4.97,
+        -6.58,
+        0.5
+      ],
+      "size": 2.66,
+      "color": "#9fe0c8",
+      "entityCount": 571,
+      "topType": "Concept",
+      "typeCount": {
+        "Concept": 150,
+        "Unknown": 125,
+        "Method": 87,
+        "Artifact": 34,
+        "Process": 32,
+        "Person": 32,
+        "Document": 31,
+        "Component": 30,
+        "Metric": 26,
+        "System": 8,
+        "Material": 7,
+        "Dataset": 5,
+        "Event": 2,
+        "Location": 1,
+        "Organization": 1
+      },
+      "core": [
+        {
+          "id": "Models",
+          "degree": 146
         },
         {
-          "id": "Documents",
+          "id": "Quantized Graph Representation",
+          "degree": 46
+        },
+        {
+          "id": "Interpretability",
+          "degree": 41
+        },
+        {
+          "id": "Subgraph",
+          "degree": 34
+        },
+        {
+          "id": "Encoder",
+          "degree": 30
+        },
+        {
+          "id": "Dr. E",
           "degree": 27
+        },
+        {
+          "id": "SSQR",
+          "degree": 25
+        },
+        {
+          "id": "ReaLM",
+          "degree": 23
+        },
+        {
+          "id": "HOG",
+          "degree": 22
+        },
+        {
+          "id": "Codebook",
+          "degree": 21
+        }
+      ]
+    },
+    {
+      "id": "c9",
+      "name": "Ontology",
+      "summary": "WordNet / Wikidata / Freebase",
+      "position": [
+        9.33,
+        1.37,
+        1.0
+      ],
+      "size": 2.53,
+      "color": "#ffb3c7",
+      "entityCount": 461,
+      "topType": "Concept",
+      "typeCount": {
+        "Concept": 98,
+        "Unknown": 94,
+        "Person": 68,
+        "System": 38,
+        "Method": 31,
+        "Document": 27,
+        "Artifact": 26,
+        "Process": 25,
+        "Dataset": 15,
+        "Event": 11,
+        "Component": 11,
+        "Organization": 8,
+        "Location": 4,
+        "Tool": 3,
+        "Metric": 2
+      },
+      "core": [
+        {
+          "id": "Ontology",
+          "degree": 83
+        },
+        {
+          "id": "WordNet",
+          "degree": 71
+        },
+        {
+          "id": "Wikidata",
+          "degree": 59
+        },
+        {
+          "id": "Freebase",
+          "degree": 55
+        },
+        {
+          "id": "Dataset",
+          "degree": 52
+        },
+        {
+          "id": "DBpedia",
+          "degree": 51
+        },
+        {
+          "id": "ConceptNet",
+          "degree": 47
+        },
+        {
+          "id": "NELL",
+          "degree": 41
+        },
+        {
+          "id": "Semantic Web",
+          "degree": 35
+        },
+        {
+          "id": "YAGO",
+          "degree": 32
         }
       ]
     },
     {
       "id": "c10",
-      "name": "TechGPT-2.0",
-      "summary": "Fine-Tuning / Domain Knowledge / LLAMA2",
+      "name": "Embeddings",
+      "summary": "Logic Rules / unseen relations / Logical Rules",
       "position": [
-        0.7,
-        6.7,
+        -0.21,
+        -2.74,
         -1.0
       ],
-      "size": 2.42,
+      "size": 2.52,
       "color": "#8fd0e8",
-      "entityCount": 359,
-      "topType": "Concept",
+      "entityCount": 449,
+      "topType": "Unknown",
       "typeCount": {
-        "Concept": 79,
-        "Unknown": 67,
-        "Artifact": 29,
-        "System": 28,
-        "Process": 27,
-        "Dataset": 24,
-        "Person": 23,
-        "Method": 20,
-        "Metric": 18,
-        "Component": 17,
-        "Organization": 11,
-        "Document": 8,
-        "Tool": 3,
-        "Event": 3,
-        "Location": 2
+        "Unknown": 122,
+        "Concept": 113,
+        "Person": 52,
+        "Document": 41,
+        "Method": 41,
+        "Process": 17,
+        "System": 15,
+        "Component": 15,
+        "Dataset": 11,
+        "Artifact": 8,
+        "Event": 7,
+        "Metric": 4,
+        "Tool": 3
       },
       "core": [
         {
-          "id": "TechGPT-2.0",
-          "degree": 63
+          "id": "Embeddings",
+          "degree": 160
         },
         {
-          "id": "Fine-Tuning",
-          "degree": 42
+          "id": "Logic Rules",
+          "degree": 40
         },
         {
-          "id": "Domain Knowledge",
+          "id": "unseen relations",
+          "degree": 39
+        },
+        {
+          "id": "Logical Rules",
+          "degree": 37
+        },
+        {
+          "id": "Unseen Entity",
+          "degree": 28
+        },
+        {
+          "id": "Query Answering",
           "degree": 25
         },
         {
-          "id": "LLAMA2",
+          "id": "Testing Set",
+          "degree": 25
+        },
+        {
+          "id": "Rule Mining",
           "degree": 24
         },
         {
-          "id": "Ascend Server",
-          "degree": 23
+          "id": "Few-Shot KG Completion",
+          "degree": 22
         },
         {
-          "id": "Atom",
-          "degree": 23
-        },
-        {
-          "id": "Model Training",
-          "degree": 23
-        },
-        {
-          "id": "Researchers",
-          "degree": 23
-        },
-        {
-          "id": "LLaMA",
+          "id": "Training Set",
           "degree": 20
-        },
-        {
-          "id": "Mindformer",
-          "degree": 19
         }
       ]
     },
     {
       "id": "c11",
-      "name": "Tables",
-      "summary": "Methodology / Open Research Knowledge Graph / Paper",
+      "name": "Temporal Knowledge Graph",
+      "summary": "Facts / Figure 1 / Dynamic Knowledge Graph",
       "position": [
-        3.38,
-        1.68,
+        2.21,
+        7.42,
         -0.5
       ],
-      "size": 2.39,
+      "size": 2.49,
       "color": "#e0b3ff",
-      "entityCount": 341,
-      "topType": "Unknown",
+      "entityCount": 427,
+      "topType": "Concept",
       "typeCount": {
-        "Unknown": 65,
-        "Concept": 63,
-        "Artifact": 35,
-        "Person": 30,
-        "Method": 29,
+        "Concept": 122,
+        "Unknown": 95,
+        "Method": 51,
+        "Person": 36,
         "Document": 29,
-        "Process": 23,
-        "Component": 22,
-        "Tool": 17,
-        "System": 12,
-        "Event": 6,
-        "Dataset": 5,
-        "Metric": 4,
-        "Material": 1
+        "Process": 24,
+        "System": 17,
+        "Artifact": 15,
+        "Location": 11,
+        "Component": 9,
+        "Organization": 6,
+        "Dataset": 6,
+        "Event": 3,
+        "Metric": 3
       },
       "core": [
         {
-          "id": "Tables",
+          "id": "Temporal Knowledge Graph",
+          "degree": 52
+        },
+        {
+          "id": "Facts",
           "degree": 50
+        },
+        {
+          "id": "Figure 1",
+          "degree": 44
+        },
+        {
+          "id": "Dynamic Knowledge Graph",
+          "degree": 39
+        },
+        {
+          "id": "Temporal Knowledge Graphs",
+          "degree": 35
+        },
+        {
+          "id": "Temporal Knowledge Graph Completion",
+          "degree": 30
+        },
+        {
+          "id": "Symbolic Reasoning",
+          "degree": 28
+        },
+        {
+          "id": "Temporal Information",
+          "degree": 27
+        },
+        {
+          "id": "Event Knowledge Graph",
+          "degree": 25
+        },
+        {
+          "id": "Temporal Knowledge Graph Reasoning",
+          "degree": 18
+        }
+      ]
+    },
+    {
+      "id": "c12",
+      "name": "Survey",
+      "summary": "Tables / Methodology / Open Research Knowledge Graph",
+      "position": [
+        -4.85,
+        7.62,
+        0.0
+      ],
+      "size": 2.46,
+      "color": "#ffd9a0",
+      "entityCount": 408,
+      "topType": "Unknown",
+      "typeCount": {
+        "Unknown": 89,
+        "Concept": 84,
+        "Artifact": 39,
+        "Document": 38,
+        "Method": 35,
+        "Person": 27,
+        "Process": 25,
+        "Component": 20,
+        "Tool": 17,
+        "System": 15,
+        "Event": 7,
+        "Metric": 5,
+        "Dataset": 4,
+        "Location": 1,
+        "Material": 1,
+        "Organization": 1
+      },
+      "core": [
+        {
+          "id": "Survey",
+          "degree": 159
+        },
+        {
+          "id": "Tables",
+          "degree": 57
         },
         {
           "id": "Methodology",
@@ -867,1180 +949,1109 @@
         },
         {
           "id": "Scholarly Knowledge Graph",
-          "degree": 27
+          "degree": 28
         },
         {
           "id": "Data",
-          "degree": 26
+          "degree": 27
         },
         {
           "id": "Article",
-          "degree": 24
+          "degree": 25
         },
         {
           "id": "Table Extraction",
           "degree": 24
         },
         {
-          "id": "Survey Table",
-          "degree": 21
-        },
-        {
-          "id": "GROBID",
-          "degree": 20
-        }
-      ]
-    },
-    {
-      "id": "c12",
-      "name": "Relation Extraction",
-      "summary": "Knowledge Acquisition / Coreference Resolution / Entity Discovery",
-      "position": [
-        -6.68,
-        5.14,
-        0.0
-      ],
-      "size": 2.38,
-      "color": "#ffd9a0",
-      "entityCount": 335,
-      "topType": "Unknown",
-      "typeCount": {
-        "Unknown": 71,
-        "Concept": 61,
-        "Person": 49,
-        "Method": 49,
-        "Document": 27,
-        "Tool": 17,
-        "Process": 16,
-        "System": 15,
-        "Artifact": 12,
-        "Event": 10,
-        "Material": 3,
-        "Component": 2,
-        "Dataset": 2,
-        "Location": 1
-      },
-      "core": [
-        {
-          "id": "Relation Extraction",
-          "degree": 145
-        },
-        {
-          "id": "Knowledge Acquisition",
-          "degree": 61
-        },
-        {
-          "id": "Coreference Resolution",
-          "degree": 55
-        },
-        {
-          "id": "Entity Discovery",
-          "degree": 17
-        },
-        {
-          "id": "Deep Learning Models",
-          "degree": 15
-        },
-        {
-          "id": "Knowledge Refinement",
-          "degree": 14
-        },
-        {
-          "id": "Knowitall",
-          "degree": 13
-        },
-        {
-          "id": "Joint Extraction",
-          "degree": 12
-        },
-        {
-          "id": "OpenKE",
-          "degree": 12
-        },
-        {
-          "id": "Few-Shot Relation Classification",
-          "degree": 11
+          "id": "Domains",
+          "degree": 22
         }
       ]
     },
     {
       "id": "c13",
-      "name": "Named Entity Recognition",
-      "summary": "BERT / Entity Typing / Pre-Trained Language Models",
+      "name": "KGs",
+      "summary": "Machine Learning / Ontologies / Automated Driving",
       "position": [
-        7.44,
-        -2.22,
+        3.54,
+        1.79,
         0.5
       ],
-      "size": 2.37,
+      "size": 2.38,
       "color": "#b3e8c0",
-      "entityCount": 327,
-      "topType": "Concept",
+      "entityCount": 348,
+      "topType": "Unknown",
       "typeCount": {
-        "Concept": 73,
-        "Person": 72,
-        "Unknown": 69,
-        "Method": 38,
-        "Document": 22,
-        "Artifact": 10,
-        "System": 9,
-        "Process": 8,
-        "Component": 7,
-        "Metric": 5,
-        "Tool": 5,
-        "Dataset": 5,
-        "Event": 3,
-        "Location": 1
-      },
-      "core": [
-        {
-          "id": "Named Entity Recognition",
-          "degree": 129
-        },
-        {
-          "id": "BERT",
-          "degree": 113
-        },
-        {
-          "id": "Entity Typing",
-          "degree": 50
-        },
-        {
-          "id": "Pre-Trained Language Models",
-          "degree": 46
-        },
-        {
-          "id": "Language Models Are Few-Shot Learners",
-          "degree": 26
-        },
-        {
-          "id": "Background Knowledge",
-          "degree": 20
-        },
-        {
-          "id": "Language Models Are Unsupervised Multitask Learners",
-          "degree": 16
-        },
-        {
-          "id": "NAACL",
-          "degree": 16
-        },
-        {
-          "id": "Word2Vec",
-          "degree": 16
-        },
-        {
-          "id": "Person",
-          "degree": 15
-        }
-      ]
-    },
-    {
-      "id": "c14",
-      "name": "ArXiv",
-      "summary": "Qwen / A Survey On Multimodal Large Language Models / Unifying Large Language Models and Knowledge Graphs: A Roadmap",
-      "position": [
-        -6.31,
-        -1.9,
-        1.0
-      ],
-      "size": 2.36,
-      "color": "#ffa8b8",
-      "entityCount": 317,
-      "topType": "Person",
-      "typeCount": {
-        "Person": 146,
-        "Document": 49,
-        "Unknown": 40,
-        "Concept": 20,
-        "Method": 17,
-        "Artifact": 13,
-        "Organization": 10,
+        "Unknown": 83,
+        "Concept": 70,
+        "Person": 46,
+        "Method": 37,
+        "Process": 27,
+        "Document": 23,
+        "Component": 19,
+        "Artifact": 14,
         "System": 8,
-        "Process": 5,
-        "Event": 3,
-        "Metric": 2,
-        "Location": 2,
-        "Component": 1,
-        "Dataset": 1
-      },
-      "core": [
-        {
-          "id": "ArXiv",
-          "degree": 189
-        },
-        {
-          "id": "Qwen",
-          "degree": 20
-        },
-        {
-          "id": "A Survey On Multimodal Large Language Models",
-          "degree": 15
-        },
-        {
-          "id": "Unifying Large Language Models and Knowledge Graphs: A Roadmap",
-          "degree": 15
-        },
-        {
-          "id": "Shirui Pan",
-          "degree": 14
-        },
-        {
-          "id": "FolkScope",
-          "degree": 11
-        },
-        {
-          "id": "ChatRule",
-          "degree": 10
-        },
-        {
-          "id": "Reasoning on Graphs",
-          "degree": 10
-        },
-        {
-          "id": "Investigating Pretrained Language Models for Graph-to-Text Generation",
-          "degree": 9
-        },
-        {
-          "id": "LIMA",
-          "degree": 9
-        }
-      ]
-    },
-    {
-      "id": "c15",
-      "name": "Schema",
-      "summary": "Property / Entity Description Pattern / Weights",
-      "position": [
-        2.36,
-        -8.27,
-        -1.0
-      ],
-      "size": 2.33,
-      "color": "#a0c8ff",
-      "entityCount": 299,
-      "topType": "Concept",
-      "typeCount": {
-        "Concept": 81,
-        "Unknown": 66,
-        "Method": 43,
-        "Metric": 24,
-        "Artifact": 22,
-        "Process": 16,
-        "Document": 13,
-        "System": 10,
-        "Component": 10,
-        "Person": 7,
+        "Organization": 8,
+        "Metric": 3,
+        "Location": 3,
         "Dataset": 3,
-        "Tool": 2,
-        "Organization": 1,
-        "Event": 1
+        "Event": 2,
+        "Tool": 2
       },
       "core": [
         {
-          "id": "Schema",
-          "degree": 36
+          "id": "KGs",
+          "degree": 72
         },
         {
-          "id": "Property",
+          "id": "Machine Learning",
+          "degree": 60
+        },
+        {
+          "id": "Ontologies",
+          "degree": 39
+        },
+        {
+          "id": "Automated Driving",
           "degree": 34
         },
         {
-          "id": "Entity Description Pattern",
+          "id": "Vehicle",
+          "degree": 23
+        },
+        {
+          "id": "Scene Understanding",
+          "degree": 22
+        },
+        {
+          "id": "AD",
           "degree": 18
         },
         {
-          "id": "Weights",
-          "degree": 18
-        },
-        {
-          "id": "AutoSchemaKG",
-          "degree": 16
-        },
-        {
-          "id": "Data Type",
-          "degree": 16
-        },
-        {
-          "id": "Text Descriptions",
-          "degree": 16
-        },
-        {
-          "id": "Product Image",
+          "id": "Huang et al.",
           "degree": 15
         },
         {
-          "id": "VLM",
-          "degree": 14
+          "id": "Perception",
+          "degree": 15
         },
         {
-          "id": "KG Triples",
+          "id": "Context Model",
           "degree": 13
         }
       ]
     },
     {
-      "id": "c16",
+      "id": "c14",
       "name": "ACL",
-      "summary": "Relation Classification / Deep Neural Networks / GraphRel",
+      "summary": "Relation Classification / 2017 / Association For Computational Linguistics",
       "position": [
-        -2.22,
-        1.82,
-        -0.5
+        -6.46,
+        -0.58,
+        1.0
       ],
-      "size": 2.33,
-      "color": "#cfc0ff",
-      "entityCount": 297,
+      "size": 2.35,
+      "color": "#ffa8b8",
+      "entityCount": 325,
       "topType": "Person",
       "typeCount": {
-        "Person": 99,
-        "Unknown": 56,
-        "Concept": 36,
-        "Method": 29,
-        "Document": 26,
-        "System": 12,
-        "Artifact": 10,
-        "Event": 8,
+        "Person": 109,
+        "Unknown": 68,
+        "Document": 41,
+        "Concept": 26,
+        "Method": 22,
+        "Event": 20,
+        "System": 9,
+        "Location": 8,
+        "Artifact": 8,
         "Component": 7,
-        "Metric": 6,
-        "Process": 5,
-        "Dataset": 2,
-        "Organization": 1
+        "Process": 4,
+        "Organization": 2,
+        "Dataset": 1
       },
       "core": [
         {
           "id": "ACL",
-          "degree": 108
+          "degree": 110
         },
         {
           "id": "Relation Classification",
           "degree": 52
         },
         {
-          "id": "Deep Neural Networks",
-          "degree": 22
+          "id": "2017",
+          "degree": 23
         },
         {
-          "id": "GraphRel",
+          "id": "Association For Computational Linguistics",
           "degree": 18
         },
         {
           "id": "Zheng Et Al.",
-          "degree": 16
-        },
-        {
-          "id": "Joint Entity and Relation Extraction",
-          "degree": 15
-        },
-        {
-          "id": "Knowledge-Based Systems",
-          "degree": 15
-        },
-        {
-          "id": "CoType",
-          "degree": 14
-        },
-        {
-          "id": "Dict-BERT",
-          "degree": 13
+          "degree": 12
         },
         {
           "id": "Semantic Features",
           "degree": 11
+        },
+        {
+          "id": "15th Conference Of The European Chapter Of The Association For Computational Linguistics",
+          "degree": 10
+        },
+        {
+          "id": "Machine Learning Methods",
+          "degree": 10
+        },
+        {
+          "id": "Maps",
+          "degree": 10
+        },
+        {
+          "id": "Self-Supervised Quantized Representation Paper",
+          "degree": 10
+        }
+      ]
+    },
+    {
+      "id": "c15",
+      "name": "ChatGPT",
+      "summary": "Relation Type / ArchiMate / Resources",
+      "position": [
+        2.23,
+        -7.93,
+        -1.0
+      ],
+      "size": 2.34,
+      "color": "#a0c8ff",
+      "entityCount": 317,
+      "topType": "Concept",
+      "typeCount": {
+        "Concept": 82,
+        "Unknown": 67,
+        "Person": 28,
+        "Process": 25,
+        "Method": 22,
+        "Artifact": 20,
+        "System": 20,
+        "Document": 16,
+        "Component": 11,
+        "Event": 7,
+        "Organization": 7,
+        "Metric": 7,
+        "Tool": 4,
+        "Dataset": 1
+      },
+      "core": [
+        {
+          "id": "ChatGPT",
+          "degree": 57
+        },
+        {
+          "id": "Relation Type",
+          "degree": 51
+        },
+        {
+          "id": "ArchiMate",
+          "degree": 26
+        },
+        {
+          "id": "Resources",
+          "degree": 22
+        },
+        {
+          "id": "Electronic Court Filing",
+          "degree": 21
+        },
+        {
+          "id": "Experiment",
+          "degree": 21
+        },
+        {
+          "id": "Domain Concept",
+          "degree": 17
+        },
+        {
+          "id": "Expert",
+          "degree": 17
+        },
+        {
+          "id": "Human Expert",
+          "degree": 16
+        },
+        {
+          "id": "Web Tables",
+          "degree": 16
+        }
+      ]
+    },
+    {
+      "id": "c16",
+      "name": "TechGPT-2.0",
+      "summary": "Hyperparameter / Ascend Server / Atom",
+      "position": [
+        -1.98,
+        2.7,
+        -0.5
+      ],
+      "size": 2.33,
+      "color": "#cfc0ff",
+      "entityCount": 311,
+      "topType": "Unknown",
+      "typeCount": {
+        "Unknown": 62,
+        "Concept": 60,
+        "Artifact": 28,
+        "Process": 26,
+        "Person": 25,
+        "System": 24,
+        "Dataset": 20,
+        "Metric": 19,
+        "Component": 13,
+        "Organization": 11,
+        "Method": 11,
+        "Document": 5,
+        "Tool": 4,
+        "Event": 2,
+        "Location": 1
+      },
+      "core": [
+        {
+          "id": "TechGPT-2.0",
+          "degree": 63
+        },
+        {
+          "id": "Hyperparameter",
+          "degree": 27
+        },
+        {
+          "id": "Ascend Server",
+          "degree": 24
+        },
+        {
+          "id": "Atom",
+          "degree": 23
+        },
+        {
+          "id": "Researchers",
+          "degree": 22
+        },
+        {
+          "id": "Qwen",
+          "degree": 20
+        },
+        {
+          "id": "Mindformer",
+          "degree": 19
+        },
+        {
+          "id": "TechGPT-1.0",
+          "degree": 19
+        },
+        {
+          "id": "LLAMA2",
+          "degree": 18
+        },
+        {
+          "id": "Large Models",
+          "degree": 17
         }
       ]
     },
     {
       "id": "c17",
-      "name": "Graph Neural Networks",
-      "summary": "Language Model / GNN-Based Methods / R-GCN",
+      "name": "Knowledge Graph Construction",
+      "summary": "Automatic Knowledge Graph Construction / Information Extraction / Meta-learning",
       "position": [
-        0.25,
-        -3.23,
+        5.47,
+        -3.42,
         0.0
       ],
-      "size": 2.3,
+      "size": 2.32,
       "color": "#ffe0a8",
-      "entityCount": 279,
-      "topType": "Concept",
+      "entityCount": 306,
+      "topType": "Unknown",
       "typeCount": {
-        "Concept": 77,
-        "Unknown": 68,
-        "Person": 38,
-        "Method": 34,
-        "System": 14,
-        "Component": 13,
-        "Document": 11,
-        "Artifact": 9,
-        "Process": 8,
-        "Event": 4,
-        "Dataset": 2,
-        "Organization": 1
+        "Unknown": 77,
+        "Person": 64,
+        "Concept": 52,
+        "Method": 31,
+        "Document": 20,
+        "Process": 18,
+        "System": 10,
+        "Metric": 8,
+        "Artifact": 8,
+        "Dataset": 5,
+        "Event": 5,
+        "Component": 3,
+        "Organization": 2,
+        "Material": 2,
+        "Tool": 1
       },
       "core": [
         {
-          "id": "Graph Neural Networks",
-          "degree": 100
+          "id": "Knowledge Graph Construction",
+          "degree": 112
         },
         {
-          "id": "Language Model",
-          "degree": 63
+          "id": "Automatic Knowledge Graph Construction",
+          "degree": 52
         },
         {
-          "id": "GNN-Based Methods",
-          "degree": 30
-        },
-        {
-          "id": "R-GCN",
-          "degree": 30
+          "id": "Information Extraction",
+          "degree": 44
         },
         {
           "id": "Meta-learning",
           "degree": 24
         },
         {
-          "id": "Recommendation Systems",
+          "id": "Graphusion",
+          "degree": 23
+        },
+        {
+          "id": "Alignment",
+          "degree": 18
+        },
+        {
+          "id": "Systems",
+          "degree": 18
+        },
+        {
+          "id": "Inference",
           "degree": 17
         },
         {
-          "id": "Representation",
+          "id": "EntGPT",
           "degree": 16
         },
         {
-          "id": "GNN-Based Method",
-          "degree": 14
-        },
-        {
-          "id": "Liu",
-          "degree": 14
-        },
-        {
-          "id": "Node2VEC",
-          "degree": 12
+          "id": "AI Applications",
+          "degree": 11
         }
       ]
     }
   ],
   "links": [
     {
-      "source": "c1",
+      "source": "c0",
+      "target": "c2",
+      "strength": "strong",
+      "relationCount": 354
+    },
+    {
+      "source": "c0",
+      "target": "c7",
+      "strength": "strong",
+      "relationCount": 246
+    },
+    {
+      "source": "c0",
+      "target": "c10",
+      "strength": "strong",
+      "relationCount": 222
+    },
+    {
+      "source": "c2",
       "target": "c3",
       "strength": "strong",
-      "relationCount": 340
+      "relationCount": 209
+    },
+    {
+      "source": "c2",
+      "target": "c4",
+      "strength": "strong",
+      "relationCount": 205
+    },
+    {
+      "source": "c0",
+      "target": "c3",
+      "strength": "strong",
+      "relationCount": 178
+    },
+    {
+      "source": "c2",
+      "target": "c7",
+      "strength": "strong",
+      "relationCount": 176
+    },
+    {
+      "source": "c2",
+      "target": "c9",
+      "strength": "strong",
+      "relationCount": 145
     },
     {
       "source": "c0",
       "target": "c1",
       "strength": "strong",
-      "relationCount": 336
-    },
-    {
-      "source": "c0",
-      "target": "c3",
-      "strength": "strong",
-      "relationCount": 257
+      "relationCount": 120
     },
     {
       "source": "c0",
       "target": "c5",
       "strength": "strong",
-      "relationCount": 214
-    },
-    {
-      "source": "c3",
-      "target": "c4",
-      "strength": "strong",
-      "relationCount": 165
-    },
-    {
-      "source": "c1",
-      "target": "c4",
-      "strength": "strong",
-      "relationCount": 137
+      "relationCount": 117
     },
     {
       "source": "c0",
-      "target": "c6",
-      "strength": "strong",
-      "relationCount": 128
-    },
-    {
-      "source": "c0",
-      "target": "c9",
-      "strength": "strong",
-      "relationCount": 127
-    },
-    {
-      "source": "c3",
-      "target": "c6",
-      "strength": "strong",
-      "relationCount": 127
-    },
-    {
-      "source": "c1",
-      "target": "c8",
-      "strength": "strong",
-      "relationCount": 118
-    },
-    {
-      "source": "c1",
       "target": "c6",
       "strength": "strong",
       "relationCount": 114
     },
     {
+      "source": "c0",
+      "target": "c8",
+      "strength": "strong",
+      "relationCount": 107
+    },
+    {
+      "source": "c2",
+      "target": "c5",
+      "strength": "strong",
+      "relationCount": 101
+    },
+    {
+      "source": "c2",
+      "target": "c12",
+      "strength": "strong",
+      "relationCount": 93
+    },
+    {
+      "source": "c3",
+      "target": "c6",
+      "strength": "strong",
+      "relationCount": 90
+    },
+    {
       "source": "c3",
       "target": "c9",
       "strength": "strong",
-      "relationCount": 113
-    },
-    {
-      "source": "c1",
-      "target": "c5",
-      "strength": "strong",
-      "relationCount": 103
-    },
-    {
-      "source": "c3",
-      "target": "c5",
-      "strength": "strong",
-      "relationCount": 102
-    },
-    {
-      "source": "c0",
-      "target": "c2",
-      "strength": "strong",
-      "relationCount": 100
-    },
-    {
-      "source": "c0",
-      "target": "c7",
-      "strength": "strong",
-      "relationCount": 96
-    },
-    {
-      "source": "c1",
-      "target": "c9",
-      "strength": "strong",
-      "relationCount": 94
+      "relationCount": 90
     },
     {
       "source": "c0",
       "target": "c4",
       "strength": "strong",
-      "relationCount": 89
+      "relationCount": 86
+    },
+    {
+      "source": "c1",
+      "target": "c5",
+      "strength": "strong",
+      "relationCount": 85
+    },
+    {
+      "source": "c3",
+      "target": "c5",
+      "strength": "strong",
+      "relationCount": 83
+    },
+    {
+      "source": "c3",
+      "target": "c7",
+      "strength": "strong",
+      "relationCount": 81
+    },
+    {
+      "source": "c5",
+      "target": "c7",
+      "strength": "strong",
+      "relationCount": 80
+    },
+    {
+      "source": "c0",
+      "target": "c12",
+      "strength": "strong",
+      "relationCount": 79
     },
     {
       "source": "c1",
       "target": "c2",
       "strength": "strong",
-      "relationCount": 83
+      "relationCount": 78
+    },
+    {
+      "source": "c5",
+      "target": "c6",
+      "strength": "strong",
+      "relationCount": 78
+    },
+    {
+      "source": "c1",
+      "target": "c14",
+      "strength": "strong",
+      "relationCount": 75
+    },
+    {
+      "source": "c4",
+      "target": "c7",
+      "strength": "strong",
+      "relationCount": 75
+    },
+    {
+      "source": "c3",
+      "target": "c4",
+      "strength": "strong",
+      "relationCount": 73
     },
     {
       "source": "c0",
-      "target": "c8",
+      "target": "c11",
       "strength": "strong",
-      "relationCount": 82
+      "relationCount": 69
+    },
+    {
+      "source": "c4",
+      "target": "c5",
+      "strength": "strong",
+      "relationCount": 69
     },
     {
       "source": "c2",
-      "target": "c3",
+      "target": "c10",
+      "strength": "strong",
+      "relationCount": 69
+    },
+    {
+      "source": "c2",
+      "target": "c11",
       "strength": "strong",
       "relationCount": 68
     },
     {
-      "source": "c1",
-      "target": "c13",
+      "source": "c3",
+      "target": "c10",
       "strength": "strong",
-      "relationCount": 66
+      "relationCount": 67
     },
     {
-      "source": "c4",
-      "target": "c9",
-      "strength": "strong",
-      "relationCount": 64
-    },
-    {
-      "source": "c1",
-      "target": "c7",
+      "source": "c2",
+      "target": "c8",
       "strength": "strong",
       "relationCount": 62
     },
     {
-      "source": "c2",
-      "target": "c5",
+      "source": "c4",
+      "target": "c8",
       "strength": "strong",
       "relationCount": 60
     },
     {
       "source": "c2",
-      "target": "c16",
-      "strength": "medium",
-      "relationCount": 59
-    },
-    {
-      "source": "c3",
-      "target": "c17",
-      "strength": "medium",
-      "relationCount": 57
-    },
-    {
-      "source": "c4",
-      "target": "c7",
+      "target": "c13",
       "strength": "medium",
       "relationCount": 56
     },
     {
-      "source": "c4",
+      "source": "c1",
       "target": "c6",
       "strength": "medium",
-      "relationCount": 56
+      "relationCount": 55
     },
     {
-      "source": "c3",
-      "target": "c15",
+      "source": "c2",
+      "target": "c17",
       "strength": "medium",
       "relationCount": 53
     },
     {
-      "source": "c0",
-      "target": "c17",
-      "strength": "medium",
-      "relationCount": 51
-    },
-    {
       "source": "c3",
       "target": "c12",
+      "strength": "medium",
+      "relationCount": 52
+    },
+    {
+      "source": "c0",
+      "target": "c9",
       "strength": "medium",
       "relationCount": 51
     },
     {
       "source": "c1",
-      "target": "c12",
-      "strength": "medium",
-      "relationCount": 50
-    },
-    {
-      "source": "c4",
-      "target": "c10",
-      "strength": "medium",
-      "relationCount": 50
-    },
-    {
-      "source": "c1",
-      "target": "c11",
-      "strength": "medium",
-      "relationCount": 49
-    },
-    {
-      "source": "c2",
-      "target": "c14",
+      "target": "c3",
       "strength": "medium",
       "relationCount": 48
     },
     {
       "source": "c3",
-      "target": "c7",
-      "strength": "medium",
-      "relationCount": 48
-    },
-    {
-      "source": "c0",
-      "target": "c12",
-      "strength": "medium",
-      "relationCount": 48
-    },
-    {
-      "source": "c2",
-      "target": "c12",
+      "target": "c8",
       "strength": "medium",
       "relationCount": 47
     },
     {
-      "source": "c0",
-      "target": "c15",
+      "source": "c7",
+      "target": "c8",
       "strength": "medium",
       "relationCount": 46
     },
     {
-      "source": "c3",
-      "target": "c11",
+      "source": "c1",
+      "target": "c4",
       "strength": "medium",
       "relationCount": 45
     },
     {
-      "source": "c1",
-      "target": "c17",
-      "strength": "medium",
-      "relationCount": 44
-    },
-    {
       "source": "c4",
-      "target": "c12",
+      "target": "c9",
       "strength": "medium",
-      "relationCount": 42
+      "relationCount": 43
     },
     {
-      "source": "c0",
-      "target": "c13",
+      "source": "c7",
+      "target": "c11",
       "strength": "medium",
-      "relationCount": 41
+      "relationCount": 40
     },
     {
-      "source": "c4",
-      "target": "c13",
+      "source": "c5",
+      "target": "c9",
+      "strength": "medium",
+      "relationCount": 40
+    },
+    {
+      "source": "c6",
+      "target": "c10",
       "strength": "medium",
       "relationCount": 40
     },
     {
       "source": "c2",
-      "target": "c8",
+      "target": "c15",
       "strength": "medium",
-      "relationCount": 38
+      "relationCount": 37
     },
     {
-      "source": "c7",
+      "source": "c1",
+      "target": "c7",
+      "strength": "medium",
+      "relationCount": 37
+    },
+    {
+      "source": "c2",
+      "target": "c6",
+      "strength": "medium",
+      "relationCount": 37
+    },
+    {
+      "source": "c1",
       "target": "c9",
       "strength": "medium",
       "relationCount": 37
     },
     {
       "source": "c5",
-      "target": "c8",
+      "target": "c17",
       "strength": "medium",
-      "relationCount": 36
-    },
-    {
-      "source": "c1",
-      "target": "c10",
-      "strength": "medium",
-      "relationCount": 36
-    },
-    {
-      "source": "c1",
-      "target": "c15",
-      "strength": "medium",
-      "relationCount": 35
-    },
-    {
-      "source": "c4",
-      "target": "c14",
-      "strength": "medium",
-      "relationCount": 35
-    },
-    {
-      "source": "c2",
-      "target": "c6",
-      "strength": "medium",
-      "relationCount": 33
+      "relationCount": 37
     },
     {
       "source": "c0",
-      "target": "c11",
+      "target": "c16",
       "strength": "medium",
-      "relationCount": 33
+      "relationCount": 36
     },
     {
-      "source": "c2",
-      "target": "c13",
+      "source": "c6",
+      "target": "c7",
+      "strength": "medium",
+      "relationCount": 36
+    },
+    {
+      "source": "c4",
+      "target": "c16",
+      "strength": "medium",
+      "relationCount": 35
+    },
+    {
+      "source": "c7",
+      "target": "c10",
+      "strength": "medium",
+      "relationCount": 34
+    },
+    {
+      "source": "c4",
+      "target": "c15",
       "strength": "medium",
       "relationCount": 32
     },
     {
-      "source": "c8",
-      "target": "c12",
+      "source": "c5",
+      "target": "c14",
+      "strength": "medium",
+      "relationCount": 31
+    },
+    {
+      "source": "c3",
+      "target": "c11",
+      "strength": "medium",
+      "relationCount": 31
+    },
+    {
+      "source": "c4",
+      "target": "c17",
       "strength": "medium",
       "relationCount": 30
     },
     {
       "source": "c3",
-      "target": "c8",
-      "strength": "medium",
-      "relationCount": 29
-    },
-    {
-      "source": "c2",
-      "target": "c4",
-      "strength": "medium",
-      "relationCount": 29
-    },
-    {
-      "source": "c3",
       "target": "c13",
       "strength": "medium",
       "relationCount": 28
     },
     {
-      "source": "c3",
-      "target": "c14",
-      "strength": "medium",
-      "relationCount": 28
-    },
-    {
-      "source": "c12",
-      "target": "c13",
-      "strength": "medium",
-      "relationCount": 28
-    },
-    {
-      "source": "c6",
-      "target": "c9",
-      "strength": "medium",
-      "relationCount": 28
-    },
-    {
-      "source": "c9",
+      "source": "c0",
       "target": "c15",
-      "strength": "medium",
-      "relationCount": 28
-    },
-    {
-      "source": "c8",
-      "target": "c13",
       "strength": "medium",
       "relationCount": 26
     },
     {
-      "source": "c0",
-      "target": "c16",
-      "strength": "medium",
-      "relationCount": 24
-    },
-    {
-      "source": "c4",
-      "target": "c5",
-      "strength": "medium",
-      "relationCount": 24
-    },
-    {
-      "source": "c2",
+      "source": "c1",
       "target": "c17",
       "strength": "medium",
+      "relationCount": 26
+    },
+    {
+      "source": "c6",
+      "target": "c8",
+      "strength": "medium",
+      "relationCount": 25
+    },
+    {
+      "source": "c9",
+      "target": "c11",
+      "strength": "medium",
       "relationCount": 24
     },
     {
       "source": "c0",
+      "target": "c13",
+      "strength": "medium",
+      "relationCount": 24
+    },
+    {
+      "source": "c1",
       "target": "c10",
       "strength": "medium",
       "relationCount": 23
     },
     {
-      "source": "c8",
-      "target": "c16",
-      "strength": "medium",
-      "relationCount": 23
-    },
-    {
-      "source": "c5",
-      "target": "c9",
-      "strength": "medium",
-      "relationCount": 22
-    },
-    {
-      "source": "c5",
-      "target": "c17",
-      "strength": "medium",
-      "relationCount": 22
-    },
-    {
       "source": "c6",
-      "target": "c17",
+      "target": "c14",
       "strength": "medium",
       "relationCount": 22
+    },
+    {
+      "source": "c0",
+      "target": "c14",
+      "strength": "medium",
+      "relationCount": 22
+    },
+    {
+      "source": "c8",
+      "target": "c10",
+      "strength": "medium",
+      "relationCount": 22
+    },
+    {
+      "source": "c9",
+      "target": "c10",
+      "strength": "medium",
+      "relationCount": 21
     },
     {
       "source": "c7",
-      "target": "c17",
+      "target": "c9",
       "strength": "medium",
-      "relationCount": 20
-    },
-    {
-      "source": "c5",
-      "target": "c6",
-      "strength": "medium",
-      "relationCount": 20
-    },
-    {
-      "source": "c6",
-      "target": "c12",
-      "strength": "medium",
-      "relationCount": 20
+      "relationCount": 21
     },
     {
       "source": "c4",
-      "target": "c17",
+      "target": "c12",
       "strength": "medium",
-      "relationCount": 20
+      "relationCount": 21
     },
     {
-      "source": "c8",
-      "target": "c9",
-      "strength": "weak",
-      "relationCount": 19
+      "source": "c9",
+      "target": "c12",
+      "strength": "medium",
+      "relationCount": 21
     },
     {
       "source": "c3",
       "target": "c16",
-      "strength": "weak",
-      "relationCount": 19
+      "strength": "medium",
+      "relationCount": 21
     },
     {
-      "source": "c4",
+      "source": "c10",
       "target": "c11",
-      "strength": "weak",
-      "relationCount": 19
-    },
-    {
-      "source": "c5",
-      "target": "c13",
-      "strength": "weak",
-      "relationCount": 18
-    },
-    {
-      "source": "c5",
-      "target": "c7",
-      "strength": "weak",
-      "relationCount": 18
-    },
-    {
-      "source": "c7",
-      "target": "c10",
-      "strength": "weak",
-      "relationCount": 18
-    },
-    {
-      "source": "c9",
-      "target": "c13",
-      "strength": "weak",
-      "relationCount": 17
-    },
-    {
-      "source": "c6",
-      "target": "c11",
-      "strength": "weak",
-      "relationCount": 17
-    },
-    {
-      "source": "c6",
-      "target": "c8",
-      "strength": "weak",
-      "relationCount": 17
-    },
-    {
-      "source": "c4",
-      "target": "c15",
-      "strength": "weak",
-      "relationCount": 17
-    },
-    {
-      "source": "c4",
-      "target": "c8",
-      "strength": "weak",
-      "relationCount": 16
-    },
-    {
-      "source": "c9",
-      "target": "c17",
-      "strength": "weak",
-      "relationCount": 16
+      "strength": "medium",
+      "relationCount": 20
     },
     {
       "source": "c1",
-      "target": "c14",
-      "strength": "weak",
-      "relationCount": 16
+      "target": "c11",
+      "strength": "medium",
+      "relationCount": 20
+    },
+    {
+      "source": "c3",
+      "target": "c17",
+      "strength": "medium",
+      "relationCount": 20
     },
     {
       "source": "c7",
+      "target": "c12",
+      "strength": "weak",
+      "relationCount": 19
+    },
+    {
+      "source": "c5",
+      "target": "c11",
+      "strength": "weak",
+      "relationCount": 18
+    },
+    {
+      "source": "c5",
       "target": "c8",
       "strength": "weak",
-      "relationCount": 15
+      "relationCount": 18
+    },
+    {
+      "source": "c3",
+      "target": "c15",
+      "strength": "weak",
+      "relationCount": 18
+    },
+    {
+      "source": "c4",
+      "target": "c13",
+      "strength": "weak",
+      "relationCount": 18
+    },
+    {
+      "source": "c0",
+      "target": "c17",
+      "strength": "weak",
+      "relationCount": 17
+    },
+    {
+      "source": "c4",
+      "target": "c11",
+      "strength": "weak",
+      "relationCount": 17
     },
     {
       "source": "c5",
-      "target": "c16",
+      "target": "c12",
       "strength": "weak",
-      "relationCount": 15
-    },
-    {
-      "source": "c5",
-      "target": "c10",
-      "strength": "weak",
-      "relationCount": 15
-    },
-    {
-      "source": "c6",
-      "target": "c7",
-      "strength": "weak",
-      "relationCount": 15
+      "relationCount": 16
     },
     {
       "source": "c8",
-      "target": "c17",
+      "target": "c12",
       "strength": "weak",
-      "relationCount": 14
-    },
-    {
-      "source": "c1",
-      "target": "c16",
-      "strength": "weak",
-      "relationCount": 14
-    },
-    {
-      "source": "c6",
-      "target": "c13",
-      "strength": "weak",
-      "relationCount": 14
-    },
-    {
-      "source": "c9",
-      "target": "c11",
-      "strength": "weak",
-      "relationCount": 14
+      "relationCount": 16
     },
     {
       "source": "c12",
+      "target": "c15",
+      "strength": "weak",
+      "relationCount": 16
+    },
+    {
+      "source": "c9",
+      "target": "c13",
+      "strength": "weak",
+      "relationCount": 15
+    },
+    {
+      "source": "c12",
+      "target": "c13",
+      "strength": "weak",
+      "relationCount": 15
+    },
+    {
+      "source": "c2",
+      "target": "c16",
+      "strength": "weak",
+      "relationCount": 15
+    },
+    {
+      "source": "c8",
+      "target": "c16",
+      "strength": "weak",
+      "relationCount": 15
+    },
+    {
+      "source": "c7",
       "target": "c16",
       "strength": "weak",
       "relationCount": 14
     },
     {
-      "source": "c3",
-      "target": "c10",
-      "strength": "weak",
-      "relationCount": 13
-    },
-    {
-      "source": "c9",
+      "source": "c1",
       "target": "c12",
       "strength": "weak",
-      "relationCount": 13
+      "relationCount": 14
     },
     {
-      "source": "c13",
-      "target": "c16",
+      "source": "c6",
+      "target": "c9",
       "strength": "weak",
-      "relationCount": 13
+      "relationCount": 14
     },
     {
-      "source": "c9",
-      "target": "c10",
+      "source": "c11",
+      "target": "c12",
       "strength": "weak",
-      "relationCount": 12
+      "relationCount": 14
     },
     {
       "source": "c5",
-      "target": "c12",
+      "target": "c10",
+      "strength": "weak",
+      "relationCount": 14
+    },
+    {
+      "source": "c8",
+      "target": "c9",
+      "strength": "weak",
+      "relationCount": 14
+    },
+    {
+      "source": "c7",
+      "target": "c17",
+      "strength": "weak",
+      "relationCount": 13
+    },
+    {
+      "source": "c6",
+      "target": "c11",
       "strength": "weak",
       "relationCount": 11
     },
     {
-      "source": "c5",
-      "target": "c11",
+      "source": "c4",
+      "target": "c10",
       "strength": "weak",
-      "relationCount": 9
+      "relationCount": 11
     },
     {
-      "source": "c2",
-      "target": "c7",
+      "source": "c4",
+      "target": "c6",
       "strength": "weak",
-      "relationCount": 9
-    },
-    {
-      "source": "c6",
-      "target": "c14",
-      "strength": "weak",
-      "relationCount": 9
+      "relationCount": 11
     },
     {
       "source": "c7",
-      "target": "c12",
+      "target": "c15",
       "strength": "weak",
-      "relationCount": 9
+      "relationCount": 11
     },
     {
-      "source": "c9",
+      "source": "c12",
       "target": "c16",
       "strength": "weak",
-      "relationCount": 9
+      "relationCount": 11
+    },
+    {
+      "source": "c15",
+      "target": "c16",
+      "strength": "weak",
+      "relationCount": 10
+    },
+    {
+      "source": "c2",
+      "target": "c14",
+      "strength": "weak",
+      "relationCount": 10
+    },
+    {
+      "source": "c1",
+      "target": "c8",
+      "strength": "weak",
+      "relationCount": 10
+    },
+    {
+      "source": "c10",
+      "target": "c16",
+      "strength": "weak",
+      "relationCount": 10
+    },
+    {
+      "source": "c4",
+      "target": "c14",
+      "strength": "weak",
+      "relationCount": 10
+    },
+    {
+      "source": "c11",
+      "target": "c13",
+      "strength": "weak",
+      "relationCount": 10
+    },
+    {
+      "source": "c7",
+      "target": "c13",
+      "strength": "weak",
+      "relationCount": 10
+    },
+    {
+      "source": "c16",
+      "target": "c17",
+      "strength": "weak",
+      "relationCount": 10
     },
     {
       "source": "c12",
       "target": "c17",
       "strength": "weak",
-      "relationCount": 9
+      "relationCount": 10
+    },
+    {
+      "source": "c1",
+      "target": "c16",
+      "strength": "weak",
+      "relationCount": 10
     },
     {
       "source": "c10",
-      "target": "c11",
-      "strength": "weak",
-      "relationCount": 9
-    },
-    {
-      "source": "c5",
-      "target": "c15",
-      "strength": "weak",
-      "relationCount": 8
-    },
-    {
-      "source": "c13",
       "target": "c14",
       "strength": "weak",
       "relationCount": 8
     },
     {
-      "source": "c10",
-      "target": "c13",
-      "strength": "weak",
-      "relationCount": 8
-    },
-    {
-      "source": "c2",
-      "target": "c9",
-      "strength": "weak",
-      "relationCount": 8
-    },
-    {
-      "source": "c4",
-      "target": "c16",
-      "strength": "weak",
-      "relationCount": 8
-    },
-    {
-      "source": "c13",
+      "source": "c6",
       "target": "c17",
       "strength": "weak",
       "relationCount": 8
     },
     {
-      "source": "c7",
+      "source": "c5",
       "target": "c13",
       "strength": "weak",
-      "relationCount": 7
+      "relationCount": 8
+    },
+    {
+      "source": "c8",
+      "target": "c17",
+      "strength": "weak",
+      "relationCount": 8
+    },
+    {
+      "source": "c9",
+      "target": "c16",
+      "strength": "weak",
+      "relationCount": 8
     },
     {
       "source": "c5",
-      "target": "c14",
+      "target": "c16",
       "strength": "weak",
-      "relationCount": 6
-    },
-    {
-      "source": "c7",
-      "target": "c14",
-      "strength": "weak",
-      "relationCount": 6
-    },
-    {
-      "source": "c7",
-      "target": "c15",
-      "strength": "weak",
-      "relationCount": 6
-    },
-    {
-      "source": "c0",
-      "target": "c14",
-      "strength": "weak",
-      "relationCount": 6
+      "relationCount": 8
     }
   ]
 }

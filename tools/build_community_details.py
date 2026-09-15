@@ -32,7 +32,9 @@ from pathlib import Path
 import networkx as nx
 
 sys.path.insert(0, str(ROOT / "src"))
-from graph_store import Neo4jStore  # noqa: E402
+sys.path.insert(0, str(ROOT / "tools"))          # 为了 import graph_source
+from graph_store import Neo4jStore  # noqa: E402,F401  （保留导入：向后兼容）
+from graph_source import load_graph  # noqa: E402
 
 OUT = ROOT / "web/kg-data"
 FIL = OUT / "filaments.json"
@@ -43,6 +45,11 @@ def parse_args():
     ap.add_argument("--max-nodes", type=int, default=1200, help="单社区最多导出节点数")
     ap.add_argument("--min-degree", type=int, default=1, help="内部边最少度数门槛")
     ap.add_argument("--max-edges", type=int, default=4000, help="单社区最多边数")
+    # 2026-09-15：数据源从 Neo4j 换成 data/corpus/graphs/*.json。
+    # 默认与 build_filament_data.py 一致地做治理还原，否则两个脚本口径不同，
+    # 社区详情里的边会与星云对不上。
+    ap.add_argument("--no-governed", action="store_true",
+                    help="不做 entity_filter 治理还原（与 filaments 保持一致时不要用）")
     return ap.parse_args()
 
 
@@ -56,10 +63,12 @@ def main():
     clouds = fil["clouds"]
     print(f"filaments.json: {len(clouds)} 个社区")
 
-    store = Neo4jStore(uri="bolt://localhost:7687", user="neo4j", password="kgdemo2026")
-    nodes = store.query_nodes()
-    edges = store.query_edges()
-    store.close()
+    # ── 数据源（2026-09-15）──────────────────────────────────────────────
+    # 原先**硬依赖 Neo4j**，而那个实例已经不在了 ⇒ 社区详情无法重建。
+    # 现在统一走 `tools/graph_source.py`。
+    # **默认开治理还原**，与 `build_filament_data.py` 保持一致 ——
+    # 否则两个脚本口径不同，社区详情里的边会与星云对不上。
+    nodes, edges = load_graph(governed=not ARGS.no_governed)
     print(f"载入 {len(nodes)} 节点 / {len(edges)} 边")
 
     G = nx.Graph()
@@ -67,10 +76,25 @@ def main():
     for n in nodes:
         G.add_node(n["name"])
         ntype[n["name"]] = n.get("type") or "Concept"
+    # ── 保留真实边类型（2026-09-15 修）──────────────────────────────────
+    # `nx.Graph()` 一条边只能有一个属性，而**同一对实体可能有多条不同类型的边**
+    # （例如 A—USES→B 与 A—EVALUATES→B 同时存在）。所以另外维护一个
+    # `(小, 大) -> [类型...]` 的字典来记住它们。
+    #
+    # **为什么要修**：此前 `out_edges.append([m, nb, "RELATED"])` **硬编码**
+    # 把类型写成 `"RELATED"` —— 实测 18 个社区的 **16569 条边全是 `RELATED`**。
+    # 于是社区详情里**看不出任何关系语义**，`CONTRADICTS`（争议）自然也不存在。
+    # 这正是"概览里有类型、详情里没有"的根因。
+    pair_types = {}
     for e in edges:
         s, t = e["source"], e["target"]
         if s != t and s in G and t in G:
             G.add_edge(s, t)
+            key = (s, t) if s <= t else (t, s)
+            ty = str(e.get("type") or "RELATED_TO")
+            lst = pair_types.setdefault(key, [])
+            if ty not in lst:
+                lst.append(ty)
 
     print("Louvain（与概览一致，seed=42）...")
     comms = sorted(nx.community.louvain_communities(G, seed=42), key=len, reverse=True)
@@ -118,7 +142,15 @@ def main():
                 if key in seen:
                     continue
                 seen.add(key)
-                out_edges.append([m, nb, "RELATED"])
+                # 用真实类型（2026-09-15 修：此前硬编码 "RELATED"，
+                # 导致 18 个社区 16569 条边全是 RELATED，社区详情看不出关系语义）。
+                # 同一对实体若有多条不同类型的边，**每种类型各出一条** ——
+                # 否则会把 CONTRADICTS 这类少数类型挤掉（这正是当初丢信息的地方）。
+                tys = pair_types.get(key) or ["RELATED_TO"]
+                for ty in tys:
+                    out_edges.append([m, nb, ty])
+                    if len(out_edges) >= ARGS.max_edges:
+                        break
                 if len(out_edges) >= ARGS.max_edges:
                     break
             if len(out_edges) >= ARGS.max_edges:
