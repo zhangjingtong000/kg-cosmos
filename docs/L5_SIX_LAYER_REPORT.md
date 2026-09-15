@@ -40,7 +40,7 @@
 > （`tools/backfill_missing_endpoints.py:188-196`）⇒ **判据近乎恒真**。
 > 同一份代码对 **L2 / L3 都排除了 `_backfilled`**（`l2_report.py:57`、
 > `l5_report.py:78/124-126`），**唯独 L1 没排除** ——
-> 项目自己记过后果：`backfill_missing_endpoints.py:20`「L1 92.8% → 94.4%」。
+> 项目自己**此前**记过后果：`backfill_missing_endpoints.py:20`「L1 92.8% → 94.4%」。
 > 权威产物里其实**已经算好了抽取口径**（`L3_endpoints_extracted_caliber`），
 > 只是没有并列展示。
 
