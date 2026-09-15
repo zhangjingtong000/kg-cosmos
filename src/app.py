@@ -607,11 +607,15 @@ async def chat(req: ChatRequest):
     + 上限 70 节点的子图**，结果可复现、可解释，且不依赖模型。
     两者定位不同：本端点是"给定 graph_id 的单文档问答壳"，
     PathQA 是"面向全图的子图检索视图"。
-    """
-    if req.graph_id not in graphs:
-        raise HTTPException(404, f"Graph '{req.graph_id}' not found")
 
-    graph = graphs[req.graph_id]
+    **2026-09-15 修**：这里原本是 `if req.graph_id not in graphs:` —— **只查内存**。
+    而 `_ensure_graph` 的 docstring（见上方）**正是为这个坑写的**：
+    「`/api/qa` 第一版只查内存，重启后直接 404，**而同一时刻 `/graph/ad690dfb`
+    却能正常返回** —— 这种"同一个东西，两个端点一个能用一个不能用"最容易骗过测试。」
+    `/api/qa` 当时已修，**`/chat` 漏了** ⇒ 后端一重启，`/graph/{id}` 200、
+    `/chat` 404。现在统一走 `_ensure_graph`。
+    """
+    graph = _ensure_graph(req.graph_id)
     edges = graph["edges"]
 
     q_lower = req.question.lower()
@@ -693,11 +697,47 @@ async def api_qa_step(req: QAStepRequest):
 
 @app.get("/stats")
 async def stats():
-    """Get overall pipeline statistics."""
+    """Get overall pipeline statistics.
+
+    **2026-09-15 修**：这里原本只累加**内存里已加载过的上传图**（`graphs`），
+    没有任何磁盘回退 ⇒ **冷启动返回 `{0,0,0}`**，与 docstring
+    「overall pipeline statistics」严重不符 —— 18780 / 31308 这些全库数字
+    **从不出现**。
+
+    现在**分两个口径**报，并各自标明含义（这个项目已经吃过多次
+    "一个名字两个口径"的亏，见 `docs/METRIC_CALIBERS.md`）：
+      · `overview`  —— **概览层全库**（读 `web/kg-data/nebula.json` 的 `meta`）；
+      · `uploaded`  —— **本进程内已加载的上传图**（内存态，冷启动就是 0）。
+    """
+    # 概览层全库：优先读 meta，读不到就给 None（不猜）
+    overview = None
+    try:
+        p = KG_DATA / 'nebula.json'
+        if p.exists():
+            meta = json.loads(p.read_text(encoding='utf-8')).get('meta') or {}
+            overview = {
+                'nodes': meta.get('nodes'),
+                'edges': meta.get('edges'),
+                'communities': meta.get('communities'),
+                'source': 'web/kg-data/nebula.json',
+            }
+    except Exception:
+        overview = None
+
     return {
+        # 概览层：全库规模（与界面首屏一致）
+        "overview": overview,
+        # 本进程内已加载的上传图（冷启动会是 0，这是正常的）
+        "uploaded": {
+            "graphs_loaded": len(graphs),
+            "total_nodes": sum(len(g.get("nodes") or []) for g in graphs.values()),
+            "total_edges": sum(len(g.get("edges") or []) for g in graphs.values()),
+            "note": "只统计本进程已加载的图；磁盘上的图要靠 /graph/{id} 取，取过才算",
+        },
+        # 兼容旧字段名（此前只有这三个），但值改为"已加载"口径并保留 note 说明
         "graphs_stored": len(graphs),
-        "total_nodes": sum(len(g["nodes"]) for g in graphs.values()),
-        "total_edges": sum(len(g["edges"]) for g in graphs.values()),
+        "total_nodes": sum(len(g.get("nodes") or []) for g in graphs.values()),
+        "total_edges": sum(len(g.get("edges") or []) for g in graphs.values()),
     }
 
 
