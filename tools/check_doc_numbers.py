@@ -21,6 +21,7 @@ _HERE = _Path(__file__).resolve()
 ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -91,6 +92,25 @@ RETRACTED = [
 ]
 
 
+def _pytest_count():
+    """跑一次 `pytest --collect-only` 拿**实时**测试数；拿不到返回 None。
+
+    **为什么动态读而不是写死**（N10，2026-09-15 修）：
+    这里原先写死「测试数应为 **74** 条」，而实测已经是 **85** ——
+    **一个写死的基准，本身就是下一次过时**。
+    这与本项目"文档数字会漂"的毛病同源，所以改成实时读。
+    拿不到时返回 None，脚本会跳过这一项而不是误报。
+    """
+    try:
+        r = subprocess.run(
+            [sys.executable, '-m', 'pytest', 'tests', '-q', '--collect-only'],
+            capture_output=True, text=True, timeout=90, cwd=str(ROOT))
+        m = re.search(r'(\d+)\s+tests?\s+collected', (r.stdout or '') + (r.stderr or ''))
+        return int(m.group(1)) if m else None
+    except Exception:
+        return None
+
+
 def main():
     cur = load()
     print('=== 文档数字一致性 ===\n')
@@ -115,6 +135,9 @@ def main():
     # 这是"验证验证器"时发现的（往 HTML 里注入一个旧值，检查居然不报）。
     # 所以现在把三种载体都列上：Markdown 粗体、纯文本、HTML 标签。
     L1 = cur['l1_pct']
+    # 实时测试数（拿不到就是 None，相关检查会跳过而不是误报）
+    _N_TESTS = _pytest_count()
+    print(f'  （实时测试数：{_N_TESTS if _N_TESTS else "未取到"}）')
     STALE = {
         '15116': f"节点数应为 {cur['nodes']}",
         '20869': f"概览层边数应为 {cur['edges_overview']}",
@@ -125,8 +148,8 @@ def main():
         '**92.8%**': f"L1 应为 {L1}%",
         'L1 92.8%': f"L1 应为 {L1}%",
         '<b>92.8%</b>': f"L1 应为 {L1}%",
-        '32 条 pytest': '测试数应为 74 条',
-        '32 条，含': '测试数应为 74 条',
+        '32 条 pytest': f'测试数应为 {_N_TESTS} 条' if _N_TESTS else '测试数已过时',
+        '32 条，含': f'测试数应为 {_N_TESTS} 条' if _N_TESTS else '测试数已过时',
         '27981': f"L5 支持边数应为 {cur['edges_supported']}",
         '归并 384 组': f"L2 累计归并应为 {cur['l2_cumulative']} 组",
         '**归并 384**': f"L2 累计归并应为 {cur['l2_cumulative']} 组",
@@ -196,7 +219,11 @@ def main():
         f"{cur['l3_extracted_pct']}%": 'L3 抽取口径',
         f"{cur['l9_pct']}%": 'L9 端点召回',
         f"{cur['l2_cumulative']}": 'L2 累计归并',
+        # N10（2026-09-15 加）：测试数也该被守 —— 此前它只在 STALE 里当旧值，
+        # 而**没有任何检查强制文档写出这个数**，所以它可以一直是错的。
     }
+    if _N_TESTS:
+        need[str(_N_TESTS)] = f'测试数（{_N_TESTS} 条）'
     for tok, why in need.items():
         if tok in readme:
             print(f'  ✅ README 含 {why} ({tok})')
