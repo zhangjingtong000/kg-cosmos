@@ -155,6 +155,21 @@ def main():
         })
 
     # 边：只保留两端都在导出节点里的
+    #
+    # ⚠️ **2026-09-14 修一个数据损失 bug**：去重键原先只有 `(s, t)`（无向），
+    # **不含关系类型**。于是同一对实体的**不同关系会互相覆盖** ——
+    # 例如 `A —[PART_OF]→ B` 先出现，后面 `A —[CONTRADICTS]→ B` 就被当重复丢掉。
+    #
+    # 实测（拿评测全集 43867 条做模拟）：**丢 4081 条（9.3%）**，
+    # 每一类都有损失：RELATED_TO −822、PART_OF −727、USES −655、CREATED_BY −608…
+    # 而 `CONTRADICTS` 恰好最容易中招（同一对实体常有多种关系），
+    # 这直接导致概览数据里 **14 种类型中没有 CONTRADICTS** ——
+    # 也就是说，原始四透镜记录里"争议边一键高亮，几乎零成本"这条，
+    # **前提根本不成立**：不是改样式的事，是数据里压根没有争议边。
+    #
+    # 现在键改成 `(s, t, type)`：**同一对实体的不同关系各自保留**，
+    # 只有"同一对 + 同一类型"才算重复（那种情况下无向去重仍然合理，
+    # 因为正反两条同类型边在可视化上没有区别）。
     keep = {n["id"] for n in out_nodes}
     out_edges = []
     seen = set()
@@ -162,11 +177,13 @@ def main():
         s, t = e["source"], e["target"]
         if s == t or s not in keep or t not in keep:
             continue
-        key = (s, t) if s < t else (t, s)
+        rel = e.get("type") or "RELATED_TO"
+        pair = (s, t) if s < t else (t, s)
+        key = (pair[0], pair[1], rel)          # ← 加上 type
         if key in seen:
             continue
         seen.add(key)
-        out_edges.append([s, t, e.get("type") or "RELATED_TO"])
+        out_edges.append([s, t, rel])
         if len(out_edges) >= ARGS.max_edges:
             break
     print(f"导出节点 {len(out_nodes)}，边 {len(out_edges)}")

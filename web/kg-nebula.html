@@ -1967,6 +1967,40 @@ animate();
   }
 }
 
+// ── 直接从「论文原文」进来：?pdf=<文件名>&page=<页>&q=<片段> ──────────────
+//
+// **为什么加这一组参数**：`ask.html`（多 Agent 问答）的每条证据都带着
+// 论文文件名与页码，但**点不进去** —— 用户看到"2506.09566v1 · 第 4 页"
+// 只能自己去翻。而这一页早就实现了 pdf.js 面板与片段高亮
+// （`openPdf(src, page, snippet)`，见 `tools/cdp_verify_pdflink.py`）。
+//
+// 与其把那套面板搬到 ask.html（几百行 pdf.js 逻辑，还要再维护一份），
+// 不如**让引文直接跳到这里** —— 复用完整能力（高亮、翻页、原文链接），
+// 也顺带把"问答 → 原文"这条动线接到主视图上。
+//
+// `back` 参数用于回跳（带上它，用户看完原文能一键回到刚才那个问题）。
+{
+  const q2 = new URLSearchParams(location.search);
+  const pdfSrc = q2.get('pdf');
+  if (pdfSrc) {
+    const page = Number(q2.get('page')) || 1;
+    const snip = q2.get('q') || '';
+    try {
+      await openPdf(pdfSrc, page, snip);
+      // 自动化验证读这个：确认真的开了、且高亮画出来了
+      window.__pdfState = {
+        src: pdfSrc, page: pdfPageNum,
+        highlights: document.querySelectorAll('#pdfTextLayer span.hl').length,
+        viaUrl: true
+      };
+    } catch (e) {
+      window.__pdfState = { src: pdfSrc, page: page, error: String((e && e.message) || e) };
+    }
+    // 带 ?pdf= 进来时，就绪信号以"PDF 已尝试打开"为准
+    window.__ready = true;
+  }
+}
+
 // ── 供自动化验证使用的调试接口（见 tools/cdp_check_labels.py）──
 window.KGNebula = {
   enter: (i) => enterCommunity(i),
@@ -2233,5 +2267,6 @@ addEventListener('resize', () => {
   startAtmosphere();
   /* 不设 window.__ready：各页可能自带更严格的就绪条件（kg-nebula 要等 3D 首帧），抢跑会让 CDP 回归在场景就绪前截图。 */
 </script>
+<script src="./lib/demo-rail.js"></script>
 </body>
 </html>

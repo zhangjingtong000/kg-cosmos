@@ -253,10 +253,13 @@ h1 em{font-style:normal;
 .more .why b{color:var(--warm);font-weight:600}
 .more .out{margin:11px 0 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .src{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+/* .lnk 从 <button> 改成了 <a>（"在原文里查看 →" 要真的能跳），
+   所以补 text-decoration:none —— <a> 默认带下划线，会和已有的 border-bottom 叠成两条。 */
 .lnk{font:inherit;font-size:11.5px;color:var(--ink-2);background:none;cursor:pointer;
   border:0;border-bottom:1px solid var(--line);padding:0 0 2px;
-  transition:color .3s,border-color .3s}
+  text-decoration:none;transition:color .3s,border-color .3s}
 .lnk:hover{color:var(--warm);border-bottom-color:rgba(255,207,168,.5)}
+.lnk.off{color:var(--ink-3);cursor:default;border-bottom-color:transparent}
 .note-line{margin:10px 0 0;font-size:11.5px;color:var(--ink-3)}
 
 /* ── 综合结论：刻意克制。不做大标题、不用白字重排 ────────────────────── */
@@ -577,7 +580,11 @@ function adaptQA(resp){
         qt: c.quote ? ('「' + c.quote.slice(0, 160) + '」') : ('（该边在原文里找不到引文）' + it.claim),
         src: c.paper ? (shortName(c.paper) + ' · 第 ' + c.page + ' 页') : '（无引文）',
         sec: '',
-        why: it.claim
+        why: it.claim,
+        /* 这三个字段给 pdfLink() 用 —— 引文要能点进主视图的 PDF 面板 */
+        paper: c.paper || '',
+        page: c.page || '',
+        quote: c.quote || ''
       };
     });
     return {stake: stake, claim: role, ev: list.length ? list : [
@@ -962,10 +969,29 @@ function renderGraph(d, narrow){
   return i > 0;
 }
 
+/* 引文 → 主视图的 PDF 面板。
+   `kg-nebula.html` 早就实现了 pdf.js 面板与片段高亮
+   （`openPdf(src, page, snippet)`，见 `tools/cdp_verify_pdflink.py`），
+   而问答页这条证据此前只能显示「2506.09566v1 · 第 4 页」却点不进去。
+   与其把那几百行 pdf.js 逻辑再搬一份过来，不如**直接跳过去复用** ——
+   顺带把「问答 → 原文」这条动线接到主视图上。 */
+function pdfLink(e){
+  if (!e.paper || !e.page) return '';
+  const snip = String(e.quote || '').replace(/^「|」$/g, '').slice(0, 120);
+  return './kg-nebula.html?pdf=' + encodeURIComponent(e.paper) +
+         '&page=' + encodeURIComponent(e.page) +
+         '&q=' + encodeURIComponent(snip);
+}
+
 function evHTML(e, i){
   let tagCls = 'tag n';
   if (e.tier === 's') tagCls = 'tag s';
   if (e.tier === 'c') tagCls = 'tag c';
+  const href = pdfLink(e);
+  const out = href
+    ? '<a class="lnk" href="' + href + '" target="_blank" rel="noopener">' +
+      '在原文里查看 →</a>'
+    : '<span class="lnk off">（这条没有原文引文）</span>';
   return '' +
     '<div class="ev">' +
       '<button class="eb" type="button" aria-expanded="false">' +
@@ -977,9 +1003,8 @@ function evHTML(e, i){
       '</button>' +
       '<div class="more" hidden>' +
         '<p class="why">' + e.why + '</p>' +
-        '<p class="out"><button class="lnk" type="button">查看原文</button>' +
+        '<p class="out">' + out +
         '<span class="src">' + esc(e.src) + ' ' + esc(e.sec) + '</span></p>' +
-        '<p class="note-line" hidden>视觉稿：原文页高亮未接入，接后端后跳到该篇 PDF 的对应段落。</p>' +
       '</div>' +
     '</div>';
 }
