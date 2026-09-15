@@ -208,6 +208,16 @@ class Neo4jStore:
         "PART_OF", "USES", "PRODUCES", "MEASURES", "EVALUATES", "COMPARES_WITH",
         "SUPPORTS", "CONTRADICTS", "CAUSES", "ENABLES", "APPLIES_TO", "LOCATED_AT",
         "CREATED_BY", "CITES", "RELATED_TO",
+        # 2026-09-14 本体扩展。**这一处曾经漏掉**：把 PUBLISHED_IN 加进
+        # kg_extractor.RELATION_TYPES 与 ontology 约束表之后，忘了同步这里的
+        # 存储层白名单，而 `safe_relation_type`（本文件 :252）会把非白名单谓词
+        # 静默改写成 RELATED_TO —— 于是本体扩展的数据收益恒为 0，
+        # 还多了一个不会报错的失败点。
+        #
+        # 根因是 check_ontology_consistency.py 当时**只检查
+        # sync_graph.py 的关系白名单，没检查本文件**（它检查了本文件的实体
+        # 类型，唯独漏了关系类型）。已把本文件加进那个自检，防止再漏。
+        "PUBLISHED_IN",
     }
 
     # Evidence records are stored as a list of JSON strings.  Re-uploads are

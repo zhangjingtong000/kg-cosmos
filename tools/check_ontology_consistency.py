@@ -35,9 +35,40 @@ from ontology import (  # noqa: E402
 )
 
 
+def strip_comments(text):
+    """去掉 Python 源码里的注释，避免"注释里提到某类型"被当成"白名单里有它"。
+
+    **为什么必须剥**（2026-09-14 实测）：`parse_set` 的正则 `"([^"]+)"` 不区分
+    代码与注释。当时把 `PUBLISHED_IN` 从 `graph_store.ALLOWED_RELATION_TYPES`
+    注释掉做防复发测试，自检**仍报"全部一致"** —— 因为紧挨着的注释里写了
+    「把 PUBLISHED_IN 加进 kg_extractor…」，正则把这句里的类型名也算进了集合。
+
+    这是**假阴性**方向：真漏了白名单但注释提过，自检就查不出来。
+    比假阳性危险，所以先剥注释再解析。
+
+    只处理整行注释（`#` 开头的行）与行尾注释（引号外的 `#`）——
+    不做完整词法分析，够用且不会误伤字符串里的 `#`。
+    """
+    out = []
+    for line in text.splitlines():
+        in_str = None
+        cut = len(line)
+        for i, ch in enumerate(line):
+            if in_str:
+                if ch == in_str and line[i - 1] != '\\':
+                    in_str = None
+            elif ch in '"\'':
+                in_str = ch
+            elif ch == '#':
+                cut = i
+                break
+        out.append(line[:cut])
+    return '\n'.join(out)
+
+
 def parse_set(text, name):
-    """从源码里解析 `name = { "a", "b", ... }`（跨行）。"""
-    m = re.search(re.escape(name) + r'\s*=\s*\{(.*?)\}', text, re.S)
+    """从源码里解析 `name = { "a", "b", ... }`（跨行）。**会先剥掉注释。**"""
+    m = re.search(re.escape(name) + r'\s*=\s*\{(.*?)\}', strip_comments(text), re.S)
     if not m:
         return None
     return set(re.findall(r'"([^"]+)"', m.group(1)))
@@ -136,6 +167,12 @@ def main():
     check_relations('tools/sync_graph.py', 'ONTOLOGY_RELS')
     check_relations('tools/l5_ontology_audit.py', 'ONTOLOGY')
     check_relations('tools/l5_report.py', 'ONTOLOGY')
+    # 2026-09-14 补：**存储层的关系白名单此前没被检查**。
+    # 后果是实测发生过的：把 PUBLISHED_IN 加进 kg_extractor 与 ontology 之后，
+    # 忘了同步这里，而 `safe_relation_type` 会把非白名单谓词静默改写成
+    # RELATED_TO —— 本体扩展的数据收益恒为 0，且不报错。
+    # （本文件原来**只**检查了 graph_store 的实体类型 ALLOWED_LABELS，漏了关系。）
+    check_relations('src/graph_store.py', 'ALLOWED_RELATION_TYPES')
 
     # ── 实体类型（本体 15 类，不含派生）──
     check_entities('src/graph_store.py', 'ALLOWED_LABELS')
