@@ -83,6 +83,26 @@ def parse_args():
     ap.add_argument("--from-json", action="store_true",
                     help="从 data/corpus/graphs/*.json 汇总读（不依赖 Neo4j；"
                          "口径是治理前全量 43867 条，而非 Neo4j 的 31308 条）")
+    # ── 2026-09-15 加：把「治理前」还原成「治理后」 ──────────────────────
+    #
+    # **为什么需要**：`--from-json` 读的是**治理前全量**（19427 节点 / 43867 边），
+    # 而**原来的**概览是**治理后**口径（18780 节点 / 29120 边）——
+    # 两者差 **647 节点 / 12559 边**，也就是说新概览里混进了**被治理清理掉的坏边**。
+    # 界面会显示脏数据，也制造了新的口径分歧。
+    #
+    # **本选项做其中最大的一块**：`data/quality/filtered-edges.json` 记录的
+    # **9792 条被 `entity_filter` 过滤掉的边**（占 12559 差额的 **78%**）。
+    #
+    # **刻意不做的三块**（都是"改"而不是"删"，对概览规模影响小）：
+    #   · `created-by-plan.json` 的 `reverse`(2684) / `drop`(165) —— 改方向或删少量；
+    #   · `venue-rewrite-plan.json` 的 1019 条 —— 改类型（PART_OF → PUBLISHED_IN）；
+    #   · `type-normalization-plan.json` —— 改类型。
+    # 这三块**不是"边变少了"，而是"边的属性变了"**，对"概览有多少节点/边"影响很小。
+    # 若要完整还原，它们各自都有 plan 文件可依（`docs/ARCHIVE_POLICY.md` 的"
+    # 只出计划不改数据"先例），后续可逐个加。
+    ap.add_argument("--governed", action="store_true",
+                    help="在 --from-json 基础上，减去 filtered-edges.json 里"
+                         "被 entity_filter 过滤掉的 9792 条边（还原治理后口径）")
     return ap.parse_args()
 
 
@@ -99,6 +119,31 @@ def fib_sphere(i, n):
     return (math.sin(phi) * math.cos(theta),
             math.sin(phi) * math.sin(theta),
             math.cos(phi))
+
+
+def _load_filtered_keys():
+    """读 `data/quality/filtered-edges.json`，返回被过滤掉的边的键集合。
+
+    该文件由 `entity_filter` 产出，结构：
+        {"threshold": 0.67, "types": ["CREATED_BY","RELATED_TO"],
+         "stats": {...}, "filtered": [{"paper","type","source","target","entail_prob"}]}
+    `stats.filtered` 实测 **9792** 条。
+
+    键用 `(paper, source, target, type)` —— **带 paper**，
+    因为不同论文里可能有同名实体对，不按篇区分会误杀。
+    """
+    p = QUALITY / "filtered-edges.json"
+    if not p.exists():
+        print(f"  ⚠️ 没有 {p.name}，--governed 无从下手（将按治理前口径导出）")
+        return set()
+    d = json.loads(p.read_text(encoding="utf-8-sig"))
+    keys = {(x.get("paper"), str(x.get("source") or "").strip().lower(),
+             str(x.get("target") or "").strip().lower(), x.get("type"))
+            for x in (d.get("filtered") or [])}
+    st = d.get("stats") or {}
+    print(f"  载入 filtered-edges：{len(keys)} 个键"
+          f"（文件自报 filtered={st.get('filtered')}）")
+    return keys
 
 
 def load_from_json():
@@ -142,7 +187,10 @@ def load_from_json():
     edges = []
     n_swapped = 0
     n_rewritten = 0
+    n_governed = 0
+    filtered_keys = _load_filtered_keys() if ARGS.governed else set()
     for f in files:
+        paper = f.stem
         try:
             d = json.loads(f.read_text(encoding="utf-8-sig"))
         except Exception as exc:
@@ -154,6 +202,13 @@ def load_from_json():
                 by_name[nm] = {"name": nm, "type": n.get("type") or "Concept"}
         for e in (d.get("edges") or []):
             t = str(e.get("type") or "")
+            # ① 治理：先按 (paper, source, target, type) 判是否被过滤掉
+            if filtered_keys:
+                k = (paper, str(e.get("source") or "").strip().lower(),
+                     str(e.get("target") or "").strip().lower(), t)
+                if k in filtered_keys:
+                    n_governed += 1
+                    continue
             desc = str(e.get("description") or "").strip()
             if t not in LEGAL_RELATIONS and desc in LEGAL_RELATIONS:
                 # ① 字段错位：description 里才是真类型。保守换回，并留痕。
@@ -174,6 +229,8 @@ def load_from_json():
 
     print(f"  从 {len(files)} 篇快照汇总"
           f"（口径：治理前全量，非 Neo4j 的治理后 31308）")
+    if n_governed:
+        print(f"  ✅ 治理：按 filtered-edges 减掉 {n_governed} 条被过滤的边")
     print(f"  ⚠️ 修正字段错位 {n_swapped} 条（type/description 互换，"
           f"只在 description 恰为合法类型时）")
     print(f"  ⚠️ 改写越界谓词 {n_rewritten} 条 → RELATED_TO"
