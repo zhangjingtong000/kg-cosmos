@@ -22,6 +22,12 @@ CHECKS = [
     ("星云交互 · 标签 · 证据面板", ["tools/cdp_verify_ui.py", "0"]),
     ("标签分配与深度遮挡（节点级门槛）", ["tools/cdp_verify_label_detail.py"]),
     ("统一着色引擎（含默认外观等价性回归）", ["tools/cdp_verify_color.py", "0"]),
+    # P7「只看分歧」（2026-09-15 加）。**为什么它值得一个回归位**：
+    # 这个功能的数据依赖曾经是断的（build_community_details.py 把边类型硬编码成
+    # "RELATED"，18 个社区 16569 条边全是同一个类型），所以"看起来做了但没数据"
+    # 是很容易发生的事 —— 必须有断言盯着"真的有条数、真的会变色、无数据时不显示"。
+    ("争议视图「只看分歧」（有数据 · 能变色 · 无数据不显示）",
+     ["tools/cdp_verify_contradicts.py"]),
     ("方法能力与局限视图", ["tools/cdp_verify_method_limits.py"]),
     ("图谱分析面板（数字可追溯）", ["tools/cdp_verify_analytics.py"]),
     # 数据接进去了不等于**显示得出来**：L5 效度与 L7 归因这两个区块是 hidden 的，

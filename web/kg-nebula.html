@@ -103,6 +103,19 @@
           backdrop-filter: blur(8px); }
   #back:hover { border-color: rgba(170,174,188, .6); color: #fff; }
 
+  /* ── 「只看分歧」按钮（2026-09-15 加，P7）────────────────────────────
+     放在 #back 右侧（#back 是 left:26px，宽约 130px ⇒ 168px 起不重叠）。
+     用暖橙描边与 CONTRADICTS 边的颜色呼应；aria-pressed=true 时填实，
+     让"当前正处在筛选态"这件事一眼可见 —— 否则用户会以为数据少了。 */
+  #onlyContra { position: fixed; left: 172px; top: 26px; pointer-events: auto; cursor: pointer;
+                background: rgba(8, 13, 30, .86); border: 1px solid rgba(255,122,69, .42);
+                color: #ffb08a; border-radius: 9px; padding: 8px 14px; font-size: 12px;
+                backdrop-filter: blur(8px); }
+  #onlyContra:hover { border-color: rgba(255,122,69, .8); color: #ffd0b8; }
+  #onlyContra[aria-pressed="true"] { background: rgba(255,122,69, .22);
+                                     border-color: rgba(255,122,69, .9); color: #fff; }
+  #onlyContra[hidden] { display: none; }
+
   /* ── 内部视图的实体列表与搜索 ── */
   #side { position: fixed; left: 22px; top: 74px; bottom: 18px; width: 236px; z-index: 4;
           display: flex; flex-direction: column; gap: 8px;
@@ -303,7 +316,7 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
   </div>
   <div id="list"></div>
 </aside>
-<div id="inner"><div id="innerTitle"><b id="itName"></b><small id="itSub"></small></div><button id="back" type="button">← 返回星云概览</button></div>
+<div id="inner"><div id="innerTitle"><b id="itName"></b><small id="itSub"></small></div><button id="onlyContra" type="button" hidden title="只显示 CONTRADICTS（矛盾）关系，其余变暗">⚠️ 只看分歧</button><button id="back" type="button">← 返回星云概览</button></div>
 <aside id="legend"></aside>
 <aside id="pdfPane">
   <div class="pdf-head">
@@ -1653,11 +1666,31 @@ async function enterCommunity(ci, preloaded) {
   const ep = new Float32Array(data.edges.length * 6);
   const ec = new Float32Array(data.edges.length * 6);
   const ec0 = base.clone().multiplyScalar(0.5);
+  // ── 「只看分歧」（2026-09-15 加，P7）─────────────────────────────────
+  // `data.edges` 的元素是 `[source, target, type]`，而 `comm-*.json` 的 type
+  // **在 2026-09-15 之前被硬编码成 `"RELATED"`**（build_community_details.py:145），
+  // 所以这里以前根本没有可区分的信息。修好之后 `CONTRADICTS`（矛盾）才真正可见。
+  const CONTRA = 'CONTRADICTS';
+  const contraIdx = [];              // 哪些边是分歧边
+  const ecDim = new Float32Array(data.edges.length * 6);   // 变暗态
+  const ecHot = new Float32Array(data.edges.length * 6);   // 只显分歧态
+  const HOT = new THREE.Color('#ff7a45');   // 暖橙：与页面的暖色灯光一致，且够醒目
   data.edges.forEach((e, k) => {
     const a = idx.get(e[0]), b = idx.get(e[1]);
     if (a === undefined || b === undefined) return;
     ep.set([pos[a*3],pos[a*3+1],pos[a*3+2],pos[b*3],pos[b*3+1],pos[b*3+2]], k*6);
     ec.set([ec0.r,ec0.g,ec0.b,ec0.r,ec0.g,ec0.b], k*6);
+    ecDim.set([ec0.r,ec0.g,ec0.b,ec0.r,ec0.g,ec0.b], k*6);
+    if (String(e[2] || '').toUpperCase() === CONTRA) {
+      contraIdx.push(k);
+      ecHot.set([HOT.r,HOT.g,HOT.b,HOT.r,HOT.g,HOT.b], k*6);
+      // 分歧边在默认态就稍微亮一点 —— 否则"有分歧"这件事永远看不见
+      ec.set([HOT.r*0.75,HOT.g*0.75,HOT.b*0.75,
+              HOT.r*0.75,HOT.g*0.75,HOT.b*0.75], k*6);
+    } else {
+      ecHot.set([ec0.r*0.18,ec0.g*0.18,ec0.b*0.18,
+                 ec0.r*0.18,ec0.g*0.18,ec0.b*0.18], k*6);
+    }
   });
   const eg = new THREE.BufferGeometry();
   eg.setAttribute('position', new THREE.BufferAttribute(ep, 3));
@@ -1667,6 +1700,45 @@ async function enterCommunity(ci, preloaded) {
   const lines = new THREE.LineSegments(eg, em);
   lines.frustumCulled = false;
   overlay.add(lines);
+
+  // ── 「只看分歧」开关 ──────────────────────────────────────────────────
+  // 数据里没有 CONTRADICTS 时**隐藏按钮**（不给一个点了没反应的控件）。
+  const contraBtn = document.getElementById('onlyContra');
+  if (contraBtn) {
+    let onlyContra = false;
+    const nContra = contraIdx.length;
+    contraBtn.hidden = nContra === 0;
+    contraBtn.textContent = `⚠️ 只看分歧（${nContra}）`;
+    contraBtn.setAttribute('aria-pressed', 'false');
+    // 没数据时也把说明写进 title，免得用户以为是坏了
+    contraBtn.title = nContra
+      ? `只显示 ${nContra} 条 CONTRADICTS（矛盾）关系，其余变暗；再点恢复`
+      : '本社区没有 CONTRADICTS（矛盾）关系';
+    if (!contraBtn.dataset.bound) {          // 防重复绑定（可反复进入社区）
+      contraBtn.dataset.bound = '1';
+      contraBtn.addEventListener('click', () => {
+        const st = overlay.userData.contra;
+        if (!st) return;
+        st.on = !st.on;
+        const src = st.on ? st.hot : st.dim;
+        st.attr.array.set(src);
+        st.attr.needsUpdate = true;
+        st.mat.opacity = st.on ? 0.85 : 0.30;
+        contraBtn.setAttribute('aria-pressed', String(st.on));
+        status.textContent = st.on
+          ? `只看分歧：${st.n} 条 CONTRADICTS`
+          : '已恢复全部关系';
+        status.classList.add('visible');
+        clearTimeout(contraBtn._t);
+        contraBtn._t = setTimeout(() => status.classList.remove('visible'), 2000);
+      });
+    }
+    // 状态存在 overlay.userData 上（社区切换时 overlay 会重建）
+    overlay.userData.contra = {
+      on: false, n: nContra, dim: ecDim, hot: ecHot,
+      attr: eg.getAttribute('color'), mat: em,
+    };
+  }
 
   // 标签池：预建一批 CSS2DObject，由 layoutInnerLabels 每几帧重新分配给
   // "当前最该显示"的节点。
@@ -1725,6 +1797,13 @@ async function enterCommunity(ci, preloaded) {
   overlay.userData = {
     center, radius: data.meta.radius || 60,
     data, nodeIndex: idx, labels: labelItems, pts, halo,
+    // ⚠️ **必须在这里带上 `contra`**（2026-09-15，P7）——
+    // 本行是**整体替换** `overlay.userData`，位置晚于上面那段
+    // `overlay.userData.contra = {...}`，不带上的话它会被冲掉。
+    // 第一版就是这个 bug：**按钮文字正确（24 条）、但点了没反应**
+    // （`click` 回调里 `overlay.userData.contra` 是 undefined，直接 return）。
+    // 教训：往一个"稍后会被整体替换"的对象上挂状态，必须在那次替换里带上。
+    contra: overlay.userData.contra,
   };
 
   // 图例必须在此处刷新：它读 overlay.userData，而 userData 刚被赋值。
