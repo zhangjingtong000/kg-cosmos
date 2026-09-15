@@ -304,6 +304,13 @@ async function poll(id) {
           + `${s.stats.edges} 条关系 · 用时 ${s.stats.extraction_time_s}s。正在打开图谱…`;
       }
       const dest = (s.redirect && String(s.redirect)).replace(/^\.\//, './');
+      /* 记住这次上传的 gid，让后续页面延续「我的图」这个上下文 ——
+         此前用户传完一篇，除了在结果页看一眼，其它页面都和他刚做的事无关；
+         问答页甚至会默认问另一篇。这里写一次，ask / 主视图都能读到。 */
+      try {
+        const m = /[?&]src=([^&]+)/.exec(String(s.redirect || ''));
+        if (m) localStorage.setItem('kg-last-gid', decodeURIComponent(m[1]));
+      } catch (e) {}
       setTimeout(() => { location.href = dest || './kg-nebula.html'; }, 2200);
       return;
     }
@@ -361,5 +368,6 @@ file.addEventListener('change', () => { if (file.files[0]) upload(file.files[0])
 
 window.__ready = true;
 </script>
+<script src="./lib/demo-rail.js"></script>
 </body>
 </html>

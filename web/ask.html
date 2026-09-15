@@ -55,6 +55,15 @@ h1 em{font-style:normal;
 .sub{margin:16px 0 0;max-width:66ch;font-size:14.5px;line-height:1.78;color:var(--ink-2);
   text-wrap:pretty}
 
+/* 当前语境：问的是哪张图。做得显眼但不抢标题 ——
+   用户必须一眼知道"这是我自己上传的那篇"还是"我没带图进来"。 */
+.ctx{margin:18px 0 0;padding:9px 14px;max-width:66ch;font-size:13px;line-height:1.6;
+  border-left:2px solid var(--accent);background:rgba(224,164,105,.06);
+  color:var(--ink-2);border-radius:0 7px 7px 0}
+.ctx b{color:#fff;font-weight:600}
+.ctx.miss{border-left-color:var(--clay,#c07a4e);background:rgba(192,122,78,.08)}
+.ctx a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(224,164,105,.4)}
+
 /* ── 提问栏：一条发丝线 + 大字号输入，不是聊天输入框 ─────────────────── */
 .askwrap{margin:34px 0 0}
 .askwrap .lb{display:block;font-size:10.5px;letter-spacing:.26em;
@@ -282,6 +291,10 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
       答案可以含糊，证据不行。
     </p>
 
+    <!-- 当前语境：问的是哪张图。此前这一页默认问另一篇论文，
+         用户看完全部内容都不知道"这不是我上传的那篇"。 -->
+    <p class="ctx" id="ctx"></p>
+
     <form class="askwrap" id="ask" autocomplete="off">
       <label class="lb" for="q">你的问题</label>
       <div class="ask">
@@ -443,7 +456,42 @@ const GN = {A:[180,208], B:[96,92], C:[96,324], D:[264,92], E:[264,324],
 
    QA 常量保留为**离线兜底**：后端未启动时用它，并明确标注是演示数据。
    ══════════════════════════════════════════════════════════════════════ */
-const ASK_GID = (new URLSearchParams(location.search)).get('src') || 'ad690dfb';
+/* 问哪张图：URL 参数 → 上次上传的那篇 → 什么都没有。
+
+   **此前这里写的是 `|| 'ad690dfb'`**，即用户不手动改 URL 就永远在问
+   **另一篇**论文 —— 而他自己刚上传的那篇，在 new-graph.html 里看完就丢了。
+   「上传 → 提问」是这个项目最主要的看点，一个默认值把它降级成了
+   "看别人的示例"。所以既不能有默认值，也不能什么都不提示。 */
+const PARAM_GID = (new URLSearchParams(location.search)).get('src');
+const LAST_GID = (function () {
+  try { return localStorage.getItem('kg-last-gid'); } catch (e) { return null; }
+})();
+const ASK_GID = PARAM_GID || LAST_GID || '';
+const ASK_EXPLICIT = !!PARAM_GID;        // 是"带着某篇图进来的"吗
+const ASK_PARAM = PARAM_GID;
+
+/* 顶部那行语境提示：让用户一眼知道自己在问哪张图。
+   带上来源（是刚看过的那张，还是记住的上一次上传），
+   否则"问的是谁"这件事对用户来说是隐形的。
+
+   **这里自带转义，不复用下面的 `esc`** —— 后者是 `const` 定义的
+   （在 ~840 行），而本 IIFE 立即执行；`const` 不提升，
+   复用会抛 `ReferenceError: Cannot access 'esc' before initialization`。 */
+(function fillCtx(){
+  const el = document.getElementById('ctx');
+  if (!el) return;
+  const x = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  if (!ASK_GID) {
+    el.className = 'ctx miss';
+    el.innerHTML = '⚠️ <b>还没有指定要问哪张图。</b>请先 ' +
+      '<a href="./upload.html">上传一篇论文</a>，在结果页点「就这篇提问」；' +
+      '或先 <a href="./kg-nebula.html">进入主视图</a> 浏览全库。';
+  } else {
+    el.innerHTML = '正在问：<b>' + x(ASK_GID) + '</b>' +
+      (ASK_EXPLICIT ? '（你刚才看的那张图）' : '（上次上传的那篇）');
+  }
+})();
 
 function shortName(s){ return String(s || '').replace(/\.pdf$/i, ''); }
 
@@ -991,6 +1039,25 @@ async function askReal(question){
   $('how').hidden = true;
   $('how-note').hidden = true;
   $('result').hidden = false;
+
+  /* 没有指定图就别假装能问 —— 明确告诉用户该怎么办，而不是偷偷换一篇。 */
+  if (!ASK_GID) {
+    if (note) note.textContent = '';
+    $('camps').innerHTML = '';
+    $('verdict').innerHTML =
+      '还没有指定要问哪张图。<br>' +
+      '请先 <a href="./upload.html" style="color:var(--accent)">上传一篇论文</a>，' +
+      '在结果页点「就这篇提问」；或先 <a href="./kg-nebula.html" ' +
+      'style="color:var(--accent)">进入主视图</a> 看看全库。';
+    $('caveat').innerHTML =
+      '本页只对**某一张具体的图**提问（检索、取证、结论都基于那张图的实体与边）。' +
+      '此前这里默认指向另一篇论文，用户看到的不是自己的东西 —— 已改掉。';
+    $('gstats').innerHTML = '';
+    if ($('gdesc')) $('gdesc').textContent = '';
+    paint(false);
+    return;
+  }
+
   if (note) note.textContent = '正在检索子图并取证…（本地模型需要几十秒）';
 
   try {
@@ -1043,5 +1110,6 @@ addEventListener('resize', function(){
 
 window.__ready = true;
 </script>
+<script src="./lib/demo-rail.js"></script>
 </body>
 </html>

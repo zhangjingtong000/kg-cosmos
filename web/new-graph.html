@@ -99,8 +99,13 @@ footer{margin-top:34px;font-size:11px;color:var(--ink-3);padding-left:132px}
   <div class="actions">
     <a class="btn" href="./upload.html">← 再传一篇</a>
     <a class="btn" href="./kg-nebula.html">看全库主视图</a>
+    <!-- 闭环的关键一环：从这里能直接对**这一篇**提问。
+         此前这一页只有「再传一篇」和「看全库」，用户想提问得回导航页，
+         而 ask.html 又默认问另一篇 —— 上传完最自然的那个动作（就这篇提个问）
+         在界面上根本没有入口。href 由下面的脚本带上 ?src=<gid>。 -->
+    <a class="btn" id="askThis" href="./ask.html">就这篇提问 →</a>
   </div>
-  <footer>抽取在当前进程内完成 · 数据来自 <code id="srcpath">/graph/&lt;id&gt;</code></footer>
+  <footer>数据来自 <code id="srcpath">/graph/&lt;id&gt;</code><span id="modeNote"></span></footer>
 </div>
 
 <script>
@@ -238,15 +243,28 @@ function render(data) {
   // （2026-09-14 修：原先硬编码「没有调用任何云端接口」，
   //   但 mode=cloud 跑出来的图也被这么写，属于误导。）
   const mode = data.mode || '';
-  const modeNote = mode === 'cloud'
+  const modeText = mode === 'cloud'
     ? '。抽取走的是云端 API（本篇实测 ¥0.44 / 8.5 分钟）。'
     : mode === 'local'
       ? '。抽取走本机模型，零 API 成本。'
       : '。';
   document.getElementById('sub').textContent =
     `来自 ${data.source && data.source.name ? data.source.name : '你上传的文件'}`
-    + modeNote;
+    + modeText;
   document.getElementById('srcpath').textContent = `/graph/${gid}`;
+  /* footer 里那句按实际通道显示 —— 此前是硬编码「抽取在当前进程内完成，
+     没有调用任何云端接口」，而 mode=cloud 跑出来的图也被这么写。 */
+  const mn = document.getElementById('modeNote');
+  if (mn) mn.textContent = modeText;
+
+  /* ── 闭环：把这一篇带进问答页 ─────────────────────────────────────
+     上传 → 出图 → 「就这篇提问」→ ask.html?src=<gid>
+     这一环此前是断的：ask.html 默认问另一篇，用户上传完最自然的动作
+     （就这篇提个问）在界面上没有入口。顺手把 gid 记到 localStorage，
+     让后续页面能延续「我的图」这个上下文。 */
+  const at = document.getElementById('askThis');
+  if (at && gid) at.href = `./ask.html?src=${encodeURIComponent(gid)}`;
+  try { if (gid) localStorage.setItem('kg-last-gid', gid); } catch (e) {}
 
   const figs = [
     [st.pdf_pages != null ? st.pdf_pages : '—', 'PDF 页数', false],
