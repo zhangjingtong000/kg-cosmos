@@ -40,6 +40,15 @@ from pdf_parser import parse_pdf  # noqa: F401  (kept for direct API consumers)
 from pipeline import extract_graph
 from graph_store import GraphStore
 from explorer_models import build_detail_window, build_source_summary
+from logging_setup import setup as _log_setup, get_logger
+
+# ── 日志（2026-09-15 加，J3）──────────────────────────────
+# 此前 `src/` 下**零 logging**，只有 44 处 print：没有时间戳、没有级别、不落盘。
+# 而本项目**抽一篇要 36 分钟**，中途出错如果不落盘，事后只能靠状态里那一行
+# `error` 字符串。这里只做"请求 + 异常"两类记录，**不动那 44 处 print**
+# （它们承担的是"给人看的进度"，混进日志反而更乱）。
+_log_setup()
+log = get_logger('app')
 
 # ── App Setup ────────────────────────────────────────────
 
@@ -50,6 +59,34 @@ QUALITY = ROOT / "data" / "quality"
 
 app = FastAPI(title="KG Extraction API", version="1.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+
+@app.middleware("http")
+async def _access_log(request, call_next):
+    """请求日志：方法 / 路径 / 状态 / 耗时。
+
+    **为什么要它**：此前 44 处 print **全在抽取与脚本里**，
+    **HTTP 层一条记录都没有** —— 于是"哪个请求 500 了、什么参数"事后查不到。
+    这是 36 分钟的抽取任务出问题时最缺的一条线索。
+
+    **刻意只记"摘要"**：不记请求体（上传是二进制 PDF、chat 是用户输入，
+    落盘既占地方又可能带隐私）。要定位具体输入时，配合调用方自己的日志。
+    """
+    import time as _t
+    t0 = _t.perf_counter()
+    try:
+        resp = await call_next(request)
+    except Exception:
+        # 让 FastAPI 的异常处理照常走，但**这里先记一笔带栈的**
+        log.exception('请求异常 %s %s', request.method, request.url.path)
+        raise
+    ms = (_t.perf_counter() - t0) * 1000
+    lvl = log.warning if resp.status_code >= 500 else (
+        log.info if resp.status_code >= 400 else log.debug)
+    lvl('%s %s -> %s (%.0fms)', request.method, request.url.path,
+        resp.status_code, ms)
+    return resp
+
 
 # Store graphs in memory + on disk
 DATA_DIR = ROOT / "data"
