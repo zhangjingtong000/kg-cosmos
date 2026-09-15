@@ -493,7 +493,10 @@ fetch('./kg-data/nebula.json')
       '<span class="it"><span class="v">' + n.toLocaleString() + '</span>'
       + '<span class="l">实体 · 真实抽取</span></span>'
       + '<span class="it"><span class="v">' + e.toLocaleString() + '</span>'
-      + '<span class="l">关系 · 评测全集 43867</span></span>'
+      // 2026-09-15 改：`e` 是**概览层导出的边数**（受 `--max-edges` 上限约束，
+      // 现在是 30000），**不等于评测全集的 43867**。
+      // 原文案把两个口径并进一个标签，读起来像"30000 就是 43867"。
+      + '<span class="l">关系 · 概览层导出（评测全集 43867）</span></span>'
       + '<span class="it"><span class="v">' + c + '</span>'
       + '<span class="l">社区 · Louvain</span></span>';
   })

@@ -2,63 +2,63 @@
   "source": "web/kg-data/nebula.json",
   "caliber": "无向去重简化图（概览层导出），不可与有向图口径混用",
   "scale": {
-    "nodes": 18780,
-    "edges": 29120,
-    "density": 0.00016514039400388386,
-    "avg_clustering": 0.10004
+    "nodes": 19427,
+    "edges": 28323,
+    "density": 0.0001500998034118131,
+    "avg_clustering": 0.09611
   },
   "connectivity": {
-    "components": 3377,
-    "largest_component": 14630,
-    "largest_component_pct": 77.9,
-    "isolated_nodes": 3036
+    "components": 4260,
+    "largest_component": 14311,
+    "largest_component_pct": 73.67,
+    "isolated_nodes": 3891
   },
   "random_baseline": {
     "n_runs": 10,
-    "n": 18780,
-    "m": 29120,
-    "avg_clustering_mean": 0.000109,
-    "avg_clustering_sd": 5.7e-05,
-    "clustering_ratio_vs_random": 913.95,
-    "largest_component_mean": 17771.9
+    "n": 19427,
+    "m": 28323,
+    "avg_clustering_mean": 0.000173,
+    "avg_clustering_sd": 8.4e-05,
+    "clustering_ratio_vs_random": 556.74,
+    "largest_component_mean": 18128.5
   },
   "predicate_space": {
-    "distinct_types": 14,
+    "distinct_types": 15,
     "ontology_types": 16,
-    "conciseness": 1.1429,
+    "conciseness": 1.0667,
     "caliber_warning": "入库后口径：越界谓词已被 safe_relation_type 改写为 RELATED_TO。入库前有 147 种越界类型，那一口径的简洁度约 15/161 ≈ 0.09。",
     "top": [
       [
         "USES",
-        6416
+        6546
       ],
       [
         "PART_OF",
-        4830
+        5031
       ],
       [
         "RELATED_TO",
-        4268
+        4578
       ],
       [
         "APPLIES_TO",
-        3339
+        3440
       ],
       [
         "CREATED_BY",
-        3339
+        3122
       ],
       [
         "PRODUCES",
-        1946
+        1979
       ],
       [
         "CITES",
-        906
+        907
       ],
       [
         "ENABLES",
-        844
+        852
       ]
     ]
   },
@@ -72,11 +72,11 @@
     "abnormal_pct": 0.021
   },
   "degree": {
-    "max": 1332,
-    "p99": 28,
+    "max": 1303,
+    "p99": 27,
     "p90": 6,
     "median": 1,
-    "mean": 3.101,
-    "top1pct_degree_share": 21.04
+    "mean": 2.916,
+    "top1pct_degree_share": 21.61
   }
 }

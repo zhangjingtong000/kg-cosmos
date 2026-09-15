@@ -282,7 +282,14 @@ def main():
         # 4. 数据区被 JS 填充（说明数据链路仍在工作）
         facts = ev(ws, "(document.getElementById('liveFacts')||{}).innerText || ''")
         print(f'[4] 数据区: {facts[:70].replace(chr(10), " / ")!r}')
-        if '18,780' not in facts and '18780' not in facts:
+        # **不硬编码规模**（2026-09-15 修）—— 原来写死 `'18,780' not in facts`，
+        # 而本项目的数据规模会变（概览口径从 18780 变成 19427），
+        # 于是"界面明明正常显示"也会被判失败。
+        # **这与 `check_doc_numbers.py` 的测试数基准是同一类病**：
+        # 一个写死的基准，本身就是下一次过时。
+        # 改为"确实填了数字"：至少一个 ≥4 位的数字（含千分位逗号）。
+        import re as _re
+        if not _re.search(r'\d{1,3}(?:,\d{3})+|\d{4,}', facts):
             fails.append('数据区未被填充（liveFacts 里没有实体数）')
 
         # 5. 进度点数量 = 章节数
