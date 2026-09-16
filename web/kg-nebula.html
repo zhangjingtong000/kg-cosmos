@@ -282,6 +282,18 @@
 #dbody .flagbar .ok{color:#7cc0b6;border-color:rgba(124,192,182,.45)}
 #dbody .flagbar .no{color:#dda07a;border-color:rgba(221,160,122,.45)}
 #dbody .flagbar .msg{margin-top:9px;font-size:11px;color:rgba(193,195,201,.5);line-height:1.6}
+/* K1：改名并提交改图计划。用金色（= 需要留意的动作）与"只记录"的按钮区分开。 */
+#dbody .editrow{margin-top:14px;padding-top:12px;border-top:1px dashed rgba(178,180,186,.16)}
+#dbody .editrow .editin{display:flex;gap:7px;margin-top:7px}
+#dbody .editrow input{flex:1;min-width:0;background:rgba(8,13,30,.6);
+  border:1px solid rgba(178,181,194,.28);border-radius:8px;padding:6px 9px;
+  color:#e4e6ec;font-size:12px;font-family:inherit}
+#dbody .editrow input:focus-visible{outline:2px solid #e0a469;outline-offset:1px}
+#dbody .editrow button{background:transparent;border:1px solid rgba(224,164,105,.42);
+  color:#e0a469;border-radius:8px;padding:6px 11px;font-size:12px;cursor:pointer}
+#dbody .editrow button:hover{border-color:rgba(224,164,105,.8);color:#fff}
+#dbody .editrow button:disabled{opacity:.45;cursor:default}
+#dbody .editrow .editmsg{margin-top:7px}
 /* ==KG_FLAG_V1_END== */
 </style>
 <link rel="stylesheet" href="./lib/design.css">
@@ -1176,6 +1188,17 @@ function renderInnerPreview(nodeIdx) {
          <button type="button" data-flag="wrong_evidence">原文不支持</button>
        </div>
        <div class="msg">人工判断只**记录**，不自动改图 —— 改动图规模会让六层指标失去可比性。</div>
+       <!-- K1（2026-09-16）：把"只记录"接上一个**出口** —— 提交一份改图计划。
+            端点只落盘、不改图；执行交给 tools/apply_edit_plan.py
+            （它会先归档 before、快照真源、改完重跑 6 个下游、再归档 after 并打 diff）。 -->
+       <div class="editrow" data-edit-node="${escHtml(n.id)}">
+         <span class="qh">改名并提交改图计划</span>
+         <div class="editin">
+           <input type="text" placeholder="填新名字" aria-label="把这个实体改成什么名字">
+           <button type="button" data-edit="rename">提交计划</button>
+         </div>
+         <div class="msg editmsg"></div>
+       </div>
      </div>`;
   detail.classList.add('open');
 }
@@ -2323,6 +2346,52 @@ addEventListener('resize', () => {
   const dbody = document.getElementById('dbody');
   if (!dbody) return;
   dbody.addEventListener('click', async (ev) => {
+    // ── K1：提交改图计划（与上面"只记录"分开的一条路径）─────────────────
+    // 端点 `/api/kg/edit-plan` **只落盘计划文件、不改图**；执行交给
+    // `tools/apply_edit_plan.py`。所以这里的措辞必须说清"这只是提交了一份计划"，
+    // 否则用户会以为图已经被改了。
+    const ebtn = ev.target.closest('.editrow button[data-edit]');
+    if (ebtn) {
+      const row = ebtn.closest('.editrow');
+      const node = row.dataset.editNode;
+      const input = row.querySelector('input');
+      const msg = row.querySelector('.editmsg');
+      const to = (input.value || '').trim();
+      if (!to) {
+        msg.textContent = '请先填新名字。';
+        input.focus();
+        return;
+      }
+      if (to === node) {
+        msg.textContent = '新名字和原名一样，没有要提交的改动。';
+        return;
+      }
+      ebtn.disabled = true;
+      try {
+        const r = await fetch('./api/kg/edit-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            generated_by: 'web/kg-nebula',
+            note: `在实体详情里把「${node}」改成「${to}」`,
+            operations: [{ op: 'rename_entity', from: node, to: to,
+                           reason: '界面上提交的人工修正' }],
+          }),
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        msg.textContent = `已提交改图计划（${j.operations} 条操作）→ ${j.saved_to}。`
+          + ` 这只写了一份计划，**图还没改** —— 由人跑 apply 脚本执行。`;
+        input.value = '';
+      } catch (e) {
+        msg.textContent = '提交失败：' + (e && e.message ? e.message : e)
+          + '（后端未启动时不假装已保存）。';
+      } finally {
+        ebtn.disabled = false;
+      }
+      return;
+    }
+
     const btn = ev.target.closest('.flagbar button[data-flag]');
     if (!btn) return;
     const bar = btn.closest('.flagbar');

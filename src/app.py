@@ -23,7 +23,7 @@ Run:
 """
 
 import asyncio
-import json, os, uuid, shutil
+import json, os, uuid, shutil, sys, time
 from collections import Counter
 from pathlib import Path
 from datetime import datetime
@@ -33,7 +33,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import uvicorn
 
 from pdf_parser import parse_pdf  # noqa: F401  (kept for direct API consumers)
@@ -41,6 +41,21 @@ from pipeline import extract_graph
 from graph_store import GraphStore
 from explorer_models import build_detail_window, build_source_summary
 from logging_setup import setup as _log_setup, get_logger
+
+# ── 跨盘安全的相对路径（2026-09-16）─────────────────────────────────────
+# `Path.relative_to` 在 Windows 上**跨盘会抛 ValueError**
+# （`path is on mount 'C:', start on mount 'D:'`）。
+# 而本项目的写入目标**允许被重定向**（测试用 tmp_path、计划用 KG_EDIT_PLAN_DIR）
+# ⇒ **跨盘是常态而不是例外**。
+#
+# **这个坑本项目已经踩了三次**：
+#   ① `tools/metric_provenance.py`（归档目录被指到 C 盘）
+#   ② `tools/apply_edit_plan.py`（计划文件在 pytest 的 C 盘临时目录）
+#   ③ `src/app.py` 的 `/api/kg/edit-plan`（同上）
+# 三次的症状都是"一个**打印/返回**语句把整个请求搞挂"。
+# 实现已在 `tools/_paths.py`，这里接上它，**不在本文件再写一份**。
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'tools'))
+from _paths import rel as _rel  # noqa: E402
 
 # ── 日志（2026-09-15 加，J3）──────────────────────────────
 # 此前 `src/` 下**零 logging**，只有 44 处 print：没有时间戳、没有级别、不落盘。
@@ -554,7 +569,7 @@ async def add_flag(req: FlagRequest):
     QUALITY.mkdir(parents=True, exist_ok=True)
     FLAGS_PATH.write_text(json.dumps(flags, ensure_ascii=False, indent=2),
                           encoding="utf-8")
-    return {"total": len(flags), "saved_to": str(FLAGS_PATH.relative_to(ROOT))}
+    return {"total": len(flags), "saved_to": str(_rel(FLAGS_PATH))}
 
 
 @app.get("/api/flags")
@@ -567,6 +582,118 @@ async def list_flags():
     except Exception:
         flags = []
     return {"total": len(flags), "applied": False, "flags": flags}
+
+
+# ── K1 改图：把「人工判断」变成可执行的计划（2026-09-16）─────────────────
+#
+# 【为什么要有这一步】上面 `/api/flag` 的 docstring 写着
+# 「**这些标记没有被应用到图上**」—— 那是有意的（改图会改变全库实体数、
+# 从而打破六层指标的可比性）。但"只记录不执行"意味着**用户的操作没有出口**。
+#
+# 【K1 的解法】沿用项目已有的 `plan → apply` 先例
+# （`data/quality/venue-rewrite-plan.json` 只出计划、由 `apply_*.py` 执行）：
+#   · **本端点只写计划文件**（秒回，不碰图数据）；
+#   · **执行交给 `tools/apply_edit_plan.py`** —— 它会在覆盖前归档指标（N1）、
+#     快照真源、改完重跑 6 个下游、再归档一次并打 before/after diff。
+#
+# 【为什么不在端点里直接改】改图要几小时机器时间（重跑下游），
+# 而且**必须有人看过 before/after 再决定是否保留**。把执行放在批处理里，
+# 前端这半天的工作量就与机器时间解耦了。
+EDIT_PLAN_DIR = QUALITY / "edit-plans"
+EDIT_OPS = ("rename_entity", "merge_entities", "delete_edge", "retag_edge")
+
+
+def _edit_plan_dir():
+    """**每次调用时读环境变量**，而不是在 import 时读一次。
+
+    ⚠️ **这是被测试逼出来的**：`tests/test_edit_plan_api.py` 单独跑 6 passed、
+    但和别的测试一起跑就失败 —— 因为 `app` 早已被别的测试 import 过，
+    模块级常量已经定型，`monkeypatch.setenv` 再改也没用。
+
+    **这同时是个真实的可用性问题**：任何人想在**同进程内**切换计划目录
+    （测试、或将来按项目分目录）都会静默失效 —— 而"静默失效"正是本项目
+    最想避免的一类缺陷。所以改成函数，**每次请求时算**。
+    """
+    d = os.environ.get("KG_EDIT_PLAN_DIR")
+    return Path(d) if d else (QUALITY / "edit-plans")
+
+
+class EditOperation(BaseModel):
+    """一条改图操作。字段按 `op` 取用 —— 与 `tools/apply_edit_plan.py` 一致。"""
+    op: str
+    from_: Optional[str] = Field(default=None, alias="from")
+    to: Optional[str] = None
+    into: Optional[str] = None
+    source: Optional[str] = None
+    target: Optional[str] = None
+    type: Optional[str] = None
+    to_type: Optional[str] = None
+    reason: Optional[str] = None
+
+    model_config = {"populate_by_name": True}
+
+
+class EditPlanRequest(BaseModel):
+    """一份改图计划。**端点只把它落盘，不改图。**"""
+    operations: list[EditOperation] = []
+    note: Optional[str] = None
+    generated_by: Optional[str] = "web"
+
+
+@app.post("/api/kg/edit-plan")
+async def submit_edit_plan(req: EditPlanRequest):
+    """**写一份改图计划文件**（不执行）。
+
+    返回里给出**下一步该跑的命令** —— 否则前端提交完就"没有出口"了，
+    那正是这个端点要解决的问题。
+    """
+    ops = [o.model_dump(by_alias=True, exclude_none=True) for o in req.operations]
+    if not ops:
+        raise HTTPException(400, "operations 不能为空")
+    bad = sorted({o.get("op") for o in ops} - set(EDIT_OPS))
+    if bad:
+        raise HTTPException(400, f"未知操作 {bad}；允许 {list(EDIT_OPS)}")
+    # 逐条做最小的必填校验 —— 让错误在**写文件之前**暴露
+    for i, o in enumerate(ops, 1):
+        k = o["op"]
+        need = {
+            "rename_entity": ("from", "to"),
+            "merge_entities": ("from", "into"),
+            "delete_edge": ("source", "target"),
+            "retag_edge": ("source", "target", "to_type"),
+        }[k]
+        miss = [f for f in need if not o.get(f)]
+        if miss:
+            raise HTTPException(400, f"第 {i} 条 {k} 缺字段 {miss}")
+
+    plan_dir = _edit_plan_dir()          # ← 每次请求时算，见该函数的说明
+    plan_dir.mkdir(parents=True, exist_ok=True)
+    ts = time.strftime("%Y%m%d-%H%M%S")
+    out = plan_dir / f"edit-{ts}.json"
+    n = 2
+    while out.exists():                       # **不覆盖已有计划**
+        out = plan_dir / f"edit-{ts}-{n}.json"
+        n += 1
+
+    out.write_text(json.dumps({
+        "generated_by": req.generated_by or "web",
+        "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "note": req.note or "",
+        "method": "记录而非立即改图 —— 改图会改变图规模，必须先归档指标（N1）",
+        "operations": ops,
+    }, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    rel = str(_rel(out))
+    return {
+        "saved_to": rel,
+        "operations": len(ops),
+        "applied": False,
+        "next": [
+            f"python tools/apply_edit_plan.py {rel}            # 看影响（dry-run）",
+            f"python tools/apply_edit_plan.py {rel} --apply    # 真的改（含 before/after 归档）",
+        ],
+        "note": "改图会重跑 6 个下游并归档指标；执行前请先看 dry-run 的影响条数。",
+    }
 
 
 def _ensure_graph(graph_id: str):

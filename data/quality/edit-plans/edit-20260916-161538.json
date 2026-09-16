@@ -1,0 +1,21 @@
+{
+  "generated_by": "web",
+  "generated_at": "2026-09-16 16:15:38",
+  "note": "pytest",
+  "method": "记录而非立即改图 —— 改图会改变图规模，必须先归档指标（N1）",
+  "operations": [
+    {
+      "op": "rename_entity",
+      "from": "TransE",
+      "to": "TransE (Bordes 2013)",
+      "reason": "区分同名"
+    },
+    {
+      "op": "delete_edge",
+      "source": "A",
+      "target": "B",
+      "type": "USES",
+      "reason": "原文不支持"
+    }
+  ]
+}

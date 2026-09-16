@@ -1,0 +1,31 @@
+{
+  "generated_by": "web",
+  "generated_at": "2026-09-16 16:15:08",
+  "note": "",
+  "method": "记录而非立即改图 —— 改图会改变图规模，必须先归档指标（N1）",
+  "operations": [
+    {
+      "op": "rename_entity",
+      "from": "A",
+      "to": "B"
+    },
+    {
+      "op": "merge_entities",
+      "from": "A",
+      "into": "B"
+    },
+    {
+      "op": "delete_edge",
+      "source": "A",
+      "target": "B",
+      "type": "USES"
+    },
+    {
+      "op": "retag_edge",
+      "source": "A",
+      "target": "B",
+      "type": "PART_OF",
+      "to_type": "PUBLISHED_IN"
+    }
+  ]
+}
