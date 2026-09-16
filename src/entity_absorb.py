@@ -87,6 +87,104 @@ CARRIER_WORDS = frozenset({
     'files', 'file', 'reports', 'report', 'books', 'book',
 })
 
+# A5（2026-09-16）：人名补齐的成分。**这两个集合是"允许被吸收"的全部可能**——
+# 删除或放宽它们会让 1C 重新把"论文标题片段"吸进实体（实测 1404 对里抽样 0 对该合）。
+TITLE_WORDS = frozenset({
+    'mr', 'mrs', 'ms', 'dr', 'prof', 'professor', 'sir', 'miss',
+})
+ET_AL = frozenset({'et', 'al', 'others'})
+
+
+_PERSON_PIECE = re.compile(r'^(?:[A-Za-z]\.-?)+$')      # 'W.-Y.' / 'A.'
+_TITLE_PIECES = frozenset({'mr.', 'mrs.', 'ms.', 'dr.', 'prof.', 'professor.',
+                           'sir.', 'mr', 'mrs', 'ms', 'dr', 'prof', 'sir'})
+_ETAL_PIECES = frozenset({'et', 'al', 'others'})
+
+
+def extra_is_person_form(short: str, long_: str) -> bool:
+    """多出来的部分是否**只含"人名补齐"成分** —— A5（2026-09-16）新增的第六道条件。
+
+    ## ⚠️ 这个函数**必须用原始字符串**，不能用 `tokens()`
+
+    `tokens()` 会做两件事，而**正是被它去掉的那两样东西在区分人名与公式**：
+      · `re.sub(r"\\([^)]*\\)", " ", ...)` ⇒ **括号内容整段丢掉**；
+      · `re.split(r"[^0-9A-Za-z]+", ...)` ⇒ **点也被切掉**。
+
+    于是：
+        `tokens('Score function f(h, r, t)')` = `['score','function','f']`  ⇒ extra `['f']`
+        `tokens('W.-Y. Ma')`                  = `['w','y','ma']`            ⇒ extra `['w']`
+    **`['f']` 与 `['w']` 在 tokens 层面完全一样** —— 一个是数学符号，一个是人名首字母。
+    ⇒ 所以本函数**在原始字符串上工作**：`'f(h, r, t)'` 含 `(`，
+      `'W.-Y.'` 匹配"带点的首字母"。
+
+    ## 为什么必须加这一条：实测那 1404 对里抽样看**几乎全是错的**
+
+    `tools/_probe/_probe_absorb_1c.py` + `_probe_absorb_1c_step2.py`（只读）量出：
+
+        1404 对：③ 人名成分 32（2.3%）· ④ 限定词 121 · ⑤ 其它 1251（89%）
+
+    而 ⑤ 里**随机抽 14 对，0 对该合**：
+        `Deep Learning`      → `Deep Learning-based Models`         （含义变了）
+        `Structured Data`    → `Semi-Structured Data`               （**`Semi-` 改了含义**）
+        `Question Answering` → `Knowledge Graph Question Answering` （**上义词，不是同一实体**）
+        `KG Completion`      → `KG Completion Benchmark`
+        `Named Entity Recognition` → `Neural Architectures For …`   （**论文标题片段**）
+    ④ 与"含功能词"的那 270 对同样全是错的：
+        `Nobel Prize` → `Nobel Prize in Physics`（限定）
+        `Knowledge Graphs` → `Traversing Knowledge Graphs in Vector Space`（论文标题）
+
+    ⇒ **"长名包含短名"在有名词短语上根本不足以判定同指** ——
+    多一个词通常意味着**更具体的另一个概念**，而不是"同一个东西的完整写法"。
+    ⇒ 所以 1C 收紧成**只吸收人名补齐**（唯一一类"多出来的部分**不改变所指**"的情形）。
+    收紧后 **1404 → 1 对**（`Balažević` → `Balažević Et Al.`）。
+
+    ## 该保留的（A5 原意）
+
+        `Balažević` → `Balažević Et Al.`      额外部分 `'Et Al.'`  ⇒ et al.
+        `Y. Ma`     → `W.-Y. Ma`              额外部分 `'W.-Y.'`   ⇒ 带点的首字母
+        `C. Ré`     → `C. R´e`                额外部分 `'´'`（重音符，无实词）⇒ 空
+
+    ## ⚠️ 一个**明知会漏掉**的情形，以及为什么不放宽
+
+    A5 的原文举了另一个该合的例子：`Baeza-Yates` → `Ricardo A. Baeza-Yates`。
+    **本判据认不出它** —— `Ricardo` 既不是"带点的首字母"也不是称谓，会被排除。
+
+    **为什么不为了它放宽**：要认它，就得允许"额外部分是**首字母大写的单词**"。
+    但那样 `Sparse Attention Vectors`（额外 `Sparse`）也会通过 ——
+    而 `Sparse` 同样是首字母大写的单词。**两者在字符串上无法区分。**
+
+    ⇒ 取舍：**保住"零误吸收"，放弃那一类漏吸收**（合并不可逆，宁可少不可错）。
+    将来要认那一类，得用**外部信息**（姓名表、或它在语料里的上下文形态），
+    **不能靠"首字母大写"这个弱信号**。
+    """
+    s, l = (short or '').strip(), (long_ or '').strip()
+    if not s or not l:
+        return False
+    i = l.lower().find(s.lower())
+    if i < 0:
+        return False
+    extra = (l[:i] + ' ' + l[i + len(s):]).strip()
+    if not extra:
+        return False
+    # 公式的特征：有括号（`f(h, r, t)`）。tokens() 会把括号丢掉，这里必须自己挡。
+    if '(' in extra or ')' in extra:
+        return False
+    for piece in extra.split():
+        p = piece.strip(' ,;:')
+        if not p:
+            continue
+        # 1) **带点的首字母形态**（W.- / A.）—— 必须在去点之前试：
+        #    'W.-' 去掉末尾的点会变成 'W'，就认不出来了。
+        if _PERSON_PIECE.match(p):
+            continue
+        # 2) 称谓 / et al. —— 这里要**去掉末尾的点**再比：
+        #    'Et Al.' 切出来是 ['Et', 'Al.']，而集合里存的是 'al'。
+        q = p.strip('.').lower()
+        if q in _TITLE_PIECES or q in _ETAL_PIECES:
+            continue
+        return False
+    return True
+
 
 def extra_is_version_or_carrier(short_toks, long_toks) -> bool:
     """多出来的部分是否表示「不同版本」或「不同载体」。
@@ -165,6 +263,19 @@ def find_absorptions(nodes):
                     continue
                 # 条件 4：多出的部分是版本/载体标记 → 不是同一个实体
                 if extra_is_version_or_carrier(st, ct):
+                    continue
+                # 条件 5（A5，2026-09-16）：**只有"人名补齐"才吸收**。
+                #
+                # 实测（`tools/_probe/_probe_absorb_1c*.py`）：全库 1404 对里
+                # 人名仅 32 对（2.3%），其余抽样看**几乎全错** ——
+                # `Structured Data`→`Semi-Structured Data`（`Semi-` 改了含义）、
+                # `Question Answering`→`KG Question Answering`（上义词）、
+                # `Knowledge Graphs`→`Traversing Knowledge Graphs in Vector Space`（论文标题）。
+                #
+                # ⇒ "长名包含短名"在有名词短语上**不足以判定同指**：
+                # 多一个词通常意味着**更具体的另一个概念**。
+                # ⇒ 只保留"多出来的部分不改变所指"的那一类。
+                if not extra_is_person_form(it["name"], cand["name"]):
                     continue
                 out.append((it["name"], cand["name"],
                             f'{"".join(st)} ⊂ {"".join(ct)}（同页 {sorted(sp & cand["pages"])}）'))
