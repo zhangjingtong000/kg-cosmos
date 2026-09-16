@@ -1,0 +1,284 @@
+{
+ "generated": "2026-09-16 20:22:03",
+ "purpose": "H1：综述段落生成 —— 图谱接地 + 句句溯源 + 主张-证据支持率",
+ "source_of_requirement": "`EXECUTION_READINESS.md:49/:65`（**不是** `FOUR_LENS_SCAN.md` —— 该文件的机会清单与复扫都没有\"综述\"二字；TODO 自己已记下要改来源）",
+ "design": {
+  "no_llm_judge": "**不用 LLM 判分** —— 本项目已量过四个模型标注者对关系层的一致性 α 是**负的**；用一个 α 为负的裁判给另一个模型打分没有意义。四个指标全是可机械核对的事实。",
+  "evidence_is_numbered": "证据带编号 [E1][E2]…，要求每句末尾标引用 ⇒ 引用可被机械解析与核对。",
+  "why_grounding_is_strict": "接地率的判据是\"**句子提到的实体出现在它所引用的证据里**\" —— 比\"有没有引用\"严得多，能挡住\"引了一堆无关证据\"这种假溯源。"
+ },
+ "model": "qwen3.5:9b",
+ "topic": "link prediction",
+ "graph": null,
+ "segments": [
+  {
+   "topic": "link prediction",
+   "graph": null,
+   "text": "链接预测是知识图谱补全的核心任务之一，两者密切相关 [E1][E2]。该任务旨在对三元组进行预测与应用 [E7][E8]，并属于知识图谱补全的一部分 [E9]。在方法实现上，链接预测利用了嵌入模型、R-GCN、SACN 和 KBGAT 等技术手段 [E4][E5][E6][E10][E12][E13][E14]，同时也涉及概率一阶逻辑规则的使用 [E16]。此外，实体预测也与链接预测存在关联 [E3][E11]，而 Yang et al. (2017) 的工作也通过链接预测得以体现 [E15]。",
+   "evidence": [
+    {
+     "score": 2,
+     "source": "Knowledge Graph Completion",
+     "target": "Link Prediction",
+     "type": "RELATED_TO",
+     "paper": "1703.08098v9",
+     "page": 1,
+     "quote": "A survey of embedding models of entities and relationships for knowledge graph completion Dat Quoc Nguyen VinAI Research, Vietnam v. datnq9@vinai. io "
+    },
+    {
+     "score": 2,
+     "source": "Link Prediction",
+     "target": "Knowledge Graph Completion",
+     "type": "RELATED_TO",
+     "paper": "1703.08098v9",
+     "page": 1,
+     "quote": "tasks. However, because knowledge graphs are typically incomplete, it is useful to perform knowledge graph completion or link prediction, i. e. predic"
+    },
+    {
+     "score": 2,
+     "source": "Link Prediction",
+     "target": "Entity Prediction",
+     "type": "RELATED_TO",
+     "paper": "1703.08098v9",
+     "page": 1,
+     "quote": "and pointing out potential future research directions. Keywords: Knowledge graph completion, Link prediction, Embedding model, Entity prediction. 1 In"
+    },
+    {
+     "score": 2,
+     "source": "Embedding Models",
+     "target": "Link Prediction",
+     "type": "USES",
+     "paper": "1703.08098v9",
+     "page": 1,
+     "quote": "and pointing out potential future research directions. Keywords: Knowledge graph completion, Link prediction, Embedding model, Entity prediction. 1 In"
+    },
+    {
+     "score": 2,
+     "source": "TransE",
+     "target": "Link Prediction",
+     "type": "USES",
+     "paper": "1703.08098v9",
+     "page": 1,
+     "quote": "between country and capital entities. Also, we represent this relationship by a translation vector vis capital of in the entity vector space. Thus, we"
+    },
+    {
+     "score": 2,
+     "source": "Embedding Models",
+     "target": "Link Prediction",
+     "type": "ENABLES",
+     "paper": "1703.08098v9",
+     "page": 1,
+     "quote": "between country and capital entities. Also, we represent this relationship by a translation vector vis capital of in the entity vector space. Thus, we"
+    },
+    {
+     "score": 2,
+     "source": "Knowledge Graph Completion",
+     "target": "Link Prediction",
+     "type": "PRODUCES",
+     "paper": "1703.08098v9",
+     "page": 2,
+     "quote": " correctly interpreted question. For example, given the incomplete KG in Figure 2, it would be impossible to answer the question “where was Jane born."
+    },
+    {
+     "score": 2,
+     "source": "Link Prediction",
+     "target": "Triple",
+     "type": "APPLIES_TO",
+     "paper": "1703.08098v9",
+     "page": 2,
+     "quote": " correctly interpreted question. For example, given the incomplete KG in Figure 2, it would be impossible to answer the question “where was Jane born."
+    },
+    {
+     "score": 2,
+     "source": "Link Prediction",
+     "target": "KG Completion",
+     "type": "PART_OF",
+     "paper": "1703.08098v9",
+     "page": 2,
+     "quote": "triples by leveraging existing triples in the KG (Lao and Cohen, 2010; Bordes et al. , 2012; Gardner et al. , 2014; Garc´ıa-Dur´an et al. , 2016). For"
+    },
+    {
+     "score": 2,
+     "source": "Embedding Models",
+     "target": "Link Prediction",
+     "type": "PRODUCES",
+     "paper": "1703.08098v9",
+     "page": 2,
+     "quote": "triples by leveraging existing triples in the KG (Lao and Cohen, 2010; Bordes et al. , 2012; Gardner et al. , 2014; Garc´ıa-Dur´an et al. , 2016). For"
+    },
+    {
+     "score": 2,
+     "source": "Entity Prediction",
+     "target": "Link Prediction",
+     "type": "RELATED_TO",
+     "paper": "1703.08098v9",
+     "page": 2,
+     "quote": "relation types are represented by latent feature vectors and/or matrices and/or third-order tensors (Bordes et al. , 2013; Socher et al. , 2013). This"
+    },
+    {
+     "score": 2,
+     "source": "Link Prediction",
+     "target": "R-GCN",
+     "type": "USES",
+     "paper": "1703.08098v9",
+     "page": 6,
+     "quote": "propagation to accumulate linearly-transformed embeddings of its neighboring entities through a normalized sum with different relational weights. For "
+    },
+    {
+     "score": 2,
+     "source": "Link Prediction",
+     "target": "SACN",
+     "type": "USES",
+     "paper": "1703.08098v9",
+     "page": 6,
+     "quote": "propagation to accumulate linearly-transformed embeddings of its neighboring entities through a normalized sum with different relational weights. For "
+    },
+    {
+     "score": 2,
+     "source": "Link Prediction",
+     "target": "KBGAT",
+     "type": "USES",
+     "paper": "1703.08098v9",
+     "page": 6,
+     "quote": "propagation to accumulate linearly-transformed embeddings of its neighboring entities through a normalized sum with different relational weights. For "
+    },
+    {
+     "score": 2,
+     "source": "Yang et al. (2017)",
+     "target": "Link Prediction",
+     "type": "CREATED_BY",
+     "paper": "1703.08098v9",
+     "page": 6,
+     "quote": "algorithms for KG completion can be also found in Feng et al. (2016b), Liu et al. (2016), Wei et al. (2016), Mazumder and Liu (2017) and Das et al. (2"
+    },
+    {
+     "score": 2,
+     "source": "Link Prediction",
+     "target": "probabilistic first-order logical rules",
+     "type": "USES",
+     "paper": "1703.08098v9",
+     "page": 6,
+     "quote": "algorithms for KG completion can be also found in Feng et al. (2016b), Liu et al. (2016), Wei et al. (2016), Mazumder and Liu (2017) and Das et al. (2"
+    }
+   ],
+   "elapsed_s": 4.2,
+   "metrics": {
+    "n_sentences": 4,
+    "trace_rate": 1.0,
+    "valid_id_rate": 1.0,
+    "grounding_rate": 0.75,
+    "ungrounded": 0,
+    "unjudgeable": 1,
+    "claim_support_rate": 1.0,
+    "judgeable_rate": 0.75,
+    "semantic_used": true,
+    "per_sentence": [
+     {
+      "sentence": "链接预测是知识图谱补全的核心任务之一，两者密切相关 。",
+      "ids": [
+       1,
+       2
+      ],
+      "valid_ids": [
+       1,
+       2
+      ],
+      "mentioned_entities": [
+       "Knowledge Graph Completion",
+       "Link Prediction"
+      ],
+      "matched_by": "semantic",
+      "has_citation": true,
+      "ids_valid": true,
+      "grounding_state": "grounded",
+      "grounded": true,
+      "supported": true
+     },
+     {
+      "sentence": "该任务旨在对三元组进行预测与应用 ，并属于知识图谱补全的一部分 。",
+      "ids": [
+       7,
+       8,
+       9
+      ],
+      "valid_ids": [
+       7,
+       8,
+       9
+      ],
+      "mentioned_entities": [],
+      "matched_by": "string",
+      "has_citation": true,
+      "ids_valid": true,
+      "grounding_state": "unjudgeable",
+      "grounded": false,
+      "supported": false
+     },
+     {
+      "sentence": "在方法实现上，链接预测利用了嵌入模型、R-GCN、SACN 和 KBGAT 等技术手段 ，同时也涉及概率一阶逻辑规则的使用 。",
+      "ids": [
+       4,
+       5,
+       6,
+       10,
+       12,
+       13,
+       14,
+       16
+      ],
+      "valid_ids": [
+       4,
+       5,
+       6,
+       10,
+       12,
+       13,
+       14,
+       16
+      ],
+      "mentioned_entities": [
+       "KBGAT",
+       "R-GCN",
+       "SACN"
+      ],
+      "matched_by": "string",
+      "has_citation": true,
+      "ids_valid": true,
+      "grounding_state": "grounded",
+      "grounded": true,
+      "supported": true
+     },
+     {
+      "sentence": "此外，实体预测也与链接预测存在关联 ，而 Yang et al. (2017) 的工作也通过链接预测得以体现 。",
+      "ids": [
+       3,
+       11,
+       15
+      ],
+      "valid_ids": [
+       3,
+       11,
+       15
+      ],
+      "mentioned_entities": [
+       "Yang et al. (2017)"
+      ],
+      "matched_by": "string",
+      "has_citation": true,
+      "ids_valid": true,
+      "grounding_state": "grounded",
+      "grounded": true,
+      "supported": true
+     }
+    ]
+   }
+  }
+ ],
+ "summary": {
+  "trace_rate": 1.0,
+  "valid_id_rate": 1.0,
+  "grounding_rate": 0.75,
+  "claim_support_rate": 1.0
+ },
+ "elapsed_s": 6.8
+}
