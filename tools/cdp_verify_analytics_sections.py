@@ -61,6 +61,20 @@ EXPECT = [
     ("漏抽归因写明与产出构成不矛盾",
      "/不矛盾/.test(document.getElementById('l9rMiss').innerText)"),
     ("L5 区块含 PPV 字样", "/PPV/.test(document.getElementById('l5v').innerText)"),
+    # K4（2026-09-16）：「这 16 类关系分别是什么意思」区块。
+    # **为什么值得一条断言**：它的数据来自 `relations.json`（经 analytics.json 带进来），
+    # 而**附加区块拿不到数据时不会报错，只会静默消失** ——
+    # 与项目里"某个字段没接上、区块就 hidden"是同一类沉默失效。
+    ("关系语义区块已渲染", "(document.getElementById('relsem')||{}).innerHTML"
+                        " && document.getElementById('relsem').innerHTML.length > 400"),
+    ("关系语义区块含 16 类中的代表类型",
+     "/APPLIES_TO/.test(document.getElementById('relsem').innerText)"
+     " && /CONTRADICTS/.test(document.getElementById('relsem').innerText)"),
+    ("关系语义区块写明了「L7 为什么只对 3 类做方向校验」",
+     "/方向校验/.test(document.getElementById('relsem').innerText)"),
+    ("关系语义区块标出了对称类", "/对称/.test(document.getElementById('relsem').innerText)"),
+    ("关系语义区块如实保留零条的 PUBLISHED_IN",
+     "/PUBLISHED_IN/.test(document.getElementById('relsem').innerText)"),
 ]
 
 try:

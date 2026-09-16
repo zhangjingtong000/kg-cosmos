@@ -60,6 +60,25 @@ def by_type_rows(edges, threshold):
     return rows
 
 
+def _load_relations():
+    """读 `web/kg-data/relations.json`（由 `tools/build_relations_data.py` 生成）。
+
+    拿不到就返回 None —— 前端会跳过那个区块，**不让整份 analytics.json 失败**
+    （这与项目里"进度上报绝不能反过来把抽取搞挂"是同一条纪律：
+    一个附加区块不该成为主链路的故障点）。
+    """
+    p = WEB / "relations.json"
+    if not p.exists():
+        print("  ⚠️ 没有 relations.json（先跑 tools/build_relations_data.py）"
+              "—— 关系语义区块将不出现在分析面板里")
+        return None
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"  ⚠️ relations.json 读失败：{type(e).__name__}: {e}")
+        return None
+
+
 def main():
     neb = read(WEB / "nebula.json")
     six = read(QUAL / "l5-six-layer.json")
@@ -374,6 +393,11 @@ def main():
             "edges": six.get("edges_supported"),
             "dropped": six.get("edges_dropped"),
         },
+        # K4（2026-09-16）：16 类关系的可读说明（语义/方向性/端点约束/假设模板）。
+        # **塞进同一份 payload 而不是让前端再 fetch 一个文件** ——
+        # 这个页面已经读 analytics.json，多一个请求只增加"某个文件没生成好"的失败面。
+        # 数据由 `tools/build_relations_data.py` 生成；这里只做"如果它在，就带上"。
+        "relations": _load_relations(),
     }
 
     OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")),

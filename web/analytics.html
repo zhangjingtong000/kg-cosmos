@@ -533,6 +533,19 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
     <div id="types"></div>
   </section>
 
+  <!-- K4（2026-09-16）：16 类关系的**可读说明**。
+       数据本来就在 src/ontology.py 里（每类都有中文语义、方向性、端点约束、
+       NLI 假设模板），只是没上界面 —— 与 I8 那三条同类。
+       ★ 顺带讲清一件容易困惑的事：**L7 为什么只对 3 类做方向校验**。 -->
+  <section id="s-relsem">
+    <div class="sec-h">
+      <span class="eyebrow">07b · RELATION SEMANTICS</span>
+      <h2>这 16 类关系分别是什么意思</h2>
+    </div>
+    <div class="sub">每类的语义、方向性、端点约束，以及实测条数</div>
+    <div id="relsem"></div>
+  </section>
+
   <section id="s-hits">
     <div class="sec-h">
       <span class="eyebrow">08 · EVIDENCE HIT</span>
@@ -1020,6 +1033,57 @@ function boot(D) {
         <div class="r ${cls(p)}">${p}%</div>
       </div>`;
     }).join('');
+
+  /* ── K4：16 类关系的可读说明 ──────────────────────────────────────────
+     数据来自 src/ontology.py（每类都有中文语义 / 方向性 / 端点约束），
+     经 build_relations_data.py 汇总、由 build_analytics_data.py 带进这份 payload。
+     **设计要点**：
+       · 按条数排序（用户最先看到的是占比最大的关系）；
+       · 对称类（COMPARES_WITH / CONTRADICTS）**单独标记** —— 因为
+         "L7 为什么只对 3 类做方向校验"的答案就在这里；
+       · 零条的类（PUBLISHED_IN）**灰显但保留** —— 它说明"本体新增了类，
+         不等于抽取器就能抽出来"，这是个如实的事实。 */
+  (function renderRelSem(){
+    const box = document.getElementById('relsem');
+    if (!box) return;
+    const R = D.relations;
+    if (!R || !R.relations) {
+      box.innerHTML = '<div class="row"><span class="nm" style="color:rgba(170,174,188,.55)">'
+        + '关系语义数据未生成（运行 tools/build_relations_data.py）</span></div>';
+      return;
+    }
+    const st = R.stats || {};
+    const kinds = {directed: '有向', symmetric: '对称（不判方向）',
+                   unconstrained: '无约束（语义不唯一）'};
+    const head = `<div class="sub" style="margin:10px 0 14px">共 <b>${st.types}</b> 类 ·`
+      + ` 合计 <b>${(st.total_edges || 0).toLocaleString()}</b> 条边 ·`
+      + ` 有向 <b>${st.directed || 0}</b> 类 · 对称 <b>${st.symmetric || 0}</b> 类`
+      + `<br><b>「L7 为什么只对 3 类做方向校验」</b>：对称类定义上就没有反向；`
+      + `另有若干类语义不可逆、但两端类型重叠 ⇒ 只有 3 类具备可靠的方向指纹。</div>`;
+    box.innerHTML = head + R.relations.map(r => {
+      const zero = r.count === 0;
+      const tag = r.kind === 'symmetric'
+        ? '<span class="pill" style="color:var(--pq-warm);border-color:rgba(224,164,105,.45)">对称</span>'
+        : (r.kind === 'unconstrained'
+            ? '<span class="pill" style="color:var(--pq-txt-3);border-color:var(--pq-line)">无约束</span>'
+            : '<span class="pill ok">有向</span>');
+      const core = (r.source_core && r.source_core.length)
+        ? `<div class="src">端点约束：source ∈ {${esc(r.source_core.join(', '))}}`
+          + `${r.target_core && r.target_core.length ? ` · target ∈ {${esc(r.target_core.join(', '))}}` : ''}</div>`
+        : '';
+      return `<div class="card" style="margin-bottom:10px${zero ? ';opacity:.55' : ''}">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <b style="font-family:ui-monospace,Consolas,monospace">${esc(r.type)}</b>
+          ${tag}
+          <span style="color:var(--pq-txt-3);font-size:12px">
+            ${r.count.toLocaleString()} 条 · ${r.share}% · 出现在 ${r.papers} 篇${zero ? ' · 抽取结果里一条都没有' : ''}
+          </span>
+        </div>
+        <div style="margin-top:7px;font-size:13px">${esc(r.semantics)}</div>
+        ${core}
+      </div>`;
+    }).join('');
+  })();
 
   const h = D.hit_distribution, tot = Object.values(h).reduce((a, b) => a + b, 0);
   const label = { both: '两端都命中', one: '仅一端命中', none: '两端都未命中' };
