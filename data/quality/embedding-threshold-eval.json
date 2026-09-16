@@ -1,0 +1,211 @@
+{
+ "generated": "2026-09-16 17:09:16",
+ "model": "bge-m3:latest",
+ "purpose": "H4：向量余弦能否判\"同一实体\"（\"替代字符重叠\"这个说法成不成立）",
+ "thresholds": {
+  "HIGH": 0.93,
+  "LOW": 0.3
+ },
+ "cases": [
+  {
+   "a": "knowledge graph",
+   "b": "knowledge graphs",
+   "should_merge": true,
+   "class": "单复数",
+   "cosine": 0.9655,
+   "action": "合",
+   "ok": true
+  },
+  {
+   "a": "OpenRefine",
+   "b": "Open Refine",
+   "should_merge": true,
+   "class": "拼写/空白",
+   "cosine": 0.9379,
+   "action": "合",
+   "ok": true
+  },
+  {
+   "a": "multi-head attention",
+   "b": "Multi-Head Attention",
+   "should_merge": true,
+   "class": "大小写/连字符",
+   "cosine": 0.9244,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "graph",
+   "b": "graph neural network",
+   "should_merge": false,
+   "class": "子串陷阱",
+   "cosine": 0.8502,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "time",
+   "b": "timestamp",
+   "should_merge": false,
+   "class": "子串陷阱",
+   "cosine": 0.7862,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "tabula",
+   "b": "Tabula PDF",
+   "should_merge": true,
+   "class": "版本后缀",
+   "cosine": 0.7618,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "Tag",
+   "b": "Tagger",
+   "should_merge": false,
+   "class": "子串陷阱",
+   "cosine": 0.7477,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "TransE",
+   "b": "TransE (Bordes 2013)",
+   "should_merge": true,
+   "class": "带括注",
+   "cosine": 0.713,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "BERT",
+   "b": "BERTLarge",
+   "should_merge": true,
+   "class": "版本后缀",
+   "cosine": 0.625,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "AD",
+   "b": "A. Doan",
+   "should_merge": false,
+   "class": "同缩写不同全称",
+   "cosine": 0.551,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "RDF",
+   "b": "Reference Data File",
+   "should_merge": false,
+   "class": "碰巧首字母对齐",
+   "cosine": 0.5051,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "AI",
+   "b": "Semantic Scholar",
+   "should_merge": false,
+   "class": "完全不相关",
+   "cosine": 0.4873,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "AD",
+   "b": "Anomaly Detection",
+   "should_merge": true,
+   "class": "缩写↔全称",
+   "cosine": 0.4681,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "GNN",
+   "b": "Graph Neural Networks",
+   "should_merge": true,
+   "class": "缩写↔全称",
+   "cosine": 0.4669,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "UI",
+   "b": "build graph.py",
+   "should_merge": false,
+   "class": "完全不相关",
+   "cosine": 0.4437,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "Crossref",
+   "b": "Semantic Scholar",
+   "should_merge": false,
+   "class": "完全不相关",
+   "cosine": 0.424,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "ORKG",
+   "b": "Open Research Knowledge Graph",
+   "should_merge": false,
+   "class": "独立品牌 vs 表面全称",
+   "cosine": 0.4181,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "KG",
+   "b": "Knowledge Graph",
+   "should_merge": true,
+   "class": "缩写↔全称",
+   "cosine": 0.4074,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "AD",
+   "b": "Action Dropout",
+   "should_merge": false,
+   "class": "同缩写不同全称",
+   "cosine": 0.3961,
+   "action": "不可判",
+   "ok": true
+  },
+  {
+   "a": "Tabula",
+   "b": "GROBID",
+   "should_merge": false,
+   "class": "完全不相关",
+   "cosine": 0.3462,
+   "action": "不可判",
+   "ok": true
+  }
+ ],
+ "summary": {
+  "n": 20,
+  "pos_min": 0.4074,
+  "pos_max": 0.9655,
+  "neg_min": 0.3462,
+  "neg_max": 0.8502,
+  "classes_overlap": true,
+  "best_single_threshold": {
+   "thr": 0.45,
+   "tp": 8,
+   "fp": 6,
+   "fn": 1,
+   "tn": 5,
+   "f1": 0.6956521739130435
+  },
+  "auto_decided": 2,
+  "auto_correct": 2,
+  "auto_wrong": 0
+ },
+ "conclusion": "**中间区不可判** —— \"该拒\"的最高分高于\"该合\"的最低分。余弦只能作为高分区（≥HIGH）的补充通道，不能替代字符判据。"
+}

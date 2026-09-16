@@ -186,6 +186,9 @@ h3 { font-weight: 600; }
 #seeds .nm{ border-left:2px solid rgba(224,164,105,.55); padding-left:8px; }
 /* 子图统计里的数字用青，和灰色标签拉开 */
 #stats b,#stats strong{ color:var(--pq-cyan); }
+  .fbnote{margin:0 0 10px;padding:9px 11px;border-radius:8px;font-size:12px;
+    line-height:1.65;color:#e8c9a4;background:rgba(224,164,105,.08);
+    border:1px solid rgba(224,164,105,.34)}
 </style>
 <link rel="stylesheet" href="./lib/design.css">
 <link rel="stylesheet" href="./lib/a11y.css">
@@ -233,7 +236,9 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
 </div>
 
 <footer id="foot">数据：<code>web/kg-data/nebula.json</code>（Louvain 社区的概览层导出）。
-  检索是字面匹配 + BFS，不含语义模型——匹配不到时应当如实显示"没有命中"，而不是猜。</footer>
+  检索是**字面匹配 + 2 跳 BFS**；**字面一个都没命中时**，再用 `bge-m3` 嵌入做一次
+**语义兜底**，给出的候选**必须由人判断**（实测余弦的中间区不可判：该拒的最高分 0.85 &gt; 该合的最低分 0.41）。
+两种情况都会如实显示"没有命中"，而不是猜。</footer>
 
 <script>
 const esc = (s) => String(s == null ? '' : s)
@@ -459,15 +464,29 @@ function layout(nodes, links, W, H, rnd) {
   return { P, L };
 }
 
-function render(question, seeds, sg) {
+function render(question, seeds, sg, fb) {
   const box = document.getElementById('graph');
   const W = box.clientWidth, H = box.clientHeight;
   const hint = document.getElementById('hint2');
   if (!sg.nodes.length) {
       /* 空态只切覆盖层，不再用 innerHTML 把整个 <svg> 一起推平重建 —— 那样连
          svg 节点本身都丢了，下一次渲染还得重新创建，也拿不到平滑过渡。 */
-      if (hint) { hint.style.display = 'block';
-                  hint.innerHTML = '没有命中任何实体。<br>换一个更具体的名字试试。'; }
+      if (hint) {
+        hint.style.display = 'block';
+        /* H4：**把"为什么没命中"分三种情况说清** ——
+           ① 语义兜底也没找到（且它确实在跑）⇒ 是真的没有；
+           ② 语义兜底没就绪 ⇒ 告诉用户"功能没开"，而不是让他以为图里没有；
+           ③ 后端不可用 ⇒ 报原因。
+           三种都显示"没有命中"，但**原因不同，用户该做的事也不同**。 */
+        let msg = '没有命中任何实体。<br>换一个更具体的名字试试。';
+        if (fb && fb.used) {
+          msg = '字面没有命中，**语义兜底也没有找到足够接近的**（要求余弦 ≥ 0.5）。'
+              + '<br>这说明图里可能确实没有这个概念。';
+        } else if (fb && fb.note) {
+          msg = '字面没有命中。<br>语义兜底没生效：' + esc(fb.note);
+        }
+        hint.innerHTML = msg;
+      }
       clearScene();
       PIN.clear(); TARGET.clear(); POS.clear();
       /* 提前 return 之前必须清空侧栏：否则画布说"没有命中"，
@@ -478,6 +497,23 @@ function render(question, seeds, sg) {
       });
       return; }
   if (hint) { hint.style.display = 'none'; hint.textContent = ''; }
+  /* H4：这次是**语义兜底**找到的种子 ⇒ 必须在命中列表上方说清楚，
+     否则用户会以为自己的词真的字面出现在图里。 */
+  if (fb && fb.used) {
+    const sbox = document.getElementById('seeds');
+    if (sbox && sbox.parentNode) {
+      // 同一次检索只留一条提示 —— 重渲染时先清掉旧的
+      sbox.parentNode.querySelectorAll('.fbnote').forEach(el => el.remove());
+      const head = document.createElement('div');
+      head.className = 'fbnote';
+      const names = (fb.matches || []).map(m => m.name + '（' + m.score + '）').join('、');
+      head.innerHTML = '⚠️ <b>字面没有命中</b>，下面是**语义兜底**的候选'
+        + '（余弦 ≥ 0.5）：' + esc(names) + '。<br>'
+        + '余弦的中间区不可判（该拒的最高分 0.85 &gt; 该合的最低分 0.41），'
+        + '<b>请自行判断是不是同一个东西</b>。';
+      sbox.parentNode.insertBefore(head, sbox);
+    }
+  }
   /* 布局随机数由问句播种：同一个问题必须永远得到同一张图。 */
   const { P, L } = layout(sg.nodes, sg.links, W, H, mulberry32(hash32(question)));
   const idx = new Map(sg.nodes.map((n, i) => [n.id, i]));
@@ -799,15 +835,81 @@ function bindGraph() {
 
 let DATA = null;
 
+/** H4（2026-09-16）：**字面匹配失败时的语义兜底**。
+ *
+ *  ## 为什么它只在"字面完全没命中"时才用
+ *
+ *  H4 的标定实验结论是「**余弦的中间区不可判**」——
+ *  "该拒"的最高分（0.85，`graph` ↔ `graph neural network`）
+ *  高于"该合"的最低分（0.41，`KG` ↔ `Knowledge Graph`），
+ *  任何单阈值都会在那段里判错（最佳 F1 只有 0.696）。
+ *  见 `docs/H4_EMBEDDING_RESULT.md`。
+ *
+ *  ⇒ 所以**不能**拿它替代字面匹配（那会把 `Tag`/`Tagger` 这种判成同一个）。
+ *  它只做一件事：**字面一个都没命中时，给出几个候选让人选**，
+ *  **并且必须标明"这是语义兜底、不是字面命中"** ——
+ *  否则用户会以为自己的词真的在图里。
+ *
+ *  ## 为什么必须带 min_score
+ *
+ *  后端默认 `min_score=0.5`。**返回一个 0.3 分的"最像的"比返回空更危险** ——
+ *  调用方会以为"找到了"。
+ */
+async function semanticFallback(question) {
+  const none = { used: false, ready: false, matches: [], seeds: [], note: '' };
+  try {
+    const r = await fetch('./api/semantic-match', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ query: question, top_k: 5, min_score: 0.5 }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    if (!j.ready) {
+      // **如实报"功能没开"**，而不是假装"没找到"
+      return Object.assign({}, none, { note: j.note || '语义兜底未就绪' });
+    }
+    const byName = new Map(NODES.map(n => [String(n.id).toLowerCase(), n]));
+    const seeds = [];
+    for (const m of (j.matches || [])) {
+      const n = byName.get(String(m.name).toLowerCase());
+      if (n && seeds.indexOf(n) < 0) seeds.push(n);
+      if (seeds.length >= MAX_SEEDS) break;
+    }
+    return { used: true, ready: true, matches: j.matches || [], seeds,
+             note: j.note || '' };
+  } catch (e) {
+    // 后端没起 / 嵌入服务不可用 —— **不静默降级**，把原因带出去
+    return Object.assign({}, none,
+      { note: '语义兜底不可用：' + (e && e.message ? e.message : e) });
+  }
+}
+
 function ask() {
   const q = document.getElementById('q').value.trim();
   if (!q || !DATA) return;
   const seeds = findSeeds(q);
+  if (seeds.length) {
+    finishAsk(q, seeds, null);
+    return;
+  }
+  // 字面一个都没命中 ⇒ 试语义兜底（异步）
+  window.__lastAsk = { q, seeds: [], nodes: 0, links: 0, fallback: 'pending' };
+  semanticFallback(q).then(function (fb) {
+    finishAsk(q, fb.seeds, fb);
+  });
+}
+
+function finishAsk(q, seeds, fb) {
   const sg = seeds.length ? subgraph(seeds)
     : { nodes: [], links: [], dist: new Map() };
-  render(q, seeds, sg);
-  window.__lastAsk = { q, seeds: seeds.map(s => s.id),
-                       nodes: sg.nodes.length, links: sg.links.length };
+  render(q, seeds, sg, fb);
+  window.__lastAsk = {
+    q, seeds: seeds.map(s => s.id),
+    nodes: sg.nodes.length, links: sg.links.length,
+    fallback: fb && fb.used ? 'used' : (fb ? 'off' : null),
+    fallbackMatches: fb ? (fb.matches || []).map(m => m.name) : [],
+  };
 }
 
 function boot(data) {

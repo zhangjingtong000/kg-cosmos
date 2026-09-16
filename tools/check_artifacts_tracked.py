@@ -72,10 +72,17 @@ EXCLUDE_PREFIX = (
 # 这些是"大文件、有意不入库"，`REPRODUCE.md` 里有重建说明
 LARGE_KNOWN = (
     'data/quality/relation-verify-all',          # 三个 ~53 MB 的大文件
+    # ⚠️ 两个 baseline 也是 53 MB 级 —— 我一度按"文档引用了它"把它们 `add -f` 了，
+    # 那会让仓库凭空胖 106 MB。**判据要加一条：大小上限。**
+    'data/quality/baseline/relation-verify-all',
     'data/quality/subgraph-supported.json',      # 5.1 MB
+    'data/quality/entity-embeddings.npz',        # 72.3 MB（H4 的嵌入，重跑 4 分钟）
     'data/corpus/graphs/2012.00456v1.json',      # 2.2 MB
     'data/3e38f803/graph.json',                  # 3.2 MB
 )
+# 单文件超过这个大小就**不该入库**（GitHub 单文件上限 100 MB，但仓库不该被几十 MB 撑大）。
+# 超限的必须出现在 `REPRODUCE.md` 的重建清单里。
+SIZE_LIMIT_MB = 20.0
 
 # 文档里写"待产出 / 尚未生成 / 运行时生成"的引用不算错 —— 那是**如实标注**。
 # 判据：同一行（或紧邻上下文）出现这些词。
@@ -149,10 +156,14 @@ def main():
         return 0
 
     refs = referenced_paths()
-    missing, untracked, imprecise, pending = [], [], [], []
+    missing, untracked, imprecise, pending, toolarge = [], [], [], [], []
     for p, who in sorted(refs.items()):
         if (ROOT / p).exists():
-            if p not in tracked:
+            mb = (ROOT / p).stat().st_size / 1024 / 1024
+            if mb > SIZE_LIMIT_MB and p not in tracked:
+                # **超限的大文件不该入库** ⇒ 不报"未入库"，而是要求它在重建清单里
+                toolarge.append((p, mb, who))
+            elif p not in tracked:
                 untracked.append((p, who))
             continue
         # 原路径不在 —— 先看是不是"文档省了 web/kg-data/ 前缀"，再看有没有标"待产出"
@@ -202,6 +213,13 @@ def main():
             print(f'       {p}  →  实际在 {same}   ← {", ".join(sorted(set(who))[:2])}')
         print('     建议：文档里写全路径（前端产物在 `web/kg-data/`、盲态产物在 `web/l5-data/`），')
         print('     否则读者照着 `data/...` 去找会扑空。')
+
+    if toolarge:
+        print()
+        print(f'  · {len(toolarge)} 个产物**超过 {SIZE_LIMIT_MB:.0f} MB 且未入库**'
+              f'（这是有意的，但必须在 `REPRODUCE.md` 里有重建说明）：')
+        for p, mb, who in toolarge:
+            print(f'       {p}  ({mb:.1f} MB)   ← {", ".join(sorted(set(who))[:2])}')
 
     if pending:
         print()

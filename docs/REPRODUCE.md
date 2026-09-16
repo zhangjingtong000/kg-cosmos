@@ -27,6 +27,11 @@
 | `data/quality/subgraph-supported.json` | 5.1 MB | 4 | `python tools/l5_subgraph.py` | 秒级，纯规则 |
 | `data/3e38f803/graph.json` | 3.2 MB | 2 | **上传那篇 PDF 重抽**（走 `upload.html` 或 `/api/upload/start`） | **约 36 分钟**，要 Ollama |
 | `data/corpus/graphs/2012.00456v1.json` | 2.2 MB | 1 | `python tools/sync_graph.py`（从 Neo4j 导出）或重跑该篇的整条管线 | 视来源而定 |
+| `data/quality/entity-embeddings.npz` | **72.3 MB** | 0（代码按路径读） | `python tools/build_entity_embeddings.py` | **约 250 秒**，要 Ollama + `bge-m3:latest` |
+
+> **`entity-embeddings.npz`（H4 新增）**：19877 个实体名 × 1024 维、**已归一化**
+> （检索时余弦 = 点积）。**没有它时 `/api/semantic-match` 会如实返回
+> `ready:false`**，而不是假装"没找到" —— 见 `docs/H4_EMBEDDING_RESULT.md`。
 
 **⚠️ 两个 baseline 的特殊性**：它们是**"治理前"的历史快照**，
 **重跑不出来**（因为语料与代码都已经变了）。它们属于「**只能留档、不能重建**」的一类 ——

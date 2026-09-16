@@ -917,6 +917,101 @@ async def stats():
     }
 
 
+# ── H4 语义兜底（2026-09-16）──────────────────────────────────────────────
+#
+# TODO 里 H4 的第二个用途：「**PathQA 端点匹配失败时语义召回兜底**」。
+# PathQA 在前端做"字面种子匹配 + 2 跳 BFS"，**字面匹配不到时现在就是"检索不到"**；
+# 语义兜底 = 拿问题里的词去和全库实体名比余弦，找回最像的几个。
+#
+# ## 两个刻意的设计
+#
+# ① **向量预计算 + 惰性加载**：全库 1.9 万个实体名，现算一次要 6 分钟。
+#    所以嵌入离线算好存成 `.npz`（`tools/build_entity_embeddings.py`），
+#    首次请求时载入内存并缓存。**没有那个文件时端点如实报"未就绪"**，
+#    不静默返回空 —— 前端要能区分"没找到"和"功能没开"。
+#
+# ② **必须给最低分阈值**（`min_score`）：H4 的标定实验结论是
+#    **"余弦的中间区不可判"**（该拒的最高分 0.85 > 该合的最低分 0.41）。
+#    所以这里**不返回"最像的那个"** —— 返回一个 0.3 分的候选比返回空更危险，
+#    调用方会以为"找到了"。默认 `min_score=0.5`，低于它的一律不返回。
+#    （详见 `docs/H4_EMBEDDING_RESULT.md`。）
+ENTITY_EMB = QUALITY / "entity-embeddings.npz"
+_EMB_CACHE = {"mtime": None, "names": None, "vectors": None}
+
+
+class SemanticMatchRequest(BaseModel):
+    query: str
+    top_k: int = 5
+    # 低于这个余弦一律不返回（**不要改成 0** —— 见上面的 ②）
+    min_score: float = 0.5
+
+
+def _load_entity_embeddings():
+    """惰性加载 `.npz`，按 mtime 缓存。返回 `(names, vectors)` 或 `(None, None)`。"""
+    import numpy as np
+    if not ENTITY_EMB.exists():
+        return None, None
+    mtime = ENTITY_EMB.stat().st_mtime
+    if _EMB_CACHE["mtime"] != mtime:
+        try:
+            z = np.load(ENTITY_EMB, allow_pickle=True)
+            _EMB_CACHE.update(mtime=mtime, names=list(z["names"]),
+                              vectors=z["vectors"])
+        except Exception as e:
+            log.warning(f'实体嵌入载入失败：{type(e).__name__}: {e}')
+            return None, None
+    return _EMB_CACHE["names"], _EMB_CACHE["vectors"]
+
+
+@app.post("/api/semantic-match")
+async def api_semantic_match(req: SemanticMatchRequest):
+    """**字面匹配失败时的语义兜底**：把 query 和全库实体名比余弦。
+
+    与 `/api/qa/step` 的检索**不是一回事**：那个是"字面种子匹配 + BFS"（可复现、
+    不依赖模型）；这个是**在字面匹配不到时才用的宽松召回**，
+    所以它返回的是**候选（带分数）**，不是"答案"。
+    """
+    import numpy as np
+    q = (req.query or "").strip()
+    if not q:
+        raise HTTPException(400, "query 不能为空")
+
+    names, vectors = _load_entity_embeddings()
+    if names is None:
+        # **如实报"未就绪"**，而不是返回空数组让前端以为"没找到"
+        return {"ready": False, "matches": [],
+                "note": f"实体嵌入未生成：先跑 tools/build_entity_embeddings.py"
+                        f"（期望产物 {_rel(ENTITY_EMB)}）"}
+
+    try:
+        # `embeddings.py` 与本文件同在 `src/`，直接 import
+        from embeddings import embed
+        qv = embed([q])[0]
+    except Exception as e:
+        raise HTTPException(503, f"嵌入服务不可用（Ollama 在跑吗）：{type(e).__name__}")
+
+    # 预计算时已归一化 ⇒ 余弦 = 点积
+    qa = np.asarray(qv, dtype=np.float32)
+    n = float(np.linalg.norm(qa)) or 1.0
+    sims = (vectors @ (qa / n)).astype(float)
+
+    k = max(1, min(int(req.top_k or 5), 50))
+    idx = np.argsort(-sims)[:k]
+    out = [{"name": names[i], "score": round(float(sims[i]), 4)}
+           for i in idx if float(sims[i]) >= float(req.min_score or 0)]
+
+    return {
+        "ready": True,
+        "query": q,
+        "matches": out,
+        "min_score": req.min_score,
+        "n_candidates": len(names),
+        "note": ("**候选，不是答案** —— 余弦的中间区不可判（该拒的最高分 0.85 > "
+                 "该合的最低分 0.41），所以只返回 >= min_score 的。"
+                 "见 docs/H4_EMBEDDING_RESULT.md。"),
+    }
+
+
 # ── Main ─────────────────────────────────────────────────
 
 # 把 web/ 挂在同一个 origin 下（必须在所有 API 路由**之后**挂载，
