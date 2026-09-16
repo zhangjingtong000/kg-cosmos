@@ -1,0 +1,54 @@
+{
+  "source": "data/gold/SOURCE-2012.00456v1-p1-12.txt",
+  "model": "qwen3.5:9b",
+  "reps": 2,
+  "caliber": "单元=(源,目标)对；值=关系类型编码，0=未列出（\"未列出==明确判定不属于\"，与 tools/recompute_agreement.py 同口径）",
+  "reconstructed": true,
+  "reconstructed_note": "**本文件是手工重建的** —— 原产物被第二篇覆盖、且从未入库（data/quality 被 gitignore，当时只 add -f 了 53 个被文档引用的文件）。每个数字逐字誊写自当时的运行输出，未做推算。详见脚本 docstring。",
+  "results": {
+    "1": {
+      "name": "完全开放",
+      "alpha_fill0": -0.2977,
+      "alpha_nan": 0.0,
+      "units": 40,
+      "types_used": 29,
+      "annotators": {
+        "P1-rep0": 22,
+        "P1-rep1": 20
+      }
+    },
+    "2": {
+      "name": "给类型表",
+      "alpha_fill0": -0.2209,
+      "alpha_nan": 1.0,
+      "units": 38,
+      "types_used": 10,
+      "annotators": {
+        "P2-rep0": 17,
+        "P2-rep1": 24
+      }
+    },
+    "3": {
+      "name": "类型 + 方向",
+      "alpha_fill0": -0.0243,
+      "alpha_nan": 0.7069,
+      "units": 37,
+      "types_used": 9,
+      "annotators": {
+        "P3-rep0": 19,
+        "P3-rep1": 27
+      }
+    },
+    "4": {
+      "name": "槽位式（SciREX 形态）",
+      "alpha_fill0": 0.4179,
+      "alpha_nan": 1.0,
+      "units": 7,
+      "types_used": 3,
+      "annotators": {
+        "P4-rep0": 6,
+        "P4-rep1": 5
+      }
+    }
+  }
+}
