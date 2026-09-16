@@ -260,8 +260,8 @@ Louvain 实际检出 **3452** 个社区（治理还原后），前端只导出�
 ## 6. 验证
 
 ```bash
-python -m pytest tests -q          # 单元测试（共 128 个：123 passed / 5 skipped / 0 failed）
-python tools/verify_all.py --fast  # 全量回归 34 项
+python -m pytest tests -q          # 单元测试（共 133 个：128 passed / 5 skipped / 0 failed）
+python tools/verify_all.py --fast  # 全量回归 35 项
 powershell -File tools/check.ps1   # 一次跑完：语法 + 本体一致性 + 文档数字 + pytest + 回归
 ```
 

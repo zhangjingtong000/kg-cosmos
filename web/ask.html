@@ -666,6 +666,24 @@ function adaptQA(resp){
 }
 
 const QA = {
+  /* ⚠️ **这是内置演示数据，不是检索结果。**
+     它只在"后端不可用"时显示，并且 `caveat` 里会明确说清这一点（见 catch 分支）。
+
+     ## 它的"证据"引自哪里 —— 这一点必须说明（G1 普查的结论）
+
+     评审当初的诊断是「全文件 0 次 fetch、18 条"证据"全部指向项目自己的
+     `docs/`、0 条指向论文原文」。**"真链路"已经修好了**：
+     现在走 `POST /api/qa/step`，`evidence[].citations[].src` 是**论文文件名**
+     （18/18 条都指向原文）。
+
+     **但这份内置演示里的 `src` 仍然指向 `docs/*.md`** ——
+     因为它是**手写的一段示范**，而示范里引用的那些结论
+     （如"多对一映射的短板在本项目语料里留下了可追溯记录"）
+     出处就是项目的分析文档。
+
+     ⇒ **这不是"假装是论文原文"**，而是"**这段演示讲的本来就是我们自己分析出来的东西**"。
+     但它对用户确实可能造成误解（以为那是论文里的证据），
+     所以：① 本节顶部的注释写清来源；② 页面在用它时**必须**显示"内置演示数据"的警告。 */
   transe: {
     q: 'TransE 有什么局限？',
     seeds: ['TransE', 'Scoring Function'],
@@ -1262,10 +1280,26 @@ window.renderHist = renderHist;
 window.histLoad = histLoad;
 
 async function askReal(question){
+  /* ── G4（2026-09-16）：**截断超长问题** ────────────────────────────────
+     此前没有任何上限，一个几万字符的问题会一路拼进后端 prompt。
+     后端现在有 `Field(max_length=500)`，**但前端也要截** ——
+     否则用户会先看到"请求被拒绝"，而问题明明可以问（只是太长）。
+     **在 `askReal` 内部截断**（而不是两个调用点各截一次）：入口只有一个，
+     以后再加调用点也不会漏。 */
+  const MAX_Q = 500;
+  let truncatedFrom = 0;
+  if (question && question.length > MAX_Q) {
+    truncatedFrom = question.length;
+    question = question.slice(0, MAX_Q);
+  }
   const note = $('trace');
   $('how').hidden = true;
   $('how-note').hidden = true;
   $('result').hidden = false;
+  if (truncatedFrom && $('caveat')) {
+    $('caveat').innerHTML = '⚠️ 问题超过 ' + MAX_Q + ' 字符（原 '
+      + truncatedFrom + ' 字符），**已截取前 ' + MAX_Q + ' 字符**再检索。';
+  }
 
   /* 没有指定图就别假装能问 —— 明确告诉用户该怎么办，而不是偷偷换一篇。 */
   if (!ASK_GID) {
@@ -1405,11 +1439,55 @@ async function askReal(question){
       const li = document.querySelector('#alog li[data-step="' + s + '"]');
       if (li && li.className === 'run') li.className = 'bad';
     });
-    run(QA.transe);
+    /* ── G3（2026-09-16）：**按错误类型分流，不一律降级到演示数据** ──────────
+       原实现把**所有**异常都归成"后端不可用"，然后 `run(QA.transe)` ——
+       于是「这张图不存在」（HTTP 404）也会显示**内置的 TransE 演示问答**。
+       用户看到的是"我这个问题答出来了"，而实际是**别人的数据**。
+       这正是 G3 记的那条"会误导"。
+
+       ⇒ 分三种：
+         · **404**：图不存在。**明确报错，且不显示任何演示数据** ——
+           因为这时显示什么都等于在冒充"你那篇的结果"。
+         · **400**：请求不合法（如问题超长）。如实说是请求的问题。
+         · **网络/后端没起**：这时降级是**合理**的（不然页面全空），
+           但**必须说清"这不是本次提问的结果"**。 */
+    const m = String((err && err.message) || err);
+    const is404 = /HTTP\s*404/.test(m);
+    const is400 = /HTTP\s*400/.test(m);
     const c = $('caveat');
-    if (c) c.innerHTML = '⚠️ 后端不可用（' + esc(String(err.message || err)) +
-      '），下面显示的是**内置演示数据**，不是本次提问的检索结果。' +
-      '启动后端后本页会走真的多 Agent 问答。';
+
+    if (is404) {
+      if ($('camps')) $('camps').innerHTML = '';
+      if ($('verdict')) {
+        $('verdict').innerHTML =
+          '**这张图不存在。**<br>可能的原因：它已被删除、或后端重启后磁盘上没有它的快照。<br>'
+          + '请回到 <a href="./upload.html" style="color:var(--accent)">上传页</a> '
+          + '重新选一篇，或 <a href="./kg-nebula.html" style="color:var(--accent)">进入主视图</a> 看看全库。';
+      }
+      if (c) {
+        c.innerHTML = '⚠️ 这里**不显示演示数据** —— 那会把「别人的内置问答」'
+          + '冒充成「你这篇的结果」。';
+      }
+      if ($('gstats')) $('gstats').innerHTML = '';
+      if ($('agentsec')) $('agentsec').hidden = true;
+      return;
+    }
+
+    if (is400) {
+      if ($('verdict')) {
+        $('verdict').innerHTML = '请求被后端拒绝了（' + esc(m) + '）。<br>'
+          + '最常见的原因是**问题太长**（超过后端上限）。把问题缩短一点再试。';
+      }
+      if (c) c.innerHTML = '⚠️ 这是**请求本身**的问题，不是图或后端的问题。';
+      return;
+    }
+
+    // 网络类 / 后端没起：降级是可以的，但要说清
+    run(QA.transe);
+    if (c) {
+      c.innerHTML = '⚠️ 后端不可用（' + esc(m) + '），下面显示的是**内置演示数据**，'
+        + '**不是本次提问的检索结果**。启动后端后本页会走真的多 Agent 问答。';
+    }
   }
 }
 window.askReal = askReal;

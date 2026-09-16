@@ -149,7 +149,11 @@ class QARequest(BaseModel):
     结果里会标 `degraded: true`，不假装有模型参与。
     """
     graph_id: str
-    question: str
+    # G4（2026-09-16）：**限制问题长度**。此前没有任何上限 ——
+    # 一个几万字符的问题会一路拼进 prompt，轻则变慢、重则撑爆上下文。
+    # 500 字符的依据：`data/distill/` 里 prompt 的中位长度是 1207 字符，
+    # 而那是"论文片段 + 规则"，**用户的问题**通常远短于它。
+    question: str = Field(max_length=500)
     use_llm: bool = True
     # K7 多轮追问：历史由前端回传（后端不存 session）。
     # 形如 `[{"question": "...", "answer": "..."}]`，**只用于补全没主语的追问**。
@@ -173,7 +177,8 @@ class QAStepRequest(BaseModel):
     这个项目在上传任务上已经栽过一次（后端重启丢任务，后加 `_save_task`）。
     """
     graph_id: str
-    question: str
+    # G4：与 `QARequest` 同一个上限（500 字符）
+    question: str = Field(max_length=500)
     step: str = 'retrieve'
     evidence: list[dict] = []
     support: str = ''
