@@ -1,0 +1,49 @@
+{
+ "graphs": 17,
+ "totals": {
+  "1": {
+   "absorbed_pairs": 23,
+   "rewired_edges": 48,
+   "merged_after_rewire": 211,
+   "dropped_entities": 0,
+   "dropped_edges_dangling": 0,
+   "direction_flipped": 0,
+   "direction_uncertain": 0,
+   "direction_unexpected": 0
+  },
+  "2": {
+   "absorbed_pairs": 23,
+   "rewired_edges": 48,
+   "merged_after_rewire": 211,
+   "dropped_entities": 754,
+   "dropped_edges_dangling": 0,
+   "direction_flipped": 0,
+   "direction_uncertain": 0,
+   "direction_unexpected": 0
+  },
+  "3": {
+   "absorbed_pairs": 23,
+   "rewired_edges": 48,
+   "merged_after_rewire": 312,
+   "dropped_entities": 754,
+   "dropped_edges_dangling": 0,
+   "direction_flipped": 1560,
+   "direction_uncertain": 38115,
+   "direction_unexpected": 0
+  }
+ },
+ "drop_reasons": {
+  "证据来自参考文献段": 15,
+  "纯数字": 83,
+  "参考文献作者（姓, 首字母）": 600,
+  "泛指名词（严格档）": 22,
+  "引用尾词": 1,
+  "文献编号（arXiv/DOI/ISBN）": 32,
+  "年份": 1
+ },
+ "assertions": {
+  "absorb_deletes_nothing": true,
+  "no_unexpected_verdict": true,
+  "never_grows_edges": true
+ }
+}

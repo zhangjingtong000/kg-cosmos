@@ -18,6 +18,9 @@ from kg_extractor import (
     extract_chunk_once,
 )
 from graph_store import merge_evidence
+# A4（2026-09-16）：把 entity_filter / entity_absorb / direction_witness 接到图这一层。
+# **默认关闭**（`KG_SANITIZE=0`）⇒ 既有绿灯与全部历史产物的口径不变。
+import graph_sanitize as _sanitize
 
 
 class ExtractionFailed(RuntimeError):
@@ -145,6 +148,23 @@ def extract_graph(
             f"{source_id}: {total_chunks} chunks 全部零产出"
             f"（失败 {len(failures)} 个；首因：{failures[0][1] if failures else '模型对每个 chunk 都返回 0 实体'}）"
         )
+
+    # ── A4：图净化（吸收 / 过滤 / 方向）────────────────────────────────
+    #
+    # **放在 `deduplicate_entities` 之前**：净化会改节点集（吸收标 `absorbed_into`、
+    # 过滤真删），而 dedup 与 canonicalize 都应该看到**净化之后**的图 ——
+    # 否则"被删掉的实体"还可能被 canonicalize 当成端点映射的目标。
+    #
+    # **默认 `KG_SANITIZE=0` ⇒ `sanitize()` 原样返回、连拷贝都不做**，
+    # 这条路径的行为与开销与接入前**完全一致**（`test_level_0_is_a_noop` 钉住了这点）。
+    #
+    # ⚠️ 这里与下面 `L156` 的 `dangling` 检查**不是同一件事**，别混淆：
+    #   · 下面的 dangling：**名字对不上**（端点在节点集里找不到）⇒ 一直是丢边+计数；
+    #   · 这里的净化：**节点被判为噪声而删除**（名字能对上，但节点不该存在）
+    #     ⇒ 它连的边也必须删，**否则就是悬空边**。这一层在 A4 之前没有实现。
+    all_nodes, all_edges, _san_rep = _sanitize.sanitize(all_nodes, all_edges)
+    if _san_rep.get('enabled'):
+        print(f"    [sanitize] {_sanitize.describe(_san_rep)}", flush=True)
 
     all_nodes = deduplicate_entities(all_nodes, mode)
 
