@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-14 20:30:23",
+  "generated": "2026-09-16 16:22:14",
   "evaluated_function": "src/kg_extractor.py::_names_are_duplicates",
   "design": "规则可判定构造集（不用人工金标，避免标注不可靠与循环论证）",
   "seed": 20260914,
@@ -38,13 +38,13 @@
       "methods": {
         "ours": {
           "precision": 1.0,
-          "recall": 0.9992,
-          "f1": 0.9996,
+          "recall": 1.0,
+          "f1": 1.0,
           "specificity": 0.0,
           "fp_rate": 0.0,
-          "tp": 3715,
+          "tp": 3718,
           "fp": 0,
-          "fn": 3,
+          "fn": 0,
           "tn": 0
         },
         "wratio_0.80": {
@@ -102,14 +102,14 @@
       "has_positive": true,
       "methods": {
         "ours": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1": 0.0,
+          "precision": 1.0,
+          "recall": 0.0008,
+          "f1": 0.0017,
           "specificity": 0.0,
           "fp_rate": 0.0,
-          "tp": 0,
+          "tp": 1,
           "fp": 0,
-          "fn": 1206,
+          "fn": 1205,
           "tn": 0
         },
         "wratio_0.80": {
@@ -236,23 +236,23 @@
           "precision": 0.0,
           "recall": 0.0,
           "f1": 0.0,
-          "specificity": 0.986,
-          "fp_rate": 0.014,
+          "specificity": 0.9687,
+          "fp_rate": 0.0313,
           "tp": 0,
-          "fp": 38,
+          "fp": 85,
           "fn": 0,
-          "tn": 2676
+          "tn": 2629
         },
         "wratio_0.80": {
           "precision": 0.0,
           "recall": 0.0,
           "f1": 0.0,
-          "specificity": 0.664,
-          "fp_rate": 0.336,
+          "specificity": 0.6629,
+          "fp_rate": 0.3371,
           "tp": 0,
-          "fp": 912,
+          "fp": 915,
           "fn": 0,
-          "tn": 1802
+          "tn": 1799
         },
         "ratio_0.93": {
           "precision": 0.0,
@@ -295,14 +295,14 @@
   "methods": {
     "ours": {
       "overall": {
-        "precision": 0.9899,
-        "recall": 0.7545,
-        "f1": 0.8563,
-        "accuracy": 0.8756,
-        "tp": 3715,
-        "fp": 38,
-        "tn": 5066,
-        "fn": 1209
+        "precision": 0.9777,
+        "recall": 0.7553,
+        "f1": 0.8522,
+        "accuracy": 0.8714,
+        "tp": 3719,
+        "fp": 85,
+        "tn": 5019,
+        "fn": 1205
       },
       "per_recipe": {
         "N1-disjoint": {
@@ -318,8 +318,8 @@
         "N2-shared-one-word": {
           "n": 1200,
           "tp": 0,
-          "fp": 5,
-          "tn": 1195,
+          "fp": 6,
+          "tn": 1194,
           "fn": 0,
           "precision": 0.0,
           "recall": 0.0,
@@ -338,8 +338,8 @@
         "N4-substring-trap": {
           "n": 314,
           "tp": 0,
-          "fp": 29,
-          "tn": 285,
+          "fp": 58,
+          "tn": 256,
           "fn": 0,
           "precision": 0.0,
           "recall": 0.0,
@@ -348,8 +348,8 @@
         "N5-shared-head": {
           "n": 1200,
           "tp": 0,
-          "fp": 4,
-          "tn": 1196,
+          "fp": 21,
+          "tn": 1179,
           "fn": 0,
           "precision": 0.0,
           "recall": 0.0,
@@ -387,13 +387,13 @@
         },
         "P4-parenthesis": {
           "n": 118,
-          "tp": 115,
+          "tp": 118,
           "fp": 0,
           "tn": 0,
-          "fn": 3,
+          "fn": 0,
           "precision": 1.0,
-          "recall": 0.9746,
-          "f1": 0.9871
+          "recall": 1.0,
+          "f1": 1.0
         },
         "P5a-abbrev-in-corpus": {
           "n": 6,
@@ -407,25 +407,25 @@
         },
         "P5b-abbrev-initials": {
           "n": 1200,
-          "tp": 0,
+          "tp": 1,
           "fp": 0,
           "tn": 0,
-          "fn": 1200,
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1": 0.0
+          "fn": 1199,
+          "precision": 1.0,
+          "recall": 0.0008,
+          "f1": 0.0017
         }
       }
     },
     "wratio_0.80": {
       "overall": {
-        "precision": 0.8035,
+        "precision": 0.803,
         "recall": 0.7575,
-        "f1": 0.7798,
-        "accuracy": 0.79,
+        "f1": 0.7796,
+        "accuracy": 0.7897,
         "tp": 3730,
-        "fp": 912,
-        "tn": 4192,
+        "fp": 915,
+        "tn": 4189,
         "fn": 1194
       },
       "per_recipe": {
@@ -442,8 +442,8 @@
         "N2-shared-one-word": {
           "n": 1200,
           "tp": 0,
-          "fp": 219,
-          "tn": 981,
+          "fp": 221,
+          "tn": 979,
           "fn": 0,
           "precision": 0.0,
           "recall": 0.0,
@@ -472,8 +472,8 @@
         "N5-shared-head": {
           "n": 1200,
           "tp": 0,
-          "fp": 400,
-          "tn": 800,
+          "fp": 401,
+          "tn": 799,
           "fn": 0,
           "precision": 0.0,
           "recall": 0.0,
@@ -916,8 +916,8 @@
   },
   "ratio_threshold_scan": {
     "threshold": 88,
-    "f1": 0.8386,
-    "precision": 0.9724,
+    "f1": 0.8384,
+    "precision": 0.9719,
     "recall": 0.7372
   },
   "l4_whitelist_audit": {
@@ -1082,14 +1082,14 @@
   },
   "multi_seed_stability": {
     "ours": {
-      "f1_mean": 0.8554,
-      "f1_std": 0.0005,
+      "f1_mean": 0.8515,
+      "f1_std": 0.0006,
       "f1_values": [
-        0.8559,
-        0.8552,
-        0.8547,
-        0.8554,
-        0.8559
+        0.8518,
+        0.8511,
+        0.8508,
+        0.8515,
+        0.8524
       ]
     },
     "wratio_0.80": {
@@ -1097,10 +1097,10 @@
       "f1_std": 0.0027,
       "f1_values": [
         0.7781,
-        0.7731,
-        0.7771,
-        0.7773,
-        0.7817
+        0.7734,
+        0.7777,
+        0.7764,
+        0.7819
       ]
     },
     "ratio_0.93": {
@@ -1137,5 +1137,5 @@
       ]
     }
   },
-  "elapsed_sec": 2.25
+  "elapsed_sec": 2.5
 }

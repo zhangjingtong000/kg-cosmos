@@ -1122,8 +1122,29 @@ def _fold_flat(name: str) -> str:
 
 
 def _tokens_lower(name: str):
-    """切成小写实词（去掉标点与括号内容）。"""
+    """切成小写实词（去掉标点与括号内容）。
+
+    ── 2026-09-16（BUG-1 修复）：**拆驼峰** ─────────────────────────────
+    原实现是「先 `lower()` 再按非字母数字切分」—— 于是**驼峰信息在被切之前
+    就已经丢了**：`BERTLarge` 切成 `['bertlarge']` 一个词，
+    而 `BERT Large`（带空格）切成 `['bert','large']` 两个词。
+
+    后果是一个**自相矛盾**的行为：
+      · `BERT` vs `BERT Large` → `_word_boundary_contains` 成立 ⇒ 合并 ✅
+      · `BERT` vs `BERTLarge`  → 不成立 ⇒ 只能靠"短名长度 ≥5"的兜底，
+        而 `bert` 只有 4 ⇒ **漏合** ❌
+    **同一个东西，写法差一个空格，判据结果就相反。**
+
+    修法：在 `lower()` **之前**按驼峰边界插空格。两条规则——
+      · `(?<=[a-z0-9])(?=[A-Z])`  小写/数字 → 大写（`TabulaPDF` → `Tabula PDF`）
+      · `(?<=[A-Z])(?=[A-Z][a-z])` 连续大写 → 大写+小写（`BERTLarge` → `BERT Large`）
+
+    **全大写词不受影响**：`PDF`/`GNN`/`RDF` 里没有"大写后跟大写+小写"的位置，
+    所以不会被拆开 —— 这正是我们要的（缩写必须保持整体）。
+    """
     body = re.sub(r"\([^)]*\)", " ", name or "")
+    body = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", body)
+    body = re.sub(r"(?<=[A-Z])(?=[A-Z][a-z])", " ", body)
     return [t for t in re.split(r"[^0-9A-Za-z]+", body.lower()) if t]
 
 
@@ -1152,6 +1173,62 @@ def _is_initialism(short: str, long_: str) -> bool:
     # 首词首字母必须对齐（GNN/KG 都满足；Abstract Knowledge Graph 的 initials
     # 是 akg，与 kg 不等，已经被上面挡掉——这条是双保险）
     return toks[0][0] == sl[0]
+
+
+def initialism_candidates(names):
+    r"""在名字集合里找出「疑似 缩写 ↔ 全称」的候选对，**供人工审核**。
+
+    ## 为什么它只能是"候选"
+
+    见 `_names_are_duplicates` 的 ② 段：**「首字母对齐」不足以判定**，
+    纯字符串判据拿不到"这个缩写是否另有全称"的信息，于是无法区分：
+
+    ```
+    KG   ← Knowledge Graphs                      该合
+    RDF  vs Reference Data File                  不该合（RDF 真全称是
+                                                 Resource Description Framework）
+    ORKG vs Open Research Knowledge Graph        不该合（ORKG 已是独立名称，
+                                                 合了它就从图谱里消失）
+    ```
+
+    ⇒ 自动合并已被废止（BUG-1），**但这个信号不能丢**：
+    这些对正好是"最值得人工看一眼"的。本函数把它们列出来。
+
+    ## 复杂度
+
+    **不两两比**：全库约 2.4 万节点，两两是 5.6 亿对。
+    改为先给"长名"建 `首字母串 → 名字` 的索引，再拿每个候选短名去查
+    —— **一趟建索引 + 一趟查询**。
+
+    返回 `[{'short','long','note'}]`，按 (短名, 长名) 排序、去重。
+    """
+    idx = {}
+    for n in names:
+        toks = [t for t in _tokens_lower(n) if t not in _TITLES]
+        if 2 <= len(toks) <= 12:
+            idx.setdefault("".join(t[0] for t in toks), []).append(n)
+
+    out, seen = [], set()
+    for n in names:
+        s = _fold_flat(n)
+        if not (2 <= len(s) <= 8):
+            continue
+        for m in idx.get(s, []):
+            if m == n or _fold_flat(m) == s:
+                continue
+            if not _is_initialism(n, m):
+                continue
+            key = (s, _fold_flat(m))
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append({
+                'short': n, 'long': m,
+                'note': '首字母对齐。**合并不可逆** —— 需人工确认该缩写是否另有全称、'
+                        '或本身已是独立名称（如 ORKG）。',
+            })
+    out.sort(key=lambda d: (d['short'].lower(), d['long'].lower()))
+    return out
 
 
 def _plural_same(fa: str, fb: str) -> bool:
@@ -1215,6 +1292,8 @@ def _names_are_duplicates(a: str, b: str) -> bool:
       ⑦ 模糊相似度 ≥0.93。
 
     **刻意不做**：首字母缩写只作候选、不进自动合并 —— 合并不可逆（T4.4）。
+    **2026-09-16 实测**：真实语料里 93.6% 的缩写候选是「一短多长」的歧义对
+    （见下方 ② 段的数字），自动合并会成片吞掉别的实体。
     """
     fa, fb = _fold_flat(a), _fold_flat(b)
     if not fa or not fb:
@@ -1224,9 +1303,49 @@ def _names_are_duplicates(a: str, b: str) -> bool:
     if fa == fb:
         return True
 
-    # ② 首字母缩写（双向都试：调用方不保证谁短谁长）
-    if _is_initialism(a, b) or _is_initialism(b, a):
-        return True
+    # ② 首字母缩写 —— **不再自动合并**（2026-09-16，BUG-1 修复）
+    #
+    # 本函数的 docstring 一直写着「**刻意不做**：首字母缩写只作候选、
+    # 不进自动合并 —— 合并不可逆（T4.4）」，**但代码在这里 return True**。
+    # 文档与实现矛盾，三个单元测试长期失败：
+    #
+    #     _names_are_duplicates('RDF', 'Reference Data File')  → 误合 ❌
+    #     _names_are_duplicates('ORKG','Open Research Knowledge Graph') → 误合 ❌
+    #         （后果：`ORKG` 这个被广泛使用的独立名称从图谱里**消失**）
+    #
+    # **为什么"首字母对齐"不足以判定**：纯字符串判据拿不到
+    # 「这个缩写是否另有全称」的信息，于是无法区分：
+    #     · `KG`   ← `Knowledge Graphs`              （该合）
+    #     · `RDF`  ← 真全称是 Resource Description Framework，
+    #                而 `Reference Data File` 只是**碰巧**首字母对齐（不该合）
+    #     · `ORKG` ← 表面上是 `Open Research Knowledge Graph`，
+    #                但它**已经是一个独立名称**，合了就没了（不该合）
+    #
+    # ⇒ **保守是对的，但信号不能丢**：改用 `initialism_candidates()`
+    #    输出候选对供人工审核（见该函数）。
+    #
+    # ── 在真实语料上量过之后，才敢下这个结论（2026-09-16）──────────────
+    #
+    # 评测集里的 `L-B 缩写↔全称` 有 1206 条、**全是正例、且都是 1:1 的干净缩写**
+    # （`JEF`←`Joint Extraction Framework` 这类）。在那个合成样本上，
+    # 自动合并的 recall 是 **0.7048**。
+    #
+    # **但真实语料不是那样。** 拿全库 19877 个实体名扫一遍候选：
+    #
+    #     候选对 2142 条 · 涉及 298 个不同的短名
+    #       · 只对应 1 个长名：137 个（46.0%）—— 这些合并还算安全
+    #       · 对应 ≥2 个长名：161 个（54.0%）—— **合并必然丢掉别的东西**
+    #     歧义最重的：'P. S.' → 60 个 · 'S. M.' → 60 个 · 'es' → 55 个 · 'rp' → 46 个
+    #     ⇒ **落在歧义短名上的候选对占 93.6%**
+    #
+    # **93.6%** —— 这就是"自动合并缩写"的真实风险。
+    # 合成样本上的 0.7048 recall 是在一个**只含 6.4% 情形**的分布上测出来的。
+    # 而合并**不可逆**（T4.4）：把 `AD` 合进 `Anomaly Detection`，
+    # 就同时丢掉了 `A. Doan` / `Action Dropout` / `Appendix D` 等 30 多个不同的实体。
+    #
+    # 原实现（**已废止，按 `docs/ARCHIVE_POLICY.md` 留存**）：
+    #     if _is_initialism(a, b) or _is_initialism(b, a):
+    #         return True
 
     # ③ 规范复数
     if _plural_same(fa, fb):
