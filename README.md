@@ -260,9 +260,17 @@ Louvain 实际检出 **3452** 个社区（治理还原后），前端只导出�
 ## 6. 验证
 
 ```bash
-python -m pytest tests -q          # 单元测试
-python tools/verify_all.py --fast  # 全量回归 30 项
+python -m pytest tests -q          # 单元测试（共 115 个：107 passed / 3 failed / 5 skipped）
+python tools/verify_all.py --fast  # 全量回归 32 项
+powershell -File tools/check.ps1   # 一次跑完：语法 + 本体一致性 + 文档数字 + pytest + 回归
 ```
+
+> ⚠️ **那 3 个 failed 是已知的**：`_names_are_duplicates` 的消歧判据
+> （`BERT/BERTLarge` 该合却判不合、`RDF/Reference Data File` 不该合却合），
+> 根因是 2026-09-14 的"判据 v6"加了过宽的 initialism 通道。
+> **修它会改变全库实体数** ⇒ 按项目纪律**并入 K1（改图）的时间窗**一起做，
+> 以便共用同一套"指标档案 + before/after 双口径"。
+> 在此之前它**一直红**，这是**如实反映现状**，不去给它加豁免。
 
 回归覆盖：本体口径一致性、指标与数据快照的版本绑定（stale 检测）、
 主视图离线可用、**前后端连通（API 优先 + 静态回退）**、全站可访问性、
