@@ -52,9 +52,60 @@ import math
 import os
 import urllib.request
 
-OLLAMA = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434')
-MODEL = os.environ.get('KG_EMBED_MODEL', 'bge-m3:latest')
+DEFAULT_HOST = 'http://127.0.0.1:11434'
+DEFAULT_MODEL = 'bge-m3:latest'
 TIMEOUT = 120
+
+
+def _norm_host(h):
+    """把 `OLLAMA_HOST` 正规化成带 scheme 的 URL。
+
+    ## ⚠️ 为什么需要这一步（2026-09-16 实测）
+
+    **Windows 上 Ollama 会把 `OLLAMA_HOST` 写成 `127.0.0.1:11434`（不带 `http://`）** ——
+    那是它的惯用写法。而 `urllib` 拿到没有 scheme 的串会直接报：
+
+        URLError: <urlopen error unknown url type: 127.0.0.1>
+
+    **这不是假设，是实测复现的**：
+        不带 scheme: ❌ URLError: <urlopen error unknown url type: 127.0.0.1>
+        带 scheme:   ✅ 维度 1024
+    而且那个报错**与后端 `/api/semantic-match` 返回 503 时的内部异常一模一样**。
+
+    ⇒ 这里补一把：没有 scheme 就当作 `http://`。**只补不覆盖** ——
+      已经带 scheme 的（`http://` / `https://`）原样返回。
+    """
+    h = str(h or '').strip().rstrip('/')
+    if not h:
+        return DEFAULT_HOST
+    if '://' not in h:
+        return 'http://' + h
+    return h
+
+
+def ollama_host():
+    """**每次调用都读环境变量**（不在模块级缓存）。
+
+    ⚠️ 这条有教训，而且是**同一个坑第二次**：
+      · `app.py` 的 `EDIT_PLAN_DIR` 曾在模块级读 ⇒ `test_edit_plan_api.py`
+        单跑全过、进全量跑就挂（import 只发生一次，测试改了环境变量也不生效）；
+      · 本文件的 `OLLAMA` 曾同样在模块级读 ⇒ **后端进程启动时的环境被永久冻结**，
+        之后无论怎么改 `OLLAMA_HOST` 都不会生效，**表现为"端点一直 503"**。
+
+    ⇒ 凡是"由环境变量控制的配置"，都要在**调用点**读。
+    """
+    return _norm_host(os.environ.get('OLLAMA_HOST') or DEFAULT_HOST)
+
+
+def ollama_model():
+    return os.environ.get('KG_EMBED_MODEL') or DEFAULT_MODEL
+
+
+# 保留旧名字（**不删**）：别处可能 `from embeddings import OLLAMA`。
+# 但它现在是**导入那一刻的快照**，只应作默认值用 —— 真正的解析走 `ollama_host()`。
+# 这与 ARCHIVE_POLICY 一致：被替代的东西留存，而不是删掉。
+OLLAMA = ollama_host()
+MODEL = ollama_model()
 
 # ── 三个阈值（**由上面那张表定，不是拍的**）──────────────────────────────
 #   HIGH：这个分数之上，实测样本里"该合"的全中、且没有"该拒"混进来
@@ -71,8 +122,9 @@ def embed(texts, model=None, host=None, batch=64):
     texts = [str(t or '') for t in texts]
     if not texts:
         return []
-    host = host or OLLAMA
-    model = model or MODEL
+    # **在调用点解析**（不是用模块级快照）—— 见 `ollama_host()` 的注释
+    host = _norm_host(host) if host else ollama_host()
+    model = model or ollama_model()
     out = []
     for i in range(0, len(texts), batch):
         chunk = texts[i:i + batch]

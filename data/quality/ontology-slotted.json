@@ -1,0 +1,1066 @@
+{
+ "ontology": {
+  "version": "slotted-v1",
+  "generated": "2026-09-16 19:56:31",
+  "purpose": "P4：把本体真的改造成槽位式（原本体并存，不删）",
+  "design": {
+   "what_is_slotting": "关系不再是**谓词**，而是**实体的一个属性槽**：`Method —APPLIES_TO→ Task` 变成 `Task(Method=X)`。即\"主语是什么\"由槽位名本身承担，不需要另外学一个谓词。",
+   "admission_test": "**主语是不是一个稳定的实体类别？** USES 的主语永远是 Method/Tool ⇒ 能；CAUSES 的主语可能是任何东西 ⇒ 不能；CONTRADICTS/COMPARES_WITH 是**对称**的而槽位是单向的 ⇒ 不能；PART_OF 的层级深度不定 ⇒ 不能。",
+   "archive_policy": "**原本体一个字都不删** —— ontology.py 的 RELATION_TYPES 与 RELATION_SEMANTICS 原样保留；本文档与产物是**并存**的新定义；`--convert` 也只另写一份图，不覆盖 data/corpus/graphs/。",
+   "what_is_NOT_done": "**\"改造前后各标一轮\"需要人类标注者** ⇒ 记进 内部记录 的\"需要用户本人\"清单。**在那两轮标注之前，P4 只能算\"改造已完成、效果待测\"。**"
+  },
+  "slots": {
+   "Method": {
+    "task": "APPLIES_TO",
+    "material": "USES",
+    "metric": "MEASURES",
+    "produces": "PRODUCES"
+   },
+   "Person_or_Org": {
+    "work": "CREATED_BY",
+    "produces": "PRODUCES"
+   },
+   "Paper": {
+    "venue": "PUBLISHED_IN"
+   }
+  },
+  "kept_relations": [
+   "SUPPORTS",
+   "PART_OF",
+   "EVALUATES",
+   "ENABLES",
+   "LOCATED_AT",
+   "CITES",
+   "RELATED_TO",
+   "COMPARES_WITH",
+   "CONTRADICTS",
+   "CAUSES"
+  ],
+  "reversed_when_slotting": [
+   "CREATED_BY"
+  ],
+  "original_ontology": {
+   "relation_types": [
+    "MEASURES",
+    "CITES",
+    "PRODUCES",
+    "COMPARES_WITH",
+    "USES",
+    "ENABLES",
+    "CAUSES",
+    "EVALUATES",
+    "PART_OF",
+    "SUPPORTS",
+    "PUBLISHED_IN",
+    "APPLIES_TO",
+    "LOCATED_AT",
+    "RELATED_TO",
+    "CREATED_BY",
+    "CONTRADICTS"
+   ],
+   "relation_semantics": {
+    "PART_OF": "source 是 target 的组成部分或子集（整体-部分），不是『属于某类别』",
+    "USES": "source 使用了 target 这个工具/方法/数据（施动者用被用物）",
+    "PRODUCES": "source 产出/生成 target（source 是生产者，target 是产物）",
+    "MEASURES": "source 度量/衡量 target 这个指标或对象",
+    "EVALUATES": "source 评测/检验 target 的效果或质量",
+    "COMPARES_WITH": "source 与 target 被相互比较（对称，双方并列）",
+    "SUPPORTS": "source 为 target 提供支持或证据（不是『使用』）",
+    "CONTRADICTS": "source 与 target 的结论相互矛盾（对称）",
+    "CAUSES": "source 导致 target（有因果与时序先后，不可反）",
+    "ENABLES": "source 使 target 成为可能（前置条件，不是直接因果）",
+    "APPLIES_TO": "source 是被应用的方法/技术，target 是它被应用的领域/任务",
+    "LOCATED_AT": "source 是有位置的实体，target 是它所在的地点/机构",
+    "CREATED_BY": "source 是创作者（人/机构），target 是被创作物。注意方向是 Author → Work，不是 Work → Author",
+    "CITES": "source 引用 target（学术引用，单向）",
+    "RELATED_TO": "**兜底类型，尽量不用**。仅当以上 14 类都不合适时才用",
+    "PUBLISHED_IN": "source 是论文/作品，target 是它发表的会议、期刊或出版场所。**注意**：这是「论文发表于会议」，不是「论文是会议的一部分」，也不要写成 LOCATED_AT（那会变成「论文位于某地」）"
+   },
+   "note": "**原样保留**，本文件不替代它"
+  }
+ },
+ "quantification": {
+  "graphs": 17,
+  "nodes": 23716,
+  "edges": 43867,
+  "slotted_edges": 23029,
+  "kept_edges": 20601,
+  "unknown_edges": 237,
+  "slotted_share": 0.525,
+  "kept_share": 0.4696,
+  "per_type": [
+   {
+    "type": "RELATED_TO",
+    "n": 9598,
+    "share": 0.2188,
+    "fate": "保留为谓词"
+   },
+   {
+    "type": "CREATED_BY",
+    "n": 8755,
+    "share": 0.1996,
+    "fate": "槽位 Person_or_Org.work"
+   },
+   {
+    "type": "USES",
+    "n": 7339,
+    "share": 0.1673,
+    "fate": "槽位 Method.material"
+   },
+   {
+    "type": "PART_OF",
+    "n": 5816,
+    "share": 0.1326,
+    "fate": "保留为谓词"
+   },
+   {
+    "type": "APPLIES_TO",
+    "n": 3850,
+    "share": 0.0878,
+    "fate": "槽位 Method.task"
+   },
+   {
+    "type": "PRODUCES",
+    "n": 2213,
+    "share": 0.0504,
+    "fate": "**多宿主槽位** Method/Person_or_Org.produces（落哪个取决于主语类型 ⇒ 本项目暂无该信息）"
+   },
+   {
+    "type": "ENABLES",
+    "n": 999,
+    "share": 0.0228,
+    "fate": "保留为谓词"
+   },
+   {
+    "type": "CITES",
+    "n": 967,
+    "share": 0.022,
+    "fate": "保留为谓词"
+   },
+   {
+    "type": "MEASURES",
+    "n": 872,
+    "share": 0.0199,
+    "fate": "槽位 Method.metric"
+   },
+   {
+    "type": "LOCATED_AT",
+    "n": 853,
+    "share": 0.0194,
+    "fate": "保留为谓词"
+   },
+   {
+    "type": "SUPPORTS",
+    "n": 793,
+    "share": 0.0181,
+    "fate": "保留为谓词"
+   },
+   {
+    "type": "COMPARES_WITH",
+    "n": 598,
+    "share": 0.0136,
+    "fate": "保留为谓词"
+   },
+   {
+    "type": "EVALUATES",
+    "n": 454,
+    "share": 0.0103,
+    "fate": "保留为谓词"
+   },
+   {
+    "type": "CAUSES",
+    "n": 280,
+    "share": 0.0064,
+    "fate": "保留为谓词"
+   },
+   {
+    "type": "CONTRADICTS",
+    "n": 243,
+    "share": 0.0055,
+    "fate": "保留为谓词"
+   },
+   {
+    "type": "CONTAINS",
+    "n": 9,
+    "share": 0.0002,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Representation Learning",
+    "n": 5,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Entity",
+    "n": 5,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Stock",
+    "n": 5,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Position",
+    "n": 5,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Recommendation Systems",
+    "n": 4,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Question Answering",
+    "n": 4,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Triple",
+    "n": 4,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Pure Symbolic Reasoning",
+    "n": 4,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "REPRESENTED_BY",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Relation Extraction",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Embedding",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Temporal Logical Reasoning",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Relation",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "ADDRESSES",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "PREDICTS",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "NYT10",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Aminer COVID-19 Open Data",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "External Knowledge Graph",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "friend",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Short",
+    "n": 3,
+    "share": 0.0001,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Entity Recognition",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Knowledge Representation",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Knowledge Graph",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Temporal Relational Dependency",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Torus Space",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Skew-Symmetry",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Composition",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "HasPart",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "RDF",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "OWL",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "OWL 2",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Semantic Net",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Literal",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "HAS",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "fuses",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "DBpedia500k",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "FB15k-237-OWE",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Logic Reasoning",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "DistMult",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "TensorLog",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "COVID-19 Concepts",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "C",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Attention Mechanisms",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "CNN Structure",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Multi-Level CNN",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Donald Trump",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "DEFINES",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Phar. A",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Phar. B",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Med. C",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Biotech D",
+    "n": 2,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Triple Classification",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Heterogeneous Information",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Ontologies",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Semantics",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Multi-Lingual Knowledge",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Fact",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Entity Set",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Relation Set",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Entity Dynamics",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Natural Language Understanding",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Real-world Tasks",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "NLU",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Denoted as [h], [r], [t] ∈Tn in torus space.",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Relational Translation",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "2-Dimensional Polygon",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Symmetry",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Inversion",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Reflection",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "extends",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "KEE",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Google’s Knowledge Graph",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "KL-ONE",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Cyc Project",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "General Problem Solver",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "SUMMARIZES",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Head Entity",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Tail Entity",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Relational Fact",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Node",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Edge",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Entity Attribute",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Data Property",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Data Type",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "String",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Date",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Integer",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Decimal",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "CONCATENATION",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Model Parameter",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Class Embedding",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Seen Class",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Unseen Class",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "KG",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Class Belief",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "introduced in",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "requires",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "category of",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "study of",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "investigates",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "for",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "have",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "are",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Training Tasks",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Entity Pair",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Graph",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "WEB19",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Wikipedia",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "PUBLISHED_BY",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Relation-Specific Sphere",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Ontological Schema",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Composition Of Relations",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "IterE",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "ENHANCES",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "OAG",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Huapu",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "GEDMatch",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "U. S. A.",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "B",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Tree Structures",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "LSTM Framework",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Word-Level Attention",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Attention-CNN",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Input Attention Mechanism",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Attention-Based Pooling",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "GCNs",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Pre-Trained Models",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "CONVERTED",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Attribute Alignment",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Entity Matching",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Entity Alignment",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Trump",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "work_at",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "live_in",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "located_in",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "DEFINED_BY",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "DEMAND",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "INTEND_TO_MEET",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "OPTIMISTIC_COMMENT",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "USE_MILITARY_FORCE",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "CRITICIZE",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "MAKE_STATEMENT",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Knowledge Graph Reasoning Methods",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Direction",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   },
+   {
+    "type": "Long",
+    "n": 1,
+    "share": 0.0,
+    "fate": "**未归类**（原本体里没有它）"
+   }
+  ]
+ },
+ "compare_with_P5": {
+  "P5": "统计出「槽位化只能覆盖 33.6%」—— 只是**数了数**",
+  "P4": "把它变成**可执行的本体定义**，并在全库量到 **52.50%** 可进槽位、46.96% 保留为谓词",
+  "why_it_matters": "这样\"前后各标一轮\"才有东西可标 —— P5 之前只能说\"理论上能覆盖多少\"，现在有了一份能直接拿去标注的本体",
+  "NOT_done": "**前后各标一轮需要人类标注者** ⇒ 见 内部记录「需要用户本人」清单"
+ }
+}
