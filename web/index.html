@@ -252,6 +252,20 @@ h3 { font-weight: 600; }
              不把"计划中的语料"说成"已覆盖的语料"。</p></span>
           <span class="mt">语料边界<span class="go">→</span></span>
         </a>
+
+        <!-- F4（2026-09-16）：USES 的施动者 × 被用物二部图。
+             **刻意不叫"方法-数据集二部图"** —— USES 的 target 语义是混的
+             （工具/方法/数据都可能），要真分侧需要实体类型，而类型有 Unknown。
+             页面上把这句话写明了 —— 名字对不上内容是这类页面最容易骗人的地方。 -->
+        <a class="entry" href="bipartite.html">
+          <span class="ix">08</span>
+          <span><h3>使用关系二部图</h3>
+          <p>全库 <b>7381 条 <code>USES</code></b> 的<b>施动者 × 被用物</b>：
+             左边是谁在用，右边是被用的东西，连线粗细 = 跨多少篇同时出现。
+             点一个节点可只看它连的。<b>两侧是"施动/被用"，不是"方法/数据集"</b> ——
+             并如实标出"画出来的连线已按 top N 截断，数字是全库真实度数"。</p></span>
+          <span class="mt">关系结构<span class="go">→</span></span>
+        </a>
       </div>
     </div>
   </section>

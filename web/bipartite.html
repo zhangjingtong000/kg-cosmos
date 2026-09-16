@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KG Cosmos · 使用关系二部图</title>
+<!--
+  F4（2026-09-16）：`USES` 的**施动者 × 被用物**二部图。
+
+  ## ⚠️ 为什么标题不叫「方法-数据集二部图」
+
+  TODO 里这一项叫「方法-数据集二部图」，但 `USES` 的语义是
+  「source 使用了 target 这个**工具/方法/数据**」—— **target 侧是混的**。
+  实测右列 top 里既有 `Embeddings`、`Convolutional Neural Networks`（方法类），
+  也有 `Knowledge Graphs`、`Triple`、`Entity`（概念/数据类）。
+
+  **要真的分成"方法侧"与"数据集侧"，需要实体类型** ——
+  而本项目的类型在相当一部分节点上是 `Unknown`。
+  ⇒ 所以这一页按它**实际测量的东西**命名，并把这句话写在页面上。
+     **名字对不上内容是这一类页面最容易骗人的地方。**
+
+  ## 为什么用 SVG 而不是复用 three.js 的星云
+
+  二部图是**两列 + 中间连线**的平面结构，用三维反而更难读。
+  SVG 还能直接拿到每个元素的命中区域做悬停/点击，且**零依赖**。
+
+  ## 截断的诚实处理
+
+  全量是 3062 × 3623，必须取 top N；而**截断会让"画出来的连线数"小于真实度数**。
+  ⇒ 每个节点显示的是**全库真实度数**（数据里带的 `deg`），
+    并在页脚写明这一点 —— 不让人把看到的连线当成全部。
+-->
+<style>
+  :root{--bg:#0b0d12;--fg:#dfe2e8;--dim:#8b95a8;--line:rgba(193,195,201,.18);
+        --hot:#e0a469;--cool:#7cc0b6;--warn:#e8c9a4}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(1200px 600px at 50% -10%,#141826 0%,var(--bg) 60%);
+       color:var(--fg);font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+       overflow:hidden}
+  header{padding:14px 20px 10px}
+  h1{margin:0;font-size:17px;font-weight:600;letter-spacing:.02em}
+  .sub{color:var(--dim);font-size:12.5px;margin-top:4px}
+  .sub b{color:var(--warn)}
+  #wrap{position:absolute;inset:96px 0 52px 0;overflow:auto}
+  svg{display:block;margin:0 auto}
+  .col-h{fill:var(--dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .node text{fill:var(--fg);font-size:11.5px;dominant-baseline:middle}
+  .node .dot{stroke:none}
+  .node{cursor:pointer}
+  .node .hit{fill:transparent}
+  .node:hover text{fill:#fff}
+  .node.focus text{fill:#ffd9b8;font-weight:600}
+  .node.dim{opacity:.22}
+  .deg{fill:var(--dim);font-size:10px}
+  .link{stroke:var(--hot);fill:none;opacity:.16}
+  .link.hot{opacity:.85;stroke-width:2.4}
+  .link.dim{opacity:.05}
+  footer{position:absolute;left:0;right:0;bottom:0;padding:8px 20px;
+         color:var(--dim);font-size:12px;border-top:1px solid var(--line);
+         background:rgba(11,13,18,.86);display:flex;gap:18px;flex-wrap:wrap}
+  footer b{color:var(--warn)}
+  #tip{position:fixed;pointer-events:none;background:rgba(18,20,26,.96);
+       border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12px;
+       max-width:380px;opacity:0;transition:opacity .12s;z-index:9}
+  a{color:var(--cool)}
+</style>
+</head>
+<body>
+<header>
+  <h1>使用关系二部图</h1>
+  <div class="sub" id="sub">载入中…</div>
+</header>
+<div id="wrap"><svg id="svg"></svg></div>
+<div id="tip"></div>
+<footer>
+  <span>左侧 <b>施动者</b>（谁在用）· 右侧 <b>被用物</b>（被用的东西）</span>
+  <span>⚠️ <b>两侧是"施动/被用"，不是"方法/数据集"</b> —— <code>USES</code> 的 target 语义是混的（工具/方法/数据都可能）</span>
+  <span>数字是 <b>全库真实度数</b>；画出来的连线**已按 top N 截断**</span>
+  <span><a href="./index.html">← 回导航页</a></span>
+</footer>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const ROW = 26, PAD_T = 44, L_X = 250, R_X = 900, W = 1180;
+let DATA = null, FOCUS = null;
+
+function draw() {
+  const d = DATA;
+  const n = Math.max(d.left.length, d.right.length);
+  const H = PAD_T + n * ROW + 40;
+  const svg = $('#svg');
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  const ly = new Map(), ry = new Map();
+  d.left.forEach((x, i) => ly.set(x.id, PAD_T + i * ROW));
+  d.right.forEach((x, i) => ry.set(x.id, PAD_T + i * ROW));
+
+  const parts = [];
+  parts.push(`<text class="col-h" x="${L_X}" y="24" text-anchor="end">施动者</text>`);
+  parts.push(`<text class="col-h" x="${R_X}" y="24">被用物</text>`);
+
+  // ── 连线（**先画，压在节点下面**）──
+  for (const k of d.links) {
+    const y1 = ly.get(k.l), y2 = ry.get(k.r);
+    if (y1 === undefined || y2 === undefined) continue;
+    const mx = (L_X + R_X) / 2;
+    const sw = Math.min(6, 0.8 + Math.log2(1 + k.papers) * 1.6);
+    parts.push(`<path class="link" data-l="${esc(k.l)}" data-r="${esc(k.r)}"`
+      + ` stroke-width="${sw.toFixed(2)}"`
+      + ` d="M${L_X + 12},${y1} C${mx},${y1} ${mx},${y2} ${R_X - 12},${y2}"/>`);
+  }
+
+  // ── 节点 ──
+  const node = (id, x, y, deg, side, type) => {
+    const anchor = side === 'l' ? 'end' : 'start';
+    const tx = side === 'l' ? x - 14 : x + 14;
+    const r = Math.min(9, 3 + Math.log2(1 + deg) * 0.9);
+    const col = side === 'l' ? 'var(--hot)' : 'var(--cool)';
+    return `<g class="node" data-id="${esc(id)}" data-side="${side}">`
+      + `<rect class="hit" x="${Math.min(x, tx) - 8}" y="${y - ROW / 2}"`
+      + ` width="${Math.abs(x - tx) + 16}" height="${ROW}"/>`
+      + `<circle class="dot" cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="${col}"/>`
+      + `<text x="${tx}" y="${y}" text-anchor="${anchor}">${esc(id)}</text>`
+      + `<text class="deg" x="${tx + (side === 'l' ? 6 : -6)}" y="${y}"`
+      + ` text-anchor="${anchor}">${deg}</text></g>`;
+  };
+
+  d.left.forEach(x => parts.push(node(x.id, L_X, ly.get(x.id), x.deg, 'l', x.type)));
+  d.right.forEach(x => parts.push(node(x.id, R_X, ry.get(x.id), x.deg, 'r', x.type)));
+
+  svg.innerHTML = parts.join('');
+  bind();
+}
+
+function bind() {
+  const svg = $('#svg');
+  const tip = $('#tip');
+  svg.querySelectorAll('.node').forEach(g => {
+    g.addEventListener('mousemove', ev => {
+      const id = g.dataset.id, side = g.dataset.side;
+      const isL = side === 'l';
+      const rel = DATA.links.filter(k => (isL ? k.l : k.r) === id);
+      const total = isL
+        ? (DATA.left.find(x => x.id === id) || {}).deg
+        : (DATA.right.find(x => x.id === id) || {}).deg;
+      tip.innerHTML = `<b>${esc(id)}</b><br>`
+        + `<span style="color:var(--dim)">${isL ? '施动者' : '被用物'}`
+        + ` · 全库度数 ${total}</span><br>`
+        + `画出来的连线 ${rel.length} 条`
+        + (rel.length ? '<br>' + rel.slice(0, 6).map(k =>
+            `· ${esc(isL ? k.r : k.l)}`).join('<br>')
+            + (rel.length > 6 ? `<br>…另有 ${rel.length - 6} 条` : '') : '');
+      tip.style.opacity = '1';
+      tip.style.left = Math.min(ev.clientX + 14, innerWidth - 400) + 'px';
+      tip.style.top = (ev.clientY + 14) + 'px';
+    });
+    g.addEventListener('mouseleave', () => { tip.style.opacity = '0'; });
+    g.addEventListener('click', () => {
+      const id = g.dataset.id;
+      FOCUS = (FOCUS === id) ? null : id;
+      applyFocus();
+    });
+  });
+}
+
+function applyFocus() {
+  const svg = $('#svg');
+  const keep = new Set();
+  if (FOCUS) {
+    DATA.links.forEach(k => {
+      if (k.l === FOCUS) keep.add(k.r);
+      if (k.r === FOCUS) keep.add(k.l);
+    });
+  }
+  svg.querySelectorAll('.node').forEach(g => {
+    const on = !FOCUS || g.dataset.id === FOCUS || keep.has(g.dataset.id);
+    g.classList.toggle('focus', g.dataset.id === FOCUS);
+    g.classList.toggle('dim', !on);
+  });
+  svg.querySelectorAll('.link').forEach(p => {
+    const on = !FOCUS || p.dataset.l === FOCUS || p.dataset.r === FOCUS;
+    p.classList.toggle('hot', !!FOCUS && on);
+    p.classList.toggle('dim', !on);
+  });
+  window.__bipartiteState = { focus: FOCUS, n_links: DATA.links.length,
+                              n_left: DATA.left.length, n_right: DATA.right.length,
+                              hot_links: svg.querySelectorAll('.link.hot').length };
+}
+
+fetch('./kg-data/bipartite.json').then(r => r.ok ? r.json() : null).then(d => {
+  if (!d) {
+    $('#sub').textContent = '读不到 kg-data/bipartite.json';
+    return;
+  }
+  DATA = d;
+  const t = d.totals || {};
+  $('#sub').innerHTML = `关系 <b>${esc(d.relation)}</b> · 全库 ${t.rel_edges} 条`
+    + `（施动者 ${t.left_entities} 个 · 被用物 ${t.right_entities} 个）`
+    + ` ⇒ 这里取两侧各 top ${d.top}：<b>${d.left.length} × ${d.right.length}</b>`
+    + `，两端都在 top 里的边 <b>${d.links.length}</b> 对`
+    + `<br>点一个节点可只看它连的；再点取消`;
+  draw();
+  window.__bipartiteReady = true;
+  window.__bipartiteState = { focus: null, n_links: d.links.length,
+                              n_left: d.left.length, n_right: d.right.length };
+}).catch(e => {
+  $('#sub').textContent = '载入失败：' + e.message;
+});
+</script>
+</body>
+</html>
