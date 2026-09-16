@@ -55,6 +55,14 @@ def parse_args():
     ap = argparse.ArgumentParser(description='H2 Schema 约束消融')
     ap.add_argument('--source', default=str(DEFAULT_SRC))
     ap.add_argument('--chars', type=int, default=3000)
+    # ⚠️ **偏移量不是可有可无的**：第一次跑（offset=0）取到的是**论文的标题页**
+    #    （标题 + 作者 + 机构），那里的关系只有 `PRODUCES`/`LOCATED_AT`/`PART_OF` 三种，
+    #    两种 prompt 下模型都只能选这几个 ⇒ **开/关没有区分度，两次输出一模一样**。
+    #    要测出差异，得从**关系密集的段落**（方法/实验/相关工作）取。
+    ap.add_argument('--offset', type=int, default=0,
+                    help='从源文本的第几个字符开始取（默认 0）')
+    ap.add_argument('--offset-pct', type=float, default=None,
+                    help='按比例取（如 0.4 = 从 40% 处开始）；给了它就覆盖 --offset')
     ap.add_argument('--mode', default='local', help='抽取通道（默认 local）')
     ap.add_argument('--out', default=str(ROOT / 'data' / 'quality' / 'schema-ablation.json'))
     # 内层模式：只跑一次抽取，把结果写到 _schema-ablation-runs/<tag>.json
@@ -73,9 +81,14 @@ def run_once(tag):
     import kg_extractor as K
 
     src = Path(ARGS.source)
-    text = src.read_text(encoding='utf-8', errors='replace')[:ARGS.chars]
+    full = src.read_text(encoding='utf-8', errors='replace')
+    off = ARGS.offset
+    if ARGS.offset_pct is not None:
+        off = int(len(full) * max(0.0, min(1.0, ARGS.offset_pct)))
+    text = full[off:off + ARGS.chars]
     bare = os.environ.get('KG_BARE_RELATION_TYPES', '0').strip() in ('1', 'true', 'yes')
-    print(f'  [{tag}] bare={bare} · 文本 {len(text)} 字符 · 模型 {K.MODELS[ARGS.mode]["text"]}')
+    print(f'  [{tag}] bare={bare} · 文本 [{off}:{off + len(text)}] / {len(full)} 字符 '
+          f'· 模型 {K.MODELS[ARGS.mode]["text"]}')
     print(f'  [{tag}] prompt 里的关系块（前 120 字符）：'
           f'{K.COMBINED_PREFIX[K.COMBINED_PREFIX.find("Relations"):][:120]!r}')
 
@@ -136,9 +149,11 @@ def main():
         print(f'── 跑 {tag}（KG_BARE_RELATION_TYPES={val}）' + '─' * 40)
         env = dict(os.environ)
         env['KG_BARE_RELATION_TYPES'] = val
+        extra = (['--offset-pct', str(ARGS.offset_pct)] if ARGS.offset_pct is not None
+                 else ['--offset', str(ARGS.offset)])
         r = subprocess.run([sys.executable, str(Path(__file__)), '--once', tag,
                             '--source', ARGS.source, '--chars', str(ARGS.chars),
-                            '--mode', ARGS.mode],
+                            '--mode', ARGS.mode] + extra,
                            cwd=str(ROOT), env=env, capture_output=True, text=True)
         for line in (r.stdout or '').splitlines():
             print('  ' + line)
