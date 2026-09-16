@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-16 20:27:37",
+  "generated": "2026-09-16 21:18:08",
   "note": "数据源指纹 + 各指标读数。数据变了而指标没重跑时，python tools/metric_provenance.py 会把它们标为 stale。",
   "sources": {
     "graphs": {
@@ -16,15 +16,15 @@
     },
     "nebula": {
       "files": 1,
-      "bytes": 3362709,
-      "newest_mtime": "2026-09-15 18:36:13",
-      "sha1_16": "125653488a9245fa"
+      "bytes": 3490559,
+      "newest_mtime": "2026-09-16 20:31:29",
+      "sha1_16": "82707d35399a86e2"
     },
     "force_full": {
       "files": 1,
       "bytes": 3714942,
-      "newest_mtime": "2026-09-15 19:33:54",
-      "sha1_16": "bf5596b5657ebb24"
+      "newest_mtime": "2026-09-16 21:13:03",
+      "sha1_16": "2b7cb9879a89b1e0"
     }
   },
   "metrics": {
@@ -148,32 +148,32 @@
       "artifact_mtime": "2026-09-12 19:50:08"
     },
     "L8_clustering_vs_random": {
-      "value": 556.74,
+      "value": 657.22,
       "artifact": "l8-structure-audit.json",
       "path": "random_baseline.clustering_ratio_vs_random",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-16 20:23:45"
+      "artifact_mtime": "2026-09-16 21:13:16"
     },
     "L8_largest_component_pct": {
-      "value": 73.67,
+      "value": 66.29,
       "artifact": "l8-structure-audit.json",
       "path": "connectivity.largest_component_pct",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-16 20:23:45"
+      "artifact_mtime": "2026-09-16 21:13:16"
     },
     "L8_isolated_nodes": {
-      "value": 3891,
+      "value": 5799,
       "artifact": "l8-structure-audit.json",
       "path": "connectivity.isolated_nodes",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-16 20:23:45"
+      "artifact_mtime": "2026-09-16 21:13:16"
     },
     "L8_nodes": {
       "value": 19427,
       "artifact": "l8-structure-audit.json",
       "path": "scale.nodes",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-16 20:23:45"
+      "artifact_mtime": "2026-09-16 21:13:16"
     },
     "L9_endpoint_recall": {
       "value": 0.8621,

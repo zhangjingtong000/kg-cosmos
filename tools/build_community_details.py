@@ -86,6 +86,10 @@ def main():
     # 于是社区详情里**看不出任何关系语义**，`CONTRADICTS`（争议）自然也不存在。
     # 这正是"概览里有类型、详情里没有"的根因。
     pair_types = {}
+    # ★ K5（2026-09-16）：**每一对实体之间的边来自哪些论文**。
+    #   存索引而不是论文名（同 `build_nebula_data.py` 的做法）——省空间，
+    #   且论文表放在 `meta.papers` 里只有一份，不会漂。
+    pair_papers = {}
     for e in edges:
         s, t = e["source"], e["target"]
         if s != t and s in G and t in G:
@@ -95,6 +99,10 @@ def main():
             lst = pair_types.setdefault(key, [])
             if ty not in lst:
                 lst.append(ty)
+            pp = pair_papers.setdefault(key, [])
+            nm = e.get("_paper")
+            if nm and nm not in pp:
+                pp.append(nm)
 
     print("Louvain（与概览一致，seed=42）...")
     comms = sorted(nx.community.louvain_communities(G, seed=42), key=len, reverse=True)
@@ -134,6 +142,18 @@ def main():
         mset = set(members)
         seen = set()
         out_edges = []
+        # ★ K5：并行的论文归属（与 `nebula.json` 的做法一致）。
+        #   索引指向本社区 payload 的 `meta.papers`。
+        c_papers = []
+        c_paper_idx = {}
+
+        def _pidx(nm):
+            if nm not in c_paper_idx:
+                c_paper_idx[nm] = len(c_papers)
+                c_papers.append(nm)
+            return c_paper_idx[nm]
+
+        out_edge_papers = []
         for m in members:
             for nb in G.neighbors(m):
                 if nb not in mset:
@@ -147,8 +167,12 @@ def main():
                 # 同一对实体若有多条不同类型的边，**每种类型各出一条** ——
                 # 否则会把 CONTRADICTS 这类少数类型挤掉（这正是当初丢信息的地方）。
                 tys = pair_types.get(key) or ["RELATED_TO"]
+                # 这一对实体的边来自哪几篇 —— **同一条边的多个类型共用同一份归属**
+                # （因为 K5 的粒度是"边是不是这篇贡献的"，不是"这个类型是不是"）
+                pidx = sorted({_pidx(nm) for nm in (pair_papers.get(key) or [])})
                 for ty in tys:
                     out_edges.append([m, nb, ty])
+                    out_edge_papers.append(list(pidx))
                     if len(out_edges) >= ARGS.max_edges:
                         break
                 if len(out_edges) >= ARGS.max_edges:
@@ -166,9 +190,13 @@ def main():
             "core": cloud.get("core", []),
             "meta": {"nodes": len(out_nodes), "edges": len(out_edges),
                      "radius": round(R, 1), "shown": len(members),
-                     "total": cloud["entityCount"]},
+                     "total": cloud["entityCount"],
+                     # K5：论文索引表（前端据此做"只看某一篇贡献的部分"）
+                     "papers": c_papers},
             "nodes": out_nodes,
             "edges": out_edges,
+            # **与 edges 等长**：`edge_papers[i]` 是第 i 条边的贡献论文索引数组
+            "edge_papers": out_edge_papers,
         }
         (OUT / f"comm-{i}.json").write_text(
             json.dumps(payload, ensure_ascii=False, separators=(",", ":")),

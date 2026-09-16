@@ -126,6 +126,21 @@ def load_graph(governed=False, verbose=True):
                 e['_rewritten_from'] = t
                 e['type'] = 'RELATED_TO'
                 n_rewritten += 1
+            # ★ K5（2026-09-16）：**记下这条边来自哪篇论文**。
+            #
+            # `paper` 本来就在这个循环里（`f.stem`），只是此前没人把它存下来 ⇒
+            # 于是下游（社区内部图、概览图）**只知道边，不知道是谁贡献的**，
+            # 而"只看某一篇贡献的部分"是自然需求（TODO K5）。
+            #
+            # **不改 `edges` 的既有字段**（下游按 `source/target/type` 取值）——
+            # 只加一个内部字段 `_paper`，由各生成器在导出时聚合成并行的 `edge_papers`。
+            #
+            # ⚠️ **本文件与 `build_nebula_data.py` 的 `load_from_json` 是同源的**
+            #    （两处都读 `data/corpus/graphs/*.json`、都做同一套字段修正）。
+            #    **改动要同步** —— 否则概览图与社区内部图的论文归属会不一致，
+            #    而那种不一致表现为"同一个筛选在两处结果不同"，很难查。
+            e = dict(e)
+            e['_paper'] = paper
             edges.append(e)
 
     if verbose:

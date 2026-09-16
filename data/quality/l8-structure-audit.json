@@ -3,24 +3,24 @@
   "caliber": "无向去重简化图（概览层导出），不可与有向图口径混用",
   "scale": {
     "nodes": 19427,
-    "edges": 28323,
-    "density": 0.0001500998034118131,
-    "avg_clustering": 0.09611
+    "edges": 28407,
+    "density": 0.00015054496753590278,
+    "avg_clustering": 0.11334
   },
   "connectivity": {
-    "components": 4260,
-    "largest_component": 14311,
-    "largest_component_pct": 73.67,
-    "isolated_nodes": 3891
+    "components": 5991,
+    "largest_component": 12879,
+    "largest_component_pct": 66.29,
+    "isolated_nodes": 5799
   },
   "random_baseline": {
     "n_runs": 10,
     "n": 19427,
-    "m": 28323,
-    "avg_clustering_mean": 0.000173,
+    "m": 28407,
+    "avg_clustering_mean": 0.000172,
     "avg_clustering_sd": 8.4e-05,
-    "clustering_ratio_vs_random": 556.74,
-    "largest_component_mean": 18128.5
+    "clustering_ratio_vs_random": 657.22,
+    "largest_component_mean": 18139.3
   },
   "predicate_space": {
     "distinct_types": 15,
@@ -29,36 +29,36 @@
     "caliber_warning": "入库后口径：越界谓词已被 safe_relation_type 改写为 RELATED_TO。入库前有 147 种越界类型，那一口径的简洁度约 15/161 ≈ 0.09。",
     "top": [
       [
-        "USES",
-        6546
-      ],
-      [
-        "PART_OF",
-        5031
-      ],
-      [
         "RELATED_TO",
-        4578
-      ],
-      [
-        "APPLIES_TO",
-        3440
+        6998
       ],
       [
         "CREATED_BY",
-        3122
+        5876
+      ],
+      [
+        "USES",
+        5263
+      ],
+      [
+        "PART_OF",
+        4022
+      ],
+      [
+        "APPLIES_TO",
+        2668
       ],
       [
         "PRODUCES",
-        1979
-      ],
-      [
-        "CITES",
-        907
+        1536
       ],
       [
         "ENABLES",
-        852
+        644
+      ],
+      [
+        "LOCATED_AT",
+        617
       ]
     ]
   },
@@ -72,11 +72,11 @@
     "abnormal_pct": 0.021
   },
   "degree": {
-    "max": 1303,
-    "p99": 27,
+    "max": 1068,
+    "p99": 29,
     "p90": 6,
     "median": 1,
-    "mean": 2.916,
-    "top1pct_degree_share": 21.61
+    "mean": 2.924,
+    "top1pct_degree_share": 20.63
   }
 }

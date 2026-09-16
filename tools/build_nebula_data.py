@@ -225,6 +225,16 @@ def load_from_json():
                 e["_rewritten_from"] = t
                 e["type"] = "RELATED_TO"
                 n_rewritten += 1
+            # ★ K5（2026-09-16）：**记下这条边来自哪篇论文**。
+            #
+            # `paper` 本来就在循环里（`f.stem`），只是此前没人把它存下来 ⇒
+            # 于是概览图**只知道边，不知道是谁贡献的**，而"只看某一篇贡献的部分"
+            # 是自然需求（TODO K5）。
+            #
+            # **不改 `edges` 的结构**（后面聚合与导出都靠它）——
+            # 加一个内部字段 `_paper`，到导出时再聚合成并行的 `edge_papers`。
+            e = dict(e)
+            e["_paper"] = paper
             edges.append(e)
 
     print(f"  从 {len(files)} 篇快照汇总"
@@ -342,6 +352,25 @@ def main():
     keep = {n["id"] for n in out_nodes}
     out_edges = []
     seen = set()
+    # **key → 已输出边的下标**：同一三元组由多篇贡献时要**并进已有那条**，
+    # 所以除了 `seen`（判重）还需要一张"回查下标"的表。
+    seen_map = {}
+    # ★ K5：并行的"论文归属"。**不改 `edges` 的三元组结构** ⇒
+    #   现有前端与所有读 `nebula.json` 的地方**一行都不用改**；
+    #   需要按论文筛选的新代码读这一项即可。
+    #
+    #   存的是**论文索引**（指向 `meta.papers`）而不是论文名：
+    #   30000 条边 × 平均 2 篇，存全名会让产物涨近 1 MB，存索引只涨约 0.2 MB。
+    paper_index = {}
+    papers_list = []
+    edge_papers = []          # 与 out_edges 等长，每项是论文索引的升序数组
+
+    def _paper_idx(name):
+        if name not in paper_index:
+            paper_index[name] = len(papers_list)
+            papers_list.append(name)
+        return paper_index[name]
+
     for e in edges:
         s, t = e["source"], e["target"]
         if s == t or s not in keep or t not in keep:
@@ -349,13 +378,25 @@ def main():
         rel = e.get("type") or "RELATED_TO"
         pair = (s, t) if s < t else (t, s)
         key = (pair[0], pair[1], rel)          # ← 加上 type
+        pidx = _paper_idx(e.get("_paper") or "")
         if key in seen:
+            # **同一三元组可能由多篇论文贡献** ⇒ 不是丢弃，而是**并到已有那条上**
+            i = seen_map[key]
+            if pidx not in edge_papers[i]:
+                edge_papers[i].append(pidx)
             continue
         seen.add(key)
+        seen_map[key] = len(out_edges)
         out_edges.append([s, t, rel])
+        edge_papers.append([pidx])
         if len(out_edges) >= ARGS.max_edges:
             break
+    for arr in edge_papers:
+        arr.sort()
+    n_multi = sum(1 for a in edge_papers if len(a) > 1)
     print(f"导出节点 {len(out_nodes)}，边 {len(out_edges)}")
+    print(f"  ★ K5 论文归属：{len(papers_list)} 篇 · "
+          f"**跨篇共享的边 {n_multi} 条**（{n_multi / max(1, len(out_edges)):.1%}）")
 
     payload = {
         "meta": {
@@ -363,11 +404,16 @@ def main():
             "communities": len(out_communities), "dust": len(dust),
             "modularity": 0.6824,
             "generated_by": "tools/build_nebula_data.py",
+            # K5：论文索引表 + 跨篇共享边数（前端据此做"按论文筛选"）
+            "papers": papers_list,
+            "edges_multi_paper": n_multi,
         },
         "type_colors": TYPE_COLORS,
         "communities": out_communities,
         "nodes": out_nodes,
         "edges": out_edges,
+        # **与 edges 等长**：`edge_papers[i]` 是第 i 条边的贡献论文索引数组
+        "edge_papers": edge_papers,
     }
     OUT.mkdir(parents=True, exist_ok=True)
     p = OUT / "nebula.json"

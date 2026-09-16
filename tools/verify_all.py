@@ -70,6 +70,11 @@ CHECKS = [
     # "点了没报错"不算通过（那条教训来自 qa_history 那次自欺的测试）。
     ("按类型聚焦（图例可点 · 颜色真变 · 是开关 · 可分享）",
      ["tools/cdp_verify_type_filter.py"]),
+    # K5：按论文筛选。同样断言到**边颜色缓冲的和** ——
+    # 而且再加一条"恢复后要回到原值"，因为 `BufferAttribute(ec).array is ec`
+    # 这个别名关系**会让恢复静默失效**（本轮实测踩到）。
+    ("按论文筛选（控件可见 · 边颜色真变 · 恢复回原值 · 可分享）",
+     ["tools/cdp_verify_paper_filter.py"]),
     ("证据深链 PDF 高亮（pdf.js 自绘，可断言）", ["tools/cdp_verify_pdflink.py"], "slow"),
 ]
 

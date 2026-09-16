@@ -310,6 +310,15 @@
   outline:1px solid rgba(224,164,105,.45);outline-offset:-1px}
 #legend .lg-item.focused .lg-nm{color:#ffd9b8;font-weight:600}
 #legend .lg-pick{color:rgba(193,195,201,.5);font-size:11px}
+/* K5（2026-09-16）：按论文筛选。样式与左侧的「只看分歧」按钮同族 ——
+   它们并排在 `#inner` 里，视觉上必须像一组控件。 */
+#paperFilter{position:fixed;left:330px;top:26px;z-index:30;pointer-events:auto;
+  background:rgba(18,20,26,.82);color:#c9cdd6;border:1px solid rgba(193,195,201,.32);
+  border-radius:8px;padding:7px 9px;font-size:12.5px;cursor:pointer;
+  max-width:230px;text-overflow:ellipsis}
+#paperFilter:hover{border-color:rgba(124,192,182,.6)}
+#paperFilter:focus-visible{outline:2px solid #7cc0b6;outline-offset:2px}
+#paperFilter[hidden]{display:none}
 /* ==KG_FLAG_V1_END== */
 </style>
 <link rel="stylesheet" href="./lib/design.css">
@@ -344,7 +353,7 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
   </div>
   <div id="list"></div>
 </aside>
-<div id="inner"><div id="innerTitle"><b id="itName"></b><small id="itSub"></small></div><button id="onlyContra" type="button" hidden title="只显示 CONTRADICTS（矛盾）关系，其余变暗">⚠️ 只看分歧</button><button id="back" type="button">← 返回星云概览</button></div>
+<div id="inner"><div id="innerTitle"><b id="itName"></b><small id="itSub"></small></div><button id="onlyContra" type="button" hidden title="只显示 CONTRADICTS（矛盾）关系，其余变暗">⚠️ 只看分歧</button><select id="paperFilter" hidden title="只看某一篇论文贡献的部分（其余变暗）"></select><button id="back" type="button">← 返回星云概览</button></div>
 <aside id="legend"></aside>
 <aside id="pdfPane">
   <div class="pdf-head">
@@ -1823,7 +1832,26 @@ async function enterCommunity(ci, preloaded) {
   const contraIdx = [];              // 哪些边是分歧边
   const ecDim = new Float32Array(data.edges.length * 6);   // 变暗态
   const ecHot = new Float32Array(data.edges.length * 6);   // 只显分歧态
+  // ── K5（2026-09-16）：**按论文筛选** ─────────────────────────────────
+  //
+  // 要解决什么（TODO K5 的原话）："图谱是全库混合的；
+  // **只看某一篇贡献的部分**是自然需求"。
+  //
+  // 数据侧：`data.edge_papers[i]` 是第 i 条边的**贡献论文索引数组**
+  // （索引指向 `data.meta.papers`）。**为什么是并行数组而不改 `edges`**：
+  // `edges` 的每一项是 `[source, target, type]` 三元组，所有读它的地方都按这个
+  // 取值；加一个并行数组则**老代码一行不改**。
+  //
+  // ⚠️ **一条边可能由多篇贡献**（实测全库 461 条是跨篇共享的）⇒
+  //    判据是 **`includes(pidx)`**，不是"等于"。
+  //
+  // ⚠️ **`ecPaper` 不能预计算** —— 论文有十几篇，预计算要为每篇存一份缓冲。
+  //    它在**选中某篇时**由 `applyPaper()` 现场填。
+  const ecPaper = new Float32Array(data.edges.length * 6);
+  const PAPERS = (data.meta && data.meta.papers) || [];
+  const EDGE_PAPERS = data.edge_papers || [];
   const HOT = new THREE.Color('#ff7a45');   // 暖橙：与页面的暖色灯光一致，且够醒目
+  const PAPER_HOT = new THREE.Color('#7cc0b6');  // 青绿：与暖橙区分，且不与类型色撞
   data.edges.forEach((e, k) => {
     const a = idx.get(e[0]), b = idx.get(e[1]);
     if (a === undefined || b === undefined) return;
@@ -1842,6 +1870,10 @@ async function enterCommunity(ci, preloaded) {
     }
   });
   const eg = new THREE.BufferGeometry();
+  // ⚠️ **先留一份默认态副本**：`BufferAttribute(ec, 3)` 的 `.array` **就是 `ec`**，
+  //    任何 `attributes.color.array.set(...)` 都会**改到 `ec` 本身** ⇒
+  //    想恢复默认态就必须有一份不被污染的拷贝（见 `applyPaper` 的注释）。
+  const ecBase = ec.slice();
   eg.setAttribute('position', new THREE.BufferAttribute(ep, 3));
   eg.setAttribute('color', new THREE.BufferAttribute(ec, 3));
   const em = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true,
@@ -1849,6 +1881,78 @@ async function enterCommunity(ci, preloaded) {
   const lines = new THREE.LineSegments(eg, em);
   lines.frustumCulled = false;
   overlay.add(lines);
+
+  // ── K5：按论文筛选的控件与切换 ────────────────────────────────────────
+  //
+  // **只在这张图真的有论文归属时显示** —— 不给一个点了没反应的控件
+  // （与 `onlyContra` 在无数据时 `hidden = true` 同一纪律）。
+  function applyPaper(sel) {
+    const g = eg.attributes.color;
+    if (!sel) {
+      // ⚠️ **必须用 `ecBase`（一份独立副本），不能用 `ec`** ——
+      //    `eg.attributes.color` 是用 `new BufferAttribute(ec, 3)` 建的
+      //    ⇒ **`.array` 就是 `ec` 本身（同一个 Float32Array）**，
+      //    所以下面 `g.array.set(ecPaper)` **会把 `ec` 也改掉**；
+      //    再 `set(ec)` 就等于"把已污染的值再写一遍" ⇒ **恢复不回去**。
+      //
+      //    实测踩到：选了第 1 篇后颜色和 5451.83 → 2409.993，
+      //    而恢复"全部"之后**仍是 2409.993**（`__paperState.selected` 已经是 null，
+      //    说明逻辑走了，是数据被别名污染了）。
+      //
+      //    `ecDim` 之所以一直好用，正因为它**是一份独立副本** ——
+      //    而"默认态"此前没有副本。
+      g.array.set(ecBase);
+    } else {
+      for (let k = 0; k < data.edges.length; k++) {
+        const hit = (EDGE_PAPERS[k] || []).includes(sel);
+        // **一条边由多篇贡献时，选中任一篇都该亮** ⇒ 用 includes
+        const c = hit ? PAPER_HOT : { r: ec0.r * 0.10, g: ec0.g * 0.10, b: ec0.b * 0.10 };
+        ecPaper.set([c.r, c.g, c.b, c.r, c.g, c.b], k * 6);
+      }
+      g.array.set(ecPaper);
+    }
+    g.needsUpdate = true;
+    // 供 CDP 脚本断言"颜色缓冲真的换了"。
+    // **为什么必须能读到这个**：B7 那次的教训 ——
+    // "点了没报错"不算通过；要能证明**渲染用的数据真的变了**。
+    // 读的是一个**只读的和**，不暴露整个 geometry（与 `__colorSample` 同一思路）。
+    window.__edgeColorSample = () => {
+      const arr = eg.attributes.color.array;
+      let s = 0;
+      for (let i = 0; i < arr.length; i++) s += arr[i];
+      return Math.round(s * 1000) / 1000;
+    };
+    // 供 CDP 脚本断言"颜色缓冲真的换了"（与 B7 的 `__colorSample` 同一思路）
+    window.__paperState = { selected: sel, papers: PAPERS.length,
+                            n_edges_with_papers: EDGE_PAPERS.filter(a => (a || []).length).length,
+                            color_sum: window.__edgeColorSample() };
+  }
+  window.__applyPaper = applyPaper;
+  applyPaper(null);                        // 初始化缓冲
+
+  const paperSel = document.getElementById('paperFilter');
+  if (paperSel) {
+    if (!PAPERS.length) {
+      paperSel.hidden = true;              // 没有论文归属 ⇒ 不显示控件
+    } else {
+      // ⚠️ **必须显式取消 `hidden`** —— HTML 里它是 `hidden` 的（默认不显示），
+      //   只写"没数据时设 true"是不够的：那样有数据时**仍然是 hidden**。
+      //   实测踩到：`n_opts=18`（数据全对）而 `hidden=True`（控件根本看不见）。
+      paperSel.hidden = false;
+      paperSel.innerHTML = '<option value="">全部论文</option>' +
+        PAPERS.map((nm, i) => `<option value="${i}">${escHtml(String(nm))}</option>`).join('');
+      paperSel.value = '';
+      if (!paperSel.dataset.bound) {
+        paperSel.dataset.bound = '1';
+        paperSel.addEventListener('change', () => {
+          const v = paperSel.value;
+          applyPaper(v === '' ? null : Number(v));
+          // 与 C4 的分享链接配套：筛选状态要能进链接
+          window.__paperPick = v === '' ? null : Number(v);
+        });
+      }
+    }
+  }
 
   // ── 「只看分歧」开关 ──────────────────────────────────────────────────
   // 数据里没有 CONTRADICTS 时**隐藏按钮**（不给一个点了没反应的控件）。
@@ -2269,6 +2373,27 @@ animate();
     }
   }
 
+  // K5：`?paper=<论文名>` ⇒ 打开就按那篇筛选（与 C4 的分享链接配套）。
+  // **用名字而不是索引**：索引依赖 `meta.papers` 的顺序，
+  // 而那个顺序会随快照目录的遍历顺序变 —— 名字是稳定的。
+  const wantPaper = q3.get('paper');
+  if (wantPaper && typeof window.__applyPaper === 'function') {
+    const sel = document.getElementById('paperFilter');
+    const papers = (overlay && overlay.userData && overlay.userData.data
+                    && overlay.userData.data.meta && overlay.userData.data.meta.papers) || [];
+    const i = papers.indexOf(wantPaper);
+    if (i >= 0 && sel) {
+      sel.value = String(i);
+      window.__applyPaper(i);
+      window.__paperPick = i;
+      applied.paper = wantPaper;
+    } else {
+      applied.paper_missing = true;
+      status.textContent = `链接里的论文「${wantPaper}」不在当前社区里`;
+      status.classList.add('visible');
+    }
+  }
+
   // 供 CDP 脚本断言"链接里的状态真的被恢复了"
   window.__viewState = applied;
   if (applied.node || applied.only) {
@@ -2534,6 +2659,12 @@ addEventListener('resize', () => {
     // 发出去对方看到的还是全量图（**这正是 `?n=` 单独用时为空那次的同类问题**：
     // 状态没进链接 = 分享出去的东西与眼前看到的不一致）。
     if (typeFocus) q.set('type', String(typeFocus));
+    // K5：按论文筛选也要能分享
+    if (typeof window.__paperPick === 'number') {
+      const ps = (overlay && overlay.userData && overlay.userData.data
+                  && overlay.userData.data.meta && overlay.userData.data.meta.papers) || [];
+      if (ps[window.__paperPick]) q.set('paper', String(ps[window.__paperPick]));
+    }
     const qs = q.toString();
     return location.origin + location.pathname + (qs ? '?' + qs : '');
   }
