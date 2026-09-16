@@ -75,6 +75,10 @@ CHECKS = [
     # 这个别名关系**会让恢复静默失效**（本轮实测踩到）。
     ("按论文筛选（控件可见 · 边颜色真变 · 恢复回原值 · 可分享）",
      ["tools/cdp_verify_paper_filter.py"]),
+    # K6：批量上传。用**空 PDF** 让每篇快速失败，
+    # 于是能一次测到"批量 + **一篇失败不停整批** + 完成时不自动跳转"三件事。
+    ("批量上传（多选 · 串行排队 · 失败不停批 · 不自动跳转）",
+     ["tools/cdp_verify_batch_upload.py"]),
     ("证据深链 PDF 高亮（pdf.js 自绘，可断言）", ["tools/cdp_verify_pdflink.py"], "slow"),
 ]
 

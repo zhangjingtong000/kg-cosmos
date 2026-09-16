@@ -141,9 +141,17 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
         <path d="M3.5 15v3.5A1.5 1.5 0 0 0 5 20h14a1.5 1.5 0 0 0 1.5-1.5V15"/>
       </svg>
       <span class="t">把 PDF 拖到这里，或者<b>点击选择</b></span>
-      <span class="h">仅 .pdf · 解析在本地完成 · 不上传第三方</span>
-      <input type="file" id="file" accept="application/pdf" hidden>
+      <span class="h">仅 .pdf · 解析在本地完成 · 不上传第三方 · <b>可一次选多个</b></span>
+      <input type="file" id="file" accept="application/pdf" multiple hidden>
     </div>
+
+    <!-- K6（2026-09-16）：批量上传的进度与汇总。
+         **一次一篇地排队抽**（抽取真跑模型，并行会互相抢资源），
+         全批跑完才出现「打开图谱」—— 而不是第一篇完成就跳走。 -->
+    <div id="batch" hidden
+         style="margin:14px 0 0;padding:12px 14px;border-radius:10px;
+                background:rgba(224,164,105,.07);border:1px solid rgba(224,164,105,.28);
+                font-size:13px;line-height:1.8;color:#d8dbe2"></div>
 
     <div class="stages" id="stages" aria-live="polite">
       <div class="stage" data-k="parse"><span class="ix">01</span><span class="nm">解析全文</span><span class="bar"><i></i></span><span class="vv">待开始</span></div>
@@ -282,7 +290,9 @@ function demo() {
   setTimeout(() => { running = false; }, ORDER.length * 1150 + 600);
 }
 
-async function poll(id) {
+async function poll(id, opts) {
+  // K6：`navigate:false` 时不跳转 —— 批量上传时**不能在第一篇完成就跳走**。
+  const navigate = !opts || opts.navigate !== false;
   for (;;) {
     let s;
     try {
@@ -291,7 +301,7 @@ async function poll(id) {
       s = await r.json();
     } catch (e) {
       vv('graph').textContent = '进度读取失败';
-      running = false; return;
+      running = false; return { ok: false, error: '进度读取失败' };
     }
     apply(s);
     if (s.state === 'done') {
@@ -311,8 +321,9 @@ async function poll(id) {
         const m = /[?&]src=([^&]+)/.exec(String(s.redirect || ''));
         if (m) localStorage.setItem('kg-last-gid', decodeURIComponent(m[1]));
       } catch (e) {}
-      setTimeout(() => { location.href = dest || './kg-nebula.html'; }, 2200);
-      return;
+      if (navigate) setTimeout(() => { location.href = dest || './kg-nebula.html'; }, 2200);
+      return { ok: true, id: id, gid: id, dest: dest, stats: s.stats || null,
+               reused: !!s.reused };
     }
     if (s.state === 'error' || s.state === 'interrupted') {
       // interrupted：后端进程重启过，任务不可能再往下走。
@@ -325,15 +336,15 @@ async function poll(id) {
         ? '后端进程重启过，这个任务已中断 —— 抽取无法从断点续跑，请重新拖入文件。'
         : '抽取失败：' + (s.error || '未知错误');
       console.error('[upload]', s.error);
-      running = false; return;
+      running = false;
+      // K6：批量时**一篇失败不该让整批停下** —— 把失败原因交给调用方
+      return { ok: false, id: id, state: s.state, error: s.error || '未知错误' };
     }
     await new Promise(r => setTimeout(r, 700));
   }
 }
 
-async function upload(f) {
-  if (running) return;
-  running = true; reset();
+async function uploadOne(f) {
   const fd = new FormData();
   fd.append('file', f, f.name);
   let r = null;
@@ -346,11 +357,86 @@ async function upload(f) {
     document.querySelector('.drop .h').textContent =
       '后端未启动（纯静态模式）· 下面走的是占位演示，未调用抽取模型';
     demo();
-    return;
+    return { ok: false, offline: true, error: '后端未启动（纯静态模式）' };
   }
-  const { id } = await r.json();
-  await poll(id);
+  const j = await r.json();
+  // K5 的查重：同一个 PDF 传第二次会**复用**已有 gid（reused:true），不重抽
+  if (j.reused) {
+    return { ok: true, id: j.id, gid: j.id, dest: './kg-nebula.html?c=0',
+             reused: true, stats: null };
+  }
+  return await poll(j.id, { navigate: false });
 }
+
+/**
+ * K6（2026-09-16）：**批量上传**。
+ *
+ * ## 为什么必须**串行**
+ *
+ * 抽取是本地 Ollama 单实例在做，且每个 chunk 都要真跑模型。
+ * 并行上传 N 篇会让 N 个任务**抢同一个模型**，结果是
+ * **每篇都变慢、进度条都卡住、显存还可能不够** —— 比一篇一篇来更糟。
+ * ⇒ **排队串行**才是对的：用户的等待时间一样，但过程可见、可控。
+ *
+ * ## 为什么完成时**不自动跳转**
+ *
+ * `poll()` 原本在完成时 `location.href = dest`（单篇上传时是对的，
+ * 用户想看刚抽出来的图）。批量时那条逻辑会让**第一篇完成就把页面带走**，
+ * 后面 27 篇再也没人管 ⇒ 加 `navigate:false`，最后**一次性给汇总**。
+ *
+ * ## 一篇失败不该让整批停下
+ *
+ * ⇒ 单篇的结果（成功 / 复用 / 失败及原因）逐个记下来，**最后一起报**。
+ */
+async function uploadMany(files) {
+  if (running) return;
+  const list = Array.from(files || []);
+  if (!list.length) return;
+  running = true;
+
+  const boot = document.getElementById('batch');
+  if (boot) boot.hidden = false;
+  const results = [];
+  for (let i = 0; i < list.length; i++) {
+    const f = list[i];
+    if (boot) {
+      boot.innerHTML = `<b>批量上传 ${i + 1}/${list.length}</b> · 正在处理 `
+        + `<code>${f.name}</code><br><span class="muted">`
+        + (i ? `已完成 ${results.filter(r => r.ok).length} 篇`
+             : '抽取要真跑模型，一篇通常几分钟') + `</span>`;
+    }
+    reset();
+    let r = null;
+    try {
+      r = await uploadOne(f);
+    } catch (e) {
+      r = { ok: false, error: String((e && e.message) || e) };
+    }
+    results.push(Object.assign({ name: f.name }, r || { ok: false, error: '未返回' }));
+    // 供 CDP 脚本断言"真的排了队、真的逐篇写了结果"
+    window.__batchState = { total: list.length, done: results.length, results: results };
+  }
+
+  running = false;
+  const okN = results.filter(r => r.ok && !r.reused).length;
+  const reusedN = results.filter(r => r.reused).length;
+  const fail = results.filter(r => !r.ok);
+  if (boot) {
+    boot.innerHTML = `<b>批量完成 ${results.length} 篇</b> · `
+      + `新抽 ${okN} · 复用 ${reusedN} · 失败 ${fail.length}`
+      + (fail.length ? '<br>' + fail.map(r =>
+          `<span class="bad">✗ ${r.name}：${r.error || '失败'}</span>`).join('<br>') : '')
+      + `<br><button type="button" id="batchGo">打开图谱 →</button>`;
+    const go = document.getElementById('batchGo');
+    if (go) go.addEventListener('click', () => { location.href = './kg-nebula.html'; });
+  }
+  // 最后记住一个 gid（与单篇的行为一致，让 ask 等页面延续上下文）
+  const last = results.filter(r => r.ok && r.gid).pop();
+  if (last) { try { localStorage.setItem('kg-last-gid', last.gid); } catch (e) {} }
+}
+
+// 单文件入口保留（**向后兼容**：拖一个文件进来还是走这里）
+async function upload(f) { return uploadMany([f]); }
 
 drop.addEventListener('click', () => file.click());
 drop.addEventListener('keydown', e => {
@@ -361,10 +447,15 @@ drop.addEventListener('keydown', e => {
 ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => {
   e.preventDefault(); drop.classList.remove('hot'); }));
 drop.addEventListener('drop', e => {
-  const f = e.dataTransfer.files[0];
-  if (f && /\.pdf$/i.test(f.name)) upload(f);
+  // K6：**整批都要收下**，不再只取 `[0]`
+  const fs = Array.from(e.dataTransfer.files || []).filter(f => /\.pdf$/i.test(f.name));
+  if (fs.length) uploadMany(fs);
 });
-file.addEventListener('change', () => { if (file.files[0]) upload(file.files[0]); });
+file.addEventListener('change', () => {
+  // K6：同上 —— 只取第一个会让"选了 10 个却只传了 1 个"，且**毫无提示**。
+  const fs = Array.from(file.files || []).filter(f => /\.pdf$/i.test(f.name));
+  if (fs.length) uploadMany(fs);
+});
 
 window.__ready = true;
 </script>

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-16 21:18:08",
+  "generated": "2026-09-16 21:31:48",
   "note": "数据源指纹 + 各指标读数。数据变了而指标没重跑时，python tools/metric_provenance.py 会把它们标为 stale。",
   "sources": {
     "graphs": {
@@ -152,28 +152,28 @@
       "artifact": "l8-structure-audit.json",
       "path": "random_baseline.clustering_ratio_vs_random",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-16 21:13:16"
+      "artifact_mtime": "2026-09-16 21:18:20"
     },
     "L8_largest_component_pct": {
       "value": 66.29,
       "artifact": "l8-structure-audit.json",
       "path": "connectivity.largest_component_pct",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-16 21:13:16"
+      "artifact_mtime": "2026-09-16 21:18:20"
     },
     "L8_isolated_nodes": {
       "value": 5799,
       "artifact": "l8-structure-audit.json",
       "path": "connectivity.isolated_nodes",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-16 21:13:16"
+      "artifact_mtime": "2026-09-16 21:18:20"
     },
     "L8_nodes": {
       "value": 19427,
       "artifact": "l8-structure-audit.json",
       "path": "scale.nodes",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-16 21:13:16"
+      "artifact_mtime": "2026-09-16 21:18:20"
     },
     "L9_endpoint_recall": {
       "value": 0.8621,
