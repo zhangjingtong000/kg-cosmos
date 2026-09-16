@@ -1,0 +1,1317 @@
+{
+ "generated": "2026-09-16 17:45:12",
+ "purpose": "H11：多 Agent 问答的质量证据（\"答得对不对\"此前没人量过）",
+ "design": {
+  "no_llm_judge": "**不用 LLM 判分** —— 本项目已量过四个模型标注者对关系层的一致性 α 是负的；用一个 α 为负的裁判给另一个模型打分没有意义。这里只用可机械核对的事实。",
+  "recall": "拿图里真实存在的实体名造问句",
+  "refuse": "拿**伪词**（随机字母+数字，已核对不在图内）造问句；不能用\"真实但不在此图的词\"——那种词该不该拒答本身有争议",
+  "citation": "证据里的 src/page 是否指向真实存在的论文与页码"
+ },
+ "graph_id": "ad690dfb",
+ "n_nodes": 779,
+ "n_edges": 951,
+ "metrics": {
+  "recall": 0.7833,
+  "recall_n": 60,
+  "recall_hit": 47,
+  "refuse_rate": 1.0,
+  "refuse_n": 60,
+  "refuse_ok": 60,
+  "citation_rate": 1.0,
+  "citation_n": 891,
+  "citation_ok": 891
+ },
+ "records": [
+  {
+   "kind": "recall",
+   "q": "scalability 是什么",
+   "expect": "scalability",
+   "seeds": [
+    "scalability"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Nemotron-4 是什么",
+   "expect": "Nemotron-4",
+   "seeds": [
+    "Nemotron-4",
+    "Apache 2.0 License"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "scientific literature analysis 是什么",
+   "expect": "scientific literature analysis",
+   "seeds": [
+    "ArXiv",
+    "SciBERT",
+    "IEEE Access",
+    "IEEE Transactions on Knowledge and Data Engineering",
+    "Iz Beltagy",
+    "Kyle Lo",
+    "Arman Cohan",
+    "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+    "Comprehensive analysis of knowledge graph embedding techniques benchmarked on link prediction",
+    "Artificial Intelligence Review",
+    "Information Processing & Management",
+    "Sentiment analysis"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "Feng Xia 是什么",
+   "expect": "Feng Xia",
+   "seeds": [
+    "Xiaojun Wan",
+    "Taifeng Wang",
+    "Fei Xia",
+    "Xiaoqi Ni",
+    "Yafeng Ren",
+    "Xiaohui Liang",
+    "Xiang Cheng",
+    "Feng Xia",
+    "Yuxiang Wu",
+    "Xiaoli Wang",
+    "Xiangxiang Zeng",
+    "Xiangzheng Fu"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "B. K. 是什么",
+   "expect": "B. K.",
+   "seeds": [],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "reasoning strategies 是什么",
+   "expect": "reasoning strategies",
+   "seeds": [
+    "KGs",
+    "knowledge-guided reasoning",
+    "logical inference",
+    "multi-hop query answering",
+    "multi-hop QA",
+    "symbolic reasoning",
+    "Škrlj",
+    "Liu et al.",
+    "Wang et al.",
+    "Kai-Wei Chang",
+    "Haoran Wen",
+    "Muhao Chen"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "question-answering 是什么",
+   "expect": "question-answering",
+   "seeds": [
+    "Question-answering systems",
+    "BioBERT",
+    "GPT-4",
+    "GNN-LLM Collaborative Framework",
+    "question-answering",
+    "multi-hop query answering",
+    "multi-hop QA",
+    "Dennis Diefenbach",
+    "Vanessa López",
+    "Kamal Singh",
+    "Pierre Maret",
+    "Haoyu Huang"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Wen Zhang 是什么",
+   "expect": "Wen Zhang",
+   "seeds": [
+    "Zhang et al.",
+    "Wenjie Li",
+    "Wei Zhang",
+    "Yue Zhang",
+    "Wentao Zhang",
+    "Tianhua Zhang",
+    "Wen Zhang",
+    "Zhiqiang Zhang",
+    "Haoran Wen",
+    "Hangfan Zhang",
+    "Yichi Zhang",
+    "Yifei Zhang"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Ningyu Zhang 是什么",
+   "expect": "Ningyu Zhang",
+   "seeds": [
+    "Zhang et al.",
+    "Wei Zhang",
+    "Yue Zhang",
+    "Wentao Zhang",
+    "Tianhua Zhang",
+    "Wen Zhang",
+    "Zhiqiang Zhang",
+    "Hangfan Zhang",
+    "Yichi Zhang",
+    "Yifei Zhang",
+    "Beichen Zhang",
+    "Junjie Zhang"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "Vivek Srikumar 是什么",
+   "expect": "Vivek Srikumar",
+   "seeds": [
+    "Vivek Srikumar"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Ad-hoc object retrieval in the web of data 是什么",
+   "expect": "Ad-hoc object retrieval in the web of data",
+   "seeds": [
+    "Knowledge Graph",
+    "Large Language Model",
+    "Transformer networks",
+    "foundational Language Models",
+    "graphs",
+    "Transformer architecture",
+    "KGEs",
+    "PairRE",
+    "foundation models",
+    "neural machine translation",
+    "sequence-to-sequence recurrent models",
+    "T5"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "Marta Sabou 是什么",
+   "expect": "Marta Sabou",
+   "seeds": [
+    "Marta Sabou"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "machine learning 是什么",
+   "expect": "machine learning",
+   "seeds": [
+    "deep learning models",
+    "neural machine translation",
+    "sequence-to-sequence recurrent models",
+    "Carte",
+    "unified text-to-text transformer",
+    "machine translation",
+    "Representation learning",
+    "tabular learning",
+    "Dzmitry Bahdanau",
+    "Kyunghyun Cho",
+    "Yoshua Bengio",
+    "Yann LeCun"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "Enriching contextualized language model from knowledge graph for biomedical information extraction 是什么",
+   "expect": "Enriching contextualized language model from knowledge graph for biomedical information extraction",
+   "seeds": [
+    "Knowledge Graph",
+    "Large Language Model",
+    "LLMs",
+    "intelligent systems",
+    "Recommendation systems",
+    "GPT-3",
+    "Transformer networks",
+    "foundational Language Models",
+    "Hybrid Systems",
+    "KGs",
+    "graphs",
+    "deep learning models"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Proceedings of ACL 2024 是什么",
+   "expect": "Proceedings of ACL 2024",
+   "seeds": [
+    "foundation models",
+    "LLaMA 3",
+    "Mixtral 8x22B",
+    "Command R",
+    "Gemma",
+    "Jamba",
+    "Transformer-based models",
+    "graph neural networks",
+    "OpenReview.net",
+    "Yann LeCun",
+    "Kentaro Inui",
+    "Jing Jiang"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "Shuofei Qiao 是什么",
+   "expect": "Shuofei Qiao",
+   "seeds": [
+    "Shuofei Qiao"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "KG-derived facts 是什么",
+   "expect": "KG-derived facts",
+   "seeds": [
+    "pipeline architectures",
+    "KG-derived representations",
+    "Structured facts",
+    "Wang et al.",
+    "KG-derived planning",
+    "model's latent space",
+    "Twitter sentiment datasets",
+    "explicit relational chains",
+    "KG-derived facts",
+    "structured data"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "P2-0103 是什么",
+   "expect": "P2-0103",
+   "seeds": [
+    "P2-0103",
+    "Knowledge Technologies"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "rule-based methods 是什么",
+   "expect": "rule-based methods",
+   "seeds": [
+    "Large Language Model",
+    "Recommendation systems",
+    "Movie recommendation system",
+    "PConvKB",
+    "Google's Transformer-based translation models",
+    "Transformer-based models",
+    "MindMap project",
+    "KGE",
+    "text completion",
+    "question-answering",
+    "symbolic inference",
+    "neural representations"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "Bangkok 是什么",
+   "expect": "Bangkok",
+   "seeds": [
+    "Bangkok"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Federico Cocchi 是什么",
+   "expect": "Federico Cocchi",
+   "seeds": [
+    "Federico Cocchi"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Ming-Wei Chang 是什么",
+   "expect": "Ming-Wei Chang",
+   "seeds": [
+    "intelligent systems",
+    "Wei Chu",
+    "Lun-Wei Ku",
+    "Ming-Wei Chang",
+    "Wei Zhang",
+    "Wei Wang",
+    "Jiawei Jiang",
+    "Weijie Liu",
+    "Kai-Wei Chang",
+    "Kilian Q. Weinberger",
+    "Wei Li",
+    "Mingyang Chen"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Arman Cohan 是什么",
+   "expect": "Arman Cohan",
+   "seeds": [
+    "Arman Cohan"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Stefani Tsaneva 是什么",
+   "expect": "Stefani Tsaneva",
+   "seeds": [
+    "Boshko Koloski",
+    "Nada Lavrač",
+    "Stefani Tsaneva",
+    "Jožef Stefan Institute",
+    "Jožef Stefan International Postgraduate School",
+    "Slovenia"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Jure Leskovec 是什么",
+   "expect": "Jure Leskovec",
+   "seeds": [
+    "Jure Leskovec"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Nevada 是什么",
+   "expect": "Nevada",
+   "seeds": [
+    "Lake Tahoe",
+    "Nevada"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "cross-attention mechanisms 是什么",
+   "expect": "cross-attention mechanisms",
+   "seeds": [
+    "PConvKB",
+    "Attention is all you need",
+    "KG-enhanced LLMs",
+    "Entity resolution",
+    "self-attention mechanisms",
+    "cross-attention mechanisms",
+    "Cross-attention with GNN-encoded KG",
+    "attention mechanisms",
+    "multi-head self-attention mechanism",
+    "GNN-encoded KG",
+    "self-attention architectures"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Mingyang Chen 是什么",
+   "expect": "Mingyang Chen",
+   "seeds": [
+    "search engines",
+    "Semantic search",
+    "Gretchen Krueger",
+    "Mark Chen",
+    "Chengqing Zong",
+    "Hanzhu Chen",
+    "Chong Chen",
+    "Xiang Cheng",
+    "Chengjin Xu",
+    "Kai Chen",
+    "Jiaoyan Chen",
+    "Chen Chen"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "Noam Shazeer 是什么",
+   "expect": "Noam Shazeer",
+   "seeds": [
+    "Noam Shazeer"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "fine-tuning procedures 是什么",
+   "expect": "fine-tuning procedures",
+   "seeds": [
+    "Transformer-based models",
+    "structured KGs",
+    "KGE",
+    "Structured facts",
+    "Daniel Ruffinelli",
+    "rule-based methods",
+    "fine-tuning procedures",
+    "fine-tuning",
+    "mutual refinement",
+    "supervised datasets",
+    "IMDb movie reviews"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Yanqi Zhou 是什么",
+   "expect": "Yanqi Zhou",
+   "seeds": [
+    "Peng Zhou",
+    "Yanqi Zhou",
+    "Jun Zhou",
+    "Kun Zhou"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "San Diego 是什么",
+   "expect": "San Diego",
+   "seeds": [
+    "Knowledge Graph",
+    "LLMs",
+    "Recommendation systems",
+    "KGs",
+    "Movie recommendation system",
+    "BERT",
+    "neural machine translation",
+    "NLP models",
+    "LLM-and-KG surveys",
+    "Synergized LLM+KG",
+    "joint LLM–KG frameworks",
+    "neural (LLM)"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "Hugo Zaragoza 是什么",
+   "expect": "Hugo Zaragoza",
+   "seeds": [
+    "Hugo Larochelle",
+    "Hugo Zaragoza"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "biases 是什么",
+   "expect": "biases",
+   "seeds": [
+    "biases",
+    "bias mitigation"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "The 20th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining 是什么",
+   "expect": "The 20th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining",
+   "seeds": [
+    "Knowledge Graph",
+    "Large Language Model",
+    "LLMs",
+    "Recommendation systems",
+    "Transformer networks",
+    "foundational Language Models",
+    "Hybrid Systems",
+    "KGs",
+    "AI systems",
+    "graphs",
+    "deep learning models",
+    "Transformer architecture"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "Wayne Xin Zhao 是什么",
+   "expect": "Wayne Xin Zhao",
+   "seeds": [
+    "Xin Dong",
+    "Xing Xie",
+    "Ziwang Zhao",
+    "Xixin Wu",
+    "Zhe Zhao",
+    "Xinqi Tu",
+    "Xintao Wang",
+    "Wayne Xin Zhao",
+    "Zhigang Zhao",
+    "Yixin Ou"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "SciBERT 是什么",
+   "expect": "SciBERT",
+   "seeds": [
+    "BERT",
+    "SciBERT",
+    "Iz Beltagy",
+    "Kyle Lo",
+    "Arman Cohan"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Ehsan Adeli 是什么",
+   "expect": "Ehsan Adeli",
+   "seeds": [
+    "Ehsan Adeli"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Zhuo Chen 是什么",
+   "expect": "Zhuo Chen",
+   "seeds": [
+    "search engines",
+    "Semantic search",
+    "Zhu",
+    "Gretchen Krueger",
+    "Mark Chen",
+    "Chengqing Zong",
+    "Hanzhu Chen",
+    "Chong Chen",
+    "Xiang Cheng",
+    "Chengjin Xu",
+    "Kai Chen",
+    "Jiaoyan Chen"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Learning to Plan for Retrieval-Augmented Large Language Models from Knowledge Graphs 是什么",
+   "expect": "Learning to Plan for Retrieval-Augmented Large Language Models from Knowledge Graphs",
+   "seeds": [
+    "Knowledge Graph",
+    "Large Language Model",
+    "LLMs",
+    "intelligent systems",
+    "Recommendation systems",
+    "GPT-3",
+    "Transformer networks",
+    "foundational Language Models",
+    "Hybrid Systems",
+    "KGs",
+    "graphs",
+    "deep learning models"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Anisa Rula 是什么",
+   "expect": "Anisa Rula",
+   "seeds": [
+    "Anisa Rula"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "customer feedback analysis 是什么",
+   "expect": "customer feedback analysis",
+   "seeds": [
+    "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+    "Comprehensive analysis of knowledge graph embedding techniques benchmarked on link prediction",
+    "Sentiment analysis",
+    "social media monitoring",
+    "customer feedback analysis",
+    "political discourse analysis",
+    "scientific literature analysis",
+    "Twitter sentiment datasets"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "France 是什么",
+   "expect": "France",
+   "seeds": [
+    "capital",
+    "Francesco Osborne",
+    "France"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "interactive agents 是什么",
+   "expect": "interactive agents",
+   "seeds": [
+    "agents",
+    "language generation",
+    "graph traversal",
+    "chatbots",
+    "interactive agents"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Yifei Zhang 是什么",
+   "expect": "Yifei Zhang",
+   "seeds": [
+    "Zhang et al.",
+    "Wei Zhang",
+    "Yue Zhang",
+    "Wentao Zhang",
+    "Tianhua Zhang",
+    "Wen Zhang",
+    "Zhiqiang Zhang",
+    "Hangfan Zhang",
+    "Yichi Zhang",
+    "Yifei Zhang",
+    "Beichen Zhang",
+    "Junjie Zhang"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Bohg 是什么",
+   "expect": "Bohg",
+   "seeds": [
+    "Jeannette Bohg",
+    "Bohg"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Word2Vec 是什么",
+   "expect": "Word2Vec",
+   "seeds": [
+    "Word2Vec"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Synthesis Lectures on Data, Semantics, and Knowledge 是什么",
+   "expect": "Synthesis Lectures on Data, Semantics, and Knowledge",
+   "seeds": [
+    "Knowledge Graph",
+    "Large Language Model",
+    "LLMs",
+    "Recommendation systems",
+    "Transformer networks",
+    "foundational Language Models",
+    "Hybrid Systems",
+    "KGs",
+    "AI systems",
+    "graphs",
+    "deep learning models",
+    "Transformer architecture"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "GPT-4 是什么",
+   "expect": "GPT-4",
+   "seeds": [
+    "GPT-3",
+    "GPT-4",
+    "OpenAI",
+    "autoregressive token prediction"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Sneha Singhania 是什么",
+   "expect": "Sneha Singhania",
+   "seeds": [
+    "Sneha Singhania"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "search systems 是什么",
+   "expect": "search systems",
+   "seeds": [
+    "intelligent systems",
+    "Recommendation systems",
+    "foundational Language Models",
+    "Hybrid Systems",
+    "AI systems",
+    "Question-answering systems",
+    "search engines",
+    "search systems",
+    "foundation models",
+    "Command R",
+    "Open Source (Research) Cohere",
+    "hybrid structured–neural systems"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Senja Poljak 是什么",
+   "expect": "Senja Poljak",
+   "seeds": [
+    "Senja Pollak",
+    "Senja Poljak"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Lingbing Guo 是什么",
+   "expect": "Lingbing Guo",
+   "seeds": [
+    "Qingyu Guo",
+    "Jian Guo",
+    "Zhimeng Guo",
+    "Lingbing Guo"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Evgeniy Gabrilovich 是什么",
+   "expect": "Evgeniy Gabrilovich",
+   "seeds": [
+    "Evgeniy Gabrilovich"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Paul Jones 是什么",
+   "expect": "Paul Jones",
+   "seeds": [
+    "Paul Jones",
+    "Llion Jones"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "neuro-symbolic integration 是什么",
+   "expect": "neuro-symbolic integration",
+   "seeds": [
+    "KGEs",
+    "symbolic (KG)",
+    "Neurocomputing",
+    "structured knowledge integration",
+    "symbolic inference",
+    "symbolic logic",
+    "symbolic reasoning",
+    "Knowledge graph informed fake news classification via heterogeneous representation ensembles",
+    "neuro-symbolic integration",
+    "KG-LLM Integration",
+    "neuro-symbolic planning algorithm",
+    "iterative symbolic–neural co-training"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "LLM-and-KG surveys 是什么",
+   "expect": "LLM-and-KG surveys",
+   "seeds": [
+    "Knowledge Graph",
+    "LLMs",
+    "Recommendation systems",
+    "Transformer networks",
+    "Hybrid Systems",
+    "KGs",
+    "AI systems",
+    "graphs",
+    "deep learning models",
+    "Transformer architecture",
+    "Question-answering systems",
+    "Movie recommendation system"
+   ],
+   "ok": false
+  },
+  {
+   "kind": "recall",
+   "q": "Ulrike von Luxburg 是什么",
+   "expect": "Ulrike von Luxburg",
+   "seeds": [
+    "Simone von Arx",
+    "Ulrike von Luxburg"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "virtual 是什么",
+   "expect": "virtual",
+   "seeds": [
+    "virtual",
+    "virtual assistants"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "recall",
+   "q": "Unifying Large Language Models and Knowledge Graphs: A Roadmap 是什么",
+   "expect": "Unifying Large Language Models and Knowledge Graphs: A Roadmap",
+   "seeds": [
+    "Knowledge Graph",
+    "Large Language Model",
+    "LLMs",
+    "Recommendation systems",
+    "GPT-3",
+    "Transformer networks",
+    "foundational Language Models",
+    "Hybrid Systems",
+    "KGs",
+    "AI systems",
+    "graphs",
+    "deep learning models"
+   ],
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "KQQauu1000",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "JKYeau1001",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QQVeae1002",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YXZaio1003",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "WVYoeo1004",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "WXYooe1005",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "KQXuaa1006",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YJKeiu1007",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "XQQoue1008",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "KYZuio1009",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YYQoio1010",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "ZQXaiu1011",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YXJeoa1012",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "XJQaea1013",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "XWZiai1014",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "VXKaaa1015",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YWYuia1016",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YJJoeu1017",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "JZYuio1018",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "XQVeoo1019",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QKJoaa1020",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "VYWuuo1021",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "ZZJuao1022",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QYVueo1023",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "VKZuue1024",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QKYeii1025",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "VQWaaa1026",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YXJiio1027",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YVZoaa1028",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QVYuia1029",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "WJZuoe1030",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QYYoio1031",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "ZKJaii1032",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YZYeie1033",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QXKeoa1034",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "VZQuea1035",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "KJWeee1036",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "VYWuuo1037",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "ZWJaau1038",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "ZWWeuu1039",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "VZWeei1040",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YKJaue1041",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QJWeii1042",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "KYQiee1043",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "JWVeia1044",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "KZYoae1045",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QQYeue1046",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YXYiii1047",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "WJQuuu1048",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "ZWZoii1049",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YJXiai1050",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YZJooi1051",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "VZXiiu1052",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QQQueo1053",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "JWKuiu1054",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "VJWaeo1055",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "XVZuuo1056",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "QVYoue1057",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "WKQeoa1058",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  },
+  {
+   "kind": "refuse",
+   "q": "YZZioo1059",
+   "seeds": [],
+   "n_evidence": 0,
+   "ok": true
+  }
+ ],
+ "elapsed_s": 3.3
+}
