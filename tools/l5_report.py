@@ -86,15 +86,49 @@ def main():
     print(f'  其中独立抽取 {len(extracted_names)}，从边反建 {len(backfilled_names)}')
 
     # ── L1 实体存在层（节点级）──
+    #
+    # ⚠️ **A3（2026-09-16，评审的"致命 Q3"）：这一层的名字与判据不符，必须说清。**
+    #
+    # 判据是「**实体名的归一化形式，出现在 `evidence[0].text` 里**」。
+    # 而 `pipeline.py` 写 `evidence` 时，`text` 就是**该实体被抽出来的那段 chunk 原文**
+    # ⇒ 对**独立抽取**的节点，这是**定义恒等（自证）**：
+    #     「实体名在它来源的文本里」—— 实体本来就是从那段文本抽出来的。
+    #
+    # ⇒ **所以它度量的不是"实体是否真的存在"，而是：**
+    #     · **词形归一的一致性**（`Facts` vs 文本里的 `fact` ⇒ 失配）；
+    #     · 以及少量的**幻觉**（名字在来源文本里根本找不到）。
+    #
+    # 实测（`tools/_probe/_probe_l1_selfproof.py`，只读）：
+    #     全部节点      0.9507（22546/23716）
+    #     ├─ 独立抽取   0.9391（18016/19184）  ← 未通过的 1168 个：词形失配或幻觉
+    #     └─ 从边反建   0.9996（4530/4532）    ← **反而更高**
+    #
+    # **反建节点为什么更高**：它们的 `evidence` 是从**边**复制的，
+    # 而边本身来自含端点名的文本 ⇒ **那是更彻底的自证**。
+    #
+    # ⇒ 因此本层**必须分两个口径报**（与 L3 剔除反建节点的做法一致）——
+    #   把 0.9507 当成"实体存在性 95%"是错的，它是**两种口径混合后的加权平均**。
     l1_hit = l1_tot = 0
+    l1_ex_hit = l1_ex_tot = 0
+    l1_bf_hit = l1_bf_tot = 0
     l1_miss_samples = []
     for nm, txt in node_ev.items():
         l1_tot += 1
-        if norm(nm) and norm(nm) in norm(txt):
+        ok = bool(norm(nm)) and norm(nm) in norm(txt)
+        if ok:
             l1_hit += 1
         elif len(l1_miss_samples) < 5:
             l1_miss_samples.append(nm)
+        # 分口径：独立抽取 vs 从边反建（**与 L3 一致**）
+        if nm in backfilled_names:
+            l1_bf_tot += 1
+            l1_bf_hit += 1 if ok else 0
+        else:
+            l1_ex_tot += 1
+            l1_ex_hit += 1 if ok else 0
     l1 = l1_hit / l1_tot if l1_tot else 0.0
+    l1_extracted = l1_ex_hit / l1_ex_tot if l1_ex_tot else 0.0
+    l1_backfilled = l1_bf_hit / l1_bf_tot if l1_bf_tot else 0.0
 
     # ── 边级四层 ──
     def is_supported(e):
@@ -140,8 +174,14 @@ def main():
     print('-' * 104)
     print('六层指标')
     print('-' * 104)
-    print(f'L1 实体存在层（节点级）       {l1_hit}/{l1_tot} = {l1:.1%}'
-          f'   实体名未字面出现在自身证据引文中')
+    # A3：**打印必须分口径** —— 一个混在一起的 95.1% 会被读成"实体存在性 95%"，
+    # 而它对独立抽取的节点是定义恒等（自证）。
+    print(f'L1 词形归一失配层（节点级）   {l1_hit}/{l1_tot} = {l1:.1%}'
+          f'   ⚠️ **不是"实体存在性"**（判据对独立抽取的节点是自证）')
+    print(f'   ├─ 独立抽取的节点            {l1_ex_hit}/{l1_ex_tot} = {l1_extracted:.1%}'
+          f'   ← 未通过的 = 词形归一失配或幻觉')
+    print(f'   └─ 从边反建的节点            {l1_bf_hit}/{l1_bf_tot} = {l1_backfilled:.1%}'
+          f'   ← evidence 复制自边 ⇒ **更彻底的自证**，比上面还高')
     print(f'L2 实体聚类层                 归并 585 组（见 tools/l2_report.py）')
     for st in (stats_all, stats_sup):
         if not st:
@@ -199,7 +239,24 @@ def main():
             'source': os.path.basename(VERIFY),
             'threshold': thr,
             'edges_total': len(edges),
-            'L1_entity_presence': {'hit': l1_hit, 'total': l1_tot, 'rate': l1},
+            # A3（2026-09-16）：**分两个口径**报，并说明这一层到底在量什么。
+            # `rate` 保持原义（全口径）—— **不改既有调用方**
+            # （`metric_provenance.py` 按 `rate` 取值）；新增的两个口径供文档与面板引用。
+            'L1_entity_presence': {
+                'hit': l1_hit, 'total': l1_tot, 'rate': l1,
+                'rate_extracted': l1_extracted,
+                'rate_backfilled': l1_backfilled,
+                'extracted': {'hit': l1_ex_hit, 'total': l1_ex_tot},
+                'backfilled': {'hit': l1_bf_hit, 'total': l1_bf_tot},
+                'what_it_measures':
+                    '**不是"实体存在性"** —— 判据是「实体名的归一化形式出现在 '
+                    'evidence[0].text 里」，而那段 text 就是**该实体被抽出来的 chunk 原文** '
+                    '⇒ 对独立抽取的节点是**定义恒等（自证）**。'
+                    '它实际度量的是**词形归一的一致性 + 少量幻觉**。'
+                    '**必须分口径看**：反建节点的 evidence 复制自边、而边来自含端点名的文本 '
+                    '⇒ 通过率反而更高（0.9996），两个口径混在一起的加权平均会误导。'
+                    '（评审的"致命 Q3"；量化见 tools/_probe/_probe_l1_selfproof.py）',
+            },
             'L2_entity_clustering': prev_l2,
             # L3 落盘也必须是多口径。`closed` 含从边反建的节点，属人工构造，
             # 单独引用会被读成抽取质量；`extracted` 才是"只算独立抽取节点"的口径。

@@ -5,7 +5,18 @@
   "L1_entity_presence": {
     "hit": 18336,
     "total": 19427,
-    "rate": 0.9438410459669532
+    "rate": 0.9438410459669532,
+    "rate_extracted": 0.9279904780797461,
+    "rate_backfilled": 0.9995353159851301,
+    "extracted": {
+      "hit": 14034,
+      "total": 15123
+    },
+    "backfilled": {
+      "hit": 4302,
+      "total": 4304
+    },
+    "what_it_measures": "**不是\"实体存在性\"** —— 判据是「实体名的归一化形式出现在 evidence[0].text 里」，而那段 text 就是**该实体被抽出来的 chunk 原文** ⇒ 对独立抽取的节点是**定义恒等（自证）**。它实际度量的是**词形归一的一致性 + 少量幻觉**。**必须分口径看**：反建节点的 evidence 复制自边、而边来自含端点名的文本 ⇒ 通过率反而更高（0.9996），两个口径混在一起的加权平均会误导。（评审的\"致命 Q3\"；量化见 tools/_probe/_probe_l1_selfproof.py）"
   },
   "L2_entity_clustering": {
     "names_before": 15708,
