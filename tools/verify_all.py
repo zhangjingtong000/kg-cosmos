@@ -66,6 +66,10 @@ CHECKS = [
     # 在 Python 里"读源码看有没有那个函数"证明不了它能跑。
     ("分享链接（编码语义状态 · 打开能恢复 · 找不到要明说）",
      ["tools/cdp_verify_share_link.py"]),
+    # B7：类型聚焦。断言到**颜色缓冲的和变小**为止 ——
+    # "点了没报错"不算通过（那条教训来自 qa_history 那次自欺的测试）。
+    ("按类型聚焦（图例可点 · 颜色真变 · 是开关 · 可分享）",
+     ["tools/cdp_verify_type_filter.py"]),
     ("证据深链 PDF 高亮（pdf.js 自绘，可断言）", ["tools/cdp_verify_pdflink.py"], "slow"),
 ]
 

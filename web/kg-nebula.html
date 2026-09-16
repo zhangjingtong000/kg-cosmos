@@ -301,6 +301,15 @@
 #dbody .sumnote{margin:4px 0 8px;padding:7px 9px;border-radius:7px;font-size:11.5px;
   line-height:1.6;color:#e8c9a4;background:rgba(224,164,105,.08);
   border:1px solid rgba(224,164,105,.32)}
+/* B7（2026-09-16）：图例项可点击 ⇒ 聚焦某一类型。
+   此前 `.lg-item` 只是说明性的一行（不可点），现在它是个隐式按钮，
+   必须给出可点的反馈 —— 否则"原来这个能点"没人会发现。 */
+#legend .lg-item{cursor:pointer;border-radius:5px;transition:background .15s}
+#legend .lg-item:hover{background:rgba(224,164,105,.10)}
+#legend .lg-item.focused{background:rgba(224,164,105,.20);
+  outline:1px solid rgba(224,164,105,.45);outline-offset:-1px}
+#legend .lg-item.focused .lg-nm{color:#ffd9b8;font-weight:600}
+#legend .lg-pick{color:rgba(193,195,201,.5);font-size:11px}
 /* ==KG_FLAG_V1_END== */
 </style>
 <link rel="stylesheet" href="./lib/design.css">
@@ -1636,6 +1645,9 @@ function renderLegend() {
         : `亮度 = ${colorMode.ranking === 'pagerank' ? 'PageRank' : '度数'}归一（越亮越高）`}
        · 点大小同源${entries.some(e => e.label === 'Unknown')
         ? '<br><b style="color:#8b95a8">Unknown</b> = 从边反建、类型未知的端点'
+        : ''}
+       ${colorMode.partition === 'type'
+        ? `<br><span class="lg-pick">点某一类 ⇒ 只强调它（其余压暗，**不隐藏**${typeFocus ? `）· 当前：<b>${escHtml(typeFocus)}</b>` : '）'}</span>`
         : ''}</div>`;
 
   legendEl.querySelectorAll('button').forEach(b => {
@@ -1644,7 +1656,42 @@ function renderLegend() {
       applyColorMode();
     });
   });
+
+  // B7：图例项可点击 ⇒ **聚焦某一类型**（再点一次取消）。
+  //
+  // 用 `entries` 的**索引**取回 label，而不是从 DOM 反解名字 ——
+  // 类型名里可能有 `<` `&` 之类（`escHtml` 已经转义过），
+  // 从 DOM 读回来会拿到转义后的字符串，跟 `n.t` 就对不上了。
+  legendEl.querySelectorAll('.lg-item').forEach((el, i) => {
+    const e = entries[i];
+    if (!e) return;
+    if (typeFocus === e.label) el.classList.add('focused');
+    el.addEventListener('click', () => {
+      // 只在"分区 = 类型"时聚焦：社区分区下 `lg-item` 是跨社区关联，
+      // 那与"类型筛选"不是一回事（它会误改成按社区名筛类型）。
+      if (colorMode.partition !== 'type') return;
+      typeFocus = (typeFocus === e.label) ? null : e.label;
+      applyColorMode();
+    });
+  });
 }
+
+/**
+ * B7（2026-09-16）：**类型聚焦** —— 当前只强调哪一类实体（`null` = 全都要）。
+ *
+ * ## 为什么是"变暗"而不是"隐藏"
+ *
+ * 隐藏会让读者以为**图里只有这些点**（当前图上确实少了很多东西），
+ * 而变暗保留了"**图有多大、被强调的占多少**"这个信息 ——
+ * 这正是"按属性筛选"想回答的问题（`Method` 到底占几成）。
+ *
+ * ## 为什么不加下拉框
+ *
+ * **图例本来就把每种类型和它的数量列出来了**（`legendEntries` 数过），
+ * 而它此前只是一张不能点的说明表。让图例可点击，
+ * 比在工具栏再加一个"类型筛选器"少一个入口、少一处要同步的状态。
+ */
+let typeFocus = null;
 
 /** 把当前着色模式应用到已存在的点云上（只更新缓冲，不重建几何）。 */
 function applyColorMode() {
@@ -1652,11 +1699,36 @@ function applyColorMode() {
   if (!ud || !ud.pts || !ud.data) return;
   const { col, siz } = computeNodeStyle(ud.data.nodes, ud.data,
                                         colorMode.partition, colorMode.ranking);
+  // B7：非聚焦类型的点**压暗**（0.18 倍）。
+  // 乘而不是覆盖 —— 保留它原本的色相，暗下去仍能看出"那一片是另一类"。
+  if (typeFocus) {
+    const nodes = ud.data.nodes;
+    for (let i = 0; i < nodes.length; i++) {
+      if (nodes[i].t !== typeFocus) {
+        col[i * 3] *= 0.18; col[i * 3 + 1] *= 0.18; col[i * 3 + 2] *= 0.18;
+      }
+    }
+  }
   const g = ud.pts.geometry;
   g.attributes.color.array.set(col);
   g.attributes.color.needsUpdate = true;
   g.attributes.aSize.array.set(siz);
   g.attributes.aSize.needsUpdate = true;
+
+  // B7：给自动化一个**稳定的观测接口**。
+  // 为什么不是把 `overlay` 挂到 window 上：那会把内部对象暴露出去，
+  // 而 CDP 脚本只需要回答一个问题 —— **"颜色缓冲真的变了吗"**。
+  // 只读的采样函数比暴露整个对象更小、也更不容易被将来的重构弄坏。
+  // （与 `window.__ready` / `__viewState` / `__pdfState` 同一思路。）
+  window.__colorSample = () => {
+    const a = g.attributes.color.array;
+    let s = 0;
+    for (let i = 0; i < Math.min(300 * 3, a.length); i++) s += a[i];
+    return Math.round(s * 1000) / 1000;
+  };
+  window.__colorMode = { partition: colorMode.partition, ranking: colorMode.ranking };
+  window.__typeFocus = typeFocus;
+
   renderLegend();
 }
 
@@ -2177,6 +2249,26 @@ animate();
     }
   }
 
+  // B7：`?type=<实体类型>` ⇒ 打开就聚焦这一类（与 C4 的分享链接配套）。
+  // 必须放在**选区恢复之后** —— 它要调 `applyColorMode()`，
+  // 而那需要 `overlay.userData.data` 已经在位。
+  const wantType = q3.get('type');
+  if (wantType) {
+    const nodes = (overlay && overlay.userData && overlay.userData.data
+                   && overlay.userData.data.nodes) || [];
+    if (nodes.some(n => n && n.t === wantType)) {
+      typeFocus = wantType;
+      // 类型分区下才看得出聚焦效果 —— 若当前是社区分区，先切过去
+      if (colorMode.partition !== 'type') colorMode.partition = 'type';
+      applyColorMode();
+      applied.type = wantType;
+    } else {
+      applied.type_missing = true;
+      status.textContent = `链接里的类型「${wantType}」不在当前图中`;
+      status.classList.add('visible');
+    }
+  }
+
   // 供 CDP 脚本断言"链接里的状态真的被恢复了"
   window.__viewState = applied;
   if (applied.node || applied.only) {
@@ -2438,6 +2530,10 @@ addEventListener('resize', () => {
       if (n && n.id) q.set('n', String(n.id));
     } catch (e) { /* 分享失败不该影响看图 */ }
     if (onlyContra) q.set('only', '1');
+    // B7：聚焦的实体类型也要能分享 —— 否则"我筛出了 Method 这一类"
+    // 发出去对方看到的还是全量图（**这正是 `?n=` 单独用时为空那次的同类问题**：
+    // 状态没进链接 = 分享出去的东西与眼前看到的不一致）。
+    if (typeFocus) q.set('type', String(typeFocus));
     const qs = q.toString();
     return location.origin + location.pathname + (qs ? '?' + qs : '');
   }
