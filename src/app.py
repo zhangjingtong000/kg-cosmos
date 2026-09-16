@@ -492,13 +492,75 @@ async def _run_upload(gid: str, pdf_path: Path, work_dir: Path,
         _save_task(task)
 
 
+def _save_with_sha1(file, pdf_path):
+    """边写盘边算 sha1（不为了哈希重读一遍文件）。
+
+    返回前 16 位十六进制。**G2（2026-09-16）新增** ——
+    它用于"同一篇论文传了两次"的查重。
+    """
+    import hashlib
+    h = hashlib.sha1()
+    with open(pdf_path, "wb") as f:
+        while True:
+            chunk = file.file.read(1 << 20)
+            if not chunk:
+                break
+            h.update(chunk)
+            f.write(chunk)
+    return h.hexdigest()[:16]
+
+
+def _find_by_sha1(digest):
+    """在已有上传目录里找**同一个 PDF**（且已经抽完的）。
+
+    ## 为什么需要它（G2）
+
+    `upload_start` 原先每次都 `uuid.uuid4().hex[:8]` ⇒
+    **同一篇论文传两次会得到两个互不相识的 gid**，
+    界面上看起来是两篇不同的东西，而用户会问"我传了两次为什么有两份"。
+
+    ## 判据
+
+    `data/<task_id>/<同名 PDF>` 的 sha1 相同 **且该目录已有 `graph.json`**
+    ⇒ 说明这篇已经抽完了，**直接复用**，不必再花 36 分钟重抽一遍。
+    （只查"已完成"的：跑到一半的任务不该被复用，那会让用户以为它已经好了。）
+
+    返回 `task_id` 或 `None`。
+    """
+    if not DATA_DIR.exists():
+        return None
+    import hashlib
+    for d in DATA_DIR.iterdir():
+        if not d.is_dir() or not (d / "graph.json").exists():
+            continue
+        for p in d.glob("*.pdf"):
+            try:
+                h = hashlib.sha1()
+                with open(p, "rb") as f:
+                    while True:
+                        c = f.read(1 << 20)
+                        if not c:
+                            break
+                        h.update(c)
+                if h.hexdigest()[:16] == digest:
+                    return d.name
+            except Exception:
+                continue
+    return None
+
+
 @app.post("/api/upload/start")
 async def upload_start(
     file: UploadFile = File(...),
     mode: str = Query("local", description="Model backend: local or cloud"),
     max_chars: int = Query(500),
 ):
-    """接收 PDF 并**立即返回**，抽取在后台跑；进度用 /api/upload/status/{gid} 查。"""
+    """接收 PDF 并**立即返回**，抽取在后台跑；进度用 /api/upload/status/{gid} 查。
+
+    **G2（2026-09-16）**：同一个文件传第二次时**复用已有的 gid**，
+    并在返回里标明 `reused: true` ——
+    否则界面上会出现两个互不相识的图，而用户不知道它们是同一篇。
+    """
     if not (file.filename or "").lower().endswith(".pdf"):
         raise HTTPException(400, "只支持 PDF 文件")
 
@@ -506,17 +568,31 @@ async def upload_start(
     work_dir = DATA_DIR / gid
     work_dir.mkdir(parents=True, exist_ok=True)
     pdf_path = work_dir / file.filename
-    with open(pdf_path, "wb") as f:
-        shutil.copyfileobj(file.file, f)
+    digest = _save_with_sha1(file, pdf_path)
+
+    # 查重：已经抽完的同一篇 ⇒ 复用，并把刚写下的临时目录清掉
+    existing = _find_by_sha1(digest)
+    if existing and existing != gid:
+        try:
+            shutil.rmtree(work_dir, ignore_errors=True)
+        except Exception:
+            pass
+        log.info(f'upload: 同一份 PDF 已存在（sha1 {digest}）⇒ 复用 {existing}')
+        return {
+            "id": existing, "state": "done", "reused": True,
+            "sha1_16": digest,
+            "note": '这份 PDF 此前已上传并抽完，**直接复用那次的结果**，没有重抽。'
+                    '（此前每次都生成新 gid，同一篇会变成两个互不相识的图。）',
+        }
 
     UPLOAD_TASKS[gid] = {
-        "id": gid, "filename": file.filename, "mode": mode,
+        "id": gid, "filename": file.filename, "mode": mode, "sha1_16": digest,
         "state": "running", "stage": "queued", "pct": 0.0, "detail": "已入队",
         "started_at": datetime.now().isoformat(),
     }
     asyncio.create_task(_run_upload(gid, pdf_path, work_dir,
                                     file.filename, mode, max_chars))
-    return {"id": gid, "state": "running"}
+    return {"id": gid, "state": "running", "reused": False, "sha1_16": digest}
 
 
 @app.get("/api/upload/status/{gid}")
