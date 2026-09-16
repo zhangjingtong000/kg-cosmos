@@ -1,0 +1,60 @@
+{
+ "generated": "2026-09-16 18:28:00",
+ "purpose": "B1：分步问答 2/3/4 步的端到端实测（此前从未跑过）",
+ "graph_id": "ad690dfb",
+ "question": "TransE 有什么局限？",
+ "all_ok": true,
+ "total_s": 8.4,
+ "independence": {
+  "similarity": 0.4242,
+  "verdict": "✅ 明显不同 —— 两次调用确实是独立的"
+ },
+ "steps": [
+  {
+   "step": "retrieve",
+   "ok": true,
+   "elapsed_s": 0.06,
+   "seeds": [
+    "TransE-MTP",
+    "multi-translation principles",
+    "Li",
+    "Zhu",
+    "TransE",
+    "TransH",
+    "TransR",
+    "TransD"
+   ],
+   "n_evidence": 18,
+   "question_used": "TransE 有什么局限？",
+   "rewritten_from": null
+  },
+  {
+   "step": "support",
+   "ok": true,
+   "elapsed_s": 2.14,
+   "chars": 92,
+   "preview": "无支持证据。提供的图谱证据仅描述了 TransE 与其他模型（如 TransH、TransR）的关系及其作为基线被改进的情况，未包含任何关于 TransE 具体局限性或缺点的文本描述。",
+   "agent": "支持 Agent",
+   "note": "读全部证据，找**支持**答案的边"
+  },
+  {
+   "step": "oppose",
+   "ok": true,
+   "elapsed_s": 3.33,
+   "chars": 172,
+   "preview": "未发现反证。提供的证据仅描述了 TransE 作为早期模型（引文 13）及其变体（TransH/R/D），或指出 TransE-MTP 基于 TransE 并引入多翻译原则（引文 4,5,6）。这些内容属于背景介绍或方法演进，并未包含任何直接否定\"TransE 存在局限”这一结论的原文证据。现有图谱无法支撑对 TransE 具体局限性的反驳。",
+   "agent": "反对 Agent",
+   "note": "**独立**读同一批证据（不共享支持方的中间结论），找反证；找不到就如实说「未发现反证」，不编"
+  },
+  {
+   "step": "synth",
+   "ok": true,
+   "elapsed_s": 2.83,
+   "chars": 163,
+   "preview": "结论：证据不足以判定。依据支持方指出图谱无 TransE 局限文本（无具体条目），反对方指出现有证据仅涉及背景或演进（如引文 13、4-6）而无直接否定原文。因双方均承认现有材料缺乏对“具体局限性”的直接描述或反驳，无法基于给定信息得出结论。置信度：高。理由：双方明确确认当前证据链缺失关键事实支撑，逻辑上已穷尽现有信息边界。",
+   "confidence": "高",
+   "agent": "综合 Agent",
+   "note": "只看到两方交上来的意见，不接触原始证据"
+  }
+ ]
+}
