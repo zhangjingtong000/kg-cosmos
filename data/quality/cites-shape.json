@@ -1,0 +1,57 @@
+{
+ "rel": "CITES",
+ "n_edges": 967,
+ "shape_left": {
+  "other": 559,
+  "person?（两三个词）": 220,
+  "pubstring（出版串/年份）": 154,
+  "noise（图表号）": 26,
+  "person（姓, 首字母）": 8
+ },
+ "shape_right": {
+  "pubstring（出版串/年份）": 284,
+  "noise（图表号）": 20,
+  "other": 439,
+  "person?（两三个词）": 210,
+  "person（姓, 首字母）": 14
+ },
+ "type_left": {
+  "Tool": 2,
+  "Concept": 72,
+  "System": 26,
+  "Unknown": 175,
+  "Person": 283,
+  "Method": 67,
+  "Document": 294,
+  "Artifact": 16,
+  "Component": 6,
+  "Dataset": 3,
+  "?": 2,
+  "Process": 18,
+  "Metric": 3
+ },
+ "type_right": {
+  "Person": 135,
+  "Document": 270,
+  "Unknown": 182,
+  "Process": 41,
+  "Component": 2,
+  "Method": 74,
+  "Dataset": 6,
+  "Metric": 5,
+  "System": 45,
+  "Concept": 64,
+  "Tool": 1,
+  "Artifact": 14,
+  "Event": 118,
+  "?": 8,
+  "Location": 1,
+  "Organization": 1
+ },
+ "resolved_to_corpus": 0,
+ "resolved_to_node": 959,
+ "is_dag": false,
+ "nodes": 1119,
+ "edges": 964,
+ "conclusion": "F3 的原始设想在这份数据上做不了 —— 两端几乎没有\"论文\"节点，被引方绝大多数解析不到语料，且图性质不支持\"按引用先后分层\"。**这是\"数据不支持\"，不是\"没做\"。**"
+}
