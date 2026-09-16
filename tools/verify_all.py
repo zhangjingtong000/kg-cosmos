@@ -83,6 +83,10 @@ CHECKS = [
     # "数据取到了"不等于"画出来了"，后者才是这一页真正的失败模式。
     ("使用关系二部图（节点/连线真画出来 · 点节点聚焦 · 是开关）",
      ["tools/cdp_verify_bipartite.py"]),
+    # F1：时间演化。断言到**KPI 上的数字与数据帧逐字相等** ——
+    # 同样不能只断言"页面没报错"。
+    ("时间演化（帧数对 · 末帧 KPI 逐字对 · 折线画全 · 播放是开关）",
+     ["tools/cdp_verify_temporal.py"]),
     ("证据深链 PDF 高亮（pdf.js 自绘，可断言）", ["tools/cdp_verify_pdflink.py"], "slow"),
 ]
 
