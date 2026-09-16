@@ -138,7 +138,7 @@
 
 ## 附：数据与脚本
 
-- **产物**：`data/quality/protocol-ladder.json`
+- **产物**：`data/quality/archive/protocol-ladder/protocol-ladder.json`
 - **脚本**：`tools/protocol_ladder.py`（`--dry-run` 可只看四档 prompt）
 - **诊断脚本**：`tools/_probe/_probe_ladder_fail.py`（记录了 `format='json'` 那个坑）
 - **α 口径**：与 `tools/recompute_agreement.py` 一致（"未列出 == 明确判定不属于"）

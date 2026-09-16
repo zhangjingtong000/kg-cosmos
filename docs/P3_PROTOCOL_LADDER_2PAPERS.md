@@ -139,15 +139,15 @@ B 档 4: rep0 3 条 + rep1 5 条 ⇒ 去重后 **5 个单元**
 - **脚本**：`tools/protocol_ladder.py`（`--source` 指定论文、`--protocols` 选档、`--dry-run` 只看 prompt）
 - **产物（两篇各一份）**：
   - `data/quality/protocol-ladder-A_2012.00456v1.json` ← **手工重建**（见下）
-  - `data/quality/protocol-ladder-B_2401.04507v1.json`
-  - `data/quality/protocol-ladder.json` ← 脚本的固定输出路径（**现在是 B**）
+  - `data/quality/archive/protocol-ladder/protocol-ladder-B_2401.04507v1.json`
+  - `data/quality/archive/protocol-ladder/protocol-ladder.json` ← 脚本的固定输出路径（**现在是 B**）
 
 ### ⚠️ 一次数据丢失，以及它暴露的问题
 
 **脚本写固定路径 ⇒ 后跑的覆盖前跑的。** 跑第二篇时，**第一篇的产物被覆盖了**。
 
 **而我一度以为"第一篇的在 git 里（`32b93f0`）"—— 那是错的。**
-核实：`git show 32b93f0:data/quality/protocol-ladder.json` **返回 0 字节**。
+核实：`git show 32b93f0:data/quality/archive/protocol-ladder/protocol-ladder.json` **返回 0 字节**。
 
 **根因**：`data/quality/` 被 `.gitignore` 排除，我当时只 `git add -f` 了
 **53 个被文档引用**的产物——**`protocol-ladder.json` 不在那 53 个里**。

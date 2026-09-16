@@ -43,9 +43,31 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'src'))
+sys.path.insert(0, str(ROOT / 'tools'))
+# 跨盘安全的相对路径：`Path.relative_to` 在 Windows 上跨盘会抛
+# `ValueError: path is on mount 'C:', start on mount 'D:'`。
+# 本项目为此踩了三次坑，实现统一在 `tools/_paths.py`（P13 顺带修）。
+from _paths import rel as _rel  # noqa: E402
 
 GOLD = ROOT / 'data/gold'
+# P13a：**不再写死一个路径**。默认按论文 id 分文件（见 `resolve_out()`）。
+# 保留 `OUT` 作为"旧路径"，只为向后兼容文档里提到它的地方。
 OUT = ROOT / 'data/quality/protocol-ladder.json'
+
+
+def resolve_out(src):
+    """按论文 id 决定产物路径 —— **避免第二次覆盖事故**。
+
+    `SOURCE-2012.00456v1-p1-12.txt` → `protocol-ladder-2012.00456v1.json`
+    取不到 id 时退回 `protocol-ladder-<源文件stem>.json`。
+    `--out` 显式给出时以它为准。
+    """
+    if ARGS.out:
+        return Path(ARGS.out)
+    stem = src.stem if hasattr(src, 'stem') else str(src)
+    m = re.search(r'(?:SOURCE-)?([0-9]{4}\.[0-9]{4,5}(?:v\d+)?)', stem)
+    tag = m.group(1) if m else re.sub(r'[^0-9A-Za-z._-]+', '-', stem)
+    return ROOT / 'data' / 'quality' / f'protocol-ladder-{tag}.json'
 
 MODEL = os.environ.get('KG_QA_MODEL', 'qwen3.5:9b')
 OLLAMA = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434')
@@ -63,6 +85,13 @@ def parse_args():
     ap.add_argument('--chars', type=int, default=3000,
                     help='源文本截取多少字符（0=全量；全量约 440s/次）')
     ap.add_argument('--dry-run', action='store_true', help='只打 prompt，不跑模型')
+    # P13a（2026-09-16）：产物**按论文分文件**，不再写死一个路径。
+    # 起因是一次真实的数据丢失：跑第二篇时把第一篇的产物**覆盖**了，
+    # 而我以为"它在 git 里"——核实发现 `git show` 返回 0 字节，**它从未入库**
+    # （`data/quality/` 被 gitignore，当时只 `add -f` 了 53 个被文档引用的文件）。
+    # 教训：**「覆盖写固定路径」+「产物在 gitignore 目录里」= 数据必然丢。**
+    ap.add_argument('--out', default=None,
+                    help='产物路径（默认 data/quality/protocol-ladder-<论文id>.json）')
     return ap.parse_args()
 
 
@@ -295,15 +324,21 @@ def main():
                                  for d in by_ann.values() for u, v in list(d.items())[:5]][:12]}
 
     if results:
-        OUT.parent.mkdir(parents=True, exist_ok=True)
-        OUT.write_text(json.dumps({
+        out_path = resolve_out(src)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps({
             'source': str(src.relative_to(ROOT)).replace('\\', '/'),
             'model': MODEL, 'reps': ARGS.reps,
             'caliber': '单元=(源,目标)对；值=关系类型编码，0=未列出（"未列出==明确判定不属于"，'
                        '与 tools/recompute_agreement.py 同口径）',
             'results': results,
         }, ensure_ascii=False, indent=2), encoding='utf-8')
-        print(f'已写 {OUT.relative_to(ROOT)}')
+        rel_out = _rel(out_path)
+        print(f'已写 {rel_out}')
+        # P13b：**产物在 gitignore 目录里 ⇒ 必须 add -f，否则跨篇对比会丢数据。**
+        # 直接打印命令，省得下次又忘（上一次就是这么丢的）。
+        print(f'  ⚠️ data/ 被 gitignore ⇒ 入库要显式：'
+              f'git add -f "{rel_out}"')
         print()
         print('=' * 78)
         print('协议阶梯（α 是否随结构化程度单调上升）')

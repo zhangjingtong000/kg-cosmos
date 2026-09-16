@@ -1,0 +1,200 @@
+{"id": "V0001", "verdict": "reject", "reason": "端点不在：premise 中只剩末位作者名 Zhang，source 实体 Y. Xian 未出现（evidence 显示 Y. Xian 是该文献第一作者，切分时被丢弃）", "confidence": "high"}
+{"id": "V0002", "verdict": "support", "reason": "premise 明确断言：premise 直接写明该策略 (usually using Transformer)，主客方向与 USES 一致", "confidence": "high"}
+{"id": "V0003", "verdict": "reject", "reason": "端点不在：premise 只说 scoring function 用于度量 facts 的合理性，target 实体 Negative Sample 未出现（negative sample 仅出现在 evidence 后文的分值比较中）", "confidence": "high"}
+{"id": "V0004", "verdict": "reject", "reason": "方向反了：premise 说 scoring metrics 分为 distance-based 与 similarity matching based，即后者是前者的子类，与 hypothesis 的主客关系颠倒", "confidence": "high"}
+{"id": "V0005", "verdict": "reject", "reason": "端点不在：premise 只有作者名单与年份“Yongxin Zhu, Bocheng Li, Yifei Xin, and Linli Xu. 2024.”，target 作品标题未出现，无任何创作断言", "confidence": "medium"}
+{"id": "V0006", "verdict": "reject", "reason": "空泛同义反复：premise 只是同一篇文献 [26] 的作者名单，两个实体仅并列出现，未断言二者存在相关性", "confidence": "medium"}
+{"id": "V0007", "verdict": "reject", "reason": "端点不在：premise 是“of LLM-based approaches…”的碎片，source 实体 ADONIS 未出现（ADONIS 只在 evidence 后文出现）", "confidence": "high"}
+{"id": "V0008", "verdict": "reject", "reason": "端点不在：premise 讲的是逻辑规则与 embeddings 的结合（Markov logic networks + KGE），target 实体 Domain Knowledge 未出现", "confidence": "high"}
+{"id": "V0009", "verdict": "reject", "reason": "谓词不对：premise 只说 KG 中隐含大量 first-order/temporal logical rules、位于 relations 与 events 之间，未断言规则“应用于”events（evidence 后文的应用对象是 KG embedding 模型）", "confidence": "medium"}
+{"id": "V0010", "verdict": "support", "reason": "premise 明确断言：premise 说提出的 Graph Extrapolation Network 用于快速学习 unseen entities 的 embeddings，方向与 PRODUCES 一致", "confidence": "medium"}
+{"id": "V0011", "verdict": "reject", "reason": "引错段/端点不在：premise 中只见末位作者 Walters 与标题，source 实体 A. Dutra 未出现（evidence 显示 A. Dutra 是中间作者）", "confidence": "high"}
+{"id": "V0012", "verdict": "reject", "reason": "端点不在：premise 只是把 KG-aware ZSL 方法命名为 Propagation-based Paradigm，target 实体 Unseen Class 未出现，也无使用断言", "confidence": "high"}
+{"id": "V0013", "verdict": "reject", "reason": "引错段/端点不在：premise 只有末位作者 Florian 与标题，source 实体 G. Dinu 未出现", "confidence": "high"}
+{"id": "V0014", "verdict": "reject", "reason": "端点不在：premise 只剩名词短语“low-dimensional vectors.”，source 实体 Knowledge Graph Embeddings 未出现，也没有任何谓词断言", "confidence": "high"}
+{"id": "V0015", "verdict": "reject", "reason": "引错段/端点不在：premise 中仅出现“Chen”，紧邻标题的作者实为末位作者 H. Chen，source 实体 X. Chen 未在 premise 中出现", "confidence": "medium"}
+{"id": "V0016", "verdict": "reject", "reason": "引错段/端点不在：premise 讲的是 ArchiMate 视点元素与领域概念的对应关系，两个实体 Experts 与 Resources 均未出现", "confidence": "high"}
+{"id": "V0017", "verdict": "reject", "reason": "端点不在：premise 讲 deep learning model 做 coreference resolution 的两阶段流程，target 实体 Named Entity Recognition 未出现（NER 仅在 evidence 末句出现）", "confidence": "high"}
+{"id": "V0018", "verdict": "support", "reason": "premise 明确断言：premise 说 Justice 是来自 ACE 本体的 8 个粗粒度主类型之一，即 Justice 属于 ACE，方向与 PART_OF 一致", "confidence": "high"}
+{"id": "V0019", "verdict": "reject", "reason": "引错段/端点不在：premise 中只有末位作者 Zhao，source 实体 K. Liu 未出现（evidence 显示 K. Liu 是中间作者）", "confidence": "high"}
+{"id": "V0020", "verdict": "reject", "reason": "空泛同义反复：premise 是结果表格片段，两个实体只是同一张表内并列的方法条目，未断言二者相关", "confidence": "medium"}
+{"id": "V0021", "verdict": "reject", "reason": "空泛同义反复：premise 是表格被切碎后的碎片，只剩年份、[37]、用•/-表示的勾选符号，除实体名外没有任何可读断言，更没有断言 Relation Triples Extraction uses Entity", "confidence": "high"}
+{"id": "V0022", "verdict": "reject", "reason": "端点不在：premise 只截到 \\\"analysis to exploit the deep features.\\\"，Perturbations（perturbations）根本没出现在 premise 里，也无任何产出断言；完整 evidence 中的 perturbations 句被切在 premise 之外", "confidence": "high"}
+{"id": "V0023", "verdict": "reject", "reason": "引错段：premise 是 \\\"Label noise reduction in entity typing\\\"（Ren, He, Qu, Voss, Ji, Han, SIGKDD 2016）这一条参考文献，与 Zero-Shot Fine-Grained Named Entity Typing 无关，且 J. Hao 也不在这段里；真正的证据是紧随其后的 [118] 与 [119]", "confidence": "high"}
+{"id": "V0024", "verdict": "support", "reason": "premise 明确断言：文献标题 \\\"NLTK: the natural language toolkit\\\" 直接建立了 NLTK 与 Natural Language Toolkit 的等同/关联，RELATED_TO 无方向约束", "confidence": "medium"}
+{"id": "V0025", "verdict": "reject", "reason": "谓词不对：premise 只是举例 \\\"a document labeled Paris with a picture of London\\\"，text 与 Paris 仅为举例中的共现，并未断言二者存在任何关系", "confidence": "medium"}
+{"id": "V0026", "verdict": "reject", "reason": "端点不在：premise 只说到 \\\"a one-vs-rest binary classifier is trained with Dtr\\\"，Classification Layer 出现在被切掉的后续句（Such a classifier is usually composed of ... classification layer(s)），premise 内无 PART_OF 断言", "confidence": "high"}
+{"id": "V0027", "verdict": "reject", "reason": "谓词不对：premise 说 \\\"Wikidata is a collaboratively edited KG\\\"，这是 is-a（实例/子类）而非 PART_OF 的部分整体关系，类型选错", "confidence": "medium"}
+{"id": "V0028", "verdict": "reject", "reason": "端点不在：premise 只有 \\\"Multimodal medical code tokenizer.\\\" 一个标题片段，International Conference on Machine Learning（ICML）完全不在 premise 里，无任何断言", "confidence": "high"}
+{"id": "V0029", "verdict": "reject", "reason": "谓词不对：premise 断言的是 DCGST \\\"has a bounded diameter\\\"（自身性质），并未断言 DCGST 使用 Diameter Bound 这一实体；evidence 里 \\\"a diameter bound of two hops\\\" 是查询给定参数而非 DCGST 所使用", "confidence": "medium"}
+{"id": "V0030", "verdict": "reject", "reason": "空泛同义反复：premise 是模型性能对比表，TransR (Lin et al., 2015b) 与 NTN (Socher et al., 2013) 只是各自带分数的表格行，除并列罗列外没有任何关于二者关系的断言", "confidence": "medium"}
+{"id": "V0031", "verdict": "support", "reason": "premise 明确断言：LLM 的出现在应对这些挑战上提供新视角，leverages parameterized knowledge of LLMs ... for KGs' quality control and maintenance，即 LLM 使能维护工作，方向正确", "confidence": "medium"}
+{"id": "V0032", "verdict": "reject", "reason": "端点不在：premise 只有作者名单与年份 \\\"Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2019.\\\"，BERT 作品名出现在被切掉的下一句，premise 内无法确立作者—作品的创作关系", "confidence": "medium"}
+{"id": "V0033", "verdict": "support", "reason": "premise 明确断言：文献标题 \\\"path-based interaction model for few-shot knowledge graph completion\\\" 表明该模型应用于 FS-KGC，APPLIES_TO 方向（模型→任务）正确", "confidence": "medium"}
+{"id": "V0034", "verdict": "reject", "reason": "空泛同义反复：premise 是模型公式表，SimplE [48] 与 RESCAL [49] 仅作为同行条目各带打分函数，没有任何断言二者存在关联", "confidence": "medium"}
+{"id": "V0035", "verdict": "reject", "reason": "空泛同义反复＋端点不在：premise 仅 \\\"Knowledge graphs.\\\" 两词，ACM Comput. Surv. 根本不在 premise 中，且原文（Hogan et al., 2022）是论文发表于该刊，part-of 方向本身也不成立", "confidence": "high"}
+{"id": "V0036", "verdict": "reject", "reason": "端点不在：premise 只有作者列表 \\\"[22] Diogo Teles Sant'Anna, ... Lucas dos Santos Ramos, ... 2020.\\\"，作品名 Generating Knowledge Graphs from Unstructured Texts 在被切掉的下一句，premise 未断言创作关系", "confidence": "medium"}
+{"id": "V0037", "verdict": "reject", "reason": "端点不在：premise 讲的是 Ontogenia 框架引入 Metacognitive Prompting 做本体生成，Large Language Model 与 Competency Question 都不在 premise 里；LLMs parse CQs 一句在被切掉的前文", "confidence": "high"}
+{"id": "V0038", "verdict": "support", "reason": "premise 明确断言：\\\"It uses a gated recurrent update mechanism for iterative belief propagation on the auxiliary KG\\\"，即该机制被用于完成迭代信念传播，方向（机制→传播）正确", "confidence": "medium"}
+{"id": "V0039", "verdict": "support", "reason": "premise 明确断言：Table 1 的标题为 \\\"Relation types for defining relationships between knowledge graph elements (based on [20])\\\"，即该表内容依据并引用了参考文献 20", "confidence": "medium"}
+{"id": "V0040", "verdict": "support", "reason": "premise 明确断言：\\\"Multi-view knowledge graph embedding for entity alignment,\\\" in IJCAI, 2019, pp. 5429–5435，即该论文收录于 IJCAI，part-of 归属关系成立且方向正确", "confidence": "medium"}
+{"id": "V0041", "verdict": "support", "reason": "premise 明确断言：把 meta relational learning 列为知识图谱综述探讨的 emerging topic，二者确有关联（source 仅以 'temporal knowledge graphs' 形式隐含出现）", "confidence": "medium"}
+{"id": "V0042", "verdict": "reject", "reason": "端点不在：premise 只截到作者 'Roth'，通篇未出现 H. Peng（evidence 显示 H. Peng 在完整作者列表中，但 premise 未含该段）", "confidence": "high"}
+{"id": "V0043", "verdict": "support", "reason": "premise 明确断言：'Titanic (1977 film) type: Film'，直接支持 Titanic 与 Films 相关", "confidence": "high"}
+{"id": "V0044", "verdict": "support", "reason": "premise 明确断言：'Kim, “Dynamic network embeddings: …”' 的引用格式表明 Kim 是该文作者，方向符合作品 was created by 作者", "confidence": "medium"}
+{"id": "V0045", "verdict": "reject", "reason": "方向反了且端点不在：hypothesis 把出版方 Springer 当作被创作的作品、把论文标题当作作者，premise 只给出论文标题，未出现 Springer（evidence 中 Springer 是出版社）", "confidence": "high"}
+{"id": "V0046", "verdict": "reject", "reason": "端点不在：premise 只截到作者 'Wen'，未出现 Z. Lu（evidence 中 Z. Lu 为第二作者，但 premise 未含该段）", "confidence": "high"}
+{"id": "V0047", "verdict": "support", "reason": "premise 明确断言：encoder 借助 MLPs 与 GNNs 将原始图结构建模到 latent space，GNNs 用于 latent space 表示", "confidence": "medium"}
+{"id": "V0048", "verdict": "support", "reason": "premise 明确断言：'They' 依 evidence 指 KG-aware FSL methods，其用额外的 few-shot samples 训练或集成，方向正确", "confidence": "high"}
+{"id": "V0049", "verdict": "support", "reason": "premise 明确断言：OWL 2 的句子引用 [Kr¨otzsch et al., 2008]，引用标记与 source 直接关联", "confidence": "high"}
+{"id": "V0050", "verdict": "reject", "reason": "端点不在：premise 只截到作者 'Chen'，未出现 J. Zhang（evidence 中 J. Zhang 为第二作者，但 premise 未含该段）", "confidence": "high"}
+{"id": "V0051", "verdict": "support", "reason": "premise 明确断言：Haiming Bao 出现在署名 OpenAI 的作者名单 [10] 中，可支持其隶属 OpenAI", "confidence": "medium"}
+{"id": "V0052", "verdict": "support", "reason": "premise 明确断言：分类列表中 '- Neural Nets - Attention - GCN - GAN - RL' 把 GAN 置于 Neural Nets 之下，方向正确", "confidence": "medium"}
+{"id": "V0053", "verdict": "support", "reason": "premise 明确断言：提出一个 modular framework，用于基于交通规则的 decision-making，即框架使能决策", "confidence": "medium"}
+{"id": "V0054", "verdict": "support", "reason": "premise 明确断言：表格中 QuatE (Zhang et al., 2019) 行位于 FB15k 表头之下，即在 FB15k 上被评估", "confidence": "medium"}
+{"id": "V0055", "verdict": "support", "reason": "premise 明确断言：标题 'Zep: A Temporal Knowledge Graph Architecture for Agent Memory'，架构面向 Agent Memory", "confidence": "medium"}
+{"id": "V0056", "verdict": "support", "reason": "premise 明确断言：'an n-dimensional torus space which is a compact Lie group'；严格说是 is-a 而非 part-of，按宽泛归属判为支持", "confidence": "medium"}
+{"id": "V0057", "verdict": "support", "reason": "premise 明确断言：'their training data' 表明 LLM 的知识局限于并依赖于训练数据，USES 成立", "confidence": "medium"}
+{"id": "V0058", "verdict": "reject", "reason": "引错段：premise 是表格切片错位，'FR+LP/Diffusion Bridge' 属于上一行 GLAD，Bio2Token 片段被截断在 'c.'，未断言 Bio2Token 与 FR 的关系", "confidence": "medium"}
+{"id": "V0059", "verdict": "support", "reason": "premise 明确断言：已开展同时学习 temporal 与 relational embedding 的研究，即时序知识图谱嵌入使用关系嵌入", "confidence": "medium"}
+{"id": "V0060", "verdict": "support", "reason": "premise 明确断言：方法组合为 'CNN/PCNN + selective attention + max-pooling'，max-pooling 被用于 CNN/PCNN", "confidence": "medium"}
+{"id": "V0061", "verdict": "support", "reason": "premise 明确断言：引用条目中 Riedel 直接署名于该论文标题之前（作者→作品），方向正确", "confidence": "medium"}
+{"id": "V0062", "verdict": "reject", "reason": "端点不在：premise 中未出现 Handcrafted Linguistic Rules（主语被截断成 offered precision...），也未断言它支持 Knowledge Extraction", "confidence": "high"}
+{"id": "V0063", "verdict": "support", "reason": "premise 明确断言：ExpressGNN employs GCNN", "confidence": "high"}
+{"id": "V0064", "verdict": "reject", "reason": "谓词不对/端点不在：premise 是模型清单里的表行（AGGCN 由 GCN + multi-head attention + dense layers 组成），并未出现 premise 中的 AGGCN 对 Dense Layers 的 USES 断言对象端点，仅构成成分列举", "confidence": "low"}
+{"id": "V0065", "verdict": "support", "reason": "premise 明确断言：同句并列描述 DCRF 与 hierarchical CRF 为同类 CRF 方法，成立 related 关系", "confidence": "medium"}
+{"id": "V0066", "verdict": "reject", "reason": "谓词不对：premise 只是论文标题的引用片段，EMNLP 未出现，论文标题与会议不构成 PART_OF", "confidence": "high"}
+{"id": "V0067", "verdict": "reject", "reason": "端点不在：premise 只提 TransE 保留了 scalability，未出现翻译模型类实体 Translation-Based Methods", "confidence": "high"}
+{"id": "V0068", "verdict": "reject", "reason": "端点不在：premise 只截到作者 Etzioni，未出现 R. Bart", "confidence": "high"}
+{"id": "V0069", "verdict": "reject", "reason": "方向反了：premise 说的是 KG 除关系事实与字面量外还含 ontologies，而非 Knowledge Graphs 属于 Ontologies", "confidence": "high"}
+{"id": "V0070", "verdict": "reject", "reason": "端点不在：premise 中该条引用的作者是 Downey，R. Wang 未出现在 premise 里", "confidence": "high"}
+{"id": "V0071", "verdict": "reject", "reason": "端点不在：premise 只到小标题 \\\"Model augmentation methods.\\\" 即止，未出现 Searching Space，也没有任何断言", "confidence": "high"}
+{"id": "V0072", "verdict": "support", "reason": "premise 明确断言：NTN takes entity embeddings as input", "confidence": "high"}
+{"id": "V0073", "verdict": "support", "reason": "premise 明确断言：在 medicine and biology domains 中引入 domain knowledge 做预测", "confidence": "medium"}
+{"id": "V0074", "verdict": "reject", "reason": "谓词不对：premise 只是把关系抽取分为 pipeline 与 joint 两类，并未断言二者被相互比较", "confidence": "medium"}
+{"id": "V0075", "verdict": "support", "reason": "premise 明确断言：表格 Model 列表中列有 EARL (2023)，说明 EARL 属于所列举的模型", "confidence": "low"}
+{"id": "V0076", "verdict": "support", "reason": "premise 明确断言：zero-shot learning 沿用上述 support/query 形式，其 query 标签不出现在 support sets 中", "confidence": "medium"}
+{"id": "V0077", "verdict": "reject", "reason": "谓词不对：premise 只是参考文献条目（[Li et al., 2016] 与作者名），论文与其引用标签之间不构成 PART_OF", "confidence": "high"}
+{"id": "V0078", "verdict": "support", "reason": "premise 明确断言：表格 Perception 一栏之下列出 Object detection", "confidence": "medium"}
+{"id": "V0079", "verdict": "reject", "reason": "端点不在：premise 中作者名被截断为孤立的 \\\"F.\\\"，未出现完整的 Li, Y. F.，无法确认该端点", "confidence": "medium"}
+{"id": "V0080", "verdict": "support", "reason": "premise 明确断言：question answering 即给出针对自然语言问题的答案", "confidence": "high"}
+{"id": "V0081", "verdict": "reject", "reason": "端点不在：premise 是从完整引用尾部切出的片段，只出现 'Xing,'（末位作者），hypothesis 断言的作者 C. Y. Li 根本不在 premise 里。", "confidence": "high"}
+{"id": "V0082", "verdict": "reject", "reason": "引错段：premise 讲的是 'Cognitive graph for multi-hop reading comprehension at scale' (ACL 2019)，与 DKN 无关；DKN 与 WWW 只出现在后面的 evidence 里（[204]）。", "confidence": "high"}
+{"id": "V0083", "verdict": "reject", "reason": "空泛无断言：premise 只是论文标题 'Complex embeddings for simple link prediction.'，target 'International Conference on Machine Learning' 未出现，venue 信息(ICML)只在 evidence 中。", "confidence": "high"}
+{"id": "V0084", "verdict": "reject", "reason": "引错段：premise 说的是 'previous methods' 依赖现有连接、无法捕捉知识演化，主语根本不是 ConMask；ConMask 的句子（relationship-dependent content masking）在其后一段。", "confidence": "high"}
+{"id": "V0085", "verdict": "support", "reason": "premise 明确断言：GQE 把合取逻辑查询 'makes ... as intersection operators'，GQE → 使用 → Intersection Operator 方向正确。", "confidence": "high"}
+{"id": "V0086", "verdict": "support", "reason": "premise 明确断言：SDP-LSTM 'adopts multi-channel LSTM while utilizing the shortest dependency path between entity pair'，方向正确。", "confidence": "high"}
+{"id": "V0087", "verdict": "reject", "reason": "空泛同义反复：premise 仅是 Index Terms 关键词并列（Knowledge Graph, Zero-shot Learning, ...），术语共现不等于断言二者相关。", "confidence": "medium"}
+{"id": "V0088", "verdict": "reject", "reason": "端点不在：premise 只有一串信息抽取子任务名（NER、entity typing、entity linking、coreference、relation extraction），未出现 'Automatic KG Construction'，也无 part-of 断言。", "confidence": "high"}
+{"id": "V0089", "verdict": "support", "reason": "premise 明确断言：OpenNRE 提供 CNN 和 LSTM 等模型 'to perform supervised relation extraction'，即 LSTM 使能监督关系抽取，方向正确。", "confidence": "medium"}
+{"id": "V0090", "verdict": "reject", "reason": "premise 在 'Geng et al.' 处直接截断，未给出任何谓词；'integrate class hierarchies' 属于其后的 evidence 内容，premise 本身不含 Class Hierarchies。", "confidence": "high"}
+{"id": "V0091", "verdict": "support", "reason": "premise 明确断言：'the semantic matching scoring function employs compositional operators'，方向正确。", "confidence": "high"}
+{"id": "V0092", "verdict": "reject", "reason": "空泛无断言：premise 只是被切断的文献引用（含标题与期刊名），虽标题提到 knowledge embedding，但没有任何谓词断言 KEPLER 使用它。", "confidence": "medium"}
+{"id": "V0093", "verdict": "reject", "reason": "方向反了：premise 说 relational path 由 entities 和 relations 交替组成，即 relations 是 path 的组成部分，而 hypothesis 断言 path 是 relations 的一部分。", "confidence": "high"}
+{"id": "V0094", "verdict": "support", "reason": "premise 明确断言：Section 3 处理半结构化数据的方法 'including content extraction and structure interpretation'，即 structure interpretation 应用于半结构化数据，方向正确。", "confidence": "medium"}
+{"id": "V0095", "verdict": "reject", "reason": "端点不在：premise 只是一串作者姓名（Jian Zhang, Zhangqi Wang, Haiping Zhu, ...）加年份，作品中 'Mars' 未出现，也无 created-by 断言。", "confidence": "high"}
+{"id": "V0096", "verdict": "support", "reason": "premise 明确断言：'PathCon [120] leverages relational context and relational paths...'，方向正确。", "confidence": "high"}
+{"id": "V0097", "verdict": "reject", "reason": "谓词不对：premise 说 cross-sentence/cross-paragraph contexts『impedes』各子任务、尤其是 relation extraction tasks（是障碍），而非被应用于这些任务。", "confidence": "medium"}
+{"id": "V0098", "verdict": "reject", "reason": "端点不在：premise 是从完整引用尾部切出的片段，作者位只剩 'Poggio,'，hypothesis 断言的作者 M. Nickel 不在 premise 中。", "confidence": "high"}
+{"id": "V0099", "verdict": "reject", "reason": "空泛同义反复：premise 是论文配图里的标签碎片（'Semantic Web CV, NLP, ML, Database Major KG forms ... KG construction ZSL/FSL Resources'），ML 与 KG construction 只是并列罗列，未断言应用关系。", "confidence": "medium"}
+{"id": "V0100", "verdict": "reject", "reason": "谓词/端点不对：premise 是表格行，描述某模型组合（CNN/PCNN + GCN + knowledge-aware attention），并未断言 Convolutional Neural Networks 使用 Graph Convolutional Networks 这一泛化命题。", "confidence": "medium"}
+{"id": "V0101", "verdict": "reject", "reason": "端点不在：premise 只谈 large language models(LLMs) 与 knowledge graphs 之间的关系讨论，全文没有出现 TechGPT-2.0，无法支撑该实体与 LLM 的关联断言。", "confidence": "high"}
+{"id": "V0102", "verdict": "reject", "reason": "空泛同义反复：premise 仅为论文标题与作者名单的截断，除了标题里出现 Zero-shot and Few-shot Learning 字样外，没有任何关于该综述与 Zero-Shot Learning 之间关系的断言。", "confidence": "medium"}
+{"id": "V0103", "verdict": "support", "reason": "premise 明确断言：构建该基准时从 FB15k-237 三元组中随机挑选头实体，明确写明 by uniform sampling over all the associated head entities，方向为基准使用 uniform sampling，与 USES 一致。", "confidence": "medium"}
+{"id": "V0104", "verdict": "reject", "reason": "方向反了：premise 表格写作 FB15k-237 (Toutanova and Chen, 2015)，即作者创作了该数据集，而 hypothesis 写成 Toutanova and Chen was created by FB15k-237，主客颠倒。", "confidence": "high"}
+{"id": "V0105", "verdict": "reject", "reason": "方向反了：premise 是参考文献条目，D. Agarwal 是 WWW'22 会议论文集的编者(eds.)之一，hypothesis 把会议当作 D. Agarwal 的创作者，主客颠倒且语义不通。", "confidence": "high"}
+{"id": "V0106", "verdict": "support", "reason": "premise 明确断言：dummy features (instances) are synthesized for those unseen classes by GAN，即 dummy features 与 unseen classes 存在明确的生成关联，与 RELATED_TO 相符。", "confidence": "medium"}
+{"id": "V0107", "verdict": "reject", "reason": "端点不在：premise 只有 Toward an architecture for never-ending language learning 与作者 Mitchell，A. Saparov 未出现在 premise 中（其名仅见于 evidence 中另一条参考文献的作者列表），无法支撑该作者与该论文的创作关系。", "confidence": "high"}
+{"id": "V0108", "verdict": "support", "reason": "premise 明确断言：承接上文主语 RAG，It inputs it as a prompt to LLMs, enhancing the models' ability to handle knowledge-intensive tasks, such as question answering，即 RAG 被用于问答类任务，与 APPLIES_TO 相符。", "confidence": "medium"}
+{"id": "V0109", "verdict": "reject", "reason": "端点不在：premise 是一条关于 Imojie 的参考文献片段，作者为 Kolluru 等与 Chakrabarti，R. Xie 和 L. Lin 均未出现在 premise 中（二人见于 evidence 中另一条参考文献的作者列表）。", "confidence": "high"}
+{"id": "V0110", "verdict": "reject", "reason": "端点不在：premise 只含章节标题 Knowledge Dynamic 与一句泛论 knowledge dynamics，DyERNIE 未出现在 premise 中（其仅在 evidence 更后文作为示例模型被列出），无任何二者关联的断言。", "confidence": "high"}
+{"id": "V0111", "verdict": "reject", "reason": "端点不在：premise 只有标题 Language models are unsupervised multitask learners，Nick Ryder 未出现在 premise 中（他是 evidence 里另一篇论文 Language models are few-shot learners 的作者），premise 本身也无任何创作断言。", "confidence": "high"}
+{"id": "V0112", "verdict": "reject", "reason": "端点不在：premise 是从长句切出的残缺列表片段 labeled data training, synthetic data generation...for improved accuracy in complex event relationships，未出现 Event Extraction 这一端点，也未指明任何主体使用了 labeled data。", "confidence": "medium"}
+{"id": "V0113", "verdict": "support", "reason": "premise 明确断言：Distribution of SC scores across 105 articles for GraphRAG, KGGen, and RAKG，即以 SC score 对 KGGen 等系统进行度量，方向为 SC Score → KGGen，与 MEASURES 相符。", "confidence": "medium"}
+{"id": "V0114", "verdict": "reject", "reason": "端点不在：premise 只给出 Knowledge engineering: Principles and methods 的题名与作者缩写，期刊名 Data & Knowledge Engineering 未出现在 premise 中（只出现在 evidence 的后续行），无 PART_OF 断言。", "confidence": "high"}
+{"id": "V0115", "verdict": "reject", "reason": "方向反了：premise 为 Zhao, \\\"Relation-aware entity alignment for heterogeneous knowledge graphs\\\"，即 Zhao 是该论文作者，而 hypothesis 写成 D. Zhao was created by Relation-Aware Entity Alignment，主客颠倒。", "confidence": "high"}
+{"id": "V0116", "verdict": "support", "reason": "premise 明确断言：construct a auxiliary KG for evaluating KG-aware methods，即以 auxiliary KG 评估 KG-aware 方法，方向与 EVALUATES 一致。", "confidence": "medium"}
+{"id": "V0117", "verdict": "support", "reason": "premise 明确断言：ANALOGY [22] provides a unified view of several representative models, including DistMult, ComplEx, and，直接建立 ANALOGY 与 DistMult 的关联。", "confidence": "high"}
+{"id": "V0118", "verdict": "reject", "reason": "空泛同义反复：premise 是图 2 中的碎片标签 A Boris France CONTEXT MISSING Fig. 2.，Boris 与 France 仅被并列摆放，没有任何关系断言，属于占位符式文本。", "confidence": "high"}
+{"id": "V0119", "verdict": "support", "reason": "premise 明确断言：the KnowLM-IE dataset encompasses diverse fields, including people, geographical areas, transportation, organizations, works, organisms, events, etc.，直接说明 KnowLM-IE 覆盖 organizations 领域。", "confidence": "high"}
+{"id": "V0120", "verdict": "support", "reason": "premise 明确断言：Knowledge graphs that represent structural relations between entities have become an increasingly popular research direction，直接建立 Knowledge Graphs 与 entities 的关系。", "confidence": "high"}
+{"id": "V0121", "verdict": "support", "reason": "premise 明确断言：作者隶属写作“Morteza Ezzabady / Université de Toulouse / Toulouse, France”，即该大学在图卢兹，方向正确（机构 → 所在城市）", "confidence": "medium"}
+{"id": "V0122", "verdict": "reject", "reason": "端点不在：premise 只讲“提供可访问资源以帮助读者构建知识图谱系统”，全句没有出现 Qian Li", "confidence": "high"}
+{"id": "V0123", "verdict": "reject", "reason": "方向反了：premise 说 examples 是 PromptNER 的四个组成部分之一，即 Examples 属于 PromptNER，而非 PromptNER 属于 Examples", "confidence": "high"}
+{"id": "V0124", "verdict": "reject", "reason": "端点不在／谓词不对：premise 只说“解决 sample shortage 的办法是生成新数据”，并未把 Sample 作为该范式的产出物加以断言", "confidence": "medium"}
+{"id": "V0125", "verdict": "reject", "reason": "端点不在：premise 只有“Xiaojie et al.”，K. Liu 仅出现在未采用的 evidence 引文串里，且 PRODUCES 谓词也不成立", "confidence": "high"}
+{"id": "V0126", "verdict": "reject", "reason": "端点不在：premise 只断言 logic reasoning / commonsense reasoning 对高阶语境语义重要，未出现 source 实体 Models，也无“使用”关系", "confidence": "high"}
+{"id": "V0127", "verdict": "reject", "reason": "端点不在：premise 只是被截断的作者名单（至“Aidan N.”），作品名 Attention Is All You Need 并未出现在 premise 中", "confidence": "medium"}
+{"id": "V0128", "verdict": "reject", "reason": "端点不在：premise 是 Kolter 的 ICLR 2020 引用条目，Y. Yang 只出现在 evidence 的相邻参考文献 [103] 中，premise 内无此人", "confidence": "high"}
+{"id": "V0129", "verdict": "reject", "reason": "端点不在：premise 仅是不成句的片段“into interpretability and improve the reliability of predicted knowledge”，没有出现 Knowledge Graphs，也无“应用于”的断言", "confidence": "high"}
+{"id": "V0130", "verdict": "support", "reason": "premise 明确断言：超参数表中 Model 列含 Atom，其 pretrain_seqlen 取值为 4096，即 Atom 配置/使用了该序列长度参数，方向正确", "confidence": "medium"}
+{"id": "V0131", "verdict": "reject", "reason": "方向反了：premise 说车道拓扑变化是“due to forks and merges”，即 merges 导致 topology changes，而非 topology changes 导致 merges", "confidence": "high"}
+{"id": "V0132", "verdict": "reject", "reason": "端点不在：premise 只给出 Bert 论文标题与 arXiv 编号，David Luan 出现在 evidence 中另一篇（GPT）论文的作者串里，与本 premise 无关", "confidence": "high"}
+{"id": "V0133", "verdict": "reject", "reason": "端点不在：premise 仅是被截断的作者串“Michael Sejr Schlichtkrull, Thomas N.”，作品名 Modeling Relational Data with Graph Convolutional Networks 只存在于 evidence 中", "confidence": "medium"}
+{"id": "V0134", "verdict": "support", "reason": "premise 明确断言：meta relational learning 旨在“learn fast adaptation over unseen relations in low-resource settings”，两端点均出现且“在低资源设定下”的方向正确", "confidence": "medium"}
+{"id": "V0135", "verdict": "reject", "reason": "端点不在：premise 在“in Proc.”处被截断，目标实体“Proc. ACL”未出现（完整出处仅见于 evidence）", "confidence": "medium"}
+{"id": "V0136", "verdict": "reject", "reason": "谓词不对：premise 说的是“among these objects, which acquire its nodes via dependency patterns selection”，objects 并未产出 nodes，产出主体是别的构建过程", "confidence": "high"}
+{"id": "V0137", "verdict": "reject", "reason": "端点不在：premise 只讲 LLM 给 Ontology Engineering 与 KG 构建带来范式转变，未出现 source 实体 Bottom-Up Approach（该词仅在 evidence 中）", "confidence": "high"}
+{"id": "V0138", "verdict": "reject", "reason": "谓词不对：premise 说许多 table forms 网页中“function as navigators”，是充当导航器，而非“使用 Navigators”", "confidence": "medium"}
+{"id": "V0139", "verdict": "reject", "reason": "方向反了：premise 中 SLRE [Guo et al., 2020] 表示 Guo 等人是 SLRE 的作者/提出者，hypothesis 却写成 Guo Et Al. 由 SLRE 创作，主客颠倒", "confidence": "high"}
+{"id": "V0140", "verdict": "reject", "reason": "端点不在：premise 只提到“the bare metal approach”，source 实体 Bare Metal Solution 未出现（该表述仅在 evidence 后半段）", "confidence": "medium"}
+{"id": "V0141", "verdict": "support", "reason": "premise 明确断言", "confidence": "medium"}
+{"id": "V0142", "verdict": "reject", "reason": "空泛同义反复：premise 仅为符号表并列定义（ω 卷积滤波器、∗ 卷积算子），未断言 USES 关系", "confidence": "high"}
+{"id": "V0143", "verdict": "support", "reason": "premise 明确断言", "confidence": "medium"}
+{"id": "V0144", "verdict": "support", "reason": "premise 明确断言", "confidence": "medium"}
+{"id": "V0145", "verdict": "support", "reason": "premise 明确断言", "confidence": "medium"}
+{"id": "V0146", "verdict": "reject", "reason": "端点不在：premise 止于 within the scope of KG，Relational Facts 未出现，也无 ENABLES 断言", "confidence": "high"}
+{"id": "V0147", "verdict": "support", "reason": "premise 明确断言", "confidence": "high"}
+{"id": "V0148", "verdict": "support", "reason": "premise 明确断言", "confidence": "high"}
+{"id": "V0149", "verdict": "support", "reason": "premise 明确断言", "confidence": "medium"}
+{"id": "V0150", "verdict": "support", "reason": "premise 明确断言", "confidence": "medium"}
+{"id": "V0151", "verdict": "reject", "reason": "端点不在：premise 只有作者名单与年份，作品标题被切到下一句，premise 内无 target", "confidence": "medium"}
+{"id": "V0152", "verdict": "support", "reason": "premise 明确断言", "confidence": "low"}
+{"id": "V0153", "verdict": "reject", "reason": "谓词不对：premise 仅罗列 KG 的四类挑战并称割裂阻碍知识利用，未断言知识推理与知识利用相矛盾", "confidence": "high"}
+{"id": "V0154", "verdict": "support", "reason": "premise 明确断言", "confidence": "medium"}
+{"id": "V0155", "verdict": "support", "reason": "premise 明确断言", "confidence": "high"}
+{"id": "V0156", "verdict": "reject", "reason": "谓词不对：premise 说的是使用 target entity 的特征空间中的邻近实体，并未断言 target entity 位于 feature space", "confidence": "medium"}
+{"id": "V0157", "verdict": "reject", "reason": "方向反了：hypothesis 写成「人被作品创作」，与 CREATED_BY 的作者→作品约定相反；且 premise 仅作者名单，作品标题未出现", "confidence": "high"}
+{"id": "V0158", "verdict": "reject", "reason": "端点不在：premise 是另一篇论文标题片段，P. Li 未出现在 premise 中（P. Li 属于 evidence 中下一引用的 CokeBERT）", "confidence": "high"}
+{"id": "V0159", "verdict": "reject", "reason": "端点不在：premise 只有作者名单，作品标题位于 evidence 的下一句，premise 内无 target", "confidence": "medium"}
+{"id": "V0160", "verdict": "support", "reason": "premise 明确断言", "confidence": "medium"}
+{"id": "V0161", "verdict": "reject", "reason": "端点共现但无断言：premise 分别谈及 class attributes 与 class name 两类文本信息，从未把二者关联起来", "confidence": "medium"}
+{"id": "V0162", "verdict": "support", "reason": "premise 明确断言：架构表中 \\\"DyGIE [238] ELmo + BiLSTM GCN + Span enumeration\\\"", "confidence": "high"}
+{"id": "V0163", "verdict": "reject", "reason": "引错段：premise 讲的是 graph summarization 综述，Link Prediction 与 Pattern Coverage 两端点均未出现在 premise 中", "confidence": "high"}
+{"id": "V0164", "verdict": "unclear", "reason": "premise 是 \\\"Creating a Scholarly Knowledge Graph…\\\" 的表格片段，仅出现 Author 列头与若干字段名，未断言 Authors 是该 Scholarly Knowledge Graph 的组成部分", "confidence": "medium"}
+{"id": "V0165", "verdict": "support", "reason": "premise 明确断言：JOIE 学习联合嵌入并 \\\"formulates entity typing as top-k ranking\\\"", "confidence": "high"}
+{"id": "V0166", "verdict": "reject", "reason": "谓词不对：premise 只说微调过程中\\\"保持\\\"通用能力（to ensure the sustained general ability），未断言微调\\\"支持\\\"通用能力", "confidence": "medium"}
+{"id": "V0167", "verdict": "unclear", "reason": "premise 是面向未来的建议（\\\"in the future, applying both logics and embeddings into more … pre-trained KG models deserves attention\\\"），未断言已经发生的应用，无法判定该 APPLIES_TO 是否成立", "confidence": "medium"}
+{"id": "V0168", "verdict": "support", "reason": "premise 为词条 \\\"Embedding Methods for NLP.\\\"，结合其参考文献形式 \\\"Embedding Methods for NLP. In EMNLP 2014 tutorial.\\\" 可明确断言该文属于该 tutorial", "confidence": "medium"}
+{"id": "V0169", "verdict": "support", "reason": "premise 明确断言：knowledge-graph-based research 聚焦 knowledge representation learning（KRL）", "confidence": "high"}
+{"id": "V0170", "verdict": "support", "reason": "premise 为 KRL 模型汇总表的片段，标题 \\\"A summary of recent KRL models\\\" 与 \\\"Scoring Function fr(h,t)\\\" 列并置，明确断言二者相关", "confidence": "high"}
+{"id": "V0171", "verdict": "reject", "reason": "引错段：premise 是 \\\"under translational assumptions, arXiv preprint arXiv:2009.12765, 2020.\\\" 这一条作者为 M. Ali 等（[125]）之外的另一条文献的结尾，M. Berrendorf 未出现在 premise 中，该 arXiv 条目也非 Berrendorf 的成果", "confidence": "medium"}
+{"id": "V0172", "verdict": "support", "reason": "premise 明确断言：\\\"a WordNet sub-graph with 30K nodes are extracted as a KG\\\"，即子图作为知识图谱", "confidence": "medium"}
+{"id": "V0173", "verdict": "support", "reason": "premise 明确断言：\\\"[24] X. Wang, X. Han, Y. Lin, Z. Liu, and M. Sun, 'Adversarial multi-lingual neural relation extraction,'\\\"，方向为「作品 was created by 作者」，正确", "confidence": "high"}
+{"id": "V0174", "verdict": "reject", "reason": "谓词不对：premise 中 \\\"given a keyword query Avatar DiCaprio\\\" 是把 Avatar DiCaprio 作为查询串整体举例，并未断言它与 Keyword Query 这一关系成立", "confidence": "medium"}
+{"id": "V0175", "verdict": "support", "reason": "premise 为同一参考文献的作者列表，Xiaozhe Ren 与 Shanzhi Gu 并列其中，可明确断言二者相关（共同作者）", "confidence": "medium"}
+{"id": "V0176", "verdict": "support", "reason": "premise 明确断言：\\\"survey papers that are suitable for our approach (i.e., surveys representing information in tabular format)\\\"", "confidence": "high"}
+{"id": "V0177", "verdict": "support", "reason": "premise 明确断言：\\\"until the discriminator cannot distinguish features of the seen relations and the unseen relations\\\"，即判别器作用于未见关系", "confidence": "medium"}
+{"id": "V0178", "verdict": "reject", "reason": "premise 是被截断的半句 \\\"Based on the quantized codes through intra-layer and inter-layer residuals, the.\\\"，只说明量化码经由层内/层间残差，并未断言 Quantized Codes 是 Intra-Layer Residuals 的组成部分", "confidence": "medium"}
+{"id": "V0179", "verdict": "reject", "reason": "端点不在：premise 只有作者列表与年份，作品标题（target）整段未出现", "confidence": "high"}
+{"id": "V0180", "verdict": "reject", "reason": "空泛共现：premise 是论文标题加摘要首句，两个术语只是并列出现，未断言二者相关", "confidence": "medium"}
+{"id": "V0181", "verdict": "support", "reason": "premise 中作者 Guo 与作品标题同现，方向为作者→作品，关系成立", "confidence": "medium"}
+{"id": "V0182", "verdict": "support", "reason": "premise 明确称 GNN 类方法用于建模实体与关系，方向正确", "confidence": "medium"}
+{"id": "V0183", "verdict": "reject", "reason": "端点不在：premise 中 source 被截断为 B.，无法确认是 Bordes, J. B.", "confidence": "medium"}
+{"id": "V0184", "verdict": "support", "reason": "premise 表格中 Multichannel LSTM 一栏明确列出 + dropout，构成使用关系", "confidence": "medium"}
+{"id": "V0185", "verdict": "reject", "reason": "谓词不对：premise 只说 aims to learn fast adaptation，未断言产出", "confidence": "medium"}
+{"id": "V0186", "verdict": "reject", "reason": "端点不在：premise 只讲 accuracy 与 Entity Coverage 指标，GraphRAG 与 KGGen 均未出现", "confidence": "high"}
+{"id": "V0187", "verdict": "reject", "reason": "端点不在：premise 是被截断的表格碎片，不含 GCL", "confidence": "high"}
+{"id": "V0188", "verdict": "support", "reason": "premise 称 KGs 已成为语义搜索的强大资产，方向正确", "confidence": "high"}
+{"id": "V0189", "verdict": "support", "reason": "premise 直接把 FB15k-237 与 WN18RR 的子集放在一起比较", "confidence": "medium"}
+{"id": "V0190", "verdict": "reject", "reason": "端点不在：premise 中既无 Resources 也无 Strategy Viewpoint", "confidence": "high"}
+{"id": "V0191", "verdict": "support", "reason": "premise 称用 LSTM 进行 preference inference，方向正确", "confidence": "high"}
+{"id": "V0192", "verdict": "reject", "reason": "空泛并列：premise 只是 ConceptNet 关系类型的枚举，Relation 为泛指", "confidence": "medium"}
+{"id": "V0193", "verdict": "reject", "reason": "表格并列：premise 是公式表碎片，TransH 与 TransAt 仅分行共现", "confidence": "medium"}
+{"id": "V0194", "verdict": "reject", "reason": "谓词不对：premise 说该 agent 用于把假正例重分配到负样本", "confidence": "medium"}
+{"id": "V0195", "verdict": "reject", "reason": "空泛同义反复：premise 仅提出 DCGST 问题，target 是 source 名称的组成部分", "confidence": "medium"}
+{"id": "V0196", "verdict": "reject", "reason": "端点错配：premise 中 NELL 只与 the Web 关联，Web pages 修饰的是 Google KG", "confidence": "medium"}
+{"id": "V0197", "verdict": "support", "reason": "premise 引用标题 Subsequence kernels for relation extraction，表达方法应用于该任务", "confidence": "medium"}
+{"id": "V0198", "verdict": "reject", "reason": "方向反了：premise 表明 prototype-driven label embedding 是 KG embedding 方法之一", "confidence": "high"}
+{"id": "V0199", "verdict": "reject", "reason": "方向反了：premise 说训练三元组来自 WorldTree 语料，而非 WorldTree 产出三元组", "confidence": "high"}
+{"id": "V0200", "verdict": "reject", "reason": "端点不在：premise 只出现 Cheng，未出现 X. Jin", "confidence": "high"}

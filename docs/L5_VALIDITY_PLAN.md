@@ -466,7 +466,7 @@ python tools/l5_validity_second_judge.py --report
 | `data/quality/l5-validity-design.json` | 层表、权重、探针 id、预期 CI |
 | `data/quality/l5-validity-labels.jsonl` | 人工标签（append-only，**由盲判产生，现在还不存在**） |
 | `data/quality/l5-validity-report.json` | 最终指标 |
-| `data/quality/l5-second-judge.json` | 第二判定者结果（可选） |
+| `data/quality/l5-second-judge.json` | 第二判定者结果（可选） **待产出** |
 
 **盲判界面已做过端到端验收**（无头 Chrome，`tmp/cdp_check_l5review.py`，四类断言全过）：
 

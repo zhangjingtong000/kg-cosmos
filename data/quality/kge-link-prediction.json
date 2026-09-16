@@ -1,0 +1,202 @@
+{
+ "generated": "2026-09-16 17:02:33",
+ "purpose": "H6 链接预测 + H7「GNN 是否值得做」的数据支撑",
+ "design": {
+  "split_A_by_edge": "随机切边（文献常规，乐观）",
+  "split_B_by_paper": "**整篇留作测试** —— 训练时完全没出现过的论文，这才是\"读一篇新论文时能不能补关系\"的真实设定",
+  "eval_setting": "realistic（PyKeen 默认的过滤式排名）",
+  "seed": 20260916
+ },
+ "data": {
+  "triples": 43867,
+  "entities": 19469,
+  "relations": 15,
+  "papers": 17,
+  "relation_counts": {
+   "RELATED_TO": 9720,
+   "CREATED_BY": 8757,
+   "USES": 7381,
+   "PART_OF": 5856,
+   "APPLIES_TO": 3857,
+   "PRODUCES": 2215,
+   "ENABLES": 1006,
+   "CITES": 967,
+   "MEASURES": 872,
+   "LOCATED_AT": 854,
+   "SUPPORTS": 797,
+   "COMPARES_WITH": 604,
+   "EVALUATES": 454,
+   "CAUSES": 284,
+   "CONTRADICTS": 243
+  },
+  "long_tail_relations_lt50": 0,
+  "long_tail_edges": 0,
+  "per_paper": {
+   "1703.08098v9": {
+    "nodes": 989,
+    "edges": 2263
+   },
+   "2002.00388v4": {
+    "nodes": 2789,
+    "edges": 5894
+   },
+   "2012.00456v1": {
+    "nodes": 669,
+    "edges": 1391
+   },
+   "2112.10006v6": {
+    "nodes": 2627,
+    "edges": 6400
+   },
+   "2202.07412v1": {
+    "nodes": 904,
+    "edges": 1752
+   },
+   "2210.08119v1": {
+    "nodes": 1260,
+    "edges": 1946
+   },
+   "2302.05019v1": {
+    "nodes": 3915,
+    "edges": 7157
+   },
+   "2310.04835v3": {
+    "nodes": 2461,
+    "edges": 4926
+   },
+   "2401.04507v1": {
+    "nodes": 830,
+    "edges": 1506
+   },
+   "2402.12001v1": {
+    "nodes": 836,
+    "edges": 1307
+   },
+   "2406.08223v2": {
+    "nodes": 1184,
+    "edges": 1747
+   },
+   "2410.21237v1": {
+    "nodes": 757,
+    "edges": 981
+   },
+   "2412.10092v1": {
+    "nodes": 513,
+    "edges": 1155
+   },
+   "2501.03566v1": {
+    "nodes": 815,
+    "edges": 1231
+   },
+   "2502.00681v2": {
+    "nodes": 1169,
+    "edges": 1824
+   },
+   "2504.09823v1": {
+    "nodes": 660,
+    "edges": 980
+   },
+   "2510.20345v1": {
+    "nodes": 1083,
+    "edges": 1407
+   }
+  }
+ },
+ "config": {
+  "models": [
+   "TransE",
+   "RotatE"
+  ],
+  "epochs": 100,
+  "embedding_dim": 128,
+  "batch_size": 1024,
+  "test_ratio": 0.1,
+  "held_out_papers": 3
+ },
+ "results": [
+  {
+   "model": "TransE",
+   "split": "by-edge",
+   "elapsed_s": 65.5,
+   "n_train": 38242,
+   "n_test": 3535,
+   "n_test_dropped_new_entity": 835,
+   "pct_test_dropped": 19.04,
+   "n_entities": 18666,
+   "n_relations": 15,
+   "unseen_entities_in_test": 0,
+   "unseen_relations_in_test": 0,
+   "mrr": 0.039760950952768326,
+   "hits@1": 0.005091937765205092,
+   "hits@3": 0.0545968882602546,
+   "hits@10": 0.1
+  },
+  {
+   "model": "RotatE",
+   "split": "by-edge",
+   "elapsed_s": 79.8,
+   "n_train": 38242,
+   "n_test": 3535,
+   "n_test_dropped_new_entity": 835,
+   "pct_test_dropped": 19.04,
+   "n_entities": 18666,
+   "n_relations": 15,
+   "unseen_entities_in_test": 0,
+   "unseen_relations_in_test": 0,
+   "mrr": 0.1269543319940567,
+   "hits@1": 0.10141442715700141,
+   "hits@3": 0.13012729844413012,
+   "hits@10": 0.16973125884016974
+  },
+  {
+   "model": "TransE",
+   "split": "by-paper",
+   "elapsed_s": 45.2,
+   "n_train": 37184,
+   "n_test": 1009,
+   "n_test_dropped_new_entity": 4367,
+   "pct_test_dropped": 80.96,
+   "n_entities": 17188,
+   "n_relations": 15,
+   "unseen_entities_in_test": 0,
+   "unseen_relations_in_test": 0,
+   "mrr": 0.06552402675151825,
+   "hits@1": 0.013379583746283449,
+   "hits@3": 0.09266600594648167,
+   "hits@10": 0.155599603567889
+  },
+  {
+   "model": "RotatE",
+   "split": "by-paper",
+   "elapsed_s": 53.4,
+   "n_train": 37184,
+   "n_test": 1009,
+   "n_test_dropped_new_entity": 4367,
+   "pct_test_dropped": 80.96,
+   "n_entities": 17188,
+   "n_relations": 15,
+   "unseen_entities_in_test": 0,
+   "unseen_relations_in_test": 0,
+   "mrr": 0.1167578250169754,
+   "hits@1": 0.09663032705649158,
+   "hits@3": 0.11496531219028741,
+   "hits@10": 0.1466798810703667
+  }
+ ],
+ "splits": [
+  {
+   "kind": "by-edge",
+   "note": "随机切 10% 的边作测试"
+  },
+  {
+   "kind": "by-paper",
+   "held_out": [
+    "1703.08098v9",
+    "2402.12001v1",
+    "2502.00681v2"
+   ],
+   "note": "整篇留 3 篇作测试（训练时完全没出现）"
+  }
+ ],
+ "elapsed_s": 253.3
+}

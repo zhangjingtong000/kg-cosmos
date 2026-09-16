@@ -63,6 +63,13 @@ try {
     # ④ 单元测试（**此前完全不在任何入口里**）
     Step '单元测试 (pytest)' { & $PY -m pytest tests -q }
 
+    # ⑤ 产物入库（P13b，2026-09-16）
+    # **为什么需要**：一次真实的数据丢失 —— 跑 P3 第二篇时第一篇的产物被覆盖，
+    # 而我以为"它在 git 里"，核实发现**它从未入库**（`data/` 被 gitignore，
+    # 当时只 `add -f` 了 53 个"文档引用到的"文件，而它不在里面）。
+    # 这个检查盯的就是那条判据：**文档写了它，它就必须存在且已入库。**
+    Step '产物入库（文档引用）' { & $PY tools/check_artifacts_tracked.py }
+
     # ⑤ 回归（31 项；--fast 跳过慢的 PDF 检查）
     if (-not $Quick) {
         Step '回归 (verify_all --fast)' { & $PY tools/verify_all.py --fast }
