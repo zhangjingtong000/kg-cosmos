@@ -32,6 +32,11 @@ import sys
 import time
 
 ROOT = str(ROOT)
+
+# `_rel` 的实现抽到 `tools/_paths.py`（见 N1 的说明）。
+sys.path.insert(0, os.path.join(ROOT, 'tools'))
+from _paths import rel as _shared_rel  # noqa: E402
+
 Q = os.path.join(ROOT, 'data', 'quality')
 OUT = os.path.join(Q, 'metric-provenance.json')
 
@@ -60,16 +65,13 @@ ARCHIVE_DIR = os.environ.get('KG_ARCHIVE_DIR') or os.path.join(
 def _rel(path):
     """尽量给相对路径；**跨盘时退回绝对路径**。
 
-    为什么需要它：`os.path.relpath` 在 Windows 上**跨盘会抛 ValueError**
-    （`path is on mount 'C:', start on mount 'D:'`）。
-    而 `KG_ARCHIVE_DIR` 是可配置的 —— 完全可能被指到另一个盘
-    （测试里就是：`tmp_path` 在 C 盘、仓库在 D 盘）。
-    **一个打印语句不该把整个命令搞挂。**
+    实现已抽到 `tools/_paths.py` —— **因为这是第二次踩同一个坑**：
+    `tools/apply_edit_plan.py` 也栽在 `Path.relative_to` 的跨盘
+    `ValueError: path is on mount 'C:', start on mount 'D:'` 上。
+    （第一次是本文件的 `KG_ARCHIVE_DIR` 被测试指到 C 盘。）
+    这里保留一个薄包装，是为了不动本文件其它调用点。
     """
-    try:
-        return os.path.relpath(path, ROOT)
-    except ValueError:
-        return path
+    return _shared_rel(path)
 
 
 def _fname_ts(rec):

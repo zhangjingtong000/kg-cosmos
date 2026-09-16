@@ -1,0 +1,8 @@
+{
+  "generated_by": "人工手写（K1 的验收样例）",
+  "note": "这是一个**不改任何东西**的计划：所有操作都指向不存在的名字。用途是验证 apply_edit_plan.py 的 dry-run 路径与「没命中会告警」的行为。",
+  "operations": [
+    {"op": "rename_entity", "from": "__NOT_EXIST_A__", "to": "__NOT_EXIST_B__", "reason": "故意不命中"},
+    {"op": "delete_edge", "source": "__NOT_EXIST_A__", "target": "__NOT_EXIST_B__", "type": "USES", "reason": "故意不命中"}
+  ]
+}
