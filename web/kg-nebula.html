@@ -365,6 +365,7 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
   <button type="button" data-exp="png"  title="把当前三维视图存成 PNG">PNG</button>
   <button type="button" data-exp="json" title="导出当前视图的节点与边（JSON）">JSON</button>
   <button type="button" data-exp="gexf" title="导出 Gephi 可打开的 .gexf">GEXF</button>
+  <button type="button" data-exp="share" title="把当前视图（社区 / 选中实体 / 只看分歧）编码进链接，复制后发给别人">分享</button>
 </div>
 <!-- ==KG_EXPORT_V1_END== -->
 
@@ -2122,6 +2123,69 @@ animate();
   }
 }
 
+// ── C4（2026-09-16）：从链接恢复视图状态 ?n=<实体名>&only=1 ──────────────
+//
+// **必须在 `?c=N` 之后**：`?c=N` 负责把社区内部数据加载出来（`data`），
+// 而"选中某个实体"要在那之后才有得选。
+// 分享按钮（`data-exp="share"`）生成的链接就长这样，两者是一对。
+{
+  const q3 = new URLSearchParams(location.search);
+  const wantNode = q3.get('n');
+  const wantOnly = q3.get('only') === '1';
+  const applied = { node: null, only: false, node_missing: false };
+
+  if (wantOnly && typeof contraBtn !== 'undefined' && contraBtn) {
+    // 直接点那个按钮 —— **不复制它的逻辑**：按钮里除了置位还有重绘与
+    // aria 状态，复制一份将来一定会漂。
+    contraBtn.click();
+    applied.only = true;
+  }
+
+  if (wantNode) {
+    try {
+      // ⚠️ **`?n=` 单独出现时，概览层里根本没有实体** ——
+      // 概览层是"社区云"（每个球是一个社区），实体要**进入社区之后**才有。
+      // ⇒ 所以先拿 `communities[].core`（nebula.json 里每个社区的核心实体，
+      //   60×12=720 个名字，**已经在内存里，零额外请求**）定位它在哪个社区，
+      //   **自动进去**，然后再选。
+      //   不做这一步的后果实测过：`?n='Knowledge Graph Embeddings'` 打开是空的
+      //   —— 而"发给老师一个链接，打开就能看到那个实体"正是 C4 的目的。
+      if (inside === null && typeof clouds !== 'undefined' && clouds) {
+        for (let ci = 0; ci < clouds.length; ci++) {
+          const core = (clouds[ci] && clouds[ci].core) || [];
+          if (core.some(x => x && x.id === wantNode)) {
+            await enterCommunity(ci);
+            break;
+          }
+        }
+      }
+      const ud = overlay && overlay.userData;
+      const nodes = (ud && ud.data && ud.data.nodes) || [];
+      const i = nodes.findIndex(x => x && x.id === wantNode);
+      if (i >= 0) {
+        selectNode(i);
+        applied.node = wantNode;
+      } else {
+        // **找不到要说出来**，不要静默 —— 分享出去的链接可能对应
+        // 另一份图数据（换了一篇论文），那时"什么都没发生"最让人困惑。
+        applied.node_missing = true;
+        status.textContent = `链接里的实体「${wantNode}」不在当前图中（可能对应另一份数据）`;
+        status.classList.add('visible');
+      }
+    } catch (e) {
+      applied.node_missing = true;
+    }
+  }
+
+  // 供 CDP 脚本断言"链接里的状态真的被恢复了"
+  window.__viewState = applied;
+  if (applied.node || applied.only) {
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
+    window.__ready = true;
+  }
+}
+
 // ── 直接从「论文原文」进来：?pdf=<文件名>&page=<页>&q=<片段> ──────────────
 //
 // **为什么加这一组参数**：`ask.html`（多 Agent 问答）的每条证据都带着
@@ -2344,12 +2408,59 @@ addEventListener('resize', () => {
 
   const bar = document.getElementById('kgExport');
   if (!bar) return;
+
+  // ── C4（2026-09-16）：分享链接 ──────────────────────────────────────
+  //
+  // **要解决什么**（TODO C4 的原话）：演示时想"把这个视图发给老师看"，做不到。
+  //
+  // ## 编码什么：**语义状态**，而不是相机坐标
+  //
+  // 状态只有三个，**刻意不含相机位置**（`OrbitControls` 的 x/y/z）：
+  //     ?c=<n>       进入的社区号（**已有**，这一页本来就有）
+  //     ?n=<实体名>   选中的实体（新）
+  //     ?only=1      "只看分歧"打开（新）
+  //
+  // **为什么不编码相机坐标**：坐标是**屏幕相关的** —— 换个窗口大小、
+  // 换台机器、换个 DPR，同一个 `(x,y,z)` 看到的完全不是一回事。
+  // **链接要在别人机器上打开还长一样，就只能带语义状态。**
+  // （这与项目"产物要可复现"的纪律一致：能带的必须是**不随环境变的东西**。）
+  //
+  // 节点名可能含 `&` `#` 空格等，统一走 `URLSearchParams` 让它转义；
+  // 读回来时 `URLSearchParams.get` 会自动反转义，不需要手工处理。
+  function buildShareURL() {
+    const q = new URLSearchParams();
+    if (typeof inside === 'number' && inside !== null) q.set('c', String(inside));
+    // 选中实体：`selectedNodeIdx` 是**内部索引**，换一次数据就可能变
+    // ⇒ 一定用**名字**，它是图的一部分，与加载顺序无关。
+    try {
+      const ud = typeof overlay !== 'undefined' && overlay && overlay.userData;
+      const n = ud && ud.data && ud.data.nodes && ud.data.nodes[selectedNodeIdx];
+      if (n && n.id) q.set('n', String(n.id));
+    } catch (e) { /* 分享失败不该影响看图 */ }
+    if (onlyContra) q.set('only', '1');
+    const qs = q.toString();
+    return location.origin + location.pathname + (qs ? '?' + qs : '');
+  }
+
   bar.addEventListener('click', ev => {
     const btn = ev.target.closest('button[data-exp]');
     if (!btn) return;
     const kind = btn.dataset.exp;
     try {
-      if (kind === 'png') {
+      if (kind === 'share') {
+        const url = buildShareURL();
+        // 供自动化验证读取（CDP 脚本据此断言"编码了哪些状态"）
+        window.__shareState = { url: url, copied: false };
+        const done = () => { flash(btn); window.__shareState.copied = true; };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(done).catch(() => {
+            // **剪贴板不可用不是失败**：把链接显示出来让用户自己复制
+            prompt('复制这个链接：', url); done();
+          });
+        } else {
+          prompt('复制这个链接：', url); done();
+        }
+      } else if (kind === 'png') {
         renderer.render(scene, camera);
         renderer.domElement.toBlob(b => {
           if (!b) { alert('PNG 导出失败：画布为空'); return; }

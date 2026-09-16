@@ -62,6 +62,10 @@ CHECKS = [
     ("问题子图 PathQA", ["tools/cdp_verify_pathqa.py"]),
     # 盲判界面是 L5 严格效度的**唯一**入口；它坏了会让 3–6 小时的人工投入白费。
     ("L5 盲判界面（盲态不泄漏 · 判定可落盘）", ["tools/cdp_verify_l5_review.py"]),
+    # C4：分享链接。**必须用浏览器测** —— 编码与恢复全在前端，
+    # 在 Python 里"读源码看有没有那个函数"证明不了它能跑。
+    ("分享链接（编码语义状态 · 打开能恢复 · 找不到要明说）",
+     ["tools/cdp_verify_share_link.py"]),
     ("证据深链 PDF 高亮（pdf.js 自绘，可断言）", ["tools/cdp_verify_pdflink.py"], "slow"),
 ]
 
