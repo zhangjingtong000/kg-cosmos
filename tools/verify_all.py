@@ -87,6 +87,10 @@ CHECKS = [
     # 同样不能只断言"页面没报错"。
     ("时间演化（帧数对 · 末帧 KPI 逐字对 · 折线画全 · 播放是开关）",
      ["tools/cdp_verify_temporal.py"]),
+    # F2：多图对比。**最强的那条是"用 Python 独立算一遍交集，与浏览器算出的
+    # KPI 逐字相等"** —— 渲染一个错的数也算渲染，所以必须能独立复算。
+    ("多图对比（默认对 · **交集与独立复算逐字相等** · 三栏 · 点切换到那对）",
+     ["tools/cdp_verify_diff.py"]),
     ("证据深链 PDF 高亮（pdf.js 自绘，可断言）", ["tools/cdp_verify_pdflink.py"], "slow"),
 ]
 

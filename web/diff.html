@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KG Cosmos · 多图对比</title>
+<!--
+  F2（2026-09-16）：任选两篇，看**共有 / 各自独有**。
+
+  ## 先量了一遍，才知道这页该给人看什么
+
+  17 篇两两对比（136 对）：
+    · 节点重叠（Jaccard）**最高只有 0.089** —— 同领域两篇共享实体也很少；
+    · **节点重叠为 0 的对数：0 / 136** —— 每一对都有共享实体；
+    · **边重叠为 0 的对数：28 / 136** —— 但有 28 对**没有共享的边**。
+
+  ⇒ **后一条才是看点**：两篇共享了实体，却没有任何一条相同的关系 ——
+    即"**同一批东西，两篇给出的关系不一样**"。
+
+  ## ⚠️ 「类型分歧」不等于「矛盾」
+
+  同一对实体在两篇里类型不同（一篇 `USES`、一篇 `RELATED_TO`），
+  可能是**两篇在说不同的侧面**。本项目**没有做"这两条边冲突吗"的判断**
+  （那需要读原文）⇒ 所以这里叫「**类型分歧**」，并在页面上注明它**不等于矛盾**。
+
+  ## 为什么按需加载
+
+  两两全量会得到 136 对的大文件，而用户**一次只看一对**。
+  ⇒ 索引（19 KB）+ 每篇一个文件（平均 148 KB），选了哪两篇才取那两个。
+-->
+<style>
+  :root{--bg:#0b0d12;--fg:#dfe2e8;--dim:#8b95a8;--line:rgba(193,195,201,.18);
+        --hot:#e0a469;--cool:#7cc0b6;--warn:#e8c9a4;--bad:#e07575}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(1200px 600px at 50% -10%,#141826 0%,var(--bg) 60%);
+       color:var(--fg);font:14px/1.65 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+       overflow:auto}
+  header{padding:16px 22px 8px}
+  h1{margin:0;font-size:18px;font-weight:600}
+  .sub{color:var(--dim);font-size:12.5px;margin-top:5px;max-width:1040px}
+  .sub b{color:var(--warn)}
+  main{padding:6px 22px 40px;max-width:1240px}
+  .panel{background:rgba(255,255,255,.03);border:1px solid var(--line);
+         border-radius:12px;padding:14px 16px;margin:14px 0}
+  .k{color:var(--dim);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase}
+  select{background:rgba(18,20,26,.9);color:var(--fg);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;
+         max-width:340px}
+  select:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+  .ctl{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .v{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums}
+  .v.cool{color:var(--cool)} .v.hot{color:var(--hot)}
+  .cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  @media (max-width:900px){.cols{grid-template-columns:1fr}}
+  .box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:110px}
+  .box.a{border-color:rgba(224,164,105,.4)}
+  .box.b{border-color:rgba(124,192,182,.4)}
+  .box.c{border-color:rgba(232,201,164,.4)}
+  ul{margin:6px 0 0;padding-left:18px;max-height:280px;overflow:auto}
+  li{margin:1px 0;font-size:12.5px;word-break:break-word}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px}
+  th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;
+        vertical-align:top}
+  th{color:var(--dim);font-weight:500;font-size:11.5px}
+  .tag{display:inline-block;border-radius:5px;padding:1px 6px;font-size:11.5px;
+       margin-right:4px}
+  .tag.a{background:rgba(224,164,105,.16);color:var(--warn)}
+  .tag.b{background:rgba(124,192,182,.16);color:var(--cool)}
+  .note{color:var(--dim);font-size:12.5px;margin-top:8px}
+  .note b{color:var(--warn)}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:3px 0}
+  button{background:rgba(224,164,105,.14);color:var(--warn);cursor:pointer;
+         border:1px solid rgba(224,164,105,.42);border-radius:8px;padding:6px 12px;
+         font-size:12.5px;font-family:inherit}
+  button:hover{border-color:rgba(224,164,105,.86);color:#fff}
+  a{color:var(--cool)} code{color:var(--warn)}
+</style>
+</head>
+<body>
+<header>
+  <h1>多图对比</h1>
+  <div class="sub" id="sub">载入中…</div>
+</header>
+<main>
+  <div class="panel">
+    <div class="ctl">
+      <span class="k">左</span><select id="selA" aria-label="左图"></select>
+      <span class="k">右</span><select id="selB" aria-label="右图"></select>
+      <button id="swap" type="button">⇄ 交换</button>
+    </div>
+    <div class="note" id="hint"></div>
+  </div>
+
+  <div class="panel">
+    <div class="grid">
+      <div><div class="k">共有实体</div><div class="v cool" id="nInter">—</div></div>
+      <div><div class="k">节点 Jaccard</div><div class="v" id="nJ">—</div></div>
+      <div><div class="k">共有关系</div><div class="v cool" id="nEInter">—</div></div>
+      <div><div class="k">只在左 / 只在右</div><div class="v" id="nOnly">—</div></div>
+    </div>
+    <div class="note" id="jnote"></div>
+  </div>
+
+  <div class="panel">
+    <div class="k" style="margin-bottom:8px">实体</div>
+    <div class="cols">
+      <div class="box a"><div class="k">只在左</div><ul id="onlyA"></ul></div>
+      <div class="box c"><div class="k">共有</div><ul id="bothN"></ul></div>
+      <div class="box b"><div class="k">只在右</div><ul id="onlyB"></ul></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="k" style="margin-bottom:8px">
+      共有关系（两端都在交集里）· 按实体对归纳，<b>两篇的类型并排</b>
+    </div>
+    <div id="sharedEdges"></div>
+    <div class="note">
+      <b>类型分歧</b>：同一对实体，两篇给的类型不同 —— 上面用两个色块并排显示。
+      ⚠️ <b>分歧不等于矛盾</b>：可能是两篇在说不同的侧面。
+      本项目<b>没有做"这两条边冲突吗"的判断</b>（那需要读原文）。
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="k" style="margin-bottom:8px">
+      值得看的对（<b>共享实体、但零共享关系</b> —— "同一批东西，两篇给的关系完全不一样"）
+    </div>
+    <div id="interesting"></div>
+  </div>
+
+  <div class="panel">
+    <div class="note">
+      节点重叠的 <b>Jaccard 最高只有 0.089</b>（同领域两篇共享实体也很少）；
+      而 <b>0/136 对的节点交集是空的</b>，<b>28/136 对的关系交集是空的</b>。
+      ⇒ 后一条才是这一页的看点。
+    </div>
+  </div>
+
+  <p style="color:var(--dim);font-size:12.5px">
+    <a href="./index.html">← 回导航页</a> ·
+    <a href="./temporal.html">时间演化</a> ·
+    <a href="./bipartite.html">使用关系二部图</a>
+  </p>
+</main>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let IDX = null, CA = null, CB = null;
+
+const LIMIT = 260;   // 列表最多显示多少条（其余只报数量）
+
+function fillSelect(sel, keep) {
+  sel.innerHTML = IDX.papers.map(p =>
+    `<option value="${esc(p.id)}">${esc(p.id)} · ${p.n_nodes} 实体`
+    + `${p.year ? ' · ' + p.year : ''}</option>`).join('');
+  if (keep) sel.value = keep;
+}
+
+async function loadPair() {
+  const a = $('#selA').value, b = $('#selB').value;
+  const [ra, rb] = await Promise.all([
+    fetch('./kg-data/diff/' + a + '.json').then(r => r.json()),
+    fetch('./kg-data/diff/' + b + '.json').then(r => r.json()),
+  ]);
+  CA = ra; CB = rb;
+  render();
+  // 供 CDP 断言"真的算了、真的画了"
+  window.__diffState = { a: a, b: b,
+                         n_inter_nodes: window.__last?.nInter ?? null,
+                         n_inter_edges: window.__last?.nEInter ?? null };
+}
+
+function render() {
+  const na = new Set(CA.nodes), nb = new Set(CB.nodes);
+  const inter = [...na].filter(x => nb.has(x));
+  const onlyA = [...na].filter(x => !nb.has(x));
+  const onlyB = [...nb].filter(x => !na.has(x));
+  const j = inter.length / Math.max(1, na.size + nb.size - inter.length);
+
+  $('#nInter').textContent = inter.length.toLocaleString();
+  $('#nJ').textContent = j.toFixed(4);
+  $('#nOnly').textContent = onlyA.length.toLocaleString()
+    + ' / ' + onlyB.length.toLocaleString();
+
+  // ── 边：`s|t|type` ──
+  const interSet = new Set(inter);
+  const ea = CA.edges, eb = CB.edges;
+  const setA = new Set(ea), setB = new Set(eb);
+  const eInter = ea.filter(e => setB.has(e));
+  $('#nEInter').textContent = eInter.length.toLocaleString();
+
+  // 按**实体对**归纳（同一对可能有多种类型）
+  const byPair = new Map();
+  for (const e of ea) {
+    const [s, t, ty] = e.split('|');
+    if (!interSet.has(s) || !interSet.has(t)) continue;
+    const k = s + ' ═ ' + t;
+    if (!byPair.has(k)) byPair.set(k, { a: [], b: [] });
+    byPair.get(k).a.push(ty);
+  }
+  for (const e of eb) {
+    const [s, t, ty] = e.split('|');
+    if (!interSet.has(s) || !interSet.has(t)) continue;
+    const k = s + ' ═ ' + t;
+    if (!byPair.has(k)) byPair.set(k, { a: [], b: [] });
+    byPair.get(k).b.push(ty);
+  }
+  const pairs = [...byPair.entries()];
+  const diverge = pairs.filter(([, v]) =>
+    v.a.length && v.b.length && v.a.slice().sort().join() !== v.b.slice().sort().join());
+  const onlyOneSide = pairs.filter(([, v]) => !v.a.length || !v.b.length);
+
+  $('#sharedEdges').innerHTML = pairs.length ? `
+    <div class="note" style="margin:0 0 8px">
+      交集实体之间共 <b>${pairs.length}</b> 对关系：
+      <b>${pairs.length - diverge.length - onlyOneSide.length}</b> 对两篇类型一致 ·
+      <b>${diverge.length}</b> 对<b>类型分歧</b> ·
+      <b>${onlyOneSide.length}</b> 对<b>只有一篇有</b>
+    </div>
+    <table><thead><tr><th>实体对</th><th>左篇类型</th><th>右篇类型</th></tr></thead>
+    <tbody>${pairs.slice(0, LIMIT).map(([k, v]) => `<tr>
+      <td class="mono">${esc(k)}</td>
+      <td>${v.a.length ? v.a.map(t => `<span class="tag a">${esc(t)}</span>`).join('')
+                       : '<span class="note">—</span>'}</td>
+      <td>${v.b.length ? v.b.map(t => `<span class="tag b">${esc(t)}</span>`).join('')
+                       : '<span class="note">—</span>'}</td>
+    </tr>`).join('')}</tbody></table>
+    ${pairs.length > LIMIT
+      ? `<div class="note">…另有 ${pairs.length - LIMIT} 对（列表上限 ${LIMIT}）</div>` : ''}`
+    : '<div class="note">交集实体之间没有任何关系（这也是一种结果）</div>';
+
+  const li = (arr) => arr.slice(0, LIMIT).map(x => `<li>${esc(x)}</li>`).join('')
+    + (arr.length > LIMIT
+        ? `<li class="note">…另有 ${arr.length - LIMIT} 个</li>` : '');
+  $('#onlyA').innerHTML = li(onlyA) || '<li class="note">（无）</li>';
+  $('#bothN').innerHTML = li(inter) || '<li class="note">（无）</li>';
+  $('#onlyB').innerHTML = li(onlyB) || '<li class="note">（无）</li>';
+
+  const pa = IDX.papers.find(p => p.id === CA.id) || {};
+  const pb = IDX.papers.find(p => p.id === CB.id) || {};
+  $('#jnote').innerHTML = `左 <code>${esc(CA.id)}</code> ${CA.nodes.length} 实体；`
+    + `右 <code>${esc(CB.id)}</code> ${CB.nodes.length} 实体。`
+    + (inter.length === 0
+        ? ' <b>这两篇没有任何共享实体</b>。'
+        : (eInter.length === 0
+            ? ' ⚠️ <b>共享实体，但零共享关系</b> —— 同一批东西，两篇给的关系完全不一样。'
+            : ''))
+    + (pa.title ? `<br>左：${esc(pa.title)}` : '')
+    + (pb.title ? `<br>右：${esc(pb.title)}` : '');
+
+  $('#interesting').innerHTML = IDX.pairs.filter(p => p.zero_shared_edges)
+    .slice(0, 24).map(p => `<div class="row">
+      <button type="button" data-a="${esc(p.a)}" data-b="${esc(p.b)}">
+        ${esc(p.a)} × ${esc(p.b)}</button>
+      <span class="note">共享 ${p.n_inter_nodes} 实体 · 共享 0 关系 · J=${p.j}</span>
+    </div>`).join('') || '<div class="note">（没有这种对）</div>';
+  $('#interesting').querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => {
+      $('#selA').value = b.dataset.a;
+      $('#selB').value = b.dataset.b;
+      loadPair();
+    });
+  });
+
+  window.__last = { nInter: inter.length, nEInter: eInter.length,
+                    nPairs: pairs.length, nDiverge: diverge.length };
+  window.__diffState = { a: CA.id, b: CB.id, n_inter_nodes: inter.length,
+                         n_inter_edges: eInter.length, n_pairs: pairs.length,
+                         n_diverge: diverge.length };
+}
+
+fetch('./kg-data/diff.json').then(r => r.ok ? r.json() : null).then(d => {
+  if (!d) { $('#sub').textContent = '读不到 kg-data/diff.json'; return; }
+  IDX = d;
+  const m = (d.design || {}).measured || {};
+  $('#sub').innerHTML = `${d.papers.length} 篇 · ${d.pairs.length} 对`
+    + ` · 节点重叠最高 J=<b>${m.max_jaccard}</b>`
+    + ` · <b>共享实体但零共享关系的有 ${m.pairs_with_zero_shared_edges} 对</b>`
+    + `<br>选两篇对比；也可以直接点下面「值得看的对」`;
+  fillSelect($('#selA'));
+  fillSelect($('#selB'));
+  // 默认给**J 最高**的那一对（重叠最多，最有可比性）
+  if (d.pairs.length) {
+    $('#selA').value = d.pairs[0].a;
+    $('#selB').value = d.pairs[0].b;
+  }
+  $('#selA').addEventListener('change', loadPair);
+  $('#selB').addEventListener('change', loadPair);
+  $('#swap').addEventListener('click', () => {
+    const v = $('#selA').value; $('#selA').value = $('#selB').value;
+    $('#selB').value = v; loadPair();
+  });
+  loadPair().then(() => { window.__diffReady = true; });
+}).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
+</script>
+</body>
+</html>
