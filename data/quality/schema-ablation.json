@@ -1,0 +1,42 @@
+{
+ "generated": "2026-09-16 18:48:15",
+ "purpose": "H2：实验章节核心 —— 关系类型\"语义说明\"开/关对抽取的影响",
+ "caliber": "**消融的是\"给不给语义说明\"，两种都给了类型表** —— 称它\"Schema 开/关\"不准确；真正的\"完全不给类型表\"需要改代码，本实验不做。",
+ "setup": {
+  "source": "D:\\kg-demo\\data\\gold\\SOURCE-2012.00456v1-p1-12.txt",
+  "chars": 3000,
+  "mode": "local",
+  "env": {
+   "KG_BARE_RELATION_TYPES": "0 = 给语义 / 1 = 裸列表"
+  }
+ },
+ "scores": {
+  "with-sem": {
+   "n_nodes": 17,
+   "n_edges": 6,
+   "n_types_used": 3,
+   "type_dist": {
+    "USES": 3,
+    "CITES": 2,
+    "RELATED_TO": 1
+   },
+   "predicate_in_ontology": 1.0,
+   "related_to_share": 0.1667,
+   "illegal_types": []
+  },
+  "bare": {
+   "n_nodes": 17,
+   "n_edges": 6,
+   "n_types_used": 3,
+   "type_dist": {
+    "USES": 3,
+    "CITES": 2,
+    "RELATED_TO": 1
+   },
+   "predicate_in_ontology": 1.0,
+   "related_to_share": 0.1667,
+   "illegal_types": []
+  }
+ },
+ "elapsed_s": 480.7
+}

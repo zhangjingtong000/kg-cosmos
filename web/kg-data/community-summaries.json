@@ -1,0 +1,1251 @@
+{
+ "generated": "2026-09-16 18:49:25",
+ "model": "qwen3.5:9b",
+ "purpose": "B6：每个社区一段\"这个社区在研究什么\"（GraphRAG 的核心卖点）",
+ "design": {
+  "only_given_facts": "prompt 明确要求\"只用给定的实体与关系，不补充外部知识\"",
+  "may_say_no_theme": "允许回答\"这个社区没有明显的共同主题\"，不硬编",
+  "must_cite": "要求末尾列出\"引用实体: …\"，并可机械校验",
+  "grounding_check": "从摘要里抽出英文词，看有多少不在给定的实体清单里"
+ },
+ "n_total": 18,
+ "n_ok": 18,
+ "grounding_suspect": [],
+ "communities": [
+  {
+   "id": "comm-0",
+   "name": "Triple",
+   "ok": true,
+   "elapsed_s": 6.6,
+   "summary": "该社区主要围绕知识图谱嵌入技术展开，其中知识图谱嵌入方法利用三元组、关系及链接预测等概念，并包含 TransE 和 ComplEx 等具体方法。这些技术应用于链接预测任务，能够支持知识图谱补全过程，同时涉及评分函数以评估模型效果。整个体系还涵盖了 FB15k、FB15k-237 和 WN18RR 等多个数据集以及神经网络等相关概念。引用实体：Triple、Knowledge Graph Embeddings、Link Prediction、Relation、Scoring Function、Knowledge Graph Completion、TransE、KG Completion、ComplEx、Neural Networks、FB15k、FB15k-237、WN18RR",
+   "grounding": {
+    "unknown_tokens": [
+     "Completion",
+     "Embeddings",
+     "Function",
+     "Graph",
+     "Knowledge",
+     "Link",
+     "Networks",
+     "Neural",
+     "Prediction",
+     "Scoring"
+    ],
+    "n_unknown_tokens": 10,
+    "cited": [
+     "Triple",
+     "Knowledge Graph Embeddings",
+     "Link Prediction",
+     "Relation",
+     "Scoring Function",
+     "Knowledge Graph Completion",
+     "TransE",
+     "KG Completion",
+     "ComplEx",
+     "Neural Networks",
+     "FB15k",
+     "FB15k-237",
+     "WN18RR"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 1200,
+    "n_edges": 3018,
+    "core_ids": [
+     "ComplEx",
+     "FB15k",
+     "FB15k-237",
+     "KG Completion",
+     "Knowledge Graph Completion",
+     "Knowledge Graph Embeddings",
+     "Link Prediction",
+     "Methods",
+     "Neural Networks",
+     "Relation",
+     "Scoring Function",
+     "TransE",
+     "Triple",
+     "WN18RR"
+    ],
+    "top_types": {
+     "USES": 745,
+     "PART_OF": 463,
+     "RELATED_TO": 434,
+     "APPLIES_TO": 294,
+     "EVALUATES": 190,
+     "PRODUCES": 183
+    }
+   }
+  },
+  {
+   "id": "comm-1",
+   "name": "ArXiv",
+   "ok": true,
+   "elapsed_s": 5.4,
+   "summary": "根据给定数据，这个社区没有明显的共同主题。提供的实体和关系仅展示了部分会议（如AAAI、IJCAI）与特定方法或文档之间的关联，但缺乏足够的上下文来定义整个社区的统一研究范畴。引用实体: ArXiv、AAAI、EMNLP、COLING、IJCAI、IEEE Transactions on Neural Networks and Learning Systems、Reinforcement Learning、A Comprehensive Survey on Automatic Knowledge Graph Construction、Distant Supervision、NeurIPS、WWW、Pre-Training、Document-Level Relation Extraction、Commonsense Knowledge",
+   "grounding": {
+    "unknown_tokens": [
+     "Automatic",
+     "Commonsense",
+     "Comprehensive",
+     "Construction",
+     "Distant",
+     "Document-Level",
+     "Extraction",
+     "Graph",
+     "IEEE",
+     "Knowledge",
+     "Learning",
+     "Networks"
+    ],
+    "n_unknown_tokens": 20,
+    "cited": [
+     "ArXiv",
+     "AAAI",
+     "EMNLP",
+     "COLING",
+     "IJCAI",
+     "IEEE Transactions on Neural Networks and Learning Systems",
+     "Reinforcement Learning",
+     "A Comprehensive Survey on Automatic Knowledge Graph Construction",
+     "Distant Supervision",
+     "NeurIPS",
+     "WWW",
+     "Pre-Training",
+     "Document-Level Relation Extraction",
+     "Commonsense Knowledge"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": true
+   },
+   "facts": {
+    "n_nodes": 1200,
+    "n_edges": 1734,
+    "core_ids": [
+     "A Comprehensive Survey on Automatic Knowledge Graph Construction",
+     "AAAI",
+     "ArXiv",
+     "COLING",
+     "Commonsense Knowledge",
+     "Distant Supervision",
+     "Document-Level Relation Extraction",
+     "EMNLP",
+     "IEEE Transactions on Neural Networks and Learning Systems",
+     "IJCAI",
+     "NeurIPS",
+     "Pre-Training",
+     "Reinforcement Learning",
+     "WWW"
+    ],
+    "top_types": {
+     "CREATED_BY": 591,
+     "PART_OF": 335,
+     "RELATED_TO": 276,
+     "LOCATED_AT": 172,
+     "CITES": 133,
+     "USES": 120
+    }
+   }
+  },
+  {
+   "id": "comm-2",
+   "name": "Knowledge Graphs",
+   "ok": true,
+   "elapsed_s": 3.8,
+   "summary": "该社区主要围绕知识图谱展开，探讨其如何应用于问答系统、支持知识感知应用以及服务于推荐系统。根据给定信息，知识图谱不仅产生属性并作为关系事实的一部分，还启用了多种方法如多任务学习和抽取式知识图谱摘要。这些实体共同构成了一个以知识图谱为核心，连接各类概念、过程和方法的学术网络。引用实体：Knowledge Graphs、Question Answering、Property、Relational Facts、Knowledge-Aware Applications、Multi-Task Learning、Evaluation、Extractive KG Summarization、Entity Description Pattern、Recommendation Systems、Product Image、Product、KG Application",
+   "grounding": {
+    "unknown_tokens": [
+     "Answering",
+     "Application",
+     "Applications",
+     "Description",
+     "Entity",
+     "Extractive",
+     "Facts",
+     "Graphs",
+     "Image",
+     "Knowledge",
+     "Knowledge-Aware",
+     "Learning"
+    ],
+    "n_unknown_tokens": 19,
+    "cited": [
+     "Knowledge Graphs",
+     "Question Answering",
+     "Property",
+     "Relational Facts",
+     "Knowledge-Aware Applications",
+     "Multi-Task Learning",
+     "Evaluation",
+     "Extractive KG Summarization",
+     "Entity Description Pattern",
+     "Recommendation Systems",
+     "Product Image",
+     "Product",
+     "KG Application"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 958,
+    "n_edges": 1356,
+    "core_ids": [
+     "Enterprise Modeling",
+     "Entity Description Pattern",
+     "Evaluation",
+     "Extractive KG Summarization",
+     "KG Application",
+     "Knowledge Graphs",
+     "Knowledge-Aware Applications",
+     "Multi-Task Learning",
+     "Product",
+     "Product Image",
+     "Property",
+     "Question Answering",
+     "Recommendation Systems",
+     "Relational Facts"
+    ],
+    "top_types": {
+     "USES": 282,
+     "PART_OF": 215,
+     "APPLIES_TO": 213,
+     "RELATED_TO": 186,
+     "PRODUCES": 117,
+     "CREATED_BY": 80
+    }
+   }
+  },
+  {
+   "id": "comm-3",
+   "name": "Zero-Shot Learning",
+   "ok": true,
+   "elapsed_s": 3.8,
+   "summary": "Zero-Shot Learning 是一种应用于图像分类、自然语言处理和知识提取等领域的概念，它利用辅助信息和属性来支持未见类别的处理。该方法与少样本学习（FSL）进行比较，并能够启用或支持少样本学习的实现。此外，Zero-Shot Learning 还涉及类编码过程以及分类器的组件应用。\n引用实体: Zero-Shot Learning、FSL、Knowledge Extraction、Auxiliary Information、Class Encodings、Class、Natural Language Processing、Few-Shot Learning、Attribute、Classifier、Image Classification、Chen Et Al.、Image、Unseen Classes",
+   "grounding": {
+    "unknown_tokens": [
+     "Al.",
+     "Auxiliary",
+     "Chen",
+     "Classes",
+     "Classification",
+     "Encodings",
+     "Extraction",
+     "Few-Shot",
+     "Information",
+     "Knowledge",
+     "Language",
+     "Learning"
+    ],
+    "n_unknown_tokens": 16,
+    "cited": [
+     "Zero-Shot Learning",
+     "FSL",
+     "Knowledge Extraction",
+     "Auxiliary Information",
+     "Class Encodings",
+     "Class",
+     "Natural Language Processing",
+     "Few-Shot Learning",
+     "Attribute",
+     "Classifier",
+     "Image Classification",
+     "Chen Et Al.",
+     "Image",
+     "Unseen Classes"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 801,
+    "n_edges": 1582,
+    "core_ids": [
+     "Attribute",
+     "Auxiliary Information",
+     "Chen Et Al.",
+     "Class",
+     "Class Encodings",
+     "Classifier",
+     "FSL",
+     "Few-Shot Learning",
+     "Image",
+     "Image Classification",
+     "Knowledge Extraction",
+     "Natural Language Processing",
+     "Unseen Classes",
+     "Zero-Shot Learning"
+    ],
+    "top_types": {
+     "USES": 517,
+     "PART_OF": 278,
+     "RELATED_TO": 208,
+     "APPLIES_TO": 207,
+     "PRODUCES": 128,
+     "ENABLES": 59
+    }
+   }
+  },
+  {
+   "id": "comm-4",
+   "name": "Large Language Model",
+   "ok": true,
+   "elapsed_s": 3.6,
+   "summary": "这个社区主要围绕大型语言模型（Large Language Model）展开，该模型属于人工智能的一部分，并涉及自然语言和知识工程。它利用微调、指令微调、LoRA 等训练方法以及提示等技术来产生自然语言和推理能力。此外，该模型还与应用到 RAG 和知识表示等相关领域。引用实体: Large Language Model、LLMs、Language Model、Reasoning、RAG、Fine-Tuning、Knowledge Representation、Prompt、Artificial Intelligence、Natural Language、Instruction Fine-Tuning、Knowledge Engineering、LoRA、Luo Et Al.",
+   "grounding": {
+    "unknown_tokens": [
+     "Al.",
+     "Artificial",
+     "Engineering",
+     "Instruction",
+     "Intelligence",
+     "Knowledge",
+     "Language",
+     "Large",
+     "Luo",
+     "Model",
+     "Natural",
+     "Representation"
+    ],
+    "n_unknown_tokens": 12,
+    "cited": [
+     "Large Language Model",
+     "LLMs",
+     "Language Model",
+     "Reasoning",
+     "RAG",
+     "Fine-Tuning",
+     "Knowledge Representation",
+     "Prompt",
+     "Artificial Intelligence",
+     "Natural Language",
+     "Instruction Fine-Tuning",
+     "Knowledge Engineering",
+     "LoRA",
+     "Luo Et Al."
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 774,
+    "n_edges": 1047,
+    "core_ids": [
+     "Artificial Intelligence",
+     "Fine-Tuning",
+     "Instruction Fine-Tuning",
+     "Knowledge Engineering",
+     "Knowledge Representation",
+     "LLMs",
+     "Language Model",
+     "Large Language Model",
+     "LoRA",
+     "Luo Et Al.",
+     "Natural Language",
+     "Prompt",
+     "RAG",
+     "Reasoning"
+    ],
+    "top_types": {
+     "USES": 229,
+     "APPLIES_TO": 130,
+     "PART_OF": 122,
+     "RELATED_TO": 121,
+     "CREATED_BY": 110,
+     "PRODUCES": 69
+    }
+   }
+  },
+  {
+   "id": "comm-5",
+   "name": "Relation Extraction",
+   "ok": true,
+   "elapsed_s": 4.0,
+   "summary": "Relation Extraction 是知识获取的一部分，它利用文本和预训练语言模型来应用于非结构化及半结构化数据。该过程与实体识别密切相关，并具体使用命名实体识别技术来实现对实体的识别、消歧以及链接等功能。此外，Relation Extraction 还涉及 BERT 系统的使用，并与其他如实体类型化等概念相关联。\n引用实体: Relation Extraction、Named Entity Recognition、BERT、Knowledge Acquisition、Coreference Resolution、Pre-Trained Language Models、Entity Typing、Entity Linking、Text、Entity Recognition、Entity Disambiguation、Unstructured Data、Semi-Structured Data",
+   "grounding": {
+    "unknown_tokens": [
+     "Acquisition",
+     "Coreference",
+     "Data",
+     "Disambiguation",
+     "Entity",
+     "Extraction",
+     "Knowledge",
+     "Language",
+     "Linking",
+     "Models",
+     "Named",
+     "Pre-Trained"
+    ],
+    "n_unknown_tokens": 18,
+    "cited": [
+     "Relation Extraction",
+     "Named Entity Recognition",
+     "BERT",
+     "Knowledge Acquisition",
+     "Coreference Resolution",
+     "Pre-Trained Language Models",
+     "Entity Typing",
+     "Entity Linking",
+     "Text",
+     "Entity Recognition",
+     "Entity Disambiguation",
+     "Unstructured Data",
+     "Semi-Structured Data"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 772,
+    "n_edges": 1114,
+    "core_ids": [
+     "BERT",
+     "Coreference Resolution",
+     "Deep Neural Networks",
+     "Entity Disambiguation",
+     "Entity Linking",
+     "Entity Recognition",
+     "Entity Typing",
+     "Knowledge Acquisition",
+     "Named Entity Recognition",
+     "Pre-Trained Language Models",
+     "Relation Extraction",
+     "Semi-Structured Data",
+     "Text",
+     "Unstructured Data"
+    ],
+    "top_types": {
+     "USES": 293,
+     "APPLIES_TO": 186,
+     "PART_OF": 172,
+     "RELATED_TO": 140,
+     "CREATED_BY": 110,
+     "PRODUCES": 71
+    }
+   }
+  },
+  {
+   "id": "comm-6",
+   "name": "Convolutional Neural Networks",
+   "ok": true,
+   "elapsed_s": 4.0,
+   "summary": "这个社区主要围绕卷积神经网络及其相关方法展开，其中卷积神经网络能够启用知识图谱补全过程。该领域广泛使用注意力机制、位置编码以及图卷积网络等组件或方法，并与长短期记忆网络和 Transformer 进行比较或关联。此外，社区还涉及 PCNN 系统、AGGCN 系统以及 Zhang Et Al. 等人提出的相关工作。引用实体：Convolutional Neural Networks、Graph Convolutional Networks、LSTM、Attention Mechanism、Transformer、Zhang Et Al.、Position Embeddings、AGGCN、Entity Pair、Knowledge Base Completion、PCNN、Attention、MetaR",
+   "grounding": {
+    "unknown_tokens": [
+     "Al.",
+     "Base",
+     "Completion",
+     "Convolutional",
+     "Embeddings",
+     "Entity",
+     "Graph",
+     "Knowledge",
+     "Mechanism",
+     "Networks",
+     "Neural",
+     "Pair"
+    ],
+    "n_unknown_tokens": 14,
+    "cited": [
+     "Convolutional Neural Networks",
+     "Graph Convolutional Networks",
+     "LSTM",
+     "Attention Mechanism",
+     "Transformer",
+     "Zhang Et Al.",
+     "Position Embeddings",
+     "AGGCN",
+     "Entity Pair",
+     "Knowledge Base Completion",
+     "PCNN",
+     "Attention",
+     "MetaR"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 632,
+    "n_edges": 964,
+    "core_ids": [
+     "AGGCN",
+     "Attention",
+     "Attention Mechanism",
+     "CIKM",
+     "Convolutional Neural Networks",
+     "Entity Pair",
+     "Graph Convolutional Networks",
+     "Knowledge Base Completion",
+     "LSTM",
+     "MetaR",
+     "PCNN",
+     "Position Embeddings",
+     "Transformer",
+     "Zhang Et Al."
+    ],
+    "top_types": {
+     "USES": 440,
+     "PART_OF": 141,
+     "APPLIES_TO": 83,
+     "PRODUCES": 82,
+     "RELATED_TO": 82,
+     "CREATED_BY": 58
+    }
+   }
+  },
+  {
+   "id": "comm-7",
+   "name": "Entity",
+   "ok": true,
+   "elapsed_s": 4.0,
+   "summary": "这个社区主要围绕知识图谱（KG）相关的系统、组件及概念构建，其中实体与节点等组件通过 USES 关系使用 RAKG 和 KG-BERT 等系统，并部分属于 Graph 或 Documents。此外，实体与 Entities 还涉及对 Relationship、Concept 及相关路径的关联、测量甚至矛盾关系的描述。整体来看，该社区聚焦于知识图谱系统的构建要素及其相互间的结构与应用联系。\n引用实体：Entity、Entities、Node、RAKG、Graph、Relationship、Edges、KGGen、KG-BERT、RSN、Concept、Relation Path、Object、Documents",
+   "grounding": {
+    "unknown_tokens": [
+     "Path",
+     "Relation",
+     "USES"
+    ],
+    "n_unknown_tokens": 3,
+    "cited": [
+     "Entity",
+     "Entities",
+     "Node",
+     "RAKG",
+     "Graph",
+     "Relationship",
+     "Edges",
+     "KGGen",
+     "KG-BERT",
+     "RSN",
+     "Concept",
+     "Relation Path",
+     "Object",
+     "Documents"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 630,
+    "n_edges": 901,
+    "core_ids": [
+     "Concept",
+     "Documents",
+     "Edges",
+     "Entities",
+     "Entity",
+     "Graph",
+     "KG-BERT",
+     "KGGen",
+     "Node",
+     "Object",
+     "RAKG",
+     "RSN",
+     "Relation Path",
+     "Relationship"
+    ],
+    "top_types": {
+     "USES": 204,
+     "PART_OF": 148,
+     "RELATED_TO": 115,
+     "PRODUCES": 96,
+     "APPLIES_TO": 92,
+     "MEASURES": 70
+    }
+   }
+  },
+  {
+   "id": "comm-8",
+   "name": "Models",
+   "ok": true,
+   "elapsed_s": 4.5,
+   "summary": "该社区主要围绕图模型及其组件展开，其中 Models 作为核心概念，部分属于 SSQR 和 ReaLM 方法，并用于评估可解释性。Quantized Graph Representation 这一方法利用子图组件，支持并启用可解释性，同时应用于量化过程。此外，Dr. E 使用多阶段学习和 HOG 概念，而 Node Classification 则适用于多阶段学习。SSQR 与 ReaLM 之间存在比较关系，且 Codebook 也涉及量化过程的使用。引用实体: Models、Quantized Graph Representation、Interpretability、Subgraph、Encoder、Dr. E、SSQR、ReaLM、HOG、Node Classification、Codebook",
+   "grounding": {
+    "unknown_tokens": [
+     "Classification",
+     "Dr.",
+     "Graph",
+     "Node",
+     "Quantized",
+     "Representation"
+    ],
+    "n_unknown_tokens": 6,
+    "cited": [
+     "Models",
+     "Quantized Graph Representation",
+     "Interpretability",
+     "Subgraph",
+     "Encoder",
+     "Dr. E",
+     "SSQR",
+     "ReaLM",
+     "HOG",
+     "Node Classification",
+     "Codebook"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 571,
+    "n_edges": 877,
+    "core_ids": [
+     "Codebook",
+     "Dr. E",
+     "Encoder",
+     "HOG",
+     "Interpretability",
+     "Models",
+     "Multi-Stage Learning",
+     "Node Classification",
+     "Quantization",
+     "Quantization Process",
+     "Quantized Graph Representation",
+     "ReaLM",
+     "SSQR",
+     "Subgraph"
+    ],
+    "top_types": {
+     "USES": 245,
+     "PART_OF": 131,
+     "APPLIES_TO": 120,
+     "PRODUCES": 74,
+     "RELATED_TO": 70,
+     "CITES": 54
+    }
+   }
+  },
+  {
+   "id": "comm-9",
+   "name": "Ontology",
+   "ok": true,
+   "elapsed_s": 4.1,
+   "summary": "该社区主要围绕本体（Ontology）及其与多种知识系统之间的关系展开，其中本体作为部分组件存在于 WordNet、DBpedia 和 Freebase 中。WordNet 不仅属于语义网的一部分，还与 DBpedia、YAGO、Freebase、NELL 及 Wikidata 等系统进行比较或使用关联。此外，社区还涉及数据集、开放信息抽取过程以及 Wikipedia 等系统或文档实体。引用实体：Ontology、WordNet、Wikidata、Freebase、Dataset、DBpedia、ConceptNet、NELL、Semantic Web、YAGO、Wikipedia、ProBase、DKG、Open Information Extraction",
+   "grounding": {
+    "unknown_tokens": [
+     "Extraction",
+     "Information",
+     "Open",
+     "Semantic",
+     "Web"
+    ],
+    "n_unknown_tokens": 5,
+    "cited": [
+     "Ontology",
+     "WordNet",
+     "Wikidata",
+     "Freebase",
+     "Dataset",
+     "DBpedia",
+     "ConceptNet",
+     "NELL",
+     "Semantic Web",
+     "YAGO",
+     "Wikipedia",
+     "ProBase",
+     "DKG",
+     "Open Information Extraction"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 461,
+    "n_edges": 736,
+    "core_ids": [
+     "ConceptNet",
+     "DBpedia",
+     "DKG",
+     "Dataset",
+     "Freebase",
+     "NELL",
+     "Ontology",
+     "Open Information Extraction",
+     "ProBase",
+     "Semantic Web",
+     "Wikidata",
+     "Wikipedia",
+     "WordNet",
+     "YAGO"
+    ],
+    "top_types": {
+     "PART_OF": 144,
+     "RELATED_TO": 137,
+     "USES": 135,
+     "CREATED_BY": 93,
+     "APPLIES_TO": 60,
+     "COMPARES_WITH": 51
+    }
+   }
+  },
+  {
+   "id": "comm-10",
+   "name": "Embeddings",
+   "ok": true,
+   "elapsed_s": 4.2,
+   "summary": "这个社区主要围绕\"Embeddings\"展开，该实体应用于逻辑规则并产生未见过的实体或关系，同时利用少样本知识图谱补全和逻辑推理等过程来支持查询回答和规则挖掘。其中，逻辑规则使用马尔可夫逻辑网络并进行规则挖掘，而整个体系与 NIPS 会议相关联。这些概念和方法共同构成了一个专注于将嵌入技术与逻辑推理相结合的知识处理框架。\n引用实体: Embeddings、Logic Rules、unseen relations、Logical Rules、Unseen Entity、Query Answering、Testing Set、Rule Mining、Training Set、DRUM、Markov Logic Network、Logic Reasoning、NIPS",
+   "grounding": {
+    "unknown_tokens": [
+     "Answering",
+     "Entity",
+     "Logic",
+     "Logical",
+     "Markov",
+     "Mining",
+     "Network",
+     "Query",
+     "Reasoning",
+     "Rule",
+     "Rules",
+     "Set"
+    ],
+    "n_unknown_tokens": 17,
+    "cited": [
+     "Embeddings",
+     "Logic Rules",
+     "unseen relations",
+     "Logical Rules",
+     "Unseen Entity",
+     "Query Answering",
+     "Testing Set",
+     "Rule Mining",
+     "Training Set",
+     "DRUM",
+     "Markov Logic Network",
+     "Logic Reasoning",
+     "NIPS"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 449,
+    "n_edges": 664,
+    "core_ids": [
+     "DRUM",
+     "Embeddings",
+     "Few-Shot KG Completion",
+     "Logic Reasoning",
+     "Logic Rules",
+     "Logical Rules",
+     "Markov Logic Network",
+     "NIPS",
+     "Query Answering",
+     "Rule Mining",
+     "Testing Set",
+     "Training Set",
+     "Unseen Entity",
+     "unseen relations"
+    ],
+    "top_types": {
+     "RELATED_TO": 142,
+     "USES": 139,
+     "PART_OF": 87,
+     "APPLIES_TO": 84,
+     "CREATED_BY": 69,
+     "PRODUCES": 64
+    }
+   }
+  },
+  {
+   "id": "comm-11",
+   "name": "Temporal Knowledge Graph",
+   "ok": true,
+   "elapsed_s": 4.4,
+   "summary": "这个社区主要围绕“时间知识图谱”展开，该概念利用时序信息并涉及时序知识图谱补全与推理等主题。根据文档 Figure 1 的记载，时间知识图谱与动态知识图谱及事件知识图谱存在比较或从属关系，同时能生成事实数据。这些事实进一步用于构建动态知识图谱和事件知识图谱，并支持相应的推理方法。引用实体: Temporal Knowledge Graph、Facts、Figure 1、Dynamic Knowledge Graph、Temporal Knowledge Graphs、Temporal Knowledge Graph Completion、Symbolic Reasoning、Temporal Information、Event Knowledge Graph、Temporal Knowledge Graph Reasoning、Dynamic Knowledge Graph Reasoning、DKGs、TKGs、James Cameron",
+   "grounding": {
+    "unknown_tokens": [
+     "Cameron",
+     "Completion",
+     "Dynamic",
+     "Event",
+     "Figure",
+     "Graph",
+     "Graphs",
+     "Information",
+     "James",
+     "Knowledge",
+     "Reasoning",
+     "Symbolic"
+    ],
+    "n_unknown_tokens": 13,
+    "cited": [
+     "Temporal Knowledge Graph",
+     "Facts",
+     "Figure 1",
+     "Dynamic Knowledge Graph",
+     "Temporal Knowledge Graphs",
+     "Temporal Knowledge Graph Completion",
+     "Symbolic Reasoning",
+     "Temporal Information",
+     "Event Knowledge Graph",
+     "Temporal Knowledge Graph Reasoning",
+     "Dynamic Knowledge Graph Reasoning",
+     "DKGs",
+     "TKGs",
+     "James Cameron"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 427,
+    "n_edges": 600,
+    "core_ids": [
+     "DKGs",
+     "Dynamic Knowledge Graph",
+     "Dynamic Knowledge Graph Reasoning",
+     "Event Knowledge Graph",
+     "Facts",
+     "Figure 1",
+     "James Cameron",
+     "Symbolic Reasoning",
+     "TKGs",
+     "Temporal Information",
+     "Temporal Knowledge Graph",
+     "Temporal Knowledge Graph Completion",
+     "Temporal Knowledge Graph Reasoning",
+     "Temporal Knowledge Graphs"
+    ],
+    "top_types": {
+     "RELATED_TO": 125,
+     "USES": 120,
+     "PART_OF": 110,
+     "APPLIES_TO": 70,
+     "PRODUCES": 43,
+     "CREATED_BY": 39
+    }
+   }
+  },
+  {
+   "id": "comm-12",
+   "name": "Survey",
+   "ok": true,
+   "elapsed_s": 3.7,
+   "summary": "该社区主要围绕调查（Survey）及其相关组件展开，其中调查作为文档的一部分属于某个领域，并采用方法论来构建。表格作为核心组件不仅产生方法论，还引用论文并应用于表格提取过程，同时测量 GROBID 工具。方法论则进一步用于生产学术论文、构建学术知识图谱以及使用调查文章。\n引用实体: Survey、Tables、Methodology、Open Research Knowledge Graph、Paper、Scholarly Knowledge Graph、Data、Article、Table Extraction、Survey Table、Domains、Survey Articles、GROBID、Crowdsourcing",
+   "grounding": {
+    "unknown_tokens": [
+     "Articles",
+     "Extraction",
+     "Graph",
+     "Knowledge",
+     "Open",
+     "Research",
+     "Scholarly",
+     "Table"
+    ],
+    "n_unknown_tokens": 8,
+    "cited": [
+     "Survey",
+     "Tables",
+     "Methodology",
+     "Open Research Knowledge Graph",
+     "Paper",
+     "Scholarly Knowledge Graph",
+     "Data",
+     "Article",
+     "Table Extraction",
+     "Survey Table",
+     "Domains",
+     "Survey Articles",
+     "GROBID",
+     "Crowdsourcing"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 408,
+    "n_edges": 709,
+    "core_ids": [
+     "Article",
+     "Crowdsourcing",
+     "Data",
+     "Domains",
+     "GROBID",
+     "Methodology",
+     "Open Research Knowledge Graph",
+     "Paper",
+     "Scholarly Knowledge Graph",
+     "Survey",
+     "Survey Articles",
+     "Survey Table",
+     "Table Extraction",
+     "Tables"
+    ],
+    "top_types": {
+     "PART_OF": 146,
+     "RELATED_TO": 105,
+     "USES": 102,
+     "PRODUCES": 86,
+     "APPLIES_TO": 77,
+     "CITES": 30
+    }
+   }
+  },
+  {
+   "id": "comm-13",
+   "name": "KGs",
+   "ok": true,
+   "elapsed_s": 3.5,
+   "summary": "KGs 是本体的一部分并适用于自动驾驶、感知、场景理解及运动规划等领域，同时能够启用机器学习。机器学习应用于自动驾驶和图结构，而本体则与自动驾驶相关并被其使用，还涉及 Huang et al.。该社区主要围绕知识图谱在自动驾驶及相关技术中的应用展开关联。引用实体: KGs、Machine Learning、Ontologies、Automated Driving、Vehicle、Scene Understanding、AD、Huang et al.、Perception、Context Model、Motion Planning、Driver、Automated Vehicles、Graphs",
+   "grounding": {
+    "unknown_tokens": [
+     "Automated",
+     "Context",
+     "Driving",
+     "Huang",
+     "Learning",
+     "Machine",
+     "Model",
+     "Motion",
+     "Planning",
+     "Scene",
+     "Understanding",
+     "Vehicles"
+    ],
+    "n_unknown_tokens": 13,
+    "cited": [
+     "KGs",
+     "Machine Learning",
+     "Ontologies",
+     "Automated Driving",
+     "Vehicle",
+     "Scene Understanding",
+     "AD",
+     "Huang et al.",
+     "Perception",
+     "Context Model",
+     "Motion Planning",
+     "Driver",
+     "Automated Vehicles",
+     "Graphs"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 348,
+    "n_edges": 429,
+    "core_ids": [
+     "AD",
+     "Automated Driving",
+     "Automated Vehicles",
+     "Context Model",
+     "Driver",
+     "Graphs",
+     "Huang et al.",
+     "KGs",
+     "Machine Learning",
+     "Motion Planning",
+     "Ontologies",
+     "Perception",
+     "Scene Understanding",
+     "Vehicle"
+    ],
+    "top_types": {
+     "PART_OF": 112,
+     "RELATED_TO": 76,
+     "USES": 75,
+     "APPLIES_TO": 62,
+     "CREATED_BY": 33,
+     "SUPPORTS": 21
+    }
+   }
+  },
+  {
+   "id": "comm-14",
+   "name": "ACL",
+   "ok": true,
+   "elapsed_s": 5.4,
+   "summary": "该社区主要围绕 ACL 会议及其相关研究展开，其中 ACL 位于低维双曲知识图谱嵌入、2017 年以及自监督量化表示论文中。ACL 是关联计算语言学协会的一部分，而该协会由欧洲语言学会第 15 届分会创建。在研究方法上，社区涉及关系分类、语义特征、对比图表示及混合神经网络等多种技术，其中关系分类能产生 Zheng Et Al. 并启用语义特征。引用实体: ACL、Relation Classification、2017、Association For Computational Linguistics、Zheng Et Al.、Semantic Features、Self-Supervised Quantized Representation Paper、A Novel Cascade Binary Tagging Framework For Relational Triple Extraction、Low-Dimensional Hyperbolic Knowledge Graph Embeddings、Maps、Machine Learning Methods、Contrastive Graph Representations、Hybrid neural network",
+   "grounding": {
+    "unknown_tokens": [
+     "Al.",
+     "Association",
+     "Binary",
+     "Cascade",
+     "Classification",
+     "Computational",
+     "Contrastive",
+     "Embeddings",
+     "Extraction",
+     "Features",
+     "For",
+     "Framework"
+    ],
+    "n_unknown_tokens": 35,
+    "cited": [
+     "ACL",
+     "Relation Classification",
+     "2017",
+     "Association For Computational Linguistics",
+     "Zheng Et Al.",
+     "Semantic Features",
+     "Self-Supervised Quantized Representation Paper",
+     "A Novel Cascade Binary Tagging Framework For Relational Triple Extraction",
+     "Low-Dimensional Hyperbolic Knowledge Graph Embeddings",
+     "Maps",
+     "Machine Learning Methods",
+     "Contrastive Graph Representations",
+     "Hybrid neural network"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 325,
+    "n_edges": 411,
+    "core_ids": [
+     "15th Conference Of The European Chapter Of The Association For Computational Linguistics",
+     "2017",
+     "A Novel Cascade Binary Tagging Framework For Relational Triple Extraction",
+     "ACL",
+     "Association For Computational Linguistics",
+     "Contrastive Graph Representations",
+     "Hybrid neural network",
+     "Low-Dimensional Hyperbolic Knowledge Graph Embeddings",
+     "Machine Learning Methods",
+     "Maps",
+     "Relation Classification",
+     "Self-Supervised Quantized Representation Paper",
+     "Semantic Features",
+     "Zheng Et Al."
+    ],
+    "top_types": {
+     "CREATED_BY": 127,
+     "PART_OF": 69,
+     "RELATED_TO": 61,
+     "USES": 52,
+     "LOCATED_AT": 40,
+     "APPLIES_TO": 30
+    }
+   }
+  },
+  {
+   "id": "comm-15",
+   "name": "ChatGPT",
+   "ok": true,
+   "elapsed_s": 4.2,
+   "summary": "该社区主要围绕 ChatGPT 系统展开，其中 ChatGPT 与 Resources、Expert 及 Human Expert 进行比较，并评估 Relation Type。ChatGPT 作为 Experiment 的一部分，使用 ChatIE 系统，同时 ArchiMate 与 Domain Concept 相关并应用于 Electronic Court Filing。此外，Experiment 支持 Use Cases，而 Use Cases 又支持 Domain Concept，最终由 Expert 产生 Ranking。引用实体：ChatGPT、Relation Type、ArchiMate、Resources、Electronic Court Filing、Experiment、Domain Concept、Expert、Human Expert、Use Cases、Section 2、Ranking、ChatIE",
+   "grounding": {
+    "unknown_tokens": [
+     "Cases",
+     "Concept",
+     "Court",
+     "Domain",
+     "Electronic",
+     "Filing",
+     "Human",
+     "Relation",
+     "Section",
+     "Type",
+     "Use"
+    ],
+    "n_unknown_tokens": 11,
+    "cited": [
+     "ChatGPT",
+     "Relation Type",
+     "ArchiMate",
+     "Resources",
+     "Electronic Court Filing",
+     "Experiment",
+     "Domain Concept",
+     "Expert",
+     "Human Expert",
+     "Use Cases",
+     "Section 2",
+     "Ranking",
+     "ChatIE"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 317,
+    "n_edges": 477,
+    "core_ids": [
+     "ArchiMate",
+     "ChatGPT",
+     "ChatIE",
+     "Domain Concept",
+     "Electronic Court Filing",
+     "Experiment",
+     "Expert",
+     "Human Expert",
+     "Ranking",
+     "Relation Type",
+     "Resources",
+     "Section 2",
+     "Use Cases",
+     "Web Tables"
+    ],
+    "top_types": {
+     "USES": 90,
+     "RELATED_TO": 87,
+     "PART_OF": 77,
+     "APPLIES_TO": 57,
+     "MEASURES": 43,
+     "SUPPORTS": 24
+    }
+   }
+  },
+  {
+   "id": "comm-16",
+   "name": "TechGPT-2.0",
+   "ok": true,
+   "elapsed_s": 5.1,
+   "summary": "该社区主要围绕 TechGPT-2.0 系统展开，该系统使用了 Ascend Server、Mindformer 和 QLoRA 等工具或组件。TechGPT-2.0 与 LLAMA2 存在部分关系，包括属于、使用及关联，同时 Ascend Server 也支持与 LLAMA2 相关并应用于该模型。此外，Ascend Server 还用于支持 ChatGLM，而 Mindformer 同样支持 ChatGLM 和 LLAMA2。\n引用实体: TechGPT-2.0、Hyperparameter、Ascend Server、Atom、Researchers、Qwen、Mindformer、TechGPT-1.0、LLAMA2、Large Models、KnowLM-IE、QLoRA、Instruction Fine-Tuning Data、ChatGLM",
+   "grounding": {
+    "unknown_tokens": [
+     "Ascend",
+     "Data",
+     "Fine-Tuning",
+     "Instruction",
+     "Large",
+     "Models",
+     "Server"
+    ],
+    "n_unknown_tokens": 7,
+    "cited": [
+     "TechGPT-2.0",
+     "Hyperparameter",
+     "Ascend Server",
+     "Atom",
+     "Researchers",
+     "Qwen",
+     "Mindformer",
+     "TechGPT-1.0",
+     "LLAMA2",
+     "Large Models",
+     "KnowLM-IE",
+     "QLoRA",
+     "Instruction Fine-Tuning Data",
+     "ChatGLM"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 311,
+    "n_edges": 447,
+    "core_ids": [
+     "Ascend Server",
+     "Atom",
+     "ChatGLM",
+     "Hyperparameter",
+     "Instruction Fine-Tuning Data",
+     "KnowLM-IE",
+     "LLAMA2",
+     "Large Models",
+     "Mindformer",
+     "QLoRA",
+     "Qwen",
+     "Researchers",
+     "TechGPT-1.0",
+     "TechGPT-2.0"
+    ],
+    "top_types": {
+     "PART_OF": 94,
+     "USES": 83,
+     "RELATED_TO": 68,
+     "APPLIES_TO": 55,
+     "CREATED_BY": 35,
+     "PRODUCES": 31
+    }
+   }
+  },
+  {
+   "id": "comm-17",
+   "name": "Knowledge Graph Construction",
+   "ok": true,
+   "elapsed_s": 4.5,
+   "summary": "该社区主要围绕知识图谱构建这一核心过程，它利用 FolkScope 系统并支持信息提取，同时能够处理噪声数据以生成金融知识图谱。自动化的知识图谱构建方法会应用 Web 页面数据并对噪声数据进行适配，而 Graphusion 系统则通过 Alignment 和 Inference 技术来赋能 AI 应用。此外，EntGPT 系统也适用于 Alignment 过程，各类系统共同推动了从信息提取到最终 AI 应用的实现。\n引用实体：Knowledge Graph Construction、Automatic Knowledge Graph Construction、Information Extraction、Meta-learning、Graphusion、Alignment、Systems、Inference、EntGPT、FolkScope、Web Pages、AI Applications、Financial Knowledge Graph、Noisy Data",
+   "grounding": {
+    "unknown_tokens": [
+     "Applications",
+     "Automatic",
+     "Construction",
+     "Data",
+     "Extraction",
+     "Financial",
+     "Graph",
+     "Information",
+     "Knowledge",
+     "Noisy",
+     "Pages",
+     "Web"
+    ],
+    "n_unknown_tokens": 12,
+    "cited": [
+     "Knowledge Graph Construction",
+     "Automatic Knowledge Graph Construction",
+     "Information Extraction",
+     "Meta-learning",
+     "Graphusion",
+     "Alignment",
+     "Systems",
+     "Inference",
+     "EntGPT",
+     "FolkScope",
+     "Web Pages",
+     "AI Applications",
+     "Financial Knowledge Graph",
+     "Noisy Data"
+    ],
+    "cited_unknown": [],
+    "has_citation_line": true,
+    "says_no_theme": false
+   },
+   "facts": {
+    "n_nodes": 306,
+    "n_edges": 362,
+    "core_ids": [
+     "AI Applications",
+     "Alignment",
+     "Automatic Knowledge Graph Construction",
+     "EntGPT",
+     "Financial Knowledge Graph",
+     "FolkScope",
+     "Graphusion",
+     "Inference",
+     "Information Extraction",
+     "Knowledge Graph Construction",
+     "Meta-learning",
+     "Noisy Data",
+     "Systems",
+     "Web Pages"
+    ],
+    "top_types": {
+     "USES": 79,
+     "CREATED_BY": 64,
+     "PART_OF": 53,
+     "RELATED_TO": 47,
+     "APPLIES_TO": 43,
+     "ENABLES": 20
+    }
+   }
+  }
+ ],
+ "elapsed_s": 78.7
+}
