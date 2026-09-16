@@ -1,0 +1,70 @@
+{
+ "source": "SciREX gold_ner / gold_coref（人工标注，ACL 2020）",
+ "judge": "_names_are_duplicates（src/kg_extractor.py）",
+ "design": {
+  "negatives": "**人工认为不同**的实体两两配对，优先取互为子串 / 词重叠高的（那才是判据的边界；随机配对大多太平凡）",
+  "positives": "**真实的同物异写**：把人工名做三类**排版扰动**（连字符去空格 / 加空格 / 大小写）—— 这三类在 SciREX 自己的 name 里都真实出现过",
+  "why_not_same_name": "人工把同一实体的每次提及写成**同一个 name**，所以同名配对是**平凡正例**，测不出判据好坏"
+ },
+ "n_pos": 1200,
+ "n_neg": 2400,
+ "tp": 1200,
+ "fp": 658,
+ "tn": 1742,
+ "fn": 0,
+ "precision": 0.6459,
+ "recall": 1.0,
+ "f1": 0.7848,
+ "false_merge_rate": 0.2742,
+ "fp_examples": [
+  [
+   "layers of convolution and de - convolution operators",
+   "multiple layers of convolution and de - convolution operators"
+  ],
+  [
+   "De - convolutional layers",
+   "convolutional and de - convolutional layers"
+  ],
+  [
+   "convolutional and de - convolutional layers",
+   "de - convolutional layers"
+  ],
+  [
+   "convolutional and deconvolutional",
+   "convolutional and deconvolutional kernels"
+  ],
+  [
+   "convolutional and deconvolutional",
+   "convolutional and deconvolutional layers"
+  ],
+  [
+   "pixel - wise prediction",
+   "pixel - wise prediction problems"
+  ],
+  [
+   "30 layer networks",
+   "layer networks"
+  ],
+  [
+   "De - convolutional layers",
+   "convolutional layers"
+  ],
+  [
+   "Image Restoration",
+   "image restoration topics"
+  ],
+  [
+   "Image super - resolution",
+   "super - resolution"
+  ],
+  [
+   "Skip connections",
+   "Symmetric Skip Connections"
+  ],
+  [
+   "Symmetric Skip Connections",
+   "skip connections"
+  ]
+ ],
+ "fn_examples": []
+}
