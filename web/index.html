@@ -310,6 +310,22 @@ h3 { font-weight: 600; }
              ⚠️ 它是<b>抽取结果的摊平</b>，不是"论文事实的权威"（L3 端点只有 96.17%）。</p></span>
           <span class="mt">结构化导出<span class="go">→</span></span>
         </a>
+
+        <!-- L16（2026-09-17）：把支持/反对聚合成一个立场标签（对标 Consensus Meter）。
+             ★ 立场是**数出来的**，不是问模型问出来的 ——
+             本项目有一条纪律：不用 LLM 当裁判（四模型标注者的 α 是负的）。 -->
+        <a class="entry" href="stance.html">
+          <span class="ix">12</span>
+          <span><h3>立场聚合</h3>
+          <p>图里本来就有 <code>SUPPORTS</code>（793 条）与 <code>CONTRADICTS</code>（243 条）⇒
+             把 <b>671 个主张</b>聚成 <b>Yes / No / Mixed / Possibly</b>。
+             <b>立场由计数得出，不调模型</b>（本项目的纪律：不用 LLM 当裁判）。
+             每行都能展开看<b>谁支持、谁反对（带论文与页码）</b>。<br>
+             ⚠️ 三个形态如实展示：<b>No 是 0 条</b>（图里几乎没有一边倒的反对）·
+             <b>Possibly 占 90%</b>（大部分主张只有 1–2 条证据）·
+             <b>有非主张的东西混进来</b>（抽取噪声，<b>刻意不过滤</b>）。</p></span>
+          <span class="mt">立场归纳<span class="go">→</span></span>
+        </a>
       </div>
     </div>
   </section>

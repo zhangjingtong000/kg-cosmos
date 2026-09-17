@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KG Cosmos · 立场聚合</title>
+<!--
+  L16（2026-09-17）：**立场聚合视图**（对标 Consensus `Consensus Meter`）。
+
+  ## 立场是**数出来的**，不是问模型问出来的
+
+  图里本来就有 `SUPPORTS`（797 条）与 `CONTRADICTS`（243 条），
+  而 **`source` = 谁支持/反对，`target` = 被支持/反对的那个主张**（实测确认）。
+  ⇒ 立场可以直接从图上数。
+
+  **这是刻意的**：本项目有一条纪律 —— **不用 LLM 当裁判**
+  （四个模型标注者对关系层的一致性 α 是**负的**，用 α 为负的裁判打分没有意义）。
+  ⇒ 标签必须由**可核对的计数**得出。
+
+  ## ⚠️ 三个必须写出来的形态（否则会被读错）
+
+  1. **`No` 是 0 条** —— 判据要"纯反对"（O/T ≥ 0.67），
+     而实测**反对最多的那几个也都至少有几条支持** ⇒ 全落进 Mixed。
+     **不是"没有人反对"，而是"图里几乎没有一边倒的反对"。**
+  2. **`Possibly` 占约 90%** —— 因为**大部分主张只有 1–2 条证据**。
+     那正是"证据不足"该有的样子，**不是页面坏了**。
+  3. **有非主张的东西混进来**（如人名 `Shirui Pan`）——
+     `SUPPORTS` 的 target 不全是主张，**这是抽取噪声**
+     （与 F3 里 `CITES` 的 target 混进 `Figure 2` 同类）。
+     **本页不做过滤** —— 过滤需要判据，而本项目的判据被量出过 27.4% 的假阳性（B4）。
+-->
+<style>
+  :root{--bg:#0b0d12;--fg:#dfe2e8;--dim:#8b95a8;--line:rgba(193,195,201,.18);
+        --yes:#7cc0b6;--no:#e07575;--mixed:#e0a469;--poss:#7a8498}
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--fg);
+       font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  header{padding:16px 22px 8px}
+  h1{margin:0;font-size:18px;font-weight:600}
+  .sub{color:var(--dim);font-size:12.5px;margin-top:5px;max-width:1060px}
+  main{padding:0 22px 60px;max-width:1240px}
+  .dist{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px}
+  .dchip{border:1px solid var(--line);border-radius:10px;padding:9px 14px;min-width:118px}
+  .dchip .k{font-size:11.5px;color:var(--dim);letter-spacing:.09em;text-transform:uppercase}
+  .dchip .v{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+  .dchip.yes .v{color:var(--yes)} .dchip.no .v{color:var(--no)}
+  .dchip.mixed .v{color:var(--mixed)} .dchip.poss .v{color:var(--poss)}
+  .row{border:1px solid var(--line);border-radius:11px;padding:11px 14px;margin:9px 0}
+  .row .top{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+  .verdict{font-size:12px;font-weight:600;border-radius:6px;padding:1px 9px;
+           border:1px solid currentColor}
+  .v-Yes{color:var(--yes)} .v-No{color:var(--no)}
+  .v-Mixed{color:var(--mixed)} .v-Possibly{color:var(--poss)}
+  .claim{font-size:14.5px;font-weight:600}
+  .meter{display:flex;height:9px;border-radius:5px;overflow:hidden;margin:8px 0 5px;
+         background:rgba(255,255,255,.06)}
+  .meter i{display:block;height:100%}
+  .meter .s{background:var(--yes)} .meter .o{background:var(--no)}
+  .nums{color:var(--dim);font-size:12px}
+  .nums b{color:var(--fg)}
+  details{margin-top:6px}
+  summary{color:var(--dim);font-size:12px;cursor:pointer}
+  details ul{margin:6px 0 0;padding-left:18px}
+  details li{font-size:12px;color:var(--dim);margin:1px 0}
+  details li b{color:var(--fg)}
+  .note{color:var(--dim);font-size:12.5px;margin-top:16px;max-width:1060px}
+  .note b{color:#e8c9a4}
+  .warnbox{border:1px solid rgba(232,201,164,.34);background:rgba(224,164,105,.07);
+           border-radius:10px;padding:11px 14px;margin:14px 0;font-size:12.5px;
+           color:#e8c9a4;max-width:1060px}
+  a{color:var(--yes)} code{color:#e8c9a4}
+</style>
+</head>
+<body>
+<header>
+  <h1>立场聚合</h1>
+  <div class="sub" id="sub">载入中…</div>
+</header>
+<main>
+  <div class="dist" id="dist"></div>
+
+  <div class="warnbox" id="caveat"></div>
+
+  <div id="rows"></div>
+
+  <p class="note" id="foot"></p>
+</main>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LABEL = {Yes:'支持', No:'反对', Mixed:'有争议', Possibly:'证据不足'};
+
+function render(d) {
+  const t = d.thresholds || {};
+  $('#dist').innerHTML = ['Yes', 'No', 'Mixed', 'Possibly'].map(k =>
+    `<div class="dchip ${k.toLowerCase()}"><div class="k">${LABEL[k]} · ${k}</div>`
+    + `<div class="v">${d.distribution[k] || 0}</div></div>`).join('');
+
+  $('#caveat').innerHTML =
+    `⚠️ <b>立场是数出来的，不是问模型问出来的。</b>` +
+    `判据（**可复算**）：<code>T = S + O</code>；` +
+    `<code>T &lt; ${t.min_evidence}</code> ⇒ <b>Possibly</b> · ` +
+    `<code>O/T ≥ ${t.mixed_ratio}</code> ⇒ <b>Mixed</b> · ` +
+    `一侧 <code>≥ ${t.sided_ratio}</code> ⇒ <b>Yes / No</b>。` +
+    `<br>⇒ 阈值是<b>拍的</b>，所以每一行都同时给出 <b>S / O / T</b> ——` +
+    `<b>你可以不信我的标签，但你能看见我是怎么算的。</b>`;
+
+  $('#rows').innerHTML = (d.claims || []).map(c => {
+    const pctS = c.T ? (c.S / c.T * 100) : 0;
+    const pctO = c.T ? (c.O / c.T * 100) : 0;
+    const who = arr => (arr || []).length
+      ? '<ul>' + arr.slice(0, 8).map(x =>
+          `<li><b>${esc(x.who)}</b> · ${esc(x.paper)}`
+          + (x.page ? ` 第 ${x.page} 页` : '') + '</li>').join('')
+        + ((arr.length > 8) ? `<li>…另有 ${arr.length - 8} 条</li>` : '') + '</ul>'
+      : '<ul><li>（没有）</li></ul>';
+    return `<div class="row">
+      <div class="top">
+        <span class="verdict v-${esc(c.verdict)}">${esc(c.verdict)}</span>
+        <span class="claim">${esc(c.claim)}</span>
+      </div>
+      <div class="meter"><i class="s" style="width:${pctS}%"></i>
+                         <i class="o" style="width:${pctO}%"></i></div>
+      <div class="nums">支持 <b>${c.S}</b> · 反对 <b>${c.O}</b> · 合计 <b>${c.T}</b></div>
+      <details><summary>看是谁支持 / 谁反对（带论文与页码）</summary>
+        <b style="font-size:12px">支持方</b>${who(c.supporters)}
+        <b style="font-size:12px">反对方</b>${who(c.opponents)}
+      </details>
+    </div>`;
+  }).join('');
+
+  $('#foot').innerHTML =
+    `共 <b>${(d.counts || {}).claims_total}</b> 个主张（来自 ` +
+    `<b>${(d.counts || {}).suports_edges}</b> 条 <code>SUPPORTS</code> 与 ` +
+    `<b>${(d.counts || {}).contradicts_edges}</b> 条 <code>CONTRADICTS</code>）；` +
+    `这里按"总证据量"取前 ${(d.claims || []).length} 个。<br>` +
+    `⚠️ <b>三个必须一起看的形态</b>：` +
+    `① <b>No 是 0 条</b> —— 判据要"纯反对"，而实测反对最多的那几个也都有几条支持；` +
+    `② <b>Possibly 约占 90%</b> —— 因为大部分主张只有 1–2 条证据（**那正是"证据不足"该有的样子**）；` +
+    `③ <b>有非主张的东西混进来</b>（如人名）—— <code>SUPPORTS</code> 的 target 不全是主张，` +
+    `**那是抽取噪声**；<b>本页刻意不过滤</b>（过滤需要判据，而本项目的判据被量出过 27.4% 的假阳性）。<br>` +
+    `<a href="./index.html">← 回导航页</a> · ` +
+    `<a href="./paper-table.html">论文对比表</a> · ` +
+    `<a href="./analytics.html">评测结论</a>`;
+  window.__stanceState = { n_claims: (d.claims || []).length,
+                           dist: d.distribution,
+                           thresholds: d.thresholds };
+}
+
+fetch('./kg-data/stance.json').then(r => r.ok ? r.json() : null).then(d => {
+  if (!d) { $('#sub').textContent = '读不到 kg-data/stance.json'; return; }
+  const c = d.counts || {};
+  $('#sub').innerHTML = `<b>${c.claims_total}</b> 个主张，来自 `
+    + `<b>${c.suports_edges}</b> 条 <code>SUPPORTS</code> 与 `
+    + `<b>${c.contradicts_edges}</b> 条 <code>CONTRADICTS</code> · `
+    + `取证据量最高的 ${(d.claims || []).length} 个 · <b>立场由计数得出，不调模型</b>`;
+  render(d);
+  window.__stanceReady = true;
+}).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
+</script>
+</body>
+</html>
