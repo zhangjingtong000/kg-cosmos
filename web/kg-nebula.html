@@ -1702,6 +1702,44 @@ function renderLegend() {
  */
 let typeFocus = null;
 
+/* ── H9（2026-09-16）：**问题 → 子图 → 3D 高亮**的联动 ──────────────────
+ *
+ * 四透镜透镜一第 1 项要的是这条链。此前零件全齐、**但没接起来**：
+ *   · `ask.html` 有多 Agent 问答与检索到的子图（**2D**）；
+ *   · 主视图有 3D 高亮；
+ *   · **而 ask 的结果不驱动主视图** —— 用户答完就没法在图上看见那片子图。
+ *
+ * 这一项就是把最后一根线接上：
+ *   `ask.html` 给出**检索到的实体名** ⇒ 跳到
+ *   `kg-nebula.html?src=<gid>&hl=<名字1,名字2,…>` ⇒ 概览层压暗其余。
+ *
+ * **为什么用名字而不是索引**：索引随数据重排就失效，而名字是稳定的
+ * （C4 的分享链接用同样的理由）。
+ *
+ * **与 `typeFocus` 叠加时以本项为准** —— 两个"压暗"同时生效会互相打架，
+ * 而用户点"在主视图里看这片子图"时的意图很明确：**看这片子图**。
+ */
+let hlFocus = null;          // Set<string> 或 null
+
+/** H9：高亮一组实体（传空/假值即清除）。
+ *
+ * ⚠️ **返回的是"命中了几个"，不是"请求了几个"** ——
+ *   第一版返回 `hlFocus.size`，于是 `__viewState.hl_hit` 这个字段名在**撒谎**：
+ *   传两个不存在的名字进去，它也报 `hl_hit: 2`。
+ *   **那会掩盖"名字一个都对不上"这个真要报出来的情况**（C4/G3 的纪律）。
+ *   ⇒ 判据与 `__hlHit` 一致：在**当前视图的点云**里数。
+ */
+function applyHlFocus(names) {
+  hlFocus = (names && names.length) ? new Set(names) : null;
+  applyColorMode();
+  if (!hlFocus) return 0;
+  const ud = overlay && overlay.userData;
+  const nodes = (ud && ud.data && ud.data.nodes) || [];
+  let n = 0;
+  for (const x of nodes) if (x && hlFocus.has(x.id)) n++;
+  return n;
+}
+
 /** 把当前着色模式应用到已存在的点云上（只更新缓冲，不重建几何）。 */
 function applyColorMode() {
   const ud = overlay.userData;
@@ -1715,6 +1753,21 @@ function applyColorMode() {
     for (let i = 0; i < nodes.length; i++) {
       if (nodes[i].t !== typeFocus) {
         col[i * 3] *= 0.18; col[i * 3 + 1] *= 0.18; col[i * 3 + 2] *= 0.18;
+      }
+    }
+  }
+  // H9：**子图高亮优先于类型聚焦**（见上面 `hlFocus` 的注释）。
+  // 命中的点**不压暗、且提亮**；其余压到 0.08（比类型聚焦的 0.18 更暗）——
+  // 因为这里要回答的是"**这几十个点在哪**"，背景越暗越找得到。
+  if (hlFocus) {
+    const nodes = ud.data.nodes;
+    for (let i = 0; i < nodes.length; i++) {
+      if (hlFocus.has(nodes[i].id)) {
+        col[i * 3] = Math.min(1, col[i * 3] * 1.35 + 0.12);
+        col[i * 3 + 1] = Math.min(1, col[i * 3 + 1] * 1.35 + 0.12);
+        col[i * 3 + 2] = Math.min(1, col[i * 3 + 2] * 1.35 + 0.12);
+      } else {
+        col[i * 3] *= 0.08; col[i * 3 + 1] *= 0.08; col[i * 3 + 2] *= 0.08;
       }
     }
   }
@@ -1737,6 +1790,15 @@ function applyColorMode() {
   };
   window.__colorMode = { partition: colorMode.partition, ranking: colorMode.ranking };
   window.__typeFocus = typeFocus;
+  // H9：让 CDP 能断言"子图高亮真的生效了、真的命中了 N 个点"
+  window.__hlFocus = hlFocus ? [...hlFocus] : null;
+  window.__applyHlFocus = applyHlFocus;
+  window.__hlHit = (() => {
+    if (!hlFocus) return 0;
+    let n = 0;
+    for (const x of ud.data.nodes) if (hlFocus.has(x.id)) n++;
+    return n;      // **命中了几个点** —— 与传进来几个名字对比就能发现"名字对不上"
+  })();
 
   renderLegend();
 }
@@ -2370,6 +2432,59 @@ animate();
       applied.type_missing = true;
       status.textContent = `链接里的类型「${wantType}」不在当前图中`;
       status.classList.add('visible');
+    }
+  }
+
+  // ── H9：`?hl=<名字1,名字2,…>` ⇒ 打开就高亮这组实体 ──────────────────
+  //
+  // 这是"**问题 → 子图 → 3D 高亮**"那条链的最后一根线：
+  // `ask.html` 答完之后给这个名字列表，用户点一下就能在图上**看见那片证据**。
+  //
+  // **必须在 `?type=` 之后** —— 两者的压暗会互相打架，
+  // 而以 hl 为准（用户点"在主视图里看"时的意图就是看那片子图）。
+  //
+  // **命中了几个要如实报**：名字可能因为换了一篇论文而全对不上，
+  // 那时静默地"什么都没发生"最让人困惑（C4 定下的纪律）。
+  const wantHl = q3.get('hl');
+  if (wantHl) {
+    const names = String(wantHl).split(',').map(s => s.trim()).filter(Boolean);
+    if (names.length) {
+      // ⚠️ **必须先进入那个社区** —— 这是踩过才知道的一件事：
+      //   `overlay.userData.pts` 是**社区内部视图**的实体点云，
+      //   而**概览层是"社区云 + 纤维"，根本没有实体级的点**
+      //   ⇒ 在概览层调 `applyHlFocus()` 会**静默无效**
+      //   （`applyColorMode()` 第一行 `if (!ud || !ud.pts || !ud.data) return;` 就退了）。
+      //   `?n=` 之所以能用，正是因为它先 `enterCommunity(ci)`（见上面那段）。
+      //   **第一版漏了这一步，现象是"URL 参数都对、__viewState 也对，
+      //   但颜色缓冲一个都没变"** —— 记在这里免得下次再犯。
+      let target = -1, best = 0;
+      if (typeof clouds !== 'undefined' && clouds) {
+        for (let ci = 0; ci < clouds.length; ci++) {
+          const core = (clouds[ci] && clouds[ci].core) || [];
+          const hit = names.filter(nm => core.some(x => x && x.id === nm)).length;
+          if (hit > best) { best = hit; target = ci; }
+        }
+      }
+      if (target >= 0) {
+        try { await enterCommunity(target); } catch (e) { /* 进不去就退回概览 */ }
+      }
+      const hit = applyHlFocus(names);
+      applied.hl = names.length;
+      applied.hl_hit = hit;
+      applied.hl_community = target >= 0 ? target : null;
+      if (hit === 0) {
+        applied.hl_missing = true;
+        status.textContent =
+          `链接里的 ${names.length} 个实体在当前图里一个都没找到（可能对应另一份数据）`;
+        status.classList.add('visible');
+      } else {
+        status.textContent = hit === names.length
+          ? `已高亮检索到的 ${hit} 个实体`
+          : `已高亮 ${hit} / ${names.length} 个实体（其余在当前图里找不到）`;
+        status.classList.add('visible');
+        clearTimeout(window.__hlTip);
+        window.__hlTip = setTimeout(() => status.classList.remove('visible'), 4000);
+      }
     }
   }
 

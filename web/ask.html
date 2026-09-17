@@ -425,6 +425,13 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
         <p class="hint" id="trace"></p>
         <div class="graph">
           <div class="gpanel" id="gpanel" role="img" aria-labelledby="gdesc"></div>
+<!-- H9：把这一页的 2D 子图接到主视图的 3D 高亮上（`?hl=`）。
+     按钮的文字与 title 都**如实报"带了多少个"** —— 超过 40 个时说明只带了前 40 个。 -->
+<button id="to3d" type="button" hidden
+        style="margin:10px 0 2px;background:rgba(224,164,105,.14);color:#e8c9a4;
+               border:1px solid rgba(224,164,105,.42);border-radius:9px;
+               padding:8px 14px;font-size:13px;font-family:inherit;cursor:pointer">
+</button>
           <div class="gside">
             <p class="sr-only" id="gdesc"></p>
             <div id="gstats"></div>
@@ -1111,6 +1118,47 @@ function play(d){
   $('verdict').innerHTML = d.verdict;
   $('caveat').innerHTML = d.caveat;
   $('gdesc').textContent = '检索到的子图：' + d.trace;
+
+  /* ── H9（2026-09-16）：**问题 → 子图 → 3D 高亮**的最后一根线 ──────────
+   *
+   * 四透镜透镜一第 1 项要的是这条链。此前零件全齐、**但没接起来**：
+   * 这一页有问答与 2D 子图，主视图有 3D 高亮，**而两者不通** ——
+   * 用户答完没法在图上看见那片子图。
+   *
+   * 做法：把这 **片子里出现的实体名**带进主视图的 `?hl=`，
+   * 主视图压暗其余、提亮这些点。
+   *
+   * **为什么不只带种子**：种子只是入口（几个），而"我检索到的那片证据"
+   * 是**整个子图** —— 这才对应界面上画的这张图。
+   *
+   * **为什么限 40 个**：名字要塞进 URL，几十个长实体名会把 URL 撑到
+   * 浏览器/服务器的上限附近。超出的**如实说"只带了前 40 个"**，
+   * 而不是悄悄截断（C4/G3 定下的纪律：**做了多少要说出来**）。
+   */
+  var hlNames = Object.keys(d.nodes || {})
+    .map(function(k){ return d.nodes[k].t; })
+    .filter(Boolean);
+  var HL_LIMIT = 40;
+  var hlUsed = hlNames.slice(0, HL_LIMIT);
+  var hlBtn = $('to3d');
+  if (hlBtn) {
+    if (!hlUsed.length) {
+      hlBtn.hidden = true;
+    } else {
+      hlBtn.hidden = false;
+      hlBtn.textContent = '在 3D 图里看这片子图（' + hlUsed.length
+        + (hlNames.length > HL_LIMIT ? '/' + hlNames.length : '') + ' 个实体）';
+      hlBtn.onclick = function(){
+        var q = [];
+        if (ASK_GID) q.push('src=' + encodeURIComponent(ASK_GID));
+        q.push('hl=' + encodeURIComponent(hlUsed.join(',')));
+        location.href = './kg-nebula.html?' + q.join('&');
+      };
+      hlBtn.title = hlNames.length > HL_LIMIT
+        ? '子图共 ' + hlNames.length + ' 个实体，链接只带前 ' + HL_LIMIT + ' 个'
+        : '打开主视图并高亮这 ' + hlUsed.length + ' 个实体';
+    }
+  }
 
   paint(false);
 
