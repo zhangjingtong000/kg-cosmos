@@ -220,10 +220,18 @@ def main():
         per_device_train_batch_size=ARGS.batch_size,
         gradient_accumulation_steps=ARGS.grad_accum,
         learning_rate=ARGS.lr, lr_scheduler_type='cosine', warmup_ratio=0.03,
-        logging_steps=10, save_strategy='epoch', save_total_limit=1,
+        logging_steps=1, save_strategy='no', save_total_limit=1,
         bf16=True, max_length=ARGS.max_len,
         dataset_text_field='text', report_to=[],
         gradient_checkpointing=True, seed=ARGS.seed,
+        # ⚠️⚠️ **Windows 上必须显式禁用 DataLoader worker**（2026-09-17 实测踩到）：
+        #   第一次跑到一半**卡死** —— `CPU 20 秒只涨 0.3 秒`、内存不变、无产物、
+        #   92 个线程挂着。那与 Windows 上 `num_workers>0` 的
+        #   spawn/信号量问题**表现一致**（子进程起来后与主进程互相等）。
+        #   ⇒ 显式设 0（**不是"默认应该就是 0"** —— 那种假设正是这次踩坑的原因）。
+        dataloader_num_workers=0,
+        # 同理：**不要 pin memory**（它在 Windows 上也会拉一堆线程）
+        dataloader_pin_memory=False,
     )
     trainer = SFTTrainer(model=model, args=cfg, train_dataset=ds_train,
                          eval_dataset=ds_val, processing_class=tok,
