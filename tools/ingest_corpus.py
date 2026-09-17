@@ -84,6 +84,46 @@ def main() -> None:
     else:
         store = GraphStore(backend="networkx")
     print(f"[ingest] backend={backend}", flush=True)
+
+    # ★★ **单实例锁**（2026-09-17 加）。
+    #
+    # 为什么要加：**我自己踩了一次** —— 在 B5（prompt A/B 多 seed）正跑抽取时，
+    # 又起了一次 `ingest_corpus.py` 想"验证一下默认 backend"。
+    # 两次都调 Ollama ⇒ **`llama-server` 的 CPU 计数归零重载**（306s → 180s），
+    # ⇒ **正在跑的那次抽取被污染了**（它的上下文/显存被抢）。
+    #
+    # **而这个错误在输出里看不出来** —— 两边都打印正常的进度。
+    # ⇒ 所以必须**在入口挡住**，而不是靠人记得。
+    #
+    # 实现：一个锁文件，内容写 pid 与启动时间。**不删锁**（进程被杀时锁会留），
+    # 所以判定是"pid 还活着吗"，不是"锁文件在不在"。
+    LOCK = CORPUS / ".ingest.lock"
+    if LOCK.exists():
+        try:
+            info = json.loads(LOCK.read_text(encoding="utf-8"))
+            other = int(info.get("pid") or 0)
+        except Exception:
+            info, other = {}, 0
+        alive = False
+        if other:
+            try:
+                os.kill(other, 0)          # 只探测存在性，不发信号
+                alive = True
+            except OSError:
+                alive = False
+        if alive and other != os.getpid():
+            print(f"[lock] ❌ **已有抽取在跑**（pid={other}，"
+                  f"起于 {info.get('started')}）⇒ 拒绝启动。", flush=True)
+            print("[lock]   为什么：两次并发抽取会**互相抢 Ollama**，"
+                  "把它重载（`llama-server` CPU 归零），**两边的结果都不可信**。", flush=True)
+            print("[lock]   若那个进程已经死了，删掉 "
+                  f"{LOCK} 再跑。", flush=True)
+            raise SystemExit(2)
+    LOCK.write_text(json.dumps(
+        {"pid": os.getpid(),
+         "started": time.strftime("%Y-%m-%d %H:%M:%S")},
+        ensure_ascii=False), encoding="utf-8")
+
     pdfs = sorted(CORPUS.glob("*.pdf"))
     if ONLY:
         pdfs = [p for p in pdfs if p.stem in ONLY]
