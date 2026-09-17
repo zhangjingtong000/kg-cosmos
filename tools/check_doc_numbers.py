@@ -111,6 +111,37 @@ def _pytest_count():
         return None
 
 
+def _verify_all_count():
+    """从 `verify_all.py` 里**数出**检查项数；拿不到返回 None。
+
+    **为什么动态数而不是写死**：与 `_pytest_count()` 同一个道理 ——
+    **一个写死的基准，本身就是下一次过时**。
+    （实测教训：`DEMO_SCRIPT.md` 里那句"30/30"就是这么过期的。）
+
+    ⚠️ **要数两个列表**：`CHECKS`（需要浏览器）**与** `DATA_CHECKS`（纯数据侧）。
+    第一版只数了前者 ⇒ 得到 25 而实际 44 ⇒ **检查本身报了三个假警报**。
+
+    ⚠️ **还要减去标了 `"slow"` 的项** —— 文档里写的是
+    「`verify_all.py --fast` 是 N/N」，而 `--fast` **跳过 slow**。
+    不减去的话会得到 45 而实际 44，**检查又报一个假警报**。
+    """
+    p = Path(__file__).resolve().parent / 'verify_all.py'
+    try:
+        src = p.read_text(encoding='utf-8')
+    except Exception:
+        return None
+    total = 0
+    for name in ('CHECKS', 'DATA_CHECKS'):
+        m = re.search(name + r'\s*=\s*\[(.*?)\n\]', src, re.S)
+        if not m:
+            continue
+        blk = m.group(1)
+        total += len(re.findall(r'^\s{4}\(', blk, re.M))
+        # `, "slow")` 结尾的项被 `--fast` 跳过
+        total -= len(re.findall(r',\s*"slow"\)', blk))
+    return total or None
+
+
 def main():
     cur = load()
     print('=== 文档数字一致性 ===\n')
@@ -231,6 +262,47 @@ def main():
             fails.append(f'README 未反映{why}（{tok}）——文档可能又落后了')
             print(f'  ❌ README 缺 {why} ({tok})')
 
+    # ④ **回归项数**：文档里写的 "N/N" 必须与 `verify_all.py` 的实际项数一致
+    #
+    # **为什么加这一条**（2026-09-16）：`DEMO_SCRIPT.md` 的"演示前必须确认"里
+    # 写着「`verify_all.py --fast` 是 **30/30**」，而实际已经是 **44/44** ——
+    # **一处典型的过期数字**。而它**没被本脚本抓到**，因为上面那张 `need`
+    # 表只认"指标数字"，**不认"回归项数"**。
+    #
+    # ⇒ 这跟 N10（测试数）是同一个道理：**一个会被引用的数字，
+    #   如果没有任何检查强制它同步，它就会一直是错的。**
+    print('\n=== ④ 文档里的回归项数是否与实际一致 ===')
+    n_checks = _verify_all_count()
+    if n_checks is None:
+        print('  ⚠️ 数不出 verify_all 的项数，跳过这一项')
+    else:
+        print(f'  实测 `verify_all.py` 有 {n_checks} 项')
+        # 在"会被引用"的那几份文档里找 `NN/NN` 形态的写法。
+        #
+        # ⚠️ **必须带上下文**：光看 `\d+/\d+` 会误报 ——
+        #    `DEMO_SCRIPT.md` 里有一句"命中 70 个实体，**类型全对（70/70）**"，
+        #    那是**实体类型的通过率**，不是回归项数。
+        #    ⇒ 只在**同行含 `verify_all` 或"回归"**时才认。
+        stale = []
+        for rel in ('README.md', 'docs/DEMO_SCRIPT.md', 'docs/RUNBOOK.md',
+                    '早先的内部记录'):
+            p = ROOT / rel
+            if not p.exists():
+                continue
+            for i, line in enumerate(p.read_text(encoding='utf-8').split('\n'), 1):
+                if 'verify_all' not in line and '回归' not in line:
+                    continue
+                for m in re.finditer(r'(\d{2})\s*/\s*\1', line):
+                    if int(m.group(1)) != n_checks:
+                        stale.append((rel, m.group(0), i))
+        if stale:
+            for rel, tok, ln in stale:
+                fails.append(f'{rel}:{ln} 写着回归「{tok}」，实际是 {n_checks}/{n_checks}'
+                             f' —— 过期数字')
+                print(f'  ❌ {rel}:{ln} 写着 {tok}（实际 {n_checks}）')
+        else:
+            print(f'  ✅ 文档里的回归项数与实际一致（{n_checks}/{n_checks}）')
+
     print('\n' + '=' * 60)
     if fails:
         print(f'发现 {len(fails)} 处问题：')
@@ -239,7 +311,6 @@ def main():
         return 1
     print('文档数字与产物一致')
     return 0
-
 
 if __name__ == '__main__':
     sys.exit(main())
