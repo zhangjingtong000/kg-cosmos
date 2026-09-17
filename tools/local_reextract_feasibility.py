@@ -32,6 +32,14 @@ Q = ROOT / 'data' / 'quality'
 DIR = Q / '_l9rel'
 sys.path.insert(0, str(ROOT / 'src'))
 
+# C3（2026-09-16）：本地抽取的**重试**参数。
+#
+# 这一项在回归里**间歇性**报 HTTP 500（实测两次：116.2s / 51.3s），
+# 而复现脚本连打 3 次**全 200**（62.7–82.2s）⇒ 它是间歇性的 ⇒ 重试是对的。
+# **但重试绝不等于吞掉错误** —— 见下面调用处的注释。
+RETRIES = 3
+RETRY_WAIT = 10          # 秒。给 Ollama 一点时间把显存理顺（假设是 OOM，见 C3 文档）
+
 NON_ENTITY = re.compile(
     r'^(this|these|those|it|its|the)\s+\w+'
     r'|^\d[\d\s,]*\s*(papers?|tables?|sections?|articles?|methods?)$'
@@ -150,8 +158,58 @@ def main():
             if b in {x[0] for x in pair.get(a, set())}:
                 cloud_hit.append(t)
         t0 = time.time()
-        res = extract_chunk(text, MODELS['local']['text'], 'local',
-                            MODELS['local'].get('vision'), None, 'text')
+        # ── C3（2026-09-16）：**重试 + 错误分类** ────────────────────────
+        #
+        # ## 为什么要重试
+        #
+        # 这一项在回归里**间歇性**报 `HTTP 500`（两次：116.2s / 51.3s）。
+        # 复现脚本 `tools/_probe/_probe_ollama_500.py` 连打 3 次**全 200**
+        # （62.7–82.2s），说明它是**间歇性**的 ⇒ 重试是对的。
+        #
+        # ## 但**绝不能吞掉错误**
+        #
+        # 重试如果写成"失败就当没抽到"，那就变成了**静默降级** ——
+        # 而本脚本的**全部价值**就是"本地抽取到底行不行"这个结论。
+        # 把失败静默成"0 条"会让结论**看起来更差**（等于替本地模型认了没做的事），
+        # 那是另一种谎。
+        # ⇒ 所以：**每次失败都打印**，重试用尽后**如实抛出**。
+        #
+        # ## 复现时测到的、与根因最相关的一个数
+        #
+        # ```
+        # 模型未驻留（显存  895 MiB）：82.2s
+        # 模型已驻留（显存 6496 MiB）：62.7s      ← 6496 / 8188 = **79%**
+        # ```
+        # ⇒ **9B 模型驻留后只剩 1692 MiB 余量**。
+        # 500 最可能与**当时显存余量**有关（Ollama 的 OOM 表现可能就是 500）。
+        # ⚠️ **这是假设，不是结论** —— 判别方法写在
+        # `docs/C3_OLLAMA_500_ROOT_CAUSE.md`，**没有做 OOM 实验**
+        # （那会让 Ollama 崩溃，不能在无人看着时做）。
+        res = None
+        last_err = None
+        for attempt in range(1, RETRIES + 1):
+            try:
+                res = extract_chunk(text, MODELS['local']['text'], 'local',
+                                    MODELS['local'].get('vision'), None, 'text')
+                if attempt > 1:
+                    print(f'   （第 {attempt} 次重试成功）')
+                break
+            except Exception as exc:                  # noqa: BLE001
+                last_err = exc
+                kind = type(exc).__name__
+                code = getattr(getattr(exc, 'response', None), 'status_code', None)
+                extra = f'（HTTP {code}）' if code else ''
+                print(f'   ⚠️ 本地抽取第 {attempt}/{RETRIES} 次失败{extra}：{kind}: '
+                      f'{str(exc)[:160]}')
+                if attempt < RETRIES:
+                    time.sleep(RETRY_WAIT)
+        if res is None:
+            # **如实抛出**，不把它变成"抽到 0 条"
+            raise SystemExit(
+                f'❌ 本地抽取连续 {RETRIES} 次失败，最后一次：'
+                f'{type(last_err).__name__}: {str(last_err)[:200]}\n'
+                f'   ⇒ **不把它当成"抽到 0 条"** —— 那会让本脚本的结论失真。\n'
+                f'   根因排查见 docs/C3_OLLAMA_500_ROOT_CAUSE.md')
         dt = time.time() - t0
         local = (res or {}).get('edges') or []
 
