@@ -1021,10 +1021,37 @@ function pdfSearchSnippet(text) {
   return s.length >= 12 ? s : '';
 }
 
+/** N6（2026-09-17）：PDF 的**回退链** —— 静态站只服务 `web/`。
+ *
+ * ## 实测（这一步是必须做的，不能靠猜）
+ *
+ * ```
+ * ✅ 8098/web/kg-data/nebula.json    能取
+ * ✅ 8098/web/l5-data/2506.09566v1.pdf  能取（**web/ 内的**）
+ * ❌ 8098/data/corpus/2506.09566v1.pdf  **404**（仓库根的 data/）
+ * ```
+ * ⇒ 静态站（8098，`serve.py --static`）**只服务 `web/`**，
+ *   所以原来写死的 `../data/corpus/${src}` 在静态站上**必然 404**。
+ *   （那是"事后才发现"的：`l5-review.html` 早就用了回退链，这一页没有。）
+ *
+ * ## 做法：**先试 web/ 内的那份，再退回仓库的**
+ *
+ * 与 `l5-review.html` 的写法一致：
+ * ```js
+ * return [`./l5-data/${paper}.pdf`, `../data/corpus/${paper}.pdf`];
+ * ```
+ * 好处：**静态站能跑（有哪篇就开哪篇）、后端在时全都能跑**。
+ */
+function pdfCandidates(src) {
+  return [`./l5-data/${src}`, `../data/corpus/${src}`];
+}
+
 /** 构造"在新标签用浏览器查看器打开"的兜底链接（pdf.js 渲染失败时仍有退路）。 */
 function pdfHref(src, page, snippet) {
   const q = snippet ? `&search=${encodeURIComponent(snippet)}` : '';
-  return new URL(`../data/corpus/${src}#page=${page}${q}`, location.href).href;
+  // **回退链**：`./l5-data/`（静态站有）→ `../data/corpus/`（后端在时有）
+  const [a, b] = pdfCandidates(src);
+  return new URL(`${a}#page=${page}${q}`, location.href).href;
 }
 
 /** 在拼接文本里找证据片段，命中的 span 全部加 `.hl`。返回高亮的 span 数。 */
@@ -1121,8 +1148,30 @@ async function openPdf(src, page, snippet) {
   // 状态挂在 window 上供自动化验证读取（无头环境靠它断言高亮真的画出来了）
   try {
     if (!pdfDoc || pdfSrcName !== src) {
-      pdfDoc = await pdfjsLib.getDocument(`../data/corpus/${src}`).promise;
-      pdfSrcName = src;
+      // N6：**回退链** —— 静态站只服务 `web/`，所以先试 `./l5-data/`，
+      // 取不到再试仓库根的 `../data/corpus/`（详见 `pdfCandidates` 的注释）。
+      const cands = pdfCandidates(src);
+      let lastErr = null;
+      for (const c of cands) {
+        try {
+          pdfDoc = await pdfjsLib.getDocument(c).promise;
+          pdfSrcName = src;
+          window.__pdfSource = c;          // 供自动化断言"走的哪一份"
+          lastErr = null;
+          break;
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      if (lastErr) {
+        // **取不到要说清**（G3 的纪律：别让失败伪装成结果）——
+        // 静态站（8098）只服务 web/，所以 PDF 只有后端在时才有。
+        window.__pdfState = {
+          src, page: pdfPageNum, pages: 0,
+          error: 'PDF 取不到（静态站只服务 web/；请用后端 8000：python src/app.py）',
+        };
+        throw new Error('PDF 取不到：' + cands.join(' 与 '));
+      }
     }
     const hits = await renderPdfPage();
     window.__pdfState = {
