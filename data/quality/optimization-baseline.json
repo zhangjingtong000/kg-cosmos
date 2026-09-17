@@ -1,0 +1,346 @@
+{
+  "l5_six_layer": {
+    "edges_total": 43867,
+    "edges_supported": 27954
+  },
+  "l5_validity": {
+    "n_sheet": 200,
+    "n_labeled": 200,
+    "population": 43867,
+    "true_support_rate": 0.4003,
+    "ppv": 0.4967,
+    "npv": 0.2298,
+    "recall": 0.7927,
+    "f1": 0.6107,
+    "in_domain_auc": 0.7074
+  },
+  "l7-relation-constraints.json": {
+    "_keys": [
+      "by_type",
+      "criterion",
+      "edges_total",
+      "layer",
+      "reconcile_with_prototype",
+      "table_source",
+      "total"
+    ]
+  },
+  "l7-role-violation-audit.json": {
+    "_keys": [
+      "batch_b",
+      "by_relation",
+      "caveat",
+      "conclusion",
+      "false_positive_rate",
+      "n",
+      "predicate_wrong_rate",
+      "proposes",
+      "quality_imbalance",
+      "tautological_constraints",
+      "total",
+      "true_violation_rate"
+    ]
+  },
+  "l7-direction-verification.json": {
+    "_keys": [
+      "author_types",
+      "compliance_rate",
+      "compliant",
+      "creatable_types",
+      "criterion",
+      "edges_resolvable",
+      "edges_total",
+      "edges_unknown_endpoint",
+      "layer",
+      "note",
+      "relation",
+      "source_violations",
+      "target_violations",
+      "top_bad_pairs",
+      "violation_classes"
+    ]
+  },
+  "l3_gap": {
+    "edges_total": 43867,
+    "missing_edges": 13843,
+    "miss_source_only": 6154,
+    "miss_target_only": 5961,
+    "miss_both": 1728,
+    "recoverable_seen_elsewhere": 0,
+    "never_extracted": 15571,
+    "by_type": {
+      "MEASURES": {
+        "miss": 335,
+        "n": 872,
+        "rate": 0.3842
+      },
+      "COMPARES_WITH": {
+        "miss": 224,
+        "n": 598,
+        "rate": 0.3746
+      },
+      "APPLIES_TO": {
+        "miss": 1329,
+        "n": 3850,
+        "rate": 0.3452
+      },
+      "CITES": {
+        "miss": 328,
+        "n": 967,
+        "rate": 0.3392
+      },
+      "USES": {
+        "miss": 2482,
+        "n": 7339,
+        "rate": 0.3382
+      },
+      "EVALUATES": {
+        "miss": 152,
+        "n": 454,
+        "rate": 0.3348
+      },
+      "PRODUCES": {
+        "miss": 694,
+        "n": 2213,
+        "rate": 0.3136
+      },
+      "PART_OF": {
+        "miss": 1815,
+        "n": 5816,
+        "rate": 0.3121
+      },
+      "RELATED_TO": {
+        "miss": 2973,
+        "n": 9598,
+        "rate": 0.3098
+      },
+      "LOCATED_AT": {
+        "miss": 263,
+        "n": 853,
+        "rate": 0.3083
+      },
+      "CAUSES": {
+        "miss": 84,
+        "n": 280,
+        "rate": 0.3
+      },
+      "SUPPORTS": {
+        "miss": 233,
+        "n": 793,
+        "rate": 0.2938
+      },
+      "CREATED_BY": {
+        "miss": 2514,
+        "n": 8755,
+        "rate": 0.2872
+      },
+      "CONTRADICTS": {
+        "miss": 67,
+        "n": 243,
+        "rate": 0.2757
+      },
+      "ENABLES": {
+        "miss": 260,
+        "n": 999,
+        "rate": 0.2603
+      }
+    },
+    "top_never_extracted": [
+      [
+        "Relations",
+        91
+      ],
+      [
+        "KGEM",
+        76
+      ],
+      [
+        "Zero-Shot Image Classification",
+        48
+      ],
+      [
+        "Knowledge",
+        45
+      ],
+      [
+        "Temporal Knowledge Graph Completion",
+        45
+      ],
+      [
+        "Document-Level Relation Extraction",
+        44
+      ],
+      [
+        "Summary",
+        42
+      ],
+      [
+        "Temporal Knowledge Graphs",
+        41
+      ],
+      [
+        "J. W.",
+        41
+      ],
+      [
+        "Da Silva Santos, L. B.",
+        41
+      ],
+      [
+        "Unseen Entity",
+        39
+      ],
+      [
+        "Class Feature Paradigm",
+        39
+      ],
+      [
+        "DKG",
+        39
+      ],
+      [
+        "MR",
+        38
+      ],
+      [
+        "Experts",
+        36
+      ],
+      [
+        "Seen Classes",
+        34
+      ],
+      [
+        "Unseen Class",
+        34
+      ],
+      [
+        "Few-Shot Knowledge Graph Completion",
+        33
+      ],
+      [
+        "Knowledge Graph Embedding Model",
+        33
+      ],
+      [
+        "GNN-Based Methods",
+        32
+      ],
+      [
+        "Event Knowledge Graph",
+        31
+      ],
+      [
+        "KG-aware ZSL",
+        30
+      ],
+      [
+        "Dr. E",
+        30
+      ],
+      [
+        "KG-Aware ZSL",
+        28
+      ],
+      [
+        "KG-aware FSL",
+        28
+      ],
+      [
+        "M",
+        28
+      ],
+      [
+        "H.",
+        28
+      ],
+      [
+        "Task",
+        27
+      ],
+      [
+        "PCNN",
+        26
+      ],
+      [
+        "Mapping-based",
+        26
+      ],
+      [
+        "Vehicle",
+        26
+      ],
+      [
+        "Bilinear-COMP",
+        25
+      ],
+      [
+        "Class Feature",
+        25
+      ],
+      [
+        "Propagation-based",
+        24
+      ],
+      [
+        "Open Relation Extraction",
+        24
+      ],
+      [
+        "SKG",
+        24
+      ],
+      [
+        "LLAMA2",
+        24
+      ],
+      [
+        "Cyc",
+        23
+      ],
+      [
+        "Entity Pair",
+        23
+      ],
+      [
+        "TKG",
+        23
+      ]
+    ]
+  },
+  "backfill_tool_exists": true,
+  "exists_entity-quality.json": true,
+  "keys_entity-quality.json": [
+    "diagnosed",
+    "flags_by_freq",
+    "flags_by_name",
+    "top_issues",
+    "total_freq",
+    "unique_names"
+  ],
+  "exists_same-as-candidates.json": true,
+  "keys_same-as-candidates.json": [
+    "candidates",
+    "count",
+    "involved_names",
+    "note"
+  ],
+  "exists_entity-alias-map.json": true,
+  "keys_entity-alias-map.json": [
+    "alias",
+    "audit",
+    "summary"
+  ],
+  "ontology": {
+    "n_relation_types": 15,
+    "n_entity_types": 15
+  },
+  "single_local": {
+    "nodes": 793,
+    "edges": 951
+  },
+  "single_cloud": {
+    "nodes": 1045,
+    "edges": 1902
+  }
+}
