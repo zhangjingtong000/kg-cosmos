@@ -15,6 +15,7 @@ server started with OLLAMA_NUM_PARALLEL matching it to keep the GPU saturated.
 
 import json
 import os
+import shutil
 import sys
 import time
 import traceback
@@ -35,6 +36,20 @@ ONLY = [s.strip() for s in os.environ.get("KG_ONLY", "").split(",") if s.strip()
 SNAPSHOTS = CORPUS / "graphs"
 SNAPSHOTS.mkdir(parents=True, exist_ok=True)
 BATCH_ID = os.environ.get("KG_BATCH_ID") or time.strftime("ingest-%Y%m%d-%H%M%S")
+
+# ★ `KG_FORCE=1` ⇒ **强制重抽**（忽略"已有图 ⇒ skip"的判定）。
+#
+# 为什么要这个开关（2026-09-17 加）：B5（prompt A/B 多 seed）**必须对同一篇用不同
+# prompt/seed 重抽**，而 `is_usable_snapshot` 会把它判成"已完成"直接 skip。
+# 我当时的做法是**把原图移走再抽** —— 而那样会带来一个**很坏的副作用**：
+#   **`data/corpus/graphs/2012.00456v1.json` 在那段时间里不存在** ⇒
+#   · `pytest` 的 `test_paper_names_match_snapshots` **当场报红**
+#     （`papers` 里提到的名字在快照目录里找不到）；
+#   · 前端与 `verify_all` 里依赖那份图的检查**也会红**。
+#   ⇒ **一个跑实验的动作，把整个仓库变成了不一致状态** —— 而那不是实验该有的副作用。
+#
+# ⇒ 改成"**强制重抽，但原图一直在**"：抽完直接覆盖它（**而各次的产物由 B5 另存**）。
+FORCE = os.environ.get("KG_FORCE", "") not in ("", "0", "false", "False")
 
 
 def is_usable_snapshot(path: Path) -> bool:
@@ -137,10 +152,17 @@ def main() -> None:
     for idx, pdf in enumerate(pdfs, 1):
         paper_id = pdf.stem
         snapshot = SNAPSHOTS / f"{paper_id}.json"
-        if snapshot.exists():
+        if snapshot.exists() and not FORCE:
             print(f"[{idx}/{len(pdfs)}] skip (done): {paper_id}", flush=True)
             done += 1
             continue
+        if snapshot.exists() and FORCE:
+            # **强制重抽**：原图**先备份**（`<name>.json.bak`），抽完覆盖它。
+            # 这样"要重抽"与"仓库里一直有图"两件事同时成立。
+            bak = snapshot.with_suffix(".json.bak")
+            shutil.copy2(snapshot, bak)
+            print(f"[{idx}/{len(pdfs)}] **force 重抽**: {paper_id}"
+                  f"（原图备份到 {bak.name}）", flush=True)
 
         started = time.time()
         try:

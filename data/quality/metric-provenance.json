@@ -1,12 +1,12 @@
 {
-  "generated": "2026-09-17 16:58:29",
+  "generated": "2026-09-17 20:31:00",
   "note": "数据源指纹 + 各指标读数。数据变了而指标没重跑时，python tools/metric_provenance.py 会把它们标为 stale。",
   "sources": {
     "graphs": {
-      "files": 17,
-      "bytes": 81362577,
+      "files": 16,
+      "bytes": 79054522,
       "newest_mtime": "2026-09-12 14:44:26",
-      "sha1_16": "86a747eaaa250b0b"
+      "sha1_16": "58bfb554bb47b963"
     },
     "relation_verify_all": {
       "files": 1,

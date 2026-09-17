@@ -177,14 +177,25 @@ def main():
               f'（否则 ingest 会 skip）')
 
     def fresh_extract(tag, env):
-        """移走旧图 → 抽 → 把产物存成 `<tag>.json`。"""
-        if snapshot.exists():
-            snapshot.unlink()
+        """**强制重抽**（`KG_FORCE=1`）→ 把产物另存为 `<tag>.json`。
+
+        ⚠️ **第一版是"把原图移走再抽"** —— 而那样有一个很坏的副作用：
+        `data/corpus/graphs/2012.00456v1.json` **在那段时间里不存在** ⇒
+        · `pytest` 的 `test_paper_names_match_snapshots` **当场报红**
+          （`papers` 里提到的名字在快照目录里找不到）；
+        · 前端与 `verify_all` 里依赖那份图的检查也会红。
+        **⇒ 一个跑实验的动作，把整个仓库变成了不一致状态。**
+
+        ⇒ 改成 `KG_FORCE=1`：**强制重抽，但原图一直在**
+        （`ingest_corpus.py` 会先把原图备份成 `.json.bak`，抽完覆盖它）。
+        """
+        e = dict(env)
+        e['KG_FORCE'] = '1'
         p = subprocess.run(
             [PY, str(ROOT / 'tools' / 'ingest_corpus.py'),
              str(ROOT / 'data' / 'corpus'), os.environ.get('KG_INGEST_MODE', 'local')],
             capture_output=True, text=True, encoding='utf-8', errors='replace',
-            cwd=str(ROOT), env=env)
+            cwd=str(ROOT), env=e)
         got = RUNS / f'{tag}.json'
         if snapshot.exists():
             got.write_bytes(snapshot.read_bytes())
