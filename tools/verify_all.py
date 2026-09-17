@@ -130,6 +130,11 @@ CHECKS = [
 DATA_CHECKS = [
     ("本体口径一致性（唯一来源自检）", ["tools/check_ontology_consistency.py"]),
     ("文档数字与产物一致性", ["tools/check_doc_numbers.py"]),
+    # J6：命令行工具。**它是 CLI，不是页面** ⇒ 不进上面那组 CDP 检查，
+    # 而是"把每个子命令真跑一遍"（六组断言，含 `--no-llm` 与 `--remote` 的失败路径）。
+    # ⚠️ 这一条**必须放在数据侧**：它只需要图快照，不需要浏览器，也不调模型。
+    ('命令行工具 kg（J6：六个子命令真跑 · **--no-llm 不调模型** · 连不上要说清）',
+     ['tools/check_kg_cli.py']),
     # 内联 JS 的语法：一旦有语法错，整页白屏（boot() 根本不会执行），
     # 后果比一个数据错严重得多，而检测只要 node --check。
     # 实测我在 analytics.html 里连改四版括号才发现——当时 CDP 检查只报
