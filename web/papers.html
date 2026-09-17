@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KG Cosmos · 论文管理</title>
+<!--
+  K2（2026-09-17）：**论文管理**（已入库列表 / 删除 / 元数据）。
+
+  ## ★ N7 已经把这一页的每个决定都答好了
+
+  | 决定 | 答案 |
+  |---|---|
+  | 列表按哪一层列？ | **四层都列**（清单 / 已下载 / 已入库 / 上传图） |
+  | "我传过哪些"要不要含失败的？ | **要** —— 失败的 6 次也在（**用户最想知道的是"我那次为什么没成"**） |
+  | 删除删什么？ | **UI 上必须区分"上传的图（gid）"与"语料图（arXiv id）"** |
+  | 同一篇被传两次？ | **不合并**，标出"同一篇有 N 份" |
+
+  ## ★★ 删除永远不真删（这一页最要紧的设计）
+
+  `ARCHIVE_POLICY`：被替代的东西不删。删除**用户自己的数据**更严重 ——
+  点错一下，**几十分钟的本地抽取就没了**。
+  ⇒ 后端把"删除"实现成**移到 `data/_trash/` 并留一张 `_why.json`**。
+
+  **而这一页必须把这件事说清楚，否则用户不敢点、或者以为真删了。**
+  ⇒ 按钮文案是「移入回收站」，并且**必须填原因**（后端会拒空的 why）。
+-->
+<style>
+  :root{--bg:#0b0d12;--fg:#dfe2e8;--dim:#8b95a8;--line:rgba(193,195,201,.18);
+        --hot:#e0a469;--cool:#7cc0b6;--warn:#e8c9a4;--bad:#e07575}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:14px/1.65 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  header{padding:16px 22px 8px}
+  h1{margin:0;font-size:18px;font-weight:600}
+  .sub{color:var(--dim);font-size:12.5px;margin-top:5px;max-width:1060px}
+  .sub b{color:var(--warn)}
+  main{padding:0 22px 60px;max-width:1240px}
+  h2{font-size:15.5px;margin:24px 0 4px}
+  .hint{color:var(--dim);font-size:12.5px;margin-bottom:6px;max-width:1000px}
+  .kpis{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
+  .kpi{border:1px solid var(--line);border-radius:10px;padding:9px 14px;min-width:104px}
+  .kpi .k{font-size:11.5px;color:var(--dim);letter-spacing:.07em}
+  .kpi .v{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--cool)}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:6px}
+  th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;
+        vertical-align:top}
+  th{color:var(--dim);font-weight:500;font-size:11.5px}
+  code{color:var(--warn);font-size:12px}
+  .pill{display:inline-block;border:1px solid var(--line);border-radius:5px;
+        padding:0 6px;font-size:11px;color:var(--dim)}
+  .pill.up{border-color:rgba(124,192,182,.6);color:var(--cool)}
+  .pill.bad{border-color:rgba(224,117,117,.6);color:var(--bad)}
+  button{background:rgba(224,164,105,.13);color:var(--warn);cursor:pointer;
+         border:1px solid rgba(224,164,105,.4);border-radius:7px;
+         padding:4px 10px;font-size:12px;font-family:inherit}
+  button:hover:not(:disabled){border-color:rgba(224,164,105,.9);color:#fff}
+  button.danger{background:rgba(224,117,117,.1);color:var(--bad);
+                border-color:rgba(224,117,117,.42)}
+  button.danger:hover:not(:disabled){border-color:var(--bad);color:#fff}
+  button:disabled{opacity:.5;cursor:default}
+  .note{color:var(--dim);font-size:12.5px;margin-top:14px;max-width:1060px}
+  .note b{color:var(--warn)}
+  .warnbox{border:1px solid rgba(232,201,164,.34);background:rgba(224,164,105,.07);
+           border-radius:10px;padding:11px 14px;margin:14px 0;font-size:12.5px;
+           color:var(--warn);max-width:1060px}
+  dialog{background:#12141a;color:var(--fg);border:1px solid var(--line);
+         border-radius:12px;padding:18px 20px;max-width:520px;width:92%}
+  dialog h3{margin:0 0 6px;font-size:15px}
+  dialog p{font-size:12.5px;color:var(--dim);margin:6px 0}
+  dialog input{background:rgba(255,255,255,.05);color:var(--fg);
+               border:1px solid var(--line);border-radius:7px;
+               padding:7px 9px;width:100%;font-family:inherit;font-size:13px;margin-top:4px}
+  dialog .row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+  pre{background:rgba(0,0,0,.3);border-radius:7px;padding:9px;font-size:11.5px;
+      overflow-x:auto;max-height:170px}
+  a{color:var(--cool)}
+  .empty{color:var(--dim);font-size:12.5px;padding:4px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>论文管理</h1>
+  <div class="sub" id="sub">载入中…</div>
+</header>
+<main>
+  <div class="kpis" id="kpis"></div>
+
+  <div class="warnbox">
+    ⚠️ <b>「移入回收站」不是删除。</b>后端把它实现成<b>移到 <code>data/_trash/</code>
+    并留一张 <code>_why.json</code></b>（谁、何时、为什么、原路径）——
+    <b>永远可以恢复</b>。原因必填：不填的话，一周后那就是一堆时间戳，
+    <b>没人知道哪个能删</b>。
+  </div>
+
+  <h2>我传过哪些</h2>
+  <p class="hint">这是<b>上传的图</b>（<code>data/&lt;gid&gt;/</code>）。
+    <b>gid 是随机的</b>，与 arXiv id 是两套体系 —— 靠 PDF 文件名连起来。</p>
+  <div id="uploads"></div>
+
+  <h2>传过但没成的</h2>
+  <p class="hint">如果只看图，这几次会<b>全部漏掉</b> —— 传失败了也是"传过"，
+    而你想知道的恰恰是<b>那次为什么没成</b>。</p>
+  <div id="failed"></div>
+
+  <h2>已入库的语料</h2>
+  <p class="hint">这是<b>语料图</b>（<code>data/corpus/graphs/</code>）—— 按 arXiv id，
+    与上面的上传图是两套。</p>
+  <div id="corpus"></div>
+
+  <h2>回收站</h2>
+  <div id="trash"></div>
+
+  <p class="note" id="foot"></p>
+</main>
+
+<dialog id="dlg">
+  <h3 id="dlgTitle">移入回收站</h3>
+  <p id="dlgDesc"></p>
+  <p><label>为什么删（<b>必填</b>）<input id="dlgWhy" placeholder="如：传错了 / 抽取质量差 / 重复"></label></p>
+  <p id="dlgConfirmWrap" hidden><label>输入 <code id="dlgCode"></code> 确认
+    <input id="dlgConfirm" autocomplete="off"></label></p>
+  <div class="row">
+    <button id="dlgCancel" type="button">取消</button>
+    <button id="dlgOk" class="danger" type="button">移入回收站</button>
+  </div>
+  <pre id="dlgOut" hidden></pre>
+</dialog>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let REG = null, TRASH = [];
+let pending = null;
+
+/* 两种来源：后端 API（8000）或静态 kg-data/（8098，只读）。
+   ⚠️ 静态站下**没有删除能力** —— 按钮要禁用并说明，而不是点了报错。 */
+let CAN_WRITE = false;
+
+function api(p, opt) {
+  return fetch('./api/papers/' + p, opt).then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+}
+
+function render() {
+  const c = (REG && REG.counts) || {};
+  $('#kpis').innerHTML = [
+    ['清单条目', c.manifest_total], ['已下载', c.downloaded_pdf],
+    ['已入库', c.in_graph], ['上传图', c.uploaded_graphs],
+    ['上传任务', c.upload_tasks], ['传过但没成', c.upload_failed_no_graph],
+  ].map(([k, v]) => `<div class="kpi"><div class="k">${k}</div>
+    <div class="v">${v ?? '—'}</div></div>`).join('');
+
+  // ── 上传的图 ──
+  const ups = (REG.uploads) || [];
+  $('#uploads').innerHTML = ups.length ? `<table><thead><tr>
+    <th>gid</th><th>文件名</th><th>arXiv id</th><th>规模</th><th>创建</th><th></th>
+    </tr></thead><tbody>${ups.map(u => `<tr>
+      <td><code>${esc(u.gid)}</code></td>
+      <td>${esc(u.filename ?? '—')}</td>
+      <td>${u.arxiv_id ? `<code>${esc(u.arxiv_id)}</code>`
+          : '<span class="pill bad">连不上</span>'}</td>
+      <td>${u.nodes} 节点 / ${u.edges} 边</td>
+      <td>${esc(String(u.created_at ?? '').slice(0, 19))}</td>
+      <td><button class="danger" data-kind="upload" data-id="${esc(u.gid)}"
+          data-label="${esc(u.filename ?? u.gid)}" ${CAN_WRITE ? '' : 'disabled'}
+          >移入回收站</button></td></tr>`).join('')}</tbody></table>`
+    : '<div class="empty">（没有上传的图）</div>';
+
+  // ── 传过但没成的 ──
+  const fl = (REG.upload_failures) || [];
+  $('#failed').innerHTML = fl.length ? `<table><thead><tr>
+    <th>gid</th><th>文件名</th><th>状态</th><th>阶段</th></tr></thead><tbody>
+    ${fl.map(o => `<tr><td><code>${esc(o.gid)}</code></td>
+      <td>${esc(o.filename ?? '—')}</td>
+      <td><span class="pill bad">${esc(o.state ?? '')}</span></td>
+      <td>${esc(o.stage ?? '')}</td></tr>`).join('')}</tbody></table>`
+    : '<div class="empty">（没有失败的）</div>';
+
+  // ── 已入库（同一篇传过多次的标出来）──
+  const ing = (REG.papers || []).filter(p => p.in_graph);
+  $('#corpus').innerHTML = `<table><thead><tr><th>arXiv id</th><th>年</th>
+    <th>标题</th><th>上传过</th><th></th></tr></thead><tbody>${ing.map(p => {
+      const n = (p.uploads || []).length;
+      return `<tr><td><code>${esc(p.arxiv_id)}</code></td>
+        <td>${esc(p.year ?? '')}</td><td>${esc((p.title || '').slice(0, 62))}</td>
+        <td>${n ? `<span class="pill up">${n} 次</span>` : '—'}</td>
+        <td><button class="danger" data-kind="corpus_graph"
+            data-id="${esc(p.arxiv_id)}" data-label="${esc(p.arxiv_id)}"
+            data-needconfirm="1" ${CAN_WRITE ? '' : 'disabled'}
+            >移入回收站</button></td></tr>`;
+    }).join('')}</tbody></table>`;
+
+  // ── 回收站 ──
+  $('#trash').innerHTML = TRASH.length ? `<table><thead><tr>
+    <th>目录名</th><th>原路径</th><th>大小</th><th>原因</th><th>时间</th><th></th>
+    </tr></thead><tbody>${TRASH.map(t => `<tr>
+      <td><code>${esc(t.name)}</code></td><td>${esc(t.original ?? '—')}</td>
+      <td>${t.bytes ? (t.bytes / 1024).toFixed(0) + ' KB' : '—'}</td>
+      <td>${esc(t.why ?? '—')}</td>
+      <td>${esc(String(t.trashed_at ?? '').slice(0, 19))}</td>
+      <td><button data-restore="${esc(t.name)}" ${CAN_WRITE ? '' : 'disabled'}
+          >恢复</button></td></tr>`).join('')}</tbody></table>`
+    : '<div class="empty">（回收站是空的）</div>';
+
+  $('#foot').innerHTML =
+    '<b>四层身份的区别（N7 定的）</b>：清单条目（检索到）· 已下载（有 PDF）· '
+    + '已入库（有图）· 上传图（<b>gid</b>，用户当场传的）。'
+    + '「我传过哪些」问的是最后一层。<br>'
+    + (CAN_WRITE
+        ? '删除能力已连上后端（8000）。'
+        : '<b>⚠️ 当前是静态站（无后端）—— 只能看，不能删。</b>'
+          + '要删请用 8000（<code>python src/app.py</code>），'
+          + '或用命令行：<code>python tools/papers_admin.py trash &lt;kind&gt; &lt;id&gt; --why "…"</code>')
+    + '<br><a href="./index.html">← 回导航页</a> · '
+    + '<a href="./upload.html">上传</a> · <a href="./corpus.html">语料清单</a>'
+    + ' · <a href="./paper-table.html">论文对比表</a>';
+
+  window.__papersState = {
+    counts: c, uploads: ups.length, failed: fl.length,
+    in_graph: ing.length, trash: TRASH.length, can_write: CAN_WRITE,
+  };
+}
+
+// ── 删除对话框 ──────────────────────────────────────────────────────
+function openTrash(kind, id, label, needConfirm) {
+  pending = {kind, id, needConfirm};
+  $('#dlgTitle').textContent = '移入回收站：' + label;
+  $('#dlgDesc').innerHTML =
+    `类型 <code>${esc(kind)}</code> · id <code>${esc(id)}</code><br>`
+    + '这**不会真删** —— 文件移到 <code>data/_trash/</code>，'
+    + '并记下原路径、大小与你写的原因，之后随时可以恢复。'
+    + (needConfirm
+        ? '<br><b>⚠️ 这一类要求输入 id 确认</b>（它会让那篇从图谱里消失）。'
+        : '');
+  $('#dlgWhy').value = '';
+  $('#dlgConfirm').value = '';
+  $('#dlgConfirmWrap').hidden = !needConfirm;
+  $('#dlgCode').textContent = id;
+  $('#dlgOut').hidden = true;
+  $('#dlgOk').disabled = false;
+  $('#dlg').showModal();
+}
+
+$('#dlgCancel').addEventListener('click', () => { $('#dlg').close(); pending = null; });
+$('#dlgOk').addEventListener('click', () => {
+  if (!pending) return;
+  const why = $('#dlgWhy').value.trim();
+  if (!why) { alert('必须填"为什么删"'); return; }
+  if (pending.needConfirm && $('#dlgConfirm').value.trim() !== pending.id) {
+    alert('确认框里要输入完整 id：' + pending.id); return;
+  }
+  $('#dlgOk').disabled = true;
+  $('#dlgOut').hidden = false;
+  $('#dlgOut').textContent = '提交中…';
+  api('trash', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(pending)})
+    .then(r => { $('#dlgOut').textContent = r.output || '(无输出)';
+                 setTimeout(() => { $('#dlg').close(); boot(); }, 1400); })
+    .catch(e => { $('#dlgOut').textContent = '❌ ' + e.message; $('#dlgOk').disabled = false; });
+});
+
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-kind]');
+  if (b) { openTrash(b.dataset.kind, b.dataset.id, b.dataset.label,
+                    b.dataset.needconfirm === '1'); return; }
+  const r = ev.target.closest('button[data-restore]');
+  if (r) {
+    r.disabled = true; r.textContent = '恢复中…';
+    api('restore', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: r.dataset.restore})})
+      .then(() => boot())
+      .catch(e => { r.textContent = '❌ ' + e.message; });
+  }
+});
+
+function boot() {
+  // 先探一下后端在不在（**静态站下没有删除能力，要说清而不是点了报错**）
+  fetch('./api/papers/trashcan', {cache: 'no-store'})
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(j => { CAN_WRITE = true; TRASH = j.items || []; })
+    .catch(() => { CAN_WRITE = false; TRASH = []; })
+    .then(() => {
+      const src = CAN_WRITE ? './api/papers/registry' : './kg-data/paper-registry.json';
+      return fetch(src, {cache: 'no-store'}).then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      });
+    })
+    .then(j => {
+      REG = j;
+      const c = j.counts || {};
+      $('#sub').innerHTML = `<b>${c.manifest_total}</b> 条清单 · `
+        + `<b>${c.in_graph}</b> 篇入库 · <b>${c.uploaded_graphs}</b> 个上传图 · `
+        + `<b>${c.upload_failed_no_graph}</b> 次传过但没成 · `
+        + `<b>${TRASH.length}</b> 项在回收站`
+        + (CAN_WRITE ? ' · <b>删除能力已连上</b>'
+                     : ' · <b>静态站：只能看，不能删</b>');
+      render();
+      window.__papersReady = true;
+    })
+    .catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
+}
+boot();
+</script>
+</body>
+</html>

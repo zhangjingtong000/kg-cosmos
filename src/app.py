@@ -359,6 +359,102 @@ async def verify_status():
     return VERIFY_TASK
 
 
+# ── K2（2026-09-17）：论文管理 ────────────────────────────────────────
+#
+# TODO 的原话：论文管理（已入库列表 / 删除 / 元数据）——
+# **"我传过哪些"的真相散在三处**，而**删除**是这里唯一危险的动作。
+#
+# ## ★★ 删除**永不真删**（这是这一块的全部设计）
+#
+# `ARCHIVE_POLICY`：被替代的东西不删。而删除**用户自己的数据**比"替代一个实现"
+# 严重得多 —— 点错一下，**几十分钟的本地抽取就没了**（C3 那次还遇到 500）。
+# ⇒ 所以这里的"删除"只有一种语义：**移到 `data/_trash/` 并留一张 `_why.json`。**
+#
+# ## ⚠️ 为什么要求 `why` 非空
+#
+# 回收站的文件名带时间戳，但**"为什么删"只有人知道**。
+# 不强制填，一周后就是一堆 `20260917-142457-upload-ad6xxxx`，
+# **没人知道哪个能删**。⇒ 强制填写，是让回收站**在未来仍然可用**。
+#
+# ## ⚠️ 三个 kind 的危险程度不同
+#
+# `upload`（一次上传）最安全；`corpus_graph` 会让那篇从图谱里消失；
+# **`corpus_pdf` 最危险** —— 它让已入库的图**失去可核对的原文**
+# （证据深链会断）。⇒ 前端对后两者要求**输入 id 二次确认**。
+
+
+class TrashRequest(BaseModel):
+    kind: str                    # upload | corpus_graph | corpus_pdf
+    id: str
+    why: str                     # **必填**（见上面的理由）
+
+
+@app.get("/api/papers/registry")
+async def papers_registry():
+    """K2 的数据面：论文注册表（由 `tools/build_paper_registry.py` 生成）。
+
+    ⚠️ 与 `kg-api.js` 的静态回退一致：产物在 `web/kg-data/`，所以静态站也能取。
+    """
+    return _serve_json(KG_DATA / 'paper-registry.json')
+
+
+@app.get("/api/papers/trashcan")
+async def papers_trashcan():
+    """回收站里有什么（每项带原路径、字节数、原因）。"""
+    t = DATA_DIR / '_trash'
+    items = []
+    if t.exists():
+        for d in sorted(t.iterdir()):
+            if not d.is_dir():
+                continue
+            wf = d / '_why.json'
+            info = {}
+            if wf.exists():
+                try:
+                    info = json.loads(wf.read_text(encoding='utf-8'))
+                except Exception:
+                    info = {'note': '_why.json 读失败'}
+            items.append({'name': d.name, **info})
+    return {'count': len(items), 'items': items}
+
+
+@app.post("/api/papers/trash")
+async def papers_trash(req: TrashRequest):
+    """把一项移入回收站（**永不真删**）。前端负责二次确认。"""
+    if not (req.why or '').strip():
+        raise HTTPException(400, '必须填"为什么删" —— 否则回收站一周后就没人看得懂了')
+    if req.kind not in ('upload', 'corpus_graph', 'corpus_pdf'):
+        raise HTTPException(400, f'kind 必须是 upload / corpus_graph / corpus_pdf')
+    # **不在这里重实现一遍移动逻辑** —— 直接调 `tools/papers_admin.py`，
+    # 那样 CLI 与 API **走同一条路径**（两边行为不一致是这类功能最常见的坑）。
+    import subprocess          # 顶层没 import（`_run_verify` 里也是局部 import）
+    p = subprocess.run(
+        [sys.executable, str(ROOT / 'tools' / 'papers_admin.py'),
+         'trash', req.kind, req.id, '--why', req.why],
+        capture_output=True, text=True, encoding='utf-8', errors='replace',
+        timeout=120, cwd=str(ROOT))
+    out = (p.stdout or '') + (p.stderr or '')
+    log.info('[papers] trash %s %s ⇒ %s', req.kind, req.id, p.returncode)
+    return {'ok': p.returncode == 0, 'output': out[-1500:],
+            'returncode': p.returncode}
+
+
+@app.post("/api/papers/restore")
+async def papers_restore(req: dict):
+    """从回收站恢复（按目录名）。"""
+    name = str((req or {}).get('name') or '')
+    if not name or '/' in name or '\\' in name or '..' in name:
+        raise HTTPException(400, '非法的回收站目录名')
+    import subprocess
+    p = subprocess.run(
+        [sys.executable, str(ROOT / 'tools' / 'papers_admin.py'), 'restore', name],
+        capture_output=True, text=True, encoding='utf-8', errors='replace',
+        timeout=120, cwd=str(ROOT))
+    out = (p.stdout or '') + (p.stderr or '')
+    return {'ok': p.returncode == 0, 'output': out[-1500:],
+            'returncode': p.returncode}
+
+
 # ── Routes ───────────────────────────────────────────────
 
 @app.post("/upload")
