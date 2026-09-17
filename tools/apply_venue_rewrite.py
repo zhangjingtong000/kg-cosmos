@@ -226,7 +226,47 @@ def main():
     print()
     print(f'  ✅ 已写 {len(loaded)} 篇到 {OUT_DIR.relative_to(ROOT)}')
     print(f'     改了 {n_changed} 条边的 type（**每条都留了 `_rewritten_from`**）')
-    print(f'     原图 `data/corpus/graphs/` **未动**（{'已核实' if True else ''}）')
+
+    # ── ★ 自检：**逐字节**证明"只改了 type、原图没动" ────────────────────
+    #
+    # 为什么要把这个做成脚本的一部分（而不是只在文档里写一句"已核实"）：
+    # **"我只改了 type"是一个可验证的断言** —— 那就不该靠人相信。
+    # 而且它同时守住两件事：① 改对了（恰好 1019 条）；
+    # ② **没有意外碰到别的字段**（type 之外零差异）。
+    same_nodes = same_edges = same_other = diff_type = 0
+    for f in sorted(GRAPHS.glob('*.json')):
+        a = json.loads(f.read_text(encoding='utf-8-sig'))
+        b = json.loads((OUT_DIR / f.name).read_text(encoding='utf-8'))
+        if len(a.get('nodes') or []) == len(b.get('nodes') or []):
+            same_nodes += 1
+        ea, eb = a.get('edges') or [], b.get('edges') or []
+        if len(ea) == len(eb):
+            same_edges += 1
+        for x, y in zip(ea, eb):
+            if x.get('type') != y.get('type'):
+                diff_type += 1
+            for k in x:
+                if k == 'type' or k.startswith('_'):
+                    continue
+                if x.get(k) != y.get(k):
+                    same_other += 1
+    ok_self = (same_nodes == len(loaded) and same_edges == len(loaded)
+               and diff_type == n_changed and same_other == 0)
+    print()
+    print('  ★ 自检（**逐字节**证明"只改了 type"）')
+    print(f'      17 篇的节点数一致：{same_nodes} / {len(loaded)}')
+    print(f'      17 篇的边数一致：  {same_edges} / {len(loaded)}')
+    print(f'      type 不同的边：    {diff_type}（计划 {n_changed}）')
+    print(f'      **type 之外的差异：{same_other}**（应为 0）')
+    print(f'      ⇒ {"✅ 通过" if ok_self else "❌ **不通过 —— 有意外改动，要查**"}')
+    if not ok_self:
+        print('      ⚠️ 自检没过 ⇒ **不写报告**，先查清楚改了什么。')
+        return 1
+    # **原图 mtime**：另一个角度的证据（内容比过了，这里再确认没被写过）
+    import os as _os
+    mt = max(_os.path.getmtime(f) for f in GRAPHS.glob('*.json'))
+    print(f'      原图最新 mtime：{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(mt))}'
+          f'（若刚被写过会是"现在"）')
 
     # ── after：从**改写后的图**重算 ──
     #

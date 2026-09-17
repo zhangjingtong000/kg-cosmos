@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-17 12:29:24",
+ "generated": "2026-09-17 12:36:06",
  "purpose": "A8：执行 PUBLISHED_IN 改写，并留改前/改后的双口径",
  "plan_source": "data/quality/venue-rewrite-plan.json",
  "output_dir": "data\\quality\\graphs-published-in",
@@ -60,5 +60,5 @@
   "rewrite_itself": 0.0,
   "note": "两个数**不要相加当成一个总提升** —— 前者是判据变化，后者是数据变化。"
  },
- "elapsed_s": 2.7
+ "elapsed_s": 4.3
 }
