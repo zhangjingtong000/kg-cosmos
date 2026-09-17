@@ -103,15 +103,27 @@ def main():
     print('B5 · prompt A/B 多 seed（**把 −4.5pp 拆成真效应与 seed 噪声**）')
     print('=' * 92)
 
-    if a.report or OUT.exists():
+    # ⚠️ **只有 `--report` 才读旧结果**。
+    #
+    # 第一版写的是 `if a.report or OUT.exists():` ⇒ **只要结果文件在就打印它并 `return 0`**
+    # ⇒ 于是"重启 B5"实际是**把上次那 6 条失败记录又打印了一遍**
+    #   （GPU 0%、无新产物，我一开始还以为它在慢慢跑）。
+    # **⇒ 一个"看结果"的分支不该挡住"再跑一次"。**
+    if a.report:
         if OUT.exists():
             d = json.loads(OUT.read_text(encoding='utf-8'))
-            print(f'  已有结果（{d.get("generated")}）')
+            runs = d.get('runs') or []
+            n_ok = sum(1 for r in runs if r.get('rc') == 0)
+            print(f'  已有结果（{d.get("generated")}）：{len(runs)} 次，'
+                  f'**成功 {n_ok} / 失败 {len(runs) - n_ok}**')
+            if runs and n_ok == 0:
+                print('  ⚠️ **上一次全都失败了** ⇒ 那些记录不能当结论用；'
+                      '修完原因后直接重跑（**不带 `--report`**）。')
             for k, v in (d.get('summary') or {}).items():
                 print(f'      {k}: {json.dumps(v, ensure_ascii=False)[:110]}')
-            return 0
-        if a.report:
+        else:
             print('  还没有结果（没跑过）')
+        return 0
 
     variants = [x.strip() for x in a.variants.split(',') if x.strip()]
     runs = [{'variant': v, 'seed': s}
@@ -148,27 +160,63 @@ def main():
     # ── 真跑 ──────────────────────────────────────────────────────
     RUNS.mkdir(parents=True, exist_ok=True)
     results = []
+    subject = '2012.00456v1'
+    snapshot = ROOT / 'data' / 'corpus' / 'graphs' / f'{subject}.json'
+    # ★★ **必须先让 ingest 愿意重抽**（2026-09-17 修）：
+    #   `ingest_corpus.py` 的 `is_usable_snapshot` 认为"已有非空图 ⇒ 已完成"，
+    #   于是六次全部打出 `[1/1] skip (done)` —— **一次都没真抽**，
+    #   而 rc=0、看起来"成功"。**那是最容易被误读成"跑通了"的假象。**
+    #   ⇒ 本脚本在每次抽取前把该篇的图**归档移走**（**按 `ARCHIVE_POLICY`：不删，留档**），
+    #     抽完再恢复 —— 而每次的产物另存为 `<tag>.json` 供后续算 F1。
+    archived = None
+    if snapshot.exists():
+        archived = RUNS / '_before.json'
+        if not archived.exists():
+            archived.write_bytes(snapshot.read_bytes())
+        print(f'  已有图 {snapshot.name} ⇒ **归档到 {archived.name} 并移走**'
+              f'（否则 ingest 会 skip）')
+
+    def fresh_extract(tag, env):
+        """移走旧图 → 抽 → 把产物存成 `<tag>.json`。"""
+        if snapshot.exists():
+            snapshot.unlink()
+        p = subprocess.run(
+            [PY, str(ROOT / 'tools' / 'ingest_corpus.py'),
+             str(ROOT / 'data' / 'corpus'), os.environ.get('KG_INGEST_MODE', 'local')],
+            capture_output=True, text=True, encoding='utf-8', errors='replace',
+            cwd=str(ROOT), env=env)
+        got = RUNS / f'{tag}.json'
+        if snapshot.exists():
+            got.write_bytes(snapshot.read_bytes())
+        return p, got
+
     for i, r in enumerate(runs):
         tag = f'{r["variant"]}-s{r["seed"]}'
         print(f'\n  ▶ [{i + 1}/{len(runs)}] {tag}（约 {MIN_PER_RUN} 分钟）')
-        out = RUNS / f'{tag}.json'
         e = env_for(r)
-        e['KG_ONLY'] = '2012.00456v1'
+        e['KG_ONLY'] = subject
         t1 = time.time()
-        # **复用 pipeline 的批抽取**（不重写抽取逻辑）
-        p = subprocess.run(
-            [PY, str(ROOT / 'tools' / 'ingest_corpus.py'), str(ROOT / 'data' / 'corpus'),
-             os.environ.get('KG_INGEST_MODE', 'local')],
-            capture_output=True, text=True, encoding='utf-8', errors='replace',
-            cwd=str(ROOT), env=e)
+        p, got = fresh_extract(tag, e)
         dt = time.time() - t1
         tail = ((p.stdout or '') + (p.stderr or '')).strip().splitlines()[-3:]
         for ln in tail:
             print('      ' + ln[:104])
+        n_nodes = 0
+        if got.exists():
+            try:
+                n_nodes = len(json.loads(got.read_text(encoding='utf-8')).get('nodes') or [])
+            except Exception:
+                n_nodes = -1
         results.append({'variant': r['variant'], 'seed': r['seed'],
                         'rc': p.returncode, 'seconds': round(dt, 1),
-                        'tag': tag})
-        print(f'      ⇒ {dt / 60:.1f} 分钟 · rc={p.returncode}')
+                        'tag': tag, 'nodes': n_nodes,
+                        'artifact': str(got.relative_to(ROOT)) if got.exists() else None})
+        print(f'      ⇒ {dt / 60:.1f} 分钟 · rc={p.returncode} · 节点 {n_nodes}')
+
+    # 恢复原图（**抽出来的那些已经另存了**）
+    if archived and archived.exists() and not snapshot.exists():
+        snapshot.write_bytes(archived.read_bytes())
+        print(f'\n  ✅ 已恢复原图 {snapshot.name}（各次产物在 {RUNS.name}/）')
 
     payload = {
         'generated': time.strftime('%Y-%m-%d %H:%M:%S'),
