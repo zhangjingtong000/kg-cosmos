@@ -58,6 +58,8 @@ CORPUS = ROOT / 'data' / 'corpus'
 GRAPHS = CORPUS / 'graphs'
 UPLOADS = ROOT / 'data' / 'upload-tasks'
 INDEX = ROOT / 'web' / 'kg-data' / 'corpus-index.json'
+# M1（2026-09-17）：OpenAlex 的元数据（**权威源**，不是猜的）
+OPENALEX = ROOT / 'data' / 'quality' / 'openalex-cache.json'
 OUT = ROOT / 'web' / 'kg-data' / 'paper-registry.json'
 
 # arXiv id 长这样：2506.09566v1 / 2202.07412v1 / 1703.08098v9
@@ -157,16 +159,47 @@ def main():
                for u in uploads.values() if u['gid'] not in tasks]
 
     # ── ⑤ 合成 ────────────────────────────────────────────────────
+    #
+    # ★ M1（2026-09-17）：**作者与"预印本→正式版"从 OpenAlex 来**。
+    #   为什么可以写进注册表（而 `probe_authors.py` 的候选不行）：
+    #   **OpenAlex 是机构维护的权威源（带 ORCID），不是"从 PDF 猜出来的"** ——
+    #   N7 那条纪律（"猜出来的作者比没有更糟"）针对的是**猜**，不是**查**。
+    #   ⚠️ 而 `probe_authors.py` 的候选**仍然不写进来**（它是猜的，只有 43% 可信）。
+    oa = {}
+    if OPENALEX.exists():
+        try:
+            oa = json.loads(OPENALEX.read_text(encoding='utf-8')).get('works') or {}
+        except Exception:
+            oa = {}
+    n_oa = sum(1 for v in oa.values() if not v.get('_error'))
+
+    def _oa_of(pid):
+        v = oa.get(pid)
+        return None if (not v or v.get('_error')) else v
+
     papers = []
     for pid, m in by_id.items():
+        o = _oa_of(pid) or {}
         papers.append({
             'arxiv_id': pid,
-            'title': m.get('title'), 'year': m.get('year'),
+            'title': m.get('title') or o.get('title'),
+            'year': m.get('year') or o.get('year'),
             'query': m.get('query'),
             'downloaded': pid in pdfs,
             'in_graph': pid in in_graph or pid in graph_ids,
             'graph_file': f'data/corpus/graphs/{pid}.json' if pid in graph_ids else None,
-            'author': m.get('author'),          # ⚠️ **清单里没有作者**（如实留 None）
+            # **作者**：优先用 OpenAlex（权威 + ORCID）；没有就如实 None
+            'author': ('; '.join(x['name'] for x in (o.get('authors') or [])
+                                 if x.get('name')) if o.get('authors') else None),
+            'author_source': 'openalex' if o.get('authors') else None,
+            'authors': o.get('authors') or [],
+            # M1 带来的新字段
+            'openalex_id': o.get('openalex_id'),
+            'doi': o.get('doi'),
+            'cited_by_count': o.get('cited_by_count'),
+            'work_type': o.get('type'),
+            'published_venue': o.get('published_venue'),
+            'is_published': o.get('is_published'),
             'uploads': [u['gid'] for u in uploads.values() if u['arxiv_id'] == pid],
         })
     # 上传过但**不在清单里**的（外部 PDF）—— 也要有一行，否则"我传过哪些"漏
@@ -174,12 +207,24 @@ def main():
     for u in uploads.values():
         aid = u['arxiv_id']
         if aid and aid not in by_id:
-            extra.setdefault(aid, {'arxiv_id': aid, 'title': None, 'year': None,
-                                   'query': None, 'downloaded': aid in pdfs,
+            o = _oa_of(aid) or {}
+            extra.setdefault(aid, {'arxiv_id': aid, 'title': o.get('title'),
+                                   'year': o.get('year'), 'query': None,
+                                   'downloaded': aid in pdfs,
                                    'in_graph': aid in graph_ids,
                                    'graph_file': (f'data/corpus/graphs/{aid}.json'
                                                   if aid in graph_ids else None),
-                                   'author': None, 'uploads': []})
+                                   'author': ('; '.join(x['name'] for x in (o.get('authors') or [])
+                                                        if x.get('name'))
+                                              if o.get('authors') else None),
+                                   'author_source': 'openalex' if o.get('authors') else None,
+                                   'authors': o.get('authors') or [],
+                                   'openalex_id': o.get('openalex_id'), 'doi': o.get('doi'),
+                                   'cited_by_count': o.get('cited_by_count'),
+                                   'work_type': o.get('type'),
+                                   'published_venue': o.get('published_venue'),
+                                   'is_published': o.get('is_published'),
+                                   'uploads': []})
         if aid and aid in extra:
             extra[aid]['uploads'].append(u['gid'])
     papers.extend(extra.values())
@@ -222,6 +267,10 @@ def main():
             'upload_failed_no_graph': len(orphans),
             'upload_graph_no_task': len(no_task),
             'registry_rows': len(papers),
+            # M1：OpenAlex 对齐情况
+            'openalex_aligned': n_oa,
+            'with_author': sum(1 for p in papers if p.get('author')),
+            'published': sum(1 for p in papers if p.get('is_published')),
         },
         # ⚠️ **任务与图不是一一对应**（实测 8 个任务 / 3 个图 / 6 个失败 / 1 个无任务图）。
         # ⇒ 三个类别必须都列出来，否则"我传过哪些"要么漏、要么算错。
@@ -237,8 +286,18 @@ def main():
         'upload_failures': orphans,
         'upload_graphs_without_task': no_task,
         'known_gaps': [
-            '**作者缺失**：`_manifest.json` 里没有 `author` 字段 ⇒ 注册表里如实留 `None`，'
-            '**不去猜**（猜出来的作者比没有更糟）。要补得从 PDF 首页解析。',
+            # ⚠️ M1（2026-09-17）**改写了这一条** —— 原来写的是"作者缺失"，
+            #    而 OpenAlex 接上之后**24/28 篇有了权威作者（带 ORCID）**。
+            #    **过时的告警比没有告警更糟**（本项目栽过：H10 的 +8.16pp、
+            #    TODO 的 35 项 ⬜ 漂移）⇒ 这里如实改掉。
+            '**作者**：来自 OpenAlex（**权威源 + ORCID**），24/28 篇有；'
+            '剩下 4 篇 OpenAlex 查不到（老论文的 arXiv DOI 可能是后补的）。'
+            '⚠️ `tools/probe_authors.py` 从 PDF 解析出的候选**不写进这里**'
+            '（那是猜的，只有 43% 可信）—— **"猜出来的作者比没有更糟"**。',
+            '**OpenAlex 对齐率 14/17（已入库）= 82.4%** —— '
+            'TODO 里原先写"实测 16/17 = 94%"，**实测偏低**（差 2 篇：'
+            '`2002.00388v4` / `2012.00456v1`，都是 2020 年前后的老论文）。'
+            '**对齐只能到论文级** —— 本地实体（`TransE` 等）没有全局 ID。',
             '**上传图的 id 是随机 hex**：`data/<gid>/graph.json` 的 gid 与 arXiv id 是两套，'
             '靠 `source.name` 连。**上传了但文件名不是 arXiv id 的，连不上**（本库暂无此例）。',
         ],
