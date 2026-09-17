@@ -1,0 +1,9 @@
+{
+ "last_checked": "2026-09-17",
+ "note": "M6 的检查起点；下次跑 watch_openalex.py 会用它",
+ "counts": {
+  "new_total": 0,
+  "obtainable": 0,
+  "not_obtainable": 0
+ }
+}
