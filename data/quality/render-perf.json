@@ -1,0 +1,174 @@
+{
+ "generated": "2026-09-17 16:04:36",
+ "purpose": "M7：渲染性能基线（可复跑，按规模梯度）",
+ "design": {
+  "curve_not_a_point": "**测一条曲线**（用仓库里已有的 `_density-*.json` 当规模梯度），而不是测一个点 —— 曲线让\"扩语料后会怎样\"**可以外推**，而不是等扩完了才知道。",
+  "idle_and_busy": "**同时测空闲与交互后**：一个 3000 节点的图不动时能跑 60 fps，**一拖动就掉到 8 fps** —— 而使用者的感受是后者。",
+  "headless_is_not_real": "⚠️ **无头 Chrome 的帧率不等于真机帧率**（无真实合成器节流，且可能是 SwiftShader 软渲染）⇒ 输出里明确标注\"仅供相对比较\"，**不把它当\"这台机器能跑多少帧\"的结论**。",
+  "what_it_replaces": "`ATLAS_DESIGN.md:62` 那句「3D 在 3000 节点时 8.9 fps、首帧 15 秒」**是文档里的一个数**，没有可复跑的测量；而 `data/quality/optimization-baseline.json` **不是帧时间基线**（它是\"优化前后对比\"）。⇒ 本脚本补的是\"**可复跑**\"这一半。",
+  "stale_numbers": "TODO 里写「现 18780 实体 / 31308 边」**已过时** ——实际是 **19427 节点 / 43867 边**（`web/kg-data/nebula.json`）。"
+ },
+ "headless_caveat": "无头软渲染，仅供相对比较；不等价于真机帧率",
+ "rows": [
+  {
+   "idle_fps": 6.7,
+   "busy_fps": 6.5,
+   "touched": "INPUT#search",
+   "dom_nodes": 141,
+   "dom_ready_ms": 716,
+   "load_ms": 887,
+   "first_paint_ms": 724,
+   "flush_draw_ms": 0.1,
+   "js_heap_mb": 17,
+   "canvas_w": 1600,
+   "canvas_h": 1000,
+   "geom_nodes": null,
+   "geom_edges": null,
+   "has_canvas": true,
+   "page_state_keys": [
+    "node",
+    "only",
+    "node_missing"
+   ],
+   "label": "_density-150",
+   "url": "http://127.0.0.1:8000/kg-nebula.html?density=150",
+   "size": {
+    "nodes": 150,
+    "edges": 964
+   }
+  },
+  {
+   "idle_fps": 4.7,
+   "busy_fps": 4.5,
+   "touched": "INPUT#search",
+   "dom_nodes": 141,
+   "dom_ready_ms": 196,
+   "load_ms": 309,
+   "first_paint_ms": 196,
+   "flush_draw_ms": 201.1,
+   "js_heap_mb": 17,
+   "canvas_w": 1600,
+   "canvas_h": 1000,
+   "geom_nodes": null,
+   "geom_edges": null,
+   "has_canvas": true,
+   "page_state_keys": [
+    "node",
+    "only",
+    "node_missing"
+   ],
+   "label": "_density-1500",
+   "url": "http://127.0.0.1:8000/kg-nebula.html?density=1500",
+   "size": {
+    "nodes": 1500,
+    "edges": 6196
+   }
+  },
+  {
+   "idle_fps": 4.5,
+   "busy_fps": 4.6,
+   "touched": "INPUT#search",
+   "dom_nodes": 141,
+   "dom_ready_ms": 100,
+   "load_ms": 222,
+   "first_paint_ms": 104,
+   "flush_draw_ms": 182.1,
+   "js_heap_mb": 17,
+   "canvas_w": 1600,
+   "canvas_h": 1000,
+   "geom_nodes": null,
+   "geom_edges": null,
+   "has_canvas": true,
+   "page_state_keys": [
+    "node",
+    "only",
+    "node_missing"
+   ],
+   "label": "_density-300",
+   "url": "http://127.0.0.1:8000/kg-nebula.html?density=300",
+   "size": {
+    "nodes": 300,
+    "edges": 1873
+   }
+  },
+  {
+   "idle_fps": 4.4,
+   "busy_fps": 4.8,
+   "touched": "INPUT#search",
+   "dom_nodes": 141,
+   "dom_ready_ms": 88,
+   "load_ms": 192,
+   "first_paint_ms": 92,
+   "flush_draw_ms": 154.7,
+   "js_heap_mb": 17,
+   "canvas_w": 1600,
+   "canvas_h": 1000,
+   "geom_nodes": null,
+   "geom_edges": null,
+   "has_canvas": true,
+   "page_state_keys": [
+    "node",
+    "only",
+    "node_missing"
+   ],
+   "label": "_density-60",
+   "url": "http://127.0.0.1:8000/kg-nebula.html?density=60",
+   "size": {
+    "nodes": 60,
+    "edges": 324
+   }
+  },
+  {
+   "idle_fps": 4.8,
+   "busy_fps": 4.9,
+   "touched": "INPUT#search",
+   "dom_nodes": 141,
+   "dom_ready_ms": 122,
+   "load_ms": 236,
+   "first_paint_ms": 116,
+   "flush_draw_ms": 159.6,
+   "js_heap_mb": 17,
+   "canvas_w": 1600,
+   "canvas_h": 1000,
+   "geom_nodes": null,
+   "geom_edges": null,
+   "has_canvas": true,
+   "page_state_keys": [
+    "node",
+    "only",
+    "node_missing"
+   ],
+   "label": "_density-600",
+   "url": "http://127.0.0.1:8000/kg-nebula.html?density=600",
+   "size": {
+    "nodes": 600,
+    "edges": 3317
+   }
+  },
+  {
+   "idle_fps": 5,
+   "busy_fps": 5,
+   "touched": "INPUT#search",
+   "dom_nodes": 141,
+   "dom_ready_ms": 89,
+   "load_ms": 190,
+   "first_paint_ms": 92,
+   "flush_draw_ms": 174.7,
+   "js_heap_mb": 17,
+   "canvas_w": 1600,
+   "canvas_h": 1000,
+   "geom_nodes": null,
+   "geom_edges": null,
+   "has_canvas": true,
+   "page_state_keys": [
+    "node",
+    "only",
+    "node_missing"
+   ],
+   "label": "__main__",
+   "url": "http://127.0.0.1:8000/kg-nebula.html",
+   "size": {}
+  }
+ ],
+ "elapsed_s": 59.7
+}
