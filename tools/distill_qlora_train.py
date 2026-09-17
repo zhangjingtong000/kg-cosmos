@@ -240,6 +240,24 @@ def main():
     trainer.train()
     train_time = time.time() - t1
 
+    def _final_loss(tr):
+        """从 `log_history` 里取最终训练 loss。
+
+        ⚠️ **不能取 `[-1]`** —— 实测踩过：最后一条是 Trainer 的**汇总记录**
+        （`{'train_runtime', 'train_samples_per_second', 'train_steps_per_second',
+        'train_loss', 'epoch'}`），**它没有 `loss` 键**（有的是 `train_loss`）。
+        于是 `[-1].get('loss')` 恒为 `None` —— 而跑完的日志里明明有 1.5167。
+        ⇒ 优先 `train_loss`（汇总里那个），再回退到**最后一个含 `loss` 的**记录。
+        """
+        hist = getattr(tr.state, 'log_history', None) or []
+        for rec in reversed(hist):
+            if 'train_loss' in rec:
+                return rec['train_loss']
+        for rec in reversed(hist):
+            if 'loss' in rec:
+                return rec['loss']
+        return None
+
     peak = torch.cuda.max_memory_allocated() / 1024 ** 3 if dev == 'cuda' else 0
     Path(ARGS.out).mkdir(parents=True, exist_ok=True)
     trainer.save_model(ARGS.out)
@@ -258,7 +276,7 @@ def main():
         'total_params_M': round(n_all / 1e6, 1),
         'train_time_s': round(train_time, 1),
         'peak_vram_gb': round(peak, 2),
-        'final_train_loss': (trainer.state.log_history or [{}])[-1].get('loss'),
+        'final_train_loss': _final_loss(trainer),
         'elapsed_s': round(time.time() - t0, 1),
         'next': '评测：与"云端 / 本地 9B 零样本 / 本模型"做四通道对比，'
                 '**必须用训练集里没出现过的论文**',
