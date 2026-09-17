@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KG Cosmos · 论文对比表</title>
+<!--
+  L17（2026-09-16）：**结构化字段抽成表**（行 = 论文，列 = 关系类型）。
+
+  ## 为什么字段是这几个，而不是照抄 Consensus
+
+  Consensus 的 `Study Snapshot` 字段是
+  **Population / Sample size / Duration / Location / Methods** ——
+  那是**医学与社科**的字段。本项目是 NLP/ML，
+  照抄那五列会得到**一列全空**的表。
+
+  ⇒ 这里的每一列都是**本领域真实存在、且从图里真的能取到**的关系类型：
+     `USES` / `APPLIES_TO` / `MEASURES` / `PRODUCES` / `COMPARES_WITH` /
+     `CREATED_BY` / `PUBLISHED_IN`。
+
+  ## ⚠️ 三件必须在页面上说清的事
+
+  1. **这是"抽取结果的摊平"，不是"论文事实的权威"** ——
+     抽取有漏有错（L3 端点完整性 96.17%），所以这页**不能当成综述的结论表**；
+  2. **每格带页码** —— 页面的价值一半在于**能点回去**，
+     否则它与"我手打一张表"没有区别；
+  3. **用的是哪一份图要写明** —— 默认读 A8 **改写后**的那份
+     （因为 `PUBLISHED_IN` 只在它里面），而它与原图**只差 1019 条边的 type**。
+-->
+<style>
+  :root{--bg:#0b0d12;--fg:#dfe2e8;--dim:#8b95a8;--line:rgba(193,195,201,.18);
+        --hot:#e0a469;--cool:#7cc0b6;--warn:#e8c9a4}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--fg);
+       font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  header{padding:16px 22px 8px;border-bottom:1px solid var(--line)}
+  h1{margin:0;font-size:18px;font-weight:600}
+  .sub{color:var(--dim);font-size:12.5px;margin-top:5px;max-width:1080px}
+  .sub b{color:var(--warn)}
+  .ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 22px;
+       border-bottom:1px solid var(--line);position:sticky;top:0;
+       background:rgba(11,13,18,.94);z-index:5}
+  .ctl .k{color:var(--dim);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+  label.chip{display:inline-flex;gap:6px;align-items:center;cursor:pointer;
+             border:1px solid var(--line);border-radius:999px;padding:4px 11px;
+             font-size:12.5px;user-select:none}
+  label.chip input{accent-color:var(--hot);margin:0}
+  label.chip.on{border-color:rgba(224,164,105,.7);color:var(--warn)}
+  button{background:rgba(224,164,105,.14);color:var(--warn);cursor:pointer;
+         border:1px solid rgba(224,164,105,.42);border-radius:8px;
+         padding:6px 13px;font-size:12.5px;font-family:inherit}
+  button:hover{border-color:rgba(224,164,105,.9);color:#fff}
+  main{padding:0 22px 60px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:14px}
+  th,td{border:1px solid var(--line);padding:7px 9px;vertical-align:top;
+        text-align:left}
+  th{background:rgba(255,255,255,.04);position:sticky;top:62px;z-index:4;
+     font-weight:600;font-size:12px}
+  th .n{color:var(--dim);font-weight:400}
+  td.pid{white-space:nowrap;font-family:ui-monospace,Consolas,monospace;
+         font-size:11.5px;color:var(--cool)}
+  td .it{margin:1px 0}
+  td .pg{color:var(--dim);font-size:11px;margin-left:3px}
+  td .more{color:var(--dim);font-size:11.5px;font-style:italic}
+  td.empty{color:var(--dim);font-size:11.5px}
+  .note{color:var(--dim);font-size:12.5px;margin-top:14px;max-width:1080px}
+  .note b{color:var(--warn)}
+  .warnbox{border:1px solid rgba(232,201,164,.34);background:rgba(224,164,105,.07);
+           border-radius:10px;padding:11px 14px;margin:14px 0;
+           font-size:12.5px;color:var(--warn);max-width:1080px}
+  a{color:var(--cool)}
+  code{color:var(--warn)}
+</style>
+</head>
+<body>
+<header>
+  <h1>论文对比表</h1>
+  <div class="sub" id="sub">载入中…</div>
+</header>
+
+<div class="ctl">
+  <span class="k">列</span>
+  <span id="cols"></span>
+  <button id="csv" type="button">导出 CSV</button>
+  <button id="md" type="button">导出 Markdown</button>
+</div>
+
+<main>
+  <div class="warnbox">
+    ⚠️ <b>这是"抽取结果的摊平"，不是"论文事实的权威"。</b>
+    抽取有漏有错（L3 端点完整性 <b>96.17%</b>）⇒ 用它做综述结论之前，
+    请点开每格右边的页码回原文核对。这一页的价值一半在于<b>每格都能点回去</b>。
+  </div>
+  <div id="out"></div>
+  <p class="note">
+    <b>字段不是照抄的</b>：Consensus 的 <code>Study Snapshot</code> 用的是
+    Population / Sample size / Duration / Location / Methods —— 那是
+    <b>医学与社科</b>的字段；本项目是 NLP/ML，照抄会得到<b>一列全空</b>的表。
+    这里每一列都是<b>本领域真实存在、且从图里真的能取到</b>的关系类型。<br>
+    <span id="srcnote"></span><br>
+    <a href="./index.html">← 回导航页</a> ·
+    <a href="./corpus.html">语料清单</a> ·
+    <a href="./analytics.html">评测结论</a>
+  </p>
+</main>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let DATA = null;
+const on = {};          // 哪几列打开
+
+function render() {
+  const cols = DATA.columns.filter(c => on[c.key]);
+  const head = '<tr><th>论文</th><th>年</th>'
+    + cols.map(c => `<th>${esc(c.label)}<br><span class="n">${c.papers}/`
+        + `${DATA.papers.length} 篇</span></th>`).join('') + '</tr>';
+  const rows = DATA.papers.map(p => {
+    const tds = cols.map(c => {
+      const cell = (p.cells || {})[c.key] || {n: 0, items: []};
+      if (!cell.n) return '<td class="empty">（这一篇没有）</td>';
+      const its = cell.items.map(it =>
+        `<div class="it">${esc(it.s)} → ${esc(it.t)}`
+        + (it.page ? `<a class="pg" href="./kg-nebula.html?src=${encodeURIComponent(p.id)}"`
+                     + ` title="去主视图看这篇">第 ${esc(it.page)} 页</a>` : '')
+        + '</div>').join('');
+      return `<td>${its}` + (cell.n > cell.items.length
+        ? `<div class="more">…另有 ${cell.n - cell.items.length} 条</div>` : '')
+        + '</td>';
+    }).join('');
+    return `<tr><td class="pid">${esc(p.id)}</td><td>${p.year ?? ''}</td>${tds}</tr>`;
+  }).join('');
+  $('#out').innerHTML = `<table><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+  window.__tableState = { cols: cols.map(c => c.key), rows: DATA.papers.length,
+                          n_cols_all: DATA.columns.length };
+}
+
+/* 导出：**只导打开的那几列**（与屏幕上看到的一致 —— 那才是"我导的就是我看到的"）。*/
+function toCSV() {
+  const cols = DATA.columns.filter(c => on[c.key]);
+  const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const lines = [['论文', '年'].concat(cols.map(c => c.label)).map(q).join(',')];
+  for (const p of DATA.papers) {
+    const row = [p.id, p.year ?? ''];
+    for (const c of cols) {
+      const cell = (p.cells || {})[c.key] || {n: 0, items: []};
+      row.push(cell.items.map(it => `${it.s} → ${it.t}`
+        + (it.page ? `（第 ${it.page} 页）` : '')).join(' ; '));
+    }
+    lines.push(row.map(q).join(','));
+  }
+  return '\ufeff' + lines.join('\n');       // BOM：Excel 打开中文不乱码
+}
+
+function toMD() {
+  const cols = DATA.columns.filter(c => on[c.key]);
+  const lines = ['| 论文 | 年 | ' + cols.map(c => c.label).join(' | ') + ' |',
+                 '|---|---|' + cols.map(() => '---').join('|') + '|'];
+  for (const p of DATA.papers) {
+    const row = ['`' + p.id + '`', p.year ?? ''];
+    for (const c of cols) {
+      const cell = (p.cells || {})[c.key] || {n: 0, items: []};
+      const s = cell.items.map(it => `${it.s} → ${it.t}`
+        + (it.page ? `（p${it.page}）` : '')).join('<br>');
+      row.push(s || '—');
+    }
+    lines.push('| ' + row.join(' | ') + ' |');
+  }
+  return lines.join('\n');
+}
+
+function download(text, name, mime) {
+  const b = new Blob([text], {type: mime});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  window.__lastExport = { name: name, bytes: text.length };
+}
+
+fetch('./kg-data/paper-table.json').then(r => r.ok ? r.json() : null).then(d => {
+  if (!d) { $('#sub').textContent = '读不到 kg-data/paper-table.json'; return; }
+  DATA = d;
+  // 默认**只开前 4 列**：一次摊开 7 列会让人看不出重点
+  d.columns.forEach((c, i) => { on[c.key] = i < 4; });
+  $('#cols').innerHTML = d.columns.map(c =>
+    `<label class="chip${on[c.key] ? ' on' : ''}" data-k="${esc(c.key)}">`
+    + `<input type="checkbox" ${on[c.key] ? 'checked' : ''}>${esc(c.label)}`
+    + ` <span class="n" style="color:#8b95a8">${c.papers}</span></label>`).join(' ');
+  $('#cols').addEventListener('change', e => {
+    const lab = e.target.closest('label');
+    const k = lab.dataset.k;
+    on[k] = e.target.checked;
+    lab.classList.toggle('on', e.target.checked);
+    render();
+  });
+  $('#csv').addEventListener('click', () =>
+    download(toCSV(), 'paper-table.csv', 'text/csv;charset=utf-8'));
+  $('#md').addEventListener('click', () =>
+    download(toMD(), 'paper-table.md', 'text/markdown;charset=utf-8'));
+  $('#sub').innerHTML = `${d.papers.length} 篇论文 × <b>${d.columns.length}</b> 个字段`
+    + `（**字段是关系类型**，从图谱里摊平）· 勾选列、导出 CSV/Markdown`;
+  $('#srcnote').textContent = '图源：' + (d.design && d.design.fields_are_not_copied
+    ? 'A8 改写后的那份（与原图只差 1019 条边的 type）' : '');
+  render();
+  window.__tableReady = true;
+}).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
+</script>
+</body>
+</html>

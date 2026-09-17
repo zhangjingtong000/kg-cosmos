@@ -75,6 +75,11 @@ OFFICIAL = {
     'bipartite.html',
     'community-atlas.html',
     'exploration.html',
+    # L17（2026-09-16）：论文对比表 —— 它是**功能页**（可导出），不是迭代残留。
+    # ⚠️ **这一行是守门逼出来的**：`check_legacy_banners.py` 报
+    #   "1 个历史页没有横幅" ⇒ 提醒我"新页面默认是历史页，
+    #   要成为正式页必须**显式**加进这份名单"。**这正是那个设计想达到的效果。**
+    'paper-table.html',
 }
 
 MARK = 'data-legacy-banner'      # 幂等标记：有它就不重复加
