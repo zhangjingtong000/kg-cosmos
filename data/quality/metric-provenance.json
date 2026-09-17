@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-17 16:57:34",
+  "generated": "2026-09-17 16:58:29",
   "note": "数据源指纹 + 各指标读数。数据变了而指标没重跑时，python tools/metric_provenance.py 会把它们标为 stale。",
   "sources": {
     "graphs": {

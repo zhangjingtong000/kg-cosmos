@@ -58,12 +58,32 @@ def purge_poisoned_snapshots() -> int:
 
 
 def main() -> None:
-    store = GraphStore(
-        backend="neo4j",
-        uri="bolt://localhost:7687",
-        user="neo4j",
-        password="kgdemo2026",
-    )
+    # ★★ **backend 必须可配，且默认 networkx**（2026-09-17 修）。
+    #
+    # 原来这里**硬编码 `backend="neo4j"`** —— 而 **neo4j 早就没在跑了**
+    # （实测 7687/7474 均无监听；见 `docs/J8_NO_DOCKER_COMPOSE.md`）。
+    # 后果非常具体：
+    #   · **B5（prompt A/B 多 seed）六次抽取全部 `rc=1`**，0.1 分钟就失败，
+    #     报 `neo4j.exceptions.ServiceUnavailable: Couldn't connect to localhost:7687`；
+    #   · 而 **N7 记的"已下载未抽取的 11 篇"**，很可能也是它 ——
+    #     **11 篇 PDF 在、图不在**，与"抽取器连不上存储"完全一致。
+    #
+    # ⚠️ 而 `src/graph_store.py:391` 的默认**本来就是 `networkx`** ——
+    # 是这里**显式覆盖**成了 neo4j。**"默认值"与"调用处传的值"不一致时，
+    # 要看调用处** —— 这个坑与本轮 H5 的 `dataloader_num_workers` 是同一类。
+    #
+    # `src/app.py:114` 的做法（`KG_BACKEND` 环境变量 + 回退）是对的，这里对齐它。
+    backend = os.environ.get("KG_BACKEND", "networkx")
+    if backend == "neo4j":
+        store = GraphStore(
+            backend="neo4j",
+            uri=os.environ.get("KG_NEO4J_URI", "bolt://localhost:7687"),
+            user=os.environ.get("KG_NEO4J_USER", "neo4j"),
+            password=os.environ.get("KG_NEO4J_PASSWORD", "kgdemo2026"),
+        )
+    else:
+        store = GraphStore(backend="networkx")
+    print(f"[ingest] backend={backend}", flush=True)
     pdfs = sorted(CORPUS.glob("*.pdf"))
     if ONLY:
         pdfs = [p for p in pdfs if p.stem in ONLY]
