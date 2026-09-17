@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KG Cosmos · 语料筛选流程（PRISMA）</title>
+<!--
+  L18（2026-09-17）：**PRISMA 流程图**（系统综述的筛选流程，自动生成）。
+
+  ## ★ 没有照抄 PRISMA 模板（这一点在页面上要写清）
+
+  标准 PRISMA 有四个阶段，其中"初筛"后面通常跟一个
+  `Records excluded (n=…)`。**而本流程没有初筛淘汰** ——
+  3 个检索式命中的 28 篇**全部下载了**。
+  ⇒ 那一框我们**画成 0 并写明原因**，**不编一个数**。
+
+  ## ★ 排除原因是从文件系统核实的，不是读清单标记
+
+  11 篇未入库的：**PDF 全都有（Y）、图全都没有（N）** ⇒ "已下载未抽取"。
+  而**"为什么"没抽取，数据里没有记录** ⇒ 页面上如实写
+  **"原因未逐篇记录"**（不推测、不编）。
+
+  ## ★ 那两个"人工筛选"框我们画不出来 —— 但那正是重点
+
+  Elicit 的 PRISMA 里有「双人独立筛选 + Cohen's κ」。
+  我们**没有** —— 而且**这不是懒**：
+  本项目**关系层**的四个模型标注者的 α 是 **−0.0119**（不重合）。
+  ⇒ 页面底部把**这一对对照**写出来（它已经在
+  `docs/L19_UNRELIABILITY_ARGUMENT.md §五` 定稿）：
+  **「可标性」不是任务的固有属性，而随协议的结构化程度变化。**
+-->
+<style>
+  :root{--bg:#0b0d12;--fg:#dfe2e8;--dim:#8b95a8;--line:rgba(193,195,201,.18);
+        --hot:#e0a469;--cool:#7cc0b6;--warn:#e8c9a4;--bad:#e07575}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:14px/1.65 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  header{padding:16px 22px 8px}
+  h1{margin:0;font-size:18px;font-weight:600}
+  .sub{color:var(--dim);font-size:12.5px;margin-top:5px;max-width:1020px}
+  main{padding:0 22px 60px;max-width:1160px}
+  .flow{display:flex;gap:16px;align-items:stretch;flex-wrap:wrap;margin:18px 0}
+  .stage{flex:1 1 210px;border:1px solid var(--line);border-radius:11px;
+         padding:12px 14px;position:relative}
+  .stage .k{font-size:11.5px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
+  .stage .n{font-size:30px;font-weight:600;font-variant-numeric:tabular-nums;
+            color:var(--cool);line-height:1.15}
+  .stage .lb{font-size:13px;margin-top:2px}
+  .stage .note{color:var(--dim);font-size:12px;margin-top:7px;line-height:1.6}
+  .stage.excl{border-color:rgba(224,117,117,.42);background:rgba(224,117,117,.07)}
+  .stage.excl .n{color:var(--bad)}
+  .arrow{display:flex;align-items:center;color:var(--dim);font-size:20px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:8px}
+  th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;
+        vertical-align:top}
+  th{color:var(--dim);font-weight:500;font-size:11.5px}
+  code{color:var(--warn);font-size:12px}
+  .note{color:var(--dim);font-size:12.5px;margin-top:16px;max-width:1020px}
+  .note b{color:var(--warn)}
+  .warnbox{border:1px solid rgba(232,201,164,.34);background:rgba(224,164,105,.07);
+           border-radius:10px;padding:11px 14px;margin:14px 0;font-size:12.5px;
+           color:var(--warn);max-width:1020px}
+  h2{font-size:15.5px;margin:22px 0 6px}
+  a{color:var(--cool)}
+  @media print{body{background:#fff;color:#000} .stage,.warnbox{border-color:#999}}
+</style>
+</head>
+<body>
+<header>
+  <h1>语料筛选流程（PRISMA）</h1>
+  <div class="sub" id="sub">载入中…</div>
+</header>
+<main>
+  <div class="flow" id="flow"></div>
+
+  <div class="warnbox" id="caveat"></div>
+
+  <h2>检索式</h2>
+  <div id="queries"></div>
+
+  <h2>被排除的 <span id="exn">0</span> 篇</h2>
+  <div id="excluded"></div>
+
+  <h2>★ 与 Elicit 的那一对对照（要写进论文）</h2>
+  <p class="note" id="contrast"></p>
+
+  <p class="note" id="foot"></p>
+</main>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+fetch('./kg-data/prisma.json').then(r => r.ok ? r.json() : null).then(d => {
+  if (!d) { $('#sub').textContent = '读不到 kg-data/prisma.json'; return; }
+  const st = d.stages || [];
+  $('#flow').innerHTML = st.map((s, i) => (
+    (i ? '<div class="arrow">→</div>' : '')
+    + `<div class="stage"><div class="k">${esc(s.key)}</div>`
+    + `<div class="n">${s.n}</div><div class="lb">${esc(s.label)}</div>`
+    + `<div class="note">${esc(s.note)}</div></div>`)).join('')
+    + '<div class="arrow">→</div>'
+    + (d.excluded || []).map(e =>
+        `<div class="stage excl"><div class="k">excluded</div>`
+        + `<div class="n">${e.n}</div><div class="lb">${esc(e.reason)}</div>`
+        + `<div class="note">${esc(e.note)}</div></div>`).join('');
+
+  $('#caveat').innerHTML =
+    '⚠️ <b>没有照抄 PRISMA 模板。</b>标准流程里"初筛"后面通常跟一个 '
+    + '<code>Records excluded</code>，<b>而本流程没有初筛淘汰</b>'
+    + '（3 个检索式命中的记录<b>全部下载了</b>）⇒ 那一框画成 0 并写明原因，'
+    + '<b>不编一个数</b>。<br>'
+    + '排除的数字也不是从清单标记读的，而是<b>去文件系统核实的</b>：'
+    + '<b>11 篇 PDF 全都有、图全都没有</b> ⇒ "已下载未抽取"；'
+    + '而<b>"为什么"没抽取数据里没有记录</b> ⇒ 如实写"原因未逐篇记录"。';
+
+  $('#queries').innerHTML = '<table><thead><tr><th>检索式</th><th>命中</th>'
+    + '<th>入库</th></tr></thead><tbody>'
+    + (d.queries || []).map(q =>
+        `<tr><td><code>${esc(q.query)}</code></td><td>${q.n}</td>`
+        + `<td>${q.in_graph}</td></tr>`).join('')
+    + '</tbody></table>';
+
+  const ex = (d.excluded || [])[0] || {items: [], n: 0};
+  $('#exn').textContent = ex.n;
+  $('#excluded').innerHTML = '<table><thead><tr><th>id</th><th>年</th>'
+    + '<th>标题</th><th>原因</th></tr></thead><tbody>'
+    + (ex.items || []).map(x =>
+        `<tr><td><code>${esc(x.id)}</code></td><td>${esc(x.year ?? '')}</td>`
+        + `<td>${esc(x.title)}</td><td>${esc(x.reason)}</td></tr>`).join('')
+    + '</tbody></table>';
+
+  $('#contrast').innerHTML =
+    'Elicit 的 PRISMA 里有「<b>双人独立筛选 + Cohen\'s κ</b>」保证'
+    + '<b>筛选阶段</b>（"这篇要不要收"）的一致性 —— 那一层<b>是可标的</b>。<br>'
+    + '本项目量出的是 <b>关系层</b>（"这条关系对不对"）的一致性：'
+    + '<b>α = −0.0119</b>（四个模型标注者<b>几乎完全不重合</b>）。<br>'
+    + '⇒ <b>两者不矛盾</b>，而是<b>同一件事在两个不同粒度上的不同结果</b>。<br>'
+    + '<b>学术意义：</b>「<b>可标性</b>」不是任务的固有属性，'
+    + '而<b>随"协议的结构化程度"变化</b> —— P3 的实测正面支持这一点：'
+    + '<b>开放式协议</b>下四个模型标注者的 α 是负的（−0.2977 / −0.1783，<b>两篇一致</b>），'
+    + '而 SciREX 用<b>槽位式协议</b>时人类标出了 <b>2148 条</b>。<br>'
+    + '<b>⇒ 正确说法不是"关系不可标注"，而是'
+    + '「关系<u>在开放式协议下</u>不可标注；换槽位式协议后，人类标得出来」</b> '
+    + '—— 一个<b>可检验、有对照</b>的主张。';
+
+  $('#foot').innerHTML =
+    '数据来自 <code>web/kg-data/corpus-index.json</code> 与'
+    + '<code>data/corpus/</code> 的真实文件；'
+    + '本页由 <code>tools/build_prisma_data.py</code> 自动生成。'
+    + (d.caliber ? '<br><b>"一篇论文"的口径：</b>' + esc(d.caliber) : '')
+    + '<br><a href="./index.html">← 回导航页</a> · '
+    + '<a href="./corpus.html">语料清单</a> · '
+    + '<a href="./analytics.html">评测结论</a>';
+
+  window.__prismaState = {
+    stages: st.map(s => ({key: s.key, n: s.n})),
+    excluded: ex.n, queries: (d.queries || []).length,
+  };
+  window.__prismaReady = true;
+}).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
+</script>
+</body>
+</html>

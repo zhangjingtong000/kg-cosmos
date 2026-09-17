@@ -140,6 +140,11 @@ DATA_CHECKS = [
     # 不查说明文字与数据字段 —— 否则会扫出一堆假阳性。
     ('前端数据自足（N6：**不许运行时读仓库 data/**，除非有回退链）',
      ['tools/check_frontend_data.py']),
+    # L18：PRISMA 流程图。**第①③组是关键** ——
+    # 阶段数字必须与数据逐字相等；且**不许照抄模板编数**
+    # （本流程没有初筛淘汰 ⇒ Screening 必须等于 Identification）。
+    ('语料筛选流程 PRISMA（L18：数字逐字相等 · **没有初筛淘汰就不编数**）',
+     ['tools/cdp_verify_prisma.py']),
     # 内联 JS 的语法：一旦有语法错，整页白屏（boot() 根本不会执行），
     # 后果比一个数据错严重得多，而检测只要 node --check。
     # 实测我在 analytics.html 里连改四版括号才发现——当时 CDP 检查只报
