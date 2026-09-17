@@ -1,0 +1,61 @@
+{
+ "purpose": "H10：L3 判据归一化（OPTIMIZATION_RANKING 第 1 名，从没做）",
+ "criterion_before": "e['source'] in all_names and e['target'] in all_names",
+ "normalization": "只吃排版差异：大小写 / 首尾与连续空白 / 下划线连字符 ⇄ 空格。**不碰复数、不碰别名** —— 那需要判据，而本项目的消歧判据已被量出 27.4% 的假阳性（B4）。",
+ "strict_pct": 0.96168,
+ "normalized_pct": 0.963936,
+ "gain_pp": 0.23,
+ "n_edges": 43867,
+ "gap_before": 1681,
+ "gap_fixed_by_normalization": 99,
+ "gap_still_missing": 1582,
+ "names_before": 19427,
+ "names_after": 18723,
+ "merged_groups": 678,
+ "risky_merged_groups": 57,
+ "risky_examples": {
+  "fine tuning": [
+   "Fine-Tuning",
+   "Fine Tuning",
+   "fine-tuning"
+  ],
+  "instruction tuning": [
+   "Instruction-Tuning",
+   "Instruction Tuning"
+  ],
+  "real time": [
+   "Real Time",
+   "Real-time",
+   "Real-Time"
+  ],
+  "low dimensional vector": [
+   "Low Dimensional Vector",
+   "Low-Dimensional Vector"
+  ],
+  "head entity embeddings": [
+   "Head Entity Embeddings",
+   "Head-Entity Embeddings"
+  ],
+  "president of": [
+   "President Of",
+   "president-of"
+  ],
+  "natural language text": [
+   "Natural Language Text",
+   "Natural-Language Text"
+  ],
+  "mention pairs": [
+   "Mention-Pairs",
+   "Mention Pairs"
+  ],
+  "m. w. chang": [
+   "M. -W. Chang",
+   "M.-W. Chang"
+  ],
+  "ad tasks": [
+   "AD-Tasks",
+   "AD Tasks"
+  ]
+ },
+ "conclusion": "严格 96.17% → 归一化 96.39%（+0.23pp）。有 57 组会真正合并 ⇒ 只能并列，不能替换。 **不替换原口径** —— 原数是别人引用过的，换掉会让六层指标不可比。"
+}
