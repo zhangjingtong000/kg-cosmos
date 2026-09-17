@@ -1,0 +1,15 @@
+{
+ "generated": "2026-09-17 15:25:07",
+ "purpose": "M4：Zotero 互操作（读 zotero.sqlite，只读）",
+ "db": "C:\\Users\\Administrator\\Zotero\\zotero.sqlite",
+ "n_items": 0,
+ "distribution": {},
+ "design": {
+  "read_only": "**只读打开**：`file:...?mode=ro&immutable=1`。那是**用户的文献库**，而且 **Zotero 可能正开着**。**本脚本一条 INSERT/UPDATE/DELETE 都没有。**",
+  "not_guessing_schema": "Zotero 的字段是 **EAV 结构**（`itemData` + `fields` + `itemDataValues`），**直接读表名猜字段必错**（第一版探针已验证）。",
+  "read_failure_is_not_empty": "**\"0 条\"与\"读不到\"是两件完全不同的事** —— 库不在/被锁/schema 变了 ⇒ **如实报错，不返回空结果**。",
+  "half_already_done": "**M4 的\"导出侧\"已在 M5 里做完**：`export_citations.py` 导出的 `.ris` 与 `.csl.json` **Zotero 两种都能直接吃**。本脚本补的是另一半（把 Zotero 已有的读出来对比）。"
+ },
+ "items": [],
+ "elapsed_s": 0.0
+}
