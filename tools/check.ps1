@@ -70,7 +70,11 @@ try {
     # 这个检查盯的就是那条判据：**文档写了它，它就必须存在且已入库。**
     Step '产物入库（文档引用）' { & $PY tools/check_artifacts_tracked.py }
 
-    # ⑤ 回归（31 项；--fast 跳过慢的 PDF 检查）
+    # ⑥ 回归（2026-09-16：从 31 项增到 44 项；--fast 跳过慢的 PDF 检查）
+    #
+    # ⚠️ **这个注释里的数字要与 `verify_all.py` 的实际项数同步** ——
+    #    本行此前写"31 项"而实际已经 44，**是一处典型的"文档与产物不符"**。
+    #    （同类问题见 H10：那张优化排序表里 +8.16pp 的预估也已过期。）
     if (-not $Quick) {
         Step '回归 (verify_all --fast)' { & $PY tools/verify_all.py --fast }
     } else {
