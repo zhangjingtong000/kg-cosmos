@@ -1,0 +1,64 @@
+{
+ "generated": "2026-09-17 12:29:24",
+ "purpose": "A8：执行 PUBLISHED_IN 改写，并留改前/改后的双口径",
+ "plan_source": "data/quality/venue-rewrite-plan.json",
+ "output_dir": "data\\quality\\graphs-published-in",
+ "design": {
+  "not_touching_original": "**不改原图，另写一份** —— 原图在 `data/corpus/graphs/` 一个字节没动。这样 before 口径随时可重算，两者可以并排引用（与 P4 的 --convert 同一做法）。",
+  "rewrite_not_delete": "**只改 `type` 一个字段**，并留 `_rewritten_from` 痕迹。计划脚本自己写了「改写而非删除 —— 这些边携带真实信息，只是类型标错」。",
+  "why_dual_caliber": "`PUBLISHED_IN` 加进本体后 **L4 的分母会变** —— 原来被判\"越界\"的谓词现在合规了。**只报 after 会让人以为\"抽取质量提升了\"，而实际只是\"判据变宽了\"。**",
+  "L7_not_computed": "**L7 没有在这里算** —— 它的判据在 `build_analytics_data.py` 里是**从产物 `l7-role-violation-audit.json` 读的**，不是从图直接算的。⇒ **不假装算了一个其实没算的层**（见文档边界）。"
+ },
+ "ontology": {
+  "before_n": 15,
+  "after_n": 16,
+  "added": [
+   "PUBLISHED_IN"
+  ]
+ },
+ "rewritten_edges": 1019,
+ "cases": {
+  "before_15_ontology": {
+   "label": "before（15 类本体）",
+   "edges": 43867,
+   "nodes": 19427,
+   "L3_endpoints": 0.96168,
+   "L3_ok": 42186,
+   "L4_predicate": 1.0,
+   "L4_ok": 43867,
+   "L7_judged": 11826,
+   "L7_compliance": 0.57382,
+   "L7_ok": 6786
+  },
+  "before_16_ontology_no_rewrite": {
+   "label": "before（16 类本体，未改图）",
+   "edges": 43867,
+   "nodes": 19427,
+   "L3_endpoints": 0.96168,
+   "L3_ok": 42186,
+   "L4_predicate": 1.0,
+   "L4_ok": 43867,
+   "L7_judged": 11826,
+   "L7_compliance": 0.57382,
+   "L7_ok": 6786
+  },
+  "after_16_ontology_with_rewrite": {
+   "label": "after（16 类本体 + 已改写）",
+   "edges": 43867,
+   "nodes": 19427,
+   "L3_endpoints": 0.96168,
+   "L3_ok": 42186,
+   "L4_predicate": 1.0,
+   "L4_ok": 43867,
+   "L7_judged": 12571,
+   "L7_compliance": 0.572429,
+   "L7_ok": 7196
+  }
+ },
+ "read_this_way": {
+  "ontology_only": 0.0,
+  "rewrite_itself": 0.0,
+  "note": "两个数**不要相加当成一个总提升** —— 前者是判据变化，后者是数据变化。"
+ },
+ "elapsed_s": 2.7
+}
