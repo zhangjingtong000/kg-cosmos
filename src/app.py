@@ -274,6 +274,91 @@ async def api_quality(name: str):
     return _serve_json(QUALITY / name)
 
 
+# ── K12（2026-09-16）：界面上的「当场跑一遍评测」───────────────────────
+#
+# ## 为什么做这个
+#
+# TODO K12 的原话：
+# > 项目有 9 层评测 + 45 项回归，**但全在命令行**。
+# > 老师问"你自己怎么验证的"，**最好的答案是当场点一下跑出来**。
+#
+# ## 为什么只跑"数据侧"
+#
+# `verify_all` 的后半（`CHECKS`）每一项都要**起一个无头 Chrome**。
+# 从后端进程里拉 Chrome 既慢（每项 3–35 秒）又依赖桌面环境 ——
+# 而界面上要的是**快、稳、当场看得见**。
+# ⇒ 只跑 `--data-only`（数据侧那些，不依赖浏览器），**完整回归仍在命令行跑**。
+#
+# ## 为什么是"后台线程 + 轮询"而不是直接返回
+#
+# 数据侧 20 项实测**约 60 秒** —— 一个 HTTP 请求挂 60 秒会被各种超时掐掉，
+# 而且界面在这 60 秒里**什么都看不到**。
+# ⇒ 与上传同一套模式：`start` 立刻返回，`status` 供轮询。
+#
+# ## 为什么**不**持久化
+#
+# 上传任务要持久化（跑到一半重启不能丢，那是一次真实的数据丢失教训）。
+# **而这个不需要**：它是一段**只读的检查**，重启后结果就过期了 ——
+# **重跑一次的成本（60 秒）比"恢复一个可能过期的结果"更低，也更诚实。**
+VERIFY_TASK: dict = {
+    "running": False, "started": None, "finished": None,
+    "passed": None, "total": None, "results": None, "error": None,
+}
+
+
+def _run_verify():
+    """在**后台线程**里跑 `verify_all --data-only --json`。"""
+    import subprocess
+    global VERIFY_TASK
+    try:
+        p = subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "verify_all.py"),
+             "--data-only", "--json"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            timeout=600, cwd=str(ROOT))
+        # **只解析最后一行** —— 前面是各检查自己打的日志
+        last = [ln for ln in (p.stdout or "").strip().splitlines() if ln.strip()]
+        payload = json.loads(last[-1]) if last else {}
+        VERIFY_TASK.update({
+            "running": False, "finished": datetime.now().isoformat(timespec="seconds"),
+            "passed": payload.get("passed"), "total": payload.get("total"),
+            "results": payload.get("results"), "error": None,
+        })
+        _LOG = log        # 本模块的 logger 名就叫 `log`（L66）
+        _LOG.info("[verify] 完成 %s/%s", payload.get("passed"), payload.get("total"))
+    except Exception as exc:                      # noqa: BLE001
+        # **失败要如实说出来** —— 不能留一个永远 running 的任务
+        VERIFY_TASK.update({"running": False, "error": f"{type(exc).__name__}: {exc}",
+                            "finished": datetime.now().isoformat(timespec="seconds")})
+        log.exception("[verify] 失败")
+
+
+@app.post("/api/verify/start")
+async def verify_start():
+    """起一次数据侧检查（立刻返回；用 `status` 轮询）。
+
+    **已经在跑就不重复起** —— 返回 `already_running: true`，
+    而不是静默地再起一个（那会让两次结果互相覆盖，且白占 CPU）。
+    """
+    import threading
+    if VERIFY_TASK.get("running"):
+        return {"running": True, "already_running": True,
+                "started": VERIFY_TASK.get("started")}
+    VERIFY_TASK.update({"running": True, "error": None, "results": None,
+                        "passed": None, "total": None,
+                        "started": datetime.now().isoformat(timespec="seconds"),
+                        "finished": None})
+    threading.Thread(target=_run_verify, daemon=True).start()
+    return {"running": True, "already_running": False,
+            "started": VERIFY_TASK["started"]}
+
+
+@app.get("/api/verify/status")
+async def verify_status():
+    """轮询用。返回 `running` / `passed` / `total` / `results` / `error`。"""
+    return VERIFY_TASK
+
+
 # ── Routes ───────────────────────────────────────────────
 
 @app.post("/upload")

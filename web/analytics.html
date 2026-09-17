@@ -65,6 +65,38 @@
   /* ── 首屏读数：三个核心 + 辅助小字 ────────────────────────────────────
      格线用 1px 分隔（editorial 的竖栏感），fig 本身透明，让 body 渐变透出来。 */
   #kpis { margin-top: 34px; }
+
+/* K12（2026-09-16）：当场跑一遍验证。样式与本页既有的 warn 区块同族 ——
+   它是个"动作"，不是一条读数，所以给边框与按钮，不用 KPI 卡片那种样式。 */
+#s-verify { margin-top: 34px; }
+.vwrap { border: 1px solid var(--pq-line, rgba(193,195,201,.22));
+         border-radius: 12px; padding: 16px 18px; }
+.vhead { display: flex; gap: 18px; align-items: flex-start;
+         justify-content: space-between; flex-wrap: wrap; }
+.vhead h2 { margin: 0 0 6px; font-size: 16px; }
+.vlede { color: var(--pq-dim, #8b95a8); font-size: 13px; margin: 0; max-width: 620px; }
+#runVerify { background: rgba(224,164,105,.14); color: #e8c9a4; cursor: pointer;
+             border: 1px solid rgba(224,164,105,.42); border-radius: 9px;
+             padding: 9px 16px; font-size: 13.5px; font-family: inherit;
+             white-space: nowrap; }
+#runVerify:hover:not(:disabled) { border-color: rgba(224,164,105,.9); color: #fff; }
+#runVerify:disabled { opacity: .55; cursor: default; }
+.vout { margin-top: 14px; }
+.vsum { padding: 9px 12px; border-radius: 8px; font-size: 13.5px;
+        display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.vsum.vok { background: rgba(124,192,182,.12); border: 1px solid rgba(124,192,182,.36); }
+.vsum.vbad { background: rgba(224,117,117,.12); border: 1px solid rgba(224,117,117,.4); }
+.vsum i, .vlist i { color: var(--pq-dim, #8b95a8); font-style: normal; font-size: 12px; }
+.vlist { list-style: none; padding: 0; margin: 10px 0 0; }
+.vlist li { padding: 5px 0; font-size: 13px; border-bottom: 1px solid rgba(193,195,201,.1);
+            display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.vlist li.vbad { color: #e8a0a0; }
+.vlist pre { width: 100%; margin: 4px 0 0; padding: 8px; overflow-x: auto;
+             background: rgba(0,0,0,.28); border-radius: 6px;
+             font-size: 11.5px; line-height: 1.5; }
+.vrun { color: #e8c9a4; font-size: 13.5px; }
+.verr { color: #e8a0a0; font-size: 13.5px; line-height: 1.7; }
+.vnote { color: var(--pq-dim, #8b95a8); font-size: 12.5px; margin-top: 10px; }
   .figs { display: grid; grid-template-columns: repeat(3, 1fr);
           border-top: 1px solid var(--pq-line); border-bottom: 1px solid var(--pq-line); }
   .fig { padding: 24px 26px 22px; min-width: 0; }
@@ -439,6 +471,27 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
        原来 6 个 KPI 等权平铺，读者不知道先看哪个。 -->
   <section id="s-top" aria-label="核心读数">
     <div id="kpis"></div>
+  </section>
+
+  <!-- K12（2026-09-16）：**当场跑一遍**。
+       这一页此前全是"已经算好的结论" —— 老师问"你自己怎么验证的"，
+       最好的答案是**当场点一下跑出来**，而不是"我跑过"。
+       ⚠️ 只跑数据侧（不依赖浏览器）；完整回归仍在命令行。
+       ⚠️ 后端没起时**要说清是"没起"而不是"全过了"** —— 那是最危险的混淆。 -->
+  <section id="s-verify" aria-label="当场跑一遍验证">
+    <div class="vwrap">
+      <div class="vhead">
+        <div>
+          <h2>当场跑一遍</h2>
+          <p class="vlede">
+            这一页上面所有的结论，背后都有一套**能自动跑的检查**。
+            点一下，**就在这台机器上真跑一遍**（数据侧，秒级到两分钟）。
+          </p>
+        </div>
+        <button id="runVerify" type="button">▶ 跑一遍</button>
+      </div>
+      <div id="verifyOut" class="vout" hidden></div>
+    </div>
   </section>
 
   <!-- 锚点目录：9 个区块之间可跳转。六层评测原来埋在 top≈3171px，
@@ -1134,6 +1187,92 @@ KGData.kg('analytics.json')
       '<span class="err">数据加载失败：' + esc(e.message) + '</span>';
     window.__ready = true;
   });
+
+/* ── K12（2026-09-16）：当场跑一遍验证 ────────────────────────────────────
+ *
+ * 为什么放在这一页：这一页全是"已经算好的结论"，
+ * 而**"你怎么验证的"这个问题，最好的答案是当场跑出来**。
+ *
+ * ⚠️ **后端没起时要如实说"没起"** —— 那是这一页最危险的混淆：
+ *    把"检查没跑"显示成"检查全过"。这与 G3（404 静默降级到演示数据）
+ *    是同一类错误，也是本项目反复防的那一种。
+ */
+(function () {
+  const btn = document.getElementById('runVerify');
+  const out = document.getElementById('verifyOut');
+  if (!btn || !out) return;
+  let timer = null;
+
+  function render(st) {
+    if (st.error) {
+      out.innerHTML = '<div class="verr">❌ 检查本身出错：' + esc(st.error) + '</div>';
+      return;
+    }
+    if (st.running) {
+      out.innerHTML = '<div class="vrun">⏳ 正在跑…（'
+        + esc(String(st.started || '')) + ' 起的，约 1–2 分钟）</div>';
+      return;
+    }
+    const ok = st.passed === st.total;
+    const rows = (st.results || []).map(r =>
+      '<li class="' + (r.ok ? 'vok' : 'vbad') + '">'
+      + '<b>' + (r.ok ? '✅' : '❌') + '</b> ' + esc(r.label)
+      + '<i>' + r.seconds + 's</i>'
+      + (r.ok ? '' : '<pre>' + esc((r.tail || []).join('\n')) + '</pre>')
+      + '</li>').join('');
+    out.innerHTML =
+      '<div class="vsum ' + (ok ? 'vok' : 'vbad') + '">'
+      + (ok ? '✅ 全部通过' : '❌ 有失败项') + ' · '
+      + '<b>' + st.passed + ' / ' + st.total + '</b>'
+      + '<i>' + esc(String(st.finished || '')) + '</i></div>'
+      + '<ul class="vlist">' + rows + '</ul>'
+      + '<p class="vnote">这是**数据侧**检查（不依赖浏览器）。'
+      + '完整回归（含前端 CDP 项）在命令行跑：'
+      + '<code>python tools/verify_all.py --fast</code></p>';
+    window.__verifyState = { passed: st.passed, total: st.total, all_ok: ok };
+  }
+
+  function poll() {
+    fetch('./api/verify/status', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(st => {
+        render(st);
+        if (st.running) {
+          timer = setTimeout(poll, 3000);
+        } else {
+          btn.disabled = false;
+          btn.textContent = '▶ 再跑一遍';
+        }
+      })
+      .catch(() => {
+        if (timer) { clearTimeout(timer); timer = null; }
+        btn.disabled = false;
+        // **说清是"没起"而不是"全过了"**
+        out.innerHTML = '<div class="verr">⚠️ 连不上后端 —— '
+          + '<b>这表示"检查没有跑"，不是"检查通过了"</b>。<br>'
+          + '请先起后端：<code>python src/app.py</code>（端口 8000），再点一次。</div>';
+        window.__verifyState = { error: 'backend_unreachable' };
+      });
+  }
+
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    btn.textContent = '⏳ 跑着…';
+    out.hidden = false;
+    out.innerHTML = '<div class="vrun">⏳ 已提交，正在跑…</div>';
+    fetch('./api/verify/start', { method: 'POST' })
+      .then(r => r.json())
+      .then(() => poll())
+      .catch(() => {
+        btn.disabled = false;
+        btn.textContent = '▶ 跑一遍';
+        out.innerHTML = '<div class="verr">⚠️ 连不上后端 —— '
+          + '<b>这表示"检查没有跑"，不是"检查通过了"</b>。<br>'
+          + '请先起后端：<code>python src/app.py</code>（端口 8000）。</div>';
+        window.__verifyState = { error: 'backend_unreachable' };
+      });
+  });
+})();
 </script>
 <script src="./lib/a11y.js"></script>
 

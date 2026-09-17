@@ -137,8 +137,10 @@ def _verify_all_count():
             continue
         blk = m.group(1)
         total += len(re.findall(r'^\s{4}\(', blk, re.M))
-        # `, "slow")` 结尾的项被 `--fast` 跳过
-        total -= len(re.findall(r',\s*"slow"\)', blk))
+        # `, "slow")` / `, 'slow')` 结尾的项被 `--fast` 跳过。
+        # ⚠️ **两种引号都要认** —— 第一版只写了双引号，于是新加的一项
+        # （用了单引号）没被减掉，检查算出 46 而实跑 45 ⇒ **又一个假警报**。
+        total -= len(re.findall(r',\s*["\']slow["\']\)', blk))
     return total or None
 
 

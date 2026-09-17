@@ -11,6 +11,7 @@
   python tools/verify_all.py            # 全部
   python tools/verify_all.py --fast     # 跳过耗时的 PDF 截图对比
 """
+import json
 import subprocess
 import sys
 import time
@@ -96,6 +97,10 @@ CHECKS = [
     # 加横幅是一次性的，**但"新增原型页也要带横幅"这条纪律要长期成立** ⇒ 需要守门。
     ('历史原型页都有「这是历史版本」横幅（A7）',
      ['tools/check_legacy_banners.py']),
+    # K12：界面上的「当场跑一遍」。**第③组是端到端**（点按钮 → 真跑 → 出结果），
+    # 第④组更关键：**后端不可用时必须说"没跑"，而不是"全过了"**。
+    ('当场跑一遍评测（K12：**端到端真跑出结果** · 没跑≠全过）',
+     ['tools/cdp_verify_run_verify.py'], 'slow'),
     # H8：E2E 技术栈守门。§3.2 纪律 2 要求 Playwright，而存量有 20 个自建 CDP。
     # **老的不重写**（功能等价、全绿），但**不许新增** —— 这条断言把它钉住。
     ('E2E 技术栈（不许新增「自建 CDP」，新脚本一律 Playwright）',
@@ -171,6 +176,11 @@ def run(label, args, timeout=300, retry_on=None):
     （`RuntimeError: CDP 未就绪`）。这种偶发失败如果直接算红，
     会让人对回归失去信任、进而忽略真正的红灯。所以只对**明确的偶发特征**重试一次，
     其他失败一律不重试（真问题必须仍然报红）。
+
+    **K12（2026-09-16）**：每项结果都记进 `RESULTS`，供 `--json` 输出。
+    为什么需要：`--json` 是给**界面上那个「当场跑一遍」按钮**用的
+    （`/api/verify` → `analytics.html`）——
+    **"老师问你怎么验证的，当场点一下跑出来"**，比"我跑过"强得多。
     """
     attempts = 2 if retry_on else 1
     for attempt in range(attempts):
@@ -194,36 +204,73 @@ def run(label, args, timeout=300, retry_on=None):
         print("   ── 失败输出末尾 ──")
         for ln in [x for x in out.strip().splitlines() if x.strip()][-8:]:
             print("   " + ln[:150])
+    RESULTS.append({
+        "label": label,
+        "ok": bool(ok),
+        "seconds": round(dt, 1),
+        "detail": (tail[0] if tail else "")[:200],
+        # 失败时留最后几行 —— 界面上要能直接看见**为什么红**
+        "tail": ([x[:200] for x in out.strip().splitlines() if x.strip()][-6:]
+                 if not ok else []),
+    })
     return ok
+
+
+RESULTS = []
 
 
 def main():
     fast = "--fast" in sys.argv
-    print("=" * 100)
-    print("数据侧检查")
-    print("-" * 100)
-    results = []
+    # K12（2026-09-16）：两个新开关，给**界面上的「当场跑一遍」**用。
+    #
+    # `--data-only`：**只跑数据侧**（`DATA_CHECKS`）。
+    #   为什么界面只跑这一半：前端检查每一项都要**起一个无头 Chrome**，
+    #   从后端进程里拉起来既慢又依赖桌面环境 ⇒
+    #   **界面上要的是"快、稳、当场看得见"**，而那正好是数据侧这 19 项。
+    #   （完整回归仍然在命令行跑，`--data-only` 不替代它。）
+    #
+    # `--json`：把每项结果打成 JSON（由界面解析渲染）。
+    data_only = "--data-only" in sys.argv
+    as_json = "--json" in sys.argv
+
+    if not as_json:
+        print("=" * 100)
+        print("数据侧检查")
+        print("-" * 100)
     for label, args in DATA_CHECKS:
-        results.append(run(label, args))
-    print()
-    print("=" * 100)
-    print("前端检查（每个都会起一个带 CDP 的 Chrome）")
-    print("-" * 100)
-    # 前端检查都要起无头 Chrome；"CDP 未就绪"是实测过的偶发启动失败，
-    # 只对这一类重试（真失败仍然报红）。
-    CDP_TRANSIENT = ("CDP 未就绪",)
-    for item in CHECKS:
-        label, args = item[0], item[1]
-        slow = len(item) > 2 and item[2] == "slow"
-        if slow and fast:
-            print(f"⏭  {label:38s}   (--fast 跳过)")
-            continue
-        results.append(run(label, args, retry_on=CDP_TRANSIENT))
-    print()
-    print("=" * 100)
-    ok = sum(1 for r in results if r)
-    print(f"通过 {ok} / {len(results)}")
-    return 0 if ok == len(results) else 1
+        run(label, args)
+
+    if not data_only:
+        if not as_json:
+            print()
+            print("=" * 100)
+            print("前端检查（每个都会起一个带 CDP 的 Chrome）")
+            print("-" * 100)
+        # 前端检查都要起无头 Chrome；"CDP 未就绪"是实测过的偶发启动失败，
+        # 只对这一类重试（真失败仍然报红）。
+        CDP_TRANSIENT = ("CDP 未就绪",)
+        for item in CHECKS:
+            label, args = item[0], item[1]
+            slow = len(item) > 2 and item[2] == "slow"
+            if slow and fast:
+                if not as_json:
+                    print(f"⏭  {label:38s}   (--fast 跳过)")
+                continue
+            run(label, args, retry_on=CDP_TRANSIENT)
+
+    ok = sum(1 for r in RESULTS if r["ok"])
+    if as_json:
+        print(json.dumps({
+            "passed": ok, "total": len(RESULTS),
+            "all_ok": ok == len(RESULTS),
+            "data_only": data_only,
+            "results": RESULTS,
+        }, ensure_ascii=False))
+    else:
+        print()
+        print("=" * 100)
+        print(f"通过 {ok} / {len(RESULTS)}")
+    return 0 if ok == len(RESULTS) else 1
 
 
 if __name__ == "__main__":
