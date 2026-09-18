@@ -655,7 +655,30 @@ def extract_chunk_once(chunk_text: str, model_text: str, mode: str,
     t1 = time.time()
     prompt = build_combined_prompt(full_text)
     if mode == "local":
-        raw = call_ollama_json(model_text, prompt)
+        # ⚠️⚠️ **这里必须用 `call_ollama`（纯文本），不能用 `call_ollama_json`**
+        # —— 2026-09-18 修，而它此前**从来没跑通过**。
+        #
+        # **根因**：`COMBINED_PREFIX` 的 `---Output Format---` 明确写着
+        #   「One entity per line, then one relation per line.
+        #     **NO markdown, NO JSON, no prose, no headings.**」
+        #   并要求 `entity<|>Name<|>Type<|>Desc` / `relation<|>Src<|>Tgt<|>Type<|>Why`。
+        #
+        #   而这里原来调 `call_ollama_json(...)` ⇒ 它**先做 JSON 解码**并返回 `dict`
+        #   ⇒ 而 `parse_combined(raw)` 要的是**按 `<|>` 分流的纯文本 str**
+        #   ⇒ **类型与格式双重不匹配 ⇒ 必然 `JSONDecodeError`。**
+        #
+        # **实测**（B5 那一轮 6 次抽取、111 chunks）：
+        #   ```
+        #   pipeline.ExtractionFailed: 111 chunks 全部零产出
+        #     （首因：JSONDecodeError: Expecting value: line 1 column 1 (char 0)）
+        #   ⇒ 每次耗时 34–45 分钟，而 **rc=0** —— 主流程以为成功了
+        #   ```
+        #   ⇒ 而 `tools/check_prompt_ab.py` 抓住了它
+        #     （六份产物与基线**逐字节相同**）。
+        #
+        # **⇒ 教训**：`prompt 里写的格式` 与 `解析它的函数` **必须是同一套**。
+        #   而"跑完 rc=0"**不能证明**这件事 —— **要看产物变了没有**。
+        raw = call_ollama(model_text, prompt)
     else:
         raw = call_deepseek(model_text, prompt)
     record_pair("combined", prompt, raw,
@@ -727,10 +750,37 @@ def build_local_entity_prompt(text: str, content_kind: str = "text") -> str:
 # ── Backend Adapters ─────────────────────────────────────
 
 def call_ollama(model: str, prompt: str, image_path: Optional[str] = None) -> str:
-    """Call local Ollama model."""
+    """Call local Ollama model. **返回的是答案，不是思考过程。**
+
+    ⚠️⚠️ 2026-09-18 修了两个问题，而**第二个很危险**：
+
+    **① `enable_thinking` 是无效字段。**
+       原来写的是 `options: {..., "enable_thinking": False}`。
+       **实测（直接打 Ollama，同一 prompt）**：
+       ```
+       combined + think:False             ⇒ status=200 · response=**1781** · thinking=0
+       combined + enable_thinking:False   ⇒ status=200 · response=**0**   · thinking=8237
+       ```
+       ⇒ **关思考要写在顶层的 `think`，不是 `options` 里。**
+
+    **② 原来在 `response` 为空时**回退到 `thinking`**：
+       ```python
+       return data.get("response") or data.get("thinking", "")   # ← 原样
+       ```
+       ⇒ 那等于**把模型的思考过程当成答案交出去**。
+       实测后果：`combined` 那条路拿到的是以 `Thinking Process:` 开头的 7953 字，
+       而 `parse_combined` 按 `<|>` 分流 ⇒ **解析出 0 条实体**（**静默的零产出**）。
+       ⇒ **现在去掉那个回退**：`response` 为空就**返回空串**，
+         让上层（`pipeline` 的零产出判定）**明确失败**，而不是把思考当答案。
+
+    **★ 这条与本轮另一条是同一个家族**：
+    "看起来有输出" ≠ "输出的是答案"。
+    """
     import requests
     payload = {"model": model, "prompt": prompt, "stream": False,
-               "options": {"temperature": 0.1, "num_predict": 2048, "num_ctx": 4096, "enable_thinking": False}}
+               # ⚠️ **顶层 `think`** —— 不是 `options.enable_thinking`（那个无效）
+               "think": False,
+               "options": {"temperature": 0.1, "num_predict": 2048, "num_ctx": 4096}}
     if image_path:
         with open(image_path, "rb") as f:
             img_b64 = base64.b64encode(f.read()).decode()
@@ -738,7 +788,8 @@ def call_ollama(model: str, prompt: str, image_path: Optional[str] = None) -> st
     r = requests.post(f"{OLLAMA}/api/generate", json=payload, timeout=120)
     r.raise_for_status()
     data = r.json()
-    return data.get("response") or data.get("thinking", "")
+    # ⚠️ **不回退到 `thinking`** —— 思考不是答案（见 docstring ②）
+    return (data.get("response") or "").strip()
 
 
 def call_ollama_json(model: str, prompt: str, schema: Optional[dict] = None,
