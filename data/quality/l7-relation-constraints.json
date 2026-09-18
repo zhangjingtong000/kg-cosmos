@@ -47,13 +47,13 @@
         "Tool"
       ],
       "n_total": 9598,
-      "n_unjudgeable": 2973,
-      "n_resolvable": 6625,
+      "n_unjudgeable": 3199,
+      "n_resolvable": 6399,
       "n_compliant_directed": 0,
       "n_compliant_role": 0,
       "n_reversed": 0,
       "n_role_violation": 0,
-      "n_unconstrained": 6625,
+      "n_unconstrained": 6399,
       "direction_compliance": null,
       "direction_coverage": 0.0,
       "role_compliance": null,
@@ -103,16 +103,16 @@
         "Tool"
       ],
       "n_total": 8755,
-      "n_unjudgeable": 2514,
-      "n_resolvable": 6241,
-      "n_compliant_directed": 5819,
+      "n_unjudgeable": 2551,
+      "n_resolvable": 6204,
+      "n_compliant_directed": 5787,
       "n_compliant_role": 0,
-      "n_reversed": 120,
-      "n_role_violation": 302,
+      "n_reversed": 119,
+      "n_role_violation": 298,
       "n_unconstrained": 0,
-      "direction_compliance": 0.9798,
-      "direction_coverage": 0.9516,
-      "role_compliance": 0.9507,
+      "direction_compliance": 0.9799,
+      "direction_coverage": 0.952,
+      "role_compliance": 0.951,
       "reversed_pairs": [
         [
           [
@@ -147,7 +147,7 @@
             "Component",
             "Person"
           ],
-          3
+          2
         ],
         [
           [
@@ -233,21 +233,21 @@
             "Concept",
             "Method"
           ],
-          8
+          7
         ],
         [
           [
             "Concept",
             "Concept"
           ],
-          8
+          6
         ],
         [
           [
-            "Artifact",
-            "Document"
+            "Concept",
+            "Artifact"
           ],
-          5
+          6
         ]
       ],
       "reversed_samples": [
@@ -438,16 +438,16 @@
         "Tool"
       ],
       "n_total": 7339,
-      "n_unjudgeable": 2482,
-      "n_resolvable": 4857,
+      "n_unjudgeable": 2519,
+      "n_resolvable": 4820,
       "n_compliant_directed": 0,
-      "n_compliant_role": 4815,
+      "n_compliant_role": 4781,
       "n_reversed": 0,
-      "n_role_violation": 42,
+      "n_role_violation": 39,
       "n_unconstrained": 0,
       "direction_compliance": null,
       "direction_coverage": 0.0,
-      "role_compliance": 0.9914,
+      "role_compliance": 0.9919,
       "reversed_pairs": [],
       "role_violation_pairs": [
         [
@@ -462,21 +462,21 @@
             "Method",
             "Person"
           ],
-          9
+          7
         ],
         [
           [
             "System",
             "Person"
           ],
-          8
+          7
         ],
         [
           [
             "Process",
             "Person"
           ],
-          4
+          6
         ],
         [
           [
@@ -487,15 +487,15 @@
         ],
         [
           [
-            "Artifact",
-            "Person"
+            "Material",
+            "Concept"
           ],
-          3
+          1
         ],
         [
           [
-            "Material",
-            "Concept"
+            "Artifact",
+            "Person"
           ],
           1
         ],
@@ -535,24 +535,6 @@
           "description": "Creating a scholarly knowledge graph requires manual effort and domain experts"
         },
         {
-          "source": "Approach",
-          "source_type": "Method",
-          "target": "Human Expert",
-          "target_type": "Person",
-          "type": "USES",
-          "l5": 0.9412,
-          "description": "The approach requires manual effort and human experts."
-        },
-        {
-          "source": "Crowdsourcing",
-          "source_type": "Method",
-          "target": "Paper Authors",
-          "target_type": "Person",
-          "type": "USES",
-          "l5": 0.6771,
-          "description": "Crowdsourcing includes paper authors."
-        },
-        {
           "source": "Crowdsourcing",
           "source_type": "Method",
           "target": "Domain Expert",
@@ -560,15 +542,6 @@
           "type": "USES",
           "l5": 0.5122,
           "description": "Crowdsourcing includes domain experts."
-        },
-        {
-          "source": "Open Research Knowledge Graph",
-          "source_type": "System",
-          "target": "Paper Authors",
-          "target_type": "Person",
-          "type": "USES",
-          "l5": 0.1323,
-          "description": "ORKG includes paper authors in crowdsourcing."
         },
         {
           "source": "Open Research Knowledge Graph",
@@ -581,12 +554,39 @@
         },
         {
           "source": "Comparison",
-          "source_type": "Artifact",
+          "source_type": "Process",
           "target": "Researchers",
           "target_type": "Person",
           "type": "USES",
           "l5": 0.4311,
           "description": "Comparisons can be revised, discussed, and annotated by many researchers."
+        },
+        {
+          "source": "Comparison",
+          "source_type": "Process",
+          "target": "Curators",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.2937,
+          "description": "Comparisons can be revised, discussed, and annotated by many curators."
+        },
+        {
+          "source": "Armadillo",
+          "source_type": "System",
+          "target": "User",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.1411,
+          "description": "Armadillo uses user-defined ontology as its bootstrap ontology."
+        },
+        {
+          "source": "MUSE",
+          "source_type": "System",
+          "target": "User",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.5609,
+          "description": "MUSE uses user-defined ontology as its bootstrap ontology."
         }
       ]
     },
@@ -632,16 +632,16 @@
         "Tool"
       ],
       "n_total": 5816,
-      "n_unjudgeable": 1815,
-      "n_resolvable": 4001,
+      "n_unjudgeable": 1884,
+      "n_resolvable": 3932,
       "n_compliant_directed": 0,
-      "n_compliant_role": 3983,
+      "n_compliant_role": 3914,
       "n_reversed": 0,
       "n_role_violation": 18,
       "n_unconstrained": 0,
       "direction_compliance": null,
       "direction_coverage": 0.0,
-      "role_compliance": 0.9955,
+      "role_compliance": 0.9954,
       "reversed_pairs": [],
       "role_violation_pairs": [
         [
@@ -667,7 +667,7 @@
         ],
         [
           [
-            "Component",
+            "Artifact",
             "Person"
           ],
           1
@@ -695,7 +695,7 @@
         },
         {
           "source": "Tables",
-          "source_type": "Component",
+          "source_type": "Artifact",
           "target": "Authors",
           "target_type": "Person",
           "type": "PART_OF",
@@ -790,10 +790,10 @@
         "Tool"
       ],
       "n_total": 3850,
-      "n_unjudgeable": 1329,
-      "n_resolvable": 2521,
+      "n_unjudgeable": 1363,
+      "n_resolvable": 2487,
       "n_compliant_directed": 0,
-      "n_compliant_role": 2521,
+      "n_compliant_role": 2487,
       "n_reversed": 0,
       "n_role_violation": 0,
       "n_unconstrained": 0,
@@ -852,24 +852,17 @@
         "Tool"
       ],
       "n_total": 2213,
-      "n_unjudgeable": 694,
-      "n_resolvable": 1519,
-      "n_compliant_directed": 684,
-      "n_compliant_role": 789,
-      "n_reversed": 36,
+      "n_unjudgeable": 733,
+      "n_resolvable": 1480,
+      "n_compliant_directed": 669,
+      "n_compliant_role": 766,
+      "n_reversed": 35,
       "n_role_violation": 10,
       "n_unconstrained": 0,
-      "direction_compliance": 0.95,
-      "direction_coverage": 0.474,
-      "role_compliance": 0.9933,
+      "direction_compliance": 0.9503,
+      "direction_coverage": 0.4757,
+      "role_compliance": 0.9931,
       "reversed_pairs": [
-        [
-          [
-            "Concept",
-            "Process"
-          ],
-          14
-        ],
         [
           [
             "Concept",
@@ -880,9 +873,23 @@
         [
           [
             "Concept",
+            "Process"
+          ],
+          12
+        ],
+        [
+          [
+            "Concept",
             "System"
           ],
           4
+        ],
+        [
+          [
+            "Artifact",
+            "Process"
+          ],
+          2
         ],
         [
           [
@@ -902,13 +909,6 @@
           [
             "Concept",
             "Person"
-          ],
-          1
-        ],
-        [
-          [
-            "Artifact",
-            "Process"
           ],
           1
         ]
@@ -981,13 +981,13 @@
           "description": "The relaxation of embedding to n-balls turns triple classification into a geometric containment problem."
         },
         {
-          "source": "Results",
-          "source_type": "Concept",
-          "target": "Import Process",
+          "source": "Tables",
+          "source_type": "Artifact",
+          "target": "Comparison",
           "target_type": "Process",
           "type": "PRODUCES",
-          "l5": 0.9133,
-          "description": "Results are reported for the import process."
+          "l5": 0.634,
+          "description": "For each table, a comparison is created in ORKG"
         },
         {
           "source": "Few-Shot Learning",
@@ -1131,10 +1131,10 @@
         "Tool"
       ],
       "n_total": 999,
-      "n_unjudgeable": 260,
-      "n_resolvable": 739,
+      "n_unjudgeable": 279,
+      "n_resolvable": 720,
       "n_compliant_directed": 0,
-      "n_compliant_role": 739,
+      "n_compliant_role": 720,
       "n_reversed": 0,
       "n_role_violation": 0,
       "n_unconstrained": 0,
@@ -1185,10 +1185,10 @@
         "Tool"
       ],
       "n_total": 967,
-      "n_unjudgeable": 328,
-      "n_resolvable": 639,
+      "n_unjudgeable": 333,
+      "n_resolvable": 634,
       "n_compliant_directed": 0,
-      "n_compliant_role": 638,
+      "n_compliant_role": 633,
       "n_reversed": 0,
       "n_role_violation": 1,
       "n_unconstrained": 0,
@@ -1261,13 +1261,13 @@
         "Tool"
       ],
       "n_total": 872,
-      "n_unjudgeable": 335,
-      "n_resolvable": 537,
+      "n_unjudgeable": 338,
+      "n_resolvable": 534,
       "n_compliant_directed": 0,
       "n_compliant_role": 0,
       "n_reversed": 0,
       "n_role_violation": 0,
-      "n_unconstrained": 537,
+      "n_unconstrained": 534,
       "direction_compliance": null,
       "direction_coverage": 0.0,
       "role_compliance": null,
@@ -1332,15 +1332,15 @@
         "Tool"
       ],
       "n_total": 853,
-      "n_unjudgeable": 263,
-      "n_resolvable": 590,
-      "n_compliant_directed": 283,
-      "n_compliant_role": 306,
+      "n_unjudgeable": 270,
+      "n_resolvable": 583,
+      "n_compliant_directed": 281,
+      "n_compliant_role": 301,
       "n_reversed": 0,
       "n_role_violation": 1,
       "n_unconstrained": 0,
       "direction_compliance": 1.0,
-      "direction_coverage": 0.4797,
+      "direction_coverage": 0.482,
       "role_compliance": 0.9983,
       "reversed_pairs": [],
       "role_violation_pairs": [
@@ -1404,10 +1404,10 @@
         "Tool"
       ],
       "n_total": 793,
-      "n_unjudgeable": 233,
-      "n_resolvable": 560,
+      "n_unjudgeable": 243,
+      "n_resolvable": 550,
       "n_compliant_directed": 0,
-      "n_compliant_role": 560,
+      "n_compliant_role": 550,
       "n_reversed": 0,
       "n_role_violation": 0,
       "n_unconstrained": 0,
@@ -1456,10 +1456,10 @@
         "Tool"
       ],
       "n_total": 598,
-      "n_unjudgeable": 224,
-      "n_resolvable": 374,
+      "n_unjudgeable": 226,
+      "n_resolvable": 372,
       "n_compliant_directed": 0,
-      "n_compliant_role": 374,
+      "n_compliant_role": 372,
       "n_reversed": 0,
       "n_role_violation": 0,
       "n_unconstrained": 0,
@@ -1506,16 +1506,16 @@
         "Tool"
       ],
       "n_total": 454,
-      "n_unjudgeable": 152,
-      "n_resolvable": 302,
+      "n_unjudgeable": 157,
+      "n_resolvable": 297,
       "n_compliant_directed": 0,
-      "n_compliant_role": 296,
+      "n_compliant_role": 291,
       "n_reversed": 0,
       "n_role_violation": 6,
       "n_unconstrained": 0,
       "direction_compliance": null,
       "direction_coverage": 0.0,
-      "role_compliance": 0.9801,
+      "role_compliance": 0.9798,
       "reversed_pairs": [],
       "role_violation_pairs": [
         [
@@ -1652,16 +1652,16 @@
         "Tool"
       ],
       "n_total": 280,
-      "n_unjudgeable": 84,
-      "n_resolvable": 196,
+      "n_unjudgeable": 92,
+      "n_resolvable": 188,
       "n_compliant_directed": 0,
-      "n_compliant_role": 195,
+      "n_compliant_role": 187,
       "n_reversed": 0,
       "n_role_violation": 1,
       "n_unconstrained": 0,
       "direction_compliance": null,
       "direction_coverage": 0.0,
-      "role_compliance": 0.9949,
+      "role_compliance": 0.9947,
       "reversed_pairs": [],
       "role_violation_pairs": [
         [
@@ -1720,16 +1720,91 @@
         "Tool"
       ],
       "n_total": 243,
-      "n_unjudgeable": 67,
-      "n_resolvable": 176,
+      "n_unjudgeable": 74,
+      "n_resolvable": 169,
       "n_compliant_directed": 0,
-      "n_compliant_role": 176,
+      "n_compliant_role": 168,
+      "n_reversed": 0,
+      "n_role_violation": 1,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 0.9941,
+      "reversed_pairs": [],
+      "role_violation_pairs": [
+        [
+          [
+            "Artifact",
+            "Material"
+          ],
+          1
+        ]
+      ],
+      "reversed_samples": [],
+      "role_violation_samples": [
+        {
+          "source": "Tables",
+          "source_type": "Artifact",
+          "target": "Raster Image",
+          "target_type": "Material",
+          "type": "CONTRADICTS",
+          "l5": 0.4898,
+          "description": "The survey table should be in markup format and not included as raster image."
+        }
+      ]
+    },
+    "PUBLISHED_IN": {
+      "kind": "directed",
+      "reversal": "judgeable",
+      "semantics": "source 是论文/作品，target 是它发表的会议、期刊或出版场所。这是「论文发表于会议」，**不是**「论文是会议的一部分」（那会写成 PART_OF），也**不是**「论文位于某地」（LOCATED_AT）。",
+      "basis": "ontology-extension",
+      "evidence": "本体扩展的动因实测：被误套为 PART_OF 745 条、LOCATED_AT 274 条、CREATED_BY 129 条（其中 target 命中 venue 判据）；venue 端点类型 Event 811 / Document 124，占 91.8%。**方向可判性有边界**：Document 类 venue（期刊/论文集）与论文同型，方向指纹判不了；只有 Event 类 venue（811 条，占 79.6%）可判。",
+      "source_core": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Material",
+        "Method",
+        "Metric",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_core": [
+        "Event"
+      ],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Material",
+        "Method",
+        "Metric",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Document",
+        "Event",
+        "Location",
+        "Organization"
+      ],
+      "n_total": 0,
+      "n_unjudgeable": 0,
+      "n_resolvable": 0,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 0,
       "n_reversed": 0,
       "n_role_violation": 0,
       "n_unconstrained": 0,
       "direction_compliance": null,
-      "direction_coverage": 0.0,
-      "role_compliance": 1.0,
+      "direction_coverage": null,
+      "role_compliance": null,
       "reversed_pairs": [],
       "role_violation_pairs": [],
       "reversed_samples": [],
@@ -1741,18 +1816,18 @@
     "prototype_resolvable": 6241,
     "prototype_compliant": 5819,
     "prototype_reversed": 120,
-    "match_resolvable": true,
-    "match_compliant": true,
-    "match_reversed": true,
-    "direction_only_compliance": 0.9798
+    "match_resolvable": false,
+    "match_compliant": false,
+    "match_reversed": false,
+    "direction_only_compliance": 0.9799
   },
   "total": {
-    "unconstrained": 7162,
-    "unjudgeable": 13753,
-    "compliant_role": 15392,
-    "compliant_directed": 6786,
-    "reversed": 156,
-    "role_violation": 381,
+    "unconstrained": 6933,
+    "unjudgeable": 14261,
+    "compliant_role": 15170,
+    "compliant_directed": 6737,
+    "reversed": 154,
+    "role_violation": 375,
     "out_of_ontology": 237
   }
 }
