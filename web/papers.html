@@ -77,6 +77,37 @@
   th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;
         vertical-align:top}
   th{color:var(--dim);font-weight:500;font-size:11.5px}
+  /* ══ 表格统一（2026-09-18）════════════════════════════════════════════
+   *
+   * **改之前的问题**（截图看到的）：
+   *   ① **列宽失衡** —— 「未成的」表里"状态"与"阶段"中间一大片空白；
+   *      「已入库」表的"上传过"列被推到很右。
+   *      ⇒ 根因：**四张表都没有 `colgroup` / `nowrap` / `table-layout`**，
+   *        浏览器纯按内容自动分配 ⇒ **短列的空白全被塞进中间**。
+   *   ② **行高不一致** —— 同一条 `th,td{padding:7px 8px}`，
+   *      但内容长短不同 ⇒ 有的单元格换行、有的不换 ⇒ **视觉上行高不同**。
+   *
+   * **改法**（**只动 CSS，不动 HTML 结构**）：
+   *   · **短列 `nowrap`** —— `gid` / `arXiv id` / 年 / 大小 / 时间**不该换行**；
+   *   · **长列限宽 + 省略号** —— 文件名 / 标题 / 原路径；
+   *   · **数字列右对齐 + 等宽数字** —— 大小 / 规模（**右对齐才比得出量级**）；
+   *   · **操作列固定宽** —— 否则"移入回收站"会被内容挤来挤去；
+   *   · **行高统一**：`nowrap` 让绝大多数行**都只有一行**，行高自然一致。
+   */
+  table{table-layout:auto}
+  td,th{line-height:1.55}
+  /* 短列：不换行 */
+  td.nowrap,th.nowrap{white-space:nowrap}
+  /* 长列：限宽 + 省略（`title` 属性里有全文） */
+  td.ellip{max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  td.ellip.wide{max-width:460px}
+  /* 数字列：右对齐 + 等宽数字（右对齐才比得出量级） */
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  /* 操作列：固定宽，别被内容挤 */
+  td.act,th.act{width:110px;text-align:right;white-space:nowrap}
+  /* 表格之间的间距统一（原来靠 `margin-top:6px`，而 `h2` 也有 margin ⇒ 不一致） */
+  h2 + .hint + table, h2 + table{margin-top:8px}
+
   code{color:var(--warn);font-size:12px}
   .pill{display:inline-block;border:1px solid var(--line);border-radius:5px;
         padding:0 6px;font-size:11px;color:var(--dim)}
@@ -189,38 +220,48 @@ function render() {
   // ── 上传的图 ──
   const ups = (REG.uploads) || [];
   $('#uploads').innerHTML = ups.length ? `<table><thead><tr>
-    <th>gid</th><th>文件名</th><th>arXiv id</th><th>规模</th><th>创建</th><th></th>
+    <th class="nowrap">gid</th><th>文件名</th><th class="nowrap">arXiv id</th>
+    <th class="num">规模</th><th class="nowrap">创建</th><th class="act"></th>
     </tr></thead><tbody>${ups.map(u => `<tr>
-      <td><code>${esc(u.gid)}</code></td>
-      <td>${esc(u.filename ?? '—')}</td>
-      <td>${u.arxiv_id ? `<code>${esc(u.arxiv_id)}</code>`
+      <td class="nowrap"><code>${esc(u.gid)}</code></td>
+      <td class="ellip wide" title="${esc(u.filename ?? '')}">${esc(u.filename ?? '—')}</td>
+      <td class="nowrap">${u.arxiv_id ? `<code>${esc(u.arxiv_id)}</code>`
           : '<span class="pill bad">连不上</span>'}</td>
-      <td>${u.nodes} 节点 / ${u.edges} 边</td>
-      <td>${esc(String(u.created_at ?? '').slice(0, 19))}</td>
-      <td><button class="danger" data-kind="upload" data-id="${esc(u.gid)}"
+      <td class="num">${u.nodes} 节点 / ${u.edges} 边</td>
+      <td class="nowrap">${esc(String(u.created_at ?? '').slice(0, 19))}</td>
+      <td class="act"><button class="danger" data-kind="upload" data-id="${esc(u.gid)}"
           data-label="${esc(u.filename ?? u.gid)}" ${CAN_WRITE ? '' : 'disabled'}
           >移入回收站</button></td></tr>`).join('')}</tbody></table>`
     : '<div class="empty">（没有上传的图）</div>';
 
   // ── 传过但没成的 ──
+  // ⚠️ 这一张是"列宽失衡"最明显的一张（"状态"与"阶段"中间一大片空白）——
+  //    原因不是间距，而是**没有 nowrap**：前两列换行后浏览器把余量全塞给了中间。
   const fl = (REG.upload_failures) || [];
   $('#failed').innerHTML = fl.length ? `<table><thead><tr>
-    <th>gid</th><th>文件名</th><th>状态</th><th>阶段</th></tr></thead><tbody>
-    ${fl.map(o => `<tr><td><code>${esc(o.gid)}</code></td>
-      <td>${esc(o.filename ?? '—')}</td>
-      <td><span class="pill bad">${esc(o.state ?? '')}</span></td>
-      <td>${esc(o.stage ?? '')}</td></tr>`).join('')}</tbody></table>`
+    <th class="nowrap">gid</th><th>文件名</th><th class="nowrap">状态</th>
+    <th class="nowrap">阶段</th></tr></thead><tbody>
+    ${fl.map(o => `<tr><td class="nowrap"><code>${esc(o.gid)}</code></td>
+      <td class="ellip wide" title="${esc(o.filename ?? '')}">${esc(o.filename ?? '—')}</td>
+      <td class="nowrap"><span class="pill bad">${esc(o.state ?? '')}</span></td>
+      <td class="nowrap">${esc(o.stage ?? '')}</td></tr>`).join('')}</tbody></table>`
     : '<div class="empty">（没有失败的）</div>';
 
   // ── 已入库（同一篇传过多次的标出来）──
+  // ⚠️ 原来"上传过"列被推到很右 —— 因为"标题"列**自己截断到 62 字**（JS 截的），
+  //    而 CSS 里没有限宽 ⇒ 浏览器仍按"这一列可能很长"分配 ⇒ 余量全给了它。
+  //    ⇒ 现在用 `ellip` 让 CSS 也参与限宽，并保留 `title` 给全文。
   const ing = (REG.papers || []).filter(p => p.in_graph);
-  $('#corpus').innerHTML = `<table><thead><tr><th>arXiv id</th><th>年</th>
-    <th>标题</th><th>上传过</th><th></th></tr></thead><tbody>${ing.map(p => {
+  $('#corpus').innerHTML = `<table><thead><tr><th class="nowrap">arXiv id</th>
+    <th class="nowrap">年</th><th>标题</th><th class="nowrap">上传过</th>
+    <th class="act"></th></tr></thead><tbody>${ing.map(p => {
       const n = (p.uploads || []).length;
-      return `<tr><td><code>${esc(p.arxiv_id)}</code></td>
-        <td>${esc(p.year ?? '')}</td><td>${esc((p.title || '').slice(0, 62))}</td>
-        <td>${n ? `<span class="pill up">${n} 次</span>` : '—'}</td>
-        <td><button class="danger" data-kind="corpus_graph"
+      const t = String(p.title || '');
+      return `<tr><td class="nowrap"><code>${esc(p.arxiv_id)}</code></td>
+        <td class="nowrap">${esc(p.year ?? '')}</td>
+        <td class="ellip wide" title="${esc(t)}">${esc(t)}</td>
+        <td class="nowrap">${n ? `<span class="pill up">${n} 次</span>` : '—'}</td>
+        <td class="act"><button class="danger" data-kind="corpus_graph"
             data-id="${esc(p.arxiv_id)}" data-label="${esc(p.arxiv_id)}"
             data-needconfirm="1" ${CAN_WRITE ? '' : 'disabled'}
             >移入回收站</button></td></tr>`;
@@ -228,13 +269,15 @@ function render() {
 
   // ── 回收站 ──
   $('#trash').innerHTML = TRASH.length ? `<table><thead><tr>
-    <th>目录名</th><th>原路径</th><th>大小</th><th>原因</th><th>时间</th><th></th>
+    <th class="nowrap">目录名</th><th>原路径</th><th class="num">大小</th>
+    <th>原因</th><th class="nowrap">时间</th><th class="act"></th>
     </tr></thead><tbody>${TRASH.map(t => `<tr>
-      <td><code>${esc(t.name)}</code></td><td>${esc(t.original ?? '—')}</td>
-      <td>${t.bytes ? (t.bytes / 1024).toFixed(0) + ' KB' : '—'}</td>
-      <td>${esc(t.why ?? '—')}</td>
-      <td>${esc(String(t.trashed_at ?? '').slice(0, 19))}</td>
-      <td><button data-restore="${esc(t.name)}" ${CAN_WRITE ? '' : 'disabled'}
+      <td class="nowrap"><code>${esc(t.name)}</code></td>
+      <td class="ellip" title="${esc(t.original ?? '')}">${esc(t.original ?? '—')}</td>
+      <td class="num">${t.bytes ? (t.bytes / 1024).toFixed(0) + ' KB' : '—'}</td>
+      <td class="ellip" title="${esc(t.why ?? '')}">${esc(t.why ?? '—')}</td>
+      <td class="nowrap">${esc(String(t.trashed_at ?? '').slice(0, 19))}</td>
+      <td class="act"><button data-restore="${esc(t.name)}" ${CAN_WRITE ? '' : 'disabled'}
           >恢复</button></td></tr>`).join('')}</tbody></table>`
     : '<div class="empty">（回收站是空的）</div>';
 
