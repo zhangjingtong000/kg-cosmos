@@ -57,11 +57,28 @@ h1 em{font-style:normal;
 
 /* 当前语境：问的是哪张图。做得显眼但不抢标题 ——
    用户必须一眼知道"这是我自己上传的那篇"还是"我没带图进来"。 */
-.ctx{margin:18px 0 0;padding:9px 14px;max-width:66ch;font-size:13px;line-height:1.6;
-  border-left:2px solid var(--accent);background:rgba(224,164,105,.06);
-  color:var(--ink-2);border-radius:0 7px 7px 0}
+/* ══ 把「左边竖线」换成系统规定的「顶部短横线」（2026-09-18）════════════════
+ *
+ * `design.css` 的注释里明确写着：`.note` 用**顶部短横线**、「**竖线已废弃**」。
+ * 而这三处（`.ctx` / `.more` / `.caveat`）各带一条 2px 的左边彩色竖线。
+ *
+ * **为什么竖线要废弃**：它是"**卡片化**"的残留 ——
+ * 一条竖线把内容框成"一块"，而这段内容其实只是**正文里的一个提示**。
+ * 顶部短横线表达的是"**下面这段是附属说明**"，**不制造容器感**。
+ *
+ * **改法照 `design.css` 的 `.note`**：
+ *   `::before{position:absolute;left:0;top:0;width:56px;height:2px;
+ *             background:var(--accent);opacity:.85}`
+ * ⚠️ 而 `.ctx` 原来还有 `background` + `border-radius`（**那更像卡片**）——
+ *    一并去掉：**它只是提示，不是卡片。**
+ * ⚠️ `.ctx.miss` 原本靠 `border-left-color` 变陶土色 ⇒ **改成 `::before` 的底色**。
+ */
+.ctx{margin:18px 0 0;padding:11px 0 0;max-width:66ch;font-size:13px;line-height:1.6;
+  position:relative;border:0;background:none;color:var(--ink-2)}
+.ctx::before{content:"";position:absolute;left:0;top:0;width:56px;height:2px;
+  background:var(--accent);opacity:.85}
 .ctx b{color:#fff;font-weight:600}
-.ctx.miss{border-left-color:var(--clay,#c07a4e);background:rgba(192,122,78,.08)}
+.ctx.miss::before{background:var(--clay,#c07a4e)}
 .ctx a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(224,164,105,.4)}
 
 /* ── Agent 工作台：让「多个 Agent 在分工」看得见 ─────────────────────
@@ -248,7 +265,10 @@ h1 em{font-style:normal;
 .qm{color:var(--ink-3)}
 .meta{margin:9px 0 0;font-size:11px;color:var(--ink-3);letter-spacing:.02em;
   word-break:break-all}
-.more{margin:0 0 18px;padding:0 0 0 15px;border-left:2px solid rgba(255,207,168,.46)}
+/* 同 `.ctx`：竖线 → 顶部短横线（见上面那段注释） */
+.more{margin:0 0 18px;padding:11px 0 0;position:relative;border:0}
+.more::before{content:"";position:absolute;left:0;top:0;width:56px;height:2px;
+  background:var(--warm);opacity:.6}
 .more .why{margin:0;font-size:12.5px;line-height:1.78;color:var(--ink-2)}
 .more .why b{color:var(--warm);font-weight:600}
 .more .out{margin:11px 0 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -268,7 +288,9 @@ h1 em{font-style:normal;
   color:var(--ink)}
 .verdict b{color:#fff;font-weight:600}
 .caveat{margin:14px 0 0;max-width:84ch;font-size:13px;line-height:1.82;
-  color:var(--ink-2);padding-left:15px;border-left:2px solid var(--line)}
+  color:var(--ink-2);padding:11px 0 0;position:relative;border:0}
+.caveat::before{content:"";position:absolute;left:0;top:0;width:56px;height:2px;
+  background:var(--ink-3);opacity:.5}
 .caveat b{color:var(--ink);font-weight:600}
 
 /* ── 页脚 ──────────────────────────────────────────────────────────────── */
