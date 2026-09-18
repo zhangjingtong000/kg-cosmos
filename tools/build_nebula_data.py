@@ -80,9 +80,24 @@ def parse_args():
     # 而此前从 Neo4j 导出的是 **31308 条**（治理后）。
     # 所以两种来源产出的概览**规模会不同**，不能混着引用
     # （本项目已经吃过多次"一个名字两个口径"的亏，见 docs/METRIC_CALIBERS.md）。
-    ap.add_argument("--from-json", action="store_true",
-                    help="从 data/corpus/graphs/*.json 汇总读（不依赖 Neo4j；"
-                         "口径是治理前全量 43867 条，而非 Neo4j 的 31308 条）")
+    # ⚠️⚠️ **默认改成 `--from-json`**（2026-09-18）。
+    #
+    # **原来这里是 `action="store_true"`（默认 False）⇒ 走 Neo4j 分支** ——
+    # 而 **Neo4j 早就没在跑了**（实测 7687/7474 均无监听）。
+    #
+    # 后果很具体：`verify_all` 的**数据新鲜度**检查里，
+    #   `web/kg-data/nebula.json ← 重建: python tools/build_nebula_data.py`
+    # **那条命令从来就跑不通** ⇒ 那个红一直挂着，而 `--fix` 也修不掉。
+    #
+    # ⇒ 现在反过来：**默认走"不需要 Neo4j"的那条路**，
+    #   要 Neo4j 得显式加 `--from-neo4j`。
+    # **这与 `tools/ingest_corpus.py` 的修法是同一个原则**：
+    #   **默认值必须是"在当前环境里真能跑通"的那个** ——
+    #   否则默认值就是一条注定失败的路径，而它看起来像"环境问题"。
+    ap.add_argument("--from-json", action="store_true", default=True,
+                    help="（**默认**）从 data/corpus/graphs/*.json 汇总读，不依赖 Neo4j")
+    ap.add_argument("--from-neo4j", dest="from_json", action="store_false",
+                    help="走 Neo4j（**需要 7687 在跑**；本机早已没有它）")
     # ── 2026-09-15 加：把「治理前」还原成「治理后」 ──────────────────────
     #
     # **为什么需要**：`--from-json` 读的是**治理前全量**（19427 节点 / 43867 边），

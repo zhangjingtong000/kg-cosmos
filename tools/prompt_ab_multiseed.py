@@ -83,51 +83,63 @@ NEW_ONE_SHOT = {'entity_f1': 0.3471, 'relation_f1': 0.0178, 'fragments': 10,
 
 
 def env_for(seed):
-    """抽取的环境。
+    """抽取的环境 —— **接到项目自己的两个真开关上**（2026-09-18 查明）。
 
-    ⚠️⚠️ **警告：这里设的三个变量，目前没有任何代码读它们。**（2026-09-18 实测）
+    ## ★★ 真正的 A/B 是两个环境变量，不是我原来造的那些
+
+    上一版这里设了 `KG_PROMPT_VARIANT` / `KG_SEED` / `OLLAMA_SEED` ——
+    **全仓库没有任何代码读它们**（grep 验证：三个名字各只出现 1 次，都在本文件里）。
+    ⇒ **六次跑的是同一个配置**（详见 `docs/B5_PROMPT_AB_MULTISEED.md §〇`）。
+
+    追下去找到了**项目真正的开关**：
 
     ```
-    grep 全仓库：KG_PROMPT_VARIANT / KG_SEED / OLLAMA_SEED 各出现 1 次 ——
-                 都在本文件里（**写**），**没有一处**读**。
+    src/kg_extractor.py:598   KG_BARE_RELATION_TYPES   —— 关系类型清单给"裸名"还是"带语义定义"
+    src/pipeline.py:91        KG_EXTRACT_STYLE         —— "split"（默认）还是 "combined"
     ```
 
-    ⇒ 所以上一次跑出来的六份产物，**用的是同一个 prompt** ——
-      **"旧 vs 新"的对比根本没有发生**（详见 `docs/B5_PROMPT_AB_MULTISEED.md §〇`）。
+    **⚠️ 而它们必须**一起**设**：
+    `KG_BARE_RELATION_TYPES` **只在 `combined` 那条路上起作用** ——
+    默认的 `split` 走 `extract_chunk`，用的是 `LOCAL_ENTITY_PROMPT` / `LOCAL_RELATION_PROMPT`，
+    **根本不读 `COMBINED_PREFIX`**。
+    ⇒ **只设前者等于没设。**（这正是 `git show 4426ab6` 里"默认关闭，可回退"的含义。）
 
-    **⇒ 那个 bug 意外产出了一个更硬的结论**（同一配置重复六次，F1 极差 4.08pp），
-      但**不能就这么留着** —— 见下面 `assert_variant_wired()`：
-      **设了变量就要验证它真被读到，否则那是一次"看起来做了 A、实际做了 B"的运行。**
-
-    **要真跑 A/B，先做这件事**：在 `src/kg_extractor.py` 里加一个分支
-    （它已经有 `ENTITY_PROMPT` / `ENTITY_PROMPT_V2` / `ENTITY_PROMPT_V3` 三份现成的），
-    读 `KG_PROMPT_VARIANT` 并把选中的那份打印出来。
+    | 变体 | `KG_EXTRACT_STYLE` | `KG_BARE_RELATION_TYPES` |
+    |---|---|---|
+    | `old`（**旧：裸类型名**） | `combined` | **`1`** |
+    | `new`（**新：带语义定义**） | `combined` | **`0`** |
     """
     e = dict(os.environ)
-    e['KG_PROMPT_VARIANT'] = 'new' if seed.get('variant') == 'new' else 'old'
-    e['KG_SEED'] = str(seed.get('seed', 0))
+    e['KG_EXTRACT_STYLE'] = 'combined'          # ⚠️ **必须**，否则下面那个不生效
+    e['KG_BARE_RELATION_TYPES'] = '1' if seed.get('variant') == 'old' else '0'
+    # 采样 seed：Ollama 是否支持取决于版本（**不支持时会被忽略，方差仍可测**）
     e['OLLAMA_SEED'] = str(seed.get('seed', 0))
     return e
 
 
 def variant_is_wired():
-    """`KG_PROMPT_VARIANT` **真的**被读到了吗？
+    """**两个真开关**是否都被源码读到？
 
-    **判据是"源码里有没有读它的地方"**，不是"变量设没设成功" ——
-    **后者一定会成功，而那正是上一次踩的坑。**
+    ⚠️ 判据是"**源码里有没有读它的地方**"，不是"变量设没设成功" ——
+    **后者一定会成功，而那正是上一次白跑 3 小时的坑。**
+    而且**两个都要**：只读 `KG_BARE_RELATION_TYPES` 而没设 `KG_EXTRACT_STYLE`
+    的话它等于没设（见 `env_for` 的 docstring）。
     """
     src = ROOT / 'src'
-    for f in list(src.glob('*.py')) + [Path(__file__)]:
-        if f.resolve() == Path(__file__).resolve():
-            continue                       # **自己的写入不算"被读到"**
+    need = {'KG_EXTRACT_STYLE': False, 'KG_BARE_RELATION_TYPES': False}
+    where = {}
+    for f in src.glob('*.py'):
         try:
             t = f.read_text(encoding='utf-8', errors='replace')
         except OSError:
             continue
-        if re.search(r'os\.environ(?:\.get)?\s*[\(\[]\s*[\'"]KG_PROMPT_VARIANT', t) \
-           or re.search(r'getenv\s*\(\s*[\'"]KG_PROMPT_VARIANT', t):
-            return True, str(f.relative_to(ROOT))
-    return False, None
+        for k in need:
+            if re.search(r'os\.environ(?:\.get)?\s*[\(\[]\s*[\'"]' + k, t) \
+               or re.search(r'getenv\s*\(\s*[\'"]' + k, t):
+                need[k] = True
+                where[k] = str(f.relative_to(ROOT))
+    missing = [k for k, v in need.items() if not v]
+    return (not missing), missing, where
 
 
 def main():
@@ -189,24 +201,25 @@ def main():
     # ★★ **跑之前先验"变体真的生效"**（2026-09-18 加）。
     #   上一次跑完六次（3 小时）之后才发现"没人读那个变量" ⇒ **白跑**。
     #   ⇒ 把这个检查放在**开始之前**，而且**它失败就拒绝往下走**。
-    wired, where = variant_is_wired()
+    wired, missing, where = variant_is_wired()
     if not wired and len(variants) > 1 and not a.same_prompt:
         print()
-        print('  ❌ **`KG_PROMPT_VARIANT` 没有任何代码读它** ⇒ 拒绝运行。')
+        print(f'  ❌ **真开关没接通**：源码里没读到 {missing} ⇒ 拒绝运行。')
         print('     为什么：那意味着**这几个变体会跑出同一份结果** ——')
         print('     而输出上完全看不出来（上一次就是这样白跑了 3 小时）。')
         print()
-        print('     先做这一步：在 `src/kg_extractor.py` 里加分支，读 `KG_PROMPT_VARIANT`；')
-        print('     （它已经有 `ENTITY_PROMPT` / `ENTITY_PROMPT_V2` / `ENTITY_PROMPT_V3` 三份现成的）')
-        print('     并在抽第一份之前**打印所选 prompt 的前 40 字符** —— 那才是"生效"的证据。')
+        print('     真开关是（见 env_for 的 docstring）：')
+        print('       src/kg_extractor.py:598  KG_BARE_RELATION_TYPES')
+        print('       src/pipeline.py:91       KG_EXTRACT_STYLE')
+        print('     ⚠️ **两个必须一起设** —— 只设前者在默认的 split 路上不起作用。')
         print()
         print('     若你只是想测**采样方差**（不换 prompt），加 `--same-prompt` ——')
         print('     那仍然有意义：本项已有的结论正来自这种跑法。')
         return 2
     if wired:
-        print(f'  ✅ `KG_PROMPT_VARIANT` 已被 {where} 读取')
+        print('  ✅ 真开关已接通：' + ' · '.join(f'{k}（{v}）' for k, v in where.items()))
     else:
-        print('  ⚠️ **`KG_PROMPT_VARIANT` 无人读** —— 但只有 1 个变体 ⇒ 那是"测采样方差"，允许')
+        print(f'  ⚠️ **真开关缺 {missing}** —— 但只有 1 个变体 ⇒ 那是"测采样方差"，允许')
     # ★ `--resume`：把已有产物的那几次标掉（**在半截文件上必须重跑**）
     if a.resume:
         kept = []
