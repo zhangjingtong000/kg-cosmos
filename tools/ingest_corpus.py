@@ -139,6 +139,25 @@ def main() -> None:
          "started": time.strftime("%Y-%m-%d %H:%M:%S")},
         ensure_ascii=False), encoding="utf-8")
 
+    # ⚠️ **跑完要自己清锁**（2026-09-18 修）。
+    #   第一版**只写不清** —— 于是 B5 六次跑完之后锁还留着，
+    #   下次启动只能靠"pid 已死"那条兜底判定才能放行。
+    #   **那能work，但是错的**：锁文件一直留着一个陈旧状态，
+    #   而"靠 pid 探测兜底"不该成为**正常路径**（它只该处理 `SIGKILL` 那种清不掉的情况）。
+    #   ⇒ 用 `atexit`：**正常结束与异常退出都清**。
+    import atexit
+
+    def _release_lock():
+        try:
+            if LOCK.exists():
+                info = json.loads(LOCK.read_text(encoding="utf-8"))
+                if int(info.get("pid") or 0) == os.getpid():
+                    LOCK.unlink()
+        except Exception:
+            pass
+
+    atexit.register(_release_lock)
+
     pdfs = sorted(CORPUS.glob("*.pdf"))
     if ONLY:
         pdfs = [p for p in pdfs if p.stem in ONLY]

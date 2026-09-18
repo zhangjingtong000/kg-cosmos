@@ -60,6 +60,7 @@ r"""B5 · **prompt A/B 多 seed** —— 把「−4.5pp」拆成"真效应"与"s
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -82,13 +83,51 @@ NEW_ONE_SHOT = {'entity_f1': 0.3471, 'relation_f1': 0.0178, 'fragments': 10,
 
 
 def env_for(seed):
-    """抽取的环境：**显式传 seed 与 prompt 版本**。"""
+    """抽取的环境。
+
+    ⚠️⚠️ **警告：这里设的三个变量，目前没有任何代码读它们。**（2026-09-18 实测）
+
+    ```
+    grep 全仓库：KG_PROMPT_VARIANT / KG_SEED / OLLAMA_SEED 各出现 1 次 ——
+                 都在本文件里（**写**），**没有一处**读**。
+    ```
+
+    ⇒ 所以上一次跑出来的六份产物，**用的是同一个 prompt** ——
+      **"旧 vs 新"的对比根本没有发生**（详见 `docs/B5_PROMPT_AB_MULTISEED.md §〇`）。
+
+    **⇒ 那个 bug 意外产出了一个更硬的结论**（同一配置重复六次，F1 极差 4.08pp），
+      但**不能就这么留着** —— 见下面 `assert_variant_wired()`：
+      **设了变量就要验证它真被读到，否则那是一次"看起来做了 A、实际做了 B"的运行。**
+
+    **要真跑 A/B，先做这件事**：在 `src/kg_extractor.py` 里加一个分支
+    （它已经有 `ENTITY_PROMPT` / `ENTITY_PROMPT_V2` / `ENTITY_PROMPT_V3` 三份现成的），
+    读 `KG_PROMPT_VARIANT` 并把选中的那份打印出来。
+    """
     e = dict(os.environ)
     e['KG_PROMPT_VARIANT'] = 'new' if seed.get('variant') == 'new' else 'old'
     e['KG_SEED'] = str(seed.get('seed', 0))
-    # 让 Ollama 的采样也换种子（**若版本不支持，会被忽略 —— 见 docstring 的边界**）
     e['OLLAMA_SEED'] = str(seed.get('seed', 0))
     return e
+
+
+def variant_is_wired():
+    """`KG_PROMPT_VARIANT` **真的**被读到了吗？
+
+    **判据是"源码里有没有读它的地方"**，不是"变量设没设成功" ——
+    **后者一定会成功，而那正是上一次踩的坑。**
+    """
+    src = ROOT / 'src'
+    for f in list(src.glob('*.py')) + [Path(__file__)]:
+        if f.resolve() == Path(__file__).resolve():
+            continue                       # **自己的写入不算"被读到"**
+        try:
+            t = f.read_text(encoding='utf-8', errors='replace')
+        except OSError:
+            continue
+        if re.search(r'os\.environ(?:\.get)?\s*[\(\[]\s*[\'"]KG_PROMPT_VARIANT', t) \
+           or re.search(r'getenv\s*\(\s*[\'"]KG_PROMPT_VARIANT', t):
+            return True, str(f.relative_to(ROOT))
+    return False, None
 
 
 def main():
@@ -102,6 +141,11 @@ def main():
     #   没有这个开关就只能**从头再来**（白烧 36 分钟/次 的 GPU 时间）。
     #   ⚠️ 判定是"`<tag>.json` 存在**且非空**" —— **不是"跑过就算"**
     #      （若上一次中途被杀，可能留下半截文件；那种情况必须重跑）。
+    # --same-prompt：**只测采样方差**（不换 prompt）。
+    #   本项已有的结论（同一配置重复六次 F1 极差 4.08pp）正来自这种跑法 ——
+    #   它**不需要** `KG_PROMPT_VARIANT` 生效。
+    ap.add_argument('--same-prompt', action='store_true',
+                    help='只测采样方差（不换 prompt，不检查变体是否接通）')
     ap.add_argument('--resume', action='store_true',
                     help='跳过已有产物的那几次（按 <tag>.json 是否存在且非空判定）')
     a = ap.parse_args()
@@ -142,6 +186,27 @@ def main():
         return 1
     print()
     print(f'  计划：{len(variants)} 个 prompt × {a.seeds} 个 seed = **{len(runs)} 次抽取**')
+    # ★★ **跑之前先验"变体真的生效"**（2026-09-18 加）。
+    #   上一次跑完六次（3 小时）之后才发现"没人读那个变量" ⇒ **白跑**。
+    #   ⇒ 把这个检查放在**开始之前**，而且**它失败就拒绝往下走**。
+    wired, where = variant_is_wired()
+    if not wired and len(variants) > 1 and not a.same_prompt:
+        print()
+        print('  ❌ **`KG_PROMPT_VARIANT` 没有任何代码读它** ⇒ 拒绝运行。')
+        print('     为什么：那意味着**这几个变体会跑出同一份结果** ——')
+        print('     而输出上完全看不出来（上一次就是这样白跑了 3 小时）。')
+        print()
+        print('     先做这一步：在 `src/kg_extractor.py` 里加分支，读 `KG_PROMPT_VARIANT`；')
+        print('     （它已经有 `ENTITY_PROMPT` / `ENTITY_PROMPT_V2` / `ENTITY_PROMPT_V3` 三份现成的）')
+        print('     并在抽第一份之前**打印所选 prompt 的前 40 字符** —— 那才是"生效"的证据。')
+        print()
+        print('     若你只是想测**采样方差**（不换 prompt），加 `--same-prompt` ——')
+        print('     那仍然有意义：本项已有的结论正来自这种跑法。')
+        return 2
+    if wired:
+        print(f'  ✅ `KG_PROMPT_VARIANT` 已被 {where} 读取')
+    else:
+        print('  ⚠️ **`KG_PROMPT_VARIANT` 无人读** —— 但只有 1 个变体 ⇒ 那是"测采样方差"，允许')
     # ★ `--resume`：把已有产物的那几次标掉（**在半截文件上必须重跑**）
     if a.resume:
         kept = []
