@@ -268,15 +268,22 @@ def main():
     #   `ingest_corpus.py` 的 `is_usable_snapshot` 认为"已有非空图 ⇒ 已完成"，
     #   于是六次全部打出 `[1/1] skip (done)` —— **一次都没真抽**，
     #   而 rc=0、看起来"成功"。**那是最容易被误读成"跑通了"的假象。**
-    #   ⇒ 本脚本在每次抽取前把该篇的图**归档移走**（**按 `ARCHIVE_POLICY`：不删，留档**），
-    #     抽完再恢复 —— 而每次的产物另存为 `<tag>.json` 供后续算 F1。
+    #   ⚠️ **修法在 `fresh_extract` 里，不在这一段** ——
+    #     现在用的是 `KG_FORCE=1`（**强制重抽，但原图一直在**），
+    #     **不是"把原图移走"**。
+    #
+    #     ⚠️⚠️ **而下面这句打印曾经没跟着改**（2026-09-18 修）：
+    #     它写着"**归档到 `_before.json` 并移走**"，而实际行为早就是"**只归档、不移走**"。
+    #     ⇒ **日志文字与现实不符** —— 本项目的第 N 次，而这次只误导了几分钟。
+    #     **⇒ 教训：改了行为要顺手改每一句描述它的输出**，
+    #       否则下一个人（或下一轮的我）会照着**日志**去理解代码。
     archived = None
     if snapshot.exists():
         archived = RUNS / '_before.json'
         if not archived.exists():
             archived.write_bytes(snapshot.read_bytes())
-        print(f'  已有图 {snapshot.name} ⇒ **归档到 {archived.name} 并移走**'
-              f'（否则 ingest 会 skip）')
+        print(f'  已有图 {snapshot.name} ⇒ **归档到 {archived.name}**'
+              f'（原图**保留**；抽取走 `KG_FORCE=1`，不会 skip）')
 
     def fresh_extract(tag, env):
         """**强制重抽**（`KG_FORCE=1`）→ 把产物另存为 `<tag>.json`。
