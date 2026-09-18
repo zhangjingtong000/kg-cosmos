@@ -25,9 +25,40 @@
   **而这一页必须把这件事说清楚，否则用户不敢点、或者以为真删了。**
   ⇒ 按钮文案是「移入回收站」，并且**必须填原因**（后端会拒空的 why）。
 -->
+<link rel="stylesheet" href="./lib/design.css">
 <style>
-  :root{--bg:#0b0d12;--fg:#dfe2e8;--dim:#8b95a8;--line:rgba(193,195,201,.18);
-        --hot:#e0a469;--cool:#7cc0b6;--warn:#e8c9a4;--bad:#e07575}
+  /* ══ 接入设计系统（2026-09-18）═════════════════════════════════════════
+   *
+   * **改之前**：这一页（以及 paper-table / prisma / stance）**没引 `design.css`**，
+   * 而是把样式写在 inline `<style>` 里 —— 而那份样式是**从 `analytics.html` 复制来的**。
+   * ⇒ 于是它自带一套 `:root`，**把系统的 token 全换成了自己的**：
+   *
+   *     本页原来              设计系统的真值
+   *     --bg   #0b0d12   →   --bg  **#02040a**
+   *                          （#0b0d12 其实是系统的 `--surface #0b0e16` —— **把 surface 当 bg 用了**）
+   *     --fg   #dfe2e8   →   --ink **#eef3fd**
+   *     --dim  #8b95a8   →   --ink-3 rgba(193,195,201,.46)
+   *     --line rgba(193,195,201,.18) → --line rgba(178,180,186,.13)
+   *     --warn #e8c9a4   →   --warm **#ffcfa8**
+   *     --bad  #e07575   →   系统里没有"红" ⇒ 用 --clay-2
+   *
+   * ⇒ **结果是它比 index/ask 亮一档** —— 一眼就能看出"不是同一个站点"。
+   *
+   * **改法**：引 `design.css`，然后**只加一层别名映射** ——
+   * 把本页原来的私有名指向系统的 token，**页面自己的 CSS 一行都不用改**。
+   *
+   * ⚠️ **注意方向**：是"**私有名 → 系统值**"，**不是反过来** ——
+   * 后者会把系统覆盖掉。（`analytics.html` 就是这么做的：它虽然引了
+   * `design.css`，却又定义了一套自己的 `--bg`，所以仍然是野生色。）
+   */
+  :root{
+    --fg: var(--ink);
+    --dim: var(--ink-3);
+    --hot: var(--accent);
+    --cool: var(--cyan);
+    --warn: var(--warm);
+    --bad: var(--clay-2);      /* 系统里没有"红"，用暖陶土色 —— 与整站同族 */
+  }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);
        font:14px/1.65 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}

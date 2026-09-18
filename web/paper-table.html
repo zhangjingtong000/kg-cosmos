@@ -27,9 +27,44 @@
   3. **用的是哪一份图要写明** —— 默认读 A8 **改写后**的那份
      （因为 `PUBLISHED_IN` 只在它里面），而它与原图**只差 1019 条边的 type**。
 -->
+<link rel="stylesheet" href="./lib/design.css">
 <style>
-  :root{--bg:#0b0d12;--fg:#dfe2e8;--dim:#8b95a8;--line:rgba(193,195,201,.18);
-        --hot:#e0a469;--cool:#7cc0b6;--warn:#e8c9a4}
+  /* ══ 接入设计系统（2026-09-18）═════════════════════════════════════════
+   *
+   * **改之前**：这一页**没引 `design.css`**，样式写在 inline `<style>` 里 ——
+   * 而那份样式是**从 `analytics.html` 复制来的** ⇒ 它自带一套 `:root`，
+   * **把系统的 token 全换成了自己的**：
+   *
+   *     本页原来              设计系统的真值
+   *     --bg   #0b0d12   →   --bg  **#02040a**
+   *                          （#0b0d12 其实是系统的 `--surface #0b0e16` —— 把 surface 当 bg 用了）
+   *     --fg   #dfe2e8   →   --ink **#eef3fd**
+   *     --dim  #8b95a8   →   --ink-3 rgba(193,195,201,.46)
+   *     --line rgba(193,195,201,.18) → --line rgba(178,180,186,.13)
+   *     --warn #e8c9a4   →   --warm **#ffcfa8**
+   *     --bad  #e07575   →   系统里没有"红" ⇒ 用 --clay-2
+   *
+   * ⇒ **结果是它比 index/ask 亮一档** —— 一眼就能看出"不是同一个站点"。
+   *
+   * **改法**：引 `design.css`，然后**只加一层别名映射** ——
+   * 把本页的私有名指向系统的 token，**页面自己的 CSS 一行都不用改**。
+   *
+   * ⚠️ **方向不能反**：是"私有名 → 系统值"。
+   * `analytics.html` 是反面教材 —— 它**引了** `design.css`，却又定义了一套
+   * 自己的 `--bg`，**把系统覆盖掉**，所以看起来仍然是野生色。
+   */
+  :root{
+    --fg: var(--ink);
+    --dim: var(--ink-3);
+    --hot: var(--accent);      /* stance.html 没有这个名，多余一行也无害 */
+    --cool: var(--cyan);
+    --warn: var(--warm);
+    --bad: var(--clay-2);
+    --yes: var(--cyan);
+    --no: var(--clay-2);
+    --mixed: var(--accent);
+    --poss: var(--ink-3);
+  }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
   body{background:var(--bg);color:var(--fg);
