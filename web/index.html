@@ -20,14 +20,31 @@ h1, h2, h3,
    放在 lead 之后、CTA 之前。用左侧一道暖色发丝线，与页面既有的
    「引用块」语言一致（不引入新的视觉词汇）；字号比 lead 略小，
    避免与主描述抢层级。 */
+/* ⚠️ 原来是 `padding-left:14px` + `border-left:2px solid var(--accent)` ——
+   一条**左边彩色竖线**。而 `lib/design.css` 的注释明确写着 `.note` 用
+   **顶部短横线**、「**竖线已废弃**」。
+   ⇒ 改成与 `.note` 一致：`::before` 画一条 **56×2px** 的金色短横线。
+   **为什么不只是换个样式**：竖线把这段框成"一块"（**卡片感**），
+   而它其实只是**副标题下面的一行说明** —— 顶部短横线表达的正是"下面是附属说明"。 */
 .edge {
   margin: 18px 0 0;
   max-width: 62ch;
-  padding-left: 14px;
-  border-left: 2px solid var(--accent, #e0a469);
+  padding: 11px 0 0;
+  position: relative;
+  border: 0;
   font-size: 13.5px;
   line-height: 1.75;
   color: var(--ink-2, rgba(203,218,241,.76));
+}
+.edge::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 56px;
+  height: 2px;
+  background: var(--accent, #e0a469);
+  opacity: .85;
 }
 /* 标题在衬线下不需要那么粗——衬线本身已经提供笔画对比 */
 h1, h2 { font-weight: 700; letter-spacing: -.02em; }

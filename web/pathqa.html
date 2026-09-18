@@ -182,8 +182,18 @@ h3 { font-weight: 600; }
   --pq-warm-deep:#c9873f;
   --pq-cyan:#7cc0b6;        /* 正面结论 */
 }
-/* 命中实体的行：左侧一道暖色，与"未命中"的灰明确区分 */
-#seeds .nm{ border-left:2px solid rgba(224,164,105,.55); padding-left:8px; }
+/* 命中实体的行：左侧一道暖色，与"未命中"的灰明确区分。
+   ⚠️ 原来写的是 `border-left:2px solid rgba(224,164,105,.55)` ——
+   那是**2px 的左边强调竖线**，而 `lib/design.css` 的注释写着「**竖线已废弃**」。
+   **⚠️ 但这一条与 `ask` 那几处不同**：它**有明确用途**（**区分"命中"与"未命中"**），
+   不是装饰 ⇒ 不能简单删掉。
+   ⇒ 改成**色标**（`::before` 一个 3×18px 的暖色小条）：
+     **位置在行首、高度只到一行的一半** —— 读起来是"这一行有状态"，
+     而不是"这一段被框住了"。**色标是标记，竖线是容器。** */
+#seeds .nm{ position:relative; padding-left:11px; border:0; }
+#seeds .nm::before{ content:""; position:absolute; left:0; top:3px;
+                    width:3px; height:15px; border-radius:2px;
+                    background:rgba(224,164,105,.65); }
 /* 子图统计里的数字用青，和灰色标签拉开 */
 #stats b,#stats strong{ color:var(--pq-cyan); }
   .fbnote{margin:0 0 10px;padding:9px 11px;border-radius:8px;font-size:12px;

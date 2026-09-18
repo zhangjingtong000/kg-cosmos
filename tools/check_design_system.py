@@ -74,11 +74,11 @@ def strip_comments(text):
 
 def main():
     print('=' * 88)
-    print('同一个 CSS 文件不许被同一个页面引两次')
+    print('设计系统守门：**重复引用** + **左边强调竖线**')
     print('=' * 88)
-    print('  （这份守门**只查这一条** —— 它误报过四次，\n'
-          '   原因与每一次的实测都写在 docstring 里。\n'
-          '   配色一致性**靠看，不靠 grep** —— 用 tools/ui_review_shots.py）')
+    print('  （配色一致性**靠看，不靠 grep** —— 用 tools/ui_review_shots.py。\n'
+          '   这份守门只查两条**客观、可判定**的；它误报过四次，'
+          '原因写在 docstring 里。）')
     print()
     dup = []
     for p in sorted(WEB.glob('*.html')):
@@ -88,15 +88,46 @@ def main():
             if hrefs.count(h) > 1:
                 dup.append((p.name, h, hrefs.count(h)))
     if not dup:
-        print('  \u2705 \u6ca1\u6709\u91cd\u590d\u5f15\u7528')
+        print('  ① 重复引用 CSS：✅ 无')
     for nm, h, n in dup:
-        print(f'  \u274c {nm}\uff1a{h} \u5f15\u4e86 {n} \u6b21\uff08**\u91cd\u590d\u52a0\u8f7d**\uff09')
+        print(f'  ① 重复引用 CSS：❌ {nm}：{h} 引了 {n} 次（**重复加载**）')
     print()
+
+    # ── ② 左边强调竖线（`design.css` 注释：「竖线已废弃」）────────────
+    #
+    # **为什么这条可以进守门**（而"配色一致性"不能）：
+    #   `lib/design.css` 自己的注释写着 `.note` 用**顶部短横线**、「**竖线已废弃**」
+    #   ⇒ 那是**本项目写下来的规矩**，不是我猜的风格偏好。
+    #
+    # **判据**：`border-left` 用 **≥2px** 的实线。
+    #   ⚠️ **1px 不算** —— 那是**分隔线**（`design.css` 自己也用 `border-bottom:1px`）。
+    #   ⚠️ **注释不算** —— 我改这些地方时会在注释里引用原来那行，
+    #      把注释算进来会把**好文档判成坏代码**（这个坑踩过）。
+    #   ⚠️ **色标不算** —— `pathqa` 那种 `::before` 的 3×15px 小条是**状态标记**，
+    #      不是"把内容框成一块"的竖线。
+    stripes = []
+    for p in sorted(WEB.glob('*.html')):
+        live = strip_comments(p.read_text(encoding='utf-8', errors='replace'))
+        for m in re.finditer(r'border-left\s*:\s*([2-9]|\d\d+)px', live):
+            ln = live[:m.start()].count('\n') + 1
+            stripes.append((p.name, ln, m.group(0)))
+    if not stripes:
+        print('  ② 左边强调竖线（≥2px）：✅ 无')
+    for nm, ln, frag in stripes:
+        print(f'  ② 左边强调竖线：❌ {nm}:{ln}  `{frag}`')
+    if stripes:
+        print('      修法：照 `lib/design.css` 的 `.note` 用**顶部短横线** ——')
+        print('            `::before{position:absolute;left:0;top:0;'
+              'width:56px;height:2px;background:var(--accent)}`')
+        print('            （**1px 的分隔线不受影响**；**色标用 `::before` 小条**也不受影响）')
+    print()
+
     print('=' * 88)
-    if dup:
-        print(f'\u274c {len(dup)} \u9879\u672a\u901a\u8fc7')
+    bad = len(dup) + len(stripes)
+    if bad:
+        print(f'❌ {bad} 项未通过')
         return 1
-    print('\u2705 \u901a\u8fc7')
+    print('✅ 两条全过')
     return 0
 
 
