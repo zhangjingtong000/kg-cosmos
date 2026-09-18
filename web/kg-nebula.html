@@ -333,8 +333,30 @@
 <style>
 /* ==DESIGN_SYS== */
 /* 让各页既有内容浮在光场之上。这样不必给它们逐个包一层容器 ——
-   analytics 981 行、kg-nebula 2214 行，能不动就不动。 */
-body > *:not(#atmo):not(#veil){position:relative;z-index:1}
+   analytics 981 行、kg-nebula 2214 行，能不动就不动。
+
+   ⚠️⚠️ **2026-09-18 修：原写法把本页 17 个 `position: fixed` 浮层全部打回了
+   文档流**（用户看到的是"星云页整个乱掉"）。原写法是：
+
+       body > *:not(#atmo):not(#veil){position:relative;z-index:1}
+       —— 特异性 (0,2,0,0)：`*` 是 0，但两个 `:not(#…)` 各带 1 个 **ID**
+
+   而本页每个浮层都是**单 ID** 选择器（`#pdfPane` = (0,1,0,0)、`#side`、
+   `#legend`、`#detail`、`#kgExport`、`#inner`、`#back`…）。
+   **(0,2,0,0) > (0,1,0,0)** ⇒ 这条"内容抬升"规则**压倒了所有浮层的
+   `position: fixed`**，把它们变成 `position: relative`：
+   `right/bottom` 失效、宽度由内容决定 ⇒ 本该滑出屏幕右侧的 PDF 预览面板
+   （`translateX(101%)`）反向出现在了**视口中间**，标题、图例、实体列表全部错位。
+
+   **修法是给 `:not()` 套 `:where()`**：`:where()` 的**特异性恒为 0**，
+   整个选择器降到 **(0,0,0,1)** —— 它仍然能当"没定位的元素"的兜底
+   （`z-index` 需要定位元素才生效，这个意图保住了），
+   但**再也赢不过任何一个 ID/类选择器**，浮层各归各位。
+   一改同时修好 5 个页面（同一条规则被复制到 analytics / method-limits /
+   l5-review / pathqa；那 4 页 `position:fixed` 出现 0 次，所以没暴露）。
+
+   取证方式与完整现场见 `docs/UI_FIXED_POSITION_ROOT_CAUSE.md`。 */
+body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
 /* 光场与遮罩必须在最底 */
 #atmo{z-index:0}
 #veil{z-index:0;pointer-events:none}

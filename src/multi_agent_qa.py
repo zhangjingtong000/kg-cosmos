@@ -51,6 +51,109 @@ def _norm(s):
     return re.sub(r'[^a-z0-9\u4e00-\u9fff]+', '', str(s or '').lower())
 
 
+# ── 跨语言种子桥接（2026-09-18）─────────────────────────────────────────
+#
+# ## 为什么必须补这一层
+#
+# `retrieve()` 的种子是**字面词级匹配**：问题里的词去和**实体名/描述**比。
+# 而本项目的图谱是从**英文论文**抽的 —— 实测 `data/3e38f803/graph.json`
+# 的 1045 个实体名里**含中文的有 0 个**（作者名、术语、机构名全是英文）。
+#
+# ⇒ **中文提问必然 0 种子 ⇒ 0 证据 ⇒ ②③④ 三步全部"未执行"。**
+# 用户看到的是一句「图谱里没有与这个问题相关的证据」，
+# 但真实原因不是"图谱里没有"，而是**问题与图谱不在同一种语言里**。
+# 这两句话对用户的意思完全不同，**不能混为一谈**。
+#
+# 复现（2026-09-18）：
+#   · `"What method does this paper propose?"` → 种子 12 个 → 18 条证据 → 四步走完（16 s）
+#   · `"这篇论文提出了什么方法？"`             → 种子  0 个 →  0 条证据 → 卡在第一步
+#
+# ## 边界：这**不是**把检索改成"模型检索"
+#
+# 「LLM 只做判断，不做检索」是硬纪律，这里**没有破**：
+#   · 桥接**只在规则匹配 0 种子、且问题含中文**时才触发 ⇒
+#     英文问题、或中文问题里带了能命中的英文术语时，**一次模型都不调**；
+#   · 模型产出的是**检索词**，不是答案；选哪些节点、BFS 怎么走，
+#     仍然完全由 `retrieve()` 的原规则决定；
+#   · 桥接结果写进返回值 `bridge`，界面**必须如实显示**
+#     （"我把你的中文问题转成了这些英文词"）——否则用户无法判断
+#     检索到底用了什么，K7 的 `rewritten_from` 就是为同一件事做的。
+#
+# ⚠️ 代价要说清：触发桥接时，**这一步不再"零模型、瞬时"**（多一次本地调用，
+# 实测约 3~8 s），且**不再严格可复现**（模型采样）。所以 `reason` 里必须写明，
+# 不能让界面继续宣称"纯规则、未调用模型"。
+
+CJK_RE = re.compile(r'[\u4e00-\u9fff]')
+
+BRIDGE_PROMPT = """把下面这个**中文**问题转成用来检索**英文学术知识图谱**的英文关键词。
+
+要求：
+· 只输出关键词，用**空格**分隔，3 到 6 个；
+· 关键词要**能在英文论文的实体名里出现**（术语、方法名、任务名、指标名），
+  例如 knowledge graph / large language model / entity alignment / reasoning；
+· **不要**输出句子、解释、编号、markdown、引号、中文；
+· 拿不准就用问题里最核心的名词。
+
+中文问题：{q}
+
+英文关键词："""
+
+
+def _match_seeds(q, q_tokens, nodes):
+    """种子匹配 —— 抽成函数是为了让"桥接后的英文词"**走完全同一条规则**。
+
+    ⚠️ 不能给桥接词另写一套更宽松的阈值：那会让中文提问和英文提问
+    的检索口径不一致，A/B 之类的对比就失去意义。
+    """
+    seeds = []
+    for n in nodes:
+        name = n.get('name') or n.get('id') or ''
+        nn = _norm(name)
+        desc = _norm(n.get('description') or '')
+        hit = False
+        if q and len(q) >= 3 and q in nn:
+            hit = True
+        elif nn and len(nn) >= 3 and nn in q:
+            hit = True
+        else:
+            for t in q_tokens:
+                if len(t) >= 3 and (t in nn or t in desc):
+                    hit = True
+                    break
+        if hit:
+            seeds.append(name)
+    return seeds[:12]
+
+
+def bridge_keywords_zh(question, timeout=60):
+    """纯中文问题 → 英文检索关键词。失败返回 `None`（由调用方降级，不抛）。
+
+    `temperature=0` + `num_predict=48`：桥接要的是几个词，不是一段话；
+    给多了模型反而会开始解释，把关键词淹掉。
+    """
+    try:
+        raw = _ollama(BRIDGE_PROMPT.format(q=question),
+                      timeout=timeout, temperature=0.0, num_predict=48)
+    except TypeError:
+        # 老签名（没有 temperature/num_predict 参数）时的兜底，不让桥接把检索拖崩
+        raw = _ollama(BRIDGE_PROMPT.format(q=question), timeout=timeout)
+    if not raw:
+        return None
+    # 模型偶尔还是会带解释/换行/项目符号 —— 只留**纯 ASCII 词**，其余丢掉。
+    line = raw.strip().splitlines()[0] if raw.strip() else ''
+    words = re.findall(r'[A-Za-z][A-Za-z0-9\-]{1,}', line)
+    seen, out = set(), []
+    for w in words:
+        lw = w.lower()
+        if lw in seen or len(lw) < 3:
+            continue
+        seen.add(lw)
+        out.append(w)
+        if len(out) >= 6:
+            break
+    return ' '.join(out) if out else None
+
+
 # ── K7 多轮追问 · 问题重写（2026-09-15）──────────────────────────────────
 #
 # ## 为什么需要"重写"而不是"把历史塞进检索"
@@ -129,6 +232,13 @@ def retrieve(question, nodes, edges, max_hops=2, max_nodes=60, history=None):
     **K7（2026-09-15）**：加了 `history`。它**只用于把没主语的追问补全**
     （见 `rewrite_question` 的说明）—— **检索算法本身没有任何改动**。
     返回结果里会带 `rewritten_from`，让"这次检索用的是补全后的问题"可追溯。
+
+    **跨语言桥接（2026-09-18）**：本项目的图谱抽自英文论文（实体名里
+    含中文的为 0 个），纯中文问题在词面匹配下**必然是 0 种子**。
+    所以规则匹配落空、且问题含中文时，会调一次本地模型把问题转成
+    **英文检索关键词**，再走**完全同一套** `_match_seeds` + BFS。
+    触发与否、用的什么词、有没有命中，全部写进返回值的 `bridge`，
+    并且 `reason` 会如实改口（不再宣称"纯规则、未调用模型"）。
     """
     q_used, rewritten_from = rewrite_question(question, history)
     question = q_used
@@ -138,24 +248,22 @@ def retrieve(question, nodes, edges, max_hops=2, max_nodes=60, history=None):
     if not q_tokens and not q:
         return {'seeds': [], 'nodes': [], 'edges': [], 'reason': '问题为空'}
 
-    seeds = []
-    for n in nodes:
-        name = n.get('name') or n.get('id') or ''
-        nn = _norm(name)
-        desc = _norm(n.get('description') or '')
-        hit = False
-        if q and len(q) >= 3 and q in nn:
-            hit = True
-        elif nn and len(nn) >= 3 and nn in q:
-            hit = True
+    seeds = _match_seeds(q, q_tokens, nodes)
+
+    # ── 跨语言桥接：只在"规则落空 + 含中文"时走（见 BRIDGE_PROMPT 上方的说明）
+    bridge = None
+    if not seeds and CJK_RE.search(question or ''):
+        kw = bridge_keywords_zh(question)
+        if kw:
+            q_b = _norm(kw)
+            toks_b = [t for t in re.split(r'[^0-9A-Za-z\u4e00-\u9fff]+', kw.lower())
+                      if len(t) >= 2]
+            seeds = _match_seeds(q_b, toks_b, nodes)
+            # 命中与否都要如实记：桥接失败也是结果，不能让界面以为它成功了
+            bridge = {'query_en': kw, 'seeds': list(seeds), 'hit': bool(seeds)}
         else:
-            for t in q_tokens:
-                if len(t) >= 3 and (t in nn or t in desc):
-                    hit = True
-                    break
-        if hit:
-            seeds.append(name)
-    seeds = seeds[:12]
+            bridge = {'query_en': None, 'seeds': [], 'hit': False,
+                      'note': '模型未返回可用英文关键词（模型不可用或超时）'}
 
     # BFS
     adj = {}
@@ -184,6 +292,22 @@ def retrieve(question, nodes, edges, max_hops=2, max_nodes=60, history=None):
         uniq.setdefault(k, e)
 
     by_name = {(n.get('name') or n.get('id')): n for n in nodes}
+    # `reason` 是给用户看的一句话解释 —— **做了什么就必须说什么**：
+    # 走了桥接就不能再写"纯规则、可复现"，落了空也要说清是"没有交集"
+    # 而不是让用户以为"图谱里本来就没有这个知识"。
+    if bridge and bridge.get('query_en'):
+        tail = ('（中文问题先转成英文检索词「%s」%s；这一步调用了本地模型，'
+                '不再严格可复现）' % (bridge['query_en'],
+                                      '命中' if bridge.get('hit') else '仍未命中'))
+    elif bridge:
+        tail = '（中文问题需要先转英文检索词，但本地模型没有返回可用关键词）'
+    else:
+        tail = '（纯规则，可复现）'
+    if not seeds:
+        # ⚠️ **不要在这里写 markdown 粗体** —— 这个字符串会经
+        # `setAgent()` 的 `textContent` 直接进界面，`**` 会原样显示成星号。
+        # 本项目已经栽过一次"markdown 泄漏进 DOM"（18 处）。
+        tail += '；问题与图谱实体没有词面交集 ⇒ 0 条证据'
     return {
         'seeds': seeds,
         'nodes': [by_name[s] for s in seen if s in by_name],
@@ -193,8 +317,10 @@ def retrieve(question, nodes, edges, max_hops=2, max_nodes=60, history=None):
         # 会奇怪"我只问了'它的缺点'，怎么检索到了 TransE"。
         'question_used': question,
         'rewritten_from': rewritten_from,
+        # 跨语言桥接的完整记录（转成什么词、命中哪些种子）—— 界面必须能显示
+        'bridge': bridge,
         'reason': f'种子 {len(seeds)} 个，{max_hops} 跳扩展至 {len(seen)} 个节点、'
-                  f'{len(uniq)} 条边（纯规则，可复现）',
+                  f'{len(uniq)} 条边{tail}',
     }
 
 
@@ -238,15 +364,21 @@ def evidence_pack(subgraph, max_items=18):
 # ────────────────────────────────────────────────────────────────────────
 # ②③④ LLM 调用（本地 Ollama）
 # ────────────────────────────────────────────────────────────────────────
-def _ollama(prompt, timeout=180):
-    """调本地 Ollama。返回文本；失败返回 None（由调用方降级，不抛）。"""
+def _ollama(prompt, timeout=180, temperature=0.2, num_predict=600):
+    """调本地 Ollama。返回文本；失败返回 None（由调用方降级，不抛）。
+
+    `temperature` / `num_predict` 可调，是为了**跨语言桥接**那一步：
+    它要的是"几个英文关键词"，不是一段判断，给 600 token 反而会让模型
+    开始写解释、把关键词淹掉（见 `bridge_keywords_zh`）。
+    两个参数的默认值**保持原样**，所以支持/反对/综合三个 Agent 的行为不变。
+    """
     body = json.dumps({
         'model': MODEL,
         'prompt': prompt,
         'stream': False,
         # 关闭思维链：抽取/判断任务上开思维链会拖慢并偏离格式
         'think': False,
-        'options': {'temperature': 0.2, 'num_predict': 600},
+        'options': {'temperature': temperature, 'num_predict': num_predict},
     }).encode('utf-8')
     req = urllib.request.Request(
         f'{OLLAMA}/api/generate', data=body,
@@ -343,6 +475,8 @@ def answer(question, nodes, edges, use_llm=True, history=None):
             # K7：把"补全后的问句"带出去，界面据此说明"我把它理解成了什么"
             'question_used': sub.get('question_used'),
             'rewritten_from': sub.get('rewritten_from'),
+            # 跨语言桥接记录（与 `step_retrieve` 保持同一字段名）
+            'bridge': sub.get('bridge'),
         },
         'evidence': ev,
         'agents': [],
@@ -422,16 +556,31 @@ def _confidence_of(text, opp_text):
 # 上传任务曾因后端重启而丢，见 `app.py` 的 `_save_task`）。
 
 def step_retrieve(question, nodes, edges, history=None):
-    """① 检索：纯规则，**不调模型**，所以永远快、永远可复现。
+    """① 检索：**默认**纯规则、不调模型，所以永远快、永远可复现。
+
+    **例外是跨语言桥接**（见 `BRIDGE_PROMPT` 上方）：纯中文问题在
+    英文图谱上词面匹配必然落空，此时会多一次本地模型调用把问题转成
+    英文检索词。`note` 会如实改口 —— **不能让界面在调了模型之后
+    还宣称"未调用模型"**。
 
     **K7**：`history` 只用于补全没主语的追问；检索算法本身未改。
     """
     sub = retrieve(question, nodes, edges, history=history)
     ev = evidence_pack(sub)
+    bridge = sub.get('bridge')
+    note = '纯规则：种子匹配 + 2 跳 BFS，未调用模型，结果可复现'
+    if bridge:
+        if bridge.get('query_en'):
+            note = ('**中文问题 → 先转成英文检索词**「%s」，再走同一条规则检索%s'
+                    % (bridge['query_en'],
+                       '（命中）' if bridge.get('hit') else '（仍未命中）'))
+        else:
+            note = ('中文问题需要先转成英文检索词，但本地模型未返回可用关键词'
+                    '（检索退化为 0 种子，如实报告，不编）')
     return {
         'stage': 'retrieve',
         'agent': '检索 Agent',
-        'note': '纯规则：种子匹配 + 2 跳 BFS，未调用模型，结果可复现',
+        'note': note,
         'retrieval': {
             'seeds': sub['seeds'],
             'n_nodes': len(sub['nodes']),
@@ -440,6 +589,8 @@ def step_retrieve(question, nodes, edges, history=None):
             # K7：让界面能说出"我把你的追问补全成了什么"
             'question_used': sub.get('question_used'),
             'rewritten_from': sub.get('rewritten_from'),
+            # 跨语言桥接：转成了什么词、有没有命中 —— 必须让界面能显示
+            'bridge': bridge,
         },
         'evidence': ev,
         'n_evidence': len(ev),

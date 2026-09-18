@@ -1208,8 +1208,19 @@ function play(d){
 
 /* 重画子图。
    instant=true 用于窄屏/宽屏切换：新生成的 SVG 元素初态是 opacity 0，
-   必须立刻解锁，否则窗口一改大小子图就整块消失（第一版正是栽在这里）。 */
+   必须立刻解锁，否则窗口一改大小子图就整块消失（第一版正是栽在这里）。
+
+   ⚠️⚠️ **`CUR` 可能是 null**（2026-09-18 实测踩到）：
+   `paint()` 也挂在 **resize** 上，而**问答还没跑完时** `CUR` 仍是 null
+   ⇒ `renderGraph(null, …)` ⇒ 进去读 `d.edges` ⇒
+   **`Cannot read properties of null (reading 'edges')`** ✗
+   ⇒ 那一下会**中断整个脚本块**，后面的事件绑定全部失效
+     —— 而**页面上看不出明显异常**（结果区照样显示了 224 字），
+        只有 trace 是空的、图是空的。**这正是"看不出坏"的那类故障。**
+
+   ⇒ 所以这里**先判空**：没有图就什么都不画（**下一帧有图了自然会画**）。 */
 function paint(instant){
+  if (!CUR) return;                       /* ← 关键的那一行 */
   renderGraph(CUR, innerWidth < 760);
   if (!instant) return;
   [].forEach.call($('gpanel').querySelectorAll('[data-in]'), function(el){
@@ -1404,10 +1415,22 @@ async function askReal(question){
     // K7：如果后端把追问补全了，**必须说出来** ——
     // 否则用户会奇怪"我只问了'它的缺点'，怎么检索到了 TransE"。
     const rw = r1.retrieval.rewritten_from;
+    // **跨语言桥接也必须说出来**（2026-09-18）：
+    // 这个项目的图谱抽自英文论文，中文问题在词面匹配下必然落空，
+    // 后端会自动调一次本地模型把问题转成英文检索词。
+    // 那一步**不再"零模型、可复现"**，用户有权知道检索实际用了什么词 ——
+    // 不说的话，用户会以为"我的中文问题被直接拿去做检索了"。
+    const br = r1.retrieval.bridge;
+    let rnote = r1.retrieval.reason;
+    if (br && br.query_en) {
+      rnote = '已把中文问题转成英文检索词「' + br.query_en + '」'
+            + (br.hit ? '（命中）' : '（仍未命中）') + ' · ' + rnote;
+    } else if (br) {
+      rnote = '中文问题需要先转成英文检索词，但本地模型没有返回可用关键词 · ' + rnote;
+    }
     setAgent('retrieve', 'done',
-             rw ? ('已把追问补全为「' + r1.retrieval.question_used + '」· '
-                   + r1.retrieval.reason)
-                : r1.retrieval.reason);
+             rw ? ('已把追问补全为「' + r1.retrieval.question_used + '」· ' + rnote)
+                : rnote);
 
     if (!r1.n_evidence) {
       ['support', 'oppose', 'synth'].forEach(function(s){
