@@ -97,6 +97,13 @@ def main():
     ap.add_argument('--variants', default='old,new', help='跑哪几个 prompt 版本')
     ap.add_argument('--apply', action='store_true', help='真跑（默认只打印计划）')
     ap.add_argument('--report', action='store_true', help='只看已有结果')
+    # ★ `--resume`：**跳过已经产出的那几次**（2026-09-18 加）。
+    #   为什么需要：每次抽取约 36 分钟，而 6 次里可能已经跑完一两次；
+    #   没有这个开关就只能**从头再来**（白烧 36 分钟/次 的 GPU 时间）。
+    #   ⚠️ 判定是"`<tag>.json` 存在**且非空**" —— **不是"跑过就算"**
+    #      （若上一次中途被杀，可能留下半截文件；那种情况必须重跑）。
+    ap.add_argument('--resume', action='store_true',
+                    help='跳过已有产物的那几次（按 <tag>.json 是否存在且非空判定）')
     a = ap.parse_args()
     t0 = time.time()
     print('=' * 92)
@@ -135,6 +142,23 @@ def main():
         return 1
     print()
     print(f'  计划：{len(variants)} 个 prompt × {a.seeds} 个 seed = **{len(runs)} 次抽取**')
+    # ★ `--resume`：把已有产物的那几次标掉（**在半截文件上必须重跑**）
+    if a.resume:
+        kept = []
+        for r in runs:
+            tag = f'{r["variant"]}-s{r["seed"]}'
+            f = RUNS / f'{tag}.json'
+            r['_done'] = f.exists() and f.stat().st_size > 1024
+        kept = [r for r in runs if r.get('_done')]
+        todo = [r for r in runs if not r.get('_done')]
+        print(f'  **--resume**：已有产物 {len(kept)} 次（跳过）· 待跑 {len(todo)} 次')
+        for r in kept:
+            f = RUNS / f'{r["variant"]}-s{r["seed"]}.json'
+            print(f'      ⏭  {r["variant"]}-s{r["seed"]}（{f.stat().st_size / 1024:.0f} KB）')
+        runs = todo
+        if not runs:
+            print('  ✅ 六次都已完成 ⇒ 没有要跑的；直接用 `--report` 看结果。')
+            return 0
     for r in runs:
         print(f'      {r["variant"]:<5} seed={r["seed"]}')
     print(f'  ⇒ 按 **{MIN_PER_RUN} 分钟/次** 估：**{len(runs) * MIN_PER_RUN} 分钟'
