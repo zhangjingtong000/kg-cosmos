@@ -58,7 +58,24 @@ CHAIN = [
     ], [sys.executable, 'tools/l8_structure_audit.py']),
     ('data/quality/l9-recall.json', [
         ('data/corpus/graphs', 'L9 召回依赖快照'),
-    ], None),                      # 需要人工标注，不能自动重建
+        # ⚠️⚠️ 原来这里是 `None`，注释写着「**需要人工标注，不能自动重建**」——
+        #   **那是错的**（2026-09-18 逐条核验，见 `docs/早先的审计记录.md`）。
+        #
+        #   依据：`data/quality/l9-gold-spans.json` 的 `annotator` 字段自己写着
+        #     「独立于抽取管线的逐段人工标注」，而 `note` 说的是
+        #     「**操作性**金标……由不经过抽取管线的**人/模型**给出」，
+        #     并且**只有 8 个 span**。
+        #   ⇒ 它要求的不是"**真人**"，而是"**一个独立于抽取管线的标注者**"。
+        #   ⇒ 那个标注者**可以是模型**。
+        #
+        #   **⇒ 而 `None` 的代价是具体的**：这条链**永远报红**、`--fix` **修不掉**，
+        #     而一个"标注为不可自动重建"的条目，会**掩盖它其实可以重建**这件事。
+        #     （这与 `L19` / `P4` 那两处"那只有用户本人能做"是同一个毛病 ——
+        #       **没解释为什么不能替代，就写上了"只能人做"。**）
+        ('data/quality/l9-gold-spans.json',
+         'L9 的标注单元（**独立标注者**给出；`l9_recall.py --sample` 导出待标、'
+         '`--score` 读回）'),
+    ], [sys.executable, 'tools/l9_recall.py', '--score']),
     ('data/quality/l5-validity-report.json', [
         ('data/quality/l5-validity-labels.jsonl', '效度报告依赖人工盲判标签'),
         ('data/quality/relation-verify-all.json', '也依赖打分（分层键）'),
