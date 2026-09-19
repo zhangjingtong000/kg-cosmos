@@ -135,6 +135,29 @@ DS_EXTRA_HEADERS = os.environ.get("DS_EXTRA_HEADERS", "")
 DS_MAX_TOKENS = int(os.environ.get("DS_MAX_TOKENS", "8192"))
 OLLAMA    = "http://localhost:11434"
 
+# ★★ 2026-09-19：本地 Ollama 的**超时与重试对齐 `call_openai_compat` 已有的策略**
+#     （见本文件 `call_openai_compat` 的 `timeout: int = 300, retries: int = 2`）。
+#
+#     **为什么必须改**：这两个数就是首版中文图只有 **95 节点 / 90 边**的直接原因
+#     （首版读数，现已无产物可回溯；现 4 篇中文图为 **179/165、269/294、1021/1042、
+#      224/340** 节点/边，见 `data/corpus/graphs/jsjkx*.json`）。
+#     `call_ollama` / `call_ollama_json` 原来写死 `timeout=120` **且不重试**，
+#     实测 `jsjkx2025-kg-rag-qa` 的 35 个 chunk 里 **14 个 ReadTimeout(120s)**
+#     —— 该 PDF 现已**不在** `data/corpus/`（`data/corpus/_manifest.json` 仍登记该 id，
+#     但 33 个落盘 PDF 里没有它；中文期刊现有 5 篇为 completion-llm / kbqa /
+#     negative-sampling / plm-survey / embedding-ontology）。
+#     ⇒ 40% 的正文从未进入模型（英文同类一篇约 500+ 节点）。
+#     ⚠️ 而**最慢的单 chunk 实测 118s** —— 120s 几乎注定切掉它，且没有第二次机会。
+#
+#     **不给新数字**：300 / 2 就是本文件 `call_openai_compat` 那条路径已有的策略，
+#     这里只是让 `_ollama_generate` 这条路径**对齐它**。
+#     （原写「让 **788/804** 这条路径对齐它」—— 那是当时 `_ollama_generate` 里
+#      超时取值与重试两处的行号。文件演化后已漂移（现为 786 取 `timeout`、
+#      804 作 HTTP 重试等待），且会继续漂，故 2026-09-19 改成写函数名。）
+#     两条都可用环境变量覆盖。
+OLLAMA_TIMEOUT = int(os.environ.get("KG_OLLAMA_TIMEOUT", "300"))
+OLLAMA_RETRIES = int(os.environ.get("KG_OLLAMA_RETRIES", "2"))
+
 MODELS = {
     "local": {
         "text":   "qwen3.5:9b",
@@ -749,6 +772,50 @@ def build_local_entity_prompt(text: str, content_kind: str = "text") -> str:
 
 # ── Backend Adapters ─────────────────────────────────────
 
+def _ollama_generate(payload: dict, timeout: Optional[int] = None,
+                     retries: Optional[int] = None) -> dict:
+    """POST `{OLLAMA}/api/generate`，**按 `call_openai_compat` 的策略重试瞬时失败**。
+
+    2026-09-19 加。此前 `call_ollama` / `call_ollama_json` 各自
+    `requests.post(..., timeout=120)` 且**不重试** —— 慢 chunk 一次 ReadTimeout
+    就整段正文丢失，而首版中文图的 14/35 失败全是这一类。
+
+    重试判据与退避**与本文件 `call_openai_compat` 一致**（不发明新策略）：
+      · `Timeout` / `ConnectionError` ⇒ 等 `10 * attempt` 秒后重试；
+      · HTTP 429/500/502/503/504      ⇒ 等 `15 * attempt` 秒后重试。
+    非瞬时错误（400/404 等）与重试耗尽**一律原样抛出** —— 失败必须可见，
+    绝不能被吞成"这个 chunk 没有实体"（那正是残图的另一种形态）。
+    """
+    import requests
+    timeout = OLLAMA_TIMEOUT if timeout is None else timeout
+    retries = OLLAMA_RETRIES if retries is None else retries
+    attempt = 0
+    while True:
+        try:
+            r = requests.post(f"{OLLAMA}/api/generate", json=payload, timeout=timeout)
+            r.raise_for_status()
+            return r.json()
+        except (requests.Timeout, requests.ConnectionError) as exc:
+            attempt += 1
+            if attempt > retries:
+                raise
+            wait = 10 * attempt
+            print(f"[ollama] {type(exc).__name__}（timeout={timeout}s），"
+                  f"retry {attempt}/{retries} in {wait}s", flush=True)
+            time.sleep(wait)
+        except requests.HTTPError as exc:
+            status = exc.response.status_code if exc.response is not None else 0
+            if status not in (429, 500, 502, 503, 504):
+                raise
+            attempt += 1
+            if attempt > retries:
+                raise
+            wait = 15 * attempt
+            print(f"[ollama] HTTP {status}, retry {attempt}/{retries} in {wait}s",
+                  flush=True)
+            time.sleep(wait)
+
+
 def call_ollama(model: str, prompt: str, image_path: Optional[str] = None) -> str:
     """Call local Ollama model. **返回的是答案，不是思考过程。**
 
@@ -775,8 +842,11 @@ def call_ollama(model: str, prompt: str, image_path: Optional[str] = None) -> st
 
     **★ 这条与本轮另一条是同一个家族**：
     "看起来有输出" ≠ "输出的是答案"。
+
+    **③ 2026-09-19：超时从写死的 120s 改成 `OLLAMA_TIMEOUT`（默认 300s）并重试。**
+       原来 `requests.post(..., timeout=120)` 且不重试 —— 慢 chunk（实测最慢 118s）
+       一次 ReadTimeout 就丢整段正文。现在与 `call_openai_compat` 同一策略。
     """
-    import requests
     payload = {"model": model, "prompt": prompt, "stream": False,
                # ⚠️ **顶层 `think`** —— 不是 `options.enable_thinking`（那个无效）
                "think": False,
@@ -785,25 +855,26 @@ def call_ollama(model: str, prompt: str, image_path: Optional[str] = None) -> st
         with open(image_path, "rb") as f:
             img_b64 = base64.b64encode(f.read()).decode()
         payload["images"] = [img_b64]
-    r = requests.post(f"{OLLAMA}/api/generate", json=payload, timeout=120)
-    r.raise_for_status()
-    data = r.json()
+    # ⚠️ 统一走 `_ollama_generate`：**300s + 重试 2 次**（见 docstring ③）
+    data = _ollama_generate(payload)
     # ⚠️ **不回退到 `thinking`** —— 思考不是答案（见 docstring ②）
     return (data.get("response") or "").strip()
 
 
 def call_ollama_json(model: str, prompt: str, schema: Optional[dict] = None,
                      image_path: Optional[str] = None) -> dict:
-    """Call Ollama with a JSON Schema and return the decoded object."""
-    import requests
+    """Call Ollama with a JSON Schema and return the decoded object.
+
+    2026-09-19：超时/重试与 `call_ollama` **同一条路径**（`_ollama_generate`，
+    默认 300s + 2 次重试）。原来这里同样写死 `timeout=120` 且不重试 ——
+    而**实体与关系两次调用都走这个函数**，所以它是 14/35 失败的主入口。
+    """
     images = None
     if image_path:
         with open(image_path, "rb") as f:
             images = [base64.b64encode(f.read()).decode()]
     payload = build_local_json_payload(model, prompt, schema, images)
-    r = requests.post(f"{OLLAMA}/api/generate", json=payload, timeout=120)
-    r.raise_for_status()
-    response = r.json().get("response", "").strip()
+    response = (_ollama_generate(payload).get("response") or "").strip()
     if not response:
         raise ValueError(f"{model} returned no structured response")
     return decode_local_json_response(response)
@@ -1381,7 +1452,9 @@ def _names_are_duplicates(a: str, b: str) -> bool:
     # （`JEF`←`Joint Extraction Framework` 这类）。在那个合成样本上，
     # 自动合并的 recall 是 **0.7048**。
     #
-    # **但真实语料不是那样。** 拿全库 19877 个实体名扫一遍候选：
+    # **但真实语料不是那样。** 拿当时的全库 **19877** 个实体名扫一遍候选
+    # （2026-09-16 读数，属历史快照；当时的"全库"口径未写明。现全库为
+    #  **20785** 节点，见 `web/kg-data/analytics.json` → `scale.nodes`）：
     #
     #     候选对 2142 条 · 涉及 298 个不同的短名
     #       · 只对应 1 个长名：137 个（46.0%）—— 这些合并还算安全

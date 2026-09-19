@@ -20,10 +20,26 @@ L3 只看端点在不在节点集内、L4 只看谓词在不在本体内，而 L
   ① **主动系表优先于被动标记**。`PASSIVE_MARK` 允许助动词后插 0–3 个词，
      于是 `is listed as an author of` 同时命中被动（`is ... listed`）与
      主动系表（`is listed as an author`），旧实现被动先判 → **判反**。
+
+     ⚠️ **补记（2026-09-19）**：上面这个原例当时**并没有真修好** ——
+     `COPULA_AGENT` 写成 `(?:listed as|the|an?)?`，**只能吃一个可选片段**：
+     吃下 `listed as` 之后就要求紧跟 `author`，而原文是 `an author`
+     ⇒ 主动系表不命中 ⇒ 仍落到被动分支 ⇒ `X is listed as an author of Y`
+     **继续判 `inverted`**（只有无冠词的 `is listed as author of` 才判对）。
+     后果是 `KG_SANITIZE=3` 会把**方向正确**的边翻转，属数据损坏级。
+     现把 `listed as` 与冠词拆成**两段都可选、可同时命中**：
+     `(?:listed\s+as\s+)?(?:one\s+of\s+)?(?:the|an?|...)?\s*` ⇒ 原例判 `consistent`。
+     `one of the` 段是同一处 bug 的同源形态：`X is listed as one of the authors
+     of Y` 原先也落到被动分支判反，一并修掉。
+     既有测试 `tests/test_direction_witness.py` 曾把旧行为钉成"现状记录"，
+     同步改成"已修"的断言。
   ② **无助动词的被动式必须单独识别**。`X authored by Y` / `X written by Y`
      没有 AUX 开头，旧实现既不判被动、又被 `AGENT_VERB` 的 `authored` 抓成
      主动 → **判反**。
   ③ **`authored by` / `written by` 从主动表移出，归被动**。
+     （2026-09-19 补记：`authored` 的**主动形态** `X authored Y` 放回主动表 ——
+     它后面不接 `by`，本就不是被动；`authored by` 仍由排在前面的
+     `PASSIVE_BARE` 拦下，判定结果不变。）
 
 **判据的边界**（如实声明）：本通道只判「description 里的谓词把谁当施事」，
 对不含谓词信息、或两个端点根本没在同一句 description 里出现的边，
@@ -57,17 +73,29 @@ PASSIVE_BARE = re.compile(
 # ── 主动系表（第 ① 处修正：必须在被动之前判）──────────────────────────
 # `X is listed as an author of Y` 里 X 是**作者**，是主动角色。
 # 若不先判，`is ... listed` 会命中被动而判反。
+#
+# ⚠️（2026-09-19）这几段必须是**独立的可选组**，不能合成一个
+# `(?:listed as|the|an?)?`：合成后只能吃一个片段，`listed as` 与 `an`
+# 无法同时命中，带冠词的原例就落到被动分支判反（真 bug，已修）。
+# `one of` 段同理 —— `X is listed as one of the authors of Y` 也曾落到
+# 被动分支判反，是同一处 bug 的同源形态（2026-09-19 一并修）。
 COPULA_AGENT = re.compile(
     r"^(?:is|are|was|were)\s+"
-    r"(?:listed as|the|an?)?\s*"
-    r"(?:author|authors|co-?author|creator|creators|writer|writers|"
+    r"(?:listed\s+as\s+)?"          # 被动式里的 "listed as"
+    r"(?:one\s+of\s+)?"             # "one of the authors" 里的 "one of"
+    r"(?:the|an?|its|their|his|her)?\s*"   # 冠词 / 所有格
+    r"(?:author|authors|co-?authors?|creator|creators|writer|writers|"
     r"developer|developers|designer|designers|owner|owners|maintainer|"
     r"contributor|contributors)\b", re.I)
 
 # ── 主动谓词 ────────────────────────────────────────────────────────────
-# 第 ③ 处修正：`authored` / `written` 已移出（它们的 `X by Y` 形态是被动）
+# 第 ③ 处修正：`written` 已移出（`X written by Y` 的 `X by Y` 形态是被动）。
+# ⚠️（2026-09-19）`authored` 以**主动词形**留在表里，覆盖 `X authored Y`
+# 这种真主动句（旧实现只列了 `authored by`，于是 `X authored Y` 判 unknown）。
+# 它的被动形态 `authored by` 靠**排在其前的 `PASSIVE_BARE`** 兜住 ⇒ 仍判被动，
+# 所以本表的这一项**不会**把被动判反；次序不要动。
 AGENT_VERB = re.compile(
-    r"^(authored by|wrote|proposes|proposed|introduces|introduced|"
+    r"^(authored by|authored|wrote|proposes|proposed|introduces|introduced|"
     r"develops|developed|creates|created|publishes|published|presents|presented|"
     r"produces|produced|uses|use|utilizes|utilized|enables|enabled|causes|caused|"
     r"supports|supported|evaluates|evaluated|measures|measured|cites|cited|"

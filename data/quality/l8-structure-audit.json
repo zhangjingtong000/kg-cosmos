@@ -2,25 +2,25 @@
   "source": "web/kg-data/nebula.json",
   "caliber": "无向去重简化图（概览层导出），不可与有向图口径混用",
   "scale": {
-    "nodes": 19427,
-    "edges": 28407,
-    "density": 0.00015054496753590278,
-    "avg_clustering": 0.11334
+    "nodes": 20785,
+    "edges": 28405,
+    "density": 0.00013150601774870586,
+    "avg_clustering": 0.10553
   },
   "connectivity": {
-    "components": 5991,
-    "largest_component": 12879,
-    "largest_component_pct": 66.29,
-    "isolated_nodes": 5799
+    "components": 7371,
+    "largest_component": 12896,
+    "largest_component_pct": 62.04,
+    "isolated_nodes": 7181
   },
   "random_baseline": {
     "n_runs": 10,
-    "n": 19427,
-    "m": 28407,
-    "avg_clustering_mean": 0.000172,
-    "avg_clustering_sd": 8.4e-05,
-    "clustering_ratio_vs_random": 657.22,
-    "largest_component_mean": 18139.3
+    "n": 20785,
+    "m": 28405,
+    "avg_clustering_mean": 9.2e-05,
+    "avg_clustering_sd": 5.7e-05,
+    "clustering_ratio_vs_random": 1150.05,
+    "largest_component_mean": 19091.6
   },
   "predicate_space": {
     "distinct_types": 15,
@@ -30,27 +30,27 @@
     "top": [
       [
         "RELATED_TO",
-        6998
+        6968
       ],
       [
         "CREATED_BY",
-        5876
+        5868
       ],
       [
         "USES",
-        5263
+        5279
       ],
       [
         "PART_OF",
-        4022
+        4034
       ],
       [
         "APPLIES_TO",
-        2668
+        2674
       ],
       [
         "PRODUCES",
-        1536
+        1539
       ],
       [
         "ENABLES",
@@ -68,15 +68,15 @@
     "name_type_conflicts": 0
   },
   "labels": {
-    "abnormal": 4,
-    "abnormal_pct": 0.021
+    "abnormal": 20,
+    "abnormal_pct": 0.096
   },
   "degree": {
     "max": 1068,
-    "p99": 29,
+    "p99": 28,
     "p90": 6,
     "median": 1,
-    "mean": 2.924,
-    "top1pct_degree_share": 20.63
+    "mean": 2.733,
+    "top1pct_degree_share": 21.28
   }
 }

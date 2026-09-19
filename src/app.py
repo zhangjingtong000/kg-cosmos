@@ -194,6 +194,31 @@ class QAStepRequest(BaseModel):
     history: list[dict] = []
 
 
+class QAGlobalStepRequest(BaseModel):
+    """**全库问答**（GraphRAG 式 Global Search）的一步请求 —— **不要求 `graph_id`**。
+
+    ## 为什么是一个新模型 / 新端点，而不是给 `QAStepRequest` 加个 `mode` 字段
+
+    单篇问答的 `graph_id` 是**必填**的，而全库问答**没有**"哪张图"这回事 ——
+    它检索的是 B6 生成的 **18 条社区摘要**（`web/kg-data/community-summaries.json`）。
+    把 `graph_id` 改成可选，等于让"这张图不存在"（404）与"没指定图"（全库）
+    在同一个端点上混淆；而 `ask.html` 的既有行为又有 44 项测试盯着。
+    ⇒ **新端点、新模型，老端点一个字节不改。**
+
+    `top_k`：全库检索取分数最高的几个社区（默认 4）。
+    上限 8 —— 每条摘要 300~900 字，取太多会把 prompt 撑过本地模型的上下文，
+    而"超上下文被静默截断"是最危险的失败方式（模型没看到，却像看到了一样回答）。
+    """
+    # 与 `QARequest` / `QAStepRequest` 同一个上限（500 字符，G4）
+    question: str = Field(max_length=500)
+    step: str = 'retrieve'
+    top_k: int = Field(default=4, ge=1, le=8)
+    evidence: list[dict] = []
+    support: str = ''
+    oppose: str = ''
+    history: list[dict] = []
+
+
 # ── 数据面：把前端要用的 JSON 暴露成 HTTP ──────────────────
 # 白名单而非通配，避免把整个目录结构暴露出去。
 
@@ -1130,6 +1155,57 @@ async def api_qa_step(req: QAStepRequest):
         return M.step_agents(req.question, req.evidence, req.step)
     if req.step == 'synth':
         return M.step_synth(req.question, req.support, req.oppose)
+    raise HTTPException(400, f"未知的 step：{req.step}（应为 retrieve/support/oppose/synth）")
+
+
+@app.get("/api/communities")
+async def api_communities():
+    """**全库问答的料在哪**：B6 生成的社区摘要清单（轻量，不含正文）。
+
+    前端在全库模式下用它显示"全库 = N 个社区摘要（由某个本地模型在某天生成了）"，
+    这样用户（和演示老师）能一眼看出这一模式的证据**不是论文原文**，
+    而是"每个社区一段概括"。**清单里不带摘要正文** —— 正文随检索结果按需下发。
+    """
+    try:
+        import multi_agent_qa as M
+    except ImportError:
+        raise HTTPException(500, "multi_agent_qa 模块不可用")
+    return M.community_catalog()
+
+
+@app.post("/api/qa/global/step")
+async def api_qa_global_step(req: QAGlobalStepRequest):
+    """**全库问答**（GraphRAG 式 Global Search）的分步端点。
+
+    `ask.html` 在「全库」模式下依次调四次：retrieve → support → oppose → synth，
+    与单篇模式**同一套四步链路**，差别只在证据来自哪里：
+
+      · 单篇模式（`/api/qa/step`）：检索**某一张图的实体与边**（2 跳 BFS 子图）；
+      · 全库模式（本端点）        ：检索 **B6 的社区摘要**（词面匹配 top-K）。
+
+    ## 三条刻意的边界
+
+    · **不需要 `graph_id`**：全局问题不落在任何一篇论文上（见 `QAGlobalStepRequest`）。
+    · **检索零模型**：社区选取是纯规则打分，**不依赖 Ollama 是否在跑**
+      —— 全库模式的"找到哪些社区"永远可复现；模型只用在后三步的判断上。
+    · **证据带 `level='community'`**：社区摘要是**生成的概括**，不是论文原文，
+      所以它的 `citations` 恒为空、`has_quote` 恒为 false，
+      支持/反对/综合三步换用社区版 prompt（原 prompt 写着"每条都来自论文原文"）。
+      这一条对应项目纪律：**不要把结构推断说成事实**。
+    """
+    try:
+        import multi_agent_qa as M
+    except ImportError:
+        raise HTTPException(500, "multi_agent_qa 模块不可用")
+
+    if req.step == 'retrieve':
+        return M.step_retrieve_global(req.question, top_k=req.top_k,
+                                      history=req.history)
+    if req.step in ('support', 'oppose'):
+        # 证据的级别由证据自身的 `level` 字段决定，不由本端点传参（见 step_agents）
+        return M.step_agents(req.question, req.evidence, req.step)
+    if req.step == 'synth':
+        return M.step_synth(req.question, req.support, req.oppose, level='community')
     raise HTTPException(400, f"未知的 step：{req.step}（应为 retrieve/support/oppose/synth）")
 
 

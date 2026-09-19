@@ -61,8 +61,10 @@ def _name_of(node) -> str:
     **两种数据源的字段名不同**，必须都兼容：
       · 抽取产物 / 金标（`data/gold/`）：用 `name`
       · 前端数据面（`web/kg-data/nebula.json`）：用 `id`
-    第一版只认 `name`，在全库 18780 个实体上命中率 100%（全被判"空名"），
+    第一版只认 `name`，在全库 **20785** 个实体上命中率 100%（全被判"空名"），
     幸好先用 `_ref_filter_scan.py` 试跑才发现。
+    （原写 **18780** —— 那是旧 Neo4j 快照的节点数；现全库以
+     `web/kg-data/analytics.json` 的 `scale.nodes` 为准。）
     """
     return (node.get("name") or node.get("id") or "").strip()
 

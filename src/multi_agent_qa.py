@@ -39,9 +39,16 @@ import re
 import urllib.error
 import urllib.request
 from collections import deque
+from pathlib import Path
 
 OLLAMA = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434')
 MODEL = os.environ.get('KG_QA_MODEL', 'qwen3.5:9b')
+
+# B6 的社区摘要产物（`tools/build_community_summaries.py` 生成）。
+# **全库问答的料就是它** —— 18 个社区各一段"这个社区在研究什么"。
+# 路径以本文件为锚点解析（不写死盘符，也不依赖 cwd）。
+COMMUNITY_SUMMARIES = (Path(__file__).resolve().parent.parent
+                       / 'web' / 'kg-data' / 'community-summaries.json')
 
 
 # ────────────────────────────────────────────────────────────────────────
@@ -392,6 +399,20 @@ def _ollama(prompt, timeout=180, temperature=0.2, num_predict=600):
 
 
 def _fmt_evidence(items, limit=14):
+    """把证据格式化成给模型看的文本。
+
+    **两种证据形状，两种格式化**（2026-09-26 加全库模式）：
+      · 图证据（单篇模式）：每条带 `citations`，格式化时写出论文名与页码；
+      · 社区级证据（全库模式）：**没有引文**（它不是论文原文），
+        格式化时写出社区名、摘要正文、成员实体。
+
+    ⇒ 判据放在这里而不是让调用方传参：**"这批证据是社区级的"这件事
+      写在数据里**（`level == 'community'`），而不是靠调用方记得传对标志 ——
+      调用方一旦忘了传，社区摘要就会被当成论文原文喂给模型（那是本项目的红线）。
+    """
+    if items and all(isinstance(it, dict) and it.get('level') == 'community'
+                     for it in items):
+        return _fmt_community_evidence(items, limit)
     lines = []
     for i, it in enumerate(items[:limit], 1):
         c = (it.get('citations') or [{}])[0]
@@ -449,6 +470,76 @@ SYNTH_PROMPT = """你是**综合** Agent。你只看到两方独立交上来的�
 3. 如果两方冲突且无法判定，就如实说「证据不足以判定」；
 4. **不要引入两方都没提到的证据**；
 5. 用中文，不超过 250 字。
+"""
+
+# ── 全库模式（社区级摘要）的三套 prompt（2026-09-26）─────────────────────
+#
+# **为什么要另写三套，而不是改上面那三套**：
+# 上面那三套里写着"证据（每条都来自论文原文，已标注出处）"——
+# 这句话对社区摘要是**假的**：摘要是本地模型根据社区的实体与关系**生成**的概括，
+# 它没有页码、不是任何一篇论文的原话。
+# 拿旧 prompt 去读社区摘要，等于**把生成的摘要说成原文证据** ——
+# 这正是本项目"不要把结构推断说成事实"那条纪律要防的事。
+#
+# 三套新 prompt 的第一句就把边界写死，并要求模型**不许**用
+# "某篇论文证明了……"这种口径，只能说"某个社区关注……"。
+
+COMMUNITY_SUPPORT_PROMPT = """你是**支持方**取证 Agent。下面给你的**不是论文原文**，而是\
+**社区级摘要** —— 每条由一个本地模型根据该社区的实体与关系写出，用来概括"这个社区在研究什么"。
+
+问题：{q}
+
+{ev}
+
+要求：
+1. **只引用上面列出的编号**，不要引入外部知识；
+2. 列出最相关的 2-4 条，每条写：编号 + 一句话说明它如何支持这个问题的答案；
+3. 如果**没有任何一条**能支持，就明确写「无支持证据」——不要编；
+4. **不许把社区摘要说成论文原文**：可以说"某社区围绕……展开"，
+   不能说"某篇论文证明了……"。
+5. 用中文，不超过 200 字。
+"""
+
+COMMUNITY_OPPOSE_PROMPT = """你是**反对方**取证 Agent，职责是**挑战**支持方的结论。\
+下面给你的**不是论文原文**，而是**社区级摘要**（本地模型根据社区的实体与关系生成的概括）。
+
+问题：{q}
+
+{ev}
+
+要求：
+1. 找出**与"直接肯定答案"相冲突**或**使结论变得不确定**的东西，例如：
+   · 摘要自己说"这个社区没有明显的共同主题"（那它就不该被当成一个论据）；
+   · 摘要的成员实体与问题只是表面词面相同、主题其实不同；
+   · 摘要里提到的实体**不在它自己的成员清单里**（接地性可疑）。
+2. 每条写：编号 + 为什么它削弱结论；
+3. **如果确实找不到反证，就明确写「未发现反证」** —— 这是有价值的结论，
+   不要为了显得有产出而编造。
+4. **不把社区摘要当作论文原文**（它有出处，但那个出处是"某个社区"，不是某一页）。
+5. 用中文，不超过 200 字。
+"""
+
+COMMUNITY_SYNTH_PROMPT = """你是**综合** Agent。你只看到两方独立交上来的意见，请给最终结论。
+
+⚠️ 这一轮的证据全部是**社区级摘要**（本地模型根据社区实体与关系生成的概括），\
+**不是论文原文**。结论必须按这个口径写。
+
+问题：{q}
+
+── 支持方说 ──
+{sup}
+
+── 反对方说 ──
+{opp}
+
+要求：
+1. 一句话给出结论，然后说明依据（支持方哪几条、反对方哪几条）；
+2. 明确标注**置信度**：高 / 中 / 低，并说明为什么；
+3. 如果两方冲突且无法判定，就如实说「证据不足以判定」；
+4. **不要引入两方都没提到的证据**；
+5. **不许说成"论文原文表明"**：应当说"社区摘要显示……"，
+   并说明这是**社区级概括**而不是某一篇论文的原话。
+6. 用中文，不超过 250 字。
 """
 
 
@@ -604,31 +695,408 @@ def step_agents(question, evidence, role):
     分两次调用而不是一次跑两个，是为了让界面能分别显示
     「支持方正在读…」与「反对方正独立地读…」。**"独立"是这个看点的核心**：
     一次返回两段，观众分不清它们是两次独立判断，还是同一段话拆成两半。
+
+    **全库模式（2026-09-26）**：证据可能是**社区级摘要**而不是论文原文。
+    此时换一套 prompt —— 原 prompt 里写着"每条都来自论文原文"，
+    拿它去读社区摘要就等于**把生成的摘要说成原文证据**（本项目红线）。
+    判据取自**证据自身的 `level` 字段**，不由调用方传参（见 `_fmt_evidence`）。
     """
     ev = evidence or []
     block = _fmt_evidence(ev)
+    comm = _is_community_evidence(ev)
     if role == 'support':
-        txt = _ollama(SUPPORT_PROMPT.format(q=question, ev=block))
+        txt = _ollama((COMMUNITY_SUPPORT_PROMPT if comm else SUPPORT_PROMPT)
+                      .format(q=question, ev=block))
         return {'stage': 'agents', 'agent': '支持 Agent', 'role': '支持方',
-                'note': '读全部证据，找**支持**答案的边',
+                'note': ('读全部社区级摘要，找支持答案的社区；'
+                         '摘要由本地模型生成，不许说成论文原文'
+                         if comm else '读全部证据，找**支持**答案的边'),
+                'evidence_level': 'community' if comm else 'graph',
                 'text': txt, 'ok': txt is not None}
     if role == 'oppose':
-        txt = _ollama(OPPOSE_PROMPT.format(q=question, ev=block))
+        txt = _ollama((COMMUNITY_OPPOSE_PROMPT if comm else OPPOSE_PROMPT)
+                      .format(q=question, ev=block))
         return {'stage': 'agents', 'agent': '反对 Agent', 'role': '反对方',
-                'note': '**独立**读同一批证据（不共享支持方的中间结论），找反证；'
-                        '找不到就如实说「未发现反证」，不编',
+                'note': ('**独立**读同一批社区级摘要（不共享支持方的中间结论），'
+                         '找反证；找不到就如实说「未发现反证」，不编'
+                         if comm else
+                         '**独立**读同一批证据（不共享支持方的中间结论），找反证；'
+                         '找不到就如实说「未发现反证」，不编'),
+                'evidence_level': 'community' if comm else 'graph',
                 'text': txt, 'ok': txt is not None}
     raise ValueError("role 必须是 'support' 或 'oppose'")
 
 
-def step_synth(question, support, oppose):
-    """④ 综合：**只看两方交上来的东西**，不接触原始证据。"""
-    txt = _ollama(SYNTH_PROMPT.format(
+def step_synth(question, support, oppose, level='graph'):
+    """④ 综合：**只看两方交上来的东西**，不接触原始证据。
+
+    `level='community'` 时用社区版 prompt（2026-09-26）：综合方虽然看不到原始证据，
+    但它会写"依据是哪些"，而那个依据的上游是**社区级摘要**而不是论文原文。
+    原 prompt 里没有这一句 ⇒ 结论会顺着"论文原文"的口径写下去。
+    **默认值 `'graph'` 保证单篇模式一字不变。**
+    """
+    comm = (level == 'community')
+    txt = _ollama((COMMUNITY_SYNTH_PROMPT if comm else SYNTH_PROMPT).format(
         q=question, sup=support or '（无）', opp=oppose or '（无）'))
     return {
         'stage': 'synth', 'agent': '综合 Agent',
         'note': '只看到两方交上来的意见，不接触原始证据',
+        'evidence_level': 'community' if comm else 'graph',
         'text': txt or ('支持方：%s\n反对方：%s' % (support, oppose)),
         'confidence': _confidence_of(txt, oppose),
         'ok': txt is not None,
+    }
+
+
+# ════════════════════════════════════════════════════════════════════════
+# 全库问答（GraphRAG 式 Global Search）—— 2026-09-26
+# ════════════════════════════════════════════════════════════════════════
+#
+# ## 为什么加这一节
+#
+# B6 已经把 **18 个社区摘要** 做好了（`web/kg-data/community-summaries.json`，
+# 并已接到社区星云页展示），**但问答链路完全没用它** ——
+# 单篇问答的检索是"字面命中实体 → 2 跳 BFS → 子图"，问题必须落在**某一篇论文**的图上。
+# ⇒ 用户问「这批文献整体在研究什么」「有哪些互相矛盾的观点」时，系统答不了：
+#   这两句话在任何单篇图里都没有对的实体可命中。
+#
+# 这一节把现成的社区摘要接进同一条四步链路（检索 → 支持 → 反对 → 综合），
+# 对应 Microsoft GraphRAG 的 **Global Search**：
+# 全局问题不落到某一篇论文，而是落到**社区级摘要**上。
+#
+# ## 三条纪律
+#
+# **① 零模型检索**：社区的选取是**词面匹配 + 可复现打分**，不调模型。
+#   项目里有 `src/embeddings.py`（bge-m3），**这里刻意不用**：
+#     · 它需要 Ollama 在跑且模型已加载 —— **检索不该因为模型没起就整个失效**；
+#     · 实测它在"短名是否同一实体"上单阈值必错（见 `embeddings.py` 头部那张表），
+#       而我们要的正是"社区名/实体名 与 问题 有没有交集"这种**字面**判断；
+#     · 单篇模式已经有一套字面判据（`_match_seeds`），**全库模式沿用同一套口径**，
+#       两种模式之间才可比。
+#
+# **② 社区摘要不许被说成论文原文**：证据里带 `level='community'` 与
+#   `level_label`，`citations` 恒为空（**从数据结构上就不给"伪装成原文引文"留位置**），
+#   支持/反对/综合三步都换用社区版 prompt（原 prompt 写着"每条都来自论文原文"）。
+#
+# **③ 找不到就如实说**：一个问题若在社区摘要里**没有任何词面命中**，
+#   如实报 `scope='all'`（"没有命中任何社区的标识词 ⇒ 给的是全库综述"），
+#   而不是假装精确检索到了。没有社区摘要文件时 `scope='none'`、证据 0 条。
+#
+# ## 全库检索的打分口径（可复现、可解释）
+#
+#   社区名命中        +3   （"Embeddings" 出现在问题里 —— 最强的信号）
+#   每个成员实体命中  +2   （最多计 3 个 —— 社区的核心实体名被点到）
+#   摘要正文用词命中  +1   （最多计 2 个 —— 弱信号，中文摘要对中文问题有用）
+#   命中阈值 2.0 ⇒ 至少命中 1 个成员实体，或社区名，才算"指向了这个社区"。
+#
+#   **中文问题为什么常常落空**：社区名与成员实体是**英文**（图谱抽自英文论文），
+#   而中文问题被切出来的是整串汉字，与英文标识词没有词面交集 ⇒ 0 命中 ⇒
+#   走 `scope='all'`（全库综述）。**这恰好是全局问题的正确行为**，
+#   而且不需要为此调一次模型做翻译。
+
+COMMUNITY_NAME_WEIGHT = 3.0
+COMMUNITY_MEMBER_WEIGHT = 2.0
+COMMUNITY_SUMMARY_WEIGHT = 1.0
+COMMUNITY_MIN_SCORE = 2.0
+COMMUNITY_TOP_K = 4
+# `scope='all'` 时取几个社区：**不取全部 18 个** ——
+# 每条摘要约 300–900 字，18 条塞进 prompt 会超过本地模型的上下文，
+# 结果是被静默截断（"给了但模型没看到"，比不给更危险）。
+# 取规模最大的 6 个：它们覆盖的实体最多，最接近"这群文献整体在研究什么"。
+COMMUNITY_ALL_LIMIT = 6
+
+# 缓存：路径 → (mtime, size, 记录列表)。**按 mtime 失效**，
+# 这样重新跑一次 B6 生成摘要后不必重启后端。
+_COMM_CACHE = {}
+
+
+def _community_record(rec, meta):
+    """把 `community-summaries.json` 的一条压成检索与展示都要用的形状。
+
+    **成员的来源是 `facts.core_ids`**（生成摘要时喂给模型的那批核心实体）——
+    它就是摘要的"接地清单"：摘要里提到的实体名应当在这一批里
+    （B6 的 `--verify` 正是按这个校验的）。
+    """
+    facts = rec.get('facts') or {}
+    grounding = rec.get('grounding') or {}
+    return {
+        'id': str(rec.get('id') or ''),
+        'name': str(rec.get('name') or ''),
+        'summary': str(rec.get('summary') or '').strip(),
+        'members': [str(x) for x in (facts.get('core_ids') or []) if x],
+        'n_nodes': facts.get('n_nodes'),
+        'n_edges': facts.get('n_edges'),
+        'top_types': facts.get('top_types') or {},
+        'grounding_ok': bool(grounding.get('has_citation_line')
+                             and not grounding.get('cited_unknown')),
+        'says_no_theme': bool(grounding.get('says_no_theme')),
+        'ok': bool(rec.get('ok')),
+        'model': meta.get('model') or '',
+        'generated': meta.get('generated') or '',
+        'source': 'web/kg-data/community-summaries.json',
+    }
+
+
+def load_community_summaries(path=None, use_cache=True):
+    """读 B6 的社区摘要。**失败返回 `[]`，不抛** —— 由调用方如实报"没有社区摘要"。
+
+    只保留 `ok=True` 且摘要正文非空的条目：B6 的记录里可能有
+    "模型返回空 response"这类失败项（脚本自己会把它们标成 `ok: False`），
+    把它们当成"这个社区没有内容"喂给模型，就是在**把失败当事实**。
+
+    **不缓存跨进程**：每次按 mtime 判断。测试传 `path` 时可关缓存。
+    """
+    p = Path(path) if path else COMMUNITY_SUMMARIES
+    try:
+        st = p.stat()
+    except OSError:
+        return []
+    key = str(p)
+    hit = _COMM_CACHE.get(key)
+    if use_cache and hit and hit[0] == st.st_mtime and hit[1] == st.st_size:
+        return hit[2]
+    try:
+        d = json.loads(p.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return []
+    meta = {'model': d.get('model'), 'generated': d.get('generated')}
+    out = []
+    for rec in (d.get('communities') or []):
+        if not isinstance(rec, dict):
+            continue
+        r = _community_record(rec, meta)
+        if r['ok'] and r['summary']:
+            out.append(r)
+    if use_cache:
+        _COMM_CACHE[key] = (st.st_mtime, st.st_size, out)
+    return out
+
+
+def community_catalog(path=None):
+    """社区摘要的**轻量清单**（不含正文）—— 给界面显示"全库 = N 个社区摘要"。"""
+    comms = load_community_summaries(path)
+    return {
+        'n': len(comms),
+        'source': 'web/kg-data/community-summaries.json',
+        'model': (comms[0].get('model') if comms else '') or '',
+        'generated': (comms[0].get('generated') if comms else '') or '',
+        'purpose': 'B6：每个社区一段"这个社区在研究什么"（GraphRAG 的社区摘要）',
+        'communities': [{'id': c['id'], 'name': c['name'],
+                         'n_nodes': c['n_nodes'], 'n_edges': c['n_edges']}
+                        for c in comms],
+    }
+
+
+def _term_hits(term, q, q_tokens):
+    """词面命中 —— 与 `_match_seeds` **同一套判据**（互相包含 / 词级包含）。
+
+    刻意不另写一套更宽松的阈值：那会让"全库模式"和"单篇模式"对
+    "什么叫命中"给出不同答案，两者之间的任何对比都失去意义
+    （这条理由与 `_match_seeds` 上方的注释是同一条）。
+    """
+    n = _norm(term)
+    if not n or len(n) < 2:
+        return False
+    if q and len(n) >= 3 and n in q:
+        return True
+    if q and len(q) >= 3 and q in n:
+        return True
+    return any(len(t) >= 3 and t in n for t in q_tokens)
+
+
+def score_community(question, community):
+    """给一个社区打分。返回 `(分数, 命中说明列表)`。**纯函数、零模型。**"""
+    q = _norm(question)
+    q_tokens = [t for t in re.split(r'[^0-9A-Za-z\u4e00-\u9fff]+',
+                                    str(question or '').lower()) if len(t) >= 2]
+    score, matched = 0.0, []
+
+    name = community.get('name') or ''
+    if _term_hits(name, q, q_tokens):
+        score += COMMUNITY_NAME_WEIGHT
+        matched.append('社区名：%s' % name)
+
+    mhits = [m for m in (community.get('members') or []) if _term_hits(m, q, q_tokens)][:3]
+    if mhits:
+        score += COMMUNITY_MEMBER_WEIGHT * len(mhits)
+        matched.append('成员实体：%s' % '、'.join(mhits))
+
+    s = _norm(community.get('summary'))
+    shits = [t for t in q_tokens if len(t) >= 3 and t in s][:2]
+    if shits:
+        score += COMMUNITY_SUMMARY_WEIGHT * len(shits)
+        matched.append('摘要用词：%s' % '、'.join(shits))
+    return score, matched
+
+
+def retrieve_communities(question, communities=None, top_k=COMMUNITY_TOP_K):
+    """**全库检索**：在所有社区摘要上做词面匹配，取最相关的 top-K。
+
+    返回 `{'hits': [...], 'scope': 'focused'|'all'|'none', 'n_total': N, 'reason': str}`。
+
+    三种 `scope` 各自的含义（**界面必须照实显示，不能都写成"检索到了"**）：
+      · `focused` —— 有社区被词面命中，取分数最高的 top-K；
+      · `all`     —— **一个都没命中** ⇒ 覆盖规模最大的若干社区，
+                     这是**全库综述**（GraphRAG global search 的做法），
+                     不是"精确检索到了这些社区"；
+      · `none`    —— 没有可用的社区摘要（文件缺失/为空）或问题为空。
+    """
+    q = str(question or '').strip()
+    comms = communities if communities is not None else load_community_summaries()
+    n_total = len(comms)
+    if not q:
+        return {'hits': [], 'scope': 'none', 'n_total': n_total, 'reason': '问题为空'}
+    if not comms:
+        return {'hits': [], 'scope': 'none', 'n_total': 0,
+                'reason': ('没有可用的社区摘要'
+                           '（web/kg-data/community-summaries.json 缺失或为空）'
+                           '—— 全库模式需要它，这里如实报"找不到"，不编')}
+
+    scored = []
+    for c in comms:
+        sc, matched = score_community(q, c)
+        scored.append((sc, c, matched))
+    # 同分时：节点多的社区优先，再按 id 稳定排序（**结果必须可复现**）
+    scored.sort(key=lambda t: (-t[0], -(t[1].get('n_nodes') or 0),
+                               str(t[1].get('id') or '')))
+
+    k = max(1, int(top_k or COMMUNITY_TOP_K))
+    focused = [t for t in scored if t[0] >= COMMUNITY_MIN_SCORE][:k]
+    if focused:
+        hits = [{'community': c, 'score': sc, 'matched': mt} for sc, c, mt in focused]
+        return {
+            'hits': hits, 'scope': 'focused', 'n_total': n_total,
+            'reason': ('社区摘要词面匹配：命中 %d 个社区（共 %d 个，取分数最高的 %d 个）'
+                       '—— 纯规则、零模型、可复现'
+                       % (len(focused), n_total, len(hits))),
+        }
+
+    bysize = sorted(scored, key=lambda t: (-(t[1].get('n_nodes') or 0),
+                                           str(t[1].get('id') or '')))[:COMMUNITY_ALL_LIMIT]
+    hits = [{'community': c, 'score': 0.0, 'matched': ['（词面未命中）']}
+            for _sc, c, _mt in bysize]
+    return {
+        'hits': hits, 'scope': 'all', 'n_total': n_total,
+        'reason': ('问题没有命中任何社区的标识词（社区名 / 成员实体）'
+                   '⇒ 覆盖规模最大的 %d 个社区（共 %d 个）：这是「全库综述」，'
+                   '不是精确检索 —— 纯规则、零模型、可复现'
+                   % (len(hits), n_total)),
+    }
+
+
+def _is_community_evidence(ev):
+    """这批证据是不是社区级的。**判据在数据里，不靠调用方传参。**"""
+    return bool(ev) and all(isinstance(it, dict) and it.get('level') == 'community'
+                            for it in ev)
+
+
+def community_evidence_pack(retrieval, max_items=None):
+    """把命中的社区整理成**社区级证据**（形状与图证据兼容，但语义不同）。
+
+    两条刻意的设计：
+
+      · `citations` **恒为空**：社区摘要是**生成的**，不是论文原文，
+        它没有页码可指。留一个空的 citations 而不是填社区名进去 ——
+        空列表会让界面显示"这条没有原文引文"，
+        **而"看起来像原文引文"的那种填充会让人以为它是原文**（本项目的红线）。
+      · `has_quote=False`：沿用 `evidence_pack` 的字段名，
+        于是所有"按 has_quote 判断"的既有代码都会把社区证据归到"无原文引文"一侧 ——
+        **这正是事实**。
+    """
+    items = []
+    for h in (retrieval or {}).get('hits') or []:
+        c = h.get('community') or {}
+        members = c.get('members') or []
+        items.append({
+            'claim': '社区「%s」（%s）· %s 实体 / %s 关系' % (
+                c.get('name') or '?', c.get('id') or '?',
+                c.get('n_nodes') if c.get('n_nodes') is not None else '?',
+                c.get('n_edges') if c.get('n_edges') is not None else '?'),
+            'type': 'COMMUNITY_SUMMARY',
+            'source': '社区：%s' % (c.get('name') or c.get('id') or '?'),
+            'target': '成员实体：%s' % ('、'.join(members[:6]) if members else '（无记录）'),
+            'citations': [],
+            'has_quote': False,
+            # ★ 这一对字段是"别把结构推断说成事实"那条纪律在数据层的落点
+            'level': 'community',
+            'level_label': '社区级摘要（本地模型生成 · 不是论文原文）',
+            'matched': h.get('matched') or [],
+            'score': h.get('score'),
+            'community': {
+                'id': c.get('id'), 'name': c.get('name'),
+                'summary': c.get('summary') or '',
+                'members': members,
+                'n_nodes': c.get('n_nodes'), 'n_edges': c.get('n_edges'),
+                'model': c.get('model'), 'generated': c.get('generated'),
+                'source': c.get('source'),
+                'grounding_ok': c.get('grounding_ok'),
+                'says_no_theme': c.get('says_no_theme'),
+            },
+        })
+    return items[:max_items] if max_items else items
+
+
+def _fmt_community_evidence(items, limit=14):
+    """社区级证据 → 给模型看的文本。**开头第一句就说明它不是论文原文。**"""
+    lines = ['（注意：下面每一条都是**社区级摘要** —— 由本地模型根据该社区的实体与关系'
+             '写出的概括，不是论文原文，也不是任何一篇论文的原话。）']
+    for i, it in enumerate(items[:limit], 1):
+        c = it.get('community') or {}
+        lines.append('[%d] %s\n    社区摘要：%s\n    成员实体：%s' % (
+            i, it.get('claim'),
+            (c.get('summary') or '（摘要缺失）')[:400],
+            '、'.join((c.get('members') or [])[:8]) or '（无）'))
+    return '\n'.join(lines)
+
+
+def step_retrieve_global(question, communities=None, top_k=COMMUNITY_TOP_K, history=None):
+    """① 全库检索：**在所有社区摘要上做词面匹配**（不碰单篇图的实体与边）。
+
+    返回形状与 `step_retrieve` 保持一致（`stage` / `note` / `retrieval` /
+    `evidence` / `n_evidence` / `n_with_quote`），所以前端可以用同一套渲染代码，
+    只在 `retrieval.mode == 'global'` 时换文案。
+
+    `n_nodes` / `n_edges` 恒为 0：全库模式**没有子图**（它检索的是社区摘要，
+    不是节点与边）。填 0 而不是拿社区数去凑，是为了让界面上的数字**不撒谎**。
+
+    `history` 与单篇模式同样只用于**补全没主语的追问**（`rewrite_question`）。
+    """
+    q_used, rewritten_from = rewrite_question(question, history)
+    r = retrieve_communities(q_used, communities, top_k=top_k)
+    ev = community_evidence_pack(r)
+    scope = r.get('scope')
+    n_total = r.get('n_total') or 0
+
+    note = ('全库模式：在 %d 条社区摘要上做词面匹配（不查某一篇论文的实体与边），'
+            '未调用模型，结果可复现' % n_total)
+    if scope == 'all':
+        note += ('；问题没有命中任何社区的标识词 ⇒ 覆盖规模最大的 %d 个社区，'
+                 '这是全库综述而不是精确检索' % len(ev))
+    elif scope == 'none':
+        note = r.get('reason') or '没有可用的社区摘要'
+
+    return {
+        'stage': 'retrieve',
+        'agent': '检索 Agent（全库 · 社区摘要）',
+        'mode': 'global',
+        'note': note,
+        'retrieval': {
+            'mode': 'global',
+            'scope': scope,
+            # 命中社区的**名字**放进 seeds：界面上"命中了什么"要看得见
+            'seeds': [h['community'].get('name') for h in (r.get('hits') or [])],
+            'n_nodes': 0,
+            'n_edges': 0,
+            'n_communities': len(ev),
+            'n_communities_total': n_total,
+            'reason': r.get('reason'),
+            'question_used': q_used,
+            'rewritten_from': rewritten_from,
+            'bridge': None,
+            'source': 'web/kg-data/community-summaries.json',
+        },
+        'evidence': ev,
+        'n_evidence': len(ev),
+        # 社区摘要**没有**论文原文引文 —— 0 就是 0，不许含糊
+        'n_with_quote': 0,
     }

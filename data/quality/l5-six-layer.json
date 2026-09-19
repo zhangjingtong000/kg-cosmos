@@ -1,16 +1,16 @@
 {
   "source": "relation-verify-all.json",
   "threshold": 0.67,
-  "edges_total": 43867,
+  "edges_total": 45708,
   "L1_entity_presence": {
-    "hit": 18336,
-    "total": 19427,
-    "rate": 0.9438410459669532,
-    "rate_extracted": 0.9279904780797461,
+    "hit": 19463,
+    "total": 20785,
+    "rate": 0.9363964397401973,
+    "rate_extracted": 0.9199077725866149,
     "rate_backfilled": 0.9995353159851301,
     "extracted": {
-      "hit": 14034,
-      "total": 15123
+      "hit": 15161,
+      "total": 16481
     },
     "backfilled": {
       "hit": 4302,
@@ -42,21 +42,21 @@
     "criterion_history": "初版判据取\"任一成员的类型\"，196 组被跳过（其中 183 组只是简单复数）；2026-09-12 改版为「纯单复数无条件合并 + 其他近名走频次加权类型 + 语义敏感名单」，L2 合并率 40.8% → 97.0%。"
   },
   "L3_endpoints": {
-    "all": 0.9616796224952698,
-    "supported": 0.9673392001144738
+    "all": 0.9648857967970595,
+    "supported": 0.9701764645179044
   },
   "L3_endpoints_extracted_caliber": {
-    "all": 0.6844324891148243,
-    "supported": 0.6855548400944409,
+    "all": 0.7007307254747528,
+    "supported": 0.7013518626810223,
     "backfilled_nodes": 4304,
     "note": "L3_endpoints 是闭合口径（含从边反建的节点，属人工构造）；本字段是抽取口径，只统计独立抽取出来的节点。两者必须并列引用。"
   },
   "L4_predicate": {
-    "all": 0.9945973054915996,
-    "supported": 0.9935250769120698
+    "all": 0.994814912050407,
+    "supported": 0.9937738639881669
   },
   "L5_triplet": {
-    "all": 0.6372443978389222,
+    "all": 0.636015577141857,
     "supported": 1.0
   },
   "L6_evidence": {
@@ -64,9 +64,9 @@
     "supported": 1.0
   },
   "hit_both": {
-    "all": 0.4691225750564205,
-    "supported": 0.5775559848322244
+    "all": 0.46582655115078325,
+    "supported": 0.5706374049740291
   },
-  "edges_supported": 27954,
-  "edges_dropped": 15913
+  "edges_supported": 29071,
+  "edges_dropped": 16637
 }

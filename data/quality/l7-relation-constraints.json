@@ -2,7 +2,7 @@
   "layer": "L7",
   "criterion": "endpoint type constraint",
   "table_source": "src/ontology.py",
-  "edges_total": 43867,
+  "edges_total": 45708,
   "by_type": {
     "RELATED_TO": {
       "kind": "unconstrained",
@@ -46,14 +46,14 @@
         "System",
         "Tool"
       ],
-      "n_total": 9598,
-      "n_unjudgeable": 3199,
-      "n_resolvable": 6399,
+      "n_total": 9800,
+      "n_unjudgeable": 2958,
+      "n_resolvable": 6842,
       "n_compliant_directed": 0,
       "n_compliant_role": 0,
       "n_reversed": 0,
       "n_role_violation": 0,
-      "n_unconstrained": 6399,
+      "n_unconstrained": 6842,
       "direction_compliance": null,
       "direction_coverage": 0.0,
       "role_compliance": null,
@@ -102,24 +102,24 @@
         "System",
         "Tool"
       ],
-      "n_total": 8755,
-      "n_unjudgeable": 2551,
-      "n_resolvable": 6204,
-      "n_compliant_directed": 5787,
+      "n_total": 8821,
+      "n_unjudgeable": 2512,
+      "n_resolvable": 6309,
+      "n_compliant_directed": 5832,
       "n_compliant_role": 0,
-      "n_reversed": 119,
-      "n_role_violation": 298,
+      "n_reversed": 152,
+      "n_role_violation": 325,
       "n_unconstrained": 0,
-      "direction_compliance": 0.9799,
-      "direction_coverage": 0.952,
-      "role_compliance": 0.951,
+      "direction_compliance": 0.9746,
+      "direction_coverage": 0.9485,
+      "role_compliance": 0.9472,
       "reversed_pairs": [
         [
           [
             "Method",
             "Person"
           ],
-          54
+          60
         ],
         [
           [
@@ -131,9 +131,16 @@
         [
           [
             "System",
+            "Organization"
+          ],
+          19
+        ],
+        [
+          [
+            "System",
             "Person"
           ],
-          15
+          16
         ],
         [
           [
@@ -147,7 +154,7 @@
             "Component",
             "Person"
           ],
-          2
+          3
         ],
         [
           [
@@ -158,21 +165,21 @@
         ],
         [
           [
-            "Tool",
-            "Person"
+            "Dataset",
+            "Organization"
           ],
-          1
-        ],
-        [
-          [
-            "Process",
-            "Person"
-          ],
-          1
+          2
         ],
         [
           [
             "Artifact",
+            "Organization"
+          ],
+          2
+        ],
+        [
+          [
+            "Tool",
             "Person"
           ],
           1
@@ -223,6 +230,13 @@
         ],
         [
           [
+            "System",
+            "System"
+          ],
+          12
+        ],
+        [
+          [
             "Organization",
             "Person"
           ],
@@ -233,21 +247,14 @@
             "Concept",
             "Method"
           ],
-          7
+          8
         ],
         [
           [
             "Concept",
             "Concept"
           ],
-          6
-        ],
-        [
-          [
-            "Concept",
-            "Artifact"
-          ],
-          6
+          8
         ]
       ],
       "reversed_samples": [
@@ -259,6 +266,15 @@
           "type": "CREATED_BY",
           "l5": 0.6381,
           "description": "Word2Vec was created by Mikolov et al."
+        },
+        {
+          "source": "KG2E",
+          "source_type": "Method",
+          "target": "He",
+          "target_type": "Person",
+          "type": "CREATED_BY",
+          "l5": 0.1592,
+          "description": "KG2E was proposed by He et al., 2015"
         },
         {
           "source": "ComplEx-N3",
@@ -313,15 +329,6 @@
           "type": "CREATED_BY",
           "l5": 0.3412,
           "description": "ROPs was created by Yin et al."
-        },
-        {
-          "source": "Inception Network",
-          "source_type": "Component",
-          "target": "Szegedy Et Al.",
-          "target_type": "Person",
-          "type": "CREATED_BY",
-          "l5": 0.3146,
-          "description": "The Inception network is attributed to Szegedy et al., 2016."
         }
       ],
       "role_violation_samples": [
@@ -437,17 +444,17 @@
         "System",
         "Tool"
       ],
-      "n_total": 7339,
-      "n_unjudgeable": 2519,
-      "n_resolvable": 4820,
+      "n_total": 7852,
+      "n_unjudgeable": 2478,
+      "n_resolvable": 5374,
       "n_compliant_directed": 0,
-      "n_compliant_role": 4781,
+      "n_compliant_role": 5328,
       "n_reversed": 0,
-      "n_role_violation": 39,
+      "n_role_violation": 46,
       "n_unconstrained": 0,
       "direction_compliance": null,
       "direction_coverage": 0.0,
-      "role_compliance": 0.9919,
+      "role_compliance": 0.9914,
       "reversed_pairs": [],
       "role_violation_pairs": [
         [
@@ -459,28 +466,35 @@
         ],
         [
           [
-            "Method",
-            "Person"
-          ],
-          7
-        ],
-        [
-          [
             "System",
             "Person"
           ],
-          7
+          10
+        ],
+        [
+          [
+            "Method",
+            "Person"
+          ],
+          9
+        ],
+        [
+          [
+            "Concept",
+            "Person"
+          ],
+          5
         ],
         [
           [
             "Process",
             "Person"
           ],
-          6
+          4
         ],
         [
           [
-            "Concept",
+            "Artifact",
             "Person"
           ],
           3
@@ -489,13 +503,6 @@
           [
             "Material",
             "Concept"
-          ],
-          1
-        ],
-        [
-          [
-            "Artifact",
-            "Person"
           ],
           1
         ],
@@ -535,6 +542,24 @@
           "description": "Creating a scholarly knowledge graph requires manual effort and domain experts"
         },
         {
+          "source": "Approach",
+          "source_type": "Method",
+          "target": "Human Expert",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.9412,
+          "description": "The approach requires manual effort and human experts."
+        },
+        {
+          "source": "Crowdsourcing",
+          "source_type": "Method",
+          "target": "Paper Authors",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.6771,
+          "description": "Crowdsourcing includes paper authors."
+        },
+        {
           "source": "Crowdsourcing",
           "source_type": "Method",
           "target": "Domain Expert",
@@ -542,6 +567,15 @@
           "type": "USES",
           "l5": 0.5122,
           "description": "Crowdsourcing includes domain experts."
+        },
+        {
+          "source": "Open Research Knowledge Graph",
+          "source_type": "System",
+          "target": "Paper Authors",
+          "target_type": "Person",
+          "type": "USES",
+          "l5": 0.1323,
+          "description": "ORKG includes paper authors in crowdsourcing."
         },
         {
           "source": "Open Research Knowledge Graph",
@@ -554,39 +588,12 @@
         },
         {
           "source": "Comparison",
-          "source_type": "Process",
+          "source_type": "Artifact",
           "target": "Researchers",
           "target_type": "Person",
           "type": "USES",
           "l5": 0.4311,
           "description": "Comparisons can be revised, discussed, and annotated by many researchers."
-        },
-        {
-          "source": "Comparison",
-          "source_type": "Process",
-          "target": "Curators",
-          "target_type": "Person",
-          "type": "USES",
-          "l5": 0.2937,
-          "description": "Comparisons can be revised, discussed, and annotated by many curators."
-        },
-        {
-          "source": "Armadillo",
-          "source_type": "System",
-          "target": "User",
-          "target_type": "Person",
-          "type": "USES",
-          "l5": 0.1411,
-          "description": "Armadillo uses user-defined ontology as its bootstrap ontology."
-        },
-        {
-          "source": "MUSE",
-          "source_type": "System",
-          "target": "User",
-          "target_type": "Person",
-          "type": "USES",
-          "l5": 0.5609,
-          "description": "MUSE uses user-defined ontology as its bootstrap ontology."
         }
       ]
     },
@@ -631,17 +638,17 @@
         "System",
         "Tool"
       ],
-      "n_total": 5816,
-      "n_unjudgeable": 1884,
-      "n_resolvable": 3932,
+      "n_total": 5920,
+      "n_unjudgeable": 1808,
+      "n_resolvable": 4112,
       "n_compliant_directed": 0,
-      "n_compliant_role": 3914,
+      "n_compliant_role": 4094,
       "n_reversed": 0,
       "n_role_violation": 18,
       "n_unconstrained": 0,
       "direction_compliance": null,
       "direction_coverage": 0.0,
-      "role_compliance": 0.9954,
+      "role_compliance": 0.9956,
       "reversed_pairs": [],
       "role_violation_pairs": [
         [
@@ -667,7 +674,7 @@
         ],
         [
           [
-            "Artifact",
+            "Component",
             "Person"
           ],
           1
@@ -695,7 +702,7 @@
         },
         {
           "source": "Tables",
-          "source_type": "Artifact",
+          "source_type": "Component",
           "target": "Authors",
           "target_type": "Person",
           "type": "PART_OF",
@@ -789,11 +796,11 @@
         "System",
         "Tool"
       ],
-      "n_total": 3850,
-      "n_unjudgeable": 1363,
-      "n_resolvable": 2487,
+      "n_total": 4085,
+      "n_unjudgeable": 1343,
+      "n_resolvable": 2742,
       "n_compliant_directed": 0,
-      "n_compliant_role": 2487,
+      "n_compliant_role": 2742,
       "n_reversed": 0,
       "n_role_violation": 0,
       "n_unconstrained": 0,
@@ -851,18 +858,25 @@
         "System",
         "Tool"
       ],
-      "n_total": 2213,
-      "n_unjudgeable": 733,
-      "n_resolvable": 1480,
-      "n_compliant_directed": 669,
-      "n_compliant_role": 766,
-      "n_reversed": 35,
-      "n_role_violation": 10,
+      "n_total": 2422,
+      "n_unjudgeable": 698,
+      "n_resolvable": 1724,
+      "n_compliant_directed": 723,
+      "n_compliant_role": 940,
+      "n_reversed": 43,
+      "n_role_violation": 18,
       "n_unconstrained": 0,
-      "direction_compliance": 0.9503,
-      "direction_coverage": 0.4757,
-      "role_compliance": 0.9931,
+      "direction_compliance": 0.9439,
+      "direction_coverage": 0.4443,
+      "role_compliance": 0.9893,
       "reversed_pairs": [
+        [
+          [
+            "Concept",
+            "Process"
+          ],
+          15
+        ],
         [
           [
             "Concept",
@@ -873,28 +887,21 @@
         [
           [
             "Concept",
-            "Process"
-          ],
-          12
-        ],
-        [
-          [
-            "Concept",
             "System"
           ],
-          4
+          8
         ],
         [
           [
             "Artifact",
-            "Process"
+            "Person"
           ],
           2
         ],
         [
           [
             "Artifact",
-            "Person"
+            "System"
           ],
           2
         ],
@@ -909,6 +916,13 @@
           [
             "Concept",
             "Person"
+          ],
+          1
+        ],
+        [
+          [
+            "Artifact",
+            "Process"
           ],
           1
         ]
@@ -923,8 +937,29 @@
         ],
         [
           [
+            "Event",
+            "Event"
+          ],
+          3
+        ],
+        [
+          [
             "Concept",
             "Organization"
+          ],
+          2
+        ],
+        [
+          [
+            "Dataset",
+            "Organization"
+          ],
+          2
+        ],
+        [
+          [
+            "Organization",
+            "Event"
           ],
           2
         ],
@@ -938,6 +973,13 @@
         [
           [
             "Document",
+            "Organization"
+          ],
+          1
+        ],
+        [
+          [
+            "System",
             "Organization"
           ],
           1
@@ -981,13 +1023,13 @@
           "description": "The relaxation of embedding to n-balls turns triple classification into a geometric containment problem."
         },
         {
-          "source": "Tables",
-          "source_type": "Artifact",
-          "target": "Comparison",
+          "source": "Results",
+          "source_type": "Concept",
+          "target": "Import Process",
           "target_type": "Process",
           "type": "PRODUCES",
-          "l5": 0.634,
-          "description": "For each table, a comparison is created in ORKG"
+          "l5": 0.9133,
+          "description": "Results are reported for the import process."
         },
         {
           "source": "Few-Shot Learning",
@@ -1130,11 +1172,11 @@
         "System",
         "Tool"
       ],
-      "n_total": 999,
-      "n_unjudgeable": 279,
-      "n_resolvable": 720,
+      "n_total": 1090,
+      "n_unjudgeable": 260,
+      "n_resolvable": 830,
       "n_compliant_directed": 0,
-      "n_compliant_role": 720,
+      "n_compliant_role": 830,
       "n_reversed": 0,
       "n_role_violation": 0,
       "n_unconstrained": 0,
@@ -1145,78 +1187,6 @@
       "role_violation_pairs": [],
       "reversed_samples": [],
       "role_violation_samples": []
-    },
-    "CITES": {
-      "kind": "directed",
-      "reversal": "unjudgeable",
-      "semantics": "source 引用 target（引用者 → 被引用的文献/方法/作者）。",
-      "basis": "semantics",
-      "evidence": "可判定 639 条：Document→Person 79 与 Person→Document 69 并存，Document 与 Person 两侧都是常见角色，类型定不了向；target=Event 104 条实为「发表于某会议」，属谓词误用而非方向错，故保留在允许集内。",
-      "source_core": [],
-      "target_core": [],
-      "source_allowed": [
-        "Artifact",
-        "Component",
-        "Concept",
-        "Dataset",
-        "Document",
-        "Event",
-        "Method",
-        "Metric",
-        "Organization",
-        "Person",
-        "Process",
-        "System",
-        "Tool"
-      ],
-      "target_allowed": [
-        "Artifact",
-        "Component",
-        "Concept",
-        "Dataset",
-        "Document",
-        "Event",
-        "Method",
-        "Metric",
-        "Organization",
-        "Person",
-        "Process",
-        "System",
-        "Tool"
-      ],
-      "n_total": 967,
-      "n_unjudgeable": 333,
-      "n_resolvable": 634,
-      "n_compliant_directed": 0,
-      "n_compliant_role": 633,
-      "n_reversed": 0,
-      "n_role_violation": 1,
-      "n_unconstrained": 0,
-      "direction_compliance": null,
-      "direction_coverage": 0.0,
-      "role_compliance": 0.9984,
-      "reversed_pairs": [],
-      "role_violation_pairs": [
-        [
-          [
-            "Document",
-            "Location"
-          ],
-          1
-        ]
-      ],
-      "reversed_samples": [],
-      "role_violation_samples": [
-        {
-          "source": "Figure 11",
-          "source_type": "Document",
-          "target": "US",
-          "target_type": "Location",
-          "type": "CITES",
-          "l5": 0.7883,
-          "description": "Figure 11 illustrates the keyword query Titanic US"
-        }
-      ]
     },
     "MEASURES": {
       "kind": "unconstrained",
@@ -1260,14 +1230,14 @@
         "System",
         "Tool"
       ],
-      "n_total": 872,
-      "n_unjudgeable": 338,
-      "n_resolvable": 534,
+      "n_total": 1013,
+      "n_unjudgeable": 387,
+      "n_resolvable": 626,
       "n_compliant_directed": 0,
       "n_compliant_role": 0,
       "n_reversed": 0,
       "n_role_violation": 0,
-      "n_unconstrained": 534,
+      "n_unconstrained": 626,
       "direction_compliance": null,
       "direction_coverage": 0.0,
       "role_compliance": null,
@@ -1275,6 +1245,78 @@
       "role_violation_pairs": [],
       "reversed_samples": [],
       "role_violation_samples": []
+    },
+    "CITES": {
+      "kind": "directed",
+      "reversal": "unjudgeable",
+      "semantics": "source 引用 target（引用者 → 被引用的文献/方法/作者）。",
+      "basis": "semantics",
+      "evidence": "可判定 639 条：Document→Person 79 与 Person→Document 69 并存，Document 与 Person 两侧都是常见角色，类型定不了向；target=Event 104 条实为「发表于某会议」，属谓词误用而非方向错，故保留在允许集内。",
+      "source_core": [],
+      "target_core": [],
+      "source_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "target_allowed": [
+        "Artifact",
+        "Component",
+        "Concept",
+        "Dataset",
+        "Document",
+        "Event",
+        "Method",
+        "Metric",
+        "Organization",
+        "Person",
+        "Process",
+        "System",
+        "Tool"
+      ],
+      "n_total": 974,
+      "n_unjudgeable": 329,
+      "n_resolvable": 645,
+      "n_compliant_directed": 0,
+      "n_compliant_role": 644,
+      "n_reversed": 0,
+      "n_role_violation": 1,
+      "n_unconstrained": 0,
+      "direction_compliance": null,
+      "direction_coverage": 0.0,
+      "role_compliance": 0.9984,
+      "reversed_pairs": [],
+      "role_violation_pairs": [
+        [
+          [
+            "Document",
+            "Location"
+          ],
+          1
+        ]
+      ],
+      "reversed_samples": [],
+      "role_violation_samples": [
+        {
+          "source": "Figure 11",
+          "source_type": "Document",
+          "target": "US",
+          "target_type": "Location",
+          "type": "CITES",
+          "l5": 0.7883,
+          "description": "Figure 11 illustrates the keyword query Titanic US"
+        }
+      ]
     },
     "LOCATED_AT": {
       "kind": "directed",
@@ -1331,18 +1373,26 @@
         "System",
         "Tool"
       ],
-      "n_total": 853,
-      "n_unjudgeable": 270,
-      "n_resolvable": 583,
-      "n_compliant_directed": 281,
-      "n_compliant_role": 301,
-      "n_reversed": 0,
+      "n_total": 888,
+      "n_unjudgeable": 263,
+      "n_resolvable": 625,
+      "n_compliant_directed": 300,
+      "n_compliant_role": 318,
+      "n_reversed": 6,
       "n_role_violation": 1,
       "n_unconstrained": 0,
-      "direction_compliance": 1.0,
-      "direction_coverage": 0.482,
-      "role_compliance": 0.9983,
-      "reversed_pairs": [],
+      "direction_compliance": 0.9804,
+      "direction_coverage": 0.4896,
+      "role_compliance": 0.9984,
+      "reversed_pairs": [
+        [
+          [
+            "Location",
+            "Document"
+          ],
+          6
+        ]
+      ],
       "role_violation_pairs": [
         [
           [
@@ -1352,7 +1402,62 @@
           1
         ]
       ],
-      "reversed_samples": [],
+      "reversed_samples": [
+        {
+          "source": "New Orleans",
+          "source_type": "Location",
+          "target": "Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies",
+          "target_type": "Document",
+          "type": "LOCATED_AT",
+          "l5": 0.908,
+          "description": "The conference proceedings were located in New Orleans."
+        },
+        {
+          "source": "Louisiana",
+          "source_type": "Location",
+          "target": "Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies",
+          "target_type": "Document",
+          "type": "LOCATED_AT",
+          "l5": 0.8902,
+          "description": "The conference proceedings were located in Louisiana."
+        },
+        {
+          "source": "Gyeongju",
+          "source_type": "Location",
+          "target": "Proceedings of the 29th International Conference on Computational Linguistics",
+          "target_type": "Document",
+          "type": "LOCATED_AT",
+          "l5": 0.9122,
+          "description": "The conference proceedings were located in Gyeongju."
+        },
+        {
+          "source": "Republic of Korea",
+          "source_type": "Location",
+          "target": "Proceedings of the 29th International Conference on Computational Linguistics",
+          "target_type": "Document",
+          "type": "LOCATED_AT",
+          "l5": 0.4067,
+          "description": "The conference proceedings were located in Republic of Korea."
+        },
+        {
+          "source": "Dublin",
+          "source_type": "Location",
+          "target": "Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics",
+          "target_type": "Document",
+          "type": "LOCATED_AT",
+          "l5": 0.4656,
+          "description": "The conference proceedings were located in Dublin."
+        },
+        {
+          "source": "Ireland",
+          "source_type": "Location",
+          "target": "Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics",
+          "target_type": "Document",
+          "type": "LOCATED_AT",
+          "l5": 0.6328,
+          "description": "The conference proceedings were located in Ireland."
+        }
+      ],
       "role_violation_samples": [
         {
           "source": "Fast Learning Algorithm",
@@ -1403,11 +1508,11 @@
         "System",
         "Tool"
       ],
-      "n_total": 793,
-      "n_unjudgeable": 243,
-      "n_resolvable": 550,
+      "n_total": 825,
+      "n_unjudgeable": 233,
+      "n_resolvable": 592,
       "n_compliant_directed": 0,
-      "n_compliant_role": 550,
+      "n_compliant_role": 592,
       "n_reversed": 0,
       "n_role_violation": 0,
       "n_unconstrained": 0,
@@ -1455,21 +1560,39 @@
         "System",
         "Tool"
       ],
-      "n_total": 598,
-      "n_unjudgeable": 226,
-      "n_resolvable": 372,
+      "n_total": 635,
+      "n_unjudgeable": 227,
+      "n_resolvable": 408,
       "n_compliant_directed": 0,
-      "n_compliant_role": 372,
+      "n_compliant_role": 407,
       "n_reversed": 0,
-      "n_role_violation": 0,
+      "n_role_violation": 1,
       "n_unconstrained": 0,
       "direction_compliance": null,
       "direction_coverage": 0.0,
-      "role_compliance": 1.0,
+      "role_compliance": 0.9975,
       "reversed_pairs": [],
-      "role_violation_pairs": [],
+      "role_violation_pairs": [
+        [
+          [
+            "Material",
+            "Concept"
+          ],
+          1
+        ]
+      ],
       "reversed_samples": [],
-      "role_violation_samples": []
+      "role_violation_samples": [
+        {
+          "source": "hyperbolic space",
+          "source_type": "Material",
+          "target": "hierarchical structure",
+          "target_type": "Concept",
+          "type": "COMPARES_WITH",
+          "l5": 0.6711,
+          "description": "Hierarchical structure in JMOI is compared with hyperbolic space."
+        }
+      ]
     },
     "EVALUATES": {
       "kind": "directed",
@@ -1505,17 +1628,17 @@
         "System",
         "Tool"
       ],
-      "n_total": 454,
-      "n_unjudgeable": 157,
-      "n_resolvable": 297,
+      "n_total": 491,
+      "n_unjudgeable": 153,
+      "n_resolvable": 338,
       "n_compliant_directed": 0,
-      "n_compliant_role": 291,
+      "n_compliant_role": 332,
       "n_reversed": 0,
       "n_role_violation": 6,
       "n_unconstrained": 0,
       "direction_compliance": null,
       "direction_coverage": 0.0,
-      "role_compliance": 0.9798,
+      "role_compliance": 0.9822,
       "reversed_pairs": [],
       "role_violation_pairs": [
         [
@@ -1651,17 +1774,17 @@
         "System",
         "Tool"
       ],
-      "n_total": 280,
-      "n_unjudgeable": 92,
-      "n_resolvable": 188,
+      "n_total": 295,
+      "n_unjudgeable": 84,
+      "n_resolvable": 211,
       "n_compliant_directed": 0,
-      "n_compliant_role": 187,
+      "n_compliant_role": 210,
       "n_reversed": 0,
       "n_role_violation": 1,
       "n_unconstrained": 0,
       "direction_compliance": null,
       "direction_coverage": 0.0,
-      "role_compliance": 0.9947,
+      "role_compliance": 0.9953,
       "reversed_pairs": [],
       "role_violation_pairs": [
         [
@@ -1719,39 +1842,21 @@
         "System",
         "Tool"
       ],
-      "n_total": 243,
-      "n_unjudgeable": 74,
-      "n_resolvable": 169,
+      "n_total": 251,
+      "n_unjudgeable": 67,
+      "n_resolvable": 184,
       "n_compliant_directed": 0,
-      "n_compliant_role": 168,
+      "n_compliant_role": 184,
       "n_reversed": 0,
-      "n_role_violation": 1,
+      "n_role_violation": 0,
       "n_unconstrained": 0,
       "direction_compliance": null,
       "direction_coverage": 0.0,
-      "role_compliance": 0.9941,
+      "role_compliance": 1.0,
       "reversed_pairs": [],
-      "role_violation_pairs": [
-        [
-          [
-            "Artifact",
-            "Material"
-          ],
-          1
-        ]
-      ],
+      "role_violation_pairs": [],
       "reversed_samples": [],
-      "role_violation_samples": [
-        {
-          "source": "Tables",
-          "source_type": "Artifact",
-          "target": "Raster Image",
-          "target_type": "Material",
-          "type": "CONTRADICTS",
-          "l5": 0.4898,
-          "description": "The survey table should be in markup format and not included as raster image."
-        }
-      ]
+      "role_violation_samples": []
     },
     "PUBLISHED_IN": {
       "kind": "directed",
@@ -1794,40 +1899,170 @@
         "Location",
         "Organization"
       ],
-      "n_total": 0,
-      "n_unjudgeable": 0,
-      "n_resolvable": 0,
-      "n_compliant_directed": 0,
-      "n_compliant_role": 0,
+      "n_total": 109,
+      "n_unjudgeable": 2,
+      "n_resolvable": 107,
+      "n_compliant_directed": 41,
+      "n_compliant_role": 43,
       "n_reversed": 0,
-      "n_role_violation": 0,
+      "n_role_violation": 23,
       "n_unconstrained": 0,
-      "direction_compliance": null,
-      "direction_coverage": null,
-      "role_compliance": null,
+      "direction_compliance": 1.0,
+      "direction_coverage": 0.3832,
+      "role_compliance": 0.785,
       "reversed_pairs": [],
-      "role_violation_pairs": [],
+      "role_violation_pairs": [
+        [
+          [
+            "System",
+            "System"
+          ],
+          7
+        ],
+        [
+          [
+            "Method",
+            "System"
+          ],
+          5
+        ],
+        [
+          [
+            "Document",
+            "System"
+          ],
+          3
+        ],
+        [
+          [
+            "Method",
+            "Concept"
+          ],
+          3
+        ],
+        [
+          [
+            "System",
+            "Method"
+          ],
+          2
+        ],
+        [
+          [
+            "Document",
+            "Concept"
+          ],
+          1
+        ],
+        [
+          [
+            "Tool",
+            "System"
+          ],
+          1
+        ],
+        [
+          [
+            "Concept",
+            "System"
+          ],
+          1
+        ]
+      ],
       "reversed_samples": [],
-      "role_violation_samples": []
+      "role_violation_samples": [
+        {
+          "source": "Qwen technical report",
+          "source_type": "Document",
+          "target": "arXiv",
+          "target_type": "System",
+          "type": "PUBLISHED_IN",
+          "l5": 0.6978,
+          "description": "The paper 'Qwen technical report' is published on 'arXiv'."
+        },
+        {
+          "source": "Recent Progress on Machine Translation Based on Pre-trained Language Models",
+          "source_type": "Document",
+          "target": "Computer Science",
+          "target_type": "Concept",
+          "type": "PUBLISHED_IN",
+          "l5": 0.7521,
+          "description": "The paper is published in Computer Science."
+        },
+        {
+          "source": "UniKGQA",
+          "source_type": "System",
+          "target": "arXiv",
+          "target_type": "System",
+          "type": "PUBLISHED_IN",
+          "l5": 0.9196,
+          "description": "The text states that existing large language models (including the context of UniKGQA's comparison) are mostly published"
+        },
+        {
+          "source": "StrutGPT",
+          "source_type": "System",
+          "target": "arXiv",
+          "target_type": "System",
+          "type": "PUBLISHED_IN",
+          "l5": 0.636,
+          "description": "The paper is published on arXiv."
+        },
+        {
+          "source": "Long Short-Term Memory",
+          "source_type": "System",
+          "target": "Neural Computation",
+          "target_type": "Method",
+          "type": "PUBLISHED_IN",
+          "l5": 0.3865,
+          "description": "The paper is published in Neural Computation."
+        },
+        {
+          "source": "Neural-SymbolicModelsforLogical Querieson Knowledge Graphs",
+          "source_type": "System",
+          "target": "arXiv",
+          "target_type": "System",
+          "type": "PUBLISHED_IN",
+          "l5": 0.9143,
+          "description": "The paper 'Neural-SymbolicModelsforLogical Querieson Knowledge Graphs' was published in arXiv."
+        },
+        {
+          "source": "arXiv",
+          "source_type": "System",
+          "target": "OntoType",
+          "target_type": "Method",
+          "type": "PUBLISHED_IN",
+          "l5": 0.3,
+          "description": "The paper OntoType was published in arXiv."
+        },
+        {
+          "source": "ChatGPT",
+          "source_type": "System",
+          "target": "arXiv",
+          "target_type": "System",
+          "type": "PUBLISHED_IN",
+          "l5": 0.5389,
+          "description": "The paper 'ColumnTypeAnnotation using ChatGPT' is published on arXiv."
+        }
+      ]
     }
   },
   "reconcile_with_prototype": {
-    "prototype_compliance_rate": 0.9324,
-    "prototype_resolvable": 6241,
-    "prototype_compliant": 5819,
-    "prototype_reversed": 120,
-    "match_resolvable": false,
-    "match_compliant": false,
-    "match_reversed": false,
-    "direction_only_compliance": 0.9799
+    "prototype_compliance_rate": 0.9244,
+    "prototype_resolvable": 6309,
+    "prototype_compliant": 5832,
+    "prototype_reversed": 152,
+    "match_resolvable": true,
+    "match_compliant": true,
+    "match_reversed": true,
+    "direction_only_compliance": 0.9746
   },
   "total": {
-    "unconstrained": 6933,
-    "unjudgeable": 14261,
-    "compliant_role": 15170,
-    "compliant_directed": 6737,
-    "reversed": 154,
-    "role_violation": 375,
+    "unconstrained": 7468,
+    "unjudgeable": 13802,
+    "compliant_role": 16664,
+    "compliant_directed": 6896,
+    "reversed": 201,
+    "role_violation": 440,
     "out_of_ontology": 237
   }
 }

@@ -12,7 +12,7 @@ be kept busy with parallel sequences instead of one request at a time.
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from pdf_parser import parse_pdf, chunk_document
+from pdf_parser import parse_pdf, chunk_document, strip_layout_noise
 from kg_extractor import (
     MODELS, canonicalize_relation_endpoints, deduplicate_entities, extract_chunk,
     extract_chunk_once,
@@ -77,6 +77,32 @@ def extract_graph(
     else:
         report("parse", 3.0, "解析 PDF")
         parsed = parse_pdf(pdf_path, work_dir)
+    # ★★ 2026-09-19：**分块之前裁掉期刊首页的"非论文内容"**。
+    #
+    # **位置就是这里** —— "文本提取之后、分块之前"，也就是**在喂给 LLM 之前**。
+    #   为什么不能放到抽取之后再过滤：那时假边与"别的论文的标题"**已经生成并进图**了。
+    #
+    #   两段式（细节见 `pdf_parser.strip_layout_noise` 的长注释）：
+    #     ① **中文期刊论文首页** ⇒ **白名单**：只保留 标题 + 作者 + 中文摘要 +
+    #        中文关键词 + 英文标题/摘要/关键词 + 正文；裁掉 页眉页脚 / DOI /
+    #        到稿日期 / **基金项目** / 通信作者 / **作者单位** / 邮箱 / 中图分类号；
+    #        （第一版只删「引用本文 / 相似文章推荐」，实测漏过基金项目实体
+    #         `军科委国防科技重点实验室基金` 与单位署名 `国防科技大学系统工程学院`。）
+    #     ② 其余页面 ⇒ 只删「引用本文 / 相似文章推荐」标记块（第一版行为）。
+    #
+    #   无中文期刊标记的 PDF（**全部 28 篇英文 arXiv**）走直通分支
+    #   ⇒ 文本**逐字节不变**（`tmp/check_strip_en_unchanged.py` 实测 28/28 篇
+    #   sha256 前后相同，且返回的是同一个字符串对象）。
+    noise_pages = 0
+    for page in parsed.get("pages", []):
+        raw = page.get("text") or ""
+        cleaned = strip_layout_noise(raw)
+        if cleaned != raw:
+            noise_pages += 1
+            page["text"] = cleaned
+    if noise_pages:
+        print(f"    [strip] 裁掉版式噪声块：{noise_pages} 页", flush=True)
+
     report("chunk", 15.0, f"{parsed['total_pages']} 页")
     chunked = chunk_document(parsed, max_chars=max_chars)
     total_chunks = len(chunked["chunks"])

@@ -19,17 +19,17 @@
     "System",
     "Tool"
   ],
-  "edges_total": 8755,
-  "edges_resolvable": 6241,
-  "edges_unknown_endpoint": 2514,
-  "compliant": 5819,
-  "compliance_rate": 0.9324,
-  "source_violations": 330,
-  "target_violations": 269,
+  "edges_total": 8821,
+  "edges_resolvable": 6309,
+  "edges_unknown_endpoint": 2512,
+  "compliant": 5832,
+  "compliance_rate": 0.9244,
+  "source_violations": 384,
+  "target_violations": 302,
   "violation_classes": {
-    "reversed": 120,
+    "reversed": 152,
     "citation_endpoint": 92,
-    "other": 210
+    "other": 233
   },
   "top_bad_pairs": [
     [
@@ -37,7 +37,7 @@
         "Method",
         "Person"
       ],
-      54
+      60
     ],
     [
       [
@@ -91,9 +91,23 @@
     [
       [
         "System",
+        "Organization"
+      ],
+      19
+    ],
+    [
+      [
+        "System",
         "Person"
       ],
-      15
+      16
+    ],
+    [
+      [
+        "System",
+        "System"
+      ],
+      12
     ],
     [
       [
@@ -125,6 +139,13 @@
     ],
     [
       [
+        "Concept",
+        "System"
+      ],
+      7
+    ],
+    [
+      [
         "Artifact",
         "Document"
       ],
@@ -132,8 +153,8 @@
     ],
     [
       [
-        "System",
-        "System"
+        "Component",
+        "Method"
       ],
       5
     ],
@@ -146,28 +167,7 @@
     ],
     [
       [
-        "Concept",
-        "System"
-      ],
-      5
-    ],
-    [
-      [
         "Document",
-        "Method"
-      ],
-      4
-    ],
-    [
-      [
-        "Dataset",
-        "Document"
-      ],
-      4
-    ],
-    [
-      [
-        "Component",
         "Method"
       ],
       4
