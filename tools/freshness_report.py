@@ -182,8 +182,11 @@ def main():
         print(f'       重建: {cmd}')
 
     if not args.fix:
-        print('\n加 --fix 可自动重跑上面这些重建命令。')
-        print('（重算的完整顺序见 RUNBOOK.md §6）')
+        print('\n重跑：E:\\Python313\\python.exe tools/freshness_report.py --fix')
+        print('⚠️ `--fix` **是本脚本的参数** —— `verify_all.py` 不接受它。')
+        print('   本脚本被 `verify_all.py` 当子检查调用时，这行提示会原样出现在父输出里，')
+        print('   照着敲 `verify_all.py --fix` 会**静默无效**（参数被忽略，什么都不重算）。')
+        print('（重算的完整顺序见 RUNBOOK.md §6 —— **在项目根目录**，不在 docs/ 下）')
         return 1
 
     import subprocess
