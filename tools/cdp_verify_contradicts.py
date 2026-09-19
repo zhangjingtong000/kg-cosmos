@@ -16,9 +16,10 @@ r"""验证「只看分歧」（P7 前端）—— 三个可断言的点。
 
 ## 三个断言
 
-  1. **有分歧的社区**（`comm-0`，实测 24 条）：按钮**可见**、文字**含条数**、
-     点击后 `aria-pressed` 变 `true`、**边颜色数组真的变了**、再点能恢复；
-  2. **无分歧的社区**（`comm-1`/`comm-9`/`comm-14`，实测 0 条）：
+  1. **有分歧的社区**（**现算**：`CONTRADICTS` 最多的那个 `comm-*`）：
+     按钮**可见**、文字**含条数**、点击后 `aria-pressed` 变 `true`、
+     **边颜色数组真的变了**、再点能恢复；
+  2. **无分歧的社区**（**现算**：`CONTRADICTS` == 0 的第一个）：
      按钮**必须隐藏** —— 不给一个点了没反应的控件；
   3. **恢复后颜色回到初值** —— 防止"只能进不能出"。
 
@@ -30,14 +31,40 @@ import subprocess
 import sys
 import time
 import urllib.request
+from pathlib import Path
 
 import websocket
 
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
 BASE = 'http://127.0.0.1:8098'
-# 实测：comm-0 有 24 条分歧；comm-1/9/14 是 0 条
-HAS = (0, 24)
-NONE = (1, 0)
+WEB = Path(__file__).resolve().parent.parent / 'web' / 'kg-data'
+
+
+def pick_communities():
+    """动态挑「有分歧」与「无分歧」的社区各一个（现算 `comm-*.json` 的 `CONTRADICTS` 数）。
+
+    ⚠️ 2026-09-19 改（原来写死 `HAS = (0, 24)` / `NONE = (1, 0)`）：
+
+    加中文语料后社区划分重排 ⇒ 分歧边整体挪了位置
+    （实测新 `comm-1` 有 22 条，而 `comm-0` 变成 0 条）⇒ **判据没错，但目标过期了**。
+
+    **断言强度不变**：仍然是"有分歧的必须看得见、条数对得上、点了真变色、再点能恢复"
+    与"没分歧的必须把按钮藏起来"。
+    """
+    counts = {}
+    for f in sorted(WEB.glob('comm-*.json')):
+        try:
+            ci = int(f.stem.split('-')[1])
+            d = json.loads(f.read_text(encoding='utf-8'))
+        except Exception:
+            continue
+        counts[ci] = sum(1 for e in (d.get('edges') or [])
+                         if len(e) > 2 and e[2] == 'CONTRADICTS')
+    has = sorted((c for c, n in counts.items() if n > 0), key=lambda c: -counts[c])
+    none = sorted(c for c, n in counts.items() if n == 0)
+    if not has or not none:
+        return None
+    return (has[0], counts[has[0]]), (none[0], 0)
 
 
 def cdp(ws, method, params=None, state=None):
@@ -98,7 +125,12 @@ def main():
             raise SystemExit(1)
 
         # ── 1. 有分歧的社区 ──────────────────────────────────────────────
-        ci, want = HAS
+        picked = pick_communities()
+        if not picked:
+            fails.append('挑不出社区（没有"有分歧"或没有"无分歧"的社区）')
+            raise SystemExit(1)
+        (ci, want), (ni, _) = picked
+        print(f'目标社区（现算）：有分歧 comm-{ci}（{want} 条）· 无分歧 comm-{ni}')
         ev(ws, f'KGNebula.enter({ci})')
         time.sleep(2.5)
 
@@ -148,7 +180,6 @@ def main():
         # ── 2. 无分歧的社区：按钮必须隐藏 ────────────────────────────────
         ev(ws, 'KGNebula.exit()')
         time.sleep(1.2)
-        ni, _ = NONE
         ev(ws, f'KGNebula.enter({ni})')
         time.sleep(2.5)
         st_n2 = ev(ws, 'KGNebula._internals().ud.contra ? '

@@ -216,6 +216,14 @@ DATA_CHECKS = [
     # 实测我在 analytics.html 里连改四版括号才发现——当时 CDP 检查只报
     # "某元素不可见"，看不出是语法错。
     ("前端内联 JS 语法（防白屏）", ["tools/check_js_syntax.py"]),
+    # 首屏数字：**断言渲染出来的值**，不是断言 `data-count` 属性。
+    #
+    # 为什么单独立这一项（2026-09-19）：`check_doc_numbers.py` 扫的是文件里的字，
+    # 而首屏那两个大字是 `voyage.js` 运行时写进去的（动画 + `setFig` 覆盖），
+    # 文案里还有一处手写的"评测全集 43867" —— **属性对不代表屏幕上对**。
+    # 内部记录 第 6 条记的"index.html 硬编码 18780/29120，守门不查 HTML"就是这块。
+    ("首屏数字（**渲染值** vs 权威产物 · Playwright）",
+     ["tools/verify_firstscreen_numbers.py"]),
     ("指标与数据快照的版本绑定（stale 检测）", ["tools/metric_provenance.py"]),
     # 产物之间的先后依赖：某个产物是不是在它依赖的上游之后生成的。
     # 与上面两项互补：那个答"数据变了没重算"，这个答"上下游顺序对不对"。
@@ -223,6 +231,8 @@ DATA_CHECKS = [
     ("社区布局数据自检", ["tools/diag_comm.py"]),
     ("claims 诊断（矛盾视图是否成立）", ["tools/diag_claims.py"]),
     ("结构指标与随机图基线", ["tools/l8_structure_audit.py"]),
+    ('方向判据自洽率（旧写法 71.55% → 当前 80.44%，不许退回）',
+     ['tools/check_direction_consistency.py']),
     # L5 域内效度：可自动化部分（表述敏感性 / 方向盲区 / 独立假阳性下界）
     # + 人工盲判进度追踪。它**不会**因为盲判没做完而失败——
     # "未完成"是一个需要如实报告的状态，不是错误。

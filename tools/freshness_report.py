@@ -93,12 +93,68 @@ CHAIN = [
     ('web/kg-data/force-full.json', [
         ('web/kg-data/filaments.json', 'force 依赖社区划分'),
     ], [sys.executable, 'tools/build_force_data.py', '--full']),
+    # ⚠️ 2026-09-19 补两条：**社区内部视图的两份数据**。
+    #
+    # 实测踩到（加中文语料那轮）：`filaments.json` 重建 ⇒ 社区划分重排，
+    # 而 `comm-*.json`（还是 09-16 的旧划分）**不在本链里** ⇒ 没有任何东西提醒要重跑。
+    # 症状很隐蔽：页面能开、社区能进，但
+    #   · `?n=<实体名>` 恢复不了（`node_missing=true`）；
+    #   · `?hl=` 一个都命中不了（`__hlHit = 0`）；
+    # 因为页面按**新** filaments 的社区号去读**旧**的 `comm-<i>.json`
+    # （实测：新 c0 叫 "AAAI"，旧 comm-0.json 叫 "Triple" —— 整个错位）。
+    # ⇒ 两份都挂上。`summaries` 实际读 `comm-*.json`，这里用 `community-index.json`
+    #    作**代理依赖**表达"必须在 details 之后"（两者由同一个脚本一次写出）。
+    ('web/kg-data/community-index.json', [
+        ('web/kg-data/filaments.json', '社区内部视图依赖社区划分'),
+    ], [sys.executable, 'tools/build_community_details.py']),
+    ('web/kg-data/community-summaries.json', [
+        ('web/kg-data/community-index.json', '摘要依赖 comm-*.json（由上一个脚本写出）'),
+    ], [sys.executable, 'tools/build_community_summaries.py']),
     ('web/kg-data/analytics.json', [
         ('data/quality/l5-six-layer.json', '面板汇总六层'),
         ('data/quality/l5-validity-report.json', '面板新增 L5 效度段'),
         ('data/quality/l7-role-violation-audit.json', '面板新增 L7 归因段'),
         ('web/kg-data/nebula.json', '面板的规模数字'),
     ], [sys.executable, 'tools/build_analytics_data.py']),
+    # ⚠️ 2026-09-19 补两条：**证据索引一直在 freshness 链之外**（已知遗留）。
+    #
+    # 实测症状（加中文语料那轮）：`evidence-*.json` 停在 09-12，而中文图是
+    # 09-19 入库的 ⇒
+    #   · `corpus-index.json` 里中文论文的 `communities` 为**空** ⇒
+    #     证据面板与"按论文筛图"**看不到中文图**；
+    #   · 更隐蔽：`force-full.json` 重建后社区已重排，旧 evidence 仍按**旧社区号**
+    #     落文件 ⇒ 实体与社区错位。
+    # **两者都不报错** —— 只是"点进去什么都没有"，所以只能靠链来盯。
+    ('web/kg-data/evidence-0.json', [
+        ('web/kg-data/force-full.json',
+         '证据索引按社区的实体表从 force-full 的社区划分出发'),
+    ], [sys.executable, 'tools/build_evidence_index.py']),
+    # 论文索引的 `communities` 是**从 `evidence-*.json` 反查**出来的
+    # （社区 → 实体 → 证据 src），同时读图快照算每篇规模。
+    ('web/kg-data/corpus-index.json', [
+        ('web/kg-data/evidence-0.json', 'communities 从 evidence-*.json 反查'),
+        ('data/corpus/graphs', '每篇的节点/边规模'),
+        # ⚠️ 2026-09-19 补：**清单一直是这条链的漏登记的依赖**。
+        #   清单是 id/title/year/query/`archived` 的第一来源（本脚本逐条读它组装 papers）。
+        #   实测症状（归档标记贴错对象那轮）：改了清单的 `archived`，
+        #   本脚本**一条都不报** —— 因为这条依赖没登记。
+        ('data/corpus/_manifest.json', '清单条目（id/title/year/query/archived）'),
+    ], [sys.executable, 'tools/build_corpus_index.py']),
+    # ⚠️⚠️ 2026-09-19 补两条：**注册表与 PRISMA 也一直在 freshness 链之外**（已知遗留）。
+    #
+    # 症状（同一轮）：`_manifest.json` 的归档标记改了，`paper-registry.json`
+    # **根本不在链里** ⇒ 没有任何东西提醒重跑；而论文页（`web/papers.html`）的
+    # 三组「N 篇 · 已出图 M 篇 · 共 K 节点」与「已归档」标签**全从它来**
+    # ⇒ 页面停在旧数字，且**不报错**。`prisma.json` 同理（它从 corpus-index 派生）。
+    # ⇒ 两条都挂上，`--fix` 才会自动重建。
+    ('web/kg-data/prisma.json', [
+        ('web/kg-data/corpus-index.json', 'PRISMA 的阶段数与排除数从语料索引来'),
+    ], [sys.executable, 'tools/build_prisma_data.py']),
+    ('web/kg-data/paper-registry.json', [
+        ('data/corpus/_manifest.json', '清单是 id/title/archived 的第一来源'),
+        ('web/kg-data/corpus-index.json', '每篇的 in_graph 与节点/边规模'),
+        ('data/corpus/graphs', '图落位（in_graph / graph_file）'),
+    ], [sys.executable, 'tools/build_paper_registry.py']),
 ]
 
 

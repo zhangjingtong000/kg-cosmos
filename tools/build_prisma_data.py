@@ -19,24 +19,22 @@ r"""L18 · **PRISMA 流程图**（系统综述的筛选流程，自动生成）�
 而"排除原因"数据里**没有** ⇒ 所以我去查了一遍：
 
 ```
-清单 28 篇 · 入库 17 篇
-检索式 3 个：
-   12 篇（入库 10）  all:"knowledge graph" AND all:"survey"
-   10 篇（入库  4）  all:"large language model" AND all:"knowledge graph" AND all:"survey"
-    6 篇（入库  3）  all:"knowledge graph construction" AND all:"large language model"
-
-未入库的 11 篇：**PDF 全都有（Y）、图全都没有（N）**
-corpus/*.pdf 共 28 个 · graphs/*.json 共 17 个
+清单 33 篇 · 入库 21 篇（2026-09-19 实测）
+检索式 8 个（加中文语料后每个中文来源各算一条 —— 见数据里的 queries）
+未入库的 12 篇：11 篇 **PDF 有（Y）、图没有（N）**；1 篇**已归档**
+（PDF 与图都移入 `data/corpus/_archive-military/`）
+corpus/*.pdf 共 33 个 · graphs/*.json 共 21 个
 ```
 
-**⇒ 所以排除原因明确**：**"已下载但未抽取"**（Eligibility 阶段）。
+**⇒ 所以排除原因明确**：**"已下载但未抽取"**（Eligibility 阶段），
+外加一类**"已归档"**（主动移走留档，**下载过** —— 不许写成"未下载"）。
 
 ## ⚠️ 三处**如实**（PRISMA 的模板套不上我们的流程）
 
-1. **没有"初筛淘汰"这一步** —— 3 个检索式命中的**28 篇全都下载了**
+1. **没有"初筛淘汰"这一步** —— 检索式命中的记录**全都下载了**
    （PRISMA 模板里的 `Records excluded` 在 Identification 后，
    而我们这里**没有** ⇒ 画成 0 或干脆不画，**不能编一个数**）；
-2. **"为什么这 11 篇没抽取"数据里没有记录** ⇒ 图上如实写
+2. **"为什么这些篇没抽取"数据里没有记录** ⇒ 图上如实写
    **"已下载未抽取（原因未逐篇记录）"**，不编原因；
 3. **没有"双人独立筛选"** —— 那需要**人类标注者**，
    而本项目的关系层标注**四个模型标注者的 α 是负的**（−0.0119）。
@@ -72,6 +70,10 @@ def main():
     total = len(ps)
     ing = [p for p in ps if p.get('in_graph')]
     not_ing = [p for p in ps if not p.get('in_graph')]
+    # ★ 2026-09-19：**归档条目单独一类** —— 它的 PDF 与图都移进了
+    #   `data/corpus/_archive-military/` ⇒ 只看"文件在不在 corpus 根"会把它
+    #   误报成"未下载"。**它下载过**（按 `ARCHIVE_POLICY` 留档不删）。
+    arch = {p['id'] for p in ps if p.get('archived')}
 
     # **从文件系统核实**（不只看清单里的标记）
     pdfs = {f.stem for f in CORPUS.glob('*.pdf')}
@@ -95,7 +97,11 @@ def main():
         pid = p['id']
         has_pdf = pid in pdfs
         has_graph = pid in graphs
-        if has_pdf and not has_graph:
+        if pid in arch:
+            # **不是"没下载"，是"按政策归档"** —— 两者都是"没进图"，
+            # 但一个是流程没走到，一个是**主动移走留档**，混成一个数就误导人。
+            r = '已归档'
+        elif has_pdf and not has_graph:
             r = '已下载未抽取'
         elif not has_pdf:
             r = '未下载'
@@ -103,6 +109,7 @@ def main():
             r = '状态不明'
         reasons[r] += 1
         detail.append({'id': pid, 'reason': r, 'year': p.get('year'),
+                       'archived': pid in arch,
                        'title': (p.get('title') or '')[:110]})
     print(f'  排除 {len(not_ing)} 篇的原因分布：{dict(reasons)}')
 
@@ -111,7 +118,8 @@ def main():
         {'key': 'identification', 'label': '检索（Identification）',
          'n': total, 'note': f'{len(queries)} 个检索式，命中并下载 {total} 篇'},
         {'key': 'screening', 'label': '初筛（Screening）',
-         'n': total, 'note': '**本流程没有初筛淘汰**：3 个检索式命中的记录全部下载'
+         'n': total, 'note': f'本流程没有初筛淘汰：{len(queries)} 个检索式/来源命中的记录'
+                             '全部下载'
                              '（PRISMA 模板里的 "Records excluded" 在这里是 0 —— '
                              '图上不编一个数）'},
         {'key': 'eligibility', 'label': '全文可抽取性评估（Eligibility）',
@@ -123,7 +131,11 @@ def main():
     ]
     excluded = [{'stage': 'eligibility', 'n': len(not_ing),
                  'reason': '、'.join(reasons) or '—',
-                 'note': '**原因未逐篇记录** ⇒ 如实写"已下载未抽取"，不编理由',
+                 # ⚠️ 这条会进页面（`esc()` 后当纯文本）⇒ **不许带 markdown 粗体**
+                 #    （`tools/check_dom_text.py` 会把字面的 `**` 判红）。
+                 'note': '未抽取的"为什么"没有逐篇记录 ⇒ 如实写"已下载未抽取"，不编理由；'
+                         '"已归档"是按 ARCHIVE_POLICY 主动移走留档的（下载过，'
+                         '不是"未下载"，见 data/corpus/_archive-military/README.md）',
                  'items': detail}]
 
     payload = {
@@ -135,8 +147,12 @@ def main():
                 '（3 个检索式命中的记录全部下载了），所以那一框画成 0 并写明原因，'
                 '**不编一个数**。',
             'exclusion_reason_from_filesystem':
-                '排除原因不是从清单里读的标记，而是**去文件系统核实的**：'
-                '11 篇 PDF 全都有、图全都没有 ⇒ "已下载未抽取"。'
+                '排除原因不是从清单里读的标记，而是**去文件系统核实 + 读清单的 '
+                '`archived` 标记**：'
+                f'{reasons.get("已下载未抽取", 0)} 篇 PDF 有、图没有 ⇒ "已下载未抽取"；'
+                f'{len(arch)} 篇 PDF 与图都已移入归档目录 ⇒ "已归档"'
+                '（它**下载过** —— 按 `ARCHIVE_POLICY` 留档不删，'
+                '**不能写成"未下载"**）。'
                 '而**"为什么"没抽取数据里没记录** ⇒ 如实写"原因未逐篇记录"。',
             'no_dual_human_screening':
                 '**没有"双人独立筛选"** —— 那需要人类标注者，'

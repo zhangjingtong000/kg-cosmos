@@ -13,14 +13,24 @@ r"""F2 的浏览器实测：多图对比。
 这一页的核心输出是**交集的规模**，而那**可以在 Python 里独立复算** ——
 ⇒ 两边必须逐字相等。**那才证明"算对了"，而不只是"画出来了"。**
 
-## 断言六组
+## 断言七组
 
 1. 载入（`__diffReady`）且两个 `<select>` 都填满了；
 2. **默认选的是 J 最高的那一对**（与索引里的 `pairs[0]` 一致）；
 3. **★ KPI 与 Python 独立复算逐字相等**（共有实体 / Jaccard / 共有关系）；
 4. 三栏列表都渲染了（只在左 / 共有 / 只在右）；
 5. **「值得看的对」条数 = 索引里零共享关系的对数**；
-6. 点其中一条 ⇒ **切换生效**（`__diffState.a/b` 变了）。
+6. 点其中一条 ⇒ **切换生效**（`__diffState.a/b` 变了）；
+7. **页面正文那句「N/M 对」的 DOM 值 = 索引里的值**（2026-09-19 加，见下）。
+
+## 第 7 组为什么必须有
+
+那句「节点交集为空的有 `0/136` 对、关系交集为空的有 `28/136` 对」
+原先**写死在 `web/diff.html` 的正文里**。语料从 17 篇涨到 21 篇后，
+产物（`diff.json`）早已是 `0/210` 与 `87/210`，而**页面还在说 28/136**
+—— **前端可见数字错了一整轮，没有任何检查发现**（第 5 组只看按钮条数，
+不看这句话）。现在这一段改为从 `diff.json` 现填，
+这一组断言就是它的守门：**DOM 里的数必须等于索引里的数**。
 
 用法：
     python tools/cdp_verify_diff.py
@@ -173,6 +183,37 @@ def main():
             for e in errs[:5]:
                 print(f'     {e[:140]}')
             fails.append(f'页面有 JS 报错：{errs[0][:120]}')
+        print()
+
+        # ── ⑦ 页面正文「N/M 对」的 DOM 值 == 索引里的值 ────────────────
+        #
+        # **为什么加**（2026-09-19）：这段正文原先是**写死的 HTML**
+        # （`0/136`、`28/136`），而产物早已是 `0/210`、`87/210`。
+        # 第 5 组只看"值得看的对"按钮条数，**不看这句话** ⇒ 它错了没人发现。
+        # 现在改为从 `diff.json` 现填，这一组就是它的守门。
+        dom7 = page.evaluate("""() => ({
+          maxJ: (document.getElementById('figMaxJ')||{}).textContent,
+          zeroNodes: (document.getElementById('figZeroNodes')||{}).textContent,
+          zeroEdges: (document.getElementById('figZeroEdges')||{}).textContent,
+          pairsA: (document.getElementById('figPairsA')||{}).textContent,
+          pairsB: (document.getElementById('figPairsB')||{}).textContent,
+        })""")
+        want_zero_nodes = sum(1 for p in idx['pairs'] if p.get('n_inter_nodes') == 0)
+        want_pairs = str(len(idx['pairs']))
+        want_maxj = f"{idx['pairs'][0]['j']:.3f}"
+        print(f'  ⑦ 正文「N/M 对」的 DOM：{dom7}')
+        print(f'     期望 {want_zero_nodes}/{want_pairs}（节点交集为空）· '
+              f'{n_zero}/{want_pairs}（关系交集为空）· J 最高 {want_maxj}')
+        ok7 = (dom7['zeroEdges'] == str(n_zero)
+               and dom7['zeroNodes'] == str(want_zero_nodes)
+               and dom7['pairsA'] == want_pairs and dom7['pairsB'] == want_pairs
+               and dom7['maxJ'] == want_maxj)
+        print(f'     与产物一致：{"✅" if ok7 else "❌"}')
+        if not ok7:
+            fails.append(f'web/diff.html 正文的「N/M 对」与产物不符：DOM={dom7}，'
+                         f'期望 {want_zero_nodes}/{want_pairs} 与 {n_zero}/{want_pairs}'
+                         f' · J={want_maxj}')
+        print()
 
         browser.close()
 
@@ -182,7 +223,7 @@ def main():
         for f in fails:
             print(f'   · {f}')
         return 1
-    print('✅ 六组断言全部通过')
+    print('✅ 七组断言全部通过')
     return 0
 
 

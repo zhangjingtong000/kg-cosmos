@@ -21,16 +21,24 @@ M1 的实现里踩了**三次坑**，每一次都**不报错**，只是"结果�
    · `= 0` ⇒ 就是上面那三个坑之一（**URL 拼错**，不是"OpenAlex 没收录"）；
    · `= 100%` ⇒ 那 4 篇老论文（arXiv DOI 后补）本来查不到，**100% 反而可疑**；
 3. **每个对齐上的 work 必须带 `openalex_id`**（形状对）；
-4. **注册表里的作者只来自 OpenAlex** ——
+4. **注册表里的作者只来自可核对的来源** ——
    `author_source` 只能是 `openalex` 或 `None`，
    **不许出现 `probe`/`pdf`**（那是 `probe_authors.py` 的候选，**只有 43% 可信，不写进注册表**）；
-5. **注册表的作者与 OpenAlex 缓存逐条对得上**（不是"差不多"）。
+   ⚠️ 2026-09-19 扩写：语料里多了 4 篇**中文期刊 OA 论文**（《计算机科学》），
+   它们的 id **不是 arXiv id** ⇒ OpenAlex 那条链（按 arXiv DOI 查）**根本查不到它们**。
+   原来的判据会把**出版信息**（PDF 首页「引用本文」+ 期刊页）误判成"猜的"。
+   ⇒ 判据按两类语料分开写（**arXiv 那一类一个字都没放宽**）：
+   · arXiv 条目：仍然只能是 `openalex` 或 `None`；
+   · 非 arXiv 条目：允许 `manifest…`，但**必须带 DOI**（作者可被独立核对）。
+5. **注册表的作者与 OpenAlex 缓存逐条对得上**（不是"差不多"）
+   —— 只对 arXiv 条目成立（非 arXiv 条目不在 OpenAlex 里，见上）。
 
 用法：
     python tools/check_openalex.py
 """
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -38,6 +46,8 @@ ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / 'data' / 'quality' / 'openalex-cache.json'
 FE = ROOT / 'web' / 'kg-data' / 'openalex.json'
 REG = ROOT / 'web' / 'kg-data' / 'paper-registry.json'
+# arXiv id 形态；**不是**这个形态的（中文期刊语料）不走 OpenAlex
+RE_ARXIV = re.compile(r'^\d{4}\.\d{4,5}v\d+$')
 
 
 def main():
@@ -100,22 +110,45 @@ def main():
         fails.append(f'{len(bad3)} 个 work 缺 openalex_id：{bad3[:3]}')
     print()
 
-    # ── ④★ 注册表的作者只能来自 OpenAlex ──────────────────────────
+    # ── ④★ 注册表的作者只能来自可核对的来源 ────────────────────────
+    # ⚠️ 2026-09-19：语料里多了 4 篇**中文期刊 OA 论文**（id 不是 arXiv id）。
+    #   它们**不在 OpenAlex 的覆盖里**（那条链按 arXiv DOI 查）⇒ 元数据只能来自
+    #   PDF 首页「引用本文」+ 期刊页（`author_source` 以 `manifest` 开头）。
+    #   **这不是"猜"**（不是 `probe_authors.py` 的候选），但也不是机构权威源
+    #   ⇒ 给它一条**更严的形状要求**：必须同时带 DOI（否则作者无从核对）。
+    #   **arXiv 那一类照旧，一个字都没放宽。**
+    papers = reg.get('papers') or []
+    arxiv_rows = [p for p in papers if RE_ARXIV.match(str(p.get('arxiv_id')))]
+    local_rows = [p for p in papers if not RE_ARXIV.match(str(p.get('arxiv_id')))]
     srcs = {}
-    for p in (reg.get('papers') or []):
+    for p in papers:
         s = p.get('author_source')
         srcs[s] = srcs.get(s, 0) + 1
     print(f'  ④ 注册表里 author_source 的分布：{srcs}')
-    bad4 = [s for s in srcs if s not in (None, 'openalex')]
+    bad4 = []
+    for p in arxiv_rows:
+        s = p.get('author_source')
+        if s not in (None, 'openalex'):
+            bad4.append((p.get('arxiv_id'), s))
+    for p in local_rows:
+        s = p.get('author_source')
+        if s is None:
+            continue
+        if 'manifest' not in str(s):
+            bad4.append((p.get('arxiv_id'), s))
+        elif not p.get('doi'):
+            bad4.append((p.get('arxiv_id'), f'{s} 但缺 DOI（作者无从核对）'))
+    print(f'     arXiv {len(arxiv_rows)} 篇 ⇒ 来源只许 openalex/None；'
+          f'非 arXiv {len(local_rows)} 篇 ⇒ 来源须含 manifest 且带 DOI')
     print(f'     **不许出现 probe/pdf**（那是"猜的"，只有 43% 可信）：'
-          f'{"✅ 没有" if not bad4 else "❌ " + str(bad4)}')
+          f'{"✅ 没有" if not bad4 else "❌ " + str(bad4[:3])}')
     if bad4:
-        fails.append(f'注册表里混进了非权威来源的作者：{bad4}')
+        fails.append(f'注册表里混进了不可核对来源的作者：{bad4[:3]}')
     print()
 
-    # ── ⑤ 注册表的作者与 OpenAlex 缓存逐条对得上 ──────────────────
+    # ── ⑤ 注册表的作者与 OpenAlex 缓存逐条对得上（**只对 arXiv 条目**）──
     bad5 = []
-    for p in (reg.get('papers') or []):
+    for p in arxiv_rows:
         aid = p.get('arxiv_id')
         o = okw.get(aid)
         if not o:
@@ -138,10 +171,12 @@ def main():
         fails.append(f'{len(bad5)} 篇的作者/ID 与 OpenAlex 不符：{bad5[:3]}')
     print()
 
-    # 顺带报一个有用的数（不进失败判定）
-    ing = [p for p in (reg.get('papers') or []) if p.get('in_graph')]
+    # 顺带报一个有用的数（不进失败判定）。
+    # ⚠️ 分母用**已入库的 arXiv 条目** —— 中文图那一篇不在 OpenAlex 里，
+    #    混进分母只会把对齐率往下拽，读起来像"变差了"。
+    ing = [p for p in arxiv_rows if p.get('in_graph')]
     ing_al = [p for p in ing if p.get('openalex_id')]
-    print(f'  · 参考：已入库 {len(ing)} 篇里对齐 {len(ing_al)} 篇 '
+    print(f'  · 参考：已入库的 arXiv {len(ing)} 篇里对齐 {len(ing_al)} 篇 '
           f'= {len(ing_al) / max(1, len(ing)):.1%}')
     print(f'  · 参考：全部 {len(reg.get("papers") or [])} 篇里有作者 '
           f'{sum(1 for p in (reg.get("papers") or []) if p.get("author"))} 篇')

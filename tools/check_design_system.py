@@ -39,6 +39,20 @@ r"""前端设计系统守门：**新增页面必须接 `design.css`，不许自�
 ⇒ 用 `tools/ui_review_shots.py`（**有头模式**）截图，**人工/模型逐张看**。
 **那份脚本的 docstring 记了更重要的一条**：**无头截图的 WebGL 背景会画错**。
 
+## ★ 正式页名单在哪（2026-09-19 合并为单一来源）
+
+**不在这份文件里。** 唯一权威是 `tools/add_legacy_banners.py` 的 `OFFICIAL`，
+本脚本直接 `import`（`tools/check_legacy_banners.py` 也从那里 import）。
+
+**此前这里抄了一份 22 条的副本**，与那份权威的名单**漂开**：
+`force-explorer` / `force-graph` / `graph-2d` / `new-graph` 四个页面
+**实际都带 `data-legacy-banner` 横幅**（= 按本脚本自己的判据就是历史页），
+却在这份副本里被算作"正式页"——**两边同时成立，等于没有判据**
+（审计：`docs/DOC_AUDIT_STRUCTURE.md §五.1`）。
+
+**⇒ 这一处与 docstring 上半部分是同一个教训**：文档/名单是**事实的复述**，
+事实变了就得跟着变；**同一个事实抄两遍，一定会漂。**
+
 用法：
     python tools/check_design_system.py
 """
@@ -46,20 +60,20 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+HERE = Path(__file__).resolve().parent
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
+
+ROOT = HERE.parent
 WEB = ROOT / 'web'
 
-# 正式的页面（**必须接设计系统**）。
-# ⚠️ 依据：`web/` 下的页面里，**没有**挂"这是历史版本"横幅、
-#    且不是 `_lab_*` 实验页的那些。
-OFFICIAL = [
-    'analytics.html', 'ask.html', 'community-atlas.html', 'corpus.html', 'diff.html',
-    'force-explorer.html', 'force-graph.html', 'graph-2d.html', 'index.html',
-    'kg-nebula.html', 'l5-review.html', 'method-limits.html', 'papers.html',
-    'paper-table.html', 'pathqa.html', 'prisma.html', 'refs.html', 'stance.html',
-    'temporal.html', 'upload.html', 'bipartite.html', 'new-graph.html',
-]
+# ── 正式页名单：**唯一权威在 `tools/add_legacy_banners.py`**（见 docstring）──
+#   ⚠️ 不要在这里再写第二份 —— 写了就会漂，这里是全项目唯一一次漂过的地方。
+from add_legacy_banners import EXPERIMENTAL, OFFICIAL  # noqa: E402
+
 # 野生底色（那份"从 analytics 复制来的 `:root`"的指纹）
+# ⚠️ 与 docstring 说的一样：**配色靠看，不靠 grep** ⇒ 这个指纹表
+#    **目前不被任何判据使用**（留着是为了下次想查时不必重新找值，不是判据）。
 WILD = ['#0b0d12', '#0b0c11', '#0d0e13', '#dfe2e8', '#8b95a8']
 
 
@@ -79,6 +93,20 @@ def main():
     print('  （配色一致性**靠看，不靠 grep** —— 用 tools/ui_review_shots.py。\n'
           '   这份守门只查两条**客观、可判定**的；它误报过四次，'
           '原因写在 docstring 里。）')
+    print()
+    # ── ⓪ 正式页名单（**只复述来源与规模，不计入退出码**）──────────────
+    #
+    # **为什么这一段不计入退出码**：判据只有"重复引用"与"左边竖线"两条
+    #   （见 docstring：这份脚本误报过四次，宁可少查不可乱查）。
+    #   名单本身归 `tools/add_legacy_banners.py` 管，那里有另一条守门
+    #   （`check_legacy_banners.py`）盯着它。
+    # **这一段存在的意义**：把"名单是谁的"印在输出里 ——
+    #   **名单抄过两份、漂了半年，就是因为没人看得见它从哪来。**
+    missing_official = sorted(n for n in OFFICIAL if not (WEB / n).exists())
+    print(f'  ⓪ 正式页名单 {len(OFFICIAL)} 个'
+          f'（**唯一权威**：`tools/add_legacy_banners.py` 的 `OFFICIAL`，本脚本 import）'
+          f' · 名单里文件不存在的：{len(missing_official)} {missing_official[:5]}')
+    print(f'     内部实验页（也不算正式页、不加横幅）：{sorted(EXPERIMENTAL)}')
     print()
     dup = []
     for p in sorted(WEB.glob('*.html')):

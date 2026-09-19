@@ -16,18 +16,18 @@ list.slice(0, 6)                    // 每种类型最多只显示 6 个邻居
 
 ## 测试目标是怎么选的
 
-社区 0 里关系类型最多的节点（实测）：
-```
-TransE                  13 种类型 · 99 条关联   ← 用它
-Link Prediction         13 种类型 · 89 条关联
-Knowledge Graph Embeddings 11 种 · 78 条
-```
-`TransE` 在 `comm-0.json` 的 `nodes` 里下标为 **6**（实测）。
-**用 13 种类型这个事实**就能区分"有没有截断"（旧代码显示 5 种）。
+**现算**（`pick_target()`）：遍历全部 `comm-*.json`，取「关系类型数最多、
+其次关联数最多」的那个节点，并进入它所在的社区。
+**用"该节点有 N 种类型"这个事实**就能区分"有没有截断"（旧代码只显示 5 种）。
+
+⚠️ 2026-09-19：这里原来写死「`comm-0` 的 `nodes[6]` == `TransE`（13 种类型）」。
+加中文语料后社区划分重排（新 `comm-0` 叫 `AAAI`，`TransE` 搬到了 `comm-1`），
+下标 6 指向 `WWW` ⇒ 脚本自己报出「测试目标漂了」。
+**判据没改，只是不再假设"目标一定在社区 0、一定在下标 6"。**
 
 ## 三个断言
 
-  1. **类型区块数 ≥ 13**（去掉 `slice(0,5)` 的直接证据）；
+  1. **该节点的每一种关系类型都要有区块**（旧代码上限 5 种）；
   2. **"出现在 N 篇论文"这一行存在**（G5 的新增内容）；
   3. **某个类型的邻居行数 > 6**（去掉 `list.slice(0,6)` 的直接证据）。
 
@@ -39,13 +39,54 @@ import subprocess
 import sys
 import time
 import urllib.request
+from pathlib import Path
 
 import websocket
 
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
 BASE = 'http://127.0.0.1:8098'
-# 实测：社区 0 的 nodes[6] 是 TransE，13 种关系类型、99 条关联
-CI, NODE_IDX, EXPECT_TYPES = 0, 6, 13
+WEB = Path(__file__).resolve().parent.parent / 'web' / 'kg-data'
+
+
+def pick_target():
+    """动态选测试目标：**全部 `comm-*.json` 里关系类型最多的节点**。
+
+    ⚠️ 2026-09-19 改（原来写死「`comm-0` 的 `nodes[6]` == `TransE`（13 种类型）」）：
+
+    加中文语料后 `filaments`/`comm-*.json` 重建 ⇒ **社区划分重排**
+    （新 `comm-0` 的社区名是 `AAAI`，节点最多只有 6 种类型；
+    `TransE` 搬到了 `comm-1` 的 `nodes[6]`）⇒ 下标 6 指向 `WWW`，
+    脚本自己报出「测试目标漂了：nodes[6] 现在是 'WWW'」。
+
+    **判据一个字都没改**（旧代码上限：5 类 × 6 行）—— 只是不再假设
+    「类型最丰富的节点一定在社区 0、一定在下标 6」。
+
+    返回 `(社区号, 下标, 类型数, 关联数, 节点名)`。
+    """
+    best = None
+    for f in sorted(WEB.glob('comm-*.json')):
+        try:
+            ci = int(f.stem.split('-')[1])
+            d = json.loads(f.read_text(encoding='utf-8'))
+        except Exception:
+            continue
+        ns, es = d.get('nodes') or [], d.get('edges') or []
+        idx = {n.get('id'): i for i, n in enumerate(ns)}
+        types, assoc = {}, {}
+        for e in es:
+            if len(e) < 3:
+                continue
+            for x in (e[0], e[1]):
+                i = idx.get(x)
+                if i is None:
+                    continue
+                types.setdefault(i, set()).add(e[2])
+                assoc[i] = assoc.get(i, 0) + 1
+        for i, ts in types.items():
+            cand = (len(ts), assoc.get(i, 0), ci, i, ns[i].get('id'))
+            if best is None or cand[:2] > best[:2]:
+                best = cand
+    return best
 
 
 def cdp(ws, method, params=None, state=None):
@@ -98,15 +139,22 @@ def main():
                 break
             time.sleep(0.1)
 
+        picked = pick_target()
+        if not picked:
+            print('❌ 挑不出测试目标（comm-*.json 缺失或没有边？）')
+            return 1
+        n_types, n_assoc, CI, NODE_IDX, want_id = picked
+        print(f'测试目标：comm-{CI} nodes[{NODE_IDX}] = {want_id!r}'
+              f'（{n_types} 种关系类型 · {n_assoc} 条关联）')
+
         ev(ws, f'KGNebula.enter({CI})')
         time.sleep(2.5)
 
         # 确认测试目标还对得上（数据变了要立刻发现，而不是静默测了个别的节点）
         nid = ev(ws, f'KGNebula._internals().ud.data.nodes[{NODE_IDX}].id')
-        print(f'测试目标：nodes[{NODE_IDX}] = {nid!r}（期望 TransE）')
-        if nid != 'TransE':
-            fails.append(f'测试目标漂了：nodes[{NODE_IDX}] 现在是 {nid!r}，'
-                         f'请重新确认下标与期望类型数')
+        if nid != want_id:
+            fails.append(f'测试目标漂了：comm-{CI} nodes[{NODE_IDX}] 现在是 {nid!r}，'
+                         f'期望 {want_id!r}')
 
         ev(ws, f'KGNebula.select({NODE_IDX})')
         time.sleep(1.0)
@@ -116,13 +164,15 @@ def main():
         rows = ev(ws, "document.querySelectorAll('#dbody .row').length")
         print(f'[1] 详情面板：{len(body)} 字符 · `#dbody .sec` 区块 {secs} 个 · `.row` {rows} 行')
 
-        # 断言 1：类型区块数 ≥ 13（旧代码上限是 5）
+        # 断言 1：**该节点的每一种关系类型都要有区块**（旧代码上限是 5 类）
         # 注意：`.sec` 里除类型外还有"证据出处"/"出现在 N 篇论文"，
-        # 所以实际数应当 ≥ 13；若 ≤ 5 就直接说明截断还在。
-        if secs is None or secs <= 5:
-            fails.append(f'类型区块只有 {secs} 个（旧代码上限就是 5）—— slice(0,5) 可能还在')
+        # 所以实际数应当 ≥ n_types；若 ≤ 5 就直接说明截断还在。
+        if secs is None or secs < n_types or secs <= 5:
+            fails.append(f'类型区块只有 {secs} 个（该节点有 {n_types} 种类型 · '
+                         f'旧代码上限 5）—— slice(0,5) 可能还在')
         else:
-            print(f'    OK 区块数 {secs} > 5 ⇒ 类型截断已去掉')
+            print(f'    OK 区块数 {secs} ≥ 该节点类型数 {n_types}（且 > 5）'
+                  f'⇒ 类型截断已去掉')
 
         # 断言 2："来源论文"区块（G5）
         #   注意**不能要求"跨多篇"** —— 实测社区 0 的 1200 个实体会 1108 个只跨 1 篇，
@@ -135,8 +185,9 @@ def main():
 
         # 断言 3：邻居行数 > 某个类型的 6 行上限
         #   旧代码：类型 ≤5 个、每类 ≤6 行 ⇒ .row 上限约 30 + 证据行
-        #   实测该节点 99 条关联，去截断后 .row 应显著多于 30
-        print(f'[3] `.row` 行数 {rows}（旧代码理论上限：5 类 × 6 = 30 + 证据行）')
+        #   目标节点有 n_assoc 条关联（现算出来的），去截断后 .row 应显著多于 30
+        print(f'[3] `.row` 行数 {rows}（目标节点 {n_assoc} 条关联 · '
+              f'旧代码理论上限：5 类 × 6 = 30 + 证据行）')
         if rows is None or rows <= 40:
             fails.append(f'`.row` 只有 {rows} 行 —— list.slice(0,6) 可能还在')
 

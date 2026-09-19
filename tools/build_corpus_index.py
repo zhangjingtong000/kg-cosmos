@@ -8,12 +8,12 @@ r"""生成论文索引 `web/kg-data/corpus-index.json`（K2 的数据前提）�
 
 **核实后发现：关联键其实存在，只是没人把它们串起来。**
 
-    data/corpus/_manifest.json        28 条，含 {id, title, year, query, status}
-    data/corpus/graphs/<id>.json      17 篇的图快照（文件名就是 id）
+    data/corpus/_manifest.json        33 条，含 {id, title, year, query, status}
+    data/corpus/graphs/<id>.json      21 篇的图快照（文件名就是 id）
     web/kg-data/evidence-*.json       每条证据的 `src` = "<id>.pdf"
 
-实测：**清单 28 条 ∩ 图快照 17 个 = 17**（完美对应，**0 个孤儿**），
-另外 **11 篇只在清单里**（下载了但没入库）—— **这个信息本身就有用**。
+实测：**清单 33 条 ∩ 图快照 21 个 = 21**（完美对应，**0 个孤儿**），
+另外 **12 篇只在清单里**（下载了但没入库，其中 1 篇已归档）—— **这个信息本身就有用**。
 
 ⇒ 所以 K2 不需要"新定义一篇论文"，只需要**把已有的三处串起来**。
 
@@ -24,7 +24,7 @@ r"""生成论文索引 `web/kg-data/corpus-index.json`（K2 的数据前提）�
     {
       "generated_from": [...],
       "papers": [
-        {"id", "title", "year", "query", "in_graph": bool,
+        {"id", "title", "year", "query", "in_graph": bool, "archived": bool,
          "nodes", "edges", "top_types": {...}, "communities": [...]}
       ],
       "stats": {"total": 28, "in_graph": 17, "downloaded_only": 11}
@@ -93,6 +93,11 @@ def main():
             'year': str(m.get('year') or ''),
             'query': m.get('query') or '',
             'in_graph': g.exists(),
+            # ★ 2026-09-19：透传清单的**归档事实**（`archived` 是清单加的第五种状态）。
+            #   为什么必须透传：下游 `build_prisma_data.py` 要把它与"未下载"分开报 ——
+            #   归档过的论文**下载过**（PDF 移进了归档目录），
+            #   只看"文件在不在 `data/corpus/` 根"就会把它写成"未下载"，那是不如实。
+            'archived': bool(m.get('archived')),
             'communities': sorted(paper_comms.get(pid, set())),
         }
         if g.exists():
