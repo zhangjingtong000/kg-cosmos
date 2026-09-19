@@ -276,7 +276,7 @@ fetch('./kg-data/paper-table.json').then(r => r.ok ? r.json() : null).then(d => 
   $('#md').addEventListener('click', () =>
     download(toMD(), 'paper-table.md', 'text/markdown;charset=utf-8'));
   $('#sub').innerHTML = `${d.papers.length} 篇论文 × <b>${d.columns.length}</b> 个字段`
-    + `（**字段是关系类型**，从图谱里摊平）· 勾选列、导出 CSV/Markdown`;
+    + `（<b>字段是关系类型</b>，从图谱里摊平）· 勾选列、导出 CSV/Markdown`;
   $('#srcnote').textContent = '图源：' + (d.design && d.design.fields_are_not_copied
     ? 'A8 改写后的那份（与原图只差 1019 条边的 type）' : '');
   render();

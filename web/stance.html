@@ -168,7 +168,7 @@ function render(d) {
 
   $('#caveat').innerHTML =
     `⚠️ <b>立场是数出来的，不是问模型问出来的。</b>` +
-    `判据（**可复算**）：<code>T = S + O</code>；` +
+    `判据（<b>可复算</b>）：<code>T = S + O</code>；` +
     `<code>T &lt; ${t.min_evidence}</code> ⇒ <b>Possibly</b> · ` +
     `<code>O/T ≥ ${t.mixed_ratio}</code> ⇒ <b>Mixed</b> · ` +
     `一侧 <code>≥ ${t.sided_ratio}</code> ⇒ <b>Yes / No</b>。` +
@@ -207,9 +207,9 @@ function render(d) {
     `这里按"总证据量"取前 ${(d.claims || []).length} 个。<br>` +
     `⚠️ <b>三个必须一起看的形态</b>：` +
     `① <b>No 是 0 条</b> —— 判据要"纯反对"，而实测反对最多的那几个也都有几条支持；` +
-    `② <b>Possibly 约占 90%</b> —— 因为大部分主张只有 1–2 条证据（**那正是"证据不足"该有的样子**）；` +
+    `② <b>Possibly 约占 90%</b> —— 因为大部分主张只有 1–2 条证据（<b>那正是"证据不足"该有的样子</b>）；` +
     `③ <b>有非主张的东西混进来</b>（如人名）—— <code>SUPPORTS</code> 的 target 不全是主张，` +
-    `**那是抽取噪声**；<b>本页刻意不过滤</b>（过滤需要判据，而本项目的判据被量出过 27.4% 的假阳性）。<br>` +
+    `<b>那是抽取噪声</b>；<b>本页刻意不过滤</b>（过滤需要判据，而本项目的判据被量出过 27.4% 的假阳性）。<br>` +
     `<a href="./index.html">← 回导航页</a> · ` +
     `<a href="./paper-table.html">论文对比表</a> · ` +
     `<a href="./analytics.html">评测结论</a>`;

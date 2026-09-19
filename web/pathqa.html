@@ -248,8 +248,8 @@ body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
 </div>
 
 <footer id="foot">数据：<code>web/kg-data/nebula.json</code>（Louvain 社区的概览层导出）。
-  检索是**字面匹配 + 2 跳 BFS**；**字面一个都没命中时**，再用 `bge-m3` 嵌入做一次
-**语义兜底**，给出的候选**必须由人判断**（实测余弦的中间区不可判：该拒的最高分 0.85 &gt; 该合的最低分 0.41）。
+  检索是字面匹配 + 2 跳 BFS；字面一个都没命中时，再用 `bge-m3` 嵌入做一次
+语义兜底，给出的候选必须由人判断（实测余弦的中间区不可判：该拒的最高分 0.85 &gt; 该合的最低分 0.41）。
 两种情况都会如实显示"没有命中"，而不是猜。</footer>
 
 <script>

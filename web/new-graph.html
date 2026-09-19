@@ -311,7 +311,7 @@ function render(data) {
 (async () => {
   if (!gid) {
     document.getElementById('sub').textContent =
-      '没有指定 src 参数。本页用于查看**刚上传那一篇**的抽取结果，'
+      '没有指定 src 参数。本页用于查看刚上传那一篇的抽取结果，'
       + '请从上传页进入，或直接访问 ?src=<id>。';
     window.__ready = true;
     return;
@@ -323,7 +323,7 @@ function render(data) {
   } catch (e) {
     document.getElementById('sub').textContent =
       '取不到这篇的结果（' + (e && e.message ? e.message : e) + '）。'
-      + '注意：上传任务的结果只保存在**当前后端进程**里，后端重启后会丢失。';
+      + '注意：上传任务的结果只保存在当前后端进程里，后端重启后会丢失。';
   }
   window.__ready = true;
 })();
