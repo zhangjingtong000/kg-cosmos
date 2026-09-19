@@ -1,10 +1,10 @@
-# N7 · 什么算"一篇论文"（2026-09-17）
+﻿# N7 · 什么算"一篇论文"（2026-09-17）
 
 > **K2 的前置**。TODO 的原话：
 >
 > | **N7** | ⬜ **K2 的前置：先定义"什么是一篇论文"** |
 > | **K2 被严重低估** —— "我传过哪些"的真相散在**三处且无关联键**：
-> | `data/corpus/_manifest.json`（28 篇，字段 `id/title/year/query/status`，**无作者**）、
+> | `data/corpus/_manifest.json`（33 篇，字段 `id/title/year/query/status`，**无作者**）、
 > | `data/<gid>/graph.json`（7 个上传图，**gid 是随机 hex**）、
 > | `data/upload-tasks/*.json`。**没有关联键** |
 >

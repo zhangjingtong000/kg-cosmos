@@ -1,5 +1,19 @@
 # F2 · 多图对比 diff（2026-09-16）
 
+> ⚠️ **本文的数字已过时，先读这一段（2026-09-19 标注）**
+>
+> 下面全文写的是 **17 篇 / 136 对** 时的读数（含那句「**28 对**零共享关系」）。
+> 语料入库涨到 **21 篇**后实测是 **210 对**，其中
+> **87 对**共享实体但零共享边 · **0 对**节点交集为空 ——
+> 一切以 `web/kg-data/diff.json`（由 `tools/build_diff_data.py` **现算**）为准，
+> 前端可见数字也已统一从那里取。
+>
+> **旧值 28 / 136 的去向**：按 `docs/ARCHIVE_POLICY.md` **留档不删** ——
+> 现在存在 `diff.json` 的 `design.superseded_measurements` 里（带口径与日期）。
+>
+> **本文正文原样保留、不再更新**：它是那一轮「先量再决定给人看什么」的原始记录，
+> 改掉它反而看不见当时的判断依据。
+
 > **配套**：`tools/build_diff_data.py`（可复跑）· `web/diff.html` ·
 > `tools/cdp_verify_diff.py`（浏览器实测）·
 > `web/kg-data/diff.json`（索引）+ `web/kg-data/diff/<论文>.json`（按需）
@@ -71,7 +85,7 @@ diff/<论文>.json   17 个 · 平均 148 KB          ← 选了哪两篇才取�
 
 ## 五、★★ 最强的那条断言：**在 Python 里独立复算**
 
-浏览器实测（`tools/cdp_verify_diff.py`）六组，其中第 3 组是核心：
+浏览器实测（`tools/cdp_verify_diff.py`）七组，其中第 3 组是核心：
 
 > **在 Python 里独立算一遍交集，与浏览器算出的 KPI 逐字相等**：
 > ```
@@ -110,5 +124,71 @@ diff/<论文>.json   17 个 · 平均 148 KB          ← 选了哪两篇才取�
 
 ```powershell
 python tools/build_diff_data.py          # 生成索引 + 每篇一个文件
-python tools/cdp_verify_diff.py          # 浏览器实测（六组断言）
+python tools/cdp_verify_diff.py          # 浏览器实测（七组断言）
 ```
+
+---
+
+## 八、数字口径修订记录：28 → 87（2026-09-19）
+
+**症状**：`web/kg-data/diff.json` 里 `design.measured.pairs_with_zero_shared_edges`
+写着 **87**，而**同一个 `measured` 对象**的 `note` 却写「有 **28** 对」——
+一份产物自己打自己的脸。而 `web/index.html` 恰好取了 `note` 里的 28，
+于是**前端可见数字错了一整轮**，没有任何检查发现
+（`tools/check_doc_numbers.py` 当时只盯 `data/quality/` 与语料篇数）。
+
+**判定：28 与 87 是同一个口径，不是两个指标。**
+两版都要求"两篇**有共享实体**、且**没有任何一条共享边**"。
+差别只在**规模**：28 是 **17 篇 / 136 对**（2026-09-16）时的读数，
+87 是 **21 篇 / 210 对**时的读数。
+（顺带排除另一种可能：本项目**没有**"零共享实体对"这个指标 ——
+实测每一对都有共享实体，`0 / 210`。）
+
+**根因**：`tools/build_diff_data.py` 把 `note` 写成了**硬编码字符串常量**
+（第 154 行原文「…有 28 对…」），而 `measured` 的其它字段是**现算**的。
+语料涨了 4 篇 ⇒ 现算的字段自动变 87，字符串里的 28 不动。
+
+**修法（三处）**：
+
+1. `tools/build_diff_data.py`：`note` 改为由 `n_zero` / `max_j` **f-string 现算**；
+   `design.why_not_precompute_all` 里的 136 / 17 同样改为现算；
+   新增 `design.superseded_measurements` —— **把 28 与 136 连同口径、日期、
+   被谁替代一起留档**（按 `docs/ARCHIVE_POLICY.md`：被替代的内容不直接删）。
+2. `web/index.html`（卡片注释与可见正文）、`web/diff.html`（注释与正文）：
+   数字统一为 87；`diff.html` 正文那句「N/M 对」**改为从 `diff.json` 现填**
+   （`figMaxJ` / `figZeroNodes` / `figZeroEdges` / `figPairsA` / `figPairsB`），
+   **页面不再保留第二份真相**。
+3. 守门（见下）。
+
+**守门加在哪、为什么**：加在既有的 `tools/check_doc_numbers.py`，
+**不另写脚本** —— 它已是 `verify_all.py:145` 的统一入口，`web/index.html`
+本来就在它的 `DOCS` 白名单里；另起一个脚本还要再接一次 verify_all、
+再维护一份白名单，只会多一处漏。共三处：
+
+- `DOCS` 增加 `web/diff.html`（此前它**不在**名单里 ⇒ ① 的旧值扫描扫不到它，
+  与前一轮 `docs/verification.md` 的缺口同型）；
+- `STALE` 增加**带分母的整串** `28/136` · `28 / 136` · `0/136` · `0 / 136`
+  （为什么不用裸 `28` / `136`：裸数字在别处可能是别的量，会误报 ——
+  这正是本脚本反复栽过的"过度收紧"与"形同虚设"之间的取法）；
+- 新增 **⑧ 针对性断言**（三层）：**a.** `note` 里的数 == `measured` 里的数
+  == 由 `pairs[]` **独立重算**的数（⚠️ 只比对两个字段不够 ——
+  两个字段一起错就查不出来）；**b.** `web/index.html` 的可见写法
+  「N 对是「共享实体、零共享关系」」必须等于产物值；
+  **c.** `web/diff.html` 可见正文不许再出现写死的 `N/M 对`，
+  且五个填充锚点必须存在（这一条**不依赖具体数值** ⇒ 对数再变仍有效）。
+
+`tools/cdp_verify_diff.py` 同步加**第 7 组**断言：页面上那句「N/M 对」的
+**DOM 值必须等于索引里的值**（此前第 5 组只看按钮条数，不看这句话）。
+
+**验证结果（2026-09-19）**：
+
+```
+实测 21 篇 · 210 对 · 零共享关系 87 对 · 节点交集为空 0 对
+check_doc_numbers.py ⑧：note [87] == measured 87 == pairs[] 重算 87 ✅
+cdp_verify_diff.py ④⑦：DOM {'zeroNodes':'0','zeroEdges':'87','pairsA':'210','pairsB':'210','maxJ':'0.089'} ✅ 七组全过
+web/index.html 卡片实际渲染：「…0.089，87 对是「共享实体、零共享关系」」✅
+```
+
+**遗留**：`web/index-classic.html`（旧版导航页）整页仍是旧值 ——
+它按档案纪律**保留原样**，不在本次修订范围；`docs/TODO.md` 里那句
+「28 对」也属于**历史记录**（由持有该文件的 agent 处理）。

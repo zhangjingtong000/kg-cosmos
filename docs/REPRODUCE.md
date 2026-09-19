@@ -1,4 +1,4 @@
-# 大产物的重建方式（REPRODUCE）
+﻿# 大产物的重建方式（REPRODUCE）
 
 > **为什么有这份文件**：按 `docs/ARCHIVE_POLICY.md`，
 > **进不了版本控制的大产物，必须保证"能重跑出来"** ——
@@ -76,7 +76,7 @@ python tools/_probe/_probe_archive_artifacts.py --apply  # 真的 git add -f
 ## 四、还没做的（记在这里，别忘）
 
 1. **两个 baseline 的归档**（53 MB × 2）—— 建议 gzip 后移入 `data/quality/archive/`；
-2. **语料 PDF 是否入库** —— 28 篇 PDF 大约几十 MB，且**有版权问题**，
+2. **语料 PDF 是否入库** —— 33 篇 PDF 大约几十 MB，且**有版权问题**，
    建议**不入库**，改为在 README 里写清"语料从哪来、怎么下"；
 3. **Neo4j 内容的重建脚本** —— `sync_graph.py` 能导出，但**从 JSON 反向导入 Neo4j**
    的路径要确认（这关系到"clone 后能不能把库建起来"）。
