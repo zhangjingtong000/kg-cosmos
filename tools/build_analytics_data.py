@@ -20,6 +20,7 @@ from pathlib import Path as _Path
 _HERE = _Path(__file__).resolve()
 ROOT = _HERE.parent.parent          # tools/*.py 与 src/*.py 都在根目录下一层
 import json
+import re
 from collections import Counter
 from pathlib import Path
 
@@ -32,6 +33,31 @@ PASS = (True, "True")
 
 def read(p):
     return json.loads(Path(p).read_text(encoding="utf-8"))
+
+
+def plain_text(obj):
+    """递归地把 markdown 粗体剥成纯文本 —— **这份 payload 的文字会直接进 DOM**。
+
+    为什么必须在**这一层**做（既不在生成脚本里、也不在前端）：
+      · 生成脚本（如 `tools/l9_relation_recall.py`）里的 `**` **是有用的** ——
+        同一段 `reading` 也会被文档引用，那里**需要**粗体；
+      · 而前端这条路（`analytics.json` → `analytics.html` 的 `textContent`）
+        **只会把 `**` 原样显示出来**，变成页面上的字面星号。
+    ⇒ **转换要发生在"进 DOM 之前"这一层**，也就是这里。
+
+    ⚠️ 实测踩到（2026-09-19）：`verify_all.py` 的「DOM 文案守门」报
+    `analytics.html` 有 1 处 markdown 泄漏，来源是 `l9_relation_recall.reading`
+    里的 `**不代表关系抽全了**`。**静态扫描源码是扫不到它的** ——
+    那段文字在 JSON 数据里，渲染之后才进 DOM。
+    ⇒ 这也是"**文案从数据进 DOM**"这一类泄漏的唯一正确修法所在。
+    """
+    if isinstance(obj, str):
+        return re.sub(r'\*\*(.+?)\*\*', r'\1', obj)
+    if isinstance(obj, dict):
+        return {k: plain_text(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [plain_text(v) for v in obj]
+    return obj
 
 
 def pass_rate(edges):
@@ -399,6 +425,12 @@ def main():
         # 数据由 `tools/build_relations_data.py` 生成；这里只做"如果它在，就带上"。
         "relations": _load_relations(),
     }
+
+    # ★ 剥掉所有 markdown 粗体 —— 这份 payload 的文字会**直接进 DOM**（2026-09-19 修）。
+    #   上游 `reading` / `caliber` 等字段里的 `**` 是给 **文档渲染** 用的，
+    #   而前端走 `textContent` ⇒ 会把 `**` 原样显示成字面星号。
+    #   ⇒ 实测：`analytics.html` 因此被「DOM 文案守门」判红。
+    payload = plain_text(payload)
 
     OUT.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
                    encoding="utf-8")

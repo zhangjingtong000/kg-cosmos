@@ -69,7 +69,17 @@
       'display:flex;align-items:center;gap:6px;flex-wrap:wrap;',
       'padding:7px 14px;font:12.5px/1.4 var(--font-sans,system-ui,sans-serif);',
       'background:rgba(4,7,14,.90);border-top:1px solid var(--line,rgba(178,180,186,.13));',
-      'backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}',
+      'backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);',
+      // ★ 条子本身**不拦截指针**，只有条子上的控件拦截（2026-09-19 修）。
+      //   它是 `position:fixed` 且**横跨全宽**，而页面底部常有同样是 fixed 的浮层
+      //   （如 `kg-nebula.html` 的 `#kgExport`：`right:18px;bottom:18px;z-index:40`）
+      //   —— 本条的 `z-index:60` 压在它们上面 ⇒ **人和自动化都点不到那些按钮**。
+      //   实测：C4 分享链接的 `btn.click()` 因此超时 30 秒（Playwright 报
+      //   `<nav id="demoRail"> intercepts pointer events`）。
+      //   `pointer-events:none` 让点击**穿透条子的空白处**；条子上的链接与按钮
+      //   再逐个打开 —— 这样"有没有压到别的东西"就只剩**视觉**问题，不再是**功能**问题。
+      'pointer-events:none}',
+      '#demoRail a,#demoRail button{pointer-events:auto}',
       '#demoRail .lb{color:var(--ink-3,rgba(193,195,201,.46));letter-spacing:.14em;',
       'font-size:10.5px;margin-right:6px;white-space:nowrap}',
       '#demoRail a{color:var(--ink-2,rgba(203,218,241,.76));text-decoration:none;',
@@ -116,12 +126,21 @@
 
     /* 别遮住内容：给 body 补一条与条子等高的下边距 */
     function pad() {
-      document.body.style.paddingBottom = bar.offsetHeight + 'px';
+      var h = bar.offsetHeight + 'px';
+      // 流内元素：靠 body 的下边距让位。
+      document.body.style.paddingBottom = h;
+      // ★ 而 `position:fixed` 的底部浮层**不受 body 下边距影响**（2026-09-19 修）
+      //   ⇒ 把条子高度也暴露成 CSS 变量，让这类浮层自己抬起来：
+      //     `bottom:calc(18px + var(--demo-rail-h,0px))`
+      //   实测没抬的那一个：`kg-nebula.html` 的 `#kgExport`（分享按钮在里面），
+      //   它的 z-index 40 < 本条的 60 ⇒ 被压在下面、点不到。
+      document.documentElement.style.setProperty('--demo-rail-h', h);
     }
     bar.querySelector('.x').addEventListener('click', function () {
       setHidden(true);
       bar.remove();
       document.body.style.paddingBottom = '';
+      document.documentElement.style.removeProperty('--demo-rail-h');
     });
     document.body.appendChild(bar);
     pad();

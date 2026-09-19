@@ -256,7 +256,15 @@
   #detail .evlink:hover { color: #fff; border-bottom-color: rgba(255, 255, 255, .7); }
 
 /* ==KG_EXPORT_V1== */
-#kgExport{position:fixed;right:18px;bottom:18px;z-index:40;display:flex;gap:6px;
+/* ★ 底部让位给演示动线（2026-09-19）：本层是 `position:fixed`，
+   `demo-rail.js` 给 body 垫的下边距**垫不到它**；而 `#demoRail`
+   （`bottom:0` 全宽、`z-index:60`）恰好压在它上面 ⇒ **分享按钮点不到**
+   （C4 检查实测 `btn.click()` 超时 30s，Playwright 报
+   `<nav id="demoRail"> intercepts pointer events`）。
+   `--demo-rail-h` 由 `web/lib/demo-rail.js` 注入条子时设成真实高度；
+   不在演示动线上的页面没有这个变量 ⇒ 回落到原来的 18px，行为不变。 */
+#kgExport{position:fixed;right:18px;
+  bottom:calc(18px + var(--demo-rail-h,0px));z-index:40;display:flex;gap:6px;
   align-items:center;font:11.5px/1 "Inter",system-ui,sans-serif}
 #kgExport .lbl{color:rgba(193,195,201,.46);letter-spacing:.18em;text-transform:uppercase;
   margin-right:4px;font-size:9.5px}

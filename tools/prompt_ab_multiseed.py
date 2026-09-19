@@ -76,10 +76,17 @@ PY = sys.executable
 # 实测（`B3_SCIREX_RELATION_RESULT.md:151`：`elapsed_s` 1900 秒）
 MIN_PER_RUN = 36
 # 旧 prompt 那一次的实测（`OPTIMIZATION_PLAN.md`）—— **作为 only-one-seed 的基线**
+#
+# ⚠️⚠️ **这两个常量记录的是一个已被推翻的结论**（2026-09-19 第二轮实测后加注）：
+#   它们来自 `OPTIMIZATION_PLAN.md:225` 的**单次**测量；本轮真 A/B（各 3 seed）显示
+#   五组口径**区间全部重叠** ⇒ 「实体 F1 0.3918→0.3471（−4.5pp）」与「关系 F1 +39%」
+#   **都落在 seed 噪声内**。它们**只作为"当初那一次测到了什么"的存档**保留，
+#   **不得用来判定变体优劣** —— 判定用 `tools/prompt_ab_f1.py` 的区间重叠。
+#   ⇒ 详见 `docs/B5_PROMPT_AB_MULTISEED.md` §八 ~ §十。
 BASELINE = {'entity_f1': 0.3918, 'relation_f1': 0.0128, 'fragments': 24,
-            'source': 'OPTIMIZATION_PLAN.md（旧 prompt，1 次）'}
+            'source': 'OPTIMIZATION_PLAN.md（旧 prompt，1 次）—— **结论已被推翻，仅存档**'}
 NEW_ONE_SHOT = {'entity_f1': 0.3471, 'relation_f1': 0.0178, 'fragments': 10,
-                'source': 'OPTIMIZATION_PLAN.md（新 prompt，1 次）'}
+                'source': 'OPTIMIZATION_PLAN.md（新 prompt，1 次）—— **结论已被推翻，仅存档**'}
 
 
 def env_for(seed):
@@ -370,7 +377,27 @@ def main():
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding='utf-8')
     print(f'\n  已写出 {OUT.relative_to(ROOT)}')
-    print('  ★ 下一步（**本脚本刻意不做**）：用 `l5_report` 口径重算每次的 F1，'
+
+    # ★★ 恢复生产图（2026-09-19 修）—— **本脚本曾把实验产物留成生产数据**
+    #
+    #   本脚本复用 `ingest_corpus.py` 的抽取路径，而 `fresh_extract` 用 `KG_FORCE=1`
+    #   ⇒ **每跑完一次，`data/corpus/graphs/<subject>.json` 就被那次结果覆盖一次**。
+    #   六次跑完，生产图 = **最后一次**（上一轮实际是 `new-s2`），而各次结果
+    #   早已另存 `RUNS/<tag>.json` ⇒ **生产图没有任何理由留在实验状态**。
+    #
+    #   ⚠️ **实测代价**（2026-09-19）：681 节点 / 1391 边 → 575 / 811（**边少 42%**），
+    #     且被写进去的是 `new` 组生产 F1 **最低**的一次（0.2366）。
+    #     下游 31 个指标连带过期（含前端 3D 的 `web/kg-data/nebula.json`），
+    #     而 `verify_all` 只报「数据新鲜度」失败 ——
+    #     **看起来像"忘了重算指标"，实际是生产数据被实验覆盖**（第 8 处假成功）。
+    if archived and archived.exists():
+        snapshot.write_bytes(archived.read_bytes())
+        print(f'  ★ 生产图已恢复为实验前的那一份（{archived.name}）；'
+              f'各次结果在 {RUNS.name}/<tag>.json')
+        print('     若下游指标已过期：E:\\Python313\\python.exe '
+              'tools/freshness_report.py --fix')
+
+    print('  ★ 下一步（**本脚本刻意不做**）：用 `tools/prompt_ab_f1.py` 重算各次的 F1，'
           '再看两个区间是否重叠 —— **那才是 B5 的结论**。')
     return 0
 
