@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KG Cosmos · 提问</title>
+<link rel="stylesheet" href="./lib/a11y.css">
+<link rel="stylesheet" href="./lib/fonts/fonts.css">
+<style>
+/* ── 设计 token：与 navigation（voyage.css）/ upload.html 逐值一致 ───────── */
+:root{
+  --ink:#eef3fd;
+  --ink-2:rgba(203,218,241,.76);
+  --ink-3:rgba(193,195,201,.46);
+  --accent:#e0a469;
+  --warm:#ffcfa8;
+  --bg:#02040a;
+  --line:rgba(178,180,186,.13);
+  --maxw:1180px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg)}
+body{
+  color:var(--ink);
+  font-family:"Inter","SF Pro Display",-apple-system,BlinkMacSystemFont,
+              "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+h1,h2,h3,.kick,.display{font-family:"Smiley Sans","Noto Serif SC",Georgia,serif}
+::selection{background:rgba(224,164,105,.28);color:#fff}
+[hidden]{display:none !important}
+
+/* ── 背景：与导航页同一套绸缎光场（只把流动速度压得更慢）─────────────── */
+#gl{position:fixed;inset:0;z-index:0;display:block}
+#veil{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 120% 80% at 50% 40%,
+    rgba(2,4,10,.10) 0%, rgba(2,4,10,.55) 55%, rgba(2,4,10,.88) 100%)}
+
+/* ── 布局 ──────────────────────────────────────────────────────────────── */
+.wrap{position:relative;z-index:2;min-height:100%;display:flex;flex-direction:column}
+header{flex:0 0 auto;padding:26px 40px 0}
+header .brand{font-size:11px;letter-spacing:.30em;text-transform:uppercase;
+  color:var(--ink-3);text-decoration:none}
+main{flex:1 1 auto;padding:0 40px}
+.inner{width:100%;max-width:var(--maxw);margin:0 auto;
+  padding:clamp(34px,6.4vh,76px) 0 30px}
+
+.kick{display:flex;align-items:baseline;gap:14px;margin:0 0 18px;
+  font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-3)}
+h1{margin:0;font-size:clamp(30px,4.3vw,54px);line-height:1.06;
+  letter-spacing:-.03em;font-weight:700;color:#fff}
+h1 em{font-style:normal;
+  background:linear-gradient(96deg,var(--warm),var(--accent) 60%,#b8823f);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin:16px 0 0;max-width:66ch;font-size:14.5px;line-height:1.78;color:var(--ink-2);
+  text-wrap:pretty}
+
+/* 当前语境：问的是哪张图。做得显眼但不抢标题 ——
+   用户必须一眼知道"这是我自己上传的那篇"还是"我没带图进来"。 */
+/* ══ 把「左边竖线」换成系统规定的「顶部短横线」（2026-09-18）════════════════
+ *
+ * `design.css` 的注释里明确写着：`.note` 用**顶部短横线**、「**竖线已废弃**」。
+ * 而这三处（`.ctx` / `.more` / `.caveat`）各带一条 2px 的左边彩色竖线。
+ *
+ * **为什么竖线要废弃**：它是"**卡片化**"的残留 ——
+ * 一条竖线把内容框成"一块"，而这段内容其实只是**正文里的一个提示**。
+ * 顶部短横线表达的是"**下面这段是附属说明**"，**不制造容器感**。
+ *
+ * **改法照 `design.css` 的 `.note`**：
+ *   `::before{position:absolute;left:0;top:0;width:56px;height:2px;
+ *             background:var(--accent);opacity:.85}`
+ * ⚠️ 而 `.ctx` 原来还有 `background` + `border-radius`（**那更像卡片**）——
+ *    一并去掉：**它只是提示，不是卡片。**
+ * ⚠️ `.ctx.miss` 原本靠 `border-left-color` 变陶土色 ⇒ **改成 `::before` 的底色**。
+ */
+.ctx{margin:18px 0 0;padding:11px 0 0;max-width:66ch;font-size:13px;line-height:1.6;
+  position:relative;border:0;background:none;color:var(--ink-2)}
+.ctx::before{content:"";position:absolute;left:0;top:0;width:56px;height:2px;
+  background:var(--accent);opacity:.85}
+.ctx b{color:#fff;font-weight:600}
+.ctx.miss::before{background:var(--clay,#c07a4e)}
+.ctx a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(224,164,105,.4)}
+
+/* ── Agent 工作台：让「多个 Agent 在分工」看得见 ─────────────────────
+   四种状态：等待（灰）· 工作中（暖金 + 呼吸）· 完成（白）· 失败（陶土）。
+   这里刻意让「工作中」有个缓慢的呼吸动画 —— 观众能看出"它现在正在读"，
+   而不是一个静态的列表。reduced-motion 下不呼吸，只换颜色。 */
+.alog{list-style:none;margin:14px 0 0;padding:0;max-width:74ch}
+.alog li{display:flex;gap:12px;align-items:baseline;padding:9px 2px;
+  border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink-3);
+  transition:color .45s cubic-bezier(.19,1,.22,1)}
+.alog li .ai{font-variant-numeric:tabular-nums;color:var(--ink-3);flex:0 0 auto}
+.alog li .an{font-weight:600;flex:0 0 88px;color:var(--ink-3);
+  transition:color .45s cubic-bezier(.19,1,.22,1)}
+.alog li .ad{color:var(--ink-3);line-height:1.6}
+.alog li.run{color:var(--ink-2)}
+.alog li.run .an,.alog li.run .ai{color:var(--accent)}
+.alog li.run .ad{color:var(--warm,#ffcfa8)}
+.alog li.run .ai::after{content:"";display:inline-block;width:6px;height:6px;
+  margin-left:6px;border-radius:50%;background:var(--accent);
+  animation:apulse 1.5s ease-in-out infinite}
+@keyframes apulse{0%,100%{opacity:.25}50%{opacity:1}}
+.alog li.done{color:var(--ink-2)}
+.alog li.done .an{color:var(--ink)}
+.alog li.done .ai{color:var(--cyan,#7cc0b6)}
+.alog li.bad .an,.alog li.bad .ai{color:var(--clay,#c07a4e)}
+@media (prefers-reduced-motion:reduce){
+  .alog li.run .ai::after{animation:none;opacity:1}
+}
+
+/* ── 提问栏：一条发丝线 + 大字号输入，不是聊天输入框 ─────────────────── */
+.askwrap{margin:34px 0 0}
+.askwrap .lb{display:block;font-size:10.5px;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
+.ask{display:flex;align-items:center;gap:18px;
+  border-bottom:1px solid var(--line);padding:0 0 14px;
+  transition:border-color .55s cubic-bezier(.19,1,.22,1)}
+.ask:focus-within{border-bottom-color:rgba(224,164,105,.52)}
+.ask input{flex:1 1 auto;min-width:0;background:none;border:0;outline:none;
+  color:#fff;padding:5px 0;letter-spacing:-.015em;
+  font:400 clamp(17px,2.05vw,23px)/1.42 inherit;font-family:inherit}
+.ask input::placeholder{color:var(--ink-3)}
+.ask .go{flex:0 0 auto;width:44px;height:44px;padding:0;border-radius:50%;
+  display:grid;place-items:center;cursor:pointer;color:var(--warm);
+  border:1px solid rgba(224,164,105,.45);
+  background:linear-gradient(120deg,rgba(224,164,105,.20),rgba(224,164,105,.05));
+  transition:transform .45s cubic-bezier(.19,1,.22,1),border-color .3s,box-shadow .45s}
+.ask .go:hover{border-color:rgba(224,164,105,.9);transform:translateY(-2px);
+  box-shadow:0 18px 44px -18px rgba(224,164,105,.7)}
+.ask .go svg{width:17px;height:17px}
+
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 0}
+.chip{font:400 12.5px/1.35 inherit;font-family:inherit;color:var(--ink-2);
+  background:rgba(255,255,255,.022);border:1px solid var(--line);
+  border-radius:999px;padding:9px 15px;cursor:pointer;text-align:left;
+  transition:color .3s,border-color .3s,background .3s}
+.chip:hover,.chip:focus-visible{color:#fff;border-color:rgba(224,164,105,.40);
+  background:rgba(224,164,105,.08)}
+.chip.on{color:#fff;border-color:rgba(224,164,105,.55);background:rgba(224,164,105,.10)}
+
+/* ── 初次进入时的说明：沿用上传页 stage 的排版节奏（序号 + 名称 + 说明）── */
+.how{margin:36px 0 0;border-top:1px solid var(--line)}
+.how .r{display:grid;grid-template-columns:26px 148px 1fr;gap:16px;align-items:baseline;
+  padding:12px 2px;border-bottom:1px solid var(--line)}
+.how .ix{font-size:11px;color:var(--ink-3);letter-spacing:.06em;
+  font-variant-numeric:tabular-nums}
+.how .nm{font-size:13.5px;color:var(--ink)}
+.how .ds{font-size:12.5px;color:var(--ink-3);line-height:1.7}
+.how-note{margin:16px 0 0;font-size:12px;color:var(--ink-3);line-height:1.7;
+  display:flex;align-items:center;gap:10px}
+.how-note::before{content:"";flex:0 0 22px;height:1px;background:var(--accent);
+  opacity:.55}
+
+/* ── 结果区 ────────────────────────────────────────────────────────────── */
+#result{margin:46px 0 0}
+.sec{border-top:1px solid var(--line);padding:26px 0 0;margin:0 0 46px}
+.sec > .kick{margin-bottom:16px}
+.sec .hint{margin:0;font-size:12.5px;color:var(--ink-3);max-width:74ch;line-height:1.75}
+
+/* 子图面板：与上传页 .drop 同一套"绸缎面板"语言 */
+.graph{display:grid;grid-template-columns:minmax(0,1.68fr) minmax(0,1fr);
+  gap:32px;align-items:start;margin:16px 0 0}
+.gpanel{position:relative;padding:10px 8px 4px;border-radius:18px;overflow:hidden;
+  background:
+    radial-gradient(120% 100% at 12% 0%, rgba(224,164,105,.08), transparent 55%),
+    radial-gradient(120% 100% at 88% 100%, rgba(120,170,230,.07), transparent 55%),
+    rgba(255,255,255,.018);
+  border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 30px 80px -54px rgba(0,0,0,.9)}
+.gpanel::after{content:"";position:absolute;left:0;right:0;top:0;height:1px;opacity:.55;
+  background:linear-gradient(90deg,transparent,rgba(224,164,105,.55),transparent)}
+.gpanel svg{display:block;width:100%;height:auto}
+
+.edge{fill:none;stroke:var(--line);stroke-width:1;opacity:0;
+  transition:opacity .7s ease}
+.edge.hot{stroke:rgba(224,164,105,.62);stroke-width:1.3}
+.edge.contra{stroke:rgba(255,207,168,.42);stroke-width:1;stroke-dasharray:4 6}
+.edge.in{opacity:1}
+.flow{fill:none;stroke:var(--warm);stroke-width:1.7;opacity:0;
+  stroke-dasharray:9 231;stroke-dashoffset:240;
+  transition:opacity .8s ease}
+.flow.in{opacity:.85;animation:flow 3.4s linear infinite}
+@keyframes flow{to{stroke-dashoffset:0}}
+.nwrap{opacity:0;transform:translateY(7px);
+  transition:opacity .7s ease,transform .7s cubic-bezier(.19,1,.22,1)}
+.nwrap.in{opacity:1;transform:none}
+.nd{fill:var(--ink-3)}
+.nd.hit{fill:var(--accent)}
+.nd.seed{fill:var(--warm)}
+.halo{fill:none;stroke:var(--accent);stroke-opacity:.30;stroke-width:1}
+.halo.seed{stroke:var(--warm);stroke-opacity:.34}
+.gl{font-size:11.5px;fill:var(--ink-3);letter-spacing:.01em}
+.gl.hit{fill:var(--ink);font-weight:500}
+.gl.seed{fill:#fff;font-weight:600}
+.gn{font-size:9.5px;fill:rgba(193,195,201,.42);letter-spacing:.14em;text-transform:uppercase}
+/* 边上直接标出 CONTRADICTS：图里真有这类边，这件事不该只写在图例里 */
+.gel{font-size:8.5px;fill:rgba(255,207,168,.62);letter-spacing:.16em;
+  text-anchor:middle}
+
+.gside{margin:2px 0 0}
+.gstat{display:grid;grid-template-columns:1fr auto;gap:12px;padding:9px 0;
+  border-bottom:1px solid var(--line);font-size:12.5px;align-items:baseline}
+.gstat .k{color:var(--ink-3)}
+.gstat .v{color:var(--ink);font-variant-numeric:tabular-nums;text-align:right}
+.legend{margin:16px 0 0;font-size:11.5px;color:var(--ink-3);line-height:1.5}
+.legend .li{display:flex;align-items:center;gap:10px;margin:0 0 9px}
+/* 样例统一占 26px 槽位：线型画在槽位里，圆点也画在槽位正中，
+   两者左边界必须对齐，否则一列图例看起来是歪的。 */
+.legend .sw{flex:0 0 26px;height:1px;background:var(--accent);position:relative}
+.legend .sw.plain{background:var(--line)}
+.legend .sw.contra{background:repeating-linear-gradient(90deg,
+  rgba(255,207,168,.55) 0 3px, transparent 3px 8px)}
+.legend .sw.dot{background:none}
+.legend .sw.dot::after{content:"";position:absolute;left:50%;top:50%;
+  width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;
+  background:var(--accent)}
+.legend .sw.dot.seed::after{background:var(--warm)}
+.legend .sw.dot.plain::after{background:var(--ink-3)}
+
+/* ── 支持 / 反方：两栏完全同构同色。分歧本身就是内容，不做主次 ───────── */
+.camps{display:grid;grid-template-columns:1fr 1fr;margin:16px 0 0;
+  border-top:1px solid var(--line)}
+.camp{padding:24px 28px 28px;min-width:0}
+.camp + .camp{border-left:1px solid var(--line)}
+.stake{display:flex;align-items:center;gap:11px;margin:0;
+  font-size:10.5px;letter-spacing:.22em;color:var(--ink-3)}
+.stake .tick{flex:0 0 22px;height:2px;background:var(--warm);opacity:.75}
+.camp.con .stake .tick{background:var(--accent)}
+.camp.syn .stake .tick{background:var(--warm)}
+.claim{margin:13px 0 0;font-size:14px;line-height:1.7;color:var(--ink-2);
+  letter-spacing:-.005em}
+.tally{margin:10px 0 0;font-size:11.5px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums}
+.tally b{color:var(--ink);font-weight:600}
+
+.evs{margin:18px 0 0;border-top:1px solid var(--line)}
+/* 证据逐条入场；SSR 不存在，所以初态由 CSS 给，由 JS 加 .up 解锁 */
+.ev{border-bottom:1px solid var(--line);opacity:0;transform:translateY(12px);
+  transition:opacity .7s ease,transform .7s cubic-bezier(.19,1,.22,1)}
+.ev.up{opacity:1;transform:none}
+#verdict,#caveat{opacity:0;transform:translateY(10px);
+  transition:opacity .8s ease,transform .8s cubic-bezier(.19,1,.22,1)}
+#verdict.up,#caveat.up{opacity:1;transform:none}
+.eb{display:block;width:100%;text-align:left;font:inherit;color:inherit;
+  background:none;border:0;padding:15px 4px 15px 2px;cursor:pointer;position:relative;
+  transition:padding-left .5s cubic-bezier(.19,1,.22,1)}
+.eb::before{content:"";position:absolute;inset:0;opacity:0;
+  background:linear-gradient(90deg,rgba(224,164,105,.09),transparent 62%);
+  transition:opacity .5s ease}
+.eb:hover::before,.eb:focus-visible::before{opacity:1}
+.eb:hover{padding-left:12px}
+.eb > *{position:relative;display:block}
+.eb .row1{display:flex;align-items:center;gap:10px}
+.tag{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  padding:3px 8px;border-radius:999px;border:1px solid var(--line);
+  color:var(--ink-3);white-space:nowrap}
+.tag.s{color:var(--warm);border-color:rgba(255,207,168,.34)}
+.tag.c{color:var(--accent);border-color:rgba(224,164,105,.38)}
+.tag.n{color:var(--ink-2);border-color:rgba(203,218,241,.22)}
+.eix{font-size:10.5px;color:var(--ink-3);letter-spacing:.14em;
+  font-variant-numeric:tabular-nums;margin-left:auto}
+.qt{margin:10px 0 0;font-size:14px;line-height:1.74;color:#fff;letter-spacing:-.005em;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.eb.open .qt{display:block;-webkit-line-clamp:unset;overflow:visible}
+.qm{color:var(--ink-3)}
+.meta{margin:9px 0 0;font-size:11px;color:var(--ink-3);letter-spacing:.02em;
+  word-break:break-all}
+/* 同 `.ctx`：竖线 → 顶部短横线（见上面那段注释） */
+.more{margin:0 0 18px;padding:11px 0 0;position:relative;border:0}
+.more::before{content:"";position:absolute;left:0;top:0;width:56px;height:2px;
+  background:var(--warm);opacity:.6}
+.more .why{margin:0;font-size:12.5px;line-height:1.78;color:var(--ink-2)}
+.more .why b{color:var(--warm);font-weight:600}
+.more .out{margin:11px 0 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.src{font-size:10.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+/* .lnk 从 <button> 改成了 <a>（"在原文里查看 →" 要真的能跳），
+   所以补 text-decoration:none —— <a> 默认带下划线，会和已有的 border-bottom 叠成两条。 */
+.lnk{font:inherit;font-size:11.5px;color:var(--ink-2);background:none;cursor:pointer;
+  border:0;border-bottom:1px solid var(--line);padding:0 0 2px;
+  text-decoration:none;transition:color .3s,border-color .3s}
+.lnk:hover{color:var(--warm);border-bottom-color:rgba(255,207,168,.5)}
+.lnk.off{color:var(--ink-3);cursor:default;border-bottom-color:transparent}
+.note-line{margin:10px 0 0;font-size:11.5px;color:var(--ink-3)}
+
+/* ── 综合结论：刻意克制。不做大标题、不用白字重排 ────────────────────── */
+.synth{margin:0 0 46px;padding:26px 0 0;border-top:1px solid var(--line)}
+.verdict{margin:14px 0 0;max-width:84ch;font-size:15.5px;line-height:1.82;
+  color:var(--ink)}
+.verdict b{color:#fff;font-weight:600}
+.caveat{margin:14px 0 0;max-width:84ch;font-size:13px;line-height:1.82;
+  color:var(--ink-2);padding:11px 0 0;position:relative;border:0}
+.caveat::before{content:"";position:absolute;left:0;top:0;width:56px;height:2px;
+  background:var(--ink-3);opacity:.5}
+.caveat b{color:var(--ink);font-weight:600}
+
+/* ── 页脚 ──────────────────────────────────────────────────────────────── */
+footer{flex:0 0 auto;padding:8px 40px 26px 132px;font-size:11px;color:var(--ink-3);
+  display:flex;gap:26px;flex-wrap:wrap}
+footer a{color:var(--ink-3);text-decoration:none;border-bottom:1px solid transparent}
+footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
+
+@media (max-width:900px){
+  .graph{grid-template-columns:1fr;gap:22px}
+  .how .r{grid-template-columns:22px 1fr;gap:8px 14px}
+  .how .ds{grid-column:2}
+}
+@media (max-width:760px){
+  header{padding:20px 22px 0}
+  main{padding:0 22px}
+  footer{padding:8px 22px 20px;gap:16px}
+  h1{font-size:clamp(27px,8.6vw,40px)}
+  .ask{gap:12px}
+  .ask input{font-size:16.5px}
+  .ask .go{width:40px;height:40px}
+  .camps{grid-template-columns:1fr}
+  .camp{padding:20px 0 24px}
+  .camp + .camp{border-left:0;border-top:1px solid var(--line)}
+  .legend{font-size:11px}
+  .verdict{font-size:14.5px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ask,.ask .go,.chip,.eb,.eb::before,.edge,.flow,.nwrap,
+  .ev,#verdict,#caveat{transition:none !important}
+  .flow.in{animation:none !important;opacity:0}
+  /* 初态直接解开，任何情况下内容都立即可见 */
+  .ev,#verdict,#caveat{opacity:1 !important;transform:none !important}
+}
+  /* ── K8 问答历史 + K9 导出（2026-09-16）───────────────────────────── */
+  #histsec{margin:26px 0 6px;padding:18px 20px;border:1px solid var(--line);
+    border-radius:12px;background:rgba(255,255,255,.015)}
+  .sec-h2{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .hclear{background:transparent;border:1px solid var(--line);color:var(--dim);
+    border-radius:8px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit}
+  .hclear:hover{border-color:rgba(221,160,122,.5);color:var(--text)}
+  .hclear:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  #hist{margin-top:10px}
+  .hrow + .hrow{margin-top:5px}
+  .hq{display:flex;align-items:baseline;gap:11px;width:100%;text-align:left;
+    background:transparent;border:1px solid transparent;border-radius:8px;
+    padding:7px 9px;cursor:pointer;font-family:inherit;color:var(--text);font-size:13px}
+  .hq:hover{background:rgba(255,255,255,.03);border-color:var(--line)}
+  .hq:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  .ht{flex:0 0 auto;color:var(--dim);font-size:11.5px;font-variant-numeric:tabular-nums}
+  .hx{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hg{flex:0 0 auto;color:var(--dim);font-size:11px;font-family:ui-monospace,Consolas,monospace}
+  .exp{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .exp button{background:transparent;border:1px solid rgba(224,164,105,.42);
+    color:var(--accent);border-radius:9px;padding:7px 13px;font-size:12.5px;
+    cursor:pointer;font-family:inherit}
+  .exp button:hover{border-color:rgba(224,164,105,.85);color:var(--text)}
+  .exp button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .expmsg{color:var(--dim);font-size:12px}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="veil"></div>
+
+<div class="wrap">
+  <header><a class="brand" href="./index.html">KG COSMOS</a></header>
+
+  <main><div class="inner">
+    <p class="kick">02 — 提问</p>
+    <h1>问一句，<em>证据自己站队</em>。</h1>
+    <p class="sub">
+      系统在图上按字面命中种子实体，沿关系做两跳扩展，得到一小片子图；
+      然后由多个 Agent 各自给出立场——每条立场都必须挂在某一篇原文的那一句上。
+      答案可以含糊，证据不行。
+    </p>
+
+    <!-- 当前语境：问的是哪张图。此前这一页默认问另一篇论文，
+         用户看完全部内容都不知道"这不是我上传的那篇"。 -->
+    <p class="ctx" id="ctx"></p>
+
+    <form class="askwrap" id="ask" autocomplete="off">
+      <label class="lb" for="q">你的问题</label>
+      <div class="ask">
+        <input id="q" type="text" name="q" placeholder="例如：知识图谱的质量怎么评估？"
+               aria-label="输入你的问题">
+        <button class="go" type="submit" aria-label="在图上检索并生成立场">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h13M13 6.5 18.5 12 13 17.5"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+
+      <!-- K7：追问提示。现有输入框本身就是追问入口 ——
+           第二轮起它会带上历史，后端据此把没主语的追问补全。 -->
+      <p class="ctx" id="histNote" hidden></p>
+
+    <div class="chips" id="chips" role="group" aria-label="示例问题">
+      <button class="chip" type="button" data-k="transe"
+              data-q="What are the limitations of TransE for knowledge graph embedding?">TransE 有什么局限？</button>
+      <button class="chip" type="button" data-k="llm"
+              data-q="Can large language models be used for knowledge graph construction?">大模型能不能直接用来做知识图谱抽取？</button>
+      <button class="chip" type="button" data-k="quality"
+              data-q="How to evaluate the quality of a knowledge graph?">知识图谱的质量怎么评估？</button>
+    </div>
+
+    <div class="how" id="how">
+      <div class="r"><span class="ix">01</span><span class="nm">字面命中种子</span>
+        <span class="ds">长名字优先，被更长命中包含的短名字直接丢掉，否则「TransE 的局限」会同时命中 Tran</span></div>
+      <div class="r"><span class="ix">02</span><span class="nm">两跳扩展子图</span>
+        <span class="ds">BFS 两跳，封顶 70 个节点；命中的实体与路径在图上高亮</span></div>
+      <div class="r"><span class="ix">03</span><span class="nm">多 Agent 各自站队</span>
+        <span class="ds">支持方与反方分开取证，每条证据附原文摘录与出处，最后给一句综合判断</span></div>
+    </div>
+    <p class="how-note" id="how-note">
+      检索之后，子图、双方证据与综合结论会依次展开在这一页里。
+    </p>
+
+    <!-- K8（2026-09-16）：问答历史。
+     此前每问一次都是'一次性'的——关掉页面就没了，演示时也没法回头对比。
+     现在存 localStorage（本页已有 kg-last-gid 的先例），并保留完整响应：
+     K9 的导出要用到证据里的引文与页码，只存结论就导不出来。 -->
+<section id="histsec" hidden>
+  <div class="sec-h2">
+    <p class="kick">问过的（本机）</p>
+    <button type="button" class="hclear" id="histClear">清空</button>
+  </div>
+  <div id="hist"></div>
+  <p class="hint">存在这台机器的浏览器里，不上传。点一条可以重新看那一轮。</p>
+</section>
+
+<section id="result" hidden>
+      <!-- ⓿ Agent 工作台：把「多个 Agent 在分工」这件事显示出来。
+           此前三个 Agent 的结果是一次性摆出来的，观众只看到"一次问答
+           给了两段文字"，看不出有分工 —— 等于把主要看点表达没了。
+           现在每步一行，逐个点亮，能看出谁在工作、谁还没轮到。 -->
+      <div class="sec" id="agentsec">
+        <p class="kick">Agent 工作台</p>
+        <ol class="alog" id="alog">
+          <li data-step="retrieve"><span class="ai">①</span><span class="an">检索 Agent</span><span class="ad">等待…</span></li>
+          <li data-step="support"><span class="ai">②</span><span class="an">支持 Agent</span><span class="ad">等待…</span></li>
+          <li data-step="oppose"><span class="ai">③</span><span class="an">反对 Agent</span><span class="ad">等待…</span></li>
+          <li data-step="synth"><span class="ai">④</span><span class="an">综合 Agent</span><span class="ad">等待…</span></li>
+        </ol>
+        <p class="hint" id="alognote">支持与反对是两次独立调用，互不可见；
+          综合方只看到两方交上来的东西，不接触原始证据。</p>
+      </div>
+
+      <!-- ① 检索到的子图 -->
+      <div class="sec">
+        <p class="kick">检索到的子图</p>
+        <p class="hint" id="trace"></p>
+        <div class="graph">
+          <div class="gpanel" id="gpanel" role="img" aria-labelledby="gdesc"></div>
+<!-- H9：把这一页的 2D 子图接到主视图的 3D 高亮上（`?hl=`）。
+     按钮的文字与 title 都**如实报"带了多少个"** —— 超过 40 个时说明只带了前 40 个。 -->
+<button id="to3d" type="button" hidden
+        style="margin:10px 0 2px;background:rgba(224,164,105,.14);color:#e8c9a4;
+               border:1px solid rgba(224,164,105,.42);border-radius:9px;
+               padding:8px 14px;font-size:13px;font-family:inherit;cursor:pointer">
+</button>
+          <div class="gside">
+            <p class="sr-only" id="gdesc"></p>
+            <div id="gstats"></div>
+            <div class="legend">
+              <div class="li"><span class="sw dot seed"></span>种子实体（字面命中）</div>
+              <div class="li"><span class="sw dot"></span>路径上的命中实体</div>
+              <div class="li"><span class="sw dot plain"></span>扩展到的邻居</div>
+              <div class="li"><span class="sw"></span>证据路径</div>
+              <div class="li"><span class="sw plain"></span>普通关系</div>
+              <div class="li"><span class="sw contra"></span>CONTRADICTS（判别器通过率 6.6%，待复核）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② 两个 Agent 各自的立场：结构完全对等 -->
+      <div class="camps" id="camps"></div>
+
+      <!-- ③ 综合结论 -->
+      <div class="synth">
+        <p class="stake"><i class="tick"></i>综合</p>
+        <p class="verdict" id="verdict"></p>
+        <p class="caveat" id="caveat"></p>
+        <!-- K9（2026-09-16）：导出这一轮为 Markdown（含引文与页码）。
+             TODO 对它的定位是「**写论文最直接的用途** —— 现在只能截图」。 -->
+        <div class="exp">
+          <button type="button" id="expMd">导出 Markdown（含引文与页码）</button>
+          <span class="expmsg" id="expMsg"></span>
+        </div>
+      </div>
+    </section>
+  </div></main>
+
+  <footer>
+    <!-- 返回导航由 a11y.js 以 fixed 元素注入在左下角，这里不再重复放一个；
+         左内边距正是为它让位。 -->
+    <span id="foot-note">检索在本地图上完成 · 每个结论都能回溯到原文那一句</span>
+  </footer>
+</div>
+
+<script src="./lib/a11y.js"></script>
+<script>
+/* 背景：与导航页同一套绸缎光场，只把流动速度再压慢一点
+   （这一页要读长文，背景更该静）。刻意不放星空、不放粒子。 */
+const cv = document.getElementById('gl');
+const gl = cv.getContext('webgl', {antialias:false, alpha:false, powerPreference:'low-power'});
+const VS = `attribute vec2 a; void main(){ gl_Position = vec4(a,0.0,1.0); }`;
+const FS = `
+precision highp float;
+uniform vec2 u_res; uniform float u_t;
+float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123); }
+float noise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),f.x), mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x), f.y); }
+float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<3;i++){ v+=a*noise(p); p*=2.07; a*=0.5; } return v; }
+vec2 warp(vec2 p,float t){
+  vec2 q=vec2(fbm(p+vec2(0.0,t)), fbm(p+vec2(5.2,1.3)-vec2(t*0.8,0.0)));
+  vec2 r=vec2(fbm(p+2.2*q+vec2(1.7,9.2)+vec2(t*1.1,0.0)), fbm(p+2.2*q+vec2(8.3,2.8)-vec2(0.0,t*0.9)));
+  return p+2.4*r; }
+void main(){
+  vec2 c=(gl_FragCoord.xy-0.5*u_res)/min(u_res.x,u_res.y);
+  float t=u_t*0.014;                       /* 上传页 0.022；这里是长文页，再慢一档 */
+  vec2 g1=vec2(-0.52,0.02), g2=vec2(0.66,0.06);
+  float fib=fbm(warp(c*1.05,t));
+  float l1=smoothstep(1.15,0.05,length(c-g1)+(fib-0.5)*0.55);
+  float l2=smoothstep(1.15,0.02,length(c-g2)+(fib-0.5)*0.50);
+  float body=smoothstep(0.34,0.78,fib);
+  vec3 base=vec3(0.010,0.013,0.023);
+  vec3 teal=vec3(0.11,0.45,0.53), gold=vec3(0.78,0.55,0.30);
+  vec3 col=base;
+  col+=teal*l1*(0.60+0.40*body);
+  col+=gold*l2*(0.50+0.50*body);
+  col+=teal*pow(body,3.0)*l1*0.24;
+  col+=gold*pow(body,3.0)*l2*0.24;
+  col+=(hash(gl_FragCoord.xy*0.7)-0.5)*0.009;
+  float vig=smoothstep(1.35,0.20,length(c));
+  col*=0.40+0.60*vig;
+  gl_FragColor=vec4(col,1.0);
+}`;
+function sh(t,s){ const o=gl.createShader(t); gl.shaderSource(o,s); gl.compileShader(o);
+  if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(o)); return o; }
+const prog=gl.createProgram();
+gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS)); gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));
+gl.linkProgram(prog); gl.useProgram(prog);
+const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+const loc=gl.getAttribLocation(prog,'a'); gl.enableVertexAttribArray(loc);
+gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+const uRes=gl.getUniformLocation(prog,'u_res'), uT=gl.getUniformLocation(prog,'u_t');
+function size(){ const d=Math.min(1.5,devicePixelRatio||1);
+  cv.width=Math.round(innerWidth*d); cv.height=Math.round(innerHeight*d);
+  gl.viewport(0,0,cv.width,cv.height); }
+addEventListener('resize',size); size();
+const t0=performance.now();
+(function loop(now){
+  gl.uniform2f(uRes,cv.width,cv.height);
+  gl.uniform1f(uT,(now-t0)/1000);
+  gl.drawArrays(gl.TRIANGLES,0,3);
+  requestAnimationFrame(loop);
+})(t0);
+
+/* ═══════════════════════════════════════════════════════════════════════
+   检索与立场数据。全部取自本项目真实产物，不写 lorem、不编论文标题。
+   数字、口径、结论都能在下面引到的文件里查到原句。
+   ═══════════════════════════════════════════════════════════════════════ */
+/* 宽屏坐标：viewBox 720×302 与面板实际宽度（约 719px）几乎 1:1，
+   所以 svg 里的 11.5px 文字在屏幕上就是 11.5px —— 第一版用 860 宽的
+   viewBox，整张图被缩到 0.84，标签小到看不清。
+   窄屏换成另一套竖排坐标（见 GN），两套都是手写、手校过避让的。 */
+const GW = {A:[361,151], B:[200,72], C:[200,237], D:[522,72], E:[522,237],
+            F:[361,42], G:[361,260], H:[81,151], I:[642,151]};
+const GN = {A:[180,208], B:[96,92], C:[96,324], D:[264,92], E:[264,324],
+            F:[180,44], G:[180,392]};
+
+/* ══════════════════════════════════════════════════════════════════════
+   真后端接线（2026-09-14）
+
+   此前这一页是**硬编码的三个问答**（下面的 QA 常量），评审实测：
+   全文件 0 次 fetch、18 条"证据"全部指向项目自己的 docs/、0 条指向论文原文。
+   而 `/chat` 也只是子串匹配原型 —— 也就是说"多 Agent 问答"在交付物里不存在。
+
+   现在接 `POST /api/qa`（src/multi_agent_qa.py）：检索 → 支持取证 /
+   反对取证（并行、互不可见）→ 综合。**每条证据都带论文文件名与页码**。
+
+   QA 常量保留为**离线兜底**：后端未启动时用它，并明确标注是演示数据。
+   ══════════════════════════════════════════════════════════════════════ */
+/* 问哪张图：URL 参数 → 上次上传的那篇 → 什么都没有。
+
+   **此前这里写的是 `|| 'ad690dfb'`**，即用户不手动改 URL 就永远在问
+   **另一篇**论文 —— 而他自己刚上传的那篇，在 new-graph.html 里看完就丢了。
+   「上传 → 提问」是这个项目最主要的看点，一个默认值把它降级成了
+   "看别人的示例"。所以既不能有默认值，也不能什么都不提示。 */
+const PARAM_GID = (new URLSearchParams(location.search)).get('src');
+const LAST_GID = (function () {
+  try { return localStorage.getItem('kg-last-gid'); } catch (e) { return null; }
+})();
+const ASK_GID = PARAM_GID || LAST_GID || '';
+const ASK_EXPLICIT = !!PARAM_GID;        // 是"带着某篇图进来的"吗
+const ASK_PARAM = PARAM_GID;
+
+/* 顶部那行语境提示：让用户一眼知道自己在问哪张图。
+   带上来源（是刚看过的那张，还是记住的上一次上传），
+   否则"问的是谁"这件事对用户来说是隐形的。
+
+   **这里自带转义，不复用下面的 `esc`** —— 后者是 `const` 定义的
+   （在 ~840 行），而本 IIFE 立即执行；`const` 不提升，
+   复用会抛 `ReferenceError: Cannot access 'esc' before initialization`。 */
+(function fillCtx(){
+  const el = document.getElementById('ctx');
+  if (!el) return;
+  const x = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  if (!ASK_GID) {
+    el.className = 'ctx miss';
+    el.innerHTML = '⚠️ <b>还没有指定要问哪张图。</b>请先 ' +
+      '<a href="./upload.html">上传一篇论文</a>，在结果页点「就这篇提问」；' +
+      '或先 <a href="./kg-nebula.html">进入主视图</a> 浏览全库。';
+  } else {
+    el.innerHTML = '正在问：<b>' + x(ASK_GID) + '</b>' +
+      (ASK_EXPLICIT ? '（你刚才看的那张图）' : '（上次上传的那篇）');
+  }
+})();
+
+function shortName(s){ return String(s || '').replace(/\.pdf$/i, ''); }
+
+/* 把 /api/qa 的返回适配成 renderGraph/play 期望的形状 */
+function adaptQA(resp){
+  const ev = resp.evidence || [];
+  const nodes = {}, key = {}, edges = [];
+  let id = 0;
+  function nodeOf(name, kind, extra){
+    if (!(name in key)) {
+      const k = String.fromCharCode(65 + (id % 26)) + (id >= 26 ? Math.floor(id/26) : '');
+      key[name] = k; id++;
+      nodes[k] = Object.assign({t: name, k: kind || ''}, extra || {});
+    }
+    return key[name];
+  }
+  const CIT = {};
+  const seedsArr = resp.retrieval.seeds || [];
+  ev.forEach(function(it){
+    const c = (it.citations || [])[0] || {};
+    const a = nodeOf(it.source, seedsArr.indexOf(it.source) >= 0 ? 'Method' : '');
+    const b = nodeOf(it.target, 'Concept');
+    if (seedsArr.indexOf(it.source) >= 0) nodes[a].seed = 1;
+    if (seedsArr.indexOf(it.target) >= 0) nodes[b].seed = 1;
+    if (!c.quote) { nodes[a].weak = 1; nodes[b].weak = 1; }
+    if (String(it.type).toUpperCase() === 'CONTRADICTS') { nodes[a].contra = 1; nodes[b].contra = 1; }
+    edges.push({a: a, b: b, r: it.type, hot: 1,
+                contra: String(it.type).toUpperCase() === 'CONTRADICTS' ? 1 : undefined});
+    CIT[a + '|' + b] = c;
+  });
+
+  /* 两方证据：都来自同一批可核验证据，但**引文出处写成论文名+页码**，
+     不再指向项目自己的文档。 */
+  function camp(role, items, stake){
+    const list = (items || []).slice(0, 6).map(function(it){
+      const c = (it.citations || [])[0] || {};
+      return {
+        rel: it.type,
+        tier: c.quote ? 's' : 'n',
+        qt: c.quote ? ('「' + c.quote.slice(0, 160) + '」') : ('（该边在原文里找不到引文）' + it.claim),
+        src: c.paper ? (shortName(c.paper) + ' · 第 ' + c.page + ' 页') : '（无引文）',
+        sec: '',
+        why: it.claim,
+        /* 这三个字段给 pdfLink() 用 —— 引文要能点进主视图的 PDF 面板 */
+        paper: c.paper || '',
+        page: c.page || '',
+        quote: c.quote || ''
+      };
+    });
+    return {stake: stake, claim: role, ev: list.length ? list : [
+      {rel: '—', tier: 'n', qt: '（无）', src: '—', sec: '', why: '这一侧没有找到证据。'}
+    ]};
+  }
+  const ag = {};
+  (resp.agents || []).forEach(function(x){ ag[x.role] = x.text; });
+
+  return {
+    q: resp.question,
+    seeds: resp.retrieval.seeds || [],
+    trace: resp.retrieval.reason + '　｜　证据 ' + ev.length + ' 条，其中 ' +
+           ev.filter(function(x){ return x.has_quote; }).length + ' 条带论文原文引文。',
+    stats: [
+      ['种子实体', String((resp.retrieval.seeds || []).length)],
+      ['子图节点', String(resp.retrieval.n_nodes)],
+      ['子图边', String(resp.retrieval.n_edges)],
+      ['证据条数', String(ev.length)],
+      ['带原文引文', String(ev.filter(function(x){ return x.has_quote; }).length)],
+      ['置信度', resp.confidence || '—']
+    ],
+    nodes: nodes, edges: edges,
+    pro: camp(ag['支持方'] || '（支持方 Agent 未运行）', ev.filter(function(x){ return x.has_quote; }).slice(0, 6), '支持 · 有原文引文的一侧'),
+    con: camp(ag['反对方'] || '（反对方 Agent 未运行）', ev.filter(function(x){ return !x.has_quote || String(x.type).toUpperCase() === 'CONTRADICTS'; }).slice(0, 6), '反对 · 引文缺失或类型为矛盾'),
+    verdict: esc(resp.conclusion || '').replace(/\n/g, '<br>'),
+    caveat: resp.degraded
+      ? '⚠️ 本地模型不可用，已降级为纯规则检索 —— 上面没有模型参与判断。'
+      : '证据均取自论文原文（标注文件名与页码）；支持方与反对方是两次独立调用，互不可见。'
+  };
+}
+
+const QA = {
+  /* ⚠️ **这是内置演示数据，不是检索结果。**
+     它只在"后端不可用"时显示，并且 `caveat` 里会明确说清这一点（见 catch 分支）。
+
+     ## 它的"证据"引自哪里 —— 这一点必须说明（G1 普查的结论）
+
+     评审当初的诊断是「全文件 0 次 fetch、18 条"证据"全部指向项目自己的
+     `docs/`、0 条指向论文原文」。**"真链路"已经修好了**：
+     现在走 `POST /api/qa/step`，`evidence[].citations[].src` 是**论文文件名**
+     （18/18 条都指向原文）。
+
+     **但这份内置演示里的 `src` 仍然指向 `docs/*.md`** ——
+     因为它是**手写的一段示范**，而示范里引用的那些结论
+     （如"多对一映射的短板在本项目语料里留下了可追溯记录"）
+     出处就是项目的分析文档。
+
+     ⇒ **这不是"假装是论文原文"**，而是"**这段演示讲的本来就是我们自己分析出来的东西**"。
+     但它对用户确实可能造成误解（以为那是论文里的证据），
+     所以：① 本节顶部的注释写清来源；② 页面在用它时**必须**显示"内置演示数据"的警告。 */
+  transe: {
+    q: 'TransE 有什么局限？',
+    seeds: ['TransE', 'Scoring Function'],
+    trace: '字面命中 2 个种子：「TransE」与「Scoring Function」。扩展 2 跳，' +
+           '封顶 70 节点，实际取到 70 个（截断 43 个）。命中的关系类型 6 种，' +
+           '其中 1 条是 CONTRADICTS —— 判别器对它只给 0.235 的中位通过概率。',
+    stats: [
+      ['种子实体', '2'],
+      ['扩展跳数', '2'],
+      ['节点 / 封顶', '70 / 70'],
+      ['子图边', '118'],
+      ['关系类型', '6'],
+      ['命中论文段', '41']
+    ],
+    nodes: {
+      A: {t:'TransE', k:'Method', seed:1},
+      B: {t:'Scoring Function', k:'Concept', hit:1},
+      C: {t:'Many-to-1 Relationships', k:'Concept', contra:1, hit:1},
+      D: {t:'FB15k', k:'Dataset', hit:1},
+      E: {t:'WN18', k:'Dataset'},
+      F: {t:'Link Prediction', k:'Task'},
+      G: {t:'KG Embedding', k:'Concept'},
+      H: {t:'ComplEx', k:'Method'},
+      I: {t:'RotatE', k:'Method'}
+    },
+    edges: [
+      {a:'A', b:'B', r:'USES', hot:1},
+      {a:'A', b:'D', r:'EVALUATES', hot:1},
+      {a:'A', b:'C', r:'CONTRADICTS', hot:1, contra:1},
+      {a:'A', b:'F', r:'APPLIES_TO'},
+      {a:'A', b:'E', r:'USES'},
+      {a:'D', b:'E', r:'COMPARES_WITH'},
+      {a:'D', b:'I', r:'COMPARES_WITH'},
+      {a:'B', b:'H', r:'COMPARES_WITH'}
+    ],
+    pro: {
+      stake: '支持 · 表达力上限有痕迹',
+      claim: '多对一映射这个短板，在本项目语料里留下了可追溯的记录，而不是只停在综述的常见说法上。',
+      ev: [
+        {rel:'SUPPORTS', tier:'s',
+         qt:'样本印证：TransE -> Many-to-1 Relationships（TransE 处理多对一的能力，不是矛盾）',
+         src:'docs/DATA_SNAPSHOT_2026-09-11.md', sec:'§4.1',
+         why:'这是本条立场最硬的一条：抽取器在「TransE 处理多对一关系」这句话上真的产出了一条边。' +
+             '它说明该短板在原文层面被反复讨论，已经沉降到实体层，而不是停留在二手转述里。'},
+        {rel:'EVALUATES', tier:'n',
+         qt:'当首选方案不可得时，需要重新做一轮完整选型——而不是顺序取下一个能用的。' +
+            '「能拿到」是约束，「最优」是目标，两者不能互相替代。',
+         src:'docs/ERROR_CASES.md', sec:'案例 4 · 技术选型用「能拿到」代替了「最好」',
+         why:'本项目当初把 TransE 类嵌入列为可选补全路径，理由是<b>它下得下来、跑得动</b>。' +
+             '按这条教训，这属于约束驱动的妥协——「TransE 够用」这个判断从未被真正验证过。'},
+        {rel:'APPLIES_TO', tier:'n',
+         qt:'KGE 链接预测（可选，1-2 天）：PyKeen TransE/RotatE 做图谱补全候选。',
+         src:'docs/EXECUTION_READINESS.md', sec:'§3 · 里程碑与可选项',
+         why:'TransE 在全部里程碑里始终停在「可选」一栏，从未进入主流水线。' +
+             '它的输出没有被当作可验证的结论使用——这本身就是对其局限的一次默许。'}
+      ]
+    },
+    con: {
+      stake: '反方 · 多数「局限」不是模型问题',
+      claim: '能被追溯到的所谓矛盾，绝大多数是对比、评测与继承；真正指向模型缺陷的，一条都没有被确认。',
+      ev: [
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'CONTRADICTS 的中位通过概率只有 0.235，通过率 6.6% —— ' +
+            '比次低类型低一个数量级，机器可验证地确认这些边基本不是真矛盾。',
+         src:'docs/DATA_SNAPSHOT_2026-09-11.md', sec:'§4.1 · L5 证据支持度实测（阈值 0.67）',
+         why:'全图谱里被标成「矛盾」的边，中位通过概率只有 0.235，是通过率最低的关系类型。' +
+             '所以「TransE 有局限」这类问句命中的矛盾边，<b>先验地不该被采信</b>。'},
+        {rel:'COMPARES_WITH', tier:'n',
+         qt:'社区 3（规模 728）的核心实体：Scoring Function(51)、TransE(49)、FB15k(47)、' +
+            'WN18(45)、ComplEx(40)；主题是 KG 嵌入模型，模块度 0.6824。',
+         src:'docs/DATA_SNAPSHOT_2026-09-11.md', sec:'§5 · 社区结构（重算）',
+         why:'在图上 TransE 是<b>基准坐标</b>，不是被否定的方法：它和 FB15k、WN18、ComplEx ' +
+             '共处同一个高模块度社区。它被频繁提及，是因为大家都在拿它当基线对比。'},
+        {rel:'APPLIES_TO', tier:'n',
+         qt:'「TransE 的局限」会额外命中无意义子串 Tran（两者都实测过）。',
+         src:'docs/早先的阶段计划.md', sec:'T6.3 · 问题子图',
+         why:'问句本身就带字面噪声。检索层丢掉了被更长命中包含的短名字，' +
+             '但单字符级别的碎片仍需在证据侧过滤——这一部分「局限」是检索造的，不是模型有的。'}
+      ]
+    },
+    verdict: '把两边放在一起看：项目里没有任何一条被确认的矛盾边为「TransE 有实质缺陷」背书，' +
+             '但「多对一映射」这条线确实在语料里留下了可追溯的痕迹。' +
+             '更可信的说法是——<b>TransE 在本项目里扮演的是基准，不是结论</b>。',
+    caveat: '<b>分歧未消解。</b>支持方依赖的是共现痕迹与选型教训，反方依赖的是判别器分数与社区结构，' +
+            '两者不在同一个口径上，谁也不能证伪对方。243 条矛盾 claim 里 REJECTED 190、' +
+            'SUSPECTED 53、<b>CONFIRMED 0</b> —— 没有确认，就不会有裁决。'
+  },
+
+  llm: {
+    q: '大模型能不能直接用来做知识图谱抽取？',
+    seeds: ['LLM', 'Relation Extraction'],
+    trace: '字面命中 2 个种子：「LLM」与「Relation Extraction」。扩展 2 跳，取到 70 个节点。' +
+           '子图里方向约束（CREATED_BY）与抽取层直接相邻——这正是两边立场分叉的地方。',
+    stats: [
+      ['种子实体', '2'],
+      ['扩展跳数', '2'],
+      ['节点 / 封顶', '70 / 70'],
+      ['子图边', '96'],
+      ['关系类型', '7'],
+      ['命中论文段', '58']
+    ],
+    nodes: {
+      A: {t:'LLM', k:'Method', seed:1},
+      B: {t:'Relation Extraction', k:'Task', hit:1},
+      C: {t:'CREATED_BY 方向', k:'Constraint', contra:1, hit:1},
+      D: {t:'Zero-Shot Learning', k:'Concept', hit:1},
+      E: {t:'Gold Standard', k:'Artifact'},
+      F: {t:'Prompting', k:'Method'},
+      G: {t:'Triplet Critic', k:'Method'},
+      H: {t:'Distillation', k:'Method'},
+      I: {t:'GraphRAG', k:'Method'}
+    },
+    edges: [
+      {a:'A', b:'B', r:'APPLIES_TO', hot:1},
+      {a:'A', b:'C', r:'CONTRADICTS', hot:1, contra:1},
+      {a:'A', b:'D', r:'ENABLES', hot:1},
+      {a:'A', b:'I', r:'PART_OF'},
+      {a:'F', b:'B', r:'USES'},
+      {a:'E', b:'I', r:'COMPARES_WITH'},
+      {a:'C', b:'G', r:'SUPPORTS'}
+    ],
+    pro: {
+      stake: '支持 · 能，而且本机跑得动',
+      claim: '在 8GB 显存、完全离线这两个真实约束下，被文献支持可行的路径是「中小模型 + 复合策略」，而不是直接调大模型接口。',
+      ev: [
+        {rel:'SUPPORTS', tier:'s',
+         qt:'COMEM achieves 2~18% F1 improvements while spending less —— ' +
+            '并在 8 个开源 instruct 模型（Llama-3.1-8B、Qwen2-7B、Mistral-7B 等）上实测；' +
+            '正文称 open-source medium-sized (3B~11B) LLMs 表现良好。',
+         src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§1.13 · LLM 时代的 ER 方法',
+         why:'本条直接命中本机的硬约束：3B~11B 的模型在 8GB 显存上勉强可跑。' +
+             '「先匹配、再比较、最后选择」的复合策略，比一次性让模型输出三元组更接近可落地。'},
+        {rel:'SUPPORTS', tier:'s',
+         qt:'DistillER：把大模型能力蒸馏到 SLM——方向与本机 8GB 显存约束一致。',
+         src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§1.13 · 逐条评估',
+         why:'调研在评估这一项时专门写下了「方向与本机约束一致」。' +
+             '这是全部候选里少数被明确标注为与运行环境相容的路线。'},
+        {rel:'ENABLES', tier:'n',
+         qt:'本地模型全量打分：44032 条边有分数，280 秒，¥0。',
+         src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§2.3 · 实测结果与最大短板',
+         why:'「能不能用大模型」在这条证据上被拆成了一个可算的问题：' +
+             '本地跑一轮判别器的成本是 280 秒和 0 元，所以试错成本极低，先跑起来比先论证划算。'}
+      ]
+    },
+    con: {
+      stake: '反方 · 不能直接当结论用',
+      claim: '现有的验证层对方向错误是盲的，而方向恰恰是大模型抽取最常错的地方。生成得出来，不等于可以采信。',
+      ev: [
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'六层里没有任何一层能可靠发现关系方向错误——L3/L4 根本不看方向，' +
+            'L5 实测只能拦住 23.9% 的方向反转（本体 12 类非对称关系 720 条样本）。',
+         src:'docs/L5_SIX_LAYER_REPORT.md', sec:'§4.5 · 已确证的盲区',
+         why:'这是反方最硬的一条：<b>整套评测里没有一层覆盖方向</b>。' +
+             '也就是说，模型把关系抽反了，六层指标一个都不会掉。'},
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'案例 5：入库层过滤掩盖了抽取层越界 —— 过滤发生在下游，' +
+            '抽取层的越界不会被发现，只会被隐藏。',
+         src:'docs/ERROR_CASES.md', sec:'案例 5 · 现象与真实原因',
+         why:'大模型的越界通常在下游才被过滤掉。过滤动作一旦生效，' +
+             '<b>上游的错误就不再可见</b>——它不会变成一条失败记录，只会变成一条静默的缺口。'},
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'### 附带发现：评测集泄漏',
+         src:'docs/ERROR_CASES.md', sec:'案例 2 · 规模口径错配',
+         why:'用同一批数据既调提示词又报指标，抽取类指标会系统性虚高。' +
+             '这一条不针对大模型本身，但它是「大模型抽取效果好」这类结论最常见的来源。'}
+      ]
+    },
+    verdict: '收益与可验证性是<b>正交的两个维度</b>：§1.13 给出的 F1 提升是真的，' +
+             '§2.3/§2.4 给出的验证盲区也是真的，两者可以同时成立。' +
+             '能拿它生成候选，不能把它的输出直接当结论。',
+    caveat: '<b>分歧未消解。</b>支持方的证据来自文献指标与本地可行性，' +
+            '反方的证据来自本项目实测出的验证盲区。' +
+            '本项目的实际做法是折中——抽取之后接一层可验证判别器，再接一层独立的端点约束规则' +
+            '（<b>src/ontology.py::RELATION_ENDPOINT_CONSTRAINTS</b>）。'
+  },
+
+  quality: {
+    q: '知识图谱的质量怎么评估？',
+    seeds: ['L5', 'Triplet Critic'],
+    trace: '字面命中 2 个种子：「L5」与「Triplet Critic」。扩展 2 跳，取到 70 个节点。' +
+           '六层评测与它自己的短板 L3、以及 CONTRADICTS 通过率同时出现在子图里。',
+    stats: [
+      ['种子实体', '2'],
+      ['扩展跳数', '2'],
+      ['节点 / 封顶', '70 / 70'],
+      ['子图边', '104'],
+      ['关系类型', '6'],
+      ['命中论文段', '49']
+    ],
+    nodes: {
+      A: {t:'L5 六层评测', k:'Method', seed:1},
+      B: {t:'Triplet Critic', k:'Method', hit:1},
+      C: {t:'L3 端点完备性', k:'Metric', contra:1, hit:1},
+      D: {t:'CONTRADICTS 通过率', k:'Metric', hit:1},
+      E: {t:'Gold Standard', k:'Artifact'},
+      F: {t:'Claim 范式', k:'Concept'},
+      G: {t:'人工标注一致性', k:'Metric'},
+      H: {t:'本体约束', k:'Concept'},
+      I: {t:'KGHeartBeat', k:'Tool'}
+    },
+    edges: [
+      {a:'A', b:'B', r:'USES', hot:1},
+      {a:'A', b:'C', r:'CONTRADICTS', hot:1, contra:1},
+      {a:'A', b:'D', r:'EVALUATES', hot:1},
+      {a:'A', b:'F', r:'USES'},
+      {a:'A', b:'I', r:'COMPARES_WITH'},
+      {a:'B', b:'H', r:'USES'},
+      {a:'F', b:'D', r:'USES'},
+      {a:'E', b:'G', r:'EVALUATES'}
+    ],
+    pro: {
+      stake: '支持 · 分层评测可跑、可复现',
+      claim: '六层评测在阈值 0.67 下把 43867 条边打了一遍分，逐层产出可查的数字，而且不需要金标。',
+      ev: [
+        {rel:'SUPPORTS', tier:'s',
+         qt:'threshold 0.67，edges_total 43867 —— L1 实体存在 0.9438、' +
+            'L3 端点 0.9617、L4 谓词 0.9946、L6 引文 1.0。',
+         src:'data/quality/l5-six-layer.json', sec:'全量输出（本地模型，约 5 分钟，¥0）',
+         why:'这是整页里唯一一条「点开就能看到全部原始数字」的证据。' +
+             'L1/L3/L4/L6 <b>完全不用人工金标</b>，改用证据引文、已知实体集、本体与引文存在性，' +
+             '所以它可以无标注地反复重跑。'},
+        {rel:'SUPPORTS', tier:'s',
+         qt:'被原文支持的关系子图：27954 条边保留，15913 条丢弃。',
+         src:'docs/L5_SIX_LAYER_REPORT.md', sec:'§3.2 · 产物：被原文支持的关系子图',
+         why:'分层评测的产出不是一组分数，而是<b>一张被筛过的图</b>。' +
+             '一个端点不存在、或原文里找不到依据的边，在可视化与问答里本来也不可用。'},
+        {rel:'COMPARES_WITH', tier:'n',
+         qt:'KGTorrent 是 Kaggle Jupyter Notebook 语料数据集，与 KG 质量评估无关；' +
+            '论文写「参考 KGTorrent」会被评审直接指出概念错误，应换成 KGHeartBeat / Luzzu / KGrEaT。',
+         src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§3.3 · 经典指标体系',
+         why:'这一条把「该参考什么」变成了可核对的清单：Zaveri 体系 + KGHeartBeat 的 ' +
+             '6 大类约 40 个指标，其中 Intrinsic / Contextual / Representational 有意义的子集可以零成本算出。'}
+      ]
+    },
+    con: {
+      stake: '反方 · 分层评测会给出过高的印象',
+      claim: '同一份结果换一个口径就从 0.64 变成 1.00，而且这套指标不产召回、也测不出方向——它回答不了「漏了多少」。',
+      ev: [
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'L5_triplet 的 all 口径是 0.6372，supported 口径是 1.0 —— ' +
+            '两个数出自同一份结果文件。',
+         src:'data/quality/l5-six-layer.json', sec:'同一文件内的两个口径',
+         why:'<b>两个数字都真实，但读者会记住 1.0。</b>' +
+             'supported 口径只统计「用同一条阈值筛出来之后剩下的边」，用筛子证明筛子，' +
+             '报这个数而不报全集，结论会完全反过来。'},
+        {rel:'CONTRADICTS', tier:'c',
+         qt:'那份调研报告也提出了一个 L1–L6 分层方案，与本项目六层同名不同义。' +
+            '……只报六层时，必须说明为什么不报召回。',
+         src:'docs/L5_SIX_LAYER_REPORT.md', sec:'§6.5 · 与调研报告版的六处实质差异',
+         why:'报告版分层以人工金标为参照、能产召回；本项目六层是<b>精度型 / 自洽型校验</b>。' +
+             '两套东西同名，引用时必须说清是哪一套——否则「六层」这个词本身就会造成误读。'},
+        {rel:'EVALUATES', tier:'n',
+         qt:'但 L3 端点完备性只有 68.5% —— 31.5% 的边至少有一端不是已抽取的节点，' +
+            '这是当前最大短板，且 L5 过滤对它毫无改善（68.5% → 68.6%），两者是正交维度。',
+         src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§2.3 · 实测结果与最大短板',
+         why:'分层评测的六层之间并不互相覆盖。把 L4 的 0.9946 和 L3 的 68.5% 并排放，' +
+             '才看得出<b>分数最高的一层和最短的一块板没有任何关系</b>。'}
+      ]
+    },
+    verdict: '六层能回答的是「这条边有没有原文支持」，回答不了「漏掉了多少」和「方向对不对」。' +
+             '它是一套<b>精度型 / 自洽型校验</b>，不是一个质量总分——' +
+             '把 L6 的 1.0 当成「图谱质量满分」是这一页最需要防住的误读。',
+    caveat: '<b>分歧未消解。</b>全集 0.6372 与支持子集 1.0000 都是真数字，' +
+            '取哪个并不取决于事实，而取决于你想让读者得到什么印象。' +
+            '项目自己的处理是<b>两个数并列写进同一份报告</b>，并单独声明口径差异。'
+  }
+};
+
+/* ── 渲染 ─────────────────────────────────────────────────────────────── */
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function curve(p, q, bend){
+  const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
+  const dx = q[0] - p[0], dy = q[1] - p[1];
+  const cx = mx - dy * bend, cy = my + dx * bend;
+  return {
+    d: 'M' + p[0] + ' ' + p[1] + 'Q' + cx.toFixed(1) + ' ' + cy.toFixed(1) +
+       ' ' + q[0] + ' ' + q[1],
+    // 二次贝塞尔 t=0.5 的落点，用来放边标签
+    mid: [(p[0] + 2 * cx + q[0]) / 4, (p[1] + 2 * cy + q[1]) / 4]
+  };
+}
+
+function renderGraph(d, narrow){
+  const POS = narrow ? GN : GW;
+  const W = narrow ? 360 : 720;
+  const H = narrow ? 430 : 302;
+  const out = [];
+  const bend = narrow ? 0.05 : 0.075;
+
+  d.edges.forEach(function(e, ei){
+    if (!POS[e.a] || !POS[e.b]) return;
+    const c = curve(POS[e.a], POS[e.b], bend);
+    let cls = 'edge';
+    if (e.contra) cls += ' contra';
+    else if (e.hot) cls += ' hot';
+    const delay = (0.1 + ei * 0.18).toFixed(2);
+    out.push('<path class="' + cls + '" d="' + c.d + '" data-in="' + delay + '"></path>');
+    if (e.contra) {
+      out.push('<text class="gel" x="' + c.mid[0].toFixed(1) + '" y="' +
+               (c.mid[1] - 7).toFixed(1) + '" data-in="' + delay + '">CONTRADICTS</text>');
+    }
+    if (e.hot && !e.contra) {
+      out.push('<path class="flow" d="' + c.d + '" pathLength="240" data-in="' +
+               (parseFloat(delay) + 0.6).toFixed(2) + '"></path>');
+    }
+  });
+
+  let i = 0;
+  const base = d.edges.length * 0.18 + 0.5;
+  Object.keys(d.nodes).forEach(function(k){
+    if (!POS[k]) return;
+    const n = d.nodes[k], p = POS[k];
+    const r = n.seed ? 5.6 : (n.hit ? 4.2 : 3);
+    let nc = 'nd';
+    if (n.seed) nc += ' seed'; else if (n.hit) nc += ' hit';
+    let lc = 'gl';
+    if (n.seed) lc += ' seed'; else if (n.hit) lc += ' hit';
+
+    // F 的两行文字整体挂到节点左侧：它的下方是连到中心的那条竖直边，
+    // 文字放在正上/正下都会被线穿过。其余节点一律「类型在上、名字在下」。
+    const side = (k === 'F');
+    const ly = side ? p[1] + 4 : p[1] + (narrow ? 17 : 19);
+    const lx = side ? p[0] - r - 10 : p[0];
+    const la = side ? 'end' : 'middle';
+    const ky = side ? p[1] - 8 : p[1] - r - 7;
+    const kx = side ? p[0] - r - 10 : p[0];
+    const ka = side ? 'end' : 'middle';
+
+    const halo = (n.seed || n.hit)
+      ? '<circle class="halo' + (n.seed ? ' seed' : '') +
+        '" cx="' + p[0] + '" cy="' + p[1] + '" r="' + (r + 5) + '"></circle>'
+      : '';
+    out.push(
+      '<g class="nwrap" data-in="' + (base + i * 0.3).toFixed(2) + '">' + halo +
+      '<circle class="' + nc + '" cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '"></circle>' +
+      '<text class="gn" x="' + kx + '" y="' + ky + '" text-anchor="' + ka + '">' +
+      esc(n.k) + '</text>' +
+      '<text class="' + lc + '" x="' + lx + '" y="' + ly + '" text-anchor="' + la + '">' +
+      esc(n.t) + '</text></g>');
+    i++;
+  });
+
+  $('gpanel').innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" ' +
+    'aria-hidden="true">' + out.join('') + '</svg>';
+  return i > 0;
+}
+
+/* 引文 → 主视图的 PDF 面板。
+   `kg-nebula.html` 早就实现了 pdf.js 面板与片段高亮
+   （`openPdf(src, page, snippet)`，见 `tools/cdp_verify_pdflink.py`），
+   而问答页这条证据此前只能显示「2506.09566v1 · 第 4 页」却点不进去。
+   与其把那几百行 pdf.js 逻辑再搬一份过来，不如**直接跳过去复用** ——
+   顺带把「问答 → 原文」这条动线接到主视图上。 */
+function pdfLink(e){
+  if (!e.paper || !e.page) return '';
+  const snip = String(e.quote || '').replace(/^「|」$/g, '').slice(0, 120);
+  return './kg-nebula.html?pdf=' + encodeURIComponent(e.paper) +
+         '&page=' + encodeURIComponent(e.page) +
+         '&q=' + encodeURIComponent(snip);
+}
+
+function evHTML(e, i){
+  let tagCls = 'tag n';
+  if (e.tier === 's') tagCls = 'tag s';
+  if (e.tier === 'c') tagCls = 'tag c';
+  const href = pdfLink(e);
+  const out = href
+    ? '<a class="lnk" href="' + href + '" target="_blank" rel="noopener">' +
+      '在原文里查看 →</a>'
+    : '<span class="lnk off">（这条没有原文引文）</span>';
+  return '' +
+    '<div class="ev">' +
+      '<button class="eb" type="button" aria-expanded="false">' +
+        '<span class="row1"><span class="' + tagCls + '">' + esc(e.rel) + '</span>' +
+        '<span class="eix">E' + (i + 1) + '</span></span>' +
+        '<span class="qt"><span class="qm">「</span>' + esc(e.qt) +
+        '<span class="qm">」</span></span>' +
+        '<span class="meta">' + esc(e.src) + ' ' + esc(e.sec) + '</span>' +
+      '</button>' +
+      '<div class="more" hidden>' +
+        '<p class="why">' + e.why + '</p>' +
+        '<p class="out">' + out +
+        '<span class="src">' + esc(e.src) + ' ' + esc(e.sec) + '</span></p>' +
+      '</div>' +
+    '</div>';
+}
+
+function campHTML(kind, c){
+  let cls = 'camp';
+  if (kind === 'con') cls += ' con';
+  return '<div class="' + cls + '">' +
+    '<p class="stake"><i class="tick"></i>' + esc(c.stake) + '</p>' +
+    '<p class="claim">' + esc(c.claim) + '</p>' +
+    '<p class="tally">证据 <b>' + c.ev.length + '</b> 条 · 全部可回溯到原文</p>' +
+    '<div class="evs">' +
+      c.ev.map(function(e, i){ return evHTML(e, i); }).join('') +
+    '</div></div>';
+}
+
+let CUR = null;
+
+function play(d){
+  CUR = d;
+  $('how').hidden = true;
+  $('how-note').hidden = true;
+  $('result').hidden = false;
+
+  // 问题回填 + 选中对应胶囊
+  $('q').value = d.q;
+  [].forEach.call(document.querySelectorAll('.chip'), function(ch){
+    ch.classList.toggle('on', QA[ch.dataset.k] === d);
+  });
+
+  $('trace').textContent = d.trace;
+  $('gstats').innerHTML = d.stats.map(function(s){
+    return '<div class="gstat"><span class="k">' + esc(s[0]) + '</span>' +
+           '<span class="v">' + esc(s[1]) + '</span></div>';
+  }).join('');
+
+  $('camps').innerHTML = campHTML('pro', d.pro) + campHTML('con', d.con);
+  $('verdict').innerHTML = d.verdict;
+  $('caveat').innerHTML = d.caveat;
+  $('gdesc').textContent = '检索到的子图：' + d.trace;
+
+  /* ── H9（2026-09-16）：**问题 → 子图 → 3D 高亮**的最后一根线 ──────────
+   *
+   * 四透镜透镜一第 1 项要的是这条链。此前零件全齐、**但没接起来**：
+   * 这一页有问答与 2D 子图，主视图有 3D 高亮，**而两者不通** ——
+   * 用户答完没法在图上看见那片子图。
+   *
+   * 做法：把这 **片子里出现的实体名**带进主视图的 `?hl=`，
+   * 主视图压暗其余、提亮这些点。
+   *
+   * **为什么不只带种子**：种子只是入口（几个），而"我检索到的那片证据"
+   * 是**整个子图** —— 这才对应界面上画的这张图。
+   *
+   * **为什么限 40 个**：名字要塞进 URL，几十个长实体名会把 URL 撑到
+   * 浏览器/服务器的上限附近。超出的**如实说"只带了前 40 个"**，
+   * 而不是悄悄截断（C4/G3 定下的纪律：**做了多少要说出来**）。
+   */
+  var hlNames = Object.keys(d.nodes || {})
+    .map(function(k){ return d.nodes[k].t; })
+    .filter(Boolean);
+  var HL_LIMIT = 40;
+  var hlUsed = hlNames.slice(0, HL_LIMIT);
+  var hlBtn = $('to3d');
+  if (hlBtn) {
+    if (!hlUsed.length) {
+      hlBtn.hidden = true;
+    } else {
+      hlBtn.hidden = false;
+      hlBtn.textContent = '在 3D 图里看这片子图（' + hlUsed.length
+        + (hlNames.length > HL_LIMIT ? '/' + hlNames.length : '') + ' 个实体）';
+      hlBtn.onclick = function(){
+        var q = [];
+        if (ASK_GID) q.push('src=' + encodeURIComponent(ASK_GID));
+        q.push('hl=' + encodeURIComponent(hlUsed.join(',')));
+        location.href = './kg-nebula.html?' + q.join('&');
+      };
+      hlBtn.title = hlNames.length > HL_LIMIT
+        ? '子图共 ' + hlNames.length + ' 个实体，链接只带前 ' + HL_LIMIT + ' 个'
+        : '打开主视图并高亮这 ' + hlUsed.length + ' 个实体';
+    }
+  }
+
+  paint(false);
+
+  // 逐层入场：边 → 节点 → 证据 → 结论。reduced-motion 下直接全部就位。
+  const items = [];
+  [].forEach.call($('gpanel').querySelectorAll('[data-in]'), function(el){
+    items.push([el, 'in', parseFloat(el.dataset.in) * 120]);
+  });
+  [].forEach.call($('camps').querySelectorAll('.ev'), function(el, i){
+    items.push([el, 'up', 380 + i * 90]);
+  });
+  [].forEach.call([$('verdict'), $('caveat')], function(el, i){
+    items.push([el, 'up', 900 + i * 120]);
+  });
+
+  if (REDUCED) {
+    items.forEach(function(it){ it[0].classList.add(it[1]); });
+    return;
+  }
+  items.forEach(function(it, i){
+    it[0].style.transitionDelay = it[2] + 'ms';
+    setTimeout(function(){ it[0].classList.add(it[1]); }, 30 + i * 12);
+  });
+}
+
+/* 重画子图。
+   instant=true 用于窄屏/宽屏切换：新生成的 SVG 元素初态是 opacity 0，
+   必须立刻解锁，否则窗口一改大小子图就整块消失（第一版正是栽在这里）。
+
+   ⚠️⚠️ **`CUR` 可能是 null**（2026-09-18 实测踩到）：
+   `paint()` 也挂在 **resize** 上，而**问答还没跑完时** `CUR` 仍是 null
+   ⇒ `renderGraph(null, …)` ⇒ 进去读 `d.edges` ⇒
+   **`Cannot read properties of null (reading 'edges')`** ✗
+   ⇒ 那一下会**中断整个脚本块**，后面的事件绑定全部失效
+     —— 而**页面上看不出明显异常**（结果区照样显示了 224 字），
+        只有 trace 是空的、图是空的。**这正是"看不出坏"的那类故障。**
+
+   ⇒ 所以这里**先判空**：没有图就什么都不画（**下一帧有图了自然会画**）。 */
+function paint(instant){
+  if (!CUR) return;                       /* ← 关键的那一行 */
+  renderGraph(CUR, innerWidth < 760);
+  if (!instant) return;
+  [].forEach.call($('gpanel').querySelectorAll('[data-in]'), function(el){
+    el.classList.add('in');
+  });
+}
+
+/* 证据卡展开 / 查看原文提示 */
+$('camps').addEventListener('click', function(ev){
+  const link = ev.target.closest('.lnk');
+  if (link) {
+    const nl = link.closest('.more').querySelector('.note-line');
+    if (nl) nl.hidden = !nl.hidden;
+    return;
+  }
+  const btn = ev.target.closest('.eb');
+  if (!btn) return;
+  const open = btn.getAttribute('aria-expanded') === 'true';
+  btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+  btn.classList.toggle('open', !open);
+  btn.parentNode.querySelector('.more').hidden = open;
+});
+
+/* 表单提交 + 示例胶囊 —— **接真后端**（2026-09-14 改）。
+
+此前这两处都是"拿输入去匹配硬编码的 QA 常量"，最像问答、实则最不像：
+输入什么都会落到三个预设之一。现在调 POST /api/qa 跑真正的四 Agent 流程；
+后端不在时才退回预设数据，并**明确标注这是演示数据**。 */
+/* ── Agent 工作台：一步一行，逐个点亮 ─────────────────────────────────
+   这是「多 Agent」这个看点的主要表达方式。此前三个 Agent 的结果是
+   一次性摆出来的，观众只看到"一次问答给了两段文字"，看不出有分工。
+
+   每步单独发一个请求（`POST /api/qa/step`），所以界面上能真的看到
+   "① 检索完成 → ② 支持方在读 → ③ 反对方在独立读 → ④ 综合"这个过程。 */
+function setAgent(step, state, detail){
+  const li = document.querySelector('#alog li[data-step="' + step + '"]');
+  if (!li) return;
+  li.className = state || '';
+  if (detail != null) {
+    const d = li.querySelector('.ad');
+    if (d) d.textContent = detail;
+  }
+}
+window.setAgent = setAgent;
+
+async function qaStep(payload){
+  const r = await fetch('./api/qa/step', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+/* ── K7 多轮追问（2026-09-15）─────────────────────────────────────────────
+   `QA_HISTORY` 存本页已问过的问题与结论，**每次追问时回传给后端**
+   （后端不存 session，与 evidence/support/oppose 同一个设计理由）。
+
+   ⚠️ **只传给 `retrieve` 一步**。另外三步（支持/反对/综合）用的是**原始问题** ——
+   它们的职责是"读这批证据、给出意见"，没必要也不应该被上一轮的问句影响。
+   后端拿它也只做一件事：**把没有主语的追问补全**
+   （「那它的缺点呢？」字面匹配不到任何实体，检索会 0 种子空转）。
+
+   实测：同一句追问，带历史 → 8 个种子；不带 → 0 个。 */
+let QA_HISTORY = [];
+
+/* ── K8 问答历史（2026-09-16）────────────────────────────────────────────
+   此前 `QA_HISTORY` 只在内存里：**关掉页面就没了**，演示时也没法回头对比。
+   而这一页产出的东西（带引文的证据、两方独立意见、结论）正是写论文要用的，
+   丢了很可惜。
+
+   **存哪里**：`localStorage`（本页已有先例：`kg-last-gid`）。
+   不引入后端 —— 这是"**我这个浏览器里问过什么**"，不是需要共享的状态。
+
+   **存什么**：除了问题与结论，还存**完整响应**（`resp`）——
+   K9 的导出要用到证据里的引文与页码；只存结论就导不出来了。
+   代价是每条几十 KB ⇒ **只留最近 20 条**（localStorage 上限约 5 MB）。
+
+   **失败了怎么办**：`localStorage` 可能被禁用或写满（QuotaExceededError）。
+   所有读写都包在 try 里 —— **历史功能坏掉不该让问答本身坏掉**。 */
+const QA_HIST_KEY = 'kg-qa-history';
+const QA_HIST_MAX = 20;
+// K9：当前展示的那一轮（点历史回看时会被替换）。
+let LAST_ENTRY = null;
+
+function histLoad(){
+  try {
+    const raw = localStorage.getItem(QA_HIST_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) { return []; }
+}
+
+function histSave(list){
+  try {
+    localStorage.setItem(QA_HIST_KEY, JSON.stringify(list));
+    return true;
+  } catch (e) {
+    // 写满时**先砍一半再试一次** —— 比直接放弃有用
+    try {
+      localStorage.setItem(QA_HIST_KEY, JSON.stringify(list.slice(-Math.ceil(list.length / 2))));
+    } catch (e2) { /* 放弃，但不影响问答 */ }
+    return false;
+  }
+}
+
+function histPush(entry){
+  const list = histLoad();
+  list.push(entry);
+  while (list.length > QA_HIST_MAX) list.shift();
+  histSave(list);
+  renderHist();
+}
+
+function renderHist(){
+  const box = $('hist');
+  if (!box) return;
+  const list = histLoad();
+  const sec = $('histsec');
+  if (sec) sec.hidden = list.length === 0;
+  if (!list.length) { box.innerHTML = ''; return; }
+  box.innerHTML = list.slice().reverse().map(function(h, i){
+    const idx = list.length - 1 - i;
+    const dt = new Date(h.t || 0);
+    const when = isNaN(dt.getTime()) ? '' :
+      (dt.getMonth() + 1) + '/' + dt.getDate() + ' ' +
+      String(dt.getHours()).padStart(2, '0') + ':' +
+      String(dt.getMinutes()).padStart(2, '0');
+    return '<div class="hrow"><button type="button" class="hq" data-hist="' + idx + '">'
+      + '<span class="ht">' + esc(when) + '</span>'
+      + '<span class="hx">' + esc(h.q || '') + '</span>'
+      + '<span class="hg">' + esc(shortName(h.gid || '')) + '</span>'
+      + '</button></div>';
+  }).join('');
+}
+window.renderHist = renderHist;
+window.histLoad = histLoad;
+
+async function askReal(question){
+  /* ── G4（2026-09-16）：**截断超长问题** ────────────────────────────────
+     此前没有任何上限，一个几万字符的问题会一路拼进后端 prompt。
+     后端现在有 `Field(max_length=500)`，**但前端也要截** ——
+     否则用户会先看到"请求被拒绝"，而问题明明可以问（只是太长）。
+     **在 `askReal` 内部截断**（而不是两个调用点各截一次）：入口只有一个，
+     以后再加调用点也不会漏。 */
+  const MAX_Q = 500;
+  let truncatedFrom = 0;
+  if (question && question.length > MAX_Q) {
+    truncatedFrom = question.length;
+    question = question.slice(0, MAX_Q);
+  }
+  const note = $('trace');
+  $('how').hidden = true;
+  $('how-note').hidden = true;
+  $('result').hidden = false;
+  if (truncatedFrom && $('caveat')) {
+    $('caveat').innerHTML = '⚠️ 问题超过 ' + MAX_Q + ' 字符（原 '
+      + truncatedFrom + ' 字符），已截取前 ' + MAX_Q + ' 字符再检索。';
+  }
+
+  /* 没有指定图就别假装能问 —— 明确告诉用户该怎么办，而不是偷偷换一篇。 */
+  if (!ASK_GID) {
+    if (note) note.textContent = '';
+    $('camps').innerHTML = '';
+    $('verdict').innerHTML =
+      '还没有指定要问哪张图。<br>' +
+      '请先 <a href="./upload.html" style="color:var(--accent)">上传一篇论文</a>，' +
+      '在结果页点「就这篇提问」；或先 <a href="./kg-nebula.html" ' +
+      'style="color:var(--accent)">进入主视图</a> 看看全库。';
+    $('caveat').innerHTML =
+      '本页只对某一张具体的图提问（检索、取证、结论都基于那张图的实体与边）。' +
+      '此前这里默认指向另一篇论文，用户看到的不是自己的东西 —— 已改掉。';
+    $('gstats').innerHTML = '';
+    if ($('gdesc')) $('gdesc').textContent = '';
+    if ($('agentsec')) $('agentsec').hidden = true;
+    paint(false);
+    return;
+  }
+  if ($('agentsec')) $('agentsec').hidden = false;
+
+  ['retrieve', 'support', 'oppose', 'synth'].forEach(function(s){
+    setAgent(s, '', '等待…');
+  });
+
+  try {
+    /* ① 检索 —— 纯规则，秒回。**只有这一步带 history**（见 QA_HISTORY 的说明） */
+    setAgent('retrieve', 'run', '命中种子、扩展两跳子图…');
+    if (note) note.textContent = '① 检索 Agent 工作中…';
+    const r1 = await qaStep({graph_id: ASK_GID, question: question, step: 'retrieve',
+                             history: QA_HISTORY});
+    // K7：如果后端把追问补全了，**必须说出来** ——
+    // 否则用户会奇怪"我只问了'它的缺点'，怎么检索到了 TransE"。
+    const rw = r1.retrieval.rewritten_from;
+    // **跨语言桥接也必须说出来**（2026-09-18）：
+    // 这个项目的图谱抽自英文论文，中文问题在词面匹配下必然落空，
+    // 后端会自动调一次本地模型把问题转成英文检索词。
+    // 那一步**不再"零模型、可复现"**，用户有权知道检索实际用了什么词 ——
+    // 不说的话，用户会以为"我的中文问题被直接拿去做检索了"。
+    const br = r1.retrieval.bridge;
+    let rnote = r1.retrieval.reason;
+    if (br && br.query_en) {
+      rnote = '已把中文问题转成英文检索词「' + br.query_en + '」'
+            + (br.hit ? '（命中）' : '（仍未命中）') + ' · ' + rnote;
+    } else if (br) {
+      rnote = '中文问题需要先转成英文检索词，但本地模型没有返回可用关键词 · ' + rnote;
+    }
+    setAgent('retrieve', 'done',
+             rw ? ('已把追问补全为「' + r1.retrieval.question_used + '」· ' + rnote)
+                : rnote);
+
+    if (!r1.n_evidence) {
+      ['support', 'oppose', 'synth'].forEach(function(s){
+        setAgent(s, '', '未执行（没有检索到证据）');
+      });
+      /* ⚠️ **不能说成"图谱里没有"**（2026-09-18）：
+         这个项目的图谱抽自**英文论文**，中文问题在词面匹配下会整句落空。
+         真实原因是"问题与图谱不在同一种语言里"，**不是"图谱里没有这个知识"** ——
+         两句话对用户的意思完全不同，混为一谈就是误导。
+         后端已经把桥接记录放进 `retrieval.bridge`（转成了什么词、有没有命中），
+         这里按它如实分三种情况说。 */
+      let concl = '图谱里没有与这个问题相关的证据。';
+      if (br && br.query_en) {
+        concl = '已把你的问题转成英文检索词「' + br.query_en + '」，' +
+                '但在图谱里仍然没有命中任何实体。换个更具体的说法' +
+                '（点出方法名 / 任务名）再试。';
+      } else if (br) {
+        concl = '这个问题是中文的，而本图谱抽自英文论文 —— 检索需要先把它转成' +
+                '英文关键词，但本地模型这次没有返回可用的词。' +
+                '可以直接用英文提问，或稍后再试。';
+      }
+      run(adaptQA({
+        question: question, retrieval: r1.retrieval, evidence: [],
+        agents: [], conclusion: concl,
+        confidence: '—', degraded: false, citations: []
+      }));
+      return;
+    }
+
+    /* ②③ 支持与反对 —— **两次独立调用**，界面上能看到它们先后在读 */
+    setAgent('support', 'run', '正在读 ' + r1.n_evidence + ' 条证据…');
+    if (note) note.textContent = '② 支持 Agent 正在读证据…';
+    const r2 = await qaStep({
+      graph_id: ASK_GID, question: question, step: 'support', evidence: r1.evidence
+    });
+    setAgent('support', r2.ok ? 'done' : 'bad',
+             r2.ok ? '已给出支持意见' : '模型无响应');
+
+    setAgent('oppose', 'run', '独立读同一批证据，找反证…');
+    if (note) note.textContent = '③ 反对 Agent 独立取证…';
+    const r3 = await qaStep({
+      graph_id: ASK_GID, question: question, step: 'oppose', evidence: r1.evidence
+    });
+    setAgent('oppose', r3.ok ? 'done' : 'bad',
+             r3.ok ? (/未发现反证/.test(r3.text || '') ? '未发现反证（如实报告）'
+                                                       : '已给出反对意见')
+                   : '模型无响应');
+
+    /* ④ 综合 —— 只看两方交上来的东西 */
+    setAgent('synth', 'run', '只看两方交上来的意见…');
+    if (note) note.textContent = '④ 综合 Agent 汇总结论…';
+    const r4 = await qaStep({
+      graph_id: ASK_GID, question: question, step: 'synth',
+      support: r2.text || '', oppose: r3.text || ''
+    });
+    setAgent('synth', r4.ok ? 'done' : 'bad',
+             r4.ok ? ('结论已给出 · 置信度 ' + (r4.confidence || '—')) : '模型无响应');
+
+    if (note) note.textContent = r1.retrieval.reason + '　｜　证据 ' + r1.n_evidence +
+      ' 条，其中 ' + r1.n_with_quote + ' 条带论文原文引文。';
+
+    run(adaptQA({
+      question: question,
+      retrieval: r1.retrieval,
+      evidence: r1.evidence,
+      agents: [
+        {role: '支持方', text: r2.text || '（支持方 Agent 无输出）'},
+        {role: '反对方', text: r3.text || '（反对方 Agent 无输出）'}
+      ],
+      conclusion: r4.text || '',
+      confidence: r4.confidence || '',
+      degraded: !(r2.ok || r3.ok),
+      citations: []
+    }));
+
+    /* K7：把这一轮记进历史，下一轮追问会带上它。
+       **上限 6 轮**：`rewrite_question` 只取最近一轮，但留几轮是为了
+       将来若改成 LLM 重写时够用；再长也没有意义（第 7 轮之后的历史
+       对"补全主语"已无贡献，只会让回传的 payload 变大）。
+
+       K8：**同一个问题也落进 localStorage**（保留完整响应）——
+       内存里那份只用于"补全追问"，持久化那份用于"回头对比 / 导出"。 */
+    const entry = {
+      q: question,
+      a: (r4.text || '').slice(0, 400),
+      t: Date.now(),
+      gid: ASK_GID,
+      resp: {
+        question: question,
+        retrieval: r1.retrieval,
+        evidence: r1.evidence,
+        n_evidence: r1.n_evidence,
+        n_with_quote: r1.n_with_quote,
+        support: r2.text || '',
+        oppose: r3.text || '',
+        conclusion: r4.text || '',
+        confidence: r4.confidence || '',
+      },
+    };
+    QA_HISTORY.push({question: entry.q, answer: entry.a});
+    if (QA_HISTORY.length > 6) QA_HISTORY.shift();
+    histPush(entry);
+    LAST_ENTRY = entry;          // K9：导出按钮据此知道"导出哪一轮"
+    if ($('expMsg')) $('expMsg').textContent = '';
+    const histNote = $('histNote');
+    if (histNote) {
+      histNote.textContent = QA_HISTORY.length > 1
+        ? ('已记住 ' + QA_HISTORY.length + ' 轮 —— 可以直接追问「那它的缺点呢？」这类'
+           + '没有主语的问题，检索会把上一轮的主语补回来。')
+        : '';
+      histNote.hidden = QA_HISTORY.length <= 1;
+    }
+  } catch (err) {
+    ['retrieve', 'support', 'oppose', 'synth'].forEach(function(s){
+      const li = document.querySelector('#alog li[data-step="' + s + '"]');
+      if (li && li.className === 'run') li.className = 'bad';
+    });
+    /* ── G3（2026-09-16）：**按错误类型分流，不一律降级到演示数据** ──────────
+       原实现把**所有**异常都归成"后端不可用"，然后 `run(QA.transe)` ——
+       于是「这张图不存在」（HTTP 404）也会显示**内置的 TransE 演示问答**。
+       用户看到的是"我这个问题答出来了"，而实际是**别人的数据**。
+       这正是 G3 记的那条"会误导"。
+
+       ⇒ 分三种：
+         · **404**：图不存在。**明确报错，且不显示任何演示数据** ——
+           因为这时显示什么都等于在冒充"你那篇的结果"。
+         · **400**：请求不合法（如问题超长）。如实说是请求的问题。
+         · **网络/后端没起**：这时降级是**合理**的（不然页面全空），
+           但**必须说清"这不是本次提问的结果"**。 */
+    const m = String((err && err.message) || err);
+    const is404 = /HTTP\s*404/.test(m);
+    const is400 = /HTTP\s*400/.test(m);
+    const c = $('caveat');
+
+    if (is404) {
+      if ($('camps')) $('camps').innerHTML = '';
+      if ($('verdict')) {
+        $('verdict').innerHTML =
+          '这张图不存在。<br>可能的原因：它已被删除、或后端重启后磁盘上没有它的快照。<br>'
+          + '请回到 <a href="./upload.html" style="color:var(--accent)">上传页</a> '
+          + '重新选一篇，或 <a href="./kg-nebula.html" style="color:var(--accent)">进入主视图</a> 看看全库。';
+      }
+      if (c) {
+        c.innerHTML = '⚠️ 这里不显示演示数据 —— 那会把「别人的内置问答」'
+          + '冒充成「你这篇的结果」。';
+      }
+      if ($('gstats')) $('gstats').innerHTML = '';
+      if ($('agentsec')) $('agentsec').hidden = true;
+      return;
+    }
+
+    if (is400) {
+      if ($('verdict')) {
+        $('verdict').innerHTML = '请求被后端拒绝了（' + esc(m) + '）。<br>'
+          + '最常见的原因是问题太长（超过后端上限）。把问题缩短一点再试。';
+      }
+      if (c) c.innerHTML = '⚠️ 这是请求本身的问题，不是图或后端的问题。';
+      return;
+    }
+
+    // 网络类 / 后端没起：降级是可以的，但要说清
+    run(QA.transe);
+    if (c) {
+      c.innerHTML = '⚠️ 后端不可用（' + esc(m) + '），下面显示的是内置演示数据，'
+        + '不是本次提问的检索结果。启动后端后本页会走真的多 Agent 问答。';
+    }
+  }
+}
+window.askReal = askReal;
+
+$('ask').addEventListener('submit', function(e){
+  e.preventDefault();
+  const v = $('q').value.trim();
+  if (v.length >= 2) askReal(v);
+});
+
+$('chips').addEventListener('click', function(e){
+  const ch = e.target.closest('.chip');
+  if (ch) {
+    const q = ch.dataset.q || ch.textContent.trim();
+    $('q').value = q;
+    askReal(q);
+  }
+});
+
+function run(d){
+  play(d);
+  const y = $('result').getBoundingClientRect().top + scrollY - 24;
+  scrollTo({top: y, behavior: REDUCED ? 'auto' : 'smooth'});
+}
+
+/* 窄屏 ↔ 宽屏切换时重画子图（两套手写坐标，避免标签挤成一团） */
+let rt = 0;
+addEventListener('resize', function(){
+  if (!CUR) return;
+  clearTimeout(rt);
+  rt = setTimeout(function(){ paint(true); }, 180);
+});
+
+/* ── K8：历史面板的交互 ──────────────────────────────────────────────────
+   点一条 → **用它存下来的完整响应重新渲染**（复用 adaptQA + run，
+   所以"回看"看到的东西和当时一模一样，而不是另做一套简版视图）。
+   清空 → 需要二次确认（本地历史删了就真没了）。 */
+(function () {
+  const box = $('hist');
+  if (box) {
+    box.addEventListener('click', function (ev) {
+      const b = ev.target.closest('button[data-hist]');
+      if (!b) return;
+      const list = histLoad();
+      const h = list[+b.dataset.hist];
+      if (!h || !h.resp) return;
+      $('how').hidden = true;
+      $('how-note').hidden = true;
+      $('result').hidden = false;
+      if ($('agentsec')) $('agentsec').hidden = true;
+      QA_HISTORY = list.slice(-6).map(function (x) {
+        return {question: x.q, answer: x.a || ''};
+      });
+      LAST_ENTRY = h;            // K9：回看时导出的是**这一条**
+      if ($('expMsg')) $('expMsg').textContent = '';
+      run(adaptQA(h.resp));
+    });
+  }
+  const clr = $('histClear');
+  if (clr) {
+    clr.addEventListener('click', function () {
+      if (!histLoad().length) return;
+      if (!confirm('清空本机保存的问答历史？这个操作没法撤销。')) return;
+      try { localStorage.removeItem(QA_HIST_KEY); } catch (e) {}
+      renderHist();
+    });
+  }
+  // K9：导出按钮
+  const exp = $('expMd');
+  if (exp) {
+    exp.addEventListener('click', function () {
+      const msg = $('expMsg');
+      if (!LAST_ENTRY) {
+        if (msg) msg.textContent = '先问一个问题，再导出。';
+        return;
+      }
+      try {
+        const n = exportMarkdown(LAST_ENTRY);
+        if (msg) msg.textContent = '已导出 ' + n + ' 字符的 Markdown（含引文与页码）。';
+      } catch (e) {
+        if (msg) msg.textContent = '导出失败：' + (e && e.message ? e.message : e);
+      }
+    });
+  }
+})();
+
+/* ── K9 答案导出（Markdown，含引文与页码）────────────────────────────────
+   TODO 里对这一条的定位是「**写论文最直接的用途** —— 现在只能截图」。
+
+   **导出什么**：把这一轮**完整地**落成 Markdown ——
+   问题、检索统计、**证据表（带论文原文引文与页码）**、支持方、反对方、
+   综合结论与置信度。**不导出界面上的装饰**（子图坐标、动画状态），
+   因为要的是"能贴进论文的东西"。
+
+   **为什么在浏览器里生成**：数据已经在前端（`#result` 就是用它渲染的），
+   再往后端加一个导出端点只会多一个失败面。
+   `Blob` + `URL.createObjectURL` 就够，**且不依赖任何库**。 */
+function evLine(it, i) {
+  const c = (it.citations || [])[0] || {};
+  const page = c.page != null ? ('第 ' + c.page + ' 页') : '';
+  const src = c.src ? shortName(c.src) : '';
+  return {i: i + 1, s: it.source, t: it.target, r: it.type,
+          quote: c.quote || '', where: [src, page].filter(Boolean).join(' · ')};
+}
+
+function toMarkdown(h) {
+  const r = h.resp || {};
+  const L = [];
+  L.push('# 知识图谱问答记录', '');
+  L.push('- 图：`' + (h.gid || '') + '`');
+  L.push('- 时间：' + new Date(h.t || Date.now()).toLocaleString());
+  L.push('- 问题：**' + (h.q || '') + '**', '');
+  const ri = r.retrieval || {};
+  L.push('## 检索', '');
+  L.push('- 种子 ' + (ri.seeds || []).length + ' 个：'
+    + (ri.seeds || []).map(function (s) { return '`' + s + '`'; }).join(' '));
+  if (ri.question_used && ri.rewritten_from) {
+    L.push('- **追问已补全为**：`' + ri.question_used + '`');
+  }
+  L.push('- ' + (ri.reason || ''));
+  L.push('- 证据 ' + (r.n_evidence || 0) + ' 条，其中 ' + (r.n_with_quote || 0)
+    + ' 条带论文原文引文', '');
+  const ev = r.evidence || [];
+  if (ev.length) {
+    L.push('## 证据（含原文引文与页码）', '');
+    L.push('| # | 源 | 关系 | 目标 | 原文出处 |');
+    L.push('|---|----|------|------|----------|');
+    ev.forEach(function (it, i) {
+      const e = evLine(it, i);
+      L.push('| ' + e.i + ' | ' + e.s + ' | `' + e.r + '` | ' + e.t + ' | '
+        + (e.where || '—') + ' |');
+    });
+    L.push('');
+    const quoted = ev.map(function (it, i) { return evLine(it, i); })
+                     .filter(function (e) { return e.quote; });
+    if (quoted.length) {
+      L.push('### 引文', '');
+      quoted.forEach(function (e) {
+        L.push('> ' + e.quote, '');
+        L.push('—— `' + e.s + '` → `' + e.t + '`（' + (e.where || '出处未记录') + '）', '');
+      });
+    }
+  }
+  if (r.support) { L.push('## 支持方', '', r.support, ''); }
+  if (r.oppose) { L.push('## 反对方（独立阅读同一批证据）', '', r.oppose, ''); }
+  if (r.conclusion) {
+    L.push('## 综合结论', '', r.conclusion, '');
+    L.push('**置信度**：' + (r.confidence || '—'), '');
+  }
+  L.push('---', '');
+  L.push('> 由 KG Cosmos 的多 Agent 问答生成。支持与反对是**两次独立调用**，');
+  L.push('> 综合方只看两方交上来的东西；结论中的每一条都可由上表的引文回溯到原文。');
+  return L.join('\n');
+}
+
+function exportMarkdown(h) {
+  const md = toMarkdown(h);
+  const name = 'kg-qa-' + new Date(h.t || Date.now())
+    .toISOString().slice(0, 19).replace(/[:T]/g, '') + '.md';
+  const blob = new Blob([md], {type: 'text/markdown;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () {
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  }, 0);
+  return md.length;
+}
+window.exportMarkdown = exportMarkdown;
+window.toMarkdown = toMarkdown;
+
+renderHist();
+window.__ready = true;
+</script>
+<script src="./lib/demo-rail.js"></script>
+</body>
+</html>

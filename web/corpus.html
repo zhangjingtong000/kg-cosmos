@@ -73,8 +73,43 @@
      （`cdp_verify_a11y.py` 的"每页都加载 a11y.css"），
      而这条检查只有在 `PAGES` 名单里加了这个页面时才会覆盖到它。 -->
 <link rel="stylesheet" href="./lib/a11y.css">
+<!--
+  ══ 2026-09-19：本页**已被 `web/papers.html` 替代，按 `ARCHIVE_POLICY` 方式 A 原地留档** ══
+
+  **归档判据**：它不是"坏掉"、更不是"数字错" ——
+  三个统计块（清单论文 / 已入库 / 只下载未入库）是**运行时读**
+  `web/kg-data/corpus-index.json` 的 `stats` 渲染的，**没有硬编码错值**。
+  真正过时的是**结构与措辞**（`docs/DOC_AUDIT_FRONTEND_COMMENTS.md` 记的实测）：
+    ① 表头写死「**arXiv id**」—— 对中文期刊论文（id 形如 `jsjkx2025-kg-kbqa`）不适用；
+    ② **没有语言列 / 语言分组** —— 而 `papers.html` 已有中文/英文分组；
+    ③ 搜索框 placeholder 只提 arXiv；页脚也少一层（缺"我传过哪些 / 传过但没成的"）。
+
+  **并入 `papers.html` 的能力**（照搬，不是重写）：
+    搜索过滤 · 「只看已入库」开关 · 关系数 · 社区数 · 每行「进入主视图 ↗」。
+
+  **为什么不是真删**：这一页是"K2 之前论文管理长什么样"的证据 ——
+  它记着**"一篇论文"这个概念最早在界面上怎么被显式化**（见 `web/index.html` 入口 07
+  原来的注释）。按纪律：**被替代的东西留下痕迹，因为那是理由，不只是历史。**
+  ⇒ 文件保留，靠 `tools/add_legacy_banners.py` 的横幅说明"这不是正式入口"。
+  ⇒ **`OFFICIAL` 名单里已不含本页**（那名单是唯一权威）。
+
+  ⚠️ 顺手修掉一处**死引用**（`docs/NEXT_STEPS.md` 第 4 条）：
+  本页原引 `<script src="./lib/demo-rail.js">`，但本页**不在 `demo-rail.js` 的 `FLOW` 里**
+  ⇒ 脚本走到 `if (idx < 0) return;`，**这一行从来没有生效过**。原行留档如下：
+      <script src="./lib/demo-rail.js"></script>
+  ⇒ 现已移除（旧页不需要演示轨道；`papers.html` 同样不在 FLOW 里）。
+-->
 </head>
 <body>
+<div data-legacy-banner
+     style="position:sticky;top:0;z-index:9999;background:#2a1d12;
+            border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
+            padding:9px 16px;font:13px/1.6 -apple-system,'Segoe UI','Microsoft YaHei',sans-serif">
+  <b>⚠️ 这是历史版本，不是正式入口。</b>
+  正式入口是 <a href="./index.html" style="color:#7cc0b6">index.html（导航页）</a> ——
+  这一页保留下来是为了<b>备查迭代过程</b>，其中的数据与结论可能已经过期。
+</div>
+
 <div class="wrap">
   <header>
     <p class="eyebrow">Corpus · 语料清单</p>
@@ -123,7 +158,10 @@
 
 <!-- a11y.js 会注入「← 导航页」（全站统一，键盘可达）与动效开关 -->
 <script src="./lib/a11y.js"></script>
-<script src="./lib/demo-rail.js"></script>
+<!-- ⚠️ 2026-09-19：这里**原来还有** `<script src="./lib/demo-rail.js"></script>`，
+     但本页不在 `demo-rail.js` 的 `FLOW` 里 ⇒ `idx < 0` 直接 return，**死引用**。
+     原行已在 `<head>` 的归档注释里留档；详细根因见 `docs/NEXT_STEPS.md` 第 4 条。
+     ⚠️ 若将来演示轨道改为覆盖全部正式页（含本页与 `papers.html`），需恢复该行引用。 -->
 <script>
 (function () {
   'use strict';

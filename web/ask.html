@@ -129,6 +129,39 @@ h1 em{font-style:normal;
   box-shadow:0 18px 44px -18px rgba(224,164,105,.7)}
 .ask .go svg{width:17px;height:17px}
 
+/* ── 问答范围：单篇图 / 全库（2026-09-26）─────────────────────────────────
+   两个模式由**用户显式选**，不由系统去猜"他想问哪一篇" ——
+   猜错的代价是"答了一片无关的图"，而用户看不出答错了。
+   样式沿用 `.chip` 的胶囊语言；选中态用 `aria-checked` 表达（无障碍属性即状态）。 */
+.modes{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0 0}
+.mode{font:500 12.5px/1.35 inherit;font-family:inherit;color:var(--ink-2);
+  background:rgba(255,255,255,.022);border:1px solid var(--line);
+  border-radius:999px;padding:9px 16px;cursor:pointer;
+  transition:color .3s,border-color .3s,background .3s}
+.mode:hover,.mode:focus-visible{color:#fff;border-color:rgba(224,164,105,.40);
+  background:rgba(224,164,105,.08)}
+.mode[aria-checked="true"]{color:#fff;border-color:rgba(224,164,105,.55);
+  background:rgba(224,164,105,.10)}
+.modehint{font-size:12px;color:var(--ink-3);line-height:1.6}
+
+/* ── 全库模式的社区卡片（替换子图的位置）─────────────────────────────────
+   全库模式**没有子图**可画（它检索的是社区摘要，不是节点与边），
+   所以这块列出命中的社区。每张卡片的第一行就是「社区级摘要」标签 ——
+   这是纪律的可见形式：**不能让人以为这是论文原文**。 */
+.clist{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:12px}
+.ccard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+  background:rgba(255,255,255,.02)}
+.ccard .chead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:0}
+.ccard .ctag{font-size:10.5px;letter-spacing:.14em;color:#e8c9a4;
+  border:1px solid rgba(224,164,105,.42);border-radius:999px;padding:3px 9px;
+  background:rgba(224,164,105,.12)}
+.ccard .cname{font-size:14.5px;font-weight:600;color:#fff}
+.ccard .cmeta{font-size:11.5px;color:var(--ink-3)}
+.ccard .csum{margin:10px 0 0;font-size:13px;line-height:1.75;color:var(--ink-2)}
+.ccard .cmem,.ccard .cmatch,.ccard .cnote{margin:8px 0 0;font-size:12px;
+  line-height:1.65;color:var(--ink-3)}
+.ccard .cnote{color:rgba(193,195,201,.60)}
+
 .chips{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 0}
 .chip{font:400 12.5px/1.35 inherit;font-family:inherit;color:var(--ink-2);
   background:rgba(255,255,255,.022);border:1px solid var(--line);
@@ -293,6 +326,25 @@ h1 em{font-style:normal;
   background:var(--ink-3);opacity:.5}
 .caveat b{color:var(--ink);font-weight:600}
 
+/* ── 降级横幅 ⑨（2026-09-19）─────────────────────────────────────────────
+   背景：`#caveat` 在 `#result` 的**底部**（综合结论之后），而 `run()` 只把
+   页面滚到 `#result` 的**顶部**。实测点完 chip 后 `#caveat.rect.top = 1893px`、
+   视口只有 900px —— 警告文字写了、`.up` 也生效了（opacity=1），**但用户看不见**，
+   等于没写。所以「后端不可用 ⇒ 显示的是内置演示数据」这句话必须落在
+   **滚动锚点之内**（`#result` 的第一行）。
+   初值 `hidden`：只在降级分支由 catch 填字显形，正常路径不占位、不误报。 */
+#degrade{margin:0 0 22px;max-width:84ch;font-size:13.5px;line-height:1.82;
+  color:var(--ink);padding:13px 16px;position:relative;
+  border:1px solid rgba(224,164,105,.42);
+  border-radius:10px;background:rgba(224,164,105,.08)}
+/* ⚠️ 2026-09-19：原来这里是 `border-left:3px solid var(--accent)`（左侧强调竖线）。
+   全站惯例是**顶部短横线**（照 `lib/design.css` 的 `.note::before`）——
+   那份文件写着「竖线已废弃」，且左侧竖线被 `tools/check_design_system.py` 判为违规。
+   **只换了记号的画法**：横幅的文字、位置、`hidden` 逻辑一个都没动。 */
+#degrade::before{content:"";position:absolute;left:0;top:0;width:56px;height:2px;
+  background:var(--accent);opacity:.85}
+#degrade b{color:#fff;font-weight:600}
+
 /* ── 页脚 ──────────────────────────────────────────────────────────────── */
 footer{flex:0 0 auto;padding:8px 40px 26px 132px;font-size:11px;color:var(--ink-3);
   display:flex;gap:26px;flex-wrap:wrap}
@@ -368,6 +420,18 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
       答案可以含糊，证据不行。
     </p>
 
+    <!-- 问答范围（2026-09-26）：**显式模式切换**，而不是让系统猜用户想问哪篇。
+         猜错的代价是"答了一片无关的图"，而用户看不出答错了。
+         全库模式问的是跨文献的全局问题（"这批文献整体在研究什么"），
+         它的证据是 B6 生成的**社区级摘要**，不是论文原文。 -->
+    <div class="modes" id="modes" role="radiogroup" aria-label="问答范围">
+      <button type="button" class="mode" id="modeGraph" role="radio"
+              aria-checked="true" data-mode="graph">单篇图</button>
+      <button type="button" class="mode" id="modeGlobal" role="radio"
+              aria-checked="false" data-mode="global">全库（社区摘要）</button>
+      <span class="modehint" id="modehint">问题落在某一篇论文的图上（检索实体与边）</span>
+    </div>
+
     <!-- 当前语境：问的是哪张图。此前这一页默认问另一篇论文，
          用户看完全部内容都不知道"这不是我上传的那篇"。 -->
     <p class="ctx" id="ctx"></p>
@@ -391,12 +455,19 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
       <p class="ctx" id="histNote" hidden></p>
 
     <div class="chips" id="chips" role="group" aria-label="示例问题">
-      <button class="chip" type="button" data-k="transe"
+      <button class="chip" type="button" data-k="transe" data-mode="graph"
               data-q="What are the limitations of TransE for knowledge graph embedding?">TransE 有什么局限？</button>
-      <button class="chip" type="button" data-k="llm"
+      <button class="chip" type="button" data-k="llm" data-mode="graph"
               data-q="Can large language models be used for knowledge graph construction?">大模型能不能直接用来做知识图谱抽取？</button>
-      <button class="chip" type="button" data-k="quality"
+      <button class="chip" type="button" data-k="quality" data-mode="graph"
               data-q="How to evaluate the quality of a knowledge graph?">知识图谱的质量怎么评估？</button>
+      <!-- 全库模式的示例问题：**跨文献的全局问题** ——
+           这两句话在任何单篇图里都没有对的实体可命中，
+           它们正是"把社区摘要接进问答链路"要回答的那一类。 -->
+      <button class="chip" type="button" data-k="gglobal" data-mode="global" hidden
+              data-q="这批文献整体在研究什么？">这批文献整体在研究什么？</button>
+      <button class="chip" type="button" data-k="gconflict" data-mode="global" hidden
+              data-q="这批文献里有哪些互相矛盾或分歧的观点？">有哪些互相矛盾的观点？</button>
     </div>
 
     <div class="how" id="how">
@@ -406,6 +477,19 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
         <span class="ds">BFS 两跳，封顶 70 个节点；命中的实体与路径在图上高亮</span></div>
       <div class="r"><span class="ix">03</span><span class="nm">多 Agent 各自站队</span>
         <span class="ds">支持方与反方分开取证，每条证据附原文摘录与出处，最后给一句综合判断</span></div>
+    </div>
+
+    <!-- 全库模式的说明（与单篇那三条**分开写**）——
+         因为它检索的东西、以及证据的性质都不一样：
+         单篇是"实体与边 + 论文原文引文"，全库是"社区级摘要（生成的概括）"。
+         用同一段说明会把两者混为一谈。 -->
+    <div class="how" id="howGlobal" hidden>
+      <div class="r"><span class="ix">01</span><span class="nm">在社区摘要上匹配</span>
+        <span class="ds">不查某一篇论文的实体与边，而是把问题与全库的社区摘要做词面匹配，取最相关的几个社区</span></div>
+      <div class="r"><span class="ix">02</span><span class="nm">证据是社区级的</span>
+        <span class="ds">每个社区一段概括，由本地模型根据该社区的实体与关系生成 —— 它不是论文原文，也没有页码</span></div>
+      <div class="r"><span class="ix">03</span><span class="nm">同一套四步链路</span>
+        <span class="ds">支持方与反对方独立读同一批社区摘要，综合方只看两方交上来的东西</span></div>
     </div>
     <p class="how-note" id="how-note">
       检索之后，子图、双方证据与综合结论会依次展开在这一页里。
@@ -425,6 +509,13 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
 </section>
 
 <section id="result" hidden>
+      <!-- ⑨（2026-09-19）：**降级横幅必须待在滚动锚点之内**。
+           此前「不是本次提问的结果」只写进 `#caveat`，而它在本 section 的
+           **底部**；`run()` 只滚到本 section 的**顶部** ⇒ 实测警告 top=1893px、
+           视口 900px，用户点完 chip 只看到假数据渲染的结果区。
+           这个元素放在第一行（`run()` 的落点就在它上方 24px），只在降级到
+           内置演示数据时由 catch 分支填字显形；正常路径保持 hidden。 -->
+      <p id="degrade" role="status" hidden></p>
       <!-- ⓿ Agent 工作台：把「多个 Agent 在分工」这件事显示出来。
            此前三个 Agent 的结果是一次性摆出来的，观众只看到"一次问答
            给了两段文字"，看不出有分工 —— 等于把主要看点表达没了。
@@ -593,33 +684,117 @@ const ASK_GID = PARAM_GID || LAST_GID || '';
 const ASK_EXPLICIT = !!PARAM_GID;        // 是"带着某篇图进来的"吗
 const ASK_PARAM = PARAM_GID;
 
-/* 顶部那行语境提示：让用户一眼知道自己在问哪张图。
+/* ── 问答范围·模式（2026-09-26）───────────────────────────────────────────
+   `graph`  —— 单篇图：现有行为（检索某一张图的实体与边）；
+   `global` —— 全库：检索 B6 生成的 18 条**社区摘要**（`web/kg-data/community-summaries.json`）。
+
+   **为什么是显式模式而不是让系统猜**：猜错的代价是"答了一片无关的图"，
+   而用户看不出答错了 —— 这个项目在"看起来对了、其实是别的东西"上栽过多次。
+   URL 参数 `?mode=global` 可直接进入全库模式（便于分享与自动化测试）。 */
+let ASK_MODE = ((new URLSearchParams(location.search)).get('mode') === 'global')
+  ? 'global' : 'graph';
+
+/* 全库模式的"料有多少条" —— 从后端 `/api/communities` 拿。
+   **拿不到时不编数字**：界面只说"社区摘要"，不说"18 条"（那个 18 是数据里的，
+   不是硬编码在页面上的 —— 万一重跑 B6 变成 20 条，页面不该撒谎）。 */
+let GLOBAL_CAT = null;
+
+function globalNote(){
+  if (GLOBAL_CAT && GLOBAL_CAT.n) {
+    return GLOBAL_CAT.n + ' 条社区摘要'
+      + (GLOBAL_CAT.model ? '（' + GLOBAL_CAT.model + ' 生成）' : '');
+  }
+  return '社区摘要';
+}
+
+/* 顶部那行语境提示：让用户一眼知道自己在问哪张图 / 还是在问全库。
    带上来源（是刚看过的那张，还是记住的上一次上传），
    否则"问的是谁"这件事对用户来说是隐形的。
 
    **这里自带转义，不复用下面的 `esc`** —— 后者是 `const` 定义的
-   （在 ~840 行），而本 IIFE 立即执行；`const` 不提升，
+   （在 ~840 行），而本函数在模块顶层立即执行；`const` 不提升，
    复用会抛 `ReferenceError: Cannot access 'esc' before initialization`。 */
-(function fillCtx(){
+function renderCtx(){
   const el = document.getElementById('ctx');
   if (!el) return;
   const x = s => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  if (ASK_MODE === 'global') {
+    el.className = 'ctx';
+    el.innerHTML = '正在问：<b>全库</b>（' + x(globalNote()) + '）—— ' +
+      '不指定某一篇论文，问题落在<b>社区级摘要</b>上。';
+    return;
+  }
   if (!ASK_GID) {
     el.className = 'ctx miss';
     el.innerHTML = '⚠️ <b>还没有指定要问哪张图。</b>请先 ' +
       '<a href="./upload.html">上传一篇论文</a>，在结果页点「就这篇提问」；' +
-      '或先 <a href="./kg-nebula.html">进入主视图</a> 浏览全库。';
+      '或先 <a href="./kg-nebula.html">进入主视图</a> 浏览全库。' +
+      '想直接问跨文献的全局问题，就切到上面的「全库（社区摘要）」。';
   } else {
+    el.className = 'ctx';
     el.innerHTML = '正在问：<b>' + x(ASK_GID) + '</b>' +
       (ASK_EXPLICIT ? '（你刚才看的那张图）' : '（上次上传的那篇）');
   }
-})();
+}
+renderCtx();
+
+const HOW_NOTE = {
+  graph: '检索之后，子图、双方证据与综合结论会依次展开在这一页里。',
+  global: '全库模式检索的是社区级摘要（不是论文原文）：命中的社区、两方立场与'
+        + '综合结论会依次展开在这一页里。'
+};
+
+/* 切换模式。**一个函数改完所有随模式变的东西** ——
+   分散在多处改最容易漏掉一处（漏掉的那处就会说错话，
+   比如全库模式下还写着"证据全部可回溯到论文原文"）。 */
+function setMode(m){
+  ASK_MODE = (m === 'global') ? 'global' : 'graph';
+  const bg = document.getElementById('modeGraph');
+  const bl = document.getElementById('modeGlobal');
+  if (bg) bg.setAttribute('aria-checked', ASK_MODE === 'graph' ? 'true' : 'false');
+  if (bl) bl.setAttribute('aria-checked', ASK_MODE === 'global' ? 'true' : 'false');
+  const hint = document.getElementById('modehint');
+  if (hint) {
+    hint.textContent = ASK_MODE === 'global'
+      ? '问题落在全库的社区级摘要上（不要求指定某一篇论文）'
+      : '问题落在某一篇论文的图上（检索实体与边）';
+  }
+  [].forEach.call(document.querySelectorAll('#chips .chip'), function(ch){
+    ch.hidden = (ch.dataset.mode || 'graph') !== ASK_MODE;
+  });
+  const hg = document.getElementById('howGlobal');
+  const hh = document.getElementById('how');
+  if (hg) hg.hidden = ASK_MODE !== 'global';
+  if (hh) hh.hidden = ASK_MODE === 'global';
+  const hn = document.getElementById('how-note');
+  if (hn) hn.textContent = HOW_NOTE[ASK_MODE];
+  renderCtx();
+}
+window.setMode = setMode;
+
+/* 后端不在（静态站 8098）时**静默不更新**：界面回落到不带数字的说法
+   "社区摘要"。**不许猜一个数字填上** —— 那个数字会被当成事实读。 */
+async function loadGlobalCatalog(){
+  try {
+    const r = await fetch('./api/communities');
+    if (!r.ok) return;
+    GLOBAL_CAT = await r.json();
+    renderCtx();
+  } catch (e) { /* 静态站/后端不可用：保持"社区摘要"这个不带数字的说法 */ }
+}
 
 function shortName(s){ return String(s || '').replace(/\.pdf$/i, ''); }
 
 /* 把 /api/qa 的返回适配成 renderGraph/play 期望的形状 */
 function adaptQA(resp){
+  /* 全库模式的响应形状不同（证据是社区级摘要、没有子图）⇒ 单独适配。
+     不分流的话，下面那套"按 has_quote 分两方"的逻辑会把社区证据
+     全归到「反对 · 引文缺失或类型为矛盾」一侧 —— 那是**把"不是原文"
+     说成"它是反证"**，两件事完全不同。 */
+  if (resp && resp.retrieval && resp.retrieval.mode === 'global') {
+    return adaptQAGlobal(resp);
+  }
   const ev = resp.evidence || [];
   const nodes = {}, key = {}, edges = [];
   let id = 0;
@@ -691,6 +866,99 @@ function adaptQA(resp){
     caveat: resp.degraded
       ? '⚠️ 本地模型不可用，已降级为纯规则检索 —— 上面没有模型参与判断。'
       : '证据均取自论文原文（标注文件名与页码）；支持方与反对方是两次独立调用，互不可见。'
+  };
+}
+
+/* ── 全库模式的适配（2026-09-26）──────────────────────────────────────────
+   与单篇模式**共用同一套渲染管线**（play / 证据卡 / 两方立场 / 综合），
+   但有三处必须换口径，否则界面会撒谎：
+     · 两侧的 `stake` 与 `tally`：单篇写"全部可回溯到原文"，
+       全库必须写"全部是社区级摘要（不是论文原文、没有页码）"；
+     · 每条证据的 `tier` 用 'c'（社区级配色），来源写社区名与生成它的模型；
+     · `caveat` 说明检索范围（精确命中 / 全库覆盖）与证据的性质。
+   另外 `communities` 与 `hl` 是给社区卡片面板和「去 3D 图看成员实体」用的。 */
+function adaptQAGlobal(resp){
+  const ev = resp.evidence || [];
+  const ri = resp.retrieval || {};
+  const all = (ri.scope === 'all');
+  const total = (ri.n_communities_total != null ? ri.n_communities_total : '—');
+
+  function one(it){
+    const c = it.community || {};
+    const sum = String(c.summary || '（摘要缺失）');
+    return {
+      rel: '社区摘要',
+      tier: 'c',
+      qt: '「' + sum.slice(0, 220) + (sum.length > 220 ? '…' : '') + '」',
+      src: '社区「' + (c.name || c.id || '?') + '」· '
+           + (c.model || '（模型名未记录）') + ' 生成',
+      why: '社区 ' + esc(c.id || '?') + ' · '
+           + (c.n_nodes != null ? c.n_nodes : '?') + ' 实体 / '
+           + (c.n_edges != null ? c.n_edges : '?') + ' 关系'
+           + '<br>成员实体（摘要的接地清单）：'
+           + esc((c.members || []).join('、') || '（无记录）')
+           + '<br>命中依据：'
+           + esc((it.matched || []).join('；') || '（词面未命中 ⇒ 全库覆盖）'),
+      paper: '', page: '', quote: '', level: 'community'
+    };
+  }
+  const list = ev.map(one);
+  const ag = {};
+  (resp.agents || []).forEach(function(x){ ag[x.role] = x.text; });
+  const tally = '证据 ' + list.length + ' 条 · 全部是社区级摘要（不是论文原文、没有页码）';
+  const scopeNote = all
+    ? '你的问题没有命中任何社区的标识词 ⇒ 下面是规模最大的 ' + ev.length +
+      ' 个社区（共 ' + total + ' 个）的「全库综述」，不是精确检索。'
+    : '词面命中 ' + ev.length + ' 个社区（共 ' + total + ' 个）。';
+
+  return {
+    global: true,
+    q: resp.question,
+    seeds: ri.seeds || [],
+    trace: (ri.reason || '') + '　｜　证据 ' + ev.length + ' 条，全部为社区级摘要'
+         + '（本地模型生成的概括，不是论文原文）；带论文原文引文 0 条。',
+    stats: [
+      ['检索范围', '全库 · 社区摘要'],
+      [all ? '覆盖社区' : '命中社区', String(ev.length)],
+      ['社区摘要总数', String(total)],
+      ['证据条数', String(ev.length)],
+      ['带原文引文', '0（社区级）'],
+      ['置信度', resp.confidence || '—']
+    ],
+    nodes: {}, edges: [],
+    communities: ev.map(function(it){
+      const c = it.community || {};
+      return {
+        id: c.id, name: c.name, summary: c.summary,
+        members: c.members || [], n_nodes: c.n_nodes, n_edges: c.n_edges,
+        model: c.model, generated: c.generated,
+        label: it.level_label || '社区级摘要',
+        matched: it.matched || [], score: it.score
+      };
+    }),
+    /* 去 3D 图高亮谁：社区摘要的**成员实体**（它们是真实存在于图谱里的名字）
+       —— 社区名本身不是图上的节点，拿它去高亮只会一个都命中不到。 */
+    hl: (function(){
+      const seen = {}, out = [];
+      ev.forEach(function(it){
+        ((it.community || {}).members || []).forEach(function(m){
+          if (m && !seen[m]) { seen[m] = 1; out.push(m); }
+        });
+      });
+      return out;
+    })(),
+    pro: {stake: '支持 · 读同一批社区级摘要',
+          claim: ag['支持方'] || '（支持方 Agent 未运行）',
+          ev: list.slice(0, 6), tally: tally},
+    con: {stake: '反对 · 独立复读同一批社区级摘要',
+          claim: ag['反对方'] || '（反对方 Agent 未运行）',
+          ev: list.slice(0, 6), tally: tally},
+    verdict: esc(resp.conclusion || '').replace(/\n/g, '<br>'),
+    caveat: resp.degraded
+      ? ('⚠️ 本地模型不可用，全库模式只完成了检索（社区级摘要没有经过模型判断）。'
+         + scopeNote)
+      : (scopeNote + '证据是「社区级摘要」—— 由本地模型对每个社区生成的一段概括，'
+         + '不是论文原文、也没有页码；支持方与反对方是两次独立调用，互不可见。')
   };
 }
 
@@ -1083,10 +1351,15 @@ function evHTML(e, i){
   if (e.tier === 's') tagCls = 'tag s';
   if (e.tier === 'c') tagCls = 'tag c';
   const href = pdfLink(e);
+  /* 社区级证据**没有原文可点**（它是生成的概括）—— 这里必须说清是"社区级"，
+     而不是沿用单篇模式那句"这条没有原文引文"：
+     后者读起来像"这条证据质量差"，而事实是"它本来就不是原文"。 */
   const out = href
     ? '<a class="lnk" href="' + href + '" target="_blank" rel="noopener">' +
       '在原文里查看 →</a>'
-    : '<span class="lnk off">（这条没有原文引文）</span>';
+    : (e.tier === 'c'
+       ? '<span class="lnk off">（社区级摘要 · 由本地模型生成，不是论文原文）</span>'
+       : '<span class="lnk off">（这条没有原文引文）</span>');
   return '' +
     '<div class="ev">' +
       '<button class="eb" type="button" aria-expanded="false">' +
@@ -1107,19 +1380,60 @@ function evHTML(e, i){
 function campHTML(kind, c){
   let cls = 'camp';
   if (kind === 'con') cls += ' con';
+  /* 计数那行的文案**随证据级别改**：单篇模式的 "全部可回溯到原文" 对
+     社区级摘要是不成立的（它没有原文可回溯）。`c.tally` 由适配层给，
+     不给时走原来那一句 —— 单篇模式的 DOM 输出因此逐字不变。 */
+  const tally = c.tally
+    ? esc(c.tally)
+    : ('证据 <b>' + c.ev.length + '</b> 条 · 全部可回溯到原文');
   return '<div class="' + cls + '">' +
     '<p class="stake"><i class="tick"></i>' + esc(c.stake) + '</p>' +
     '<p class="claim">' + esc(c.claim) + '</p>' +
-    '<p class="tally">证据 <b>' + c.ev.length + '</b> 条 · 全部可回溯到原文</p>' +
+    '<p class="tally">' + tally + '</p>' +
     '<div class="evs">' +
       c.ev.map(function(e, i){ return evHTML(e, i); }).join('') +
     '</div></div>';
+}
+
+/* ── 全库模式的社区卡片面板（替换子图的位置）──────────────────────────────
+   为什么不能复用那张子图：全库模式检索的是**社区摘要**，
+   没有"命中的实体 + 两跳邻居"这回事 —— 硬画一张图就等于**编一个子图出来**。
+   所以这里如实画卡片，每张卡片的第一行就是「社区级摘要」标签。 */
+function renderCommunityPanel(d){
+  const gp = $('gpanel');
+  if (!gp) return;
+  const rows = (d.communities || []).map(function(c){
+    const size = (c.n_nodes != null ? c.n_nodes : '?') + ' 实体 / '
+               + (c.n_edges != null ? c.n_edges : '?') + ' 关系';
+    return '<li class="ccard">' +
+      '<p class="chead"><span class="ctag">' + esc(c.label || '社区级摘要') + '</span>' +
+      '<span class="cname">' + esc(c.name || c.id || '?') + '</span>' +
+      '<span class="cmeta">' + esc(c.id || '') + ' · ' + esc(size) + '</span></p>' +
+      '<p class="csum">' + esc(c.summary || '（摘要缺失）') + '</p>' +
+      '<p class="cmem">成员实体（摘要的接地清单）：' +
+        esc((c.members || []).slice(0, 8).join('、') || '（无记录）') + '</p>' +
+      '<p class="cmatch">命中依据：' +
+        esc((c.matched || []).join('；') || '（词面未命中 ⇒ 全库覆盖）') + '</p>' +
+      '<p class="cnote">由本地模型 ' + esc(c.model || '（模型名未记录）') +
+        ' 生成于 ' + esc(c.generated || '（时间未记录）') +
+        ' —— 这是社区的概括，不是论文原文，没有页码可点。</p>' +
+      '</li>';
+  }).join('');
+  gp.innerHTML = rows
+    ? ('<ul class="clist">' + rows + '</ul>')
+    : '<p class="cnote">没有命中任何社区摘要。</p>';
 }
 
 let CUR = null;
 
 function play(d){
   CUR = d;
+  /* ⑨（2026-09-19）：先收起降级横幅。凡是走到 play() 的路径（真问答成功、
+     历史回看、以及降级时的 run(QA.transe)）都清掉它；降级分支在 run() 返回
+     之后才填字显形 —— 顺序正好在滚动之后，横幅又在本 section 首部，
+     不会改变 `#result` 的 top，滚动落点不受影响。 */
+  const dw = $('degrade');
+  if (dw) { dw.hidden = true; dw.innerHTML = ''; }
   $('how').hidden = true;
   $('how-note').hidden = true;
   $('result').hidden = false;
@@ -1139,7 +1453,17 @@ function play(d){
   $('camps').innerHTML = campHTML('pro', d.pro) + campHTML('con', d.con);
   $('verdict').innerHTML = d.verdict;
   $('caveat').innerHTML = d.caveat;
-  $('gdesc').textContent = '检索到的子图：' + d.trace;
+  /* Agent 工作台下面那句也要按模式改口：全库模式下两方读的是**社区级摘要**，
+     不能再说"综合方不接触原始证据"就完事（原始证据在这里本来就不存在）。 */
+  const alognote = $('alognote');
+  if (alognote) {
+    alognote.textContent = d.global
+      ? ('支持与反对是两次独立调用，互不可见；它们读的是社区级摘要'
+         + '（本地模型对每个社区生成的概括），不是论文原文。')
+      : ('支持与反对是两次独立调用，互不可见；综合方只看到两方交上来的东西，'
+         + '不接触原始证据。');
+  }
+  $('gdesc').textContent = (d.global ? '检索到的社区摘要：' : '检索到的子图：') + d.trace;
 
   /* ── H9（2026-09-16）：**问题 → 子图 → 3D 高亮**的最后一根线 ──────────
    *
@@ -1157,9 +1481,11 @@ function play(d){
    * 浏览器/服务器的上限附近。超出的**如实说"只带了前 40 个"**，
    * 而不是悄悄截断（C4/G3 定下的纪律：**做了多少要说出来**）。
    */
-  var hlNames = Object.keys(d.nodes || {})
-    .map(function(k){ return d.nodes[k].t; })
-    .filter(Boolean);
+  var hlNames = d.global
+    ? (d.hl || [])
+    : Object.keys(d.nodes || {})
+        .map(function(k){ return d.nodes[k].t; })
+        .filter(Boolean);
   var HL_LIMIT = 40;
   var hlUsed = hlNames.slice(0, HL_LIMIT);
   var hlBtn = $('to3d');
@@ -1168,7 +1494,11 @@ function play(d){
       hlBtn.hidden = true;
     } else {
       hlBtn.hidden = false;
-      hlBtn.textContent = '在 3D 图里看这片子图（' + hlUsed.length
+      /* 社区名不是图上的节点 ⇒ 全库模式带的是**成员实体**，
+         按钮上就得那么写（"这片子图"在这里不存在）。 */
+      var hlWhat = d.global ? '在 3D 图里看这些社区的成员实体（'
+                            : '在 3D 图里看这片子图（';
+      hlBtn.textContent = hlWhat + hlUsed.length
         + (hlNames.length > HL_LIMIT ? '/' + hlNames.length : '') + ' 个实体）';
       hlBtn.onclick = function(){
         var q = [];
@@ -1177,7 +1507,8 @@ function play(d){
         location.href = './kg-nebula.html?' + q.join('&');
       };
       hlBtn.title = hlNames.length > HL_LIMIT
-        ? '子图共 ' + hlNames.length + ' 个实体，链接只带前 ' + HL_LIMIT + ' 个'
+        ? ((d.global ? '命中社区的成员实体共 ' : '子图共 ') + hlNames.length
+           + ' 个实体，链接只带前 ' + HL_LIMIT + ' 个')
         : '打开主视图并高亮这 ' + hlUsed.length + ' 个实体';
     }
   }
@@ -1221,6 +1552,13 @@ function play(d){
    ⇒ 所以这里**先判空**：没有图就什么都不画（**下一帧有图了自然会画**）。 */
 function paint(instant){
   if (!CUR) return;                       /* ← 关键的那一行 */
+  /* 全库模式**没有子图**可画（检索的是社区摘要，不是节点与边）⇒ 改画社区卡片。
+     放在这里而不是只放在 `play()` 里：`paint()` 也挂在 resize 上，
+     只写进 play() 的话，窗口一改变全库结果就整块消失（第一版正是栽在这里）。 */
+  if (CUR.global) {
+    renderCommunityPanel(CUR);
+    return;
+  }
   renderGraph(CUR, innerWidth < 760);
   if (!instant) return;
   [].forEach.call($('gpanel').querySelectorAll('[data-in]'), function(el){
@@ -1268,6 +1606,18 @@ window.setAgent = setAgent;
 
 async function qaStep(payload){
   const r = await fetch('./api/qa/step', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+/* 全库模式的分步调用：走 `/api/qa/global/step` —— **不需要 graph_id**
+   （全局问题不落在任何一篇论文上，见 `src/app.py` 的 `QAGlobalStepRequest`）。 */
+async function qaStepGlobal(payload){
+  const r = await fetch('./api/qa/global/step', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(payload)
@@ -1373,6 +1723,10 @@ async function askReal(question){
     truncatedFrom = question.length;
     question = question.slice(0, MAX_Q);
   }
+  /* 全库模式走另一条链路（不需要 graph_id、证据是社区级摘要）。
+     分流点放在**这里**而不是两个调用点，是为了让"入口只有一个"这句话继续成立：
+     以后再加调用点也不会漏掉分流。 */
+  if (ASK_MODE === 'global') return askGlobal(question, truncatedFrom);
   const note = $('trace');
   $('how').hidden = true;
   $('how-note').hidden = true;
@@ -1597,9 +1951,179 @@ async function askReal(question){
       c.innerHTML = '⚠️ 后端不可用（' + esc(m) + '），下面显示的是内置演示数据，'
         + '不是本次提问的检索结果。启动后端后本页会走真的多 Agent 问答。';
     }
+    /* ⑨（2026-09-19）：同一句话还要写进 `#result` **第一行**的横幅 ——
+       这是用户点完 chip 一定会看到的位置（`run()` 的滚动落点）。
+       `#caveat` 那条**保留不动**：它是综合结论语境里的正式说明，
+       滚到结论时仍读得到；横幅只负责"第一屏就得说清"。
+       G3 的分流不受影响：404 / 400 各自的 return 在这一段**之前**，
+       横幅初值 hidden，那两条路径不会显示任何降级横幅或演示数据。 */
+    const dw = $('degrade');
+    if (dw) {
+      dw.innerHTML = '⚠️ <b>这里不是本次提问的检索结果</b> —— 后端不可用（'
+        + esc(m) + '），下面整页显示的是内置演示数据。'
+        + '启动后端后本页会走真的多 Agent 问答。';
+      dw.hidden = false;
+    }
   }
 }
 window.askReal = askReal;
+
+/* ── 全库问答（GraphRAG 式 Global Search，2026-09-26）─────────────────────
+   与单篇模式**同一套四步链路**（retrieve → support → oppose → synth），
+   只有两点不同：
+     ① 走 `/api/qa/global/step`（不需要 graph_id）；
+     ② 证据是**社区级摘要** ⇒ 渲染时每一处都标出这一级别（见 adaptQAGlobal）。
+   为什么把"检索范围"做成用户显式选的模式：猜错的代价是"答了一片无关的图"，
+   而用户看不出答错了（见 ASK_MODE 上方的说明）。 */
+async function askGlobal(question, truncatedFrom){
+  const MAX_Q = 500;
+  if (question && question.length > MAX_Q) question = question.slice(0, MAX_Q);
+  const note = $('trace');
+  $('how').hidden = true;
+  $('how-note').hidden = true;
+  $('result').hidden = false;
+  if (truncatedFrom && $('caveat')) {
+    $('caveat').innerHTML = '⚠️ 问题超过 ' + MAX_Q + ' 字符（原 '
+      + truncatedFrom + ' 字符），已截取前 ' + MAX_Q + ' 字符再检索。';
+  }
+  if ($('agentsec')) $('agentsec').hidden = false;
+  ['retrieve', 'support', 'oppose', 'synth'].forEach(function(s){
+    setAgent(s, '', '等待…');
+  });
+
+  try {
+    /* ① 检索 —— 纯规则、零模型、秒回（与单篇模式同一条纪律） */
+    setAgent('retrieve', 'run', '在社区摘要上做词面匹配…');
+    if (note) note.textContent = '① 检索 Agent 正在匹配 ' + globalNote() + '…';
+    const r1 = await qaStepGlobal({question: question, step: 'retrieve',
+                                   history: QA_HISTORY});
+    setAgent('retrieve', 'done', r1.note || (r1.retrieval || {}).reason);
+
+    if (!r1.n_evidence) {
+      /* 一条社区摘要都没有 ⇒ **如实说找不到**，不编（H11 的纪律）。
+         最常见的真实原因是社区摘要文件缺失或为空。 */
+      ['support', 'oppose', 'synth'].forEach(function(s){
+        setAgent(s, '', '未执行（没有可用的社区摘要）');
+      });
+      if (note) note.textContent = (r1.retrieval || {}).reason || '';
+      run(adaptQA({
+        question: question,
+        retrieval: r1.retrieval || {mode: 'global', scope: 'none'},
+        evidence: [], agents: [],
+        conclusion: '全库模式找不到可用的社区摘要 —— 如实报告，不编。'
+          + '（社区摘要由 tools/build_community_summaries.py 生成，'
+          + '落在 web/kg-data/community-summaries.json）',
+        confidence: '—', degraded: false, citations: []
+      }));
+      return;
+    }
+
+    /* ②③ 支持与反对 —— **两次独立调用**，读的是同一批社区级摘要 */
+    setAgent('support', 'run', '正在读 ' + r1.n_evidence + ' 条社区级摘要…');
+    if (note) note.textContent = '② 支持 Agent 正在读社区级摘要…';
+    const r2 = await qaStepGlobal({question: question, step: 'support',
+                                   evidence: r1.evidence});
+    setAgent('support', r2.ok ? 'done' : 'bad',
+             r2.ok ? '已给出支持意见' : '模型无响应');
+
+    setAgent('oppose', 'run', '独立读同一批社区级摘要，找反证…');
+    if (note) note.textContent = '③ 反对 Agent 独立取证…';
+    const r3 = await qaStepGlobal({question: question, step: 'oppose',
+                                   evidence: r1.evidence});
+    setAgent('oppose', r3.ok ? 'done' : 'bad',
+             r3.ok ? (/未发现反证/.test(r3.text || '') ? '未发现反证（如实报告）'
+                                                       : '已给出反对意见')
+                   : '模型无响应');
+
+    /* ④ 综合 —— 只看两方交上来的东西；后端用**社区版 prompt**
+       （原 prompt 写着"证据每条都来自论文原文"，那句话对社区摘要是假的） */
+    setAgent('synth', 'run', '只看两方交上来的意见…');
+    if (note) note.textContent = '④ 综合 Agent 汇总结论…';
+    const r4 = await qaStepGlobal({question: question, step: 'synth',
+                                   support: r2.text || '', oppose: r3.text || ''});
+    setAgent('synth', r4.ok ? 'done' : 'bad',
+             r4.ok ? ('结论已给出 · 置信度 ' + (r4.confidence || '—')) : '模型无响应');
+
+    if (note) {
+      note.textContent = (r1.retrieval || {}).reason + '　｜　证据 ' + r1.n_evidence
+        + ' 条，全部为社区级摘要（带论文原文引文 0 条）。';
+    }
+
+    run(adaptQA({
+      question: question,
+      mode: 'global',
+      retrieval: r1.retrieval,
+      evidence: r1.evidence,
+      agents: [
+        {role: '支持方', text: r2.text || '（支持方 Agent 无输出）'},
+        {role: '反对方', text: r3.text || '（反对方 Agent 无输出）'}
+      ],
+      conclusion: r4.text || '',
+      confidence: r4.confidence || '',
+      degraded: !(r2.ok || r3.ok),
+      citations: []
+    }));
+
+    /* 历史：与单篇模式**共用同一个本机历史** —— 一轮问答就是一轮，不分模式。
+       回看时走 `adaptQA(h.resp)`，而 `resp.retrieval.mode === 'global'`
+       会自动把它按全库模式渲染回来。 */
+    const entry = {
+      q: question,
+      a: (r4.text || '').slice(0, 400),
+      t: Date.now(),
+      gid: '',                      // 全库模式没有图
+      mode: 'global',
+      resp: {
+        question: question, retrieval: r1.retrieval, evidence: r1.evidence,
+        n_evidence: r1.n_evidence, n_with_quote: 0,
+        support: r2.text || '', oppose: r3.text || '',
+        conclusion: r4.text || '', confidence: r4.confidence || ''
+      }
+    };
+    QA_HISTORY.push({question: entry.q, answer: entry.a});
+    if (QA_HISTORY.length > 6) QA_HISTORY.shift();
+    histPush(entry);
+    LAST_ENTRY = entry;
+    if ($('expMsg')) $('expMsg').textContent = '';
+    const histNote = $('histNote');
+    if (histNote) {
+      histNote.textContent = QA_HISTORY.length > 1
+        ? ('已记住 ' + QA_HISTORY.length + ' 轮 —— 可以直接追问「那它的缺点呢？」这类'
+           + '没有主语的问题，检索会把上一轮的主语补回来。')
+        : '';
+      histNote.hidden = QA_HISTORY.length <= 1;
+    }
+  } catch (err) {
+    ['retrieve', 'support', 'oppose', 'synth'].forEach(function(s){
+      const li = document.querySelector('#alog li[data-step="' + s + '"]');
+      if (li && li.className === 'run') li.className = 'bad';
+    });
+    /* ⚠️ 全库模式**绝不显示内置演示数据**：`QA.transe` 是**单篇**的示范，
+       拿它冒充"全库问答的结果"正是这个项目最想避免的那种误导（G3 记的就是这类事）。
+       这里一律如实说"没跑成"。 */
+    const m = String((err && err.message) || err);
+    if ($('camps')) $('camps').innerHTML = '';
+    if ($('verdict')) {
+      $('verdict').innerHTML = /HTTP\s*4\d\d/.test(m)
+        ? ('全库问答的请求被后端拒绝了（' + esc(m) + '）。<br>'
+           + '这通常是请求本身的问题（例如问题太长）；把问题缩短一点再试。')
+        : ('全库模式没跑成：' + esc(m) + '。<br>'
+           + '全库模式需要后端（<b>http://127.0.0.1:8000</b>）在跑 —— '
+           + '它检索的社区摘要来自 `web/kg-data/community-summaries.json`。');
+    }
+    if ($('caveat')) {
+      $('caveat').innerHTML = '⚠️ 这里不显示任何演示数据 —— '
+        + '内置那份是单篇问答的示范，拿它冒充全库结果会误导。';
+    }
+    if ($('gstats')) $('gstats').innerHTML = '';
+    if ($('gpanel')) $('gpanel').innerHTML = '';
+    if ($('agentsec')) $('agentsec').hidden = true;
+    /* 清掉上一轮的子图状态：否则窗口一改大小，`paint()`（挂在 resize 上）
+       会拿**上一轮**的 CUR 把社区卡片重画成一张子图。 */
+    CUR = null;
+  }
+}
+window.askGlobal = askGlobal;
 
 $('ask').addEventListener('submit', function(e){
   e.preventDefault();
@@ -1610,7 +2134,16 @@ $('ask').addEventListener('submit', function(e){
 $('chips').addEventListener('click', function(e){
   const ch = e.target.closest('.chip');
   if (ch) {
-    const q = ch.dataset.q || ch.textContent.trim();
+    /* 用**可见的中文**提问，不再优先取 data-q（修复「点中文标签、输入框进英文」）。
+       原实现是 `ch.dataset.q || ch.textContent.trim()`，而每个 chip 都带一个英文
+       `data-q`（见上面的按钮定义），于是它**永远**取英文 —— 用户点的是中文标签，
+       输入框里出现的却是英文，中英不一致。
+       中文提问不会检索不到：图谱虽抽自英文论文，但后端在「规则落空 + 问题含中文」
+       时会先调一次本地模型把问题转成英文检索词，再走同一条字面匹配规则
+       （见 `src/multi_agent_qa.py` 的 BRIDGE_PROMPT 与 `step_retrieve`）。
+       `data-q` 属性**保留不动** —— 它现在没有别的消费者，但删掉会丢掉"这个芯片
+       原本对应哪句英文问法"的记录，留着更安全。 */
+    const q = ch.textContent.trim();
     $('q').value = q;
     askReal(q);
   }
@@ -1705,22 +2238,62 @@ function evLine(it, i) {
 function toMarkdown(h) {
   const r = h.resp || {};
   const L = [];
+  /* 全库模式导出的东西与单篇**不是一回事**：证据是社区级摘要（没有引文与页码）。
+     导出必须跟着改口径 —— 否则这份 Markdown 会声称
+     "每一条都可由上表的引文回溯到原文"，而它里面根本没有引文。 */
+  const ri = r.retrieval || {};
+  const isGlobal = (ri.mode === 'global');
   L.push('# 知识图谱问答记录', '');
-  L.push('- 图：`' + (h.gid || '') + '`');
+  if (isGlobal) {
+    L.push('- 检索范围：**全库 · 社区级摘要**'
+      + '（`web/kg-data/community-summaries.json`）');
+  } else {
+    L.push('- 图：`' + (h.gid || '') + '`');
+  }
   L.push('- 时间：' + new Date(h.t || Date.now()).toLocaleString());
   L.push('- 问题：**' + (h.q || '') + '**', '');
-  const ri = r.retrieval || {};
   L.push('## 检索', '');
-  L.push('- 种子 ' + (ri.seeds || []).length + ' 个：'
-    + (ri.seeds || []).map(function (s) { return '`' + s + '`'; }).join(' '));
+  if (isGlobal) {
+    L.push('- ' + (ri.scope === 'all' ? '覆盖社区' : '命中社区') + ' '
+      + (ri.seeds || []).length + ' 个：'
+      + (ri.seeds || []).map(function (s) { return '`' + s + '`'; }).join(' '));
+  } else {
+    L.push('- 种子 ' + (ri.seeds || []).length + ' 个：'
+      + (ri.seeds || []).map(function (s) { return '`' + s + '`'; }).join(' '));
+  }
   if (ri.question_used && ri.rewritten_from) {
     L.push('- **追问已补全为**：`' + ri.question_used + '`');
   }
   L.push('- ' + (ri.reason || ''));
-  L.push('- 证据 ' + (r.n_evidence || 0) + ' 条，其中 ' + (r.n_with_quote || 0)
-    + ' 条带论文原文引文', '');
+  if (isGlobal) {
+    L.push('- 证据 ' + (r.n_evidence || 0) + ' 条，全部为**社区级摘要**'
+      + '（本地模型生成的概括，不是论文原文、没有页码）', '');
+  } else {
+    L.push('- 证据 ' + (r.n_evidence || 0) + ' 条，其中 ' + (r.n_with_quote || 0)
+      + ' 条带论文原文引文', '');
+  }
   const ev = r.evidence || [];
-  if (ev.length) {
+  if (ev.length && isGlobal) {
+    L.push('## 证据（社区级摘要，不是论文原文）', '');
+    L.push('| # | 社区 | 规模 | 成员实体（接地清单） |');
+    L.push('|---|------|------|----------------------|');
+    ev.forEach(function (it, i) {
+      const c = it.community || {};
+      L.push('| ' + (i + 1) + ' | ' + (c.name || c.id || '?')
+        + ' | ' + (c.n_nodes != null ? c.n_nodes : '?') + ' 实体 / '
+        + (c.n_edges != null ? c.n_edges : '?') + ' 关系 | '
+        + ((c.members || []).slice(0, 10).join('、') || '—') + ' |');
+    });
+    L.push('');
+    L.push('### 社区摘要原文（由本地模型生成）', '');
+    ev.forEach(function (it) {
+      const c = it.community || {};
+      L.push('**' + (c.name || c.id || '?') + '**（' + (c.id || '?') + ' · '
+        + (c.model || '模型名未记录') + ' 生成于 ' + (c.generated || '时间未记录')
+        + '）', '');
+      L.push('> ' + String(c.summary || '').split('\n').join('\n> '), '');
+    });
+  } else if (ev.length) {
     L.push('## 证据（含原文引文与页码）', '');
     L.push('| # | 源 | 关系 | 目标 | 原文出处 |');
     L.push('|---|----|------|------|----------|');
@@ -1747,8 +2320,15 @@ function toMarkdown(h) {
     L.push('**置信度**：' + (r.confidence || '—'), '');
   }
   L.push('---', '');
-  L.push('> 由 KG Cosmos 的多 Agent 问答生成。支持与反对是**两次独立调用**，');
-  L.push('> 综合方只看两方交上来的东西；结论中的每一条都可由上表的引文回溯到原文。');
+  if (isGlobal) {
+    L.push('> 由 KG Cosmos 的多 Agent 问答生成（**全库模式**：问题落在社区级摘要上，');
+    L.push('> 不指定某一篇论文）。证据是**社区级摘要** —— 本地模型对每个社区生成的');
+    L.push('> 一段概括，**不是论文原文、没有页码**，不可当作原文引文引用；');
+    L.push('> 支持与反对是**两次独立调用**，综合方只看两方交上来的东西。');
+  } else {
+    L.push('> 由 KG Cosmos 的多 Agent 问答生成。支持与反对是**两次独立调用**，');
+    L.push('> 综合方只看两方交上来的东西；结论中的每一条都可由上表的引文回溯到原文。');
+  }
   return L.join('\n');
 }
 
@@ -1770,6 +2350,23 @@ function exportMarkdown(h) {
 }
 window.exportMarkdown = exportMarkdown;
 window.toMarkdown = toMarkdown;
+
+/* ── 问答范围控件的接线（2026-09-26）──────────────────────────────────────
+   `setMode()` 负责所有随模式变的东西（按钮态、示例问题、说明文字、语境提示），
+   这里只做两件事：绑定点击、按 URL/默认值初始化一次。
+   另外拉一次 `/api/communities`，把"全库有多少条社区摘要"填进语境提示 ——
+   拿不到（静态站/后端没起）就保持不带数字的说法：**不编数字**。 */
+(function initModes(){
+  const box = $('modes');
+  if (box) {
+    box.addEventListener('click', function(ev){
+      const b = ev.target.closest('button.mode');
+      if (b) setMode(b.dataset.mode);
+    });
+  }
+  setMode(ASK_MODE);
+  loadGlobalCatalog();
+})();
 
 renderHist();
 window.__ready = true;

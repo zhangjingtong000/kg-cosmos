@@ -299,8 +299,8 @@
   .bar .r { text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; }
   /* 质量色阶三档：青=正面结论 / 中性灰=中间 / 陶土=需注意。
      中档刻意用 --pq-txt-2 而不是最亮的 --pq-txt：六层里唯一落在中档的是
-     L5 的 63.7%（通过率），它需要被解释而不是被强调——用最亮的白会让它
-     比 94.4% 那些青色数字更抢眼，语义正好相反。 */
+     L5 的 63.6%（通过率，旧读数 63.7%），它需要被解释而不是被强调——用最亮的白会让它
+     比 93.6% 那些青色数字更抢眼，语义正好相反。 */
   .low { color: var(--pq-clay-ink, #dda07a); }
   .mid { color: var(--pq-txt-2, rgba(198,201,213,.68)); }
   .high { color: var(--pq-cyan, #7cc0b6); }
@@ -547,12 +547,12 @@ body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
     <div id="l9rMiss"></div>
   </section>
 
-  <!-- L5 的域内效度：让"63.7% 不是质量"这个最重要的发现在面板上可见。
-       不放这里，演示时屏幕上就只有一个会被误读的 63.7%。 -->
+  <!-- L5 的域内效度：让"63.6% 不是质量"这个最重要的发现在面板上可见。
+       不放这里，演示时屏幕上就只有一个会被误读的 63.6%。 -->
   <section id="l5vSec" class="warn" hidden>
     <div class="sec-h">
       <span class="eyebrow">04 · L5 · BLIND AUDIT</span>
-      <h2>L5 域内效度：63.7% 到底是什么</h2>
+      <h2>L5 域内效度：63.6% 到底是什么</h2>
     </div>
     <div class="sub" id="l5vSub"></div>
     <div id="l5v"></div>
@@ -662,15 +662,15 @@ body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
     </div>
     <div class="sub">这张图抽出来了、但没连上的部分</div>
     <div class="grid" style="margin:16px 0 0">
-      <div class="fig"><span class="n">3036</span>
-        <span class="k">孤立节点</span><span class="d">占全部 18780 个节点的 16.2%</span></div>
-      <div class="fig"><span class="n">3377</span>
-        <span class="k">连通分量</span><span class="d">最大分量含 14630 个节点（77.9%）</span></div>
+      <div class="fig"><span class="n">7181</span>
+        <span class="k">孤立节点</span><span class="d">占全部 20785 个节点的 34.5%</span></div>
+      <div class="fig"><span class="n">7371</span>
+        <span class="k">连通分量</span><span class="d">最大分量含 12896 个节点（62.04%）</span></div>
       <div class="fig"><span class="n">1</span>
-        <span class="k">度数中位数</span><span class="d">均值 3.101 —— 一半以上节点只有 1 条边</span></div>
+        <span class="k">度数中位数</span><span class="d">均值 2.733 —— 一半以上节点只有 1 条边</span></div>
     </div>
     <p class="hint" style="margin:16px 0 0">
-      这与 <b>L3 端点完整性 68.4%</b> 是同一现象的两个侧面：
+      这与 <b>L3 端点完整性 70.1%（抽取口径）</b> 是同一现象的两个侧面：
       端点没被抽成节点 → 边落不下来 → 大量节点只剩 1 条边甚至 0 条 → 图碎。
       <b>想改善连通性，只能靠补抽取或端点归一化，不能靠过滤。</b>
       出处 <code>data/quality/l8-structure-audit.json</code>。
@@ -782,7 +782,7 @@ function boot(D) {
           + `（导出 ${esc(cc.exported_to_frontend)} 个到前端）`, 'ok')
     + fig('L5 · BLIND AUDIT',
           pcOf(v5.true_support_rate).replace('%', '<i>%</i>'), '真实支持率',
-          `判通过的边里约一半不被原文支持。<b>63.7% 是通过率，不是质量。</b>`, 'warn')
+          `判通过的边里约一半不被原文支持。<b>63.6% 是通过率，不是质量。</b>`, 'warn')
     + fig('L9 · RELATION RECALL',
           esc(rangeTxt).replace('%', '<i>%</i>'), '关系召回区间（严格 → 别名最松）',
           `端点召回 ${esc(pcOf(r9.endpoint_recall))}，但原文明确断言的关系`
@@ -819,7 +819,7 @@ function boot(D) {
       : '')
   + `</div>`;
 
-  // ── L5 域内效度：把"63.7% 不是质量"这件事摆在最显眼处 ──
+  // ── L5 域内效度：把"63.6% 不是质量"这件事摆在最显眼处 ──
   const v = D.l5_validity;
   if (v && v.ppv != null) {
     document.getElementById('l5vSec').hidden = false;
@@ -837,7 +837,7 @@ function boot(D) {
       + ` <b>${pc(ag.rate_annotator1)}</b>`;
 
     const kpis = [
-      [pc(v.true_support_rate), '全图真实支持率', ciTxt('true_support_rate') || '此前用 63.7% 通过率代替'],
+      [pc(v.true_support_rate), '全图真实支持率', ciTxt('true_support_rate') || '此前用 63.6% 通过率代替'],
       [pc(v.ppv), 'PPV（判通过里真的成立）', ciTxt('ppv') || '判通过的边约一半不被支持'],
       [v.domain_auc.toFixed(4), '域内加权 AUC', `官方校准集上是 ${v.calib_auc}`],
       [v.kappa_vs_human.toFixed(3), "与人工判定 Cohen's κ", '轻微一致'],

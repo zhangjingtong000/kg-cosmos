@@ -111,6 +111,92 @@ h3 { font-weight: 600; }
   --hue-warm: #ffb27f;      /* 暖色：负面/需注意（误差、漏抽、风险） */
   --hue-gold: #ffd9a0;      /* 金：强调数字、结论性指标 */
 }
+
+/* ── 03 · 入口：主次两层（2026-09-19 重做）────────────────────────────────
+   此前这一屏是 12 个 `.entry` **同一个权重平铺**（见 `voyage.css` 的
+   `.entry{grid-template-columns:60px 1fr auto;padding:30px 8px}`）：
+   · 标题写「六个入口」，与实际 12 个对不上；
+   · 一屏装不下（实测 `#ch-3 .in` 高 2080px）；
+   · 更糟的是**看不出主次** —— 而前 6 个恰好是 `lib/demo-rail.js` 的
+     `FLOW` 那条演示动线，后 6 个只是支线功能。
+   现在拆两层：上层动线横向排布（序号 01–06，一眼看出"这是一条路径"），
+   下层支线紧凑平列（权重明显更低，序号退成索引）。
+
+   样式全部沿用既有语言：顶部分隔线复用 `.entries` 的 `border-top`；
+   卡片上那条 hover 时展开的暖金短线，做法与 `voyage.css` 的
+   `.fig::before` 完全一致（`transform:scaleX(0→1)`）。
+   ⚠️ 刻意**不引入左侧竖线** —— `lib/design.css` 写明「竖线已废弃」。 */
+.entries.flow{
+  margin-top:18px;padding-top:4px;
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0 26px;
+}
+/* 标题要同时说清两层，比其它几屏长（12 字）；`voyage.css` 给 h2 的
+   `max-width:20ch` 是给 4–6 字短标题定的 ⇒ 这一屏会折成两行、末行只剩一个
+   "能"字（孤字）。放开该限制，让它在 60px 下仍是一行。 */
+#ch-3 h2{max-width:none}
+.entries.flow .entry{display:block;padding:22px 0 20px;border-bottom:0}
+.entries.flow .entry::after{
+  content:"";position:absolute;left:0;right:0;top:-1px;height:2px;
+  background:linear-gradient(90deg,var(--accent),rgba(224,164,105,.08));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .65s cubic-bezier(.19,1,.22,1);
+}
+.entries.flow .entry:hover{padding-left:0}
+.entries.flow .entry:hover::after{transform:scaleX(1)}
+.entries.flow .entry .ix{
+  display:block;margin:0 0 13px;line-height:1;
+  font-size:22px;font-weight:200;letter-spacing:-.02em;color:var(--accent);
+}
+.entries.flow .entry h3{font-size:16px;line-height:1.35;color:#fff}
+.entries.flow .entry p{margin:9px 0 0;font-size:12.5px;line-height:1.72;max-width:none}
+.entries.flow .entry .mt{
+  display:block;margin-top:13px;text-align:left;
+  font-size:10.5px;letter-spacing:.16em;
+}
+
+/* 下层：不在动线上的 6 项。刻意压到"一眼扫过"的权重 ——
+   说明缩短但不删空（保留关键数字与限定语），序号退回索引大小。 */
+.more{margin-top:44px;padding-top:22px;border-top:1px solid var(--line)}
+.more-list{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0 26px}
+.more-list .entry{
+  display:block;padding:12px 0 14px;border-bottom:0;opacity:.7;
+  transition:opacity .45s cubic-bezier(.19,1,.22,1);
+}
+.more-list .entry:hover{padding-left:0;opacity:1}
+.more-list .entry .ix{
+  display:block;margin:0 0 7px;font-size:10.5px;letter-spacing:.2em;font-weight:600;
+}
+.more-list .entry h3{font-size:13px;line-height:1.4;color:var(--ink-2)}
+.more-list .entry p{margin:6px 0 0;font-size:11.5px;line-height:1.62;max-width:none}
+.more-list .entry .mt{
+  display:block;margin-top:9px;text-align:left;font-size:10px;letter-spacing:.14em;
+}
+@media (max-width:1100px){
+  .entries.flow,.more-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:0 32px}
+}
+@media (max-width:760px){
+  .entries.flow,.more-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* ── 页脚脚注：解释 `*`（= 这一页需要联网）─────────────────────────────
+   2026-09-19 加。**起因**：`README.md §8` 写着「导航页已用 `*` 标注」，
+   而本页当时**一个 `*` 都没有** —— 承诺只活在文档里，页面上找不到，
+   同一件事的两份说法互相矛盾（数字与分类也是错的：5 个依赖页里有 1 个是正式页）。
+   ⇒ 承诺要么兑现、要么撤掉；这里选**兑现**：把唯一有 CDN 依赖的正式入口
+   `community-atlas.html` 标上 `*`，页脚给出完整名单与含义。
+   ⚠️ **不引入新视觉语言**：只用既有的 1px 顶部分隔线与 `--ink-3` / `--hue-gold`。
+   `border-left` 竖线是 `lib/design.css` 明令废弃的，这里不用（`check_design_system.py` 会抓）。
+   ⚠️ 名单是**机检哨兵**（`#foot[data-esm-pages]`）：`tools/check_doc_numbers.py` 的「依赖 esm.sh 的页面名单」一节
+   会把它与 `web/*.html` 的实际扫描结果比对 —— 页面增删依赖时必须同步这里，
+   否则守门报红。README 里同一个事实挂在 `<!-- esm-sh-pages: … -->` 哨兵上。 */
+#foot .fn{
+  max-width:var(--maxw);margin:16px auto 0;padding-top:14px;
+  border-top:1px solid var(--line);
+  font-size:11.5px;line-height:1.95;color:var(--ink-3);
+}
+#foot .fn code{font-family:ui-monospace,Consolas,monospace;color:var(--hue-gold)}
+#foot .fn a{color:var(--ink-3);text-decoration:none;border-bottom:1px solid var(--line)}
+#foot .fn a:hover{color:var(--ink-2)}
 </style>
 </head>
 <body>
@@ -134,12 +220,12 @@ h3 { font-weight: 600; }
   <!-- 00 · Hero -->
   <section class="ch" id="ch-0">
     <div class="in">
-      <p class="eyebrow">Knowledge Graph · 28 篇论文 · 本机离线产出</p>
+      <p class="eyebrow">Knowledge Graph · 34 篇论文（21 篇入库）· 本机离线产出</p>
       <h1><span class="ln"><i class="thin">KG</i></span>
           <span class="ln"><i class="heavy">COSMOS</i></span></h1>
       <div class="facts" id="liveFacts"></div>
       <p class="lead">
-        从 28 篇论文里抽出的知识图谱，带着<strong>六层可复现的评测</strong>与
+        从 34 篇论文（其中 21 篇入库成图）里抽出的知识图谱，带着<strong>六层可复现的评测</strong>与
         <strong>三条独立的负结果</strong>。下面每一屏都在讲这张图的某个侧面。
       </p>
       <!-- 独有强项（2026-09-15 加，来自商业对标结论）。
@@ -169,11 +255,11 @@ h3 { font-weight: 600; }
         每个对外报出的数字都能追到产物文件，也包括那些不好看的。
       </p>
       <div class="grid">
-        <div class="fig"><span class="n" id="figNodes" data-count="19427">0</span>
+        <div class="fig"><span class="n" id="figNodes" data-count="20785">0</span>
           <span class="k">实体（概览层）</span><span class="d">Louvain 归入 60 个社区</span></div>
         <div class="fig"><span class="n" id="figEdges" data-count="30000">0</span>
-          <span class="k">关系（概览层）</span><span class="d">导出上限 30000；评测全集 43867 条边</span></div>
-        <div class="fig"><span class="n" data-count="94.4" data-dec="1">0<u>%</u></span>
+          <span class="k">关系（概览层）</span><span class="d">导出上限 30000；评测全集 45708 条边</span></div>
+        <div class="fig"><span class="n" data-count="93.6" data-dec="1">0<u>%</u></span>
           <span class="k">实体证据存在率</span><span class="d">L1：名字出现在自己的引文里</span></div>
         <div class="fig"><span class="n warm">¥0</span>
           <span class="k">全流程云端支出</span><span class="d">判别与评测全部在本机完成</span></div>
@@ -185,9 +271,9 @@ h3 { font-weight: 600; }
   <section class="ch" id="ch-2">
     <div class="in">
       <p class="kick">02 — 它真正量到了什么</p>
-      <h2>63.7% 后面那句<em>更该说的话</em></h2>
+      <h2>63.6% 后面那句<em>更该说的话</em></h2>
       <p class="lead">
-        项目一度把「L5 = 63.7%」当作"关系证据支持度"对外报。做域内效度抽检后发现，
+        项目一度把「L5 = 63.7%」（旧读数，现为 63.6%）当作"关系证据支持度"对外报。做域内效度抽检后发现，
         它只是<strong>判别器判通过的比例</strong>——200 条分层抽样、两个独立判定者
         （一致率 86.7%，κ = 0.722）给出的真实读数是：
       </p>
@@ -214,135 +300,133 @@ h3 { font-weight: 600; }
   <section class="ch" id="ch-3">
     <div class="in">
       <p class="kick">03 — 入口</p>
-      <h2>六个入口</h2>
-      <div class="entries">
+      <h2>六步演示动线<em> · 另有 6 项功能</em></h2>
+      <div class="entries flow">
+        <!-- 上层 = `lib/demo-rail.js` 的 FLOW 那条演示动线：序号与顺序都跟它一致
+             （01 上传 → 02 星云 → 03 提问 → 04 分析 → 05 PathQA → 06 局限）。
+             ⚠️ 改这里就必须同步改 `lib/demo-rail.js` —— 顺序的真值只有那一个。
+             为什么横向排成一行：这一层表达的是"一条路径"，不是"一堆链接"；
+             序号 01–06 与 hover 时展开的暖金短线（同 voyage.css 的 .fig::before）
+             是这层唯一的装饰，权重全靠它们与下面那层拉开。 -->
         <a class="entry" href="upload.html">
           <span class="ix">01</span>
-          <span><h3>上传一篇论文</h3>
+          <h3>上传一篇论文</h3>
           <p>给它一个 PDF：本地解析全文，逐段抽取实体与关系，去重归一聚类，
-             最后落成一张可以走进去的图。走本机模型，全程零 API 成本。</p></span>
+             最后落成一张可以走进去的图。走本机模型，全程零 API 成本。</p>
           <span class="mt"><b>起点</b><span class="go">→</span></span>
         </a>
-        <a class="entry" href="ask.html">
-          <span class="ix">02</span>
-          <span><h3>提问 · 支持与反方</h3>
-          <p>问一个问题，系统在图上检索子图，让支持和反方各自出示可回溯到原文的
-             证据，再给出结论——分歧消解不掉就如实说，不替你裁决。</p></span>
-          <span class="mt">证据链<span class="go">→</span></span>
-        </a>
         <a class="entry" href="kg-nebula.html">
-          <span class="ix">03</span>
-          <span><h3>社区星云 · 主视图</h3>
+          <span class="ix">02</span>
+          <h3>社区星云 · 主视图</h3>
           <p>近两万个实体按社区与类型分区排布的三维视图，支持度数 / PageRank 排序、
-             标签按深度遮挡、点选看证据并深链回原文 PDF 的高亮位置。</p></span>
+             标签按深度遮挡、点选看证据并深链回原文 PDF 的高亮位置。</p>
           <span class="mt"><b>核心</b><span class="go">→</span></span>
+        </a>
+        <a class="entry" href="ask.html">
+          <span class="ix">03</span>
+          <h3>提问 · 支持与反方</h3>
+          <p>问一个问题，系统在图上检索子图，让支持和反方各自出示可回溯到原文的
+             证据，再给出结论——分歧消解不掉就如实说，不替你裁决。</p>
+          <span class="mt">证据链<span class="go">→</span></span>
         </a>
         <a class="entry" href="analytics.html">
           <span class="ix">04</span>
-          <span><h3>图谱分析面板</h3>
+          <h3>图谱分析面板</h3>
           <p>六层评测、四套口径对照、L5 域内效度与阈值灵敏度、过滤策略对比、
-             L7 角色违规归因、L9 端点与关系召回。每个数字都可追溯到产物文件。</p></span>
+             L7 角色违规归因、L9 端点与关系召回。每个数字都可追溯到产物文件。</p>
           <span class="mt">结论集中在此<span class="go">→</span></span>
         </a>
         <a class="entry" href="pathqa.html">
           <span class="ix">05</span>
-          <span><h3>问题子图 PathQA</h3>
+          <h3>问题子图 PathQA</h3>
           <p>给一个孤立的实体，从图里找出它与核心社区之间的通路并渲染成子图——
-             回答"这个节点是怎么被连进来的"。</p></span>
+             回答"这个节点是怎么被连进来的"。</p>
           <span class="mt">字面匹配 → BFS 2 跳 → 力导向<span class="go">→</span></span>
         </a>
         <a class="entry" href="method-limits.html">
           <span class="ix">06</span>
-          <span><h3>方法能力与局限</h3>
+          <h3>方法能力与局限</h3>
           <p>243 条方法 × 178 个方法本体 × 194 个能力维度，逐条标注
-             "这张图能做什么、不能做什么"，避免把结构推断说成事实。</p></span>
+             "这张图能做什么、不能做什么"，避免把结构推断说成事实。</p>
           <span class="mt">边界声明<span class="go">→</span></span>
         </a>
-        <!-- K2（2026-09-15）：论文管理。此前"一篇论文"这个概念在界面上不存在 ——
-             而它在数据里有明确定义（_manifest.json 的 id），且与图快照、证据链
-             完美对应。这一页把它显式化，并如实标出"只下载未入库"的那批。 -->
-        <a class="entry" href="corpus.html">
-          <span class="ix">07</span>
-          <span><h3>论文管理 · 语料清单</h3>
-          <p>28 篇论文的清单：标题、年份、检索式、是否已入库、抽出了多少实体与关系、
-             它们的实体分布在哪些社区。<b>含 11 篇只下载、尚未入库的</b> ——
-             不把"计划中的语料"说成"已覆盖的语料"。</p></span>
-          <span class="mt">语料边界<span class="go">→</span></span>
-        </a>
+      </div>
 
-        <!-- F4（2026-09-16）：USES 的施动者 × 被用物二部图。
+      <!-- 下层：另有 6 项功能。**刻意不在动线上** —— `lib/demo-rail.js` 的 FLOW
+           只走上面 6 步，这 6 项按需进入即可。
+           说明在这里被**缩短**（原句 60–110 字，六列并排会变成文字柱），
+           但每句都保留了原句里的关键数字与限定语 —— 不删到看不懂。
+           为什么不再分「看数据 / 看结构 / 看观点」三组：见任务报告 ——
+           这 6 项用途彼此交叉（paper-table 既是看数据也含看观点），
+           强行切三组要为边界辩护，还会多出 3 个小标题把这一层的权重抬回去。 -->
+      <div class="more">
+        <p class="kick">支线功能 · 6 项<span>不在演示动线上，按需进入</span></p>
+        <div class="more-list">
+          <!-- K2（2026-09-15）：论文管理。此前"一篇论文"这个概念在界面上不存在 ——
+             而它在数据里有明确定义（_manifest.json 的 id），且与图快照、证据链
+             完美对应。这一页把它显式化，并如实标出"只下载未入库"的那批。
+             2026-09-19（合并 corpus.html）：这里**原来指向 `corpus.html`**（旧版语料清单）。
+             旧页此前是老式表结构（表头写死"arXiv id"、无语言列），而 `papers.html`
+             已有按语言分组 + 搜索 + 关系/社区列 ⇒ 入口改指新页；
+             旧页按 `ARCHIVE_POLICY` **方式 A 原地留档**（加"这是历史版本"横幅，不删）。 -->
+          <a class="entry" href="papers.html">
+            <span class="ix">07</span>
+            <h3>论文管理 · 语料清单</h3>
+            <p>33 篇论文清单（另有 1 条中文期刊记录登记但 PDF 未落盘）：标题、年份、检索式、是否入库、抽出多少实体与关系。含 13 篇只下载、尚未入库的。</p>
+            <span class="mt">语料边界<span class="go">→</span></span>
+          </a>
+          <!-- F4（2026-09-16）：USES 的施动者 × 被用物二部图。
              **刻意不叫"方法-数据集二部图"** —— USES 的 target 语义是混的
              （工具/方法/数据都可能），要真分侧需要实体类型，而类型有 Unknown。
              页面上把这句话写明了 —— 名字对不上内容是这类页面最容易骗人的地方。 -->
-        <a class="entry" href="bipartite.html">
-          <span class="ix">08</span>
-          <span><h3>使用关系二部图</h3>
-          <p>全库 <b>7381 条 <code>USES</code></b> 的<b>施动者 × 被用物</b>：
-             左边是谁在用，右边是被用的东西，连线粗细 = 跨多少篇同时出现。
-             点一个节点可只看它连的。<b>两侧是"施动/被用"，不是"方法/数据集"</b> ——
-             并如实标出"画出来的连线已按 top N 截断，数字是全库真实度数"。</p></span>
-          <span class="mt">关系结构<span class="go">→</span></span>
-        </a>
-
-        <!-- F1（2026-09-16）：按论文年份逐年累积，看"什么什么时候出现"。
+          <a class="entry" href="bipartite.html">
+            <span class="ix">08</span>
+            <h3>使用关系二部图</h3>
+            <p>全库 7381 条 USES 的施动者 × 被用物；两侧是「施动 / 被用」，不是「方法 / 数据集」。</p>
+            <span class="mt">关系结构<span class="go">→</span></span>
+          </a>
+          <!-- F1（2026-09-16）：按论文年份逐年累积，看"什么什么时候出现"。
              **刻意不做社区** —— 逐年重跑 Louvain 的社区编号会漂，
              画成同色会让人以为"这个社区一直在"，而那是假的。页面里写明了。 -->
-        <a class="entry" href="temporal.html">
-          <span class="ix">09</span>
-          <span><h3>时间演化</h3>
-          <p>17 篇论文按年份（2017–2025）<b>逐年累积</b>成 7 帧：
-             累积规模一直在变大（那是显然的），这一页真正给的是
-             <b>「当年首次出现了什么」</b> —— 新增实体与新增关系类型。
-             拖滑块或播放。<b>刻意不做社区</b>：逐年重跑 Louvain 的社区编号会漂，
-             同色会让人以为"这个社区一直在"。</p></span>
-          <span class="mt">时间维度<span class="go">→</span></span>
-        </a>
-
-        <!-- F2（2026-09-16）：任选两篇，看共有 / 各自独有。
-             先量过 136 对才决定给人看什么：节点重叠最高只有 0.089，
-             但 **28 对是"共享实体、零共享关系"** —— 那才是看点。
+          <a class="entry" href="temporal.html">
+            <span class="ix">09</span>
+            <h3>时间演化</h3>
+            <p>20 篇论文按年份逐年累积成 8 帧（2017–2026），看「当年首次出现了什么」——新增实体与新增关系类型。</p>
+            <span class="mt">时间维度<span class="go">→</span></span>
+          </a>
+          <!-- F2（2026-09-16）：任选两篇，看共有 / 各自独有。
+             数字一律取自 web/kg-data/diff.json 的 design.measured
+             （由 tools/build_diff_data.py 现算），本文件不自己算、也不许写死：
+             此前这里写 28 对 —— 那是 17 篇 / 136 对 时代的旧值，
+             语料涨到 21 篇 / 210 对后实测已是 87 对，页面却还在说 28。
+             旧值已留档在 diff.json 的 design.superseded_measurements。
              「类型分歧」不等于「矛盾」，页面上写明了。 -->
-        <a class="entry" href="diff.html">
-          <span class="ix">10</span>
-          <span><h3>多图对比</h3>
-          <p>任选两篇看<b>共有 / 各自独有</b>：实体三栏 + <b>共有关系按实体对归纳</b>
-             （两篇的类型<b>并排</b>）。先量过 136 对才决定给人看什么 ——
-             节点重叠最高只有 <b>0.089</b>，但 <b>28 对是"共享实体、零共享关系"</b>：
-             <b>同一批东西，两篇给的关系完全不一样</b>，那才是看点。
-             「类型分歧」<b>不等于矛盾</b>（可能是两篇在说不同侧面）。</p></span>
-          <span class="mt">跨篇对比<span class="go">→</span></span>
-        </a>
-
-        <!-- L17（2026-09-16）：把图谱里的关系按论文**摊平成一张可导出的表**。
+          <a class="entry" href="diff.html">
+            <span class="ix">10</span>
+            <h3>多图对比</h3>
+            <p>任选两篇看共有 / 各自独有；节点重叠最高只有 0.089，87 对是「共享实体、零共享关系」。</p>
+            <span class="mt">跨篇对比<span class="go">→</span></span>
+          </a>
+          <!-- L17（2026-09-16）：把图谱里的关系按论文**摊平成一张可导出的表**。
              对标 Elicit 的 `Extract Data`（自定义列 → 导出）。
              ⚠️ 字段**不是照抄** Consensus 的 Study Snapshot（那是医学/社科的），
              而是本领域真实存在、且从图里真的能取到的关系类型。 -->
-        <a class="entry" href="paper-table.html">
-          <span class="ix">11</span>
-          <span><h3>论文对比表</h3>
-          <p><b>行 = 论文，列 = 字段</b>（字段就是关系类型：用了什么方法 / 在什么上做 /
-             用什么指标 / 提出了什么 / 和谁比 / 谁做的 / 发表在哪）。
-             勾选列、<b>导出 CSV / Markdown</b>。<b>每格带页码</b> ——
-             这一页的价值一半在于<b>能点回原文</b>。<br>
-             ⚠️ 它是<b>抽取结果的摊平</b>，不是"论文事实的权威"（L3 端点只有 96.17%）。</p></span>
-          <span class="mt">结构化导出<span class="go">→</span></span>
-        </a>
-
-        <!-- L16（2026-09-17）：把支持/反对聚合成一个立场标签（对标 Consensus Meter）。
+          <a class="entry" href="paper-table.html">
+            <span class="ix">11</span>
+            <h3>论文对比表</h3>
+            <p>行 = 论文，列 = 关系类型字段，每格带页码，可导出 CSV / Markdown。</p>
+            <span class="mt">结构化导出<span class="go">→</span></span>
+          </a>
+          <!-- L16（2026-09-17）：把支持/反对聚合成一个立场标签（对标 Consensus Meter）。
              ★ 立场是**数出来的**，不是问模型问出来的 ——
              本项目有一条纪律：不用 LLM 当裁判（四模型标注者的 α 是负的）。 -->
-        <a class="entry" href="stance.html">
-          <span class="ix">12</span>
-          <span><h3>立场聚合</h3>
-          <p>图里本来就有 <code>SUPPORTS</code>（793 条）与 <code>CONTRADICTS</code>（243 条）⇒
-             把 <b>671 个主张</b>聚成 <b>Yes / No / Mixed / Possibly</b>。
-             <b>立场由计数得出，不调模型</b>（本项目的纪律：不用 LLM 当裁判）。
-             每行都能展开看<b>谁支持、谁反对（带论文与页码）</b>。<br>
-             ⚠️ 三个形态如实展示：<b>No 是 0 条</b>（图里几乎没有一边倒的反对）·
-             <b>Possibly 占 90%</b>（大部分主张只有 1–2 条证据）·
-             <b>有非主张的东西混进来</b>（抽取噪声，<b>刻意不过滤</b>）。</p></span>
-          <span class="mt">立场归纳<span class="go">→</span></span>
-        </a>
+          <a class="entry" href="stance.html">
+            <span class="ix">12</span>
+            <h3>立场聚合</h3>
+            <p>671 个主张聚成 Yes / No / Mixed / Possibly；立场由计数得出，不调模型。</p>
+            <span class="mt">立场归纳<span class="go">→</span></span>
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -368,14 +452,39 @@ h3 { font-weight: 600; }
   </section>
 </main>
 
-<footer id="foot">
+<footer id="foot" data-esm-pages="community-atlas,force-explorer,force-graph,graph-2d,official-3-text">
   <div class="fin">
     <span>KG Cosmos · 项目</span>
     <a href="index-classic.html">旧版导航页（保留备查）</a>
     <a href="refs.html">参考与出处</a>
     <a href="method-limits.html">方法边界</a>
-    <span class="rt">全部数据由本机 GPU 离线产出 · 无外部请求</span>
+    <span class="rt">本页与全部数据由本机 GPU 离线产出 · 无外部请求</span>
   </div>
+
+  <!-- `*` 的含义 + 依赖 esm.sh（CDN）的完整名单。
+       ⚠️ `data-esm-pages` 是**机检哨兵**（`tools/check_doc_numbers.py` 的「依赖 esm.sh 的页面名单」一节 会拿它
+       与 `web/*.html` 的实测扫描结果比对）；这段文字是给人看的，同一个事实的
+       README 副本挂在 `esm-sh-pages:` 标记上 —— 三处必须同时改。
+       ⚠️（2026-09-19 修：这里原先把那个标记**连尖括号一起**写进注释，
+       而 HTML 注释**不嵌套** —— 内层的 `--` + `>` 会把外层注释**提前关掉**，
+       于是下面的文字全变成页脚正文、`**` 也一起漏到屏幕上。
+       `check_dom_text.py` 抓到的就是这一处。⇒ 标记只写名字，不写尖括号。）
+       ⚠️ 这份名单此前**只活在文档里**（README 说"导航页已用 `*` 标注"，
+       而本页一个 `*` 都没有）：这就是"承诺没兑现"。现在兑现，
+       并把它变成"变了会被抓到"的哨兵，而不是又一句会过期的承诺。 -->
+  <p class="fn">
+    <sup aria-hidden="true">*</sup> <b>标记者需要联网</b>：这一页的图引擎从
+    <code>esm.sh</code> 加载，断网时由 <code>lib/net-guard.js</code>
+    给出明确提示而不是白屏 ——
+    <a href="community-atlas.html">社区图鉴<sup aria-hidden="true">*</sup></a>。
+    另有 <b>4 个历史原型页</b>同样依赖它、但<b>不在本页入口里</b>
+    （只有直接 URL 能到；<a href="index-classic.html">旧版导航页</a>
+    上有它们的入口与同样的 <sup aria-hidden="true">*</sup> 标注）：
+    <code>force-explorer</code> · <code>force-graph</code> · <code>graph-2d</code> ·
+    <code>official-3-text</code>。
+    本导航页、主视图与其余正式入口均<b>断网可用</b>；
+    统计范围限 <code>web/*.html</code> 顶层（不含 <code>_archive/</code> 留档页）。
+  </p>
 </footer>
 
 <!-- 章节进度点：真按钮——点击平滑滚到对应章节，可 Tab、悬停浮出章节名 -->

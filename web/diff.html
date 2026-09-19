@@ -9,10 +9,17 @@
 
   ## 先量了一遍，才知道这页该给人看什么
 
+  > ⚠️ **下面这段是 2026-09-16 的记录（17 篇 / 136 对时的读数），按
+  > `docs/ARCHIVE_POLICY.md` 原样留档，不要再当作当前值引用。**
+  > 当前值一律以 `kg-data/diff.json` 的 `design.measured` 为准
+  > （由 `tools/build_diff_data.py` 现算）；**本页可见数字也从那里取，不写死** ——
+  > 此前正文写死 `28/136`，而产物里早已是 `87/210`，同一句话的注释与产物互相打脸。
+  > 被替代的旧值（28 / 136）留档在 `diff.json` 的 `design.superseded_measurements`。
+
   17 篇两两对比（136 对）：
     · 节点重叠（Jaccard）**最高只有 0.089** —— 同领域两篇共享实体也很少；
-    · **节点重叠为 0 的对数：0 / 136** —— 每一对都有共享实体；
-    · **边重叠为 0 的对数：28 / 136** —— 但有 28 对**没有共享的边**。
+    · **节点重叠为 0 的对数：0 / 136** —— 每一对都有共享实体；   ← 旧规模(17 篇)读数
+    · **边重叠为 0 的对数：28 / 136** —— 但有 28 对**没有共享的边**。 ← 旧规模(17 篇)读数
 
   ⇒ **后一条才是看点**：两篇共享了实体，却没有任何一条相同的关系 ——
     即"**同一批东西，两篇给出的关系不一样**"。
@@ -25,7 +32,7 @@
 
   ## 为什么按需加载
 
-  两两全量会得到 136 对的大文件，而用户**一次只看一对**。
+  两两全量会得到「对数」份大文件（旧规模 136 对），而用户**一次只看一对**。
   ⇒ 索引（19 KB）+ 每篇一个文件（平均 148 KB），选了哪两篇才取那两个。
 -->
 <style>
@@ -134,8 +141,9 @@
 
   <div class="panel">
     <div class="note">
-      节点重叠的 <b>Jaccard 最高只有 0.089</b>（同领域两篇共享实体也很少）；
-      而 <b>0/136 对的节点交集是空的</b>，<b>28/136 对的关系交集是空的</b>。
+      节点重叠的 <b>Jaccard 最高只有 <span id="figMaxJ">—</span></b>（同领域两篇共享实体也很少）；
+      而 <b><span id="figZeroNodes">—</span>/<span id="figPairsA">—</span> 对的节点交集是空的</b>，
+      <b><span id="figZeroEdges">—</span>/<span id="figPairsB">—</span> 对的关系交集是空的</b>。
       ⇒ 后一条才是这一页的看点。
     </div>
   </div>
@@ -283,6 +291,19 @@ fetch('./kg-data/diff.json').then(r => r.ok ? r.json() : null).then(d => {
     + ` · 节点重叠最高 J=<b>${m.max_jaccard}</b>`
     + ` · <b>共享实体但零共享关系的有 ${m.pairs_with_zero_shared_edges} 对</b>`
     + `<br>选两篇对比；也可以直接点下面「值得看的对」`;
+  // ⚠️ 下方那句「N/M 对」也**从产物取，不许写死**（2026-09-19 修）：
+  //    此前它写死 `0/136` 与 `28/136`，而语料涨到 21 篇 / 210 对之后
+  //    实测是 `0/210` 与 `87/210` —— **前端可见数字与产物不一致**。
+  //    这类数字只应由 diff.json 推出，页面不保留第二份真相。
+  const nPairs = d.pairs.length;
+  const nZeroNodes = (m.pairs_with_zero_shared_nodes !== undefined)
+    ? m.pairs_with_zero_shared_nodes
+    : d.pairs.filter(p => p.n_inter_nodes === 0).length;
+  $('#figMaxJ').textContent = Number(m.max_jaccard).toFixed(3);
+  $('#figZeroNodes').textContent = nZeroNodes;
+  $('#figZeroEdges').textContent = m.pairs_with_zero_shared_edges;
+  $('#figPairsA').textContent = nPairs;
+  $('#figPairsB').textContent = nPairs;
   fillSelect($('#selA'));
   fillSelect($('#selB'));
   // 默认给**J 最高**的那一对（重叠最多，最有可比性）

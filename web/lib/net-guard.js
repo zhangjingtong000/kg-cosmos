@@ -1,12 +1,21 @@
-/* 离线守卫：给「依赖 CDN 的历史原型页」加一层解释，避免断网时只有一个白屏。
+/* 离线守卫：给「依赖 CDN 的页面」加一层解释，避免断网时只有一个白屏。
  *
  * 【为什么需要它】
  *   项目里有一条硬约束「离线演示铁律」（docs/早先的内部记录 §1 第 6 条）。
  *   演示主线（导航页 + 社区星云 + 方法能力 + 分析面板 + PathQA + 标杆参考）
- *   已全部本地化、断网可用；但有 5 个历史原型仍然依赖 esm.sh：
- *     community-atlas / graph-2d / force-explorer / force-graph / official-3-text
+ *   已全部本地化、断网可用；但仍有 **5 个页面**依赖 esm.sh ——
+ *   **4 个历史原型页 + 1 个正式页**：
+ *     community-atlas（**正式页** · 社区图鉴）/ graph-2d / force-explorer /
+ *     force-graph / official-3-text
  *   它们的三维/图引擎从 CDN 取，断网时**什么都不显示、也不报错**，
  *   用户只会看到一个黑屏，不知道是坏了还是需要联网。
+ *
+ *   ⚠️ **上面这段改过一次**（2026-09-19）：原文写「有 5 个**历史原型**仍然依赖
+ *   esm.sh」，名单本身对、**分类错** —— `community-atlas` 是正式页
+ *   （在 `tools/add_legacy_banners.py` 的 `OFFICIAL` 里），历史原型页只有 4 个。
+ *   同一个数字/名单在 `README.md §8`、`web/index.html` 页脚与本文件里各有一份，
+ *   现在由 `tools/check_doc_numbers.py` 的「依赖 esm.sh 的页面名单」一节统一核对
+ *   —— **同一事实抄三遍，就必须三处都守**（实施记录：`docs/FIX_ESM_SH_PAGES.md`）。
  *
  * 【为什么不做本地化】
  *   esm.sh 返回的是 0.2~0.4 KB 的**转发壳**（如 3d-force-graph 的壳引用
@@ -14,7 +23,8 @@
  *   其中两个又各带一串），本地化等于递归抓整棵依赖树；
  *   而 UMD 路线实测走不通——`web/lib/3d-force-graph.min.js` 内置了自己的
  *   three，`three-spritetext.min.js` 却用全局 THREE，两份实例不兼容（全黑）。
- *   这 5 页是"保留备查"的原型、不在演示主线上，因此如实提示而不是硬做。
+ *   这 5 页里 4 页是"保留备查"的原型、不在演示主线上，`community-atlas` 是正式页；
+ *   两者都如实提示，而不是硬做。
  *
  * 用法（放在页面最后，不要阻塞原有脚本）：
  *   <script src="./lib/net-guard.js"></script>
@@ -51,7 +61,8 @@
       + '<div style="color:rgba(196,214,240,.8)">' + reason + '</div>'
       + '<div style="margin-top:12px;padding-top:11px;font-size:11.5px;'
       + 'color:rgba(160,190,235,.6);border-top:1px solid rgba(140,170,255,.14)">'
-      + '本页是探索阶段保留的<b>历史原型</b>，它引用的图引擎来自 esm.sh，未做本地化。'
+      + '本页引用的图引擎来自 <code>esm.sh</code>（CDN），未做本地化，'
+      + '断网时它加载不出来。'
       + '演示主线（导航页、社区星云、方法能力与局限、图谱分析面板、问题子图、'
       + '可视化标杆参考）<b>均可断网运行</b>。<br>'
       + '<a href="./index.html" style="color:#9fc4ff">← 返回导航页</a></div>';

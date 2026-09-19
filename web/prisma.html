@@ -11,12 +11,18 @@
 
   标准 PRISMA 有四个阶段，其中"初筛"后面通常跟一个
   `Records excluded (n=…)`。**而本流程没有初筛淘汰** ——
-  3 个检索式命中的 28 篇**全部下载了**。
+  检索式命中的记录**全部下载了**（2026-09-19 复核：`web/kg-data/prisma.json`
+  → `stages[0]` 为「**9 个检索式**，命中并下载 **34** 篇」，而 `stages[2]`
+  为「排除 **13** 篇」）。
+  （原写「**3 个检索式**命中的 **28 篇**全部下载了」——
+   那是 `prisma.json` 还只有 3 个检索式 / 28 条时的读数，已随产物更新更正。）
   ⇒ 那一框我们**画成 0 并写明原因**，**不编一个数**。
 
   ## ★ 排除原因是从文件系统核实的，不是读清单标记
 
-  11 篇未入库的：**PDF 全都有（Y）、图全都没有（N）** ⇒ "已下载未抽取"。
+  **13 篇**未入库的：**PDF 全都有（Y）、图全都没有（N）** ⇒ "已下载未抽取"。
+  （原写 **11 篇** —— 那是清单 33 条（入库 21）时的差额；现
+   `corpus-index.json.stats` = `{total:34, in_graph:21, downloaded_only:13}`。）
   而**"为什么"没抽取，数据里没有记录** ⇒ 页面上如实写
   **"原因未逐篇记录"**（不推测、不编）。
 
@@ -186,7 +192,9 @@ fetch('./kg-data/prisma.json').then(r => r.ok ? r.json() : null).then(d => {
     + '本页由 <code>tools/build_prisma_data.py</code> 自动生成。'
     + (d.caliber ? '<br><b>"一篇论文"的口径：</b>' + esc(d.caliber) : '')
     + '<br><a href="./index.html">← 回导航页</a> · '
-    + '<a href="./corpus.html">语料清单</a> · '
+    /* 2026-09-19：原指 `corpus.html`（旧版语料清单）。合并后旧页按
+       `ARCHIVE_POLICY` 方式 A 原地留档，正式入口改指 `papers.html`。 */
+    + '<a href="./papers.html">论文管理</a> · '
     + '<a href="./analytics.html">评测结论</a>';
 
   window.__prismaState = {

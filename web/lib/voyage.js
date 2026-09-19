@@ -509,9 +509,12 @@ fetch('./kg-data/nebula.json')
       + '<span class="l">实体 · 真实抽取</span></span>'
       + '<span class="it"><span class="v">' + e.toLocaleString() + '</span>'
       // 2026-09-15 改：`e` 是**概览层导出的边数**（受 `--max-edges` 上限约束，
-      // 现在是 30000），**不等于评测全集的 43867**。
-      // 原文案把两个口径并进一个标签，读起来像"30000 就是 43867"。
-      + '<span class="l">关系 · 概览层导出（评测全集 43867）</span></span>'
+      // 现在是 30000），**不等于评测全集**。
+      // 原文案把两个口径并进一个标签，读起来像"30000 就是评测全集"。
+      // 2026-09-19 修：这里的评测全集旧值 43867 已改成 45708
+      // （`check_doc_numbers.py` 的 DOCS 不含本文件，原来漏了；现由
+      //  `tools/verify_firstscreen_numbers.py` 在真实 DOM 上盯住）。
+      + '<span class="l">关系 · 概览层导出（评测全集 45708）</span></span>'
       + '<span class="it"><span class="v">' + c + '</span>'
       + '<span class="l">社区 · Louvain</span></span>';
   })
