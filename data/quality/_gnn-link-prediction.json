@@ -1,0 +1,336 @@
+{
+ "generated": "2026-09-19 22:22:52",
+ "purpose": "H7 实测：GNN 链接预测在两种划分下到底行不行",
+ "data": {
+  "source": "data/corpus/graphs/*.json",
+  "papers_filter": "en",
+  "triples": 43867,
+  "entities": 19469,
+  "relations": 15,
+  "papers": 17,
+  "note": "不用 web/kg-data/nebula.json：那是 3D 渲染用的降采样（30k 边上限 / 9 篇论文 / 带 xyz 坐标），且不带完整论文归属"
+ },
+ "splits": {
+  "A": "随机切 10% 边（transductive，节点训练时全见过）—— GNN 最有利",
+  "B": "整篇留 3 篇：['1703.08098v9', '2402.12001v1', '2502.00681v2']（inductive）—— H7 引用的设定",
+  "B1": "B 中两端实体训练时都见过的边（H6 口径，剔除了新实体边）",
+  "B2": "B 全量测试边（真 inductive）"
+ },
+ "b_dropped_new_entity": {
+  "n": 4367,
+  "pct": 80.96
+ },
+ "methods": {
+  "Random": "均匀随机打分",
+  "PA": "优先连接 deg(h)*deg(t)（训练图）",
+  "CN": "共同邻居数（训练图）",
+  "AA": "Adamic-Adar（训练图）",
+  "TransE": "PyKeen TransE dim=128 epochs=80",
+  "GNN-ID": "手写 2 层 R-GCN + DistMult，可学习实体嵌入（transductive）",
+  "GNN-TYPE": "同上，输入 = 16 类节点类型 one-hot（inductive）",
+  "GNN-TEXT": "同上，输入 = 1024 维 bge-m3 实体名嵌入（inductive）",
+  "MLP-TYPE": "消融对照：同特征同解码器同损失，但**不做消息传递**",
+  "MLP-TEXT": "消融对照：同上（用来分离图结构的贡献与特征本身的贡献）"
+ },
+ "metric_note": "AUC = 每条测试边采 20 尾 + 20 头 filtered 负样本后的全局 AUC；Hits@10/MRR = filtered 全实体排名，head/tail 双向平均；所有方法共用同一段评测代码与同一批负样本",
+ "config": {
+  "epochs": 80,
+  "dim": 128,
+  "k_neg": 20,
+  "seed": 20260916,
+  "device": "cuda"
+ },
+ "results": [
+  {
+   "method": "Random",
+   "setting": "A",
+   "AUC": 0.5038,
+   "Hits@10": 0.0003,
+   "MRR": 0.0006,
+   "Hits@1": 0.0001,
+   "n_test": 4386,
+   "n_scored": 8772
+  },
+  {
+   "method": "PA",
+   "setting": "A",
+   "AUC": 0.6071,
+   "Hits@10": 0.0522,
+   "MRR": 0.035,
+   "Hits@1": 0.0247,
+   "n_test": 4386,
+   "n_scored": 8772
+  },
+  {
+   "method": "CN",
+   "setting": "A",
+   "AUC": 0.7065,
+   "Hits@10": 0.1632,
+   "MRR": 0.0608,
+   "Hits@1": 0.0044,
+   "n_test": 4386,
+   "n_scored": 8772
+  },
+  {
+   "method": "AA",
+   "setting": "A",
+   "AUC": 0.7089,
+   "Hits@10": 0.1927,
+   "MRR": 0.0689,
+   "Hits@1": 0.0042,
+   "n_test": 4386,
+   "n_scored": 8772
+  },
+  {
+   "method": "TransE",
+   "setting": "A",
+   "AUC": 0.5467,
+   "Hits@10": 0.0049,
+   "MRR": 0.0037,
+   "Hits@1": 0.0018,
+   "n_test": 4386,
+   "n_scored": 8772
+  },
+  {
+   "method": "GNN-ID",
+   "setting": "A",
+   "AUC": 0.7434,
+   "Hits@10": 0.0719,
+   "MRR": 0.0411,
+   "Hits@1": 0.0234,
+   "n_test": 4386,
+   "n_scored": 8772
+  },
+  {
+   "method": "GNN-TYPE",
+   "setting": "A",
+   "AUC": 0.7739,
+   "Hits@10": 0.054,
+   "MRR": 0.0289,
+   "Hits@1": 0.013,
+   "n_test": 4386,
+   "n_scored": 8772
+  },
+  {
+   "method": "GNN-TEXT",
+   "setting": "A",
+   "AUC": 0.7785,
+   "Hits@10": 0.069,
+   "MRR": 0.0397,
+   "Hits@1": 0.0221,
+   "n_test": 4386,
+   "n_scored": 8772
+  },
+  {
+   "method": "MLP-TYPE",
+   "setting": "A",
+   "AUC": 0.6612,
+   "Hits@10": 0.0,
+   "MRR": 0.0006,
+   "Hits@1": 0.0,
+   "n_test": 4386,
+   "n_scored": 8772
+  },
+  {
+   "method": "MLP-TEXT",
+   "setting": "A",
+   "AUC": 0.696,
+   "Hits@10": 0.053,
+   "MRR": 0.034,
+   "Hits@1": 0.0212,
+   "n_test": 4386,
+   "n_scored": 8772
+  },
+  {
+   "method": "Random",
+   "setting": "B1",
+   "AUC": 0.4989,
+   "Hits@10": 0.0,
+   "MRR": 0.0004,
+   "Hits@1": 0.0,
+   "n_test": 1027,
+   "n_scored": 2054
+  },
+  {
+   "method": "PA",
+   "setting": "B1",
+   "AUC": 0.7658,
+   "Hits@10": 0.0857,
+   "MRR": 0.0588,
+   "Hits@1": 0.0438,
+   "n_test": 1027,
+   "n_scored": 2054
+  },
+  {
+   "method": "CN",
+   "setting": "B1",
+   "AUC": 0.7176,
+   "Hits@10": 0.15,
+   "MRR": 0.0587,
+   "Hits@1": 0.0117,
+   "n_test": 1027,
+   "n_scored": 2054
+  },
+  {
+   "method": "AA",
+   "setting": "B1",
+   "AUC": 0.718,
+   "Hits@10": 0.1495,
+   "MRR": 0.0584,
+   "Hits@1": 0.0117,
+   "n_test": 1027,
+   "n_scored": 2054
+  },
+  {
+   "method": "TransE",
+   "setting": "B1",
+   "AUC": 0.4592,
+   "Hits@10": 0.018,
+   "MRR": 0.0119,
+   "Hits@1": 0.0063,
+   "n_test": 1027,
+   "n_scored": 2054
+  },
+  {
+   "method": "GNN-ID",
+   "setting": "B1",
+   "AUC": 0.8066,
+   "Hits@10": 0.1003,
+   "MRR": 0.0526,
+   "Hits@1": 0.0278,
+   "n_test": 1027,
+   "n_scored": 2054
+  },
+  {
+   "method": "GNN-TYPE",
+   "setting": "B1",
+   "AUC": 0.8161,
+   "Hits@10": 0.0847,
+   "MRR": 0.0408,
+   "Hits@1": 0.019,
+   "n_test": 1027,
+   "n_scored": 2054
+  },
+  {
+   "method": "GNN-TEXT",
+   "setting": "B1",
+   "AUC": 0.8154,
+   "Hits@10": 0.091,
+   "MRR": 0.0553,
+   "Hits@1": 0.0321,
+   "n_test": 1027,
+   "n_scored": 2054
+  },
+  {
+   "method": "MLP-TYPE",
+   "setting": "B1",
+   "AUC": 0.7064,
+   "Hits@10": 0.0,
+   "MRR": 0.0009,
+   "Hits@1": 0.0,
+   "n_test": 1027,
+   "n_scored": 2054
+  },
+  {
+   "method": "MLP-TEXT",
+   "setting": "B1",
+   "AUC": 0.709,
+   "Hits@10": 0.0954,
+   "MRR": 0.0618,
+   "Hits@1": 0.0414,
+   "n_test": 1027,
+   "n_scored": 2054
+  },
+  {
+   "method": "Random",
+   "setting": "B2",
+   "AUC": 0.5013,
+   "Hits@10": 0.0003,
+   "MRR": 0.0005,
+   "Hits@1": 0.0001,
+   "n_test": 5394,
+   "n_scored": 10788
+  },
+  {
+   "method": "PA",
+   "setting": "B2",
+   "AUC": 0.4415,
+   "Hits@10": 0.0163,
+   "MRR": 0.0113,
+   "Hits@1": 0.0083,
+   "n_test": 5394,
+   "n_scored": 10788
+  },
+  {
+   "method": "CN",
+   "setting": "B2",
+   "AUC": 0.5337,
+   "Hits@10": 0.0286,
+   "MRR": 0.0113,
+   "Hits@1": 0.0022,
+   "n_test": 5394,
+   "n_scored": 10788
+  },
+  {
+   "method": "AA",
+   "setting": "B2",
+   "AUC": 0.5337,
+   "Hits@10": 0.0285,
+   "MRR": 0.0112,
+   "Hits@1": 0.0022,
+   "n_test": 5394,
+   "n_scored": 10788
+  },
+  {
+   "method": "GNN-ID",
+   "setting": "B2",
+   "AUC": 0.478,
+   "Hits@10": 0.0194,
+   "MRR": 0.0106,
+   "Hits@1": 0.0053,
+   "n_test": 5394,
+   "n_scored": 10788
+  },
+  {
+   "method": "GNN-TYPE",
+   "setting": "B2",
+   "AUC": 0.6113,
+   "Hits@10": 0.0226,
+   "MRR": 0.0121,
+   "Hits@1": 0.0053,
+   "n_test": 5394,
+   "n_scored": 10788
+  },
+  {
+   "method": "GNN-TEXT",
+   "setting": "B2",
+   "AUC": 0.5852,
+   "Hits@10": 0.0335,
+   "MRR": 0.0182,
+   "Hits@1": 0.0092,
+   "n_test": 5394,
+   "n_scored": 10788
+  },
+  {
+   "method": "MLP-TYPE",
+   "setting": "B2",
+   "AUC": 0.658,
+   "Hits@10": 0.0,
+   "MRR": 0.0006,
+   "Hits@1": 0.0,
+   "n_test": 5394,
+   "n_scored": 10788
+  },
+  {
+   "method": "MLP-TEXT",
+   "setting": "B2",
+   "AUC": 0.6404,
+   "Hits@10": 0.0366,
+   "MRR": 0.0236,
+   "Hits@1": 0.0156,
+   "n_test": 5394,
+   "n_scored": 10788
+  }
+ ],
+ "elapsed_s": 940.0
+}

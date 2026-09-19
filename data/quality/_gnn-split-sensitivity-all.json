@@ -1,0 +1,70 @@
+{
+ "generated": "2026-09-19 21:55:57",
+ "papers_filter": "all",
+ "sensitivity_new_entity_pct": [
+  {
+   "held_out_papers": 1,
+   "reps": 30,
+   "min": 61.4,
+   "median": 77.8,
+   "max": 94.2,
+   "median_test_edges": 1506
+  },
+  {
+   "held_out_papers": 2,
+   "reps": 30,
+   "min": 65.8,
+   "median": 76.5,
+   "max": 92.4,
+   "median_test_edges": 3790
+  },
+  {
+   "held_out_papers": 3,
+   "reps": 30,
+   "min": 68.2,
+   "median": 78.1,
+   "max": 89.6,
+   "median_test_edges": 5079
+  },
+  {
+   "held_out_papers": 4,
+   "reps": 30,
+   "min": 71.3,
+   "median": 78.7,
+   "max": 89.6,
+   "median_test_edges": 6698
+  },
+  {
+   "held_out_papers": 5,
+   "reps": 30,
+   "min": 71.5,
+   "median": 79.2,
+   "max": 89.2,
+   "median_test_edges": 11248
+  },
+  {
+   "held_out_papers": 6,
+   "reps": 30,
+   "min": 72.2,
+   "median": 80.1,
+   "max": 87.4,
+   "median_test_edges": 13061
+  },
+  {
+   "held_out_papers": 7,
+   "reps": 30,
+   "min": 74.5,
+   "median": 80.9,
+   "max": 87.2,
+   "median_test_edges": 14852
+  },
+  {
+   "held_out_papers": 8,
+   "reps": 30,
+   "min": 74.4,
+   "median": 81.2,
+   "max": 89.2,
+   "median_test_edges": 16258
+  }
+ ]
+}
