@@ -213,6 +213,10 @@ html.js-motion #ch-0 .edge,
 html.js-motion #ch-0 .cta > *{opacity:0;transform:translateY(26px)}
 html.js-motion #ch-0 h1 .ln{transform:translateY(34px)}
 html.js-motion #ch-0 .cue{opacity:0}
+/* 标题要"从 3D 空间里飞进来" ⇒ 需要一个透视容器（否则旋转看起来是平的）。
+   只在动效开启时加：无 JS 时页面上没有任何 3D transform，加了也不产生差别。 */
+html.js-motion #ch-0 h1{perspective:900px}
+html.js-motion #ch-0 h1 .ln{transform-style:preserve-3d}
 </style>
 <script>
 /* 首屏动效的"防闪"开关：在 body 渲染之前**同步**加上 js-motion，
@@ -525,6 +529,12 @@ document.documentElement.classList.add('js-motion');
 <!-- GSAP 本地库（web/lib/gsap/，见 2026-09-20「动效准备」提交；UMD 版，
      加载后暴露 window.gsap）。下面那个 module 在它之后执行。 -->
 <script src="./lib/gsap/gsap.min.js"></script>
+<!-- SplitText 是**独立插件**，必须单独引入（UMD 版挂到 window.SplitText）。
+     ⚠️ 2026-09-20 踩过这个坑：第一版只引了核心，于是 window.SplitText 是
+     undefined，脚本走 bail() 分支 ⇒ **页面没错，但一个动画都没有**。
+     兜底救了场（没白屏），可"没坏"不等于"接对了" —— 所以下面那段
+     校验 DOM 的只读探针值得留着。 -->
+<script src="./lib/gsap/SplitText.min.js"></script>
 <script type="module">
 /* 首屏入场编排（2026-09-20）。
    放在 voyage.js **之后**：那个 module 会先填充 #liveFacts 并启动数字计数，
@@ -538,11 +548,16 @@ document.documentElement.classList.add('js-motion');
    ⇒ **动效失败时的表现是"没有动效"，而不是"白屏"或"元素消失"。** */
 (function () {
   var root = document.documentElement;
+  var splits = [];      // SplitText 会改写 DOM，失败时必须还原，否则标题永远是拆散状态
   function bail(why) {
     root.classList.remove('js-motion');
+    for (var i = 0; i < splits.length; i++) {
+      try { splits[i].revert(); } catch (e) {}
+    }
     if (window.console && console.info) console.info('[motion] 跳过首屏编排：' + why);
   }
   if (!window.gsap) { bail('gsap 未加载'); return; }
+  if (!window.SplitText) { bail('SplitText 未加载'); return; }
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     bail('用户要求减少动效'); return;
   }
@@ -551,20 +566,47 @@ document.documentElement.classList.add('js-motion');
     if (!H) { bail('找不到 #ch-0'); return; }
     var eyebrow = H.querySelector('.eyebrow');
     var lines = H.querySelectorAll('h1 .ln');
+    var thin = H.querySelector('h1 .thin');
+    var heavy = H.querySelector('h1 .heavy');
     var facts = H.querySelector('#liveFacts');
     var lead = H.querySelector('.lead');
     var edge = H.querySelector('.edge');
     var cta = H.querySelectorAll('.cta > *');
     var cue = H.querySelector('.cue');
 
+    /* ── 标题：拆成单个字母，每个字母从 3D 空间里的随机位置带旋转飞进来 ──
+       用 SplitText（GSAP 官方插件，已本地化）。拆完 DOM 变成
+       <div style="display:inline-block">K</div>… 所以**失败时必须 revert**。 */
+    splits.push(SplitText.create(thin, { type: 'chars' }));
+    splits.push(SplitText.create(heavy, { type: 'chars' }));
+    var chars = splits[0].chars.concat(splits[1].chars);
+
+    gsap.set(lines, { opacity: 1, y: 0 });   // 行容器先可见，动画交给字母
+    gsap.set(chars, {
+      opacity: 0,
+      z: 700,
+      x: function () { return gsap.utils.random(-320, 320); },
+      y: function () { return gsap.utils.random(-220, 220); },
+      rotationX: function () { return gsap.utils.random(-130, 130); },
+      rotationY: function () { return gsap.utils.random(-130, 130); },
+      rotationZ: function () { return gsap.utils.random(-45, 45); },
+      scale: 2.6
+    });
+
     var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     tl.to(eyebrow, { opacity: 1, y: 0, duration: 0.5 })
-      .to(lines, { opacity: 1, y: 0, duration: 0.85, stagger: 0.14 }, 0.15)
-      .to(facts, { opacity: 1, y: 0, duration: 0.7 }, 0.5)
-      .to(lead, { opacity: 1, y: 0, duration: 0.6 }, 0.7)
-      .to(edge, { opacity: 1, y: 0, duration: 0.6 }, 0.84)
-      .to(cta, { opacity: 1, y: 0, duration: 0.5, stagger: 0.09 }, 0.98)
-      .to(cue, { opacity: 1, duration: 0.5 }, 1.24);
+      // ★ 字母落位：乱序飞入 + 三维归零，收尾用 power4 做"啪"地定住
+      .to(chars, {
+        opacity: 1, z: 0, x: 0, y: 0,
+        rotationX: 0, rotationY: 0, rotationZ: 0, scale: 1,
+        duration: 1.25, ease: 'power4.out',
+        stagger: { each: 0.055, from: 'random' }
+      }, 0.12)
+      .to(facts, { opacity: 1, y: 0, duration: 0.7 }, 0.7)
+      .to(lead, { opacity: 1, y: 0, duration: 0.6 }, 0.9)
+      .to(edge, { opacity: 1, y: 0, duration: 0.6 }, 1.04)
+      .to(cta, { opacity: 1, y: 0, duration: 0.5, stagger: 0.09 }, 1.18)
+      .to(cue, { opacity: 1, duration: 0.5 }, 1.5);
   } catch (e) { bail('抛错 ' + e); }
 })();
 </script>
