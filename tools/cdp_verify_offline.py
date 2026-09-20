@@ -12,8 +12,10 @@
 用法：
   python tools/cdp_verify_offline.py            # 测星云页
   python tools/cdp_verify_offline.py web/analytics.html
+  python tools/cdp_verify_offline.py web/kg-nebula.html web/index.html   # 多个页面
 """
 import json
+import os
 import subprocess
 import sys
 import time
@@ -47,7 +49,25 @@ def ev(ws, expr):
 
 
 def main():
-    target = sys.argv[1] if len(sys.argv) > 1 else 'web/kg-nebula.html'
+    targets = sys.argv[1:] or ['web/kg-nebula.html']
+
+    # 支持一次传多个页面：**每个页面起一个独立的 Chrome 进程**。
+    # 为什么不是"一个浏览器里连续导航两次"：CDP 的 `Network.setBlockedURLs` 是
+    # 会话级设置，第二个页面会继承第一个留下的屏蔽/缓存状态，
+    # 容易把上一页的结果混进来。分开进程，读数才只属于那一页。
+    # （2026-09-20 加：此前 verify_all 只测 `web/kg-nebula.html` 一页，
+    #   而 GSAP 编排的主战场 `web/index.html` 根本不在离线覆盖范围内。）
+    if len(targets) > 1:
+        rc = 0
+        for t in targets:
+            print()
+            print('#' * 72)
+            print(f'# 离线检查：{t}')
+            print('#' * 72)
+            rc |= subprocess.call([sys.executable, os.path.abspath(__file__), t])
+        return 1 if rc else 0
+
+    target = targets[0]
     port = 9560 + (int(time.time() * 1000) % 40)
     proc = subprocess.Popen([
         CHROME, '--headless=new', '--enable-unsafe-swiftshader', '--disable-gpu',

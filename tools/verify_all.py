@@ -156,6 +156,18 @@ DATA_CHECKS = [
     ('单元测试全量（pytest：`tests/` 下全部单测 · 零外部依赖）',
      ['-m', 'pytest', '-q']),
     ("本体口径一致性（唯一来源自检）", ["tools/check_ontology_consistency.py"]),
+    # ── 2026-09-20 加：**页面里写了的本地文件必须真的在** ──────────────────
+    #
+    # **为什么非有不可**：引 GSAP 时踩过一次 —— 给 `web/index.html` 加首屏动效
+    # 时忘了引 `web/lib/gsap/SplitText.min.js`，页面上有一句
+    # `if (!window.SplitText) { bail(); return; }`，于是**整段动效被安静关掉**：
+    # 排版正常、链接能点、没有显眼报错，只是"一个动画都没有"。
+    # 这类缺陷的共同点是「写错的路径 ≠ 页面报错」，只能由机器逐个对磁盘。
+    #
+    # 顺带覆盖两件事：`importmap` 里的本地映射（three.js 靠它离线）、
+    # 以及「没有任何页面从 CDN 引 GSAP」（离线铁律在动效上的落点）。
+    # ⚠️ 纯文件系统检查，不开浏览器、不调模型 ⇒ 放数据侧。
+    ("本地引用存在性 + GSAP 只许本地引", ["tools/check_local_assets.py"]),
     ("文档数字与产物一致性", ["tools/check_doc_numbers.py"]),
     # J6：命令行工具。**它是 CLI，不是页面** ⇒ 不进上面那组 CDP 检查，
     # 而是"把每个子命令真跑一遍"（六组断言，含 `--no-llm` 与 `--remote` 的失败路径）。
@@ -284,7 +296,12 @@ DATA_CHECKS = [
      ["tools/local_reextract_feasibility.py", "--n", "1"]),
     # 离线可用性是「离线演示铁律」（内部记录 §1 第 6 条）的守门检查：
     # 主视图曾因 three.js 走 unpkg CDN 而断网白屏，现已本地化。
-    ("主视图离线可用（屏蔽外部域名）", ["tools/cdp_verify_offline.py", "web/kg-nebula.html"]),
+    # ★ 2026-09-20 扩面：此前只测星云页一页，而 GSAP 动效编排的主战场是
+    #   导航页 `web/index.html`（它引 gsap / SplitText / ScrollTrigger 三个本地插件）
+    #   —— 三个文件里漏一个，整段动效会**静默失效**且页面看不出坏。
+    #   把导航页一并纳入，才谈得上"GSAP 已纳入离线检查"。
+    ("主视图与导航页离线可用（屏蔽外部域名）",
+     ["tools/cdp_verify_offline.py", "web/kg-nebula.html", "web/index.html"]),
     # 依赖 CDN 的 5 个历史原型：断网时必须给出明确提示而不是白屏。
     ("历史原型断网提示（离线守卫）", ["tools/cdp_verify_net_guard.py"]),
     # 前后端连通：需要后端在 8000 跑着（tools/serve.py）。
