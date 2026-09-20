@@ -224,7 +224,10 @@
 
   <div id="rows"></div>
 
-  <p class="note inline" id="foot"></p>
+  <!-- ★ 2026-09-20：`pagefoot` = 占满容器 + 分两栏 + 顶部细线（说明见 design.css）。
+       原来只有 1060px 而容器 1396px ⇒ 右边空一大块，加上那一段本来就有三件事
+       （总数 / 三个必须一起看的形态 / 链接）⇒ 挤在左下角、读起来"语无伦次"。 -->
+  <p class="note inline pagefoot" id="foot"></p>
 </main>
 <script>
 'use strict';

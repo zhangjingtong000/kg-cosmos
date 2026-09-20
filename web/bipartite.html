@@ -47,7 +47,11 @@
          color:var(--ink-2,rgba(203,218,241,.76))}
   .howto b{color:var(--warm);font-weight:600;display:inline}
   .sub b{color:var(--warn)}
-  #wrap{position:absolute;inset:96px 0 52px 0;overflow:auto}
+  /* ★ 2026-09-20 修：`top` 原来是写死的 96px，而头部高度会随内容变 ——
+     我刚在标题下加了人话引导（`.howto`），头部一下变高 88px，
+     图区却仍从 96px 开始 ⇒ **图的节点名直接压在引导文字上**（用户实测到的重叠）。
+     改成用 JS 同步的 `--head-h`。 */
+  #wrap{position:absolute;left:0;right:0;bottom:52px;top:var(--head-h,96px);overflow:auto}
   svg{display:block;margin:0 auto}
   .col-h{fill:var(--dim);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
   .node text{fill:var(--fg);font-size:11.5px;dominant-baseline:middle}
@@ -138,13 +142,22 @@ function draw() {
     const tx = side === 'l' ? x - 14 : x + 14;
     const r = Math.min(9, 3 + Math.log2(1 + deg) * 0.9);
     const col = side === 'l' ? 'var(--hot)' : 'var(--cool)';
+    /* ★ 2026-09-20 修（用户原话："我们这个图的名称……和编号也有重叠"）。
+       原来名称与度数**画在同一个 y 上、横向只差 6px**：
+         `<text x=tx …>{名称}</text><text class="deg" x=tx±6 …>{度数}</text>`
+       名字一长（例如 "Quantized Graph Representation"）就直接压在数字上。
+       修法：度数挪到**圆点的另一侧** —— 左列的度数放在点的右边（左对齐），
+       右列的度数放在点的左边（右对齐）。这样名称与数字永远分居圆点两侧，
+       无论名字多长都不会重叠。 */
+    const degX = side === 'l' ? x + r + 6 : x - r - 6;
+    const degAnchor = side === 'l' ? 'start' : 'end';
     return `<g class="node" data-id="${esc(id)}" data-side="${side}">`
       + `<rect class="hit" x="${Math.min(x, tx) - 8}" y="${y - ROW / 2}"`
       + ` width="${Math.abs(x - tx) + 16}" height="${ROW}"/>`
-      + `<circle class="dot" cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="${col}"/>`
       + `<text x="${tx}" y="${y}" text-anchor="${anchor}">${esc(id)}</text>`
-      + `<text class="deg" x="${tx + (side === 'l' ? 6 : -6)}" y="${y}"`
-      + ` text-anchor="${anchor}">${deg}</text></g>`;
+      + `<circle class="dot" cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="${col}"/>`
+      + `<text class="deg" x="${degX.toFixed(1)}" y="${y}"`
+      + ` text-anchor="${degAnchor}">${deg}</text></g>`;
   };
 
   d.left.forEach(x => parts.push(node(x.id, L_X, ly.get(x.id), x.deg, 'l', x.type)));
@@ -208,6 +221,19 @@ function applyFocus() {
                               n_left: DATA.left.length, n_right: DATA.right.length,
                               hot_links: svg.querySelectorAll('.link.hot').length };
 }
+
+/* ★ 2026-09-20：把头部**实测高度**同步成 `--head-h`，供 `#wrap` 的 `top` 用。
+   写死 96px 的代价实测过一次：标题下加一行引导 ⇒ 图区仍从 96px 开始 ⇒ 节点名压在字上。
+   用 ResizeObserver 而不是只算一次：副标题（`#sub`）是异步填充的，填完头部还会变高。 */
+(function syncHeadHeight() {
+  const h = document.querySelector('header');
+  if (!h) return;
+  const sync = () => document.documentElement.style
+    .setProperty('--head-h', Math.ceil(h.getBoundingClientRect().height + 10) + 'px');
+  sync();
+  addEventListener('resize', sync);
+  if (window.ResizeObserver) new ResizeObserver(sync).observe(h);
+})();
 
 fetch('./kg-data/bipartite.json').then(r => r.ok ? r.json() : null).then(d => {
   if (!d) {
