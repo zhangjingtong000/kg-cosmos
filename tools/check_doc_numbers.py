@@ -943,6 +943,56 @@ def main():
     else:
         print('  ✅ 顶层以外（`web/_archive/` · `web/benchmark/`）无 esm.sh 运行时依赖')
 
+    # ⑩ **「领先 main N 个提交」必须带日期，且台账要给得出复算命令**（2026-09-20 新增）
+    #
+    # **为什么加**：`docs/TODO.md` 的 E1 行写「领先 `main` 117 个提交」，
+    # 而这个数一路 **117 → 159 → 324 → 339**（时间序列见 `REVIEW_ROUNDUP.md` §十一 R1），
+    # **每提交一次就过期**；而 117 被两轮文档当成现状引用过，没有任何检查发现。
+    #
+    # **为什么不直接断言「等于现场值」**：文档自己一被提交，这个数就 +1
+    # ⇒ 断言会**自指失败**（改了必红、红了必改，永远追不上）。所以守的是**防漂的形式**：
+    #   a. 写出的数字必须**同行带日期**（`YYYY-MM-DD`）—— 读者才能判断它是不是现状；
+    #   b. 台账里必须出现 `git rev-list --count main..feat/2d-explorer`
+    #      这条**复算命令** —— 数字会过期不致命，**读者没法自己复算**才致命。
+    #
+    # ⚠️ **只扫 `docs/TODO.md`**：`早先的审计记录.md` / `REVIEW_ROUNDUP.md`
+    # 里也出现「领先 117 个提交」，但那些是**引用旧表述并当场判定它过时**的审计记录
+    # （多处已带日期），把它们也扫进来只会逼着给历史引用补日期，属于噪音。
+    #
+    # ★ **正则里的 `[\s*]` 不是随手写的 —— 第一版写成 `\s*个提交`，结果对 E1 行
+    #   「领先 \`main\` **339** 个提交」**完全不匹配**（数字后是 `**` 加粗标记、
+    #   不是空白），守门于是「绿着但什么都没查」；负向测试（故意去掉日期）也照样绿，
+    #   差点把它当成"守门有效"。⇒ 凡是"扫文档"的判据，**必须做一次负向测试**，
+    #   否则分不清「没报错」和「没扫到」。`[^。\n|]{0,40}?` 的长度上限同理放宽过一轮。
+    print('\n=== ⑩ 「领先 N 个提交」必须带日期 + 台账给得出复算命令 ===')
+    _SELF_BR = 'feat/2d-explorer'
+    _AHEAD_PAT = re.compile(r'领先[^。\n|]{0,40}?(\d+)[\s*]{0,4}个提交')
+    _LEDGER = ROOT / 'docs' / 'TODO.md'
+    if not _LEDGER.exists():
+        print('  ⚠️ docs/TODO.md 不存在，跳过')
+    else:
+        _lt = _LEDGER.read_text(encoding='utf-8', errors='replace')
+        _n_bare = 0
+        for _i, _line in enumerate(_lt.splitlines(), 1):
+            _m = _AHEAD_PAT.search(_line)
+            if not _m:
+                continue
+            if re.search(r'\d{4}-\d{2}-\d{2}', _line):
+                continue
+            _n_bare += 1
+            fails.append(f'docs/TODO.md:{_i} 写了「{_m.group(0)}」却**没有日期** —— '
+                         f'这个数每提交一次就变，必须写成「（YYYY-MM-DD 实测）」')
+            print(f'  ❌ docs/TODO.md:{_i} 「{_m.group(0)}」缺日期')
+        if not _n_bare:
+            print('  ✅ 台账里每处「领先 N 个提交」都带日期')
+        _cmd = f'git rev-list --count main..{_SELF_BR}'
+        if _cmd in _lt:
+            print(f'  ✅ 台账给出了复算命令 `{_cmd}`')
+        else:
+            fails.append(f'docs/TODO.md 没给出复算命令 `{_cmd}` —— '
+                         f'数字会漂，但「读者能自己算」不会过期')
+            print(f'  ❌ 台账缺复算命令 `{_cmd}`')
+
     print('\n' + '=' * 60)
     if fails:
         print(f'发现 {len(fails)} 处问题：')

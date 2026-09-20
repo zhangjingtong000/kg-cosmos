@@ -288,7 +288,9 @@ powershell -File tools/check.ps1   # 一次跑完：语法 + 本体一致性 + �
 >   而 `BERT Large` 带空格时能拆成两个）⇒ 现在**在 `lower()` 之前拆驼峰**；
 > - **`RDF`/`Reference Data File`、`ORKG`/`Open Research Knowledge Graph` 误合并**
 >   —— 根因是"首字母缩写"被**自动合并**，而 docstring 一直写着它"只作候选"。
->   **在真实语料上量过**：全库 19877 个实体名里，疑似缩写候选 2142 条，
+>   **在真实语料上量过**：全库 **19877** 个实体名里（**2026-09-16 读数，属历史快照**；
+>   现全库为 **20785** 个节点，见 `web/kg-data/analytics.json` → `scale.nodes`），
+>   疑似缩写候选 2142 条，
 >   其中 **93.6% 落在「一短多长」的歧义短名上**
 >   （`'AD'` 同时对得上 `A. Doan` / `Action Dropout` / `Anomaly Detection` / `Appendix D` …）
 >   ⇒ 自动合并会成片吞掉别的实体，而**合并不可逆**。
