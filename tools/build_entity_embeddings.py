@@ -7,17 +7,17 @@ PathQA 做的是"字面种子匹配 + 2 跳 BFS"。**字面匹配失败时**（�
 和任何实体名都对不上），现在的行为是"检索不到"。语义兜底就是：
 **拿问题里的词去和全库实体名比余弦，找最像的几个。**
 
-但**不能每次请求现算**：全库实体名（本行原写 **19469**，而产物
-`data/quality/entity-embeddings.npz` 实测 `names.shape=(19877,)`；
-截至 2026-09-19 全库已是 **20785** 节点，见 `web/kg-data/analytics.json`
-→ `scale.nodes`，**该 npz 属旧口径快照，需重跑本脚本**），`bge-m3` 一次批 64 条要
+但**不能每次请求现算**：全库实体名（本行原写 **19469**；2026-09-20 重跑后
+`data/quality/entity-embeddings.npz` 实测 `names.shape=(21223,)`。
+该数**大于**节点数 20785（`web/kg-data/analytics.json` → `scale.nodes`），
+因为本脚本口径是「节点名 **+ 边两端**的名字」—— 边端未必被抽成节点），`bge-m3` 一次批 64 条要
 几百次请求 —— 那会把一次交互变成几十秒。**⇒ 预计算一次，存成 `.npy`。**
 
 ## 产物与代价
 
-    data/quality/entity-embeddings.npz     （2026-09-16 产出，75.8 MB）
-      · names   : 19877 个实体名（object 数组）
-      · vectors : (19877, 1024) float32  ⇒ 约 80 MB
+    data/quality/entity-embeddings.npz     （2026-09-20 重跑，77.2 MB）
+      · names   : 21223 个实体名（object 数组）
+      · vectors : (21223, 1024) float32  ⇒ 约 80 MB
 
 **80 MB 不入库**（加进 `tools/check_artifacts_tracked.py` 的 `LARGE_KNOWN`），
 但**这条命令要能用** —— 所以本脚本自己就是"重建说明"。

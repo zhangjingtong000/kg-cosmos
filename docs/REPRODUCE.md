@@ -1,4 +1,4 @@
-﻿# 大产物的重建方式（REPRODUCE）
+# 大产物的重建方式（REPRODUCE）
 
 > **为什么有这份文件**：按 `docs/ARCHIVE_POLICY.md`，
 > **进不了版本控制的大产物，必须保证"能重跑出来"** ——
@@ -27,11 +27,17 @@
 | `data/quality/subgraph-supported.json` | 5.1 MB | 4 | `python tools/l5_subgraph.py` | 秒级，纯规则 |
 | `data/3e38f803/graph.json` | 3.2 MB | 2 | **上传那篇 PDF 重抽**（走 `upload.html` 或 `/api/upload/start`） | **约 36 分钟**，要 Ollama |
 | `data/corpus/graphs/2012.00456v1.json` | 2.2 MB | 1 | `python tools/sync_graph.py`（从 Neo4j 导出）或重跑该篇的整条管线 | 视来源而定 |
-| `data/quality/entity-embeddings.npz` | **72.3 MB** | 0（代码按路径读） | `python tools/build_entity_embeddings.py` | **约 250 秒**，要 Ollama + `bge-m3:latest` |
+| `data/quality/entity-embeddings.npz` | **77.2 MB** | 0（代码按路径读） | `python tools/build_entity_embeddings.py` | **约 205 秒**，要 Ollama + `bge-m3:latest` |
 
-> **`entity-embeddings.npz`（H4 新增）**：19877 个实体名 × 1024 维、**已归一化**
-> （检索时余弦 = 点积）。**没有它时 `/api/semantic-match` 会如实返回
+> **`entity-embeddings.npz`（H4 新增）**：21223 个实体名 × 1024 维、**已归一化**
+> （检索时余弦 = 点积）。**条目数大于节点数 20785**，因为口径是
+> 「节点名 **+ 边两端**的名字」（边端未必被抽成节点）。
+> **没有它时 `/api/semantic-match` 会如实返回
 > `ready:false`**，而不是假装"没找到" —— 见 `docs/H4_EMBEDDING_RESULT.md`。
+>
+> 最近一次重跑：**2026-09-20**（204 秒 / 108 条·秒⁻¹，20,785 节点规模）。
+> 旧产物（19,877 名 / 72.3 MB / 09-16）留档于
+> `data/quality/_archive/entity-embeddings.before-rerun-20260920.npz`。
 
 **⚠️ 两个 baseline 的特殊性**：它们是**"治理前"的历史快照**，
 **重跑不出来**（因为语料与代码都已经变了）。它们属于「**只能留档、不能重建**」的一类 ——
