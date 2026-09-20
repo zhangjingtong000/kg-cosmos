@@ -338,16 +338,22 @@ function drawFrame(p, t) {
   }
 }
 
-/* 涟漪 → uniform 数组（x, y, 年龄秒, 强度；过期的强度归零） */
+/* 涟漪 → uniform 数组（x, y, 年龄秒, 强度；过期的强度归零）
+   ★ 2026-09-20：年龄不再用 `now - t0` 手算，而是由 GSAP 缓动推进（见 spawnRipple）。
+   为什么：手算出来的是**匀速**年龄 ⇒ 波纹像被人匀速推开，很平。
+   交给 GSAP 之后可以给它任何缓动曲线，而 **shader 一行都不用改**
+   （uniform 的语义没变：还是"年龄(秒)"）。 */
 function now4() { return (performance.now() - t0) / 1000; }
 function rippleUniforms(nowSec) {
   const out = new Float32Array(12);
   for (let i = 0; i < 3; i++) {
     const r = ripples[i];
     if (!r) continue;
-    const age = nowSec - r.t0;
+    // age/amp 由 GSAP 写；没有 gsap 时退回原来的线性年龄（行为与改动前一致）
+    const age = (r.age !== undefined) ? r.age : (nowSec - r.t0);
     out[i * 4] = r.x; out[i * 4 + 1] = r.y;
-    out[i * 4 + 2] = age; out[i * 4 + 3] = age < 2.2 ? r.s : 0;
+    out[i * 4 + 2] = age;
+    out[i * 4 + 3] = (r.amp !== undefined) ? r.amp : (age < 2.2 ? r.s : 0);
   }
   return out;
 }
@@ -356,12 +362,27 @@ function spawnRipple(clientX, clientY) {
   if (REDUCED) return;
   const m = Math.min(innerWidth, innerHeight);
   const slot = ripples.findIndex(r => !r || (now4() - r.t0) > 2.2);
-  ripples[slot === -1 ? 0 : slot] = {
+  const i = slot === -1 ? 0 : slot;
+  const old = ripples[i];
+  if (old && old._tw) old._tw.kill();   // 复用槽位前先停掉它自己的 tween
+  const r = {
     x: (clientX - 0.5 * innerWidth) / m,
     y: (0.5 * innerHeight - clientY) / m,   /* GL y 轴朝上 */
     t0: now4(),
     s: 1.0,
+    age: 0,      /* 由下面的 timeline 推进 */
+    amp: 1.0,
   };
+  ripples[i] = r;
+  if (window.gsap) {
+    // 波纹"快速荡开、缓慢停下"（expo.out）；强度在 0.55s 后开始淡出，
+    // 让环是**淡掉**的而不是到点被硬切。
+    r._tw = window.gsap.timeline()
+      .to(r, { age: 2.2, duration: 2.2, ease: 'expo.out' }, 0)
+      .to(r, { amp: 0, duration: 1.65, ease: 'power2.in' }, 0.55);
+  } else {
+    r.age = undefined;   // 兜底：走 rippleUniforms 里的线性分支
+  }
 }
 
 /* ── 事件 ───────────────────────────────────────────────────────────────── */
