@@ -100,14 +100,37 @@ def parse_str_dict(text, name):
 def main():
     fails, checks = [], []
 
+    _IMP_RE = re.compile(
+        r'^[ \t]*(?:from\s+[\w.]*ontology\s+import\b|import\s+[\w.]*ontology\b)', re.M)
+
     def uses_ontology(text):
-        """该脚本是否从唯一来源取值（而不是就地抄一份）。"""
-        return ('from ontology import' in text) or ('import ontology' in text)
+        """该脚本是否从唯一来源取值（而不是就地抄一份）。
+
+        ★ **必须按"真正的 import 行"判，不能按"全文出现过某个名字"判**
+        （2026-09-20 修，起因是一次假绿）：
+
+        假设句模板那一条原先写的是 `if 'REL_HYPOTHESIS_TEMPLATE' in txt:`
+        —— 看的是**文件全文**。而 `tools/verify_direction.py:57-58` 有两行注释：
+
+            唯一来源仍是 src/ontology.py 的 REL_HYPOTHESIS_TEMPLATE，这里只是
+            同步一份供本脚本离线使用；check_ontology_consistency.py 会逐字校验
+
+        **这两行注释本身就满足了那个判据** ⇒ 该文件被判「ok(引用 ontology)」
+        ⇒ **它另存的那 12 条 REL_TEMPLATE 从来没有被逐字比过**。
+        （注释里写着"会被逐字校验"，而它正是让逐字校验失效的原因。）
+
+        ⇒ 现在统一按**行首的真实 import** 判（注释行不算），
+        并且四类检查**共用这一个判据**（原先只有其中三处用了它）。
+        """
+        return bool(_IMP_RE.search(text))
 
     def check_relations(rel, name):
         p = ROOT / rel
         if not p.exists():
             checks.append((f'关系类型 {rel}', 'missing-file', rel))
+            fails.append(f'{rel} 不存在 —— 被检查的文件缺失时「一致」无从谈起，'
+                         f'算失败（原实现只记一行「· 」，不影响退出码 ⇒ '
+                         f'删掉文件就能让本守门变绿）')
             return
         txt = p.read_text(encoding='utf-8')
         if uses_ontology(txt):
@@ -128,6 +151,8 @@ def main():
         p = ROOT / rel
         if not p.exists():
             checks.append((f'实体类型 {rel}', 'missing-file', rel))
+            fails.append(f'{rel} 不存在 —— 被检查的文件缺失时「一致」无从谈起，'
+                         f'算失败（原实现只记一行「· 」，不影响退出码）')
             return
         txt = p.read_text(encoding='utf-8')
         if uses_ontology(txt) or 'len(ENTITY_TYPES)' in txt or \
@@ -149,6 +174,8 @@ def main():
         p = ROOT / rel
         if not p.exists():
             checks.append((f'派生标签 {rel}', 'missing-file', rel))
+            fails.append(f'{rel} 不存在 —— 被检查的文件缺失时「一致」无从谈起，'
+                         f'算失败（原实现只记一行「· 」，不影响退出码）')
             return
         got = parse_set(p.read_text(encoding='utf-8'), name)
         if got is None:
@@ -214,6 +241,8 @@ def main():
         p = ROOT / rel
         if not p.exists():
             checks.append((name, 'missing-file', rel))
+            fails.append(f'{rel} 不存在 —— 被检查的文件缺失时「一致」无从谈起，'
+                         f'算失败（原实现只记一行「· 」，不影响退出码）')
             continue
         v = parse_float(p.read_text(encoding='utf-8'), name)
         if v is None:
@@ -255,9 +284,14 @@ def main():
         p = ROOT / rel
         if not p.exists():
             checks.append((f'假设句模板 {rel}', 'missing-file', rel))
+            fails.append(f'{rel} 不存在 —— 被检查的文件缺失时「一致」无从谈起，'
+                         f'算失败（原实现只记一行「· 」，不影响退出码）')
             continue
         txt = p.read_text(encoding='utf-8')
-        if 'REL_HYPOTHESIS_TEMPLATE' in txt:
+        # ★ 用 `uses_ontology()`（**按真实 import 行判**），不用
+        #   `'REL_HYPOTHESIS_TEMPLATE' in txt`（**按全文出现判**）——
+        #   后者会被 `verify_direction.py` 自己的一行注释满足，从而旁路掉逐字校验。
+        if uses_ontology(txt):
             checks.append((f'假设句模板 {rel}', 'ok(引用 ontology)', rel))
             continue
         got = parse_str_dict(txt, name)

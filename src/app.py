@@ -1352,6 +1352,25 @@ async def api_semantic_match(req: SemanticMatchRequest):
 
 # ── Main ─────────────────────────────────────────────────
 
+# 语料 PDF：让**证据深链**（点证据行 → 打开原文那一页并高亮）在后端下真的可用。
+#
+# **为什么必须显式挂**（2026-09-20 修）：`web/kg-nebula.html` 的 PDF 回退链是
+#
+#     [ `./l5-data/${src}`, `../data/corpus/${src}` ]
+#
+# 该文件的注释写着「静态站能跑（有哪篇就开哪篇）、**后端在时全都能跑**」——
+# 但下面只挂了 `web/`，**`data/` 从未暴露** ⇒ 在正式演示用的 8000 上，
+# `../data/corpus/xxx.pdf` 同样 404。后果：**只有被预先放进 `web/l5-data/`
+# 的那几篇 PDF 打得开**，点别的论文的证据就开不出原文 ——
+# 而这正是演示要看的那一条链（是补跑 `verify_all` **全量**模式才发现的：
+# `--fast` 跳过的「证据深链 PDF 高亮」这一项，此前一直没跑过）。
+#
+# **只挂 `corpus/`，不挂整个 `data/`**：`data/quality/` 是评测中间产物，
+# 演示不需要，少暴露一个面。挂载路径与前端写的 `../data/corpus/` 逐字对应。
+_CORPUS_DIR = ROOT / "data" / "corpus"
+if _CORPUS_DIR.exists():
+    app.mount("/data/corpus", StaticFiles(directory=str(_CORPUS_DIR)), name="corpus-pdf")
+
 # 把 web/ 挂在同一个 origin 下（必须在所有 API 路由**之后**挂载，
 # 否则 StaticFiles 的根路由会吃掉 /health、/api/* 这些前缀）。
 # 收益：① 前端与 API 同源，消除 CORS 与 file:// 限制；

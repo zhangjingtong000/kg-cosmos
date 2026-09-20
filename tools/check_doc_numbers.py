@@ -448,17 +448,35 @@ def main():
             continue
         txt = p.read_text(encoding='utf-8', errors='replace')
         ok = True
+        hits = 0
         for pat, key, why in CORPUS_PATS:
             val = cur[key]
             for m in re.finditer(pat, txt):
+                hits += 1
                 if int(m.group(1)) != val:
                     line_no = txt[:m.start()].count('\n') + 1
                     fails.append(f'{rel}:{line_no} {why}写成 {m.group(1)}，'
                                  f'实际是 {val} —— 语料口径过期')
                     print(f'  ❌ {rel}:{line_no} {why} {m.group(1)} ≠ {val}')
                     ok = False
-        if ok:
-            print(f'  ✅ {rel} 的语料口径与 corpus-index.json 一致')
+        # ★ **零覆盖算失败**（2026-09-20 加，本组第一版是假绿）
+        #
+        # **为什么必须加**：这四条模式都要求**带口径词**（「…篇只下载」「语料登记…条」），
+        # 而 `docs/NUMBERS_CARD.md` 当时的写法是「**33 条**（已入库 **21**，12 条只下载）」
+        # —— "已入库 **21**，"后面**没有"篇"**、"12 条"用的量词是**"条"不是"篇"**
+        # ⇒ **四条模式一条都没匹配上**，`ok` 却仍是 `True`，于是照打
+        # 「✅ 的语料口径与 corpus-index.json 一致」。**底下压着一个真错值**
+        # （实为 total=34 / downloaded_only=13），却被判为一致。
+        # ⇒ 判据写成"只要没匹配到不等于的值就算过"时，**空集合上的一切断言都恒真**。
+        # 正确判据是「**必须至少匹配到一条**」——与 `check_dom_text.py` 的
+        # 「零覆盖也是失败」同一条纪律（那边早就写了，这边漏了）。
+        if hits == 0:
+            fails.append(f'{rel} 的语料口径**一条模式都没匹配上** —— 这不是"一致"，'
+                         f'是守门没扫到（零覆盖算失败）；请把该文件的语料写法'
+                         f'改成带口径词的形式（如「已入库 21 篇」「语料登记 34 条」）')
+            print(f'  ❌ {rel} 零覆盖：四条语料模式一条都没匹配上（不是一致，是没扫到）')
+        elif ok:
+            print(f'  ✅ {rel} 的语料口径与 corpus-index.json 一致（命中 {hits} 处）')
 
     # ⑥ **`NUMBERS_CARD.md` 专有断言**（2026-09-19 新增）
     #
@@ -472,8 +490,12 @@ def main():
     else:
         card = card_p.read_text(encoding='utf-8')
         card_need = {
-            str(cur['corpus_total']): f"语料总条数（{cur['corpus_total']} 条）",
-            str(cur['corpus_in_graph']): f"入库条数（{cur['corpus_in_graph']} 条）",
+            # ⚠️ **语料两项（`corpus_total` / `corpus_in_graph`）刻意不在这里**
+            # （2026-09-20 移出）：它们是 `'34'` / `'21'` 这种**两位数裸子串**，
+            # 而卡片里 `34.1%` / `21.88%` 之类的小数能**原样满足** `'34' in card`
+            # ⇒ 打印出来的「✅ 数字卡含语料总条数（34 条）」其实是被百分数蒙混的，
+            # 卡片真写着错值「33 条 / 12 条只下载」时它照样报绿。
+            # 语料口径改由 ⑤ 组用**带口径词的精确模式**守（并新增"零覆盖算失败"）。
             str(cur['nodes']): f"节点数（{cur['nodes']}）",
             str(cur['edges_eval']): f"评测全集边数（{cur['edges_eval']}）",
             str(cur['edges_overview']): f"自然规模边数（{cur['edges_overview']}）",
