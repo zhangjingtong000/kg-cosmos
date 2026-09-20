@@ -123,9 +123,11 @@
   <div id="excluded"></div>
 
   <h2>★ 与 Elicit 的那一对对照（要写进论文）</h2>
-  <p class="note" id="contrast"></p>
+  <!-- ⚠️ 两个都必须是 `inline`：这两段的内容由脚本生成，里面全是行内 <b>
+       （实测 `#contrast` 被拆成 17 个碎片、`#foot` 1 个）。 -->
+  <p class="note inline" id="contrast"></p>
 
-  <p class="note" id="foot"></p>
+  <p class="note inline" id="foot"></p>
 </main>
 <script>
 'use strict';

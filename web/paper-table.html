@@ -142,7 +142,10 @@
     请点开每格右边的页码回原文核对。这一页的价值一半在于<b>每格都能点回去</b>。
   </div>
   <div id="out"></div>
-  <p class="note">
+  <!-- ⚠️ `inline` 不能省：`design.css` 的 `.note b{display:block}` 是给"开头小标题"
+       那种用法写的，而这一段是**行内强调**（`<b>字段不是照抄的</b>：…` 后面还跟着
+       别的 `<b>`），不加 `inline` 就会被拆成一行一个碎片（实测 3 处）。 -->
+  <p class="note inline">
     <b>字段不是照抄的</b>：Consensus 的 <code>Study Snapshot</code> 用的是
     Population / Sample size / Duration / Location / Methods —— 那是
     <b>医学与社科</b>的字段；本项目是 NLP/ML，照抄会得到<b>一列全空</b>的表。

@@ -127,7 +127,20 @@ h3{margin:22px 0 10px;font-size:14px;color:var(--ink)}
   content:"";position:absolute;left:0;top:0;width:56px;height:2px;
   background:var(--accent);opacity:.85;
 }
+/* ⚠️ `.note b` 是"结论块开头的粗体小标题"这一种用法（本文件 121 行的设计），
+   它把 <b> 变成独占一行的 16px 块 —— 对"开头小标题"是对的。 */
 .note b{display:block;margin:0 0 8px;font-size:16px;color:var(--warm);font-weight:600}
+
+/* ★ 2026-09-20 修：但**同一个 `.note` 也被当普通段落用**，里面的 <b> 只是行内强调。
+   典型受害者是 `stance.html` 的页脚 `#foot`：
+     `共 <b>671</b> 个主张（来自 <b>793</b> 条 SUPPORTS 与 <b>243</b> 条 CONTRADICTS）…`
+   上面那条规则会把每个 <b> 抬成独立一行 ⇒ **整段被拆成"一行一个碎片"**，
+   用户原话：「"共"一个字一行，然后下面"六百七十一"一行……
+   排得很奇怪，这根本就不是给人看的」。他说"后六个几乎都有"，就是因为
+   后六页都引本文件、又都这么用 `.note`。
+   ⇒ 给行内用法一个**显式开关**：`.note.inline`（不动默认行为，避免改坏
+   那些真的靠"开头小标题"撑观感的结论块）。 */
+.note.inline b{display:inline;margin:0;font-size:inherit;color:var(--warm);font-weight:600}
 
 /* 数字组：大号数字 + 说明 */
 .figs{display:flex;gap:38px;flex-wrap:wrap;margin:24px 0 0;padding:18px 0;

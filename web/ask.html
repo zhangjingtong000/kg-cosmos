@@ -194,6 +194,15 @@ h1 em{font-style:normal;
 /* 子图面板：与上传页 .drop 同一套"绸缎面板"语言 */
 .graph{display:grid;grid-template-columns:minmax(0,1.68fr) minmax(0,1fr);
   gap:32px;align-items:start;margin:16px 0 0}
+/* ★ 2026-09-20：右列容器（`#to3d` 按钮 + `.gside` 统计/图例）。
+   原来这两件是 `.graph` 的**直接** grid 子元素，而 `.graph` 只有两列
+   ⇒ 自动放置把它们拆到 (1,2) 与 (2,1)：右列第一行只有那个 35px 的按钮、
+   **下面整列空着**（实测全库模式空 2252px），`.gside` 反而被挤到第二行左列。
+   用户看到的正是"右边只有一行字，下面啥都没有，很空"。
+   现在它们是一列：按钮在上、统计图例在下；并且**吸顶**，
+   左侧是长列表（全库模式 1879px）时，右列会一路跟着，不再是一片空白。 */
+.gcol{display:flex;flex-direction:column;gap:14px;align-self:start;
+  position:sticky;top:84px}
 .gpanel{position:relative;padding:10px 8px 4px;border-radius:18px;overflow:hidden;
   background:
     radial-gradient(120% 100% at 12% 0%, rgba(224,164,105,.08), transparent 55%),
@@ -354,6 +363,8 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
 
 @media (max-width:900px){
   .graph{grid-template-columns:1fr;gap:22px}
+  /* 单列布局下右列容器就在正文流里，吸顶会让它压住后面的内容 ⇒ 取消 sticky */
+  .gcol{position:static}
   .how .r{grid-template-columns:22px 1fr;gap:8px 14px}
   .how .ds{grid-column:2}
 }
@@ -539,10 +550,18 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
         <p class="hint" id="trace"></p>
         <div class="graph">
           <div class="gpanel" id="gpanel" role="img" aria-labelledby="gdesc"></div>
+<!-- ★ 2026-09-20 修：`#to3d` 与 `.gside` 原来都是 `.graph` 的**直接** grid 子元素，
+     而 `.graph` 只有两列 ⇒ 自动放置把它们分成 (1,2) 与 (2,1) 两格：
+     右列第一行只有这个 35px 的按钮，**下面整列空着**（实测全库模式空 2252px），
+     而 `.gside`（统计+图例）被挤到第二行左列、跑到很下面。
+     用户看到的就是"右边只有一行字，下面啥都没有，很空"。
+     现在把右列的这两件包进一个列容器 `.gcol` ⇒ `.graph` 只剩两个子元素，
+     右列从顶上开始就是"按钮 + 统计 + 图例"，且 `.gcol` 会跟着左侧长内容**吸顶**。 -->
+<div class="gcol">
 <!-- H9：把这一页的 2D 子图接到主视图的 3D 高亮上（`?hl=`）。
      按钮的文字与 title 都**如实报"带了多少个"** —— 超过 40 个时说明只带了前 40 个。 -->
 <button id="to3d" type="button" hidden
-        style="margin:10px 0 2px;background:rgba(224,164,105,.14);color:#e8c9a4;
+        style="margin:0 0 2px;background:rgba(224,164,105,.14);color:#e8c9a4;
                border:1px solid rgba(224,164,105,.42);border-radius:9px;
                padding:8px 14px;font-size:13px;font-family:inherit;cursor:pointer">
 </button>
@@ -558,6 +577,7 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
               <div class="li"><span class="sw contra"></span>CONTRADICTS（判别器通过率 6.6%，待复核）</div>
             </div>
           </div>
+</div>
         </div>
       </div>
 
@@ -846,6 +866,14 @@ function adaptQA(resp){
   }
   const ag = {};
   (resp.agents || []).forEach(function(x){ ag[x.role] = x.text; });
+  // ★ 2026-09-20 修：**历史回看**这条路上 `resp.agents` 根本不存在
+  //   （存历史时只存了 support/oppose，没存 agents，见下方 entry.resp 的构造），
+  //   于是 `ag` 两个键都空 ⇒ 下面 `ag['支持方'] || '（支持方 Agent 未运行）'`
+  //   的回退文案顶上，把**真实运行过**的一轮显示成"未运行"。
+  //   用户实测到过："刚刚明明是有在运行的"。
+  //   修法：用历史条目本来就存着的 support/oppose 兜底 —— 顺带对**旧历史数据**也生效。
+  if (!ag['支持方'] && resp.support) ag['支持方'] = resp.support;
+  if (!ag['反对方'] && resp.oppose) ag['反对方'] = resp.oppose;
 
   return {
     q: resp.question,
@@ -906,6 +934,9 @@ function adaptQAGlobal(resp){
   const list = ev.map(one);
   const ag = {};
   (resp.agents || []).forEach(function(x){ ag[x.role] = x.text; });
+  // 同单篇模式：历史回看没有 agents，用 support/oppose 兜底（见上方那段注释）
+  if (!ag['支持方'] && resp.support) ag['支持方'] = resp.support;
+  if (!ag['反对方'] && resp.oppose) ag['反对方'] = resp.oppose;
   const tally = '证据 ' + list.length + ' 条 · 全部是社区级摘要（不是论文原文、没有页码）';
   const scopeNote = all
     ? '你的问题没有命中任何社区的标识词 ⇒ 下面是规模最大的 ' + ev.length +

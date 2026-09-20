@@ -52,7 +52,13 @@
             backdrop-filter: blur(10px); color: #dfe8ff;
             transform: translateX(22px); opacity: 0; pointer-events: none;
             transition: opacity .24s ease, transform .24s ease; }
-  #detail.open { opacity: 1; transform: none; }
+  /* ★ 2026-09-20 修：`pointer-events:auto` 必须在这里恢复。
+     原先只有 `53` 行的 `pointer-events:none`，`55` 行打开时**没有恢复** ⇒
+     面板虽然可见，但鼠标事件全部穿透到画布上 ⇒ 「这条抽取对吗 / 改名并提交改图计划」
+     这两个按钮**永远收不到点击**（实测：点它们时 `/api/flag`、`/api/kg/edit-plan`
+     一个请求都没发出，`document.elementFromPoint(面板中心)` 返回的是画布）。
+     用户的原话是"右边的那个列表就形同虚设，根本操作不了" —— 这就是根因之一。 */
+  #detail.open { opacity: 1; transform: none; pointer-events: auto; }
   #detail h2 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
   #detail .sub { font-size: 11px; color: rgba(198,201,213, .62); margin-bottom: 10px; line-height: 1.6; }
   #detail .sec { font-size: 10px; letter-spacing: .13em; text-transform: uppercase;
@@ -1006,8 +1012,21 @@ renderer.domElement.addEventListener('pointermove', (event) => {
   const hit = target ? raycaster.intersectObject(target, false)[0] : null;
   const next = (hit && hit.index !== undefined) ? hit.index : -1;
   if (next !== hoverNodeIdx) {
-    hoverNodeIdx = next;
-    if (next >= 0) renderInnerPreview(next); else hidePreview();
+    hoverNodeIdx = next;          // 仍要更新：标签权重（renderInnerPreview 之外）在读它
+    // ★ 2026-09-20 修（用户原话："我鼠标一从这个节点挪走，它就消失了……
+    //    点击这个节点之后，关于它的右侧列表就可以固定在那里"）：
+    //    只要已经**点选固定**了某个实体，悬停就只更新 hoverNodeIdx，
+    //    不再换内容、也不再关面板 —— 否则面板会在鼠标移向它的路上就消失，
+    //    里头的「这条抽取对吗 / 改名 / 改图计划」根本来不及点。
+    //    取消固定的路径已有三条：再点同一节点（selectNode）、点空白（clearSelection）、
+    //    以及退出内部视图（exitCommunity）。
+    if (selectedNodeIdx >= 0) {
+      /* 已固定：不动面板 */
+    } else if (next >= 0) {
+      renderInnerPreview(next);
+    } else {
+      hidePreview();
+    }
   }
 });
 
