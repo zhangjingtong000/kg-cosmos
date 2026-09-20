@@ -1,0 +1,65 @@
+/* ============================================================================
+   web/lib/motion.css —— 「稳妥版」页面动效（导航页 index.html 之外的官方页）
+
+   为什么单独一个文件、而不是塞进各页的内联 <style>：
+   官方 11 个页面各写各的样式，加动效如果要逐页复制 CSS，
+   以后改一个字就要改 11 处，必然会漂移。放这里只有一份真源。
+
+   ★ 只动 opacity，绝不碰 transform / filter / will-change / contain。
+     理由（2026-09-20 的 12 页只读审计结论）：
+       · transform 会新建 containing block，kg-nebula 的 17 个 position:fixed
+         浮层会立刻错位（该页 :346-366 的注释记录过一次真实事故）；
+       · paper-table 的 th 与 method-limits 的 .bar 是 position:sticky，
+         祖先出现 containing block / 层叠上下文会改变它们的压盖关系。
+     opacity<1 本身也会新建层叠上下文，所以下面所有规则都必须收敛回 1，
+     并且由 motion.js 在动画结束后把 class 摘掉，不留任何残留状态。
+
+   本文件分两半：
+     ① 落屏淡入：纯 CSS，给没有页面滚动的页用（它们没有"滚入视野"可言）。
+     ② 滚入视野淡入：隐藏态只由 lib/motion.js 加 .mo 类触发，
+        **HTML 里不预置任何隐藏态** ⇒ JS 没跑 / 报错 / 浏览器不支持
+        IntersectionObserver 时，页面与没有这个文件时完全一致。
+   ============================================================================ */
+
+
+/* ── ① 落屏淡入（纯 CSS，无 JS）────────────────────────────────────────────
+   用法：在页面内容根元素上写 class="mo-enter"。
+   用 animation 而不是 transition，且**不写 animation-fill-mode**：
+   动画播完就不再作用于该元素，元素回到自己的自然样式（opacity:1），
+   不会像 `both`/`forwards` 那样留下一个永久的层叠上下文。
+   因此这一条的最坏情况是「不动」，不可能是「不显示」。 */
+@keyframes mo-enter {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+.mo-enter {
+  animation: mo-enter .5s cubic-bezier(.22, .61, .36, 1);
+}
+
+
+/* ── ② 滚入视野淡入（由 lib/motion.js 驱动）──────────────────────────────── */
+.mo {
+  opacity: 0;
+  transition: opacity .55s cubic-bezier(.22, .61, .36, 1);
+}
+.mo.mo-in {
+  opacity: 1;
+}
+
+
+/* ── ③ 尊重「减少动效」偏好 ────────────────────────────────────────────────
+   注意本文件**不能**假设 lib/a11y.css 一定被加载：bipartite / temporal / diff
+   三页不引任何外部样式表，papers / paper-table / stance 只引 design.css。
+   所以降级分支必须自带，而且要比 CSS transition 更强：这里用 !important，
+   因为 JS 逐帧改 opacity 时 a11y.css 的 transition-duration 是拦不住的
+   （motion.js 自己也判了一次 matchMedia，这里是双保险）。 */
+@media (prefers-reduced-motion: reduce) {
+  .mo-enter {
+    animation: none;
+  }
+  .mo,
+  .mo.mo-in {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+}

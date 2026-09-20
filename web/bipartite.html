@@ -65,13 +65,14 @@
        max-width:380px;opacity:0;transition:opacity .12s;z-index:9}
   a{color:var(--cool)}
 </style>
+<link rel="stylesheet" href="./lib/motion.css">
 </head>
 <body>
 <header>
   <h1>使用关系二部图</h1>
   <div class="sub" id="sub">载入中…</div>
 </header>
-<div id="wrap"><svg id="svg"></svg></div>
+<div id="wrap" class="mo-enter"><svg id="svg"></svg></div>
 <div id="tip"></div>
 <footer>
   <span>左侧 <b>施动者</b>（谁在用）· 右侧 <b>被用物</b>（被用的东西）</span>
@@ -213,5 +214,6 @@ fetch('./kg-data/bipartite.json').then(r => r.ok ? r.json() : null).then(d => {
   $('#sub').textContent = '载入失败：' + e.message;
 });
 </script>
+<script src="./lib/motion.js"></script>
 </body>
 </html>

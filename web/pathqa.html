@@ -203,6 +203,7 @@ h3 { font-weight: 600; }
 <link rel="stylesheet" href="./lib/design.css">
 <link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/fonts/fonts.css">
+<link rel="stylesheet" href="./lib/motion.css">
 <style>
 /* ==DESIGN_SYS== */
 /* 让各页既有内容浮在光场之上。这样不必给它们逐个包一层容器 ——
@@ -238,7 +239,7 @@ body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
   <span id="examples"></span>
 </div>
 
-<div class="stage">
+<div class="stage mo-enter">
   <div id="graph"><div id="hint2">正在加载图谱…</div><div id="cam"><span class="tip">拖节点 · 拖空白平移 · 滚轮缩放</span><button id="reset" type="button">复位</button></div></div>
   <aside id="side">
     <div class="box"><h3>命中的实体</h3><div id="seeds"><div class="empty">—</div></div></div>
@@ -977,5 +978,6 @@ fetch('./kg-data/nebula.json')
   /* 不设 window.__ready：各页可能自带更严格的就绪条件（kg-nebula 要等 3D 首帧），抢跑会让 CDP 回归在场景就绪前截图。 */
 </script>
 <script src="./lib/demo-rail.js"></script>
+<script src="./lib/motion.js"></script>
 </body>
 </html>

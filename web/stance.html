@@ -30,6 +30,7 @@
      **本页不做过滤** —— 过滤需要判据，而本项目的判据被量出过 27.4% 的假阳性（B4）。
 -->
 <link rel="stylesheet" href="./lib/design.css">
+<link rel="stylesheet" href="./lib/motion.css">
 <style>
   /* ══ 接入设计系统（2026-09-18）═════════════════════════════════════════
    *
@@ -229,5 +230,6 @@ fetch('./kg-data/stance.json').then(r => r.ok ? r.json() : null).then(d => {
   window.__stanceReady = true;
 }).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
 </script>
+<script src="./lib/motion.js"></script>
 </body>
 </html>

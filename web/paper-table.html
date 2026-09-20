@@ -28,6 +28,7 @@
      （因为 `PUBLISHED_IN` 只在它里面），而它与原图**只差 1019 条边的 type**。
 -->
 <link rel="stylesheet" href="./lib/design.css">
+<link rel="stylesheet" href="./lib/motion.css">
 <style>
   /* ══ 接入设计系统（2026-09-18）═════════════════════════════════════════
    *
@@ -286,5 +287,6 @@ fetch('./kg-data/paper-table.json').then(r => r.ok ? r.json() : null).then(d => 
   window.__tableReady = true;
 }).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
 </script>
+<script src="./lib/motion.js"></script>
 </body>
 </html>
