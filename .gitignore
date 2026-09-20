@@ -28,7 +28,7 @@ venv/
 #   ⚠️ 已有 122 个手工 `-f` 加进来的文件**不受影响**（gitignore 只管未跟踪文件）。
 /data/*
 !/data/quality/
-/data/quality/*/
+/data/quality/*
 !/data/quality/*.json
 /output/
 /.playwright-cli/
