@@ -73,15 +73,22 @@ def main():
     # ── ④ 若产物存在，必须完整 ───────────────────────────────────
     need = ['adapter_model.safetensors', 'adapter_config.json', 'train-summary.json']
     if ADAPTER.exists():
-        have = {f.name for f in ADAPTER.rglob('*') if f.is_file()}
-        miss = [n for n in need if n not in have]
-        print(f'  ④ `adapter-smoke` 存在 ⇒ 缺的产物：{miss or "无"}')
+        sizes = {f.name: f.stat().st_size for f in ADAPTER.rglob('*') if f.is_file()}
+        miss = [n for n in need if n not in sizes]
+        # ⚠️ **0 字节不算"有"**（2026-09-20 修，守门假绿审计 §三·B5）：
+        #    原来只收文件名，于是 **0 字节**的 `adapter_model.safetensors`
+        #    也算「缺的产物：无」（镜像实测过）。同项目 `check_paper_registry.py`
+        #    早就写着"0 字节不算入库"，这里与它对齐。
+        empty = [n for n in need if n in sizes and sizes[n] == 0]
+        print(f'  ④ `adapter-smoke` 存在 ⇒ 缺的产物：{miss or "无"}'
+              + (f' · **0 字节的产物：{empty}**' if empty else ''))
         for n in need:
-            if n in have:
-                f = next(x for x in ADAPTER.rglob(n))
-                print(f'       {n:<32}{f.stat().st_size / 1024:>9.0f} KB')
+            if n in sizes:
+                print(f'       {n:<32}{sizes[n] / 1024:>9.0f} KB')
         if miss:
             fails.append(f'adapter-smoke 缺产物：{miss}')
+        if empty:
+            fails.append(f'adapter-smoke 有 0 字节产物（不算完整）：{empty}')
     else:
         print('  ④ `adapter-smoke` 不存在 —— **没跑过就不算错**（冒烟是可选步骤）')
     print()

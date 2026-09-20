@@ -100,12 +100,31 @@ def main():
         n_label = sum(1 for _ in LABELS.open(encoding='utf-8'))
     print(f'  抽样清单 {n_sample} 条  →  {LABELS.name}')
     print(f'  已判      {n_label} 条')
-    if n_sample and n_label >= n_sample:
-        print('  ✅ 盲判已完成（两个独立标注者，κ=0.722）。')
+    # ⚠️ **2026-09-20 修（守门假绿审计 §二·A6）**：这里原来写死「κ=0.722」，
+    #    而结论段又写死「两个独立标注者 κ≥0.6」—— **两句都没读 artifact**，
+    #    判据只数了行数（`n_label >= n_sample`）。
+    #    实测：把 `l5-annotator-agreement.json` 的 κ 改成 0.55，同一份输出里
+    #    下面会打印「κ=0.55」，而这里与结论段照旧说「κ=0.722 / κ≥0.6、本层已完成」，
+    #    `exit 0` —— **同一个脚本的相邻两句话互相矛盾**。
+    #    ⇒ 现在真的读 artifact，并且 **κ≥0.6 是一个真断言**。
+    k_early = None
+    _agr = Q / 'l5-annotator-agreement.json'
+    if _agr.exists():
+        try:
+            k_early = json.loads(_agr.read_text(encoding='utf-8')).get('cohen_kappa')
+        except Exception:
+            k_early = None
+    if n_sample and n_label >= n_sample and k_early is not None and k_early >= 0.6:
+        print(f'  ✅ 盲判已完成（{n_label}/{n_sample}，两个独立标注者 κ={k_early}）。')
         print('     跑 tools/l5_validity_report.py 出本项目分布上的 PPV/召回。')
         print('     **关键结论**：真实支持率 40.0%、判别器 PPV 仅 49.7%、')
         print('     域内加权 AUC 0.7074（官方校准集是 0.9851）。')
         print('     详见 docs/L5_VALIDITY_REPORT.md。')
+    elif n_sample and n_label >= n_sample:
+        _why = ('**标注者间一致性尚未测**' if k_early is None
+                else f'**标注者间 κ={k_early} < 0.6**')
+        print(f'  ⚠️ 盲判样本已判满（{n_label}/{n_sample}），但{_why}')
+        print('     ⇒ **还不能声明"本层已完成"**；跑 tools/check_l5_agreement.py 核对一致性。')
     elif n_label:
         print(f'  ⏳ 进行中（{n_label/n_sample*100:.0f}%）；'
               f'跑 tools/l5_validity_review.py 继续')
@@ -202,6 +221,7 @@ def main():
 
     # 标注者间一致性：这是"上面那些数字可不可信"的元证据
     agr_p = Q / 'l5-annotator-agreement.json'
+    k = None          # ← 先给默认值：下面的结论段要用它，而这个文件可能不存在
     print()
     if agr_p.exists():
         a = json.loads(agr_p.read_text(encoding='utf-8'))
@@ -219,11 +239,17 @@ def main():
         print('  · 标注者间一致性：尚未测（跑 tools/check_l5_agreement.py）')
 
     print()
-    if n_sample and n_label >= n_sample:
-        print('  ✅ 本层已完成：盲判 200/200，两个独立标注者 κ≥0.6，')
+    # ⚠️ **2026-09-20 修（§二·A6）**：原为写死的「盲判 200/200，两个独立标注者 κ≥0.6」，
+    #    与上面 ② 段一样不读 artifact。现在两处**共用**同一个真实 κ。
+    if n_sample and n_label >= n_sample and k is not None and k >= 0.6:
+        print(f'  ✅ 本层已完成：盲判 {n_label}/{n_sample}，两个独立标注者 κ={k}，')
         print('     结论（真实支持率 40.0% / PPV 49.7% / 域内 AUC 0.7074）可用。')
         print('     **限度**：两个标注者都是 LLM（不同会话），不是人类金标；')
         print('     κ 说明"任务可稳定复现"，不等于"达到了人类标注水准"。')
+    elif n_sample and n_label >= n_sample:
+        _why = ('标注者间一致性尚未测' if k is None else f'标注者间 κ={k} < 0.6')
+        print(f'  ⚠️ 本层未完成：盲判样本已判满（{n_label}/{n_sample}），但{_why}')
+        print('     ⇒ 结论只能报为"一次标注的读数"，**不能**当严格效度用。')
     else:
         print(f'  ⚠️ 本层未完成：严格效度需要人工盲判 {n_sample} 条，')
         print(f'     当前进度 {n_label}/{n_sample}。在此之前只有上列**代理证据**。')

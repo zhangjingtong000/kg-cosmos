@@ -76,16 +76,30 @@ def main():
         return 1
     files = sorted(p for p in runs.glob('*.json'))
     if not files:
-        print(f'  ⚠️ {runs.name}/ 里没有 json ⇒ **还没产出任何一次的结果**')
-        print('     （若进程还在跑，那是正常的；**跑完才会有 `<tag>.json`**）')
-        return 0
+        # ⚠️ **2026-09-20 修（守门假绿审计 §二·A9）**：原来这里 `return 0`。
+        #    本脚本的 docstring 第一句就是「`rc=0` 不等于"做了事"」，
+        #    而**零产物**时它恰恰退了 0 —— 与 `check_dom_text.py`
+        #    「**零覆盖也是失败**」的纪律直接冲突：**没有任何产物 ⇒ 什么都证明不了**。
+        #    （"进程还在跑"是合法状态，但那属于"**还没验**"，不属于"验过了"。）
+        print(f'  ❌ {runs.name}/ 里没有 json ⇒ **零产物，什么都没证明**')
+        print('     （若进程还在跑，请**等它跑完**再验；不要把这一步当通过）')
+        return 1
 
     base = runs / '_before.json'
+    has_base = base.exists()
     print(f'  找到 {len(files)} 份产物'
-          + (f' · 基线 {base.name}' if base.exists() else ' · **没有基线**'))
+          + (f' · 基线 {base.name}' if has_base else ' · **没有基线**'))
     print()
-    b = stats(base) if base.exists() else None
-    bh = sha8(base) if base.exists() else None
+    b = stats(base) if has_base else None
+    bh = sha8(base) if has_base else None
+    if not has_base:
+        # ⚠️ **2026-09-20 修（§二·A10）**：没有基线时 `same` 恒为 False，
+        #    于是**两份逐字节相同的副本**都会被标成「✓ 与基线不同（真跑了）」，
+        #    还打印「✅ 至少有一份产物与基线不同 ⇒ 真抽过」并 exit 0 ——
+        #    实测两个文件 sha 都是 `0c00579a`，结论却是"都真跑了"。
+        #    **没有基线就没有比较基准，"与基线不同"这句话根本无从成立。**
+        print('  ⚠️ **没有基线（`_before.json`）⇒ 本脚本无法回答"到底重抽了没有"。**')
+        print('     下面只列 sha 供人工比对；**不要**把这一步当"真抽过"的证据。')
     if b:
         print(f'  基线（改动前）：{b["nodes"]} 节点 / {b["edges"]} 边'
               f' · 碎片 {b["fragments"]} · sha {bh}')
@@ -101,9 +115,14 @@ def main():
             print(f'  ✗ {f.name}：读失败 {type(e).__name__}')
             continue
         h = sha8(f)
-        same = (b is not None and h == bh)
-        mark = '❗**与基线完全相同 ⇒ 那次等于没跑**' if same else '✓ 与基线不同（真跑了）'
-        if not same:
+        same = (has_base and h == bh)
+        if not has_base:
+            mark = '· 无基线 ⇒ **无法判定是否真跑过**'
+        elif same:
+            mark = '❗**与基线完全相同 ⇒ 那次等于没跑**'
+        else:
+            mark = '✓ 与基线不同（真跑了）'
+        if has_base and not same:
             ok_any = True
         print(f'  {f.name:<16}{s["nodes"]:>6} 节点 {s["edges"]:>6} 边'
               f' · 碎片 {s["fragments"]:>3} · sha {h}  {mark}')
@@ -125,6 +144,10 @@ def main():
                       '先确认两者的抽取配置是否一致。')
     print()
     print('=' * 92)
+    if not has_base:
+        print('  ⚠️ **没有基线** ⇒ 本项**不构成证据，不算通过**。')
+        print(f'     请把"改动前"的那一份放到 {base.name} 再跑本脚本。')
+        return 1
     if not ok_any:
         print('  ❌ **没有任何一份产物与基线不同** ⇒')
         print('     那意味着**这些"跑"都没有真正重新抽取** ——')

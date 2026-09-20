@@ -93,9 +93,14 @@ def main():
     m4 = re.search(r'(\d+) 个种子 · (\d+) 节点 · (\d+) 边 · (\d+) 条证据', out)
     print(f'  ④ kg ask --step --no-llm ⇒ rc={rc}')
     print(f'     {m4.group(0) if m4 else "(没读到那行)"}')
-    # **判据**：四个数都读到了，且**种子数与证据数都不为 0**
+    # **判据**：四个数都读到了，且**四个都不为 0**
     # （第一版读错键 ⇒ 打出"0 个种子 · 0 节点 · 18 条证据"这种自相矛盾）
-    ok4 = bool(rc == 0 and m4 and int(m4.group(1)) > 0 and int(m4.group(4)) > 0)
+    #
+    # ⚠️ **2026-09-20 修**：此前只断言 `group(1)`（种子）与 `group(4)`（证据），
+    #    却打印「**种子/节点/边/证据四个数都对且非零**」—— 名不副实。
+    #    守门假绿审计 §三·B6 实测：喂 `12 个种子 · 0 节点 · 0 边 · 18 条证据`
+    #    时它照样打 ✅ 并 exit 0。**印几个数就必须查几个数。**
+    ok4 = bool(rc == 0 and m4 and all(int(m4.group(i)) > 0 for i in (1, 2, 3, 4)))
     print(f'     **种子/节点/边/证据四个数都对且非零**：{"✅" if ok4 else "❌"}')
     if not ok4:
         fails.append(f'kg ask --step 不对：rc={rc} m={m4} out={out[-200:]!r}')
