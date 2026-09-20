@@ -411,6 +411,11 @@ body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
 <!-- 数据加载器必须在下面的 module 之前就位：
      module 里顶层就 `await KGData.kg(...)`，加载器没到会直接抛。 -->
 <script src="./lib/kg-api.js"></script>
+<!-- GSAP 本地库（web/lib/gsap/，UMD 版 → window.gsap）。
+     在这一页它**只做一件事**：接替裸 `requestAnimationFrame` 当渲染心跳，
+     让 3D 与后续的 DOM 动效跑在同一个时钟上（见 `animate()` 上方注释）。
+     取不到它也不会坏 —— 下面的启动分支会退回原来的自调用循环。 -->
+<script src="./lib/gsap/gsap.min.js"></script>
 
 <!-- ==KG_EXPORT_V1== -->
 <div id="kgExport" role="group" aria-label="导出当前视图">
@@ -2352,7 +2357,11 @@ let hoverNodeIdx = -1;      // 内部视图里当前悬浮的实体（供标签�
 let haloAnim = null;        // 选中光晕的放大动画状态
 let targetAnim = null;      // 视线缓动状态（选中实体时平滑对准，避免画面瞬移）
 function animate() {
-  requestAnimationFrame(animate);
+  // ⚠️ 2026-09-20：**这里原来的自调用 `requestAnimationFrame(animate)` 已移除** ——
+  //   驱动源改由下方 `animate();` 那行的启动分支给出（GSAP ticker 优先）。
+  //   为什么要换：裸 rAF 与 GSAP 的时间轴各跑各的，做滚动联动时两边不在同一帧；
+  //   `gsap.ticker` 本身就是挂在 rAF 上的全局心跳，换上之后 3D 与 DOM 同一时钟。
+  //   ⚠️ 兜底：`gsap` 取不到时下方会退回**原来的自调用循环** ⇒ 画面绝不会冻结。
   const elapsed = performance.now() * .001;
 
   // ── 星云缓慢漂移：在基准位置上叠加极慢的噪声位移 ──
@@ -2424,7 +2433,15 @@ function animate() {
   // 否则 CDP 会在概览层就截图，拿到的不是内部视图。
   if (!_firstFrame) { _firstFrame = true; if (!PRE_C) window.__ready = true; }
 }
-animate();
+// ── 启动渲染循环（2026-09-20 改）───────────────────────────────────────────
+// 驱动源二选一：GSAP ticker 优先；取不到就退回裸 rAF。
+// ⚠️ 兜底分支的行为与改动前**逐字一致**（自调用 + 手动调一次 animate），
+//    所以即使 gsap.min.js 加载失败，也只是"没有动效"，不会白屏或冻结。
+if (window.gsap && window.gsap.ticker) {
+  window.gsap.ticker.add(animate);
+} else {
+  (function loop() { requestAnimationFrame(loop); animate(); })();
+}
 
 // ── 直接进入某个社区：web/kg-nebula.html?c=0 ──
 // 用于分享具体社区，也便于自动化截图验证内部视图。
