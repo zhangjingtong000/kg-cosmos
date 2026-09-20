@@ -495,7 +495,9 @@ function render() {
     ['已入库', c.in_graph], ['上传图', c.uploaded_graphs],
     ['上传任务', c.upload_tasks], ['传过但没成', c.upload_failed_no_graph],
   ].map(([k, v]) => `<div class="kpi"><div class="k">${k}</div>
-    <div class="v">${v ?? '—'}</div></div>`).join('');
+    <div class="v" data-live>${v ?? '—'}</div></div>`).join('');
+  // 数字滚动的真值仍在上面这行写下的文本里，动画只画在克隆层上（见 lib/live-numbers.js）
+  if (window.LiveNumbers) LiveNumbers.scan(document.getElementById('kpis'));
 
   // ── ★ 论文清单（按语言分组，2026-09-19 加）──
   renderInventory();
@@ -689,6 +691,7 @@ function boot() {
 boot();
 </script>
 <script src="./lib/motion.js"></script>
+<script src="./lib/live-numbers.js"></script>
 <script src="./lib/guide.js"></script>
 </body>
 </html>
