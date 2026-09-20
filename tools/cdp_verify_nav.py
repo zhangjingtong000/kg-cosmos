@@ -235,6 +235,62 @@ def main():
         ev(ws, 'scrollTo(0, 0)')
         time.sleep(1.2)
 
+        # 2b-2. 点击涟漪（2026-09-20 加）。
+        #
+        # **为什么必须补这一条**：这里原先**完全没有覆盖点击涟漪** ——
+        # 全仓库 `grep -r "ripple|spawnRipple|u_r"` 只命中 `web/lib/voyage.js`，
+        # 本脚本上面的量/帧/u_t 三个断言一个都碰不到它。
+        # 后果是实测出来的：有人给涟漪的"年龄"套了一层 `expo.out`，
+        # 以为那是"快速荡开、缓慢停下"，但 shader 的亮度项是 `exp(-1.8 * z)`
+        # —— **年龄同时是半径与亮度的自变量**，于是"扩得快"等于"灭得快"：
+        # 同一时刻亮度只剩 1/4.8、环在约 0.15 秒就撞到屏幕内切圆、全程约 12 帧。
+        # 弱了 4.8 倍，而**没有任何测试会红**，只能靠用户肉眼发现。
+        #
+        # 判据（不看像素，只看 GSAP 写进 `r.age` 的数）：
+        #   ① 点下去必须真的产生 1 个涟漪；
+        #   ② 年龄必须**单调递增**；
+        #   ③ 年龄推进速率必须落在合理区间 —— 这一条正是"前段压缩型缓动"的捕手：
+        #      线性 2.2/3.6s = 0.611/s；expo.out 之类会在 0.2 秒内冲到 1.0+/s。
+        #      这里取 [0.35, 0.95]：低于 0.35 说明慢到"看不见在动"，
+        #      高于 0.95 说明又把年龄压缩到前段了。
+        ev(ws, """window.dispatchEvent(new PointerEvent('pointerdown',
+          {clientX: Math.round(innerWidth*0.5), clientY: Math.round(innerHeight*0.55),
+           bubbles: true}))""")
+        time.sleep(1.2)
+        rip = ev(ws, """(() => {
+          if (typeof window.__voyageRipple !== 'function') return { hook: false };
+          const a = window.__voyageRipple();
+          return { hook: true, n: a.filter(Boolean).length, sample: a.find(Boolean) || null };
+        })()""")
+        time.sleep(1.2)
+        rip2 = ev(ws, """(() => {
+          const a = window.__voyageRipple();
+          const r = a.find(Boolean);
+          return r ? { age: r.age, amp: r.amp } : null;
+        })()""")
+        if not rip or not rip.get('hook'):
+            fails.append('window.__voyageRipple 不存在 —— voyage.js 未暴露只读涟漪快照'
+                         '（没有它就无法测"点击真的产生了涟漪"）')
+        elif rip['n'] < 1 or not rip.get('sample'):
+            fails.append('点击后没有产生涟漪（spawnRipple 没跑，或 MOTION_OFF 被误判）')
+        elif not rip2:
+            fails.append('涟漪在 1.2 秒后就消失了 —— 生命周期不对')
+        else:
+            age1 = float(rip['sample']['age'])
+            age2 = float(rip2['age'])
+            rate = (age2 - age1) / 1.2 if age2 > age1 else 0.0
+            print(f'[2b-2] 点击涟漪: 数量={rip["n"]} · 年龄 {age1:.3f} → {age2:.3f} '
+                  f'(速率 {rate:.3f}/s · 期望 0.611) · 强度={rip["sample"]["amp"]:.2f}')
+            if age2 <= age1:
+                fails.append(f'涟漪年龄没有推进（{age1:.3f} → {age2:.3f}）'
+                             '—— 年龄若停住，点击处会留一个永不消失的静止亮斑')
+            elif not 0.35 <= rate <= 0.95:
+                fails.append(f'涟漪年龄推进速率 {rate:.3f}/s 不在 [0.35, 0.95] 内'
+                             '（期望 0.611）：太低=慢到看不出在动，'
+                             '太高=又把年龄压缩到前段（expo.out 那类缓动会让环"扩得快、灭得快"）')
+            else:
+                print('    ✅ 涟漪真的产生了，且年龄按线性推进（没有前段压缩）')
+
         # 2c. 新交互回归：键盘 ↓ 跳到下一章；进度点点击跳到对应章节
         ev(ws, """document.body.dispatchEvent(new KeyboardEvent('keydown',
           {key: 'ArrowDown', bubbles: true, cancelable: true}))""")

@@ -47,9 +47,15 @@
 
   /* ① 尊重「减少动效」偏好：直接不启动。
         a11y.css / design.css 的降级规则只盖得住 CSS transition / animation，
-        盖不住 JS 改 opacity，所以这里必须自己判一次。 */
+        盖不住 JS 改 opacity，所以这里必须自己判一次。
+        ★ 例外：地址上显式写了 `?motion=force` 就照做 —— 用来二分
+          "代码没生效" 与 "偏好按设计把动效关掉了"（两者在页面上看起来一样）。 */
   try {
-    if (win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var FORCE = /[?&]motion=force\b/.test(win.location.search);
+    if (!FORCE && win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    /* 强制模式下给 <html> 挂个类，让 motion.css 的降级分支整体让路
+       （否则 CSS 那条 opacity:1 !important 会把淡入直接抹平 —— JS 放了、CSS 没放）。 */
+    if (FORCE) doc.documentElement.classList.add('mo-force');
   } catch (e) {
     return;
   }

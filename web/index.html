@@ -135,10 +135,16 @@ h3 { font-weight: 600; }
    "能"字（孤字）。放开该限制，让它在 60px 下仍是一行。 */
 #ch-3 h2{max-width:none}
 .entries.flow .entry{display:block;padding:22px 0 20px;border-bottom:0}
+/* ★ 卡片顶部那 2px 暖金线 = **"轴"的可见载体**（2026-09-20 补做）。
+   `transform:scaleX(var(--rail,0))` —— `--rail` 由 GSAP 随滚动补间 0→1：
+   6 张卡各画一段、连起来就是一条**横贯整行的轨道**，滚动时从左向右生长。
+   ⚠️ 之前这一版把它跳过了（GSAP 不能直接补间伪元素），于是"轴"没有任何可见载体，
+   用户滚完只看到"和原来一模一样" —— 这一条是那次返工的根因，不能再省。
+   hover 那条规则（选择器更具体）照旧生效：鼠标进去时整段立刻画满。 */
 .entries.flow .entry::after{
   content:"";position:absolute;left:0;right:0;top:-1px;height:2px;
   background:linear-gradient(90deg,var(--accent),rgba(224,164,105,.08));
-  transform:scaleX(0);transform-origin:left;
+  transform:scaleX(var(--rail,0));transform-origin:left;
   transition:transform .65s cubic-bezier(.19,1,.22,1);
 }
 .entries.flow .entry:hover{padding-left:0}
@@ -157,6 +163,14 @@ h3 { font-weight: 600; }
 /* 下层：不在动线上的 6 项。刻意压到"一眼扫过"的权重 ——
    说明缩短但不删空（保留关键数字与限定语），序号退回索引大小。 */
 .more{margin-top:44px;padding-top:22px;border-top:1px solid var(--line)}
+/* 下层那条轴：也是一条轨道，但更暗、1px（这 6 项刻意不在动线上）。
+   它正好压在下层 `.more` 的 1px 分隔线上，6 段连起来同样是一条横贯的线。 */
+.more-list .entry::after{
+  content:"";position:absolute;left:0;right:0;top:-1px;height:1px;
+  background:linear-gradient(90deg,rgba(224,164,105,.55),rgba(224,164,105,.04));
+  transform:scaleX(var(--rail,0));transform-origin:left;
+  transition:transform .65s cubic-bezier(.19,1,.22,1);
+}
 .more-list{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0 26px}
 .more-list .entry{
   display:block;padding:12px 0 14px;border-bottom:0;opacity:.7;
@@ -231,16 +245,27 @@ html.js-motion #intro-veil{
   display:block;position:fixed;inset:0;z-index:99999;pointer-events:none;
   background:#070c13;clip-path:circle(150% at 50% 48%);
 }
-/* ── 两条"轴"（2026-09-20，GSAP + ScrollTrigger）────────────────────────
+/* ── 两条"轴"（2026-09-20 重做，GSAP + ScrollTrigger）────────────────────
    第 4 屏（#ch-3）的上下两层本来就是两块 6 列网格（不是列表）。
-   所以这里**不改布局**，只给它加"轴"的运动方式：卡片**依次滑入**，
+   所以这里**不改布局**，只给它加"轴"的运动方式：卡片**沿轨道依次推进**，
    上层（六步演示动线）先动、下层（另有 6 项功能）跟随 ——
    两层各自是一条轴，对应"在动线上 / 不在动线上"这层语义
    （见本文件下方那段注释：「下层：另有 6 项功能。**刻意不在动线上**」）。
+
+   ★ 第一版做过、被用户当场否掉的两点，都在这条注释里留档：
+     ① 用 `once: true`（播一次就结束）⇒ 滚完**不留任何痕迹**，
+        静态看与没有动效**完全一样** ⇒ 用户看到的就是"一点没变"。
+        现在改成 `scrub`：动画**绑定滚动位置**，往下滚轴推进、往回滚轴退回、
+        停在中间就停在中间 —— "跟轴似的滚动"说的就是这个。
+     ② 两条"轴"当时**没有任何可见载体**（轨道线被跳过了）。
+        现在由卡片顶部那 2px / 1px 暖金线（`--rail`）承担：
+        6 段连起来是一条横贯整行的轨道，随滚动从左向右生长。
+
    ⚠️ 初始态只在 `html.js-motion` 下生效；`bail()` 会摘掉它
-   ⇒ 无动效/减少动效/gsap 缺失时，版面与改动前**逐像素一致**。 */
+   ⇒ 无动效/减少动效/gsap 缺失时，版面与改动前**逐像素一致**
+   （`--rail` 取 `var()` 的兜底值 0，与改动前 `scaleX(0)` 同值，hover 行为不变）。 */
 html.js-motion #ch-3 .entries.flow .entry,
-html.js-motion #ch-3 .more-list .entry{opacity:0;transform:translateY(26px)}
+html.js-motion #ch-3 .more-list .entry{opacity:0;transform:translateY(42px)}
 </style>
 <script>
 /* 首屏动效的"防闪"开关：在 body 渲染之前**同步**加上 js-motion，
@@ -578,6 +603,10 @@ document.documentElement.classList.add('js-motion');
    ⇒ **动效失败时的表现是"没有动效"，而不是"白屏"或"元素消失"。** */
 (function () {
   var root = document.documentElement;
+  // ★ `?motion=force`：显式忽略"减少动效"偏好，用来二分
+  //   "代码没生效" 与 "偏好把动效按设计关掉了"（两者在页面上看起来一模一样）。
+  //   普通访问仍然尊重偏好。
+  var FORCE = /[?&]motion=force\b/.test(location.search);
   var splits = [];      // SplitText 会改写 DOM，失败时必须还原，否则标题永远是拆散状态
   function bail(why) {
     root.classList.remove('js-motion');
@@ -588,8 +617,8 @@ document.documentElement.classList.add('js-motion');
   }
   if (!window.gsap) { bail('gsap 未加载'); return; }
   if (!window.SplitText) { bail('SplitText 未加载'); return; }
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    bail('用户要求减少动效'); return;
+  if (!FORCE && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    bail('用户要求减少动效（要强制看效果就在地址后加 ?motion=force）'); return;
   }
   try {
     var H = document.getElementById('ch-0');
@@ -650,24 +679,35 @@ document.documentElement.classList.add('js-motion');
       .to(cta, { opacity: 1, y: 0, duration: 0.5, stagger: 0.09 }, 1.18)
       .to(cue, { opacity: 1, duration: 0.5 }, 1.5);
 
-    // ── 两条"轴"：滚到第 4 屏时，卡片沿轨道依次滑入（2026-09-20）─────────
-    // 上层（六步演示动线）先动、下层（另有 6 项功能）跟随 —— 两层各自是一条轴，
-    // 对应"在动线上 / 不在动线上"这层语义（见本文件那段注释）。
-    // ⚠️ 下层的常态是 `opacity:.7`（权重刻意压低），所以动画要停在 **.7**，不是 1；
-    //    停在 1 会把上下两层的视觉层次抹平。
-    // ⚠️ `once: true`：只演一次。演示时反复上下滚，不该每次都重播一遍。
+    // ── 两条"轴"：**绑定滚动位置**的轨道（2026-09-20 重做）─────────────────
+    // 与第一版的差别（第一版被用户当场否掉，原因照录）：
+    //   · 第一版 `once: true` ⇒ 只演一次、结束即无痕，滚完与没有动效一模一样，
+    //     用户的原话是「为什么我这边看着还是原来的模样，一模一样，一点没变」；
+    //   · 第一版还跳过了轨道线 ⇒ "轴"根本没有可见载体。
+    // 现在：`scrub` 把动画**绑到滚动位置**（往下滚推进、往回滚退回、停下就停住），
+    //       同时补间 `--rail`，让卡片顶部那条暖金线随滚动从左向右生长 ——
+    //       6 段连起来就是一条横贯整行的"轴"。
+    // ⚠️ `ease:'none'`：scrub 下缓动会被滚动位置反复重定向，用 none 才跟手。
+    // ⚠️ 下层停在 **0.7**（它的常态权重），停在 1 会把上下两层的层次抹平。
+    // ⚠️ 上层的 scrub 区间比下层早 8% 起跑 ⇒ 仍然是"上层先动、下层跟随"，
+    //    但两条轴在**同一段滚动里同时推进**，不是接力（两轴整体只差 0.14s 的旧结论
+    //    是在 once 版下测的；scrub 版由滚动位置直接决定，天然同步）。
     if (window.ScrollTrigger) {
       gsap.registerPlugin(window.ScrollTrigger);
       [
-        { sel: '#ch-3 .entries.flow .entry', to: 1, delay: 0 },
-        { sel: '#ch-3 .more-list .entry', to: 0.7, delay: 0.14 }
+        { sel: '#ch-3 .entries.flow .entry', to: 1, start: 'top 88%', end: 'bottom 62%' },
+        { sel: '#ch-3 .more-list .entry', to: 0.7, start: 'top 80%', end: 'bottom 62%' }
       ].forEach(function (ax) {
         var els = document.querySelectorAll(ax.sel);
         if (!els.length) return;
         gsap.to(els, {
-          opacity: ax.to, y: 0, duration: 0.62, ease: 'power3.out',
-          stagger: 0.075, delay: ax.delay,
-          scrollTrigger: { trigger: '#ch-3', start: 'top 74%', once: true }
+          opacity: ax.to, y: 0, '--rail': 1,
+          ease: 'none', stagger: 0.075,
+          scrollTrigger: {
+            trigger: '#ch-3',
+            start: ax.start, end: ax.end,
+            scrub: 0.45            // 0.45s 追帧：跟手但不抖
+          }
         });
       });
     }

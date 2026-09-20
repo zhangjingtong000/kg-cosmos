@@ -52,13 +52,18 @@
    三页不引任何外部样式表，papers / paper-table / stance 只引 design.css。
    所以降级分支必须自带，而且要比 CSS transition 更强：这里用 !important，
    因为 JS 逐帧改 opacity 时 a11y.css 的 transition-duration 是拦不住的
-   （motion.js 自己也判了一次 matchMedia，这里是双保险）。 */
+   （motion.js 自己也判了一次 matchMedia，这里是双保险）。
+
+   ★ `html.mo-force` 例外：地址上带 `?motion=force` 时，motion.js 会给 <html>
+     加这个类，让整套降级**整体让路**。它只用于诊断
+     「代码没生效」与「偏好按设计把动效关掉」这两种在页面上看起来一样的情况。
+     普通访问永远拿不到这个类。 */
 @media (prefers-reduced-motion: reduce) {
-  .mo-enter {
+  html:not(.mo-force) .mo-enter {
     animation: none;
   }
-  .mo,
-  .mo.mo-in {
+  html:not(.mo-force) .mo,
+  html:not(.mo-force) .mo.mo-in {
     opacity: 1 !important;
     transition: none !important;
   }

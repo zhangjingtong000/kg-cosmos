@@ -25,11 +25,21 @@
      · targetP/curP 阻尼：滚动停下后画面继续飘一会儿；
      · userMoved 吸附：加载/浏览器恢复滚动位置时背景直接落在正确位置，
        不从 0 重播（用户报过这个 bug）；
-     · REDUCED：prefers-reduced-motion 时时间冻结、只随滚动重绘；
+     · MOTION_OFF（= `prefers-reduced-motion` 且没带 `?motion=force`）：
+       时间冻结、只随滚动重绘，不做视差、不生成涟漪；
      · #veil/#grade/#noise/#grain：文字区遮罩、色调、颗粒，保证正文可读。
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ★ 诊断开关 `?motion=force`：显式忽略"减少动效"偏好。
+   为什么要它：用户反馈"动效一点没变"，而最可能的原因恰恰是这个系统偏好 ——
+   它会让动效**按设计安静关掉**，页面上看不出任何异常，
+   于是人一直在怀疑"代码是不是没生效"。带上这个参数就能当场二分：
+   有动效 ⇒ 代码是好的、是偏好关掉的；仍没有 ⇒ 才是代码问题。
+   ⚠️ 只在**显式带参数**时生效；普通访问照旧尊重偏好。
+   ⚠️ `MOTION_OFF` 才是下面各处"要不要抑制动效"的唯一判据。 */
+const FORCE_MOTION = /[?&]motion=force\b/.test(location.search);
+const MOTION_OFF = REDUCED && !FORCE_MOTION;
 const stage  = document.getElementById('stage');
 const canvas = document.getElementById('voyageCanvas');
 const reel   = document.getElementById('reel');
@@ -274,10 +284,10 @@ function tick(now) {
      缺了这个判断，迟到的 scroll 事件会让 curP 从 0 阻尼爬升——
      用户看到的就是"整段背景被重播一遍"。 */
   if (!userMoved) { curP = targetP; }
-  else { curP += (targetP - curP) * (REDUCED ? 1 : Math.min(1, dt * 3.4)); }
+  else { curP += (targetP - curP) * (MOTION_OFF ? 1 : Math.min(1, dt * 3.4)); }
   const p = curP;
 
-  if (!REDUCED) {
+  if (!MOTION_OFF) {
     /* 视差阻尼跟随：比硬跟多一层"重量感" */
     sx += (mx - sx) * Math.min(1, dt * 4.2);
     sy += (my - sy) * Math.min(1, dt * 4.2);
@@ -305,7 +315,7 @@ function tick(now) {
       gl.viewport(0, 0, canvas.width, canvas.height);
       needResize = false;
     }
-    if (!REDUCED) {
+    if (!MOTION_OFF) {
       drawFrame(p, (now - t0) / 1000);
     } else if (Math.abs(p - drawnP) > 0.0008 || drawnP < 0) {
       drawFrame(p, 0);              /* 减少动效：时间冻结，只随滚动重绘 */
@@ -359,7 +369,7 @@ function rippleUniforms(nowSec) {
 }
 
 function spawnRipple(clientX, clientY) {
-  if (REDUCED) return;
+  if (MOTION_OFF) return;
   const m = Math.min(innerWidth, innerHeight);
   const slot = ripples.findIndex(r => !r || (now4() - r.t0) > 2.2);
   const i = slot === -1 ? 0 : slot;
@@ -375,21 +385,53 @@ function spawnRipple(clientX, clientY) {
   };
   ripples[i] = r;
   if (window.gsap) {
-    // 波纹"快速荡开、缓慢停下"（expo.out）；强度在 0.55s 后开始淡出，
-    // 让环是**淡掉**的而不是到点被硬切。
-    r._tw = window.gsap.timeline()
-      .to(r, { age: 2.2, duration: 2.2, ease: 'expo.out' }, 0)
-      .to(r, { amp: 0, duration: 1.65, ease: 'power2.in' }, 0.55);
+    /* ★ 2026-09-20 修正（用户反馈"点击没效果"，以下是复核结论，别再改回去）：
+       上一版是 `.to(r,{age:2.2,duration:2.2,ease:'expo.out'})` +
+       `.to(r,{amp:0,duration:1.65,ease:'power2.in'},0.55)`。**这是错的**，
+       根因在 shader 里（本文件 shader 那段，`ring` 那一行）：
+
+           ring = exp(-28*abs(dd - z*0.55)) * exp(-1.8*z) * w
+
+       ⇒ **年龄 z 同时是"环的半径"和"亮度衰减"的自变量**，两者被绑死。
+       于是"扩散更快"必然等于"变暗更快"：
+         · expo.out 在 0.22s 就把 z 推到 1.09（线性才 0.22），
+           而 exp(-1.8×1.09)=0.14 vs exp(-1.8×0.22)=0.67
+           ⇒ 同一时刻亮度只剩约 1/4.8；
+         · 环在约 0.15s 就撞到屏幕内切圆（可见行程只有 z:0→0.91）、
+           全程约 12 帧 ⇒ 肉眼看到的是"贴边极快地微闪一下"，而不是"荡开一圈"。
+       所以这里改回**线性推进**，并把时长从 2.2s 拉到 3.6s：
+         · z 以 0.61/s 稳定增长 ⇒ 环在屏幕内的可见行程约 1.5 秒；
+         · 同时**去掉 amp 的二次淡出** —— 它叠在 shader 的亮度衰减上就是"双重变暗"，
+           而 z 到 2.2 时 shader 自己已衰减到接近不可见，不需要再补一刀。
+       ⚠️ **绝不要在这个 age 上用前段压缩型缓动**（expo.out / power4.out / back.out）
+          —— 它们每一个都会原样重现上面那个 bug。真要"快速荡开 + 亮得久"，
+          必须先把 shader 里的半径与亮度解耦（两个独立的量），那是另一件事。 */
+    r._tw = window.gsap.to(r, { age: 2.2, duration: 3.6, ease: 'none' });
   } else {
     r.age = undefined;   // 兜底：走 rippleUniforms 里的线性分支
   }
 }
 
+/* ── 只读探针钩子 ──────────────────────────────────────────────────────────
+   为什么必须有它：这次涟漪被改弱了约 4.8 倍，而**全仓库没有任何测试覆盖涟漪**
+   （`grep -r "ripple|spawnRipple|u_r"` 只命中本文件）⇒
+   `tools/cdp_verify_nav.py` 的量、帧、u_t 那些断言一个都碰不到它，
+   于是只能靠用户肉眼发现。暴露一个纯读快照，守门就能测"点击真的产生了涟漪、
+   年龄真的在按线性推进"，从而把"前段压缩型缓动"这类回归挡在门外。
+   ⚠️ 它不改变任何行为，只返回一份拷贝；age/amp 用与 rippleUniforms 同一套取值规则。 */
+window.__voyageRipple = function () {
+  return ripples.map(r => r ? {
+    x: r.x, y: r.y,
+    age: (r.age !== undefined) ? r.age : (now4() - r.t0),
+    amp: (r.amp !== undefined) ? r.amp : r.s,
+  } : null);
+};
+
 /* ── 事件 ───────────────────────────────────────────────────────────────── */
 addEventListener('scroll', readScroll, { passive: true });
 addEventListener('resize', () => { readScroll(); sizeCanvas(); });
 addEventListener('pointermove', e => {
-  if (REDUCED) return;              /* 减少动效：不要视差 */
+  if (MOTION_OFF) return;              /* 减少动效：不要视差 */
   mx = (e.clientX / innerWidth - 0.5) * 2;
   my = (e.clientY / innerHeight - 0.5) * 2;
 }, { passive: true });
@@ -400,7 +442,7 @@ addEventListener('pointermove', e => {
 /* 点击涟漪：任意处点一下，光场里荡开一圈柔环 */
 addEventListener('pointerdown', e => spawnRipple(e.clientX, e.clientY), { passive: true });
 /* 悬停可交互元素：提灯增亮变暖（悬停/离开，配合阻尼） */
-if (!REDUCED) {
+if (!MOTION_OFF) {
   ['.btn', '.entry', '#rail .dot'].forEach(sel =>
     document.querySelectorAll(sel).forEach(el => {
       el.addEventListener('pointerenter', () => { boostTarget = 1; });
@@ -446,7 +488,7 @@ chs.forEach(c => cio.observe(c));
 function goChapter(i) {
   i = Math.max(0, Math.min(chs.length - 1, i));
   const c = chs[i];
-  if (c) scrollTo({ top: c.offsetTop, behavior: REDUCED ? 'auto' : 'smooth' });
+  if (c) scrollTo({ top: c.offsetTop, behavior: MOTION_OFF ? 'auto' : 'smooth' });
 }
 dots.forEach(d => d.addEventListener('click', () => goChapter(+d.dataset.i)));
 
@@ -484,7 +526,7 @@ function countUp(el) {
   })();
 }
 const nums = [...document.querySelectorAll('[data-count]')];
-if (REDUCED) {
+if (MOTION_OFF) {
   nums.forEach(el => {
     const to = parseFloat(el.dataset.count);
     const dec = parseInt(el.dataset.dec || '0', 10);
@@ -498,7 +540,7 @@ if (REDUCED) {
   }, { threshold: 0.4 });
   nums.forEach(el => nio.observe(el));
 }
-if (REDUCED) document.querySelectorAll('.ch').forEach(c => c.classList.add('seen'));
+if (MOTION_OFF) document.querySelectorAll('.ch').forEach(c => c.classList.add('seen'));
 
 /* ── 页面上的数据规模 ───────────────────────────────────────────────────── */
 fetch('./kg-data/nebula.json')
