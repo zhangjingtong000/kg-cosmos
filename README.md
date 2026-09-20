@@ -273,7 +273,7 @@ Louvain 在**当前 20785 节点口径**下检出 **60** 个社区（`nebula.jso
 
 ```bash
 python -m pytest tests -q          # 单元测试（2026-09-19 实时 collect：420 条；通过/跳过/失败数以实跑为准）
-python tools/verify_all.py --fast  # 全量回归 64 项
+python tools/verify_all.py --fast  # 全量回归 65 项
 powershell -File tools/check.ps1   # 一次跑完：语法 + 本体一致性 + 文档数字 + pytest + 回归
 ```
 
