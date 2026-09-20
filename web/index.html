@@ -231,6 +231,16 @@ html.js-motion #intro-veil{
   display:block;position:fixed;inset:0;z-index:99999;pointer-events:none;
   background:#070c13;clip-path:circle(150% at 50% 48%);
 }
+/* ── 两条"轴"（2026-09-20，GSAP + ScrollTrigger）────────────────────────
+   第 4 屏（#ch-3）的上下两层本来就是两块 6 列网格（不是列表）。
+   所以这里**不改布局**，只给它加"轴"的运动方式：卡片**依次滑入**，
+   上层（六步演示动线）先动、下层（另有 6 项功能）跟随 ——
+   两层各自是一条轴，对应"在动线上 / 不在动线上"这层语义
+   （见本文件下方那段注释：「下层：另有 6 项功能。**刻意不在动线上**」）。
+   ⚠️ 初始态只在 `html.js-motion` 下生效；`bail()` 会摘掉它
+   ⇒ 无动效/减少动效/gsap 缺失时，版面与改动前**逐像素一致**。 */
+html.js-motion #ch-3 .entries.flow .entry,
+html.js-motion #ch-3 .more-list .entry{opacity:0;transform:translateY(26px)}
 </style>
 <script>
 /* 首屏动效的"防闪"开关：在 body 渲染之前**同步**加上 js-motion，
@@ -552,6 +562,9 @@ document.documentElement.classList.add('js-motion');
      兜底救了场（没白屏），可"没坏"不等于"接对了" —— 所以下面那段
      校验 DOM 的只读探针值得留着。 -->
 <script src="./lib/gsap/SplitText.min.js"></script>
+<!-- ScrollTrigger 也是独立插件，同样必须单独引入（2026-09-20：
+     刚在 SplitText 上踩过一次"忘了引"⇒ 整段动效静默失效，页面却看不出坏）。 -->
+<script src="./lib/gsap/ScrollTrigger.min.js"></script>
 <script type="module">
 /* 首屏入场编排（2026-09-20）。
    放在 voyage.js **之后**：那个 module 会先填充 #liveFacts 并启动数字计数，
@@ -636,6 +649,28 @@ document.documentElement.classList.add('js-motion');
       .to(edge, { opacity: 1, y: 0, duration: 0.6 }, 1.04)
       .to(cta, { opacity: 1, y: 0, duration: 0.5, stagger: 0.09 }, 1.18)
       .to(cue, { opacity: 1, duration: 0.5 }, 1.5);
+
+    // ── 两条"轴"：滚到第 4 屏时，卡片沿轨道依次滑入（2026-09-20）─────────
+    // 上层（六步演示动线）先动、下层（另有 6 项功能）跟随 —— 两层各自是一条轴，
+    // 对应"在动线上 / 不在动线上"这层语义（见本文件那段注释）。
+    // ⚠️ 下层的常态是 `opacity:.7`（权重刻意压低），所以动画要停在 **.7**，不是 1；
+    //    停在 1 会把上下两层的视觉层次抹平。
+    // ⚠️ `once: true`：只演一次。演示时反复上下滚，不该每次都重播一遍。
+    if (window.ScrollTrigger) {
+      gsap.registerPlugin(window.ScrollTrigger);
+      [
+        { sel: '#ch-3 .entries.flow .entry', to: 1, delay: 0 },
+        { sel: '#ch-3 .more-list .entry', to: 0.7, delay: 0.14 }
+      ].forEach(function (ax) {
+        var els = document.querySelectorAll(ax.sel);
+        if (!els.length) return;
+        gsap.to(els, {
+          opacity: ax.to, y: 0, duration: 0.62, ease: 'power3.out',
+          stagger: 0.075, delay: ax.delay,
+          scrollTrigger: { trigger: '#ch-3', start: 'top 74%', once: true }
+        });
+      });
+    }
   } catch (e) { bail('抛错 ' + e); }
 })();
 </script>
