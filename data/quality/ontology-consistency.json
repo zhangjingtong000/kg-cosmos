@@ -1,0 +1,142 @@
+{
+  "source": "src/ontology.py",
+  "entity_types": [
+    "Artifact",
+    "Component",
+    "Concept",
+    "Dataset",
+    "Document",
+    "Event",
+    "Location",
+    "Material",
+    "Method",
+    "Metric",
+    "Organization",
+    "Person",
+    "Process",
+    "System",
+    "Tool"
+  ],
+  "relation_types": [
+    "APPLIES_TO",
+    "CAUSES",
+    "CITES",
+    "COMPARES_WITH",
+    "CONTRADICTS",
+    "CREATED_BY",
+    "ENABLES",
+    "EVALUATES",
+    "LOCATED_AT",
+    "MEASURES",
+    "PART_OF",
+    "PRODUCES",
+    "PUBLISHED_IN",
+    "RELATED_TO",
+    "SUPPORTS",
+    "USES"
+  ],
+  "derived_labels": [
+    "Unknown"
+  ],
+  "allowed_labels": [
+    "Artifact",
+    "Component",
+    "Concept",
+    "Dataset",
+    "Document",
+    "Event",
+    "Location",
+    "Material",
+    "Method",
+    "Metric",
+    "Organization",
+    "Person",
+    "Process",
+    "System",
+    "Tool",
+    "Unknown"
+  ],
+  "checks": [
+    {
+      "label": "关系类型 tools/sync_graph.py",
+      "status": "ok(字面量一致)",
+      "path": "tools/sync_graph.py"
+    },
+    {
+      "label": "关系类型 tools/l5_ontology_audit.py",
+      "status": "ok(引用 ontology)",
+      "path": "tools/l5_ontology_audit.py"
+    },
+    {
+      "label": "关系类型 tools/l5_report.py",
+      "status": "ok(引用 ontology)",
+      "path": "tools/l5_report.py"
+    },
+    {
+      "label": "关系类型 src/graph_store.py",
+      "status": "ok(字面量一致)",
+      "path": "src/graph_store.py"
+    },
+    {
+      "label": "实体类型 src/graph_store.py",
+      "status": "ok(字面量一致)",
+      "path": "src/graph_store.py"
+    },
+    {
+      "label": "实体类型 tools/sync_graph.py",
+      "status": "ok(字面量一致)",
+      "path": "tools/sync_graph.py"
+    },
+    {
+      "label": "实体类型 tools/l8_structure_audit.py",
+      "status": "ok(引用 ontology)",
+      "path": "tools/l8_structure_audit.py"
+    },
+    {
+      "label": "派生标签 src/graph_store.py",
+      "status": "ok",
+      "path": "src/graph_store.py"
+    },
+    {
+      "label": "派生标签 tools/sync_graph.py",
+      "status": "ok",
+      "path": "tools/sync_graph.py"
+    },
+    {
+      "label": "L7 端点约束 tools/l7_direction_verify.py",
+      "status": "ok(引用 ontology)",
+      "path": "tools/l7_direction_verify.py"
+    },
+    {
+      "label": "THRESHOLD",
+      "status": "ok(无硬编码)",
+      "path": "tools/relation_verifier.py"
+    },
+    {
+      "label": "THRESHOLD",
+      "status": "ok(无硬编码)",
+      "path": "tools/l5_report.py"
+    },
+    {
+      "label": "对称关系 tools/verify_direction.py",
+      "status": "ok(字面量一致)",
+      "path": "tools/verify_direction.py"
+    },
+    {
+      "label": "假设句模板 tools/relation_verifier.py",
+      "status": "ok(字面量一致)",
+      "path": "tools/relation_verifier.py"
+    },
+    {
+      "label": "假设句模板 tools/verify_direction.py",
+      "status": "ok(字面量一致)",
+      "path": "tools/verify_direction.py"
+    },
+    {
+      "label": "L7 端点类型约束表（16 类）",
+      "status": "ok(自检通过)",
+      "path": "src/ontology.py"
+    }
+  ],
+  "failures": []
+}

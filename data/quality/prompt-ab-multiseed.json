@@ -1,0 +1,50 @@
+{
+ "generated": "2026-09-19 12:27:25",
+ "purpose": "B5：prompt A/B 多 seed —— 把 −4.5pp 拆成真效应与 seed 噪声",
+ "subject": "2012.00456v1（**该篇有金标**，这是能算 F1 的原因）",
+ "design": {
+  "why": "单次实验分不清\"效应\"与\"噪声\"：TODO 自己写着「只有一篇、未做多 seed，−4.5pp 里有多少是真效应分不出来」。**本脚本就是去分那 4.5pp**：看两个区间是否重叠。",
+  "reuses_pipeline": "抽取复用 `tools/ingest_corpus.py` / `src/pipeline.py`（**同一条路径**），**不重写抽取** —— 否则 A/B 比的就不是 prompt 了。",
+  "seed_caveat": "⚠️ **Ollama 是否真的支持 seed 取决于版本**。若它忽略 seed，那\"多 seed\"实际只是**重复采样** —— **方差仍然可测**（那正是我们要的），但**不能声称\"复现了同一 seed\"**。",
+  "cost": "实测 **36 分钟/次**（`B3_SCIREX_RELATION_RESULT.md:151`），2 次 ≈ **72 分钟**，且**独占 GPU 与 Ollama**"
+ },
+ "baseline_one_shot": {
+  "old": {
+   "entity_f1": 0.3918,
+   "relation_f1": 0.0128,
+   "fragments": 24,
+   "source": "OPTIMIZATION_PLAN.md（旧 prompt，1 次）"
+  },
+  "new": {
+   "entity_f1": 0.3471,
+   "relation_f1": 0.0178,
+   "fragments": 10,
+   "source": "OPTIMIZATION_PLAN.md（新 prompt，1 次）"
+  }
+ },
+ "runs": [
+  {
+   "variant": "new",
+   "seed": 1,
+   "rc": 0,
+   "seconds": 2224.7,
+   "tag": "new-s1",
+   "nodes": 553,
+   "artifact": "data\\quality\\_prompt-ab-runs\\new-s1.json"
+  },
+  {
+   "variant": "new",
+   "seed": 2,
+   "rc": 0,
+   "seconds": 1969.5,
+   "tag": "new-s2",
+   "nodes": 575,
+   "artifact": "data\\quality\\_prompt-ab-runs\\new-s2.json"
+  }
+ ],
+ "summary": {
+  "n_runs": 2,
+  "note": "F1 的均值与方差需要**从各次产物重算** —— 用 `tools/l5_report.py` 与碎片计数脚本，**本脚本只负责\"跑出多次\"，不自己造一套指标口径**"
+ },
+ "elapsed_s": 4194.2
+}

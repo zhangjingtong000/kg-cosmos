@@ -1,0 +1,146 @@
+{
+  "sample": 960,
+  "per_type": 80,
+  "P1_mean_delta": 0.1183,
+  "P1_delta_positive_pct": 73.02,
+  "P1_threshold_flip": 233,
+  "P1_threshold_flip_pct": 24.27,
+  "P3_swap_evaluated": 150,
+  "P3_swap_mean_prob": 0.6207,
+  "P3_swap_gt_forward_pct": 45.33,
+  "P3_swap_pass_pct": 50.67,
+  "by_type": {
+    "APPLIES_TO": {
+      "n": 80,
+      "fwd": 67.1502,
+      "rev": 60.5957,
+      "dpos": 58,
+      "flip": 13,
+      "sw": 4.8491,
+      "sw_n": 8,
+      "sw_gt": 2,
+      "sw_pos": 5
+    },
+    "CAUSES": {
+      "n": 80,
+      "fwd": 61.4911,
+      "rev": 57.0348,
+      "dpos": 59,
+      "flip": 9,
+      "sw": 0.7672,
+      "sw_n": 2,
+      "sw_gt": 2,
+      "sw_pos": 0
+    },
+    "CITES": {
+      "n": 80,
+      "fwd": 62.3129,
+      "rev": 59.5084,
+      "dpos": 48,
+      "flip": 10,
+      "sw": 5.0953,
+      "sw_n": 12,
+      "sw_gt": 2,
+      "sw_pos": 3
+    },
+    "CREATED_BY": {
+      "n": 80,
+      "fwd": 64.4725,
+      "rev": 47.2357,
+      "dpos": 56,
+      "flip": 42,
+      "sw": 8.0799,
+      "sw_n": 11,
+      "sw_gt": 7,
+      "sw_pos": 8
+    },
+    "ENABLES": {
+      "n": 80,
+      "fwd": 68.3128,
+      "rev": 59.3847,
+      "dpos": 63,
+      "flip": 19,
+      "sw": 1.6824,
+      "sw_n": 3,
+      "sw_gt": 2,
+      "sw_pos": 1
+    },
+    "EVALUATES": {
+      "n": 80,
+      "fwd": 49.031,
+      "rev": 40.7497,
+      "dpos": 63,
+      "flip": 12,
+      "sw": 16.0893,
+      "sw_n": 39,
+      "sw_gt": 26,
+      "sw_pos": 5
+    },
+    "LOCATED_AT": {
+      "n": 80,
+      "fwd": 72.9701,
+      "rev": 45.4101,
+      "dpos": 74,
+      "flip": 42,
+      "sw": 19.9686,
+      "sw_n": 25,
+      "sw_gt": 8,
+      "sw_pos": 20
+    },
+    "MEASURES": {
+      "n": 80,
+      "fwd": 69.695,
+      "rev": 64.8453,
+      "dpos": 52,
+      "flip": 10,
+      "sw": 3.672,
+      "sw_n": 5,
+      "sw_gt": 1,
+      "sw_pos": 4
+    },
+    "PART_OF": {
+      "n": 80,
+      "fwd": 68.0471,
+      "rev": 56.1846,
+      "dpos": 58,
+      "flip": 26,
+      "sw": 15.0865,
+      "sw_n": 18,
+      "sw_gt": 8,
+      "sw_pos": 15
+    },
+    "PRODUCES": {
+      "n": 80,
+      "fwd": 69.6948,
+      "rev": 59.6514,
+      "dpos": 63,
+      "flip": 20,
+      "sw": 2.5894,
+      "sw_n": 4,
+      "sw_gt": 1,
+      "sw_pos": 2
+    },
+    "SUPPORTS": {
+      "n": 80,
+      "fwd": 60.6395,
+      "rev": 52.3482,
+      "dpos": 59,
+      "flip": 19,
+      "sw": 2.2806,
+      "sw_n": 3,
+      "sw_gt": 1,
+      "sw_pos": 2
+    },
+    "USES": {
+      "n": 80,
+      "fwd": 62.0607,
+      "rev": 59.3399,
+      "dpos": 48,
+      "flip": 11,
+      "sw": 12.9435,
+      "sw_n": 20,
+      "sw_gt": 8,
+      "sw_pos": 11
+    }
+  }
+}

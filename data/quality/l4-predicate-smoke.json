@@ -1,0 +1,383 @@
+{
+  "source": "D:\\kg-demo\\data\\quality\\relation-verify-all.json",
+  "model": "Babelscape/mdeberta-v3-base-triplet-critic-xnli",
+  "threshold": 0.67,
+  "mode": "smoke",
+  "form": "sentence",
+  "reuse_l5": false,
+  "device": "cuda",
+  "batch": 64,
+  "max_len": 256,
+  "seed": 42,
+  "elapsed_s": 62.4,
+  "edges_total": 43867,
+  "evaluated": 450,
+  "outside_ontology": 237,
+  "no_premise": 0,
+  "hypothesis_field_mismatch": 0,
+  "template_form": "sentence",
+  "templates": {
+    "APPLIES_TO": "{s} is applied to {t}.",
+    "CAUSES": "{s} causes {t}.",
+    "CITES": "{s} cites {t}.",
+    "COMPARES_WITH": "{s} is compared with {t}.",
+    "CONTRADICTS": "{s} contradicts {t}.",
+    "CREATED_BY": "{t} was created by {s}.",
+    "ENABLES": "{s} enables {t}.",
+    "EVALUATES": "{s} evaluates {t}.",
+    "LOCATED_AT": "{s} is located at {t}.",
+    "MEASURES": "{s} measures {t}.",
+    "PART_OF": "{s} is part of {t}.",
+    "PRODUCES": "{s} produces {t}.",
+    "RELATED_TO": "{s} is related to {t}.",
+    "SUPPORTS": "{s} supports {t}.",
+    "USES": "{s} uses {t}."
+  },
+  "metrics": {
+    "tie_lost_share": 0.0002,
+    "tie_eps": 0.0001,
+    "margin_p50": 0.0834,
+    "top2_hit_rate": 0.442,
+    "mrr": 0.4583,
+    "macro_f1": 0.2022,
+    "baseline_mode_class": {
+      "class": "RELATED_TO",
+      "accuracy": 0.22
+    },
+    "baseline_related_to": 0.22,
+    "bootstrap_ci95": [
+      0.2384,
+      0.3442
+    ],
+    "agreement_top1": 0.2901,
+    "agreement_top1_hit_both": 0.2835,
+    "agreement_top1_excluding_ties": 0.2902,
+    "agreement_top1_ties_as_correct": 0.2903
+  },
+  "l5_cross": {
+    "label_class_pass_rate": 0.6275,
+    "A_guessed_right_but_below_thr": 0.1087,
+    "B_label_supported_but_lost": 0.5198,
+    "C_all_below_thr": 0.1571
+  },
+  "by_hit": {
+    "both": {
+      "n": 237,
+      "accuracy": 0.2835
+    },
+    "one": {
+      "n": 191,
+      "accuracy": 0.3255
+    },
+    "none": {
+      "n": 22,
+      "accuracy": 0.0151
+    }
+  },
+  "per_class": [
+    {
+      "type": "APPLIES_TO",
+      "n": 3850,
+      "recall": 0.1333,
+      "precision": 0.2373,
+      "f1": 0.1707,
+      "top_confusion": "RELATED_TO(1155)"
+    },
+    {
+      "type": "CAUSES",
+      "n": 280,
+      "recall": 0.1667,
+      "precision": 0.2963,
+      "f1": 0.2133,
+      "top_confusion": "PART_OF(75)"
+    },
+    {
+      "type": "CITES",
+      "n": 967,
+      "recall": 0.0333,
+      "precision": 0.019,
+      "f1": 0.0242,
+      "top_confusion": "PART_OF(226)"
+    },
+    {
+      "type": "COMPARES_WITH",
+      "n": 598,
+      "recall": 0.1667,
+      "precision": 0.1389,
+      "f1": 0.1515,
+      "top_confusion": "PART_OF(80)"
+    },
+    {
+      "type": "CONTRADICTS",
+      "n": 242,
+      "recall": 0.0667,
+      "precision": 0.0621,
+      "f1": 0.0643,
+      "top_confusion": "ENABLES(32)"
+    },
+    {
+      "type": "CREATED_BY",
+      "n": 8755,
+      "recall": 0.5667,
+      "precision": 0.4761,
+      "f1": 0.5174,
+      "top_confusion": "RELATED_TO(1167)"
+    },
+    {
+      "type": "ENABLES",
+      "n": 999,
+      "recall": 0.3,
+      "precision": 0.2194,
+      "f1": 0.2534,
+      "top_confusion": "PART_OF(266)"
+    },
+    {
+      "type": "EVALUATES",
+      "n": 453,
+      "recall": 0.2333,
+      "precision": 0.0505,
+      "f1": 0.083,
+      "top_confusion": "PART_OF(121)"
+    },
+    {
+      "type": "LOCATED_AT",
+      "n": 853,
+      "recall": 0.4333,
+      "precision": 0.1538,
+      "f1": 0.227,
+      "top_confusion": "PART_OF(313)"
+    },
+    {
+      "type": "MEASURES",
+      "n": 872,
+      "recall": 0.2667,
+      "precision": 0.1166,
+      "f1": 0.1622,
+      "top_confusion": "PART_OF(320)"
+    },
+    {
+      "type": "PART_OF",
+      "n": 5816,
+      "recall": 0.5,
+      "precision": 0.2896,
+      "f1": 0.3668,
+      "top_confusion": "RELATED_TO(969)"
+    },
+    {
+      "type": "PRODUCES",
+      "n": 2213,
+      "recall": 0.1667,
+      "precision": 0.2484,
+      "f1": 0.1995,
+      "top_confusion": "CREATED_BY(738)"
+    },
+    {
+      "type": "RELATED_TO",
+      "n": 9598,
+      "recall": 0.0667,
+      "precision": 0.1192,
+      "f1": 0.0855,
+      "top_confusion": "PART_OF(3199)"
+    },
+    {
+      "type": "SUPPORTS",
+      "n": 793,
+      "recall": 0.1333,
+      "precision": 0.0926,
+      "f1": 0.1093,
+      "top_confusion": "RELATED_TO(211)"
+    },
+    {
+      "type": "USES",
+      "n": 7338,
+      "recall": 0.2667,
+      "precision": 0.8451,
+      "f1": 0.4054,
+      "top_confusion": "PART_OF(1223)"
+    }
+  ],
+  "confusion": {
+    "APPLIES_TO": {
+      "RELATED_TO": 1155.0,
+      "PRODUCES": 256.7,
+      "PART_OF": 385.0,
+      "SUPPORTS": 128.3,
+      "MEASURES": 128.3,
+      "USES": 128.3,
+      "APPLIES_TO": 513.3,
+      "CREATED_BY": 385.0,
+      "LOCATED_AT": 256.7,
+      "EVALUATES": 256.7,
+      "ENABLES": 256.7
+    },
+    "CAUSES": {
+      "PART_OF": 74.7,
+      "ENABLES": 65.3,
+      "MEASURES": 28.0,
+      "CAUSES": 46.7,
+      "PRODUCES": 18.7,
+      "EVALUATES": 18.7,
+      "RELATED_TO": 18.7,
+      "CREATED_BY": 9.3
+    },
+    "CITES": {
+      "RELATED_TO": 96.7,
+      "PART_OF": 225.6,
+      "PRODUCES": 32.2,
+      "CREATED_BY": 193.4,
+      "COMPARES_WITH": 32.2,
+      "LOCATED_AT": 32.2,
+      "MEASURES": 161.2,
+      "CITES": 32.2,
+      "EVALUATES": 128.9,
+      "USES": 32.2
+    },
+    "COMPARES_WITH": {
+      "LOCATED_AT": 19.9,
+      "COMPARES_WITH": 99.7,
+      "EVALUATES": 59.8,
+      "PART_OF": 79.7,
+      "MEASURES": 39.9,
+      "RELATED_TO": 79.7,
+      "PRODUCES": 59.8,
+      "APPLIES_TO": 19.9,
+      "USES": 19.9,
+      "ENABLES": 19.9,
+      "CREATED_BY": 79.7,
+      "CAUSES": 19.9
+    },
+    "CONTRADICTS": {
+      "RELATED_TO": 8.1,
+      "APPLIES_TO": 24.3,
+      "CONTRADICTS": 16.2,
+      "EVALUATES": 24.3,
+      "MEASURES": 16.2,
+      "PART_OF": 8.1,
+      "SUPPORTS": 24.3,
+      "LOCATED_AT": 24.3,
+      "CAUSES": 24.3,
+      "PRODUCES": 16.2,
+      "ENABLES": 32.4,
+      "USES": 8.1,
+      "COMPARES_WITH": 8.1,
+      "CREATED_BY": 8.1
+    },
+    "CREATED_BY": {
+      "PART_OF": 583.7,
+      "CREATED_BY": 4961.2,
+      "RELATED_TO": 1167.3,
+      "LOCATED_AT": 291.8,
+      "CITES": 1167.3,
+      "ENABLES": 291.8,
+      "MEASURES": 291.8
+    },
+    "ENABLES": {
+      "ENABLES": 299.7,
+      "APPLIES_TO": 133.2,
+      "COMPARES_WITH": 33.3,
+      "RELATED_TO": 66.6,
+      "PART_OF": 266.4,
+      "PRODUCES": 99.9,
+      "CAUSES": 66.6,
+      "LOCATED_AT": 33.3
+    },
+    "EVALUATES": {
+      "MEASURES": 45.4,
+      "CREATED_BY": 60.5,
+      "EVALUATES": 105.9,
+      "PART_OF": 121.1,
+      "APPLIES_TO": 15.1,
+      "RELATED_TO": 60.5,
+      "COMPARES_WITH": 30.3,
+      "USES": 15.1
+    },
+    "LOCATED_AT": {
+      "PART_OF": 312.8,
+      "LOCATED_AT": 369.6,
+      "USES": 28.4,
+      "MEASURES": 28.4,
+      "CREATED_BY": 85.3,
+      "EVALUATES": 28.4
+    },
+    "MEASURES": {
+      "EVALUATES": 29.1,
+      "PART_OF": 319.7,
+      "MEASURES": 232.5,
+      "RELATED_TO": 87.2,
+      "CREATED_BY": 116.3,
+      "CITES": 29.1,
+      "ENABLES": 29.1,
+      "LOCATED_AT": 29.1
+    },
+    "PART_OF": {
+      "PART_OF": 2908.0,
+      "LOCATED_AT": 387.7,
+      "RELATED_TO": 969.3,
+      "PRODUCES": 387.7,
+      "MEASURES": 775.5,
+      "CREATED_BY": 193.9,
+      "COMPARES_WITH": 193.9
+    },
+    "PRODUCES": {
+      "ENABLES": 73.8,
+      "PRODUCES": 368.8,
+      "MEASURES": 221.3,
+      "CREATED_BY": 737.7,
+      "APPLIES_TO": 147.5,
+      "LOCATED_AT": 73.8,
+      "CITES": 147.5,
+      "EVALUATES": 73.8,
+      "RELATED_TO": 73.8,
+      "PART_OF": 147.5,
+      "USES": 73.8,
+      "SUPPORTS": 73.8
+    },
+    "RELATED_TO": {
+      "SUPPORTS": 319.9,
+      "EVALUATES": 639.9,
+      "PART_OF": 3199.3,
+      "CREATED_BY": 2559.5,
+      "APPLIES_TO": 959.8,
+      "CITES": 319.9,
+      "COMPARES_WITH": 319.9,
+      "RELATED_TO": 639.9,
+      "LOCATED_AT": 639.9
+    },
+    "SUPPORTS": {
+      "RELATED_TO": 211.5,
+      "USES": 52.9,
+      "PART_OF": 185.0,
+      "SUPPORTS": 105.7,
+      "MEASURES": 26.4,
+      "ENABLES": 52.9,
+      "CREATED_BY": 52.9,
+      "APPLIES_TO": 105.7
+    },
+    "USES": {
+      "PART_OF": 1223.2,
+      "USES": 1957.1,
+      "CONTRADICTS": 244.6,
+      "CREATED_BY": 978.5,
+      "RELATED_TO": 733.9,
+      "SUPPORTS": 489.3,
+      "PRODUCES": 244.6,
+      "LOCATED_AT": 244.6,
+      "EVALUATES": 733.9,
+      "ENABLES": 244.6,
+      "APPLIES_TO": 244.6
+    }
+  },
+  "note": "top-1 一致率是「与抽取器标注谓词的一致率」，不是与人工金标的准确率；标注谓词由 LLM 抽取器产生且当时未给谓词定义，故本指标是两个模型的一致率（机器版 inter-annotator agreement），论文里必须这样写。",
+  "meta": {
+    "metric_keys_renamed": {
+      "reason": "top1_accuracy 度量的是\"与抽取器标注谓词的一致率\"，不是与人工真值的准确率，故改名（对抗评审修正 16）",
+      "when": "2026-09-12",
+      "renames": {
+        "top1_accuracy": "agreement_top1",
+        "top1_accuracy_hit_both": "agreement_top1_hit_both",
+        "top1_accuracy_excluding_ties": "agreement_top1_excluding_ties",
+        "top1_accuracy_ties_as_correct": "agreement_top1_ties_as_correct"
+      }
+    }
+  }
+}

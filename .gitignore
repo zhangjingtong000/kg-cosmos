@@ -9,7 +9,27 @@ venv/
 **/.next/
 
 # Local runtime, browser and brainstorming artifacts
-/data/
+# ── /data/ ────────────────────────────────────────────────────────────────
+# **默认忽略整个 data/**：里面 7.7 GB 是 Qwen3-4B 的模型权重（`data/models/`），
+# 语料 PDF（`data/corpus/` 697 MB）也在这里 —— 都不该进 Git
+# （GitHub 单文件 100 MB 硬上限，超了直接拒收）。
+#
+# ★ **2026-09-20 开白名单**：但「证据类报告」必须进来 ——
+#   文档里的每个数字、回归的二十多项检查**全都指向 `data/quality/`**，
+#   别人 clone 之后要能自己核对。在这之前靠的是**手工 `git add -f`**
+#   （已手工加 122 个文件 / 213.8 MB），代价是**新产物不会自动入库，
+#   得靠人记得** —— 2026-09-20 当天就因为这个暴露过一次。
+#
+#   白名单**只放 `data/quality/` 顶层的 `*.json`**（89 个报告 / 79.2 MB）；
+#   子目录一律排除，因为它们是快照或中间产物、不是「结论的出处」：
+#   `backup/` 552 MB · `baseline/` 106 MB · `graphs-published-in/` 70 MB ·
+#   `_archive/` 72 MB · `_prompt-ab-runs/` 32 MB。
+#
+#   ⚠️ 已有 122 个手工 `-f` 加进来的文件**不受影响**（gitignore 只管未跟踪文件）。
+/data/*
+!/data/quality/
+/data/quality/*/
+!/data/quality/*.json
 /output/
 /.playwright-cli/
 /.superpowers/

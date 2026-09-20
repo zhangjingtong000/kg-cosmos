@@ -1,0 +1,134 @@
+{
+  "n_gold": 42,
+  "n_hit": 20,
+  "n_miss": 22,
+  "miss_by_relation": {
+    "RELATED_TO": 1,
+    "PART_OF": 2,
+    "CREATED_BY": 1,
+    "CAUSES": 3,
+    "APPLIES_TO": 3,
+    "COMPARES_WITH": 2,
+    "ENABLES": 7,
+    "PRODUCES": 2,
+    "USES": 1
+  },
+  "gold_by_relation": {
+    "RELATED_TO": 1,
+    "USES": 6,
+    "PART_OF": 5,
+    "CREATED_BY": 4,
+    "EVALUATES": 1,
+    "PRODUCES": 3,
+    "ENABLES": 9,
+    "APPLIES_TO": 4,
+    "CAUSES": 3,
+    "COMPARES_WITH": 5,
+    "MEASURES": 1
+  },
+  "miss_endpoint_status": {
+    "both_in_graph": 6,
+    "one_in_graph": 14,
+    "none_in_graph": 2
+  },
+  "recoverable_share": 0.2727,
+  "miss_by_paper": {
+    "2002.00388v4": {
+      "gold": 3,
+      "hit": 2
+    },
+    "2112.10006v6": {
+      "gold": 5,
+      "hit": 4
+    },
+    "2210.08119v1": {
+      "gold": 2,
+      "hit": 2
+    },
+    "2302.05019v1": {
+      "gold": 4,
+      "hit": 4
+    },
+    "2310.04835v3": {
+      "gold": 5,
+      "hit": 2
+    },
+    "2401.04507v1": {
+      "gold": 2,
+      "hit": 0
+    },
+    "2402.12001v1": {
+      "gold": 3,
+      "hit": 1
+    },
+    "2406.08223v2": {
+      "gold": 4,
+      "hit": 0
+    },
+    "2410.21237v1": {
+      "gold": 2,
+      "hit": 1
+    },
+    "2412.10092v1": {
+      "gold": 2,
+      "hit": 1
+    },
+    "2501.03566v1": {
+      "gold": 2,
+      "hit": 0
+    },
+    "2504.09823v1": {
+      "gold": 2,
+      "hit": 2
+    },
+    "2510.20345v1": {
+      "gold": 4,
+      "hit": 0
+    }
+  },
+  "worst_papers": [
+    "2406.08223v2",
+    "2510.20345v1",
+    "2401.04507v1",
+    "2501.03566v1"
+  ],
+  "by_year": {
+    "2020": {
+      "gold": 4,
+      "hit": 2
+    },
+    "2021": {
+      "gold": 5,
+      "hit": 4
+    },
+    "2022": {
+      "gold": 2,
+      "hit": 2
+    },
+    "2023": {
+      "gold": 9,
+      "hit": 6
+    },
+    "2024": {
+      "gold": 13,
+      "hit": 3
+    },
+    "2025": {
+      "gold": 9,
+      "hit": 3
+    }
+  },
+  "evidence_found": {
+    "with_text": 22,
+    "evidence_verbatim": 22
+  },
+  "miss_verb_patterns": {
+    "through": 3,
+    "contain": 1,
+    "use": 1,
+    "produce": 1,
+    "enable": 1,
+    "via": 1
+  },
+  "conclusion": "漏掉的 22 条里，6 条（27%）两端都在图里；14 条（64%）只有一端在。漏抽集中在 ENABLES/CAUSES/APPLIES_TO（78%/100%/75%），而 USES 只漏 17%——**不是\"整体抽得差\"，是特定谓词没抽好**。更关键的是它**集中在 2024+ 的新论文上**（见 by_year），所以补救可以是\"只重抽那几篇\"，而不是全量重跑。"
+}

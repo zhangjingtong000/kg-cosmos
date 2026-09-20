@@ -1,0 +1,211 @@
+{
+  "seed": 20260912,
+  "count": 34,
+  "note": "逐段在 entities 里填该段中出现的实体名（原文用词，不要归一化）",
+  "spans": [
+    {
+      "id": "1703.08098v9#0",
+      "paper": "1703.08098v9",
+      "text": "relation types are represented\nby latent feature vectors and/or matrices and/or third-order tensors (Bordes et al. , 2013; Socher et al. ,\n2013).\n\nThis paper: (1) surveys the embedding models for KG completion, then (2) summarizes up-to-\ndate experimental results on the standard evaluation task of entity prediction—which is also referred to\nas the link prediction task (Bordes et al. , 2013), and (3) points out potential future research directions. 2\nA General Approach of Embedding Models for KG Completion\nLet E denote the set of entities and R the set of relation types.",
+      "entities": []
+    },
+    {
+      "id": "1703.08098v9#1",
+      "paper": "1703.08098v9",
+      "text": "Tu Dinh Nguyen, Dat Quoc Nguyen, and Dinh Phung. 2018. A Novel Embedding Model for\nKnowledge Base Completion Based on Convolutional Neural Network.\n\nIn NAACL-HLT, pages 327–333. Dai Quoc Nguyen, Dat Quoc Nguyen, Tu Dinh Nguyen, and Dinh Phung. 2019a. A convolutional neural network-\nbased model for knowledge base completion and its application to search personalization. Semantic Web, 10(5). Dai Quoc Nguyen, Thanh Vu, Tu Dinh Nguyen, Dat Quoc Nguyen, and Dinh Phung. 2019b. A Capsule Network-\nbased Embedding Model for Knowledge Graph Completion and Search Personalization. In NAACL-HLT, pages\npages 2180–2189.",
+      "entities": []
+    },
+    {
+      "id": "2002.00388v4#0",
+      "paper": "2002.00388v4",
+      "text": "can lead to improved accuracy. Safavi\net al. [77] further explored probability calibration under the\nmore challenging open-world assumption. E.\n\nSummary\nKnowledge representation learning is vital in the research\ncommunity of knowledge graph. This section reviews four\nfolds of KRL with several modern methods summarized in\nTable II and more in Appendix C.",
+      "entities": []
+    },
+    {
+      "id": "2002.00388v4#1",
+      "paper": "2002.00388v4",
+      "text": "matching. It usually adopts a multiplicative\nformulation, i. e. , h⊤Mr ≈t⊤, to transform head entity near\nthe tail in the representation space.\n\nh\nt\nr\ndistance\n(a)\nTranslational\ndistance-\nbased scoring of TransE. h\nt\nr\nfr(h, r)\n(b) Semantic similarity-based\nscoring of DistMult. Fig. 4: Illustrations of distance-based and similarity matching\nbased scoring functions taking TransE [16] and DistMult [32]\nas examples. 1) Distance-based Scoring Function: An intuitive distance-\nbased approach is to calculate the Euclidean distance between\nthe relational projection of entities.",
+      "entities": []
+    },
+    {
+      "id": "2012.00456v1#0",
+      "paper": "2012.00456v1",
+      "text": "160 survey\ntables, have been imported in the graph. In total, 2 626 papers have\nbeen added to the knowledge graph using the presented methodology.\n\nThe results demonstrate the feasibility of our approach, but also indi-\ncate that manual eﬀort is required and thus underscore the important\nrole of human experts. Keywords: Scholarly Communication · Scholarly Knowledge Graphs ·\nTabular Data Extraction\n1\nIntroduction\nScholarly communication is mainly document-based and the communicated schol-\narly knowledge therefore hardly machine-actionable [21].",
+      "entities": []
+    },
+    {
+      "id": "2012.00456v1#1",
+      "paper": "2012.00456v1",
+      "text": "papers were excluded. However,\nit is not uncommon for research articles to also contain tables with related work\n(e. g. , Table 1 in this article).\n\nThus the paper selection step could be extended\nto also include other articles to have a broader impact. 5. 3\nSemantics of Data\nThe extracted knowledge graph consists of structured scholarly data. The quality\nof the knowledge graph could be further improved by providing more semantics\nto the data. Currently, a primitive method is used to map existing properties\nand resources. This is based on a lookup by resource label, in case a result\nis found, the resource is mapped.",
+      "entities": []
+    },
+    {
+      "id": "2112.10006v6#0",
+      "paper": "2112.10006v6",
+      "text": "entities are discarded. Next,\na new testing set is constructed from the original testing\ntriples by removing those containing no unseen entities.\n\nNine subsets of different scales are extracted for the few-\nshot setting, by setting the size of testing triples for\nextracting unseen entities to 1, 000, 3, 000 and 5, 000,\nand by setting the position for extracting unseen entities\nto head, tail and both. • Subsets of WN18RR, FB15k-237 and NELL-995 by\nTeru et al. [133] are of the second category. They are\nconstructed in the following way.",
+      "entities": []
+    },
+    {
+      "id": "2112.10006v6#1",
+      "paper": "2112.10006v6",
+      "text": "Each image con-\ntains multiple objects, and thus NUS-WIDE is widely\nused for evaluating multi-label zero-shot image classiﬁca-\ntion [42, 156, 157].\n\nTo be more speciﬁc, the images have\ntwo versions of label sets: NUS-1000 and NUS-81. The\nformer comprises 1000 noisy labels collected from Flickr\nuser tags and the latter is a dedicated one with 81 human-.",
+      "entities": []
+    },
+    {
+      "id": "2202.07412v1#0",
+      "paper": "2202.07412v1",
+      "text": "Translating embeddings for modeling\nmulti-relational data. In NIPS, 2013.\n\n[Chang et al. , 2014] K. Chang, W. Yih,\nB. Yang, and\nC. Meek. Typed tensor decomposition of knowledge bases\nfor relation extraction. In EMNLP, 2014. [Chen et al. , 2021] Jiaoyan Chen, Yuxia Geng, Zhuo Chen,\nJeff Z Pan, Yuan He, Wen Zhang, and so on. Low-resource\nlearning with knowledge graphs: A comprehensive survey. arXiv preprint arXiv:2112. 10006, 2021. [Cohen et al. , 2020] W. W. Cohen, F. Yang, and K. Mazaitis.",
+      "entities": []
+    },
+    {
+      "id": "2202.07412v1#1",
+      "paper": "2202.07412v1",
+      "text": "Another is to research general frameworks that can simulta-\nneously support different kinds of logics and is independent\nof KG embedding methods.\n\nExplainability\nAnother critical challenge is making inte-\ngrated methods more explainable. Most methods in Sec-\ntion 3 focus on improving the model’s expressiveness, which\ndoes not change the black-box nature of embedding meth-\nods.",
+      "entities": []
+    },
+    {
+      "id": "2210.08119v1#0",
+      "paper": "2210.08119v1",
+      "text": "Sridhar, M. , Ott, P. : Latent hierarchical part based models\nfor road scene understanding. ICCVW (2015)\n106. Wang, Q. , Mao, Z. , Wang, B. , Guo, L.\n\n: Knowledge graph embedding: A survey of\napproaches and applications. IEEE Trans. on Knowledge and Data Eng. (2017)\n107. Werner, S. , Rettinger, A. , Halilaj, L. , Luettin, J. : Embedding taxonomical, sit-\nuational or sequential knowledge graph context for recommendation tasks. In:\nFurther with Knowledge Graphs (2021)\n108. Werner, S. , Rettinger, A. , Halilaj, L. , Luettin, J. : RETRA: Recurrent transformers\nfor learning temporally contextualized knowledge graph embeddings. In: ESWC\n(2021)\n109.",
+      "entities": []
+    },
+    {
+      "id": "2210.08119v1#1",
+      "paper": "2210.08119v1",
+      "text": "to enable safe automated\ndriving. They are combined with rules for ontology-based decision-making on\nuncontrolled intersections and narrow roads.\n\nAnother approach for ontology de-\nvelopment, focusing on vehicle context is described in [113]. Huang et al. [48]\nuse ontologies for scene-modeling, situation assessment and decision-making in\nurban environments and a knowledge base of driving knowledge and driving\nexperience. Using ontologies to generate semantic rules from a decision tree clas-\nsiﬁer trained on driving test descriptions of a driving school is outlined in [19]. Khan et al.",
+      "entities": []
+    },
+    {
+      "id": "2302.05019v1#0",
+      "paper": "2302.05019v1",
+      "text": "com/HKUST-KnowComp/TransOMCS\nEnterprise support KG\nGoogle Knowledge Graph\n500B+ facts on 5B+ entities\n2012\nhttps://developers. google.\n\ncom/knowledge-graph\nFacebook Graph Search\ndynamic social network of users, User-generated contents\n2013\nhttps://developers. facebook. com/docs/graph-api/\nDomain-specific KG\nPubmed\n5B+triples\n2000\nhttp://pubmed. bio2rdf. org/sparql\nDrugbank\n14K+ drug entities\n2006\nhttps://go. drugbank. com/releases/latest\nAMiner ASN\n2M+ paper nodes, 8M+ citation relations\n2007\nhttps://www. aminer. cn/aminernetwork\nHuapu\n17M+ person nodes\n2017\nhttps://www. zhonghuapu.",
+      "entities": []
+    },
+    {
+      "id": "2302.05019v1#1",
+      "paper": "2302.05019v1",
+      "text": "𝑤5\n𝑠2, …\nType\nembeddings\n𝒕𝟏\n𝒕𝟐\n𝒕𝟑\n…\nFig. 5. Illustration of deep learning-based entity typing via multi-scale feature extraction (based on [111]).\n\nAnother direction that projects salient interactions for global contexts is the attention mechanism. Luo et al. [104] introduce word-level soft attention to enhance named entity recognition. Gregoric\net al. [105] employ word-word self-attention for named entity recognition. Graph convolution networks are often used to handle context in linguistic graph structures for\nnamed entity recognition. For example, Cetoli et al.",
+      "entities": []
+    },
+    {
+      "id": "2310.04835v3#0",
+      "paper": "2310.04835v3",
+      "text": "above-mentioned knowledge extraction techniques and\nthe applications of LLMs in these techniques respectively. 3. 1\nStatic Knowledge Extraction\n3. 1.\n\n1\nNamed Entity Recognition\nNamed Entity Recognition (NER) is a crucial task in text\nprocessing, identifying entities like dates, persons, and\norganizations. Traditional sequence tagging methods like\nCRF [29] and Pointer Network [30] have evolved with the\nadvent of deep learning, leading to Bi-LSTM and CNN-\nbased models. These DNN models, like the ones proposed\nby Andrej et al. [31] and Emma et al. [32], show significant\nimprovements in NER tasks.",
+      "entities": []
+    },
+    {
+      "id": "2310.04835v3#1",
+      "paper": "2310.04835v3",
+      "text": "to the AI domain. By complementing each\nother, both entities have the potential to achieve superior\nperformance and broader application scenarios.\n\n7\nCONCLUSION\nSince the emergence of the technology of KG, the form\nof KGs is gradually changing. KG-related techniques, like\nknowledge extraction and reasoning, have also evolved\nwith the change in the form of KGs. In this survey, we first\nprovide a comprehensive overview of the evolution of KGs,\nfrom static to dynamic, temporal, and event-based KGs, and\ngive formal definitions specific to different types of KGs.",
+      "entities": []
+    },
+    {
+      "id": "2401.04507v1#0",
+      "paper": "2401.04507v1",
+      "text": "in the KnowLM open-source project. Additionally, part of\nthe data comes from annotated datasets collected during research group cooperation projects.\n\nThe NER data in these\ndomains includes some nested NER data. It is noteworthy that the KnowLM-IE dataset is annotated through remote\nsupervision, introducing considerable noise. Directly amalgamating it with our data would compromise the model’s\nability to extract entity relationship triples.",
+      "entities": []
+    },
+    {
+      "id": "2401.04507v1#1",
+      "paper": "2401.04507v1",
+      "text": "adaptation is observed, making it challenging at times to ascertain whether issues arise from\nadaptation challenges, the model, or the data itself.\n\nHere, we share select experiences encountered during the training\nprocess. In the initial phase of project development, Mindformer lacked adaptation to LLAMA2, necessitating\nmodifications based on the configuration file of LLAMA1. Key parameters, such as learning rate, warmup ratio,\nsequence length, and vocabulary size, must be adjusted to align with the selected configuration file for the LLAMA2\ninitial model.",
+      "entities": []
+    },
+    {
+      "id": "2402.12001v1#0",
+      "paper": "2402.12001v1",
+      "text": "coverage of query answers by comparing the\nresults retrieved from the summary with the correct results\nretrieved from the original KG. Wang et al.\n\n[2021] conduct\na user study to compare the usefulness of the summaries ex-\ntracted by different approaches for assisting users in compre-\nhending a large KG and then completing complex SPARQL\nqueries over the KG. Useful summaries are expected to help\ncomplete SPARQL queries correctly and also quickly. Besides, the time for extracting a summary is an important\nfactor in evaluating the practicability of an algorithm, espe-\ncially for real-time applications such as KG search engines.",
+      "entities": []
+    },
+    {
+      "id": "2402.12001v1#1",
+      "paper": "2402.12001v1",
+      "text": "[Shi et al. , 2021a] are two ap-\nproximation algorithms with the idea of finding and merging\nsmall-weight paths from a root node to all the groups.\n\nUS\nJames Cameron\nLeonardo DiCaprio\nnationality\nAvatar: The \nWay of Water\ndirected_by\nnationality\nTitanic (1977 film)\nLeonardo DiCaprio\nact_in\nKate Winslet\nAvatar: The \nWay of Water\nact_in\nact_in\nFigure 13: Two summaries extracted from Figure 1 containing the\nquery keywords Avatar and DiCaprio. Remarks\nCompared with maximum coverage, GST-based\nformulations are expressive but hard to solve.",
+      "entities": []
+    },
+    {
+      "id": "2406.08223v2#0",
+      "paper": "2406.08223v2",
+      "text": "analysis and the identification of open challenges. Finally,\nwe conclude in Section 6. 2\nLLM FOR KG\n2. 1\nKG Construction\n2. 1. 1\nOntology Creation.\n\nThis section of the paper explicitly ad-\ndresses Research Question 2, delving into the application of LLMs\nin ontology generation for KGs. LLMs exhibit significant promise in\nconstructing ontologies [64], where the organized representation\nof knowledge is essential for facilitating intelligent information\nretrieval and reasoning. LLMs contribute to creating and enriching\ncomprehensive ontologies, with domain-specific fine-tuning en-\nhancing their integration into specialized areas.",
+      "entities": []
+    },
+    {
+      "id": "2406.08223v2#1",
+      "paper": "2406.08223v2",
+      "text": "Extraction: LLMs like GPT-3, with their nat-\nural language understanding abilities, are suitable for extracting on-\ntology concepts and relations.\n\nConcept extraction is the process of\nidentifying and extracting concepts from text. The process involves\nextracting linguistic realizations of domain-specific concepts and\naccumulating semantic term variations with sense disambiguation\nand domain-specific synonym identification [73]. Relation extrac-\ntion aims to identify non-taxonomic relations between concepts\n[4].",
+      "entities": []
+    },
+    {
+      "id": "2410.21237v1#0",
+      "paper": "2410.21237v1",
+      "text": "model to infer the remaining properties. After the gen-\neration in the first turn, we use SGLang [38] for regular expression\nconstrained generation.\n\nThe output is forced to be generated in\nJSON format, strictly following the data type and schema structure. This guarantees that the response will always be generated reliably\ncontaining all requested properties, and additionally ensures the\nresponse can be parsed programmatically. Hierarchical Expansion attempts to introduce additional enti-\nties between the product node and the abstract category node.",
+      "entities": []
+    },
+    {
+      "id": "2410.21237v1#1",
+      "paper": "2410.21237v1",
+      "text": "arXiv:2305. 09858\n(2023). [4] Xiang Chen, Ningyu Zhang, Xin Xie, Shumin Deng, Yunzhi Yao, Chuanqi Tan, Fei\nHuang, Luo Si, and Huajun Chen. 2022.\n\nKnowprompt: Knowledge-aware prompt-\ntuning with synergistic optimization for relation extraction. In Proceedings of the\nACM Web conference 2022. 2778–2788. [5] Zhe Chen, Weiyun Wang, Hao Tian, Shenglong Ye, Zhangwei Gao, Erfei Cui,\nWenwen Tong, Kongzhi Hu, Jiapeng Luo, Zheng Ma, et al. 2024. How far are we\nto gpt-4v. closing the gap to commercial multimodal models with open-source\nsuites. arXiv preprint arXiv:2404. 16821 (2024).",
+      "entities": []
+    },
+    {
+      "id": "2412.10092v1#0",
+      "paper": "2412.10092v1",
+      "text": "that the results of ComplEx and UMLS\ncan be accurately predicted at the level of global KGEM\nperformance using the structural features we selected.\n\nHow-\never, we did not perform an ablation study to explore which\nstructural features are important to KGEM performance [18],.",
+      "entities": []
+    },
+    {
+      "id": "2412.10092v1#1",
+      "paper": "2412.10092v1",
+      "text": "• KGEM scoring functions influence performance. They\nshow that the scoring function used is strongly influential\non overall model performance [16].\n\nSpecifically, they\nhighlight that many models achieve very similar results\nwhen trained on their optimal hyperparameters, but that\nsome KGEMs (such as TransE) generally lag behind the\nothers in performance [16]. Despite the quite strong and far-reaching results of their\nstudy, two limitations remain. First off, their experiments on\nnegative samplers did not include most common negative\nsampling strategies [16].",
+      "entities": []
+    },
+    {
+      "id": "2501.03566v1#0",
+      "paper": "2501.03566v1",
+      "text": "employed in this domain, such as Open Group’s ArchiMate, present\n1 https://www. boc-group. com/en/blog/bpm/adonis-and-ai/\n2 https://www. signavio.\n\ncom/process-ai/\narXiv:2501. 03566v1  [cs. MA]  7 Jan 2025.",
+      "entities": []
+    },
+    {
+      "id": "2501.03566v1#1",
+      "paper": "2501.03566v1",
+      "text": "within a modeling language. This also leads to the generation of the instantiated model element and the KG\nrelation between the elements.\n\nIn contrast to KG-based approaches, which typi-\ncally produce the same output format as the input, LLM-based approaches offer\nthe option of generating formats such as JSON for subsequent processing. The\nuse of KG-based inputs guarantees that the LLM processes curated and reliable\nknowledge sources, thereby ensuring the independence of the results from the\ntraining of the LLM.",
+      "entities": []
+    },
+    {
+      "id": "2502.00681v2#0",
+      "paper": "2502.00681v2",
+      "text": "representations. Meanwhile, the semantic loss Lsm\ndistills textual information, after embedding via\nLLMs, into the discrete codes. In contrast, ReaLM\nfirst learns semantic KG embeddings using RotatE. The model then requires the quantized embedding,\ndefined as eq = PS\ns=1 cs,is, to effectively recon-\nstruct these semantic embeddings, where cs,is rep-\nresents the candidate codeword representation.",
+      "entities": []
+    },
+    {
+      "id": "2502.00681v2#1",
+      "paper": "2502.00681v2",
+      "text": "is quantized into a limited selection of\npredetermined values, which inherently formulates\na codebook as a result of these set combinations.\n\nIt\nis formulated as:\nFSQ( eXi) = R[(L −1)σ( eXi)] ∈{0, 1, · · · , L −1}d, (3)\nwhere R is the rounding operation and L ∈N is the\nnumber of unique values. The process of rounding\nsimply adjusts a scalar to its nearest integer, thereby\nexecuting quantization in every dimension. σ is a\nsigmoid or tanh function. Its loss is calculated by\nalso using the Straight-Through Estimator:\nLfsq = 1\nn\nn\nX\ni=1\n(L −1)σ( eXi)\n+ sg[R[(L −1)σ( eXi)] −(L −1)σ( eXi)].",
+      "entities": []
+    },
+    {
+      "id": "2504.09823v1#0",
+      "paper": "2504.09823v1",
+      "text": "the vector\nembedding model was BGE-M3 [27]. Fig. 2. Distribution of SC scores across 105 articles for GraphRAG,\nKGGen, and RAKG on the MINE dataset.\n\nThe results demonstrate that\nRAKG achieves an accuracy of 95. 81%, outperforming KGGen (86. 48%)\nand GraphRAG (89. 71%). Compared with baseline models such as KGGen, the\nRAKG model has demonstrated a significant improvement\nin the key metric of accuracy as Figure 2, with a clear\nand distinct advantage.",
+      "entities": []
+    },
+    {
+      "id": "2504.09823v1#1",
+      "paper": "2504.09823v1",
+      "text": "• accuracy : The accuracy of question answering on the\nMINE dataset is measured by the constructed knowl-\nedge graph, where higher accuracy means the graph\nretains the semantic info better than the original text. • Entity Coverage (EC):\nEC = |E ∩E∗|\n|E∗|\n(29)\nThe entity coverage rate reflects the proportion of enti-\nties in the evaluated knowledge graph that semantically\nmatch those in the standard knowledge graph, indicating\nits completeness at the entity level.",
+      "entities": []
+    },
+    {
+      "id": "2510.20345v1#0",
+      "paper": "2510.20345v1",
+      "text": "large-scale,\nand dynamic KGs. The advent of Large Language Models (LLMs) introduces a transformative paradigm for over-\ncoming these bottlenecks.\n\nThrough large-scale pretraining and emergent generalization capabilities,\nLLMs enable three key mechanisms: (1) Generative knowledge modeling, synthesizing structured\nrepresentations directly from unstructured text; (2) Semantic unification, integrating heterogeneous\nknowledge sources through natural language grounding; and (3) Instruction-driven orchestration,\ncoordinating complex KG construction workflows via prompt-based interaction.",
+      "entities": []
+    },
+    {
+      "id": "2510.20345v1#1",
+      "paper": "2510.20345v1",
+      "text": "Published as a conference paper at ICAIS 2025\nIn summary, traditional KE methods established the technical foundation for modern extraction\npipelines but remained constrained by data scarcity, weak generalization, and cumulative error\npropagation—limitations that motivate the LLM-driven paradigms discussed in later sections. 2.",
+      "entities": []
+    }
+  ]
+}

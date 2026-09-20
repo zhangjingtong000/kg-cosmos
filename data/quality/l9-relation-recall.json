@@ -1,0 +1,132 @@
+{
+  "n_segment": 34,
+  "n_triple_gold_raw": 65,
+  "n_triple_gold_entity_only": 42,
+  "n_triple_dropped_non_entity": 23,
+  "edge_total": 45708,
+  "recall_pair_all": 0.4762,
+  "recall_pair_supported": 0.4524,
+  "recall_triple_all": 0.4286,
+  "recall_triple_supported": 0.381,
+  "n_pair_all": 20,
+  "n_pair_supported": 19,
+  "n_triple_all": 18,
+  "n_triple_supported": 16,
+  "non_entity_examples": [
+    {
+      "source": "This paper",
+      "relation": "RELATED_TO",
+      "target": "the embedding models for KG completion"
+    },
+    {
+      "source": "entity prediction",
+      "relation": "RELATED_TO",
+      "target": "the link prediction task"
+    },
+    {
+      "source": "This paper",
+      "relation": "CITES",
+      "target": "Bordes et al. , 2013"
+    },
+    {
+      "source": "This paper",
+      "relation": "CITES",
+      "target": "Socher et al. , 2013"
+    },
+    {
+      "source": "2 626 papers",
+      "relation": "PART_OF",
+      "target": "the knowledge graph"
+    },
+    {
+      "source": "160 survey tables",
+      "relation": "PART_OF",
+      "target": "the graph"
+    },
+    {
+      "source": "The results",
+      "relation": "SUPPORTS",
+      "target": "the feasibility of our approach"
+    },
+    {
+      "source": "structured scholarly data",
+      "relation": "PART_OF",
+      "target": "The extracted knowledge graph"
+    },
+    {
+      "source": "nested NER data",
+      "relation": "PART_OF",
+      "target": "the NER data in these domains"
+    },
+    {
+      "source": "Mindformer",
+      "relation": "USES",
+      "target": "the configuration file of LLAMA1"
+    }
+  ],
+  "miss_examples": [
+    {
+      "source": "Safavi et al. [77]",
+      "relation": "RELATED_TO",
+      "target": "probability calibration"
+    },
+    {
+      "source": "tables with related work",
+      "relation": "PART_OF",
+      "target": "research articles"
+    },
+    {
+      "source": "Teru et al. [133]",
+      "relation": "CREATED_BY",
+      "target": "Subsets of WN18RR, FB15k-237 and NELL-995"
+    },
+    {
+      "source": "Named Entity Recognition (NER)",
+      "relation": "PART_OF",
+      "target": "text processing"
+    },
+    {
+      "source": "deep learning",
+      "relation": "CAUSES",
+      "target": "Bi-LSTM and CNN-based models"
+    },
+    {
+      "source": "DNN models",
+      "relation": "APPLIES_TO",
+      "target": "NER tasks"
+    },
+    {
+      "source": "remote supervision",
+      "relation": "APPLIES_TO",
+      "target": "KnowLM-IE dataset"
+    },
+    {
+      "source": "remote supervision",
+      "relation": "CAUSES",
+      "target": "considerable noise"
+    },
+    {
+      "source": "results retrieved from the summary",
+      "relation": "COMPARES_WITH",
+      "target": "correct results retrieved from the original KG"
+    },
+    {
+      "source": "Useful summaries",
+      "relation": "ENABLES",
+      "target": "completing complex SPARQL queries over the KG"
+    },
+    {
+      "source": "LLMs",
+      "relation": "PRODUCES",
+      "target": "ontologies"
+    },
+    {
+      "source": "domain-specific fine-tuning",
+      "relation": "ENABLES",
+      "target": "their integration into specialized areas"
+    }
+  ],
+  "reading": "端点召回 86.2% 只说明\"实体名抽得还行\"，**不代表关系抽全了**。本层给出的是关系的独立读数：端点对命中约 47%、三元组严格命中约 43%（见上面四个数）。**即：原文里明确断言的关系，只有约四成进了图。**",
+  "stability_note": "**标注稳定性**：同一批段落被独立标注了两次，第一次得 87 条三元组、第二次得 65 条（差 25%）。这远低于端点标注的稳定性（κ=0.722）。原因与 L5 的发现一致：**关系任务本身的歧义性远大于实体任务**——判断\"哪两个实体之间是什么关系\"需要同时定端点、定方向、选谓词。所以本层的数字应读作**量级估计**，不能当精确值。",
+  "caveat": "金标来自 LLM 独立标注（非人类），样本 34 段；两次标注差异 25% ⇒ 只报量级。"
+}

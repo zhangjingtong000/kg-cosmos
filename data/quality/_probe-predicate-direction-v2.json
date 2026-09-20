@@ -1,0 +1,107 @@
+{
+  "CREATED_BY": {
+    "n": 8755,
+    "judgeable": 2878,
+    "consistent": 2127,
+    "inverted": 751,
+    "unknown": 5877
+  },
+  "PRODUCES": {
+    "n": 2213,
+    "judgeable": 231,
+    "consistent": 219,
+    "inverted": 12,
+    "unknown": 1982
+  },
+  "LOCATED_AT": {
+    "n": 853,
+    "judgeable": 58,
+    "consistent": 21,
+    "inverted": 37,
+    "unknown": 795
+  },
+  "PART_OF": {
+    "n": 5816,
+    "judgeable": 493,
+    "consistent": 235,
+    "inverted": 258,
+    "unknown": 5323
+  },
+  "USES": {
+    "n": 7339,
+    "judgeable": 1221,
+    "consistent": 1104,
+    "inverted": 117,
+    "unknown": 6118
+  },
+  "APPLIES_TO": {
+    "n": 3850,
+    "judgeable": 131,
+    "consistent": 94,
+    "inverted": 37,
+    "unknown": 3719
+  },
+  "SUPPORTS": {
+    "n": 793,
+    "judgeable": 73,
+    "consistent": 69,
+    "inverted": 4,
+    "unknown": 720
+  },
+  "CAUSES": {
+    "n": 280,
+    "judgeable": 6,
+    "consistent": 6,
+    "inverted": 0,
+    "unknown": 274
+  },
+  "ENABLES": {
+    "n": 999,
+    "judgeable": 82,
+    "consistent": 82,
+    "inverted": 0,
+    "unknown": 917
+  },
+  "CITES": {
+    "n": 967,
+    "judgeable": 125,
+    "consistent": 100,
+    "inverted": 25,
+    "unknown": 842
+  },
+  "EVALUATES": {
+    "n": 454,
+    "judgeable": 144,
+    "consistent": 40,
+    "inverted": 104,
+    "unknown": 310
+  },
+  "MEASURES": {
+    "n": 872,
+    "judgeable": 80,
+    "consistent": 66,
+    "inverted": 14,
+    "unknown": 792
+  },
+  "COMPARES_WITH": {
+    "n": 598,
+    "judgeable": 39,
+    "consistent": 11,
+    "inverted": 28,
+    "unknown": 559
+  },
+  "CONTRADICTS": {
+    "n": 243,
+    "judgeable": 1,
+    "consistent": 0,
+    "inverted": 1,
+    "unknown": 242
+  },
+  "RELATED_TO": {
+    "n": 9598,
+    "judgeable": 689,
+    "consistent": 474,
+    "inverted": 215,
+    "unknown": 8909
+  }
+}

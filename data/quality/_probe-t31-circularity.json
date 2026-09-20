@@ -1,0 +1,36 @@
+{
+  "groups": {
+    "A_被T3.1反转过的边": {
+      "n": 2174,
+      "resolvable": 1987,
+      "compliant_directed": 1986,
+      "reversed": 0,
+      "compliant_role": 0,
+      "role_violation": 1,
+      "unjudgeable": 187,
+      "direction_compliance_pct": 100.0,
+      "direction_coverage_pct": 99.95,
+      "desc_consistent": 468,
+      "desc_inverted": 88,
+      "desc_unknown": 1618,
+      "desc_selfconsistent_pct": 84.17
+    },
+    "B_未被触碰的边": {
+      "n": 6581,
+      "resolvable": 4254,
+      "compliant_directed": 3833,
+      "reversed": 120,
+      "compliant_role": 0,
+      "role_violation": 301,
+      "unjudgeable": 2327,
+      "direction_compliance_pct": 96.96,
+      "direction_coverage_pct": 92.92,
+      "desc_consistent": 1645,
+      "desc_inverted": 650,
+      "desc_unknown": 4286,
+      "desc_selfconsistent_pct": 71.68
+    }
+  },
+  "A_share_of_compliant_pct": 34.13,
+  "independent_direction_compliance_pct": 96.96
+}
