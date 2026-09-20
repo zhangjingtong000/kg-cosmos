@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-19 22:37:39",
+  "generated": "2026-09-20 21:30:36",
   "note": "数据源指纹 + 各指标读数。数据变了而指标没重跑时，python tools/metric_provenance.py 会把它们标为 stale。",
   "sources": {
     "graphs": {
@@ -152,28 +152,28 @@
       "artifact": "l8-structure-audit.json",
       "path": "random_baseline.clustering_ratio_vs_random",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-19 22:30:47"
+      "artifact_mtime": "2026-09-20 21:08:23"
     },
     "L8_largest_component_pct": {
       "value": 62.04,
       "artifact": "l8-structure-audit.json",
       "path": "connectivity.largest_component_pct",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-19 22:30:47"
+      "artifact_mtime": "2026-09-20 21:08:23"
     },
     "L8_isolated_nodes": {
       "value": 7181,
       "artifact": "l8-structure-audit.json",
       "path": "connectivity.isolated_nodes",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-19 22:30:47"
+      "artifact_mtime": "2026-09-20 21:08:23"
     },
     "L8_nodes": {
       "value": 20785,
       "artifact": "l8-structure-audit.json",
       "path": "scale.nodes",
       "produced_by": "tools/l8_structure_audit.py",
-      "artifact_mtime": "2026-09-19 22:30:47"
+      "artifact_mtime": "2026-09-20 21:08:23"
     },
     "L9_endpoint_recall": {
       "value": 0.8621,
@@ -229,7 +229,7 @@
       "artifact": "l5-annotator-agreement.json",
       "path": "cohen_kappa",
       "produced_by": "tools/check_l5_agreement.py",
-      "artifact_mtime": "2026-09-12 22:37:57"
+      "artifact_mtime": "2026-09-20 12:51:59"
     },
     "L7_role_false_positive_rate": {
       "value": 0.0862,

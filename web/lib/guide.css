@@ -1,0 +1,100 @@
+/* ============================================================================
+   web/lib/guide.css —— 引导条的样式（配合 web/lib/guide.js）
+   设计约束（都与项目既有语言一致）：
+     · 它是**正文流里的第一块**，不是浮层 ⇒ 不遮挡任何 fixed 面板、不影响门禁；
+     · 配色取 `design.css` 的 token（`--line/--warm/--ink-*`），自己不新造色号；
+     · 结构用 `dl/dt/dd`（"标签 : 短句"），而不是一段散文；
+     · 收起后只留一行「? 这一页是干什么的」，随时可再打开。
+   ⚠️ 本文件**不设 `position:fixed/absolute`** —— 那是刻意的：
+     本项目为"浮层互压 / 点不到按钮"吃过亏（见 demo-rail.js 的注释）。
+   ============================================================================ */
+
+#kgGuide {
+  margin: 0 0 22px;
+  padding: 14px 16px 12px;
+  border: 1px solid var(--line, rgba(178, 180, 186, .13));
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(224, 164, 105, .07), rgba(224, 164, 105, .02)),
+    rgba(13, 16, 24, .55);
+}
+
+#kgGuide .kg-guide-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+#kgGuide .kg-guide-no {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px; letter-spacing: .18em; font-weight: 600;
+  color: var(--accent, #e0a469);
+}
+#kgGuide .kg-guide-head strong {
+  font-size: 14px; color: var(--ink, #eef3fd); font-weight: 600;
+}
+#kgGuide .kg-guide-kind {
+  font-size: 10.5px; letter-spacing: .1em;
+  color: var(--ink-3, rgba(193, 195, 201, .46));
+  border: 1px solid var(--line, rgba(178, 180, 186, .13));
+  border-radius: 999px; padding: 1px 8px;
+}
+#kgGuide .kg-guide-x {
+  margin-left: auto;
+  font: inherit; font-size: 11px; cursor: pointer;
+  color: var(--ink-3, rgba(193, 195, 201, .46));
+  background: none; border: 1px solid var(--line, rgba(178, 180, 186, .13));
+  border-radius: 999px; padding: 2px 10px;
+}
+#kgGuide .kg-guide-x:hover { color: #fff; border-color: rgba(224, 164, 105, .5); }
+
+/* 三行"标签 : 短句"——一屏扫完，不用读散文 */
+#kgGuide .kg-guide-body {
+  margin: 0; display: grid; gap: 6px;
+  grid-template-columns: minmax(0, 1fr);
+}
+#kgGuide .kg-guide-body > div {
+  display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px;
+  align-items: baseline;
+}
+#kgGuide dt {
+  font-size: 11px; letter-spacing: .06em; color: var(--warm, #ffcfa8);
+  white-space: nowrap;
+}
+#kgGuide dd {
+  margin: 0; font-size: 12.5px; line-height: 1.7;
+  color: var(--ink-2, rgba(203, 218, 241, .76));
+}
+#kgGuide dd b { color: var(--warm, #ffcfa8); font-weight: 600; display: inline; }
+
+#kgGuide .kg-guide-foot {
+  margin-top: 11px; padding-top: 10px;
+  border-top: 1px solid var(--line, rgba(178, 180, 186, .13));
+  font-size: 11.5px;
+}
+#kgGuide .kg-guide-foot a {
+  color: var(--ink-2, rgba(203, 218, 241, .76)); text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+#kgGuide .kg-guide-foot a:hover { color: #fff; border-bottom-color: rgba(224, 164, 105, .5); }
+#kgGuide .kg-guide-sep { color: var(--ink-3, rgba(193, 195, 201, .46)); margin: 0 9px; }
+
+/* 收起后的那一行：只是一个按钮，不占高度地贴在正文顶部 */
+#kgGuideOpen {
+  display: block; margin: 0 0 14px;
+  font: inherit; font-size: 11.5px; cursor: pointer;
+  color: var(--ink-3, rgba(193, 195, 201, .46));
+  background: none; border: 0; padding: 0;
+  border-bottom: 1px dashed var(--line, rgba(178, 180, 186, .13));
+}
+#kgGuideOpen span {
+  display: inline-block; width: 15px; height: 15px; line-height: 15px;
+  text-align: center; border-radius: 50%;
+  border: 1px solid var(--line, rgba(178, 180, 186, .18));
+  color: var(--accent, #e0a469); margin-right: 6px; font-size: 10.5px;
+}
+#kgGuideOpen:hover { color: var(--ink, #eef3fd); }
+
+/* 窄屏：标签换到上一行，避免 92px 的标签列把正文挤成细条 */
+@media (max-width: 640px) {
+  #kgGuide .kg-guide-body > div { grid-template-columns: 1fr; gap: 2px; }
+  #kgGuide dd { margin-bottom: 6px; }
+}
