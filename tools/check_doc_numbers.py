@@ -192,6 +192,21 @@ def main():
 
     fails = []
 
+    def missing_target(what):
+        """被守的文档/产物不存在 ⇒ **算失败**，不是「跳过」（2026-09-20 修，§二·A3）。
+
+        原实现有 **7 处**都只打一行「⚠️ xxx 不存在，跳过」再 continue/return ⇒
+        **把一份被守文档删掉或改名，对应判据就整体消失，而 `main()` 照旧返回 0**
+        （审计用镜像实测：drop 掉 `docs/NUMBERS_CARD.md` 之后，
+        ⑤ 与 ⑥ 两组都只剩一行 ⚠️，`main()` 返回 0）。
+        本守门的语义是"这份文档必须满足下面这些断言"——
+        文档不在 ⇒ 断言无从成立 ⇒ **必须报错**。
+        （同一形态在本体自检里还有 5 处，见 §二·A5，已一并修。）
+        """
+        fails.append(f'{what} 不存在 —— 它是本守门要守的对象，'
+                     f'缺了就不能算通过（原实现只打一行「⚠️ 跳过」）')
+        print(f'  ❌ {what} 不存在（被守对象缺失 ⇒ 判据无从成立，算失败）')
+
     # ① 已知的旧值不该再出现。
     #
     # 判据要**足够具体**，否则会误报：初版把裸的 '63.8%' 列为旧值，
@@ -444,7 +459,7 @@ def main():
     for rel in corpus_docs:
         p = ROOT / rel
         if not p.exists():
-            print(f'  ⚠️ {rel} 不存在，跳过')
+            missing_target(rel)
             continue
         txt = p.read_text(encoding='utf-8', errors='replace')
         ok = True
@@ -486,7 +501,7 @@ def main():
     print('\n=== ⑥ 数字卡是否反映当前规模 ===')
     card_p = ROOT / 'docs' / 'NUMBERS_CARD.md'
     if not card_p.exists():
-        print('  ⚠️ docs/NUMBERS_CARD.md 不存在，跳过')
+        missing_target('docs/NUMBERS_CARD.md')
     else:
         card = card_p.read_text(encoding='utf-8')
         card_need = {
@@ -564,7 +579,7 @@ def main():
     print('\n=== ⑦ 项目手册 §2 的代码事实是否与实测一致 ===')
     PLAYBOOK = ROOT / 'docs' / '已移除的旧版手册'
     if not PLAYBOOK.exists():
-        print('  ⚠️ docs/已移除的旧版手册 不存在，跳过')
+        missing_target('docs/已移除的旧版手册')
     else:
         pb = PLAYBOOK.read_text(encoding='utf-8', errors='replace')
         FACT_RE = re.compile(r'<!--\s*fact:([a-z_]+):(\S+?)\s*-->')
@@ -704,7 +719,7 @@ def main():
     print('\n=== ⑧ F2 多图对比：diff.json 自洽 + 前端数字同步 ===')
     diff_p = ROOT / 'web' / 'kg-data' / 'diff.json'
     if not diff_p.exists():
-        print('  ⚠️ web/kg-data/diff.json 不存在，跳过（先跑 tools/build_diff_data.py）')
+        missing_target('web/kg-data/diff.json')
     else:
         dj = json.loads(diff_p.read_text(encoding='utf-8'))
         dm = ((dj.get('design') or {}).get('measured') or {})
@@ -907,7 +922,7 @@ def main():
     # ② 导航页：`*` 标注**必须真的在页面上**（这次的病灶本身就是"承诺只写在文档里"）
     _idx_p = _WEB / 'index.html'
     if not _idx_p.exists():
-        print('  ⚠️ web/index.html 不存在，跳过导航页检查')
+        missing_target('web/index.html')
     else:
         idx = _idx_p.read_text(encoding='utf-8', errors='replace')
         mm = re.search(r'data-esm-pages="([^"]*)"', idx)
@@ -945,7 +960,7 @@ def main():
     #    它此前同样把 `community-atlas` 写成"历史原型"。同一事实抄三遍，就三处都守。
     _guard = _WEB / 'lib' / 'net-guard.js'
     if not _guard.exists():
-        print('  ⚠️ web/lib/net-guard.js 不存在，跳过')
+        missing_target('web/lib/net-guard.js')
     else:
         g = _guard.read_text(encoding='utf-8', errors='replace')
         miss = [n for n in runtime if n not in g]
@@ -991,7 +1006,7 @@ def main():
     _AHEAD_PAT = re.compile(r'领先[^。\n|]{0,40}?(\d+)[\s*]{0,4}个提交')
     _LEDGER = ROOT / 'docs' / 'TODO.md'
     if not _LEDGER.exists():
-        print('  ⚠️ docs/TODO.md 不存在，跳过')
+        missing_target('docs/TODO.md')
     else:
         _lt = _LEDGER.read_text(encoding='utf-8', errors='replace')
         _n_bare = 0

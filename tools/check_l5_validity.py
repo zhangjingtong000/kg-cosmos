@@ -69,6 +69,17 @@ def main():
         print(f'  P2 前提形态: 单句 {a["pass_rate"]*100:.1f}% vs 整段 {b["pass_rate"]*100:.1f}%'
               f'  Δ={delta:+.1f}pp')
         notes.append(f'P2 标定口径（整段）与运行口径（单句）相差 {delta:+.1f}pp')
+    else:
+        # ⚠️ **2026-09-20 修（守门假绿审计 §三·B8）**：原来**没有 else 分支** ——
+        #    `P2_premise_form` 只要不是恰好 2 个键，这一整条判据就**静默消失**：
+        #    输出里完全没有 P2 那一行，L234 又会用 `if len(p2) == 2 else None`
+        #    把产物字段一起抹平成 null ⇒ **判据消失得无声无息，而脚本照旧 exit 0**。
+        #    ⇒ 现在把它变成**可见且算失败**的："算不出来"不是"通过"。
+        fails.append(f'P2 判据无法计算：`P2_premise_form` 的键数是 {len(p2)}（预期 2）'
+                     f' —— probe 产物结构变了，或标定/运行口径之一缺失')
+        print(f'  ❌ P2 前提形态：`P2_premise_form` 键数 {len(p2)}（预期 2）'
+              f' ⇒ **本判据算不出来，不算通过**')
+        notes.append(f'P2 无法计算：键数 {len(p2)} ≠ 2')
 
     # P3：方向盲区——L5 能拦住多少方向反转
     p3 = p['P3_direction']
