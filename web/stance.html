@@ -67,6 +67,20 @@
     --no: var(--clay-2);
     --mixed: var(--accent);
     --poss: var(--ink-3);
+    /* ══ 布局基准（2026-09-19）═════════════════════════════════════════════
+     *
+     * **改之前**：`main` 只写了 `max-width:1240px`，**漏了 `margin:0 auto`**
+     * ⇒ 整页**贴左**，1600 宽视口下右侧空 **338px**（实测 leftGap 0 / rightGap 338）。
+     *
+     * **改法**：① `main` 用设计系统的 `--shell-w`（1440）**并居中**；
+     *   ② 页内只留**两个**宽度概念 ——
+     *      · `--shell-w`：**数据类**（`#dist` / `#rows`）**铺满容器**（不设 max-width）；
+     *      · `--read-w` ：**正文类**（`.sub` / `.note` / `.warnbox`）统一到**这一个值**
+     *        —— 这两块原来一处 1060、一处 1060，而 `.sub` 也是 1060，
+     *        但**页面里没有第二个宽度**，统一后右边界只剩一条线。
+     * ⚠️ `--shell-w` 是 `lib/design.css` 的 token，**不写死 1440**。
+     */
+    --read-w:1060px;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
@@ -74,14 +88,36 @@
        font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
   header{padding:16px 22px 8px}
   h1{margin:0;font-size:18px;font-weight:600}
-  .sub{color:var(--dim);font-size:12.5px;margin-top:5px;max-width:1060px}
-  main{padding:0 22px 60px;max-width:1240px}
-  .dist{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px}
-  .dchip{border:1px solid var(--line);border-radius:10px;padding:9px 14px;min-width:118px}
+  .sub{color:var(--dim);font-size:12.5px;margin-top:5px;max-width:var(--read-w)}
+  /* ══ 居中 + 用上右半空间（2026-09-19）══════════════════════════════════
+   * `margin:0 auto` 是这一页最要紧的一处 —— 漏了它，`max-width` 反而**制造**
+   * 了那条 338px 的空白（内容不再居中，而是全部挤在左 1240 里）。
+   * ⚠️ 窄屏（视口 < 1440）下 `max-width` 不生效 ⇒ `auto` 两边各 0
+   * ⇒ **行为与改前完全一致**（实测 1000 宽时 leftGap=0 / rightGap=0）。
+   */
+  main{padding:0 22px 60px;max-width:var(--shell-w);margin:0 auto}
+  /* ══ 分布块平分整行（2026-09-19）════════════════════════════════════════
+   *
+   * **改之前**：`.dist` 是 `flex + wrap`，4 个 `.dchip` 各 `min-width:118px`
+   * 且**不可伸缩** ⇒ 只有 4 个 chip 时它们只占左侧约 500px
+   * （实测容器右边界 1218，而最后一个 chip 的右边界只有 **555**）
+   * ⇒ 右侧那 660px 的空白是"看着空"而不是"真的需要"。
+   *
+   * **改法**：`grid-template-columns:repeat(4,1fr)` —— **4 个 chip 平分整行**。
+   * ⚠️ `.dchip` 原来的 `min-width:118px` 在 grid 下会**顶住列宽不放**
+   *    （grid item 的自动最小尺寸）⇒ 改为 `min-width:0`，宽度交给容器。
+   * ⚠️ 与它下面的 `.warnbox` **间距保持 20px**（这里 6px + warnbox 的 14px），
+   *    不挤在一起。窄屏 ≤760 退两列（4 列在 700px 下每列不到 160px，标题会折）。
+   */
+  .dist{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
+        margin:16px 0 6px}
+  .dchip{border:1px solid var(--line);border-radius:10px;padding:9px 14px;min-width:0}
   .dchip .k{font-size:11.5px;color:var(--dim);letter-spacing:.09em;text-transform:uppercase}
   .dchip .v{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
   .dchip.yes .v{color:var(--yes)} .dchip.no .v{color:var(--no)}
   .dchip.mixed .v{color:var(--mixed)} .dchip.poss .v{color:var(--poss)}
+  /* 窄屏：4 列在 700px 下每列不到 160px，标签（"证据不足 · Possibly"）会折行 */
+  @media (max-width:760px){.dist{grid-template-columns:repeat(2,1fr)}}
   /* ══ 紧凑化（2026-09-18）═════════════════════════════════════════════
    *
    * **改之前**：每一行占 **4 层**（`.top` 标题行 / `.meter` 进度条 / `.nums` 数字行 /
@@ -97,8 +133,30 @@
    *
    * ⚠️ **不要给出"表头"以外的装饰**：这一页的信息是**一条条记录**，不是"卡片"。
    */
+  /* ══ 每行右端对齐（2026-09-19）═════════════════════════════════════════
+   *
+   * **为什么要改**：`.row` 是 `flex`，而 `.claim{flex:1 1 260px}` 是**唯一可伸缩项**
+   * ⇒ 右边那一组（支持/反对/合计 · 迷你条 · ▸证据）的位置
+   * 全靠"claim 长完剩下多少"，而 `.verdict` 的宽度**随标签变**
+   * （`Yes` 实测 32px、`Possibly` 约 62px）⇒ 行与行之间数字的**起点会左右飘**，
+   * 纵向扫下来对不成一列。
+   *
+   * **选 grid 而不是 `.nums{margin-left:auto}` 的理由**（两种都试算过）：
+   *   `margin-left:auto` 在 flex 里**优先于 `flex-grow`** 吃掉剩余空间 ⇒
+   *   `.claim` 会塌回 260px 的 basis，**长主张立刻折行、行高参差**；
+   *   而 grid 的 `minmax(0,1fr)` 让 claim **照旧吸收剩余**，
+   *   同时把右侧三列钉成固定宽度 ⇒ **起点恒定、右端齐平**，两头都保住。
+   * ⚠️ 右三列的宽度**按实测值定**：数字组实测 150 ⇒ 给 160（余量）；
+   *    迷你条本来就是 86；`summary`「看是谁支持 / 谁反对（带论文与页码）」
+   *    实测 208 ⇒ 给 208（三列都是 `12px` 以内的固定文案，不会撑破）。
+   * ⚠️ ≤1100 退回 flex —— 那时宽度不够，硬钉列宽会横向溢出。
+   */
   .row{border-bottom:1px solid var(--line);padding:7px 2px;
-       display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+       display:grid;align-items:center;gap:14px;
+       grid-template-columns:minmax(0,1fr) auto 160px 86px 208px}
+  @media (max-width:1100px){
+    .row{display:flex;flex-wrap:wrap}
+  }
   .row:hover{background:rgba(255,255,255,.022)}
   .verdict{font-size:11px;font-weight:600;border-radius:5px;padding:0 7px;
            border:1px solid currentColor;flex:0 0 auto}
@@ -128,15 +186,29 @@
   details[open] summary::before{content:"▾ "}
   /* 展开的内容要**跨到下一行**（它比这一行宽得多） */
   details[open]{flex:1 1 100%;order:9}
+  /* ⚠️ grid 下 `order` 管不到跨列 —— 必须显式跨满整行，
+     否则展开的内容只会落在 208px 的那一列里（比这一行窄得多）。 */
+  details[open]{grid-column:1 / -1}
   details[open] summary{margin-bottom:2px}
   details ul{margin:6px 0 2px;padding-left:18px}
   details li{font-size:12px;color:var(--dim);margin:1px 0}
   details li b{color:var(--fg)}
-  .note{color:var(--dim);font-size:12.5px;margin-top:16px;max-width:1060px}
+  /* ══ 底部三块（caveat / rows / foot）的间距与分组（2026-09-19）══════════
+   *
+   * 用户点名的"底下的这些不太好看"。**一个字都没动**，只做三件事：
+   *   ① **右边界收敛**：`#dist` / `#rows` 铺满容器（数据），
+   *      `.warnbox` / `.note` 用 `--read-w`（正文）—— 页码里只剩这两条线；
+   *   ② **间距分两档**：块与块 14px（warnbox 的 `margin:14px 0`），
+   *      正文段与上文 18px（`.note` 的 `margin-top`），不再各写各的；
+   *   ③ `.note` 的 `line-height` 从 1.6 放到 **1.75** ——
+   *      它是这一页最长的一段（"三个必须一起看的形态"），1.6 挤成一坨。
+   */
+  .note{color:var(--dim);font-size:12.5px;margin-top:18px;line-height:1.75;
+        max-width:var(--read-w)}
   .note b{color:#e8c9a4}
   .warnbox{border:1px solid rgba(232,201,164,.34);background:rgba(224,164,105,.07);
            border-radius:10px;padding:11px 14px;margin:14px 0;font-size:12.5px;
-           color:#e8c9a4;max-width:1060px}
+           line-height:1.7;color:#e8c9a4;max-width:var(--read-w)}
   a{color:var(--yes)} code{color:#e8c9a4}
 </style>
 </head>

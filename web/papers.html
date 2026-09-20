@@ -59,19 +59,53 @@
     --cool: var(--cyan);
     --warn: var(--warm);
     --bad: var(--clay-2);      /* 系统里没有"红"，用暖陶土色 —— 与整站同族 */
+    /* ══ 布局基准（2026-09-19）══════════════════════════════════════════
+     *
+     * **改之前**：`main` 只有 `max-width:1240px` 而**漏了 `margin:0 auto`**
+     * ⇒ 整个页面**贴左**，1600 宽视口下右侧空 **338px**。
+     * 而页内的 `max-width` 又是**三种值**（1240 / 1060 / 1000）⇒ 右边界参差。
+     *
+     * **改法**：① `main` 用设计系统的 `--shell-w`（1440）**并居中**；
+     *   ② 页内只留**两个**宽度概念 ——
+     *      · `--shell-w`：**数据类**（表格 / KPI / 过滤行）**铺满容器**（不设 max-width）；
+     *      · `--read-w` ：**正文类**（`.sub` / `.hint` / `.note` / `.warnbox`）
+     *        统一到**这一个值** —— 一行太长反而读不下去，但**不能再有两种值**。
+     * ⚠️ `--shell-w` 是设计系统的 token（`lib/design.css` 的 `:root`），
+     *    **不写死 1440** —— 否则系统改宽度时这一页会掉队。
+     */
+    --read-w:1060px;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--fg);
        font:14px/1.65 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
   header{padding:16px 22px 8px}
   h1{margin:0;font-size:18px;font-weight:600}
-  .sub{color:var(--dim);font-size:12.5px;margin-top:5px;max-width:1060px}
+  .sub{color:var(--dim);font-size:12.5px;margin-top:5px;max-width:var(--read-w)}
   .sub b{color:var(--warn)}
-  main{padding:0 22px 60px;max-width:1240px}
+  /* ══ 居中 + 用上右半空间（2026-09-19）══════════════════════════════════
+   * `margin:0 auto` 是这一页最要紧的一处 —— 漏了它，`max-width` 反而**制造**
+   * 了那条空白（内容不再居中，而是全挤在左 1240 里，右侧空 338px）。
+   * ⚠️ 窄屏（视口 < 1440）下 `max-width` 不生效 ⇒ `auto` 两边各 0
+   * ⇒ **行为与改前完全一致**（实测 1000 宽时 leftGap=0 / rightGap=0）。
+   */
+  main{padding:0 22px 60px;max-width:var(--shell-w);margin:0 auto}
   h2{font-size:15.5px;margin:24px 0 4px}
-  .hint{color:var(--dim);font-size:12.5px;margin-bottom:6px;max-width:1000px}
-  .kpis{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
-  .kpi{border:1px solid var(--line);border-radius:10px;padding:9px 14px;min-width:104px}
+  /* ⚠️ 这里原来是 `max-width:1000px` —— 同一页里 1240 / 1060 / 1000 **三种右边界**。
+   * 现在正文类（`.sub` / `.hint` / `.note` / `.warnbox`）统一到 `--read-w`，
+   * 而数据类（表格 / KPI / 过滤行）**铺满容器** ⇒ 右边界只剩两条线。 */
+  .hint{color:var(--dim);font-size:12.5px;margin-bottom:6px;max-width:var(--read-w)}
+  /* ══ KPI 卡片平分整行（2026-09-19）═════════════════════════════════════
+   * 原来卡片是 `min-width:104px` 且**不伸缩** ⇒ 6 个卡片只占左侧约 734px，
+   * 而容器铺满到 1487 ⇒ **右侧又空出 660px**（截图里一眼看得出来）。
+   * **为什么用 grid 而不是 `flex:1 1 104px`**：flex 换行时**最后一行的那一项
+   * 会被 `flex-grow` 拉满整行** —— 实测 700 宽下第 6 个卡片宽 634、前 5 个各 119，
+   * 大小差 5 倍，比原来更难看。grid 的列宽与"这一行有几个"无关 ⇒ 卡片永远同宽。
+   * 列数按项目断点分档（6 / 3 / 2），**卡片右边界与下面的表格对齐**。
+   */
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:16px 0 4px}
+  @media (max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{border:1px solid var(--line);border-radius:10px;padding:9px 14px;min-width:0}
   .kpi .k{font-size:11.5px;color:var(--dim);letter-spacing:.07em}
   .kpi .v{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--cool)}
   table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:6px}
@@ -99,15 +133,38 @@
   td,th{line-height:1.55}
   /* 短列：不换行 */
   td.nowrap,th.nowrap{white-space:nowrap}
-  /* 长列：限宽 + 省略（`title` 属性里有全文） */
-  td.ellip{max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  td.ellip.wide{max-width:460px}
+  /* 长列：限宽 + 省略（`title` 属性里有全文）
+   * ⚠️ 容器从 1240 放宽到 1440（`--shell-w`）后，**限宽也要跟着放宽** ——
+   *    否则多出来的 200px 会变成表格里的空白，**比改之前更难看**。
+   *    按内容宽同比例放大（1196 → 1396）：340 → 400、460 → 560。 */
+  td.ellip{max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  td.ellip.wide{max-width:560px}
+  /* ⚠️ `#inventory`（加「主要关系」后 10 列）与 `#corpus`（加「检索来源」后 6 列）
+   *    是**带新列的两张表** —— 标题列在这里**不能**用 560，否则新列会被挤成一条缝。 */
+  #inventory td.ellip.wide, #corpus td.ellip.wide{max-width:420px}
+  /* 「主要关系」「检索来源」两列：都是"给一眼看的摘要"，全文在 `title` 里。
+   * ⚠️ 这两条必须写在 `td.ellip` **之后**（同为 0-1-1 特异性，后者胜）。 */
+  td.tt{max-width:240px}
+  td.q{max-width:320px}
   /* 数字列：右对齐 + 等宽数字（右对齐才比得出量级） */
   td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   /* 操作列：固定宽，别被内容挤 */
   td.act,th.act{width:110px;text-align:right;white-space:nowrap}
   /* 表格之间的间距统一（原来靠 `margin-top:6px`，而 `h2` 也有 margin ⇒ 不一致） */
   h2 + .hint + table, h2 + table{margin-top:8px}
+  /* ══ 窄屏：表格自己滚，页面不滚（2026-09-19 实测发现）═══════════════════
+   *
+   * **实测**（1000×900）：`#inventory` 的**最小宽度**是 **985px**，而容器只有
+   * 934 ⇒ **整页横向溢出 29px** —— 这是**改前就有的**问题
+   * （9 列里短列全 `nowrap`，浏览器不能把它们压下去）；
+   * 加「主要关系」列后放大到 **1216**（整页溢 260px）。
+   *
+   * **改法**：容器 `overflow-x:auto`。比"让短列换行"好 ——
+   * 换行会让行高参差，而那正是本页 09-18 统一行高的由头。
+   * ⚠️ 宽屏下 `table{width:100%}` 正好铺满（实测 1396 = 容器内容宽）
+   * ⇒ **不会**多出一条无谓的滚动条。
+   */
+  #inventory, #uploads, #failed, #corpus, #trash{overflow-x:auto}
 
   code{color:var(--warn);font-size:12px}
   .pill{display:inline-block;border:1px solid var(--line);border-radius:5px;
@@ -122,11 +179,17 @@
                 border-color:rgba(224,117,117,.42)}
   button.danger:hover:not(:disabled){border-color:var(--bad);color:#fff}
   button:disabled{opacity:.5;cursor:default}
-  .note{color:var(--dim);font-size:12.5px;margin-top:14px;max-width:1060px}
+  /* ══ 正文类的右边界收敛（2026-09-19）═══════════════════════════════════
+   * 原来 `.note` / `.warnbox` / `.sub` 是 1060，而 `.hint` 是 1000
+   * ⇒ 同一页同一类内容**两条右边界**（1082 / 1022），差 60px 看着"没对齐"。
+   * 现在统一成 `--read-w` 一个值；行距也顺带提到 1.75（这三块都是长段中文）。
+   */
+  .note{color:var(--dim);font-size:12.5px;margin-top:14px;line-height:1.75;
+        max-width:var(--read-w)}
   .note b{color:var(--warn)}
   .warnbox{border:1px solid rgba(232,201,164,.34);background:rgba(224,164,105,.07);
            border-radius:10px;padding:11px 14px;margin:14px 0;font-size:12.5px;
-           color:var(--warn);max-width:1060px}
+           line-height:1.7;color:var(--warn);max-width:var(--read-w)}
   dialog{background:#12141a;color:var(--fg);border:1px solid var(--line);
          border-radius:12px;padding:18px 20px;max-width:520px;width:92%}
   dialog h3{margin:0 0 6px;font-size:15px}
@@ -217,7 +280,9 @@
     <b>共 K 节点</b> = 这些论文的节点数之和，数字来自
     <code>web/kg-data/corpus-index.json</code> 的 <code>papers[].nodes</code>
     （与 <code>data/corpus/graphs/&lt;id&gt;.json</code> 里的节点数逐字一致）。<br>
-    <b>关系</b>与<b>社区</b>两列也来自 <code>corpus-index.json</code>：
+    <b>关系</b>、<b>社区</b>与<b>主要关系</b>三列也来自 <code>corpus-index.json</code>
+    （<b>主要关系</b>取 <code>top_types</code> 里计数最高的 3 项，鼠标悬停看计数；
+    <b>那篇没有这项统计时留 —，不猜</b>）：
     <b>社区</b> = 这篇论文的实体出现在哪几个社区（可从主视图按社区查看）；
     只有清单、没出图的条目这两列是 <b>—</b>。</p>
   <div class="lfilter">
@@ -360,10 +425,22 @@ function renderInventory() {
     <th class="nowrap">状态</th><th class="nowrap">id</th>
     <th class="nowrap">语言</th><th class="nowrap">年</th><th>标题</th>
     <th class="num">节点</th><th class="num">关系</th>
-    <th class="num">社区</th><th class="act"></th></tr></thead><tbody>${rows.map(p => {
+    <th class="num">社区</th><th class="nowrap">主要关系</th>
+    <th class="act"></th></tr></thead><tbody>${rows.map(p => {
       const st = STATE_PILL[stateOf(p)], t = plain(p.title), ix = idxOf(p);
       const eg = (ix && ix.edges != null) ? ix.edges : (p.edges != null ? p.edges : '—');
       const cm = (ix && ix.communities) ? ix.communities.length : '—';
+      /* ★ 新增「主要关系」（2026-09-19）：`corpus-index.json` 的 `top_types`
+       *   本来就在数据里、**从没被这一页用过** ⇒ 不需要任何新数据源。
+       *   取**前 3 项**（形如 `RELATED_TO · USES · CREATED_BY`），全文与计数进 `title`。
+       *   ⚠️ 34 篇里有 13 篇**没有**这个字段 —— 那里如实写 `—`，
+       *      **不猜、不按其他字段补**（补出来的"关系类型"是编的）。
+       *   ⚠️ 排序**自己算**，不赌 JSON 里的键序（键序是实现细节，会变）。 */
+      const tts = (ix && ix.top_types)
+        ? Object.entries(ix.top_types).sort((a, b) => b[1] - a[1]).slice(0, 3) : [];
+      const ttTxt = tts.length ? tts.map(x => x[0]).join(' · ') : '—';
+      const ttTip = tts.length ? tts.map(x => x[0] + ' ' + x[1]).join(' · ')
+                               : '（这篇没有关系类型统计）';
       /* 只有**在用且有图**的条目才有主视图可进（归档的按政策不引导过去）。 */
       const go = (p.in_graph && !p.archived)
         ? '<a href="./kg-nebula.html" title="进入主视图（三维星云）">进入主视图 ↗</a>' : '';
@@ -377,6 +454,7 @@ function renderInventory() {
         <td class="num">${p.in_graph && p.nodes != null ? p.nodes : '—'}</td>
         <td class="num">${eg}</td>
         <td class="num">${cm}</td>
+        <td class="ellip tt" title="${esc(ttTip)}">${esc(ttTxt)}</td>
         <td class="act">${go}</td></tr>`;
     }).join('')}</tbody></table>`
     : `<div class="empty">（${total ? '没有匹配的条目 —— 清掉搜索词或取消勾选试试' : '这一组没有条目'}）</div>`;
@@ -453,15 +531,25 @@ function render() {
   // ⚠️ 原来"上传过"列被推到很右 —— 因为"标题"列**自己截断到 62 字**（JS 截的），
   //    而 CSS 里没有限宽 ⇒ 浏览器仍按"这一列可能很长"分配 ⇒ 余量全给了它。
   //    ⇒ 现在用 `ellip` 让 CSS 也参与限宽，并保留 `title` 给全文。
+  /* ★ 新增「检索来源」（2026-09-19）：这张表原来只有 4 列、**是页内最空的一张**
+   *   （右侧一大片空白）。而 `query` 字段**34/34 篇都有值**
+   *   （形如 `all:"knowledge graph" AND all:"survey"`），
+   *   数据**早就在 `paper-registry.json` 里** ⇒ 加这一列不需要新数据源，
+   *   而且它回答的是"**这篇当初是怎么被检索到的**"——这张表本来就该有。
+   *   ⚠️ `corpus-index.json` 也有一份同名同值的 `query`；优先用索引里的，
+   *      取不到再退回注册表的（两边都是 34/34，互为兜底）。 */
   const ing = (REG.papers || []).filter(p => p.in_graph);
   $('#corpus').innerHTML = `<table><thead><tr><th class="nowrap">arXiv id</th>
-    <th class="nowrap">年</th><th>标题</th><th class="nowrap">上传过</th>
+    <th class="nowrap">年</th><th>标题</th><th>检索来源</th>
+    <th class="nowrap">上传过</th>
     <th class="act"></th></tr></thead><tbody>${ing.map(p => {
       const n = (p.uploads || []).length;
       const t = String(p.title || '');
+      const q = ((idxOf(p) || {}).query) || p.query || '';
       return `<tr><td class="nowrap"><code>${esc(p.arxiv_id)}</code></td>
         <td class="nowrap">${esc(p.year ?? '')}</td>
         <td class="ellip wide" title="${esc(t)}">${esc(t)}</td>
+        <td class="ellip q" title="${esc(q)}">${esc(q || '—')}</td>
         <td class="nowrap">${n ? `<span class="pill up">${n} 次</span>` : '—'}</td>
         <td class="act"><button class="danger" data-kind="corpus_graph"
             data-id="${esc(p.arxiv_id)}" data-label="${esc(p.arxiv_id)}"
