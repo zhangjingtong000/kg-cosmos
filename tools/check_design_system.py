@@ -78,11 +78,20 @@ WILD = ['#0b0d12', '#0b0c11', '#0d0e13', '#dfe2e8', '#8b95a8']
 
 
 def strip_comments(text):
-    """去掉 CSS/JS 注释 —— **只检查生效的代码**。"""
-    text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)      # /* ... */
-    text = re.sub(r'^\s*//.*$', '', text, flags=re.M)      # // ...
-    # HTML 注释
-    text = re.sub(r'<!--.*?-->', '', text, flags=re.S)
+    """去掉 CSS/JS 注释 —— **只检查生效的代码**。
+
+    ⚠️ 关键细节：**删注释时必须把换行留下**。
+    原先直接 `re.sub(r'/\\*.*?\\*/', '', ...)` 会把注释里的换行一起吃掉，
+    于是它后面所有行的**行号整体前移** —— 报出来的 `voyage.css:188`
+    其实是第 204 行。行号错了比不报还费时间（要拿着错行号去翻文件）。
+    现在一律用"注释里几个换行就补几个换行"替换，行号逐字对应原文。
+    """
+    def keep_lines(m):
+        return '\n' * m.group(0).count('\n')
+
+    text = re.sub(r'/\*.*?\*/', keep_lines, text, flags=re.S)      # /* ... */
+    text = re.sub(r'^\s*//.*$', '', text, flags=re.M)              # // ...
+    text = re.sub(r'<!--.*?-->', keep_lines, text, flags=re.S)     # HTML 注释
     return text
 
 
@@ -133,14 +142,27 @@ def main():
     #      把注释算进来会把**好文档判成坏代码**（这个坑踩过）。
     #   ⚠️ **色标不算** —— `pathqa` 那种 `::before` 的 3×15px 小条是**状态标记**，
     #      不是"把内容框成一块"的竖线。
+    #
+    # ★ 2026-09-20 **扩面**：原先只扫 `web/*.html` 的**内联** `<style>`，
+    #   于是**任何外部 CSS 都逃过这条判据** —— 连这条规矩的出处
+    #   `lib/design.css` 自己都不在被扫范围内。后果是实测出来的：
+    #   `lib/voyage.css:204` 的 `.note{border-left:2px solid …}`
+    #   （导航页的玻璃盒结论块）一直违规，而守门一路报「✅ 无」。
+    #   现在把 `web/*.css` 与 `web/lib/**/*.css` 一并纳入；
+    #   `strip_comments` 本来就同时处理 `/* */` 与 `<!-- -->`，HTML 与 CSS 可共用。
+    CSS_FILES = sorted(list(WEB.glob('*.css')) + list((WEB / 'lib').rglob('*.css')))
     stripes = []
-    for p in sorted(WEB.glob('*.html')):
+    n_html = 0
+    for p in sorted(WEB.glob('*.html')) + CSS_FILES:
         live = strip_comments(p.read_text(encoding='utf-8', errors='replace'))
+        if p.suffix == '.html':
+            n_html += 1
         for m in re.finditer(r'border-left\s*:\s*([2-9]|\d\d+)px', live):
             ln = live[:m.start()].count('\n') + 1
             stripes.append((p.name, ln, m.group(0)))
     if not stripes:
-        print('  ② 左边强调竖线（≥2px）：✅ 无')
+        print(f'  ② 左边强调竖线（≥2px）：✅ 无'
+              f'（扫了 {n_html} 个页面 + {len(CSS_FILES)} 个外部 CSS）')
     for nm, ln, frag in stripes:
         print(f'  ② 左边强调竖线：❌ {nm}:{ln}  `{frag}`')
     if stripes:

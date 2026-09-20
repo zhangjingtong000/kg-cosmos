@@ -201,13 +201,36 @@ h2 em{font-style:normal;color:var(--accent);
   transition:transform .45s cubic-bezier(.19,1,.22,1),color .3s}
 .entry:hover .go{transform:translateX(6px);color:var(--accent)}
 
-.note{margin-top:34px;padding:22px 26px;border-left:2px solid rgba(255,207,168,.4);
-      background:rgba(3,6,13,.60);backdrop-filter:blur(6px);
-      color:var(--ink-2);font-size:14.5px;max-width:82ch}
-.note b{color:var(--warm);font-weight:600}
-.note strong{color:#fff;font-weight:600}
-.note p{margin:0 0 12px}
-.note p:last-child{margin-bottom:0}
+/* ── `.note` 一族：**已从这里删除**（2026-09-20），原样留存档案 ────────────
+   删除前的写法（按项目规矩：被替代的东西不直接丢，留在注释里）：
+
+     ① 最早的版本（黑底玻璃盒 + 左侧 2px 竖线）：
+        .note{margin-top:34px;padding:22px 26px;border-left:2px solid rgba(255,207,168,.4);
+              background:rgba(3,6,13,.60);backdrop-filter:blur(6px);
+              color:var(--ink-2);font-size:14.5px;max-width:82ch}
+     ② 2026-09-20 中途改过一版的写法（玻璃盒保留、竖线挪进盒内顶部）：
+        .note{position:relative;margin-top:34px;padding:34px 26px 22px;…}
+        .note::before{content:"";position:absolute;left:26px;top:16px;
+              width:56px;height:2px;background:var(--accent);opacity:.85}
+     ③ 同族另外 4 条：`.note b` / `.note strong` / `.note p` / `.note p:last-child`
+   （以上都只作为档案，**不是生效代码** —— 它们在注释里。）
+
+   ★ 为什么整族删掉，而不是"把竖线改成顶部短横线"了事：
+     · 本文件**只有 `index.html` 一个页面引用**，而 `index.html` 的内联样式里
+       已经有一份**完整且更新**的 `.note`（见 `index.html:55-99`，那里的注释记录了
+       用户原话：「一个黑底框，以及左侧的一个竖线条」「像硬贴上去了」
+       ⇒ 新版**去掉一切框线**，改用排版本身做层次）。
+       ⇒ voyage.css 这一份是**过期的第二真源**，与 index.html 那份逐属性冲突。
+     · `index.html` 的内联规则**没有**声明 `backdrop-filter`，于是本文件的
+       `backdrop-filter:blur(6px)` 一直漏下来生效。实测计算值：
+       `backdropFilter = "blur(6px)"` 且 `background = "rgba(0, 0, 0, 0)"`
+       —— 也就是**一个连边框都没有、却把背后内容糊掉的矩形**。
+       这正属于用户否掉的"像硬贴上去"那类观感，只是更隐蔽。
+     · 删掉之后 `.note` 的外观由 `index.html` 独占决定，不再有两份会各自漂移的写法。
+
+   ⚠️ 其它页面（diff / refs / prisma / temporal / stance / papers / paper-table /
+      method-limits …）也用 `class="note"`，但它们**不引本文件**，
+      走的是 `lib/design.css:121` 那套（顶部短横线），不受本次删除影响。 */
 
 .cta{margin-top:38px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
 .btn{position:relative;display:inline-flex;align-items:center;gap:11px;
