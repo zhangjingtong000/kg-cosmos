@@ -264,82 +264,27 @@ html.js-motion #intro-veil{
   display:block;position:fixed;inset:0;z-index:99999;pointer-events:none;
   background:#070c13;clip-path:circle(150% at 50% 48%);
 }
-/* ── 第 4 屏：**卷筒**（2026-09-20；GSAP + ScrollTrigger）──────────────────
-   复刻对象：Codrops 的 Cinematic3DScroll。它的做法（我从它的构建产物里读出来的）：
-     · 内容挂在一个**圆柱**上（OGL，`radius:2.5`，radialSegments:64）；
-     · 主时间轴 `{trigger:root, start:"top top", end:"bottom bottom", scrub:1}`，
-       0 时刻并行一条 `.to(cylinder.rotation,{y:"+=28.27",duration:8.5,ease:"none"},0)`
-       ⇒ **滚动带着圆柱匀速转 ≈4.5 圈**；
-     · 每个章节再有自己 `1/N` 的滚动窗口，DOM 文案走"进—留—出"。
-   这里用同一套语言，但**不引入 OGL / 不新加任何依赖**，用纯 CSS 3D 摆成圆柱。
-   为什么这么选：这 12 项是**导航入口**，必须可点、可选中、可 Tab、读屏能读
-   （1:1 把文字渲染进画布就会全丢掉）。
+/* ── 两条"轴"（2026-09-20，第三次改；GSAP + ScrollTrigger）───────────────
+   第 4 屏（#ch-3）的上下两层本来就是两块 6 列网格（不是列表）。
+   所以这里**不改布局**，只给它加"轴"的运动方式。
 
-   ★ 五次改动的留档（同一个需求我错了四次，别再犯第五次）：
-     1 版 `once:true` + 26px 上滑 ⇒ 播完即无痕，"一点没变"。**被否。**
-     2 版 改 `scrub` + 补轨道线 ⇒ 只是"平铺淡入 + 一条线"。**被否。**
-     3 版 六项摆成"向远处退去的轨道" ⇒ 不是"卷筒"，是"斜轨道"。**被否。**
-     4 版 滚动驱动的卷筒 + 200vh 吸顶 ⇒ **又被否**：用户要的是
-          **无限循环的卷筒** —— 不靠滚动、不用拉长页面，
-          就在这一屏里**无限地转**，稍微有点景深即可。
-     5 版（本版）：`gsap` 无限循环自转（`repeat:-1`）+ 悬停/聚焦暂停 +
-          离开视口自动暂停（不做无意义的持续耗电）。
+   ★★ 三次改动的留档（同一个需求，我理解错了两次，别再犯第三次）：
+     第 1 版：`once: true` + 26px 上滑淡入，**没有任何可见载体**
+              ⇒ 播完即无痕，用户看到的就是"一点没变"。**被用户当场否掉。**
+     第 2 版：改成 `scrub`（绑滚动位置）+ 补上卡片顶部那条 `--rail` 轨道线。
+              方向对了，但**只是平铺的淡入 + 一条线**，仍然不是用户要的那个东西。
+     第 3 版（本版）：用户给出的参考是 Codrops 的 **Cinematic3DScroll**
+              （three.js + ScrollTrigger + ScrollSmoother，滚动驱动相机穿过一组 3D 平面）。
+              ⇒ 这里用同一套**纵深语言**复刻到 DOM 上：
+                六项排成一条**向远处退去的轨道**（越靠后越远、越斜、越暗），
+                滚动时"焦点"从第 1 项依次推进到第 6 项 —— **这就是"轴"**。
+                终态仍是完全平的那块六列网格（与加动效之前逐像素一致）。
 
-   ⚠️ 全部只在 `html.js-motion` 下生效。`bail()` 一摘这个 class，
-      `#reel3d` / `.reel-spin` / `.reel-hint` 就退化成三个不占位的普通元素
-      ⇒ **无动效 / 减少动效 / gsap 缺失时，版面与原来的平铺网格逐像素一致。**
-   ⚠️ 这里**不用 `will-change`** —— 它会留下永久的 containing block，本项目为它吃过亏。 */
-html.js-motion #reel3d{
-  perspective:1900px;perspective-origin:50% 46%;
-  position:relative;height:390px;margin-top:28px;
-  /* ★ 只在卷筒这一块加一层柔和的暗底（无边框、边缘渐隐到透明）。
-     为什么需要：绸缎光场的亮度起伏很大，实测截图里"01/02/03"那几块白细字
-     正好压在明亮的金色云上 ⇒ **几乎读不出来**（这不是动效问题，是背景对比度问题）。
-     用渐隐的径向暗底而不是给每块加"卡片底板"，是为了保住这一屏原有的
-     "无框、靠排版分层次"的观感。面板是 `#reel3d` 的子元素，所以这层
-     一定画在它们**后面**，不需要任何 z-index 技巧。 */
-  background:radial-gradient(66% 78% at 50% 50%,
-    rgba(2,5,11,.93), rgba(2,5,11,.68) 58%, rgba(2,5,11,0) 100%);
-}
-/* 文字的深色描边阴影：不画框也能把白字从明亮背景上"拔"出来。
-   （实测：只有暗底时，转到侧面的那几块仍会被背景吃掉。） */
-html.js-motion #reel3d .entry h3,
-html.js-motion #reel3d .entry p,
-html.js-motion #reel3d .entry .ix,
-html.js-motion #reel3d .entry .mt{
-  text-shadow:0 1px 14px rgba(2,5,11,.95), 0 0 4px rgba(2,5,11,.7);
-}
-html.js-motion #reel3d .reel-spin{
-  position:absolute;inset:0;transform-style:preserve-3d;
-}
-/* 12 个面板：围成一圈。角度与半径由 JS 写进行内 transform，
-   这里只负责"它们不再是 grid 子项，而是绝对定位的独立面板"。 */
-html.js-motion #reel3d .entries.flow,
-html.js-motion #reel3d .more-list{display:block;position:absolute;inset:0}
-html.js-motion #reel3d .more{margin:0;padding:0;border-top:0}
-html.js-motion #reel3d .more > .kick{display:none}
-html.js-motion #reel3d .entry{
-  position:absolute;left:50%;top:50%;width:300px;margin-left:-150px;
-  opacity:0;backface-visibility:hidden;
-  padding:18px 0 16px;
-}
-html.js-motion #reel3d .entry h3{font-size:17.5px}
-html.js-motion #reel3d .entry p{font-size:12.5px;line-height:1.7;max-width:none;color:var(--ink-2,rgba(203,218,241,.86))}
-html.js-motion #reel3d .more-list .entry h3{font-size:15px}
-html.js-motion #reel3d .more-list .entry p{font-size:12px}
-/* 每段顶部那条暖金线仍然由 `--rail` 驱动（现在是"转到正面时点亮"）。
-   ⚠️ 卷筒上不需要把六段连成一条了：面板是分开的，线就画在每块面板自己顶上。 */
-html.js-motion #reel3d .entry::after{right:0}
-/* 卷筒下方那句说明（用户明确不要"12 项直达链接"，所以这里只是文字）。 */
-.reel-hint{display:none}
-html.js-motion .reel-hint{
-  display:block;margin:18px 0 0;text-align:center;
-  font-size:11.5px;letter-spacing:.04em;color:var(--ink-3,#8ea0bd);
-}
-html.js-motion .reel-hint kbd{
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
-  border:1px solid rgba(140,170,255,.3);border-radius:4px;padding:1px 5px;
-}
+   ⚠️ 初始态只在 `html.js-motion` 下生效；`bail()` 会摘掉它
+   ⇒ 无动效 / 减少动效 / gsap 缺失时，版面与改动前**逐像素一致**
+   （`--rail` 取 `var()` 的兜底值 0，与改动前 `scaleX(0)` 同值，hover 行为不变）。 */
+html.js-motion #ch-3 .entries.flow .entry,
+html.js-motion #ch-3 .more-list .entry{opacity:0;transform:translateY(42px)}
 </style>
 <script>
 /* 首屏动效的"防闪"开关：在 body 渲染之前**同步**加上 js-motion，
@@ -454,19 +399,6 @@ document.documentElement.classList.add('js-motion');
     <div class="in">
       <p class="kick">03 — 入口</p>
       <h2>六步演示动线<em> · 另有 6 项功能</em></h2>
-
-      <!-- ── 卷筒（2026-09-20）：这 12 项装在一个 3D 圆柱上，滚动带着它转 ──────
-           复刻对象是 Codrops 的 Cinematic3DScroll（GSAP + ScrollTrigger + OGL）。
-           它的做法（我从它的构建产物里读出来的）是：内容挂在一个圆柱上，
-           主时间轴上 0 时刻并行一条 `.to(cylinder.rotation,{y:"+=28.27",ease:"none"})`
-           —— **滚动带着圆柱匀速转 4.5 圈**；每个章节再有自己 `1/N` 的淡入淡出窗口。
-           这里用同一套语言，但**不引入 OGL/three 渲染**，用纯 CSS 3D 摆成圆柱：
-           好处是这 12 项**始终是 DOM**（可点、可选中、可 Tab、读屏能读），
-           而无动效 / 减少动效时 `html.js-motion` 一摘，立刻回到原来的平铺网格。
-           ⚠️ 这个包裹层与 `.reel-hint` **只在 `html.js-motion` 下有样式**，
-              所以对"没有动效"的那条路径是**零影响**（它们是普通 div/p，不占位）。 -->
-      <div class="reel" id="reel3d">
-        <div class="reel-spin">
       <div class="entries flow">
         <!-- 上层 = `lib/demo-rail.js` 的 FLOW 那条演示动线：序号与顺序都跟它一致
              （01 上传 → 02 星云 → 03 提问 → 04 分析 → 05 PathQA → 06 局限）。
@@ -594,14 +526,6 @@ document.documentElement.classList.add('js-motion');
           </a>
         </div>
       </div>
-        </div><!-- /.reel-spin -->
-      </div><!-- /.reel#reel3d -->
-      <!-- 卷筒上转到背面的项看不见、点不到；这里给一句说明 + 键盘路径。
-           用户 2026-09-20 明确不要"全部 12 项的直达文字链接"，所以这里**不放链接**。
-           ⚠️ 文案必须跟实现一致：初版这句写的是"滚动带着它转（往回滚会转回去）"，
-              而实现早已改成**无限自转**（第 5 版）—— 一句会撒谎的说明比没有说明更糟。 -->
-      <p class="reel-hint">卷筒上是全部 12 项 · 自动旋转 ·
-        鼠标移上去会暂停，方便阅读与点击 · 按 <kbd>Tab</kbd> 可逐项跳到想要的那个</p>
     </div>
   </section>
 
@@ -774,86 +698,37 @@ document.documentElement.classList.add('js-motion');
       .to(cta, { opacity: 1, y: 0, duration: 0.5, stagger: 0.09 }, 1.18)
       .to(cue, { opacity: 1, duration: 0.5 }, 1.5);
 
-    // ── 卷筒：12 项装在一个**无限自转**的圆柱上（2026-09-20，第 5 版）────
-    // 复刻 Codrops Cinematic3DScroll 的"卷筒"结构：内容挂在一个圆柱上、
-    // 整圈绕 y 轴旋转。**但驱动方式与它不同**：
-    //   · 它用 `scrollTrigger{scrub:1}` + `rotation.y += 28.27` —— 滚动驱动；
-    //   · 用户要的是**无限循环**：不靠滚动、不拉长页面，就在这一屏里无限地转
-    //     ⇒ 用 `gsap.to(..., {repeat:-1, ease:'none'})` 自转。
-    // 另外两条工程约束：
-    //   ★ 悬停或键盘聚焦时**暂停** —— 卷筒一直在动，不暂停就没法点（用户
-    //     明确不要"12 项直达链接"，所以"暂停"就是唯一的可点路径）。
-    //   ★ 离开视口自动暂停 —— 不做无意义的持续耗电（这也是本项目的一贯要求）。
+    // ── 两条"轴"：**绑定滚动位置**的轨道（2026-09-20 重做）─────────────────
+    // 与第一版的差别（第一版被用户当场否掉，原因照录）：
+    //   · 第一版 `once: true` ⇒ 只演一次、结束即无痕，滚完与没有动效一模一样，
+    //     用户的原话是「为什么我这边看着还是原来的模样，一模一样，一点没变」；
+    //   · 第一版还跳过了轨道线 ⇒ "轴"根本没有可见载体。
+    // 现在：`scrub` 把动画**绑到滚动位置**（往下滚推进、往回滚退回、停下就停住），
+    //       同时补间 `--rail`，让卡片顶部那条暖金线随滚动从左向右生长 ——
+    //       6 段连起来就是一条横贯整行的"轴"。
+    // ⚠️ `ease:'none'`：scrub 下缓动会被滚动位置反复重定向，用 none 才跟手。
+    // ⚠️ 下层停在 **0.7**（它的常态权重），停在 1 会把上下两层的层次抹平。
+    // ⚠️ 上层的 scrub 区间比下层早 8% 起跑 ⇒ 仍然是"上层先动、下层跟随"，
+    //    但两条轴在**同一段滚动里同时推进**，不是接力（两轴整体只差 0.14s 的旧结论
+    //    是在 once 版下测的；scrub 版由滚动位置直接决定，天然同步）。
     if (window.ScrollTrigger) {
       gsap.registerPlugin(window.ScrollTrigger);
-      var reelSpin = document.querySelector('#reel3d .reel-spin');
-      var panels = gsap.utils.toArray('#reel3d .entry');
-      if (reelSpin && panels.length) {
-        var N = panels.length;          // 12
-        var STEP = 360 / N;             // 30°
-        var R = 620;                    // 卷筒半径（px）
-        var SECONDS = 48;               // 转一整圈 48 秒（慢转，看得清字）
-
-        // ① 摆位：每块面板**先竖直居中**，再绕自己的 y 轴转 θ、最后沿新方向推出半径 R。
-        //    ⚠️ 必须写成一条完整的 `translateY(-50%) rotateY(θ) translateZ(R)`：
-        //       · 顺序反过来（先 translateZ 再 rotateY）会把 12 块全叠在正前方，
-        //         只剩各自在原地自转，根本不成圆柱；
-        //       · `translateY(-50%)` 放在最前面，是为了让 12 块**绕着卷筒的中心轴**
-        //         转（否则它们挂在 top:0 上，转起来像被甩起来的扇子）。
-        //    GSAP 的 rotationY/z 两个属性做不到这个顺序，所以这里直接写 transform。
-        panels.forEach(function (el, i) {
-          el.style.transform = 'translateY(-50%) rotateY(' + (i * STEP) + 'deg) translateZ(' + R + 'px)';
-        });
-
-        // ② 每帧把**整圈**转 `spinDeg`，再按"该块当前正对镜头的程度"决定
-        //    亮度 / 可点 / 景深虚化。
-        //    ⚠️ 转的是**容器**（`.reel-spin`），不是各块自己 ——
-        //    各块的 `rotateY(θ) translateZ(R)` 是静态摆位，整圈转由父层承担。
-        function paint(spinDeg) {
-          reelSpin.style.transform = 'rotateY(' + (-spinDeg) + 'deg)';
-          for (var i = 0; i < N; i++) {
-            var el = panels[i];
-            var a = i * STEP - spinDeg;                       // 该块相对正前方的角度
-            var front = Math.cos(a * Math.PI / 180);          // 1 = 正对，-1 = 背对
-            var lit = front <= 0 ? 0 : Math.pow(front, 2.2);
-            // 下层 6 项（另有 6 项功能）刻意压权重，与平铺时的层次保持一致
-            if (i >= 6) lit *= 0.78;
-            el.style.opacity = lit.toFixed(3);
-            // 只有**明显正对镜头**的才可点：转过去的块不该被误点
-            // （阈值取 0.62：约 ±52° 以内。实测 0.35 会让一块 opacity 只有 0.13
-            //   的侧面板仍然可点 —— 一个几乎看不见却能点的东西是陷阱。）
-            el.style.pointerEvents = front > 0.62 ? 'auto' : 'none';
-            // 景深：越靠边越虚（最大 1.2px —— 再大就糊成一片了）
-            var blur = front > 0.55 ? 0 : (0.55 - front) * 2.2;
-            el.style.filter = blur > 0.05 ? 'blur(' + blur.toFixed(2) + 'px)' : 'none';
-            // 卡片顶部那条暖金线也随"正对程度"点亮（沿用已有 --rail）
-            el.style.setProperty('--rail', lit.toFixed(3));
+      [
+        { sel: '#ch-3 .entries.flow .entry', to: 1, start: 'top 88%', end: 'bottom 62%' },
+        { sel: '#ch-3 .more-list .entry', to: 0.7, start: 'top 80%', end: 'bottom 62%' }
+      ].forEach(function (ax) {
+        var els = document.querySelectorAll(ax.sel);
+        if (!els.length) return;
+        gsap.to(els, {
+          opacity: ax.to, y: 0, '--rail': 1,
+          ease: 'none', stagger: 0.075,
+          scrollTrigger: {
+            trigger: '#ch-3',
+            start: ax.start, end: ax.end,
+            scrub: 0.45            // 0.45s 追帧：跟手但不抖
           }
-        }
-
-        var spin = { v: 0 };
-        var tw = gsap.to(spin, {
-          v: 360 * 4,                     // 转 4 圈再回绕（避免回到 0 时有跳变）
-          duration: SECONDS * 4,
-          ease: 'none',
-          repeat: -1,
-          onUpdate: function () { paint(spin.v % 360); }
         });
-        paint(0);
-
-        // ③ 悬停 / 键盘聚焦 ⇒ 暂停；移开 ⇒ 继续
-        var reel = document.getElementById('reel3d');
-        reel.addEventListener('pointerenter', function () { tw.pause(); });
-        reel.addEventListener('pointerleave', function () { tw.play(); });
-        reel.addEventListener('focusin', function () { tw.pause(); });
-        reel.addEventListener('focusout', function () { tw.play(); });
-
-        // ④ 离开视口自动暂停
-        ScrollTrigger.create({
-          trigger: '#ch-3', start: 'top bottom', end: 'bottom top',
-          onToggle: function (self) { if (self.isActive) { tw.play(); } else { tw.pause(); } }
-        });
-      }
+      });
     }
   } catch (e) { bail('抛错 ' + e); }
 })();
