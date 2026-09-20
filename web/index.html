@@ -217,6 +217,20 @@ html.js-motion #ch-0 .cue{opacity:0}
    只在动效开启时加：无 JS 时页面上没有任何 3D transform，加了也不产生差别。 */
 html.js-motion #ch-0 h1{perspective:900px}
 html.js-motion #ch-0 h1 .ln{transform-style:preserve-3d}
+/* ── 开场遮罩（2026-09-20）───────────────────────────────────────────────
+   进来时先盖住整屏，再用 clip-path 的 circle() **收缩成一点**把页面揭开 ——
+   像光圈收拢，比单纯淡入更有"开场"的意思。
+   ⚠️ 三条安全约定（缺一条都可能出事）：
+   ① **只在 `html.js-motion` 下才 display:block** —— 无 JS、减少动效、
+      gsap 没加载这三种情况都会让脚本摘掉那个 class，遮罩随即消失，页面照常；
+   ② `pointer-events:none` + `aria-hidden="true"` —— 不拦点击、不进读屏；
+   ③ 动画结束由 JS 设 `display:none` —— 不留一个占着 z-index 的空层
+      （否则它可能挡住后续 CDP 检查里的元素点击）。 */
+#intro-veil{display:none}
+html.js-motion #intro-veil{
+  display:block;position:fixed;inset:0;z-index:99999;pointer-events:none;
+  background:#070c13;clip-path:circle(150% at 50% 48%);
+}
 </style>
 <script>
 /* 首屏动效的"防闪"开关：在 body 渲染之前**同步**加上 js-motion，
@@ -227,6 +241,9 @@ document.documentElement.classList.add('js-motion');
 </script>
 </head>
 <body>
+
+<!-- 开场遮罩（纯装饰）。⚠️ 无 JS / 减少动效 / gsap 缺失时它不显示（见 <style> 说明）。 -->
+<div id="intro-veil" aria-hidden="true"></div>
 
 <a id="a11y-skip" class="a11y-skip" href="#ch-0">跳到正文</a>
 
@@ -592,6 +609,18 @@ document.documentElement.classList.add('js-motion');
       rotationZ: function () { return gsap.utils.random(-45, 45); },
       scale: 2.6
     });
+
+    // ── 开场揭幕：遮罩收缩成一点（2026-09-20）──────────────────────────
+    // 独立于下面的首屏时间轴：它只负责"把幕拉开"，与元素入场并行跑。
+    // 结束后设 display:none —— 不留一个占着 z-index 的空层。
+    var veil = document.getElementById('intro-veil');
+    if (veil) {
+      gsap.to(veil, {
+        clipPath: 'circle(0% at 50% 48%)',
+        duration: 1.05, ease: 'expo.inOut',
+        onComplete: function () { veil.style.display = 'none'; }
+      });
+    }
 
     var tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     tl.to(eyebrow, { opacity: 1, y: 0, duration: 0.5 })
