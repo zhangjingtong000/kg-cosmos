@@ -1,0 +1,73 @@
+{
+ "generated": "2026-09-16 18:35:41",
+ "purpose": "H3：空态与边界自查表（逐条实测，不是逐条声明）",
+ "note": "第 4/5 条是**前端行为**，本脚本只核对机制存在；浏览器实测由 cdp_verify_nav.py / cdp_verify_node_detail.py / cdp_verify_semantic_fallback.py 覆盖，**不假装这里测了**。",
+ "n_ok": 7,
+ "n_total": 7,
+ "rows": [
+  {
+   "no": 1,
+   "case": "上传非 PDF",
+   "how": "POST /api/upload/start 传一个 .txt",
+   "expect": "400（明确拒绝，不是 500）",
+   "got": "HTTP 400 · 只支持 PDF 文件",
+   "ok": true,
+   "note": "400 说明是\"校验拒绝\"，不是\"服务出错\""
+  },
+  {
+   "no": "1b",
+   "case": "上传空 PDF",
+   "how": "POST /api/upload/start 传一个 0 字节的 .pdf",
+   "expect": "不抛 500（接下去，由后台任务报错）",
+   "got": "HTTP 200 · id=565c2dc1",
+   "ok": true,
+   "note": "扩展名合法就接；**坏在后台任务里**，界面上能查到状态 —— 这比当场崩好"
+  },
+  {
+   "no": 2,
+   "case": "零实体图",
+   "how": "内存里塞一个 nodes=[] 的图，再问一个问题",
+   "expect": "HTTP 200 · 种子为空 · 如实说\"没有证据\"，不崩",
+   "got": "HTTP 200 · 种子 0 · 证据 0 · reason=种子 0 个，2 跳扩展至 0 个节点、0 条边（纯规则，可复现）",
+   "ok": true,
+   "note": "零实体时它返回 0 种子 0 证据 ⇒ 前端会显示\"没有命中\"，而不是编一个"
+  },
+  {
+   "no": 3,
+   "case": "单节点图",
+   "how": "内存里塞一个 1 节点 0 边的图，再问它自己",
+   "expect": "HTTP 200 · 命中该节点 · 不崩（无邻居可扩展）",
+   "got": "HTTP 200 · 种子 ['TransE'] · 节点 1 · 边 0",
+   "ok": true,
+   "note": "命中但扩展不出东西 —— 这是正确行为，不是失败"
+  },
+  {
+   "no": "3b",
+   "case": "单节点图 + 问图里没有的东西",
+   "how": "同一个 1 节点图，问一个不在图里的实体",
+   "expect": "HTTP 200 · 0 种子 · 如实说没有",
+   "got": "HTTP 200 · 种子 0 · 证据 0",
+   "ok": true,
+   "note": "单节点图上\"问不存在的\"也不会崩"
+  },
+  {
+   "no": 4,
+   "case": "超大图降采样",
+   "how": "**前端行为** —— 检查 web/kg-nebula.html 里的降采样机制",
+   "expect": "存在（本脚本只核对存在性，不做浏览器实测）",
+   "got": "在 kg-nebula.html 里找到 'LABEL_POOL' ⇒ **节点全渲染 + 标签池上限 150**（`LABEL_POOL = Math.min(150, …)`）",
+   "ok": true,
+   "note": "**浏览器实测由 cdp_verify_nav.py / cdp_verify_node_detail.py 覆盖**，这里只核对机制存在，不假装测了渲染"
+  },
+  {
+   "no": 5,
+   "case": "断网 / 后端没起",
+   "how": "**前端行为** —— 检查 ask.html 的错误分流（G3 已修）",
+   "expect": "明说\"后端不可用\"，且 404 时不显示演示数据",
+   "got": "ask.html 里有\"后端不可用\"提示 + 404/400 分流",
+   "ok": true,
+   "note": "**已由 tools/cdp_verify_semantic_fallback.py 与 G3 的改动覆盖**，这里只核对代码里确实有分流，不重复造浏览器实测"
+  }
+ ],
+ "elapsed_s": 0.17
+}
