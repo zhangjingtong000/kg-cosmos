@@ -140,13 +140,22 @@ h3 { font-weight: 600; }
    6 张卡各画一段、连起来就是一条**横贯整行的轨道**，滚动时从左向右生长。
    ⚠️ 之前这一版把它跳过了（GSAP 不能直接补间伪元素），于是"轴"没有任何可见载体，
    用户滚完只看到"和原来一模一样" —— 这一条是那次返工的根因，不能再省。
+
+   ★ 又一步（同日）：把 6 段之间的**网格空隙也补上**，让它是一条**连续的线**而不是
+   "6 段刻度"。做法就是让每段的 `::after` 向右伸出 gutter 的宽度
+   （`right:-26px`），**每行最后一个**不伸（`right:0`）。
+   三个断点的 gutter 不同，所以下面三组各写一次：
+     · >1100px：6 列 / gutter 26px ⇒ 每 6 个一段落（`:nth-child(6n)`）
+     · ≤1100px：3 列 / gutter 32px ⇒ 每 3 个（`:nth-child(3n)`）
+     · ≤760px ：2 列 / gutter 继承 32px ⇒ 每 2 个（`:nth-child(2n)`）
    hover 那条规则（选择器更具体）照旧生效：鼠标进去时整段立刻画满。 */
 .entries.flow .entry::after{
-  content:"";position:absolute;left:0;right:0;top:-1px;height:2px;
+  content:"";position:absolute;left:0;right:-26px;top:-1px;height:2px;
   background:linear-gradient(90deg,var(--accent),rgba(224,164,105,.08));
   transform:scaleX(var(--rail,0));transform-origin:left;
   transition:transform .65s cubic-bezier(.19,1,.22,1);
 }
+.entries.flow .entry:nth-child(6n)::after{right:0}
 .entries.flow .entry:hover{padding-left:0}
 .entries.flow .entry:hover::after{transform:scaleX(1)}
 .entries.flow .entry .ix{
@@ -164,13 +173,14 @@ h3 { font-weight: 600; }
    说明缩短但不删空（保留关键数字与限定语），序号退回索引大小。 */
 .more{margin-top:44px;padding-top:22px;border-top:1px solid var(--line)}
 /* 下层那条轴：也是一条轨道，但更暗、1px（这 6 项刻意不在动线上）。
-   它正好压在下层 `.more` 的 1px 分隔线上，6 段连起来同样是一条横贯的线。 */
+   同样把网格空隙补上，让 6 段连成一条连续的线。 */
 .more-list .entry::after{
-  content:"";position:absolute;left:0;right:0;top:-1px;height:1px;
+  content:"";position:absolute;left:0;right:-26px;top:-1px;height:1px;
   background:linear-gradient(90deg,rgba(224,164,105,.55),rgba(224,164,105,.04));
   transform:scaleX(var(--rail,0));transform-origin:left;
   transition:transform .65s cubic-bezier(.19,1,.22,1);
 }
+.more-list .entry:nth-child(6n)::after{right:0}
 .more-list{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0 26px}
 .more-list .entry{
   display:block;padding:12px 0 14px;border-bottom:0;opacity:.7;
@@ -187,9 +197,18 @@ h3 { font-weight: 600; }
 }
 @media (max-width:1100px){
   .entries.flow,.more-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:0 32px}
+  /* 3 列：gutter 变 32px，且"每行最后一个"变成第 3、6 个 */
+  .entries.flow .entry::after,.more-list .entry::after{right:-32px}
+  .entries.flow .entry:nth-child(3n)::after,
+  .more-list .entry:nth-child(3n)::after{right:0}
 }
 @media (max-width:760px){
   .entries.flow,.more-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  /* 2 列：gutter 继承上面的 32px，"每行最后一个"是偶数个 */
+  .entries.flow .entry:nth-child(3n)::after,
+  .more-list .entry:nth-child(3n)::after{right:-32px}
+  .entries.flow .entry:nth-child(2n)::after,
+  .more-list .entry:nth-child(2n)::after{right:0}
 }
 
 /* ── 页脚脚注：解释 `*`（= 这一页需要联网）─────────────────────────────
@@ -245,24 +264,24 @@ html.js-motion #intro-veil{
   display:block;position:fixed;inset:0;z-index:99999;pointer-events:none;
   background:#070c13;clip-path:circle(150% at 50% 48%);
 }
-/* ── 两条"轴"（2026-09-20 重做，GSAP + ScrollTrigger）────────────────────
+/* ── 两条"轴"（2026-09-20，第三次改；GSAP + ScrollTrigger）───────────────
    第 4 屏（#ch-3）的上下两层本来就是两块 6 列网格（不是列表）。
-   所以这里**不改布局**，只给它加"轴"的运动方式：卡片**沿轨道依次推进**，
-   上层（六步演示动线）先动、下层（另有 6 项功能）跟随 ——
-   两层各自是一条轴，对应"在动线上 / 不在动线上"这层语义
-   （见本文件下方那段注释：「下层：另有 6 项功能。**刻意不在动线上**」）。
+   所以这里**不改布局**，只给它加"轴"的运动方式。
 
-   ★ 第一版做过、被用户当场否掉的两点，都在这条注释里留档：
-     ① 用 `once: true`（播一次就结束）⇒ 滚完**不留任何痕迹**，
-        静态看与没有动效**完全一样** ⇒ 用户看到的就是"一点没变"。
-        现在改成 `scrub`：动画**绑定滚动位置**，往下滚轴推进、往回滚轴退回、
-        停在中间就停在中间 —— "跟轴似的滚动"说的就是这个。
-     ② 两条"轴"当时**没有任何可见载体**（轨道线被跳过了）。
-        现在由卡片顶部那 2px / 1px 暖金线（`--rail`）承担：
-        6 段连起来是一条横贯整行的轨道，随滚动从左向右生长。
+   ★★ 三次改动的留档（同一个需求，我理解错了两次，别再犯第三次）：
+     第 1 版：`once: true` + 26px 上滑淡入，**没有任何可见载体**
+              ⇒ 播完即无痕，用户看到的就是"一点没变"。**被用户当场否掉。**
+     第 2 版：改成 `scrub`（绑滚动位置）+ 补上卡片顶部那条 `--rail` 轨道线。
+              方向对了，但**只是平铺的淡入 + 一条线**，仍然不是用户要的那个东西。
+     第 3 版（本版）：用户给出的参考是 Codrops 的 **Cinematic3DScroll**
+              （three.js + ScrollTrigger + ScrollSmoother，滚动驱动相机穿过一组 3D 平面）。
+              ⇒ 这里用同一套**纵深语言**复刻到 DOM 上：
+                六项排成一条**向远处退去的轨道**（越靠后越远、越斜、越暗），
+                滚动时"焦点"从第 1 项依次推进到第 6 项 —— **这就是"轴"**。
+                终态仍是完全平的那块六列网格（与加动效之前逐像素一致）。
 
    ⚠️ 初始态只在 `html.js-motion` 下生效；`bail()` 会摘掉它
-   ⇒ 无动效/减少动效/gsap 缺失时，版面与改动前**逐像素一致**
+   ⇒ 无动效 / 减少动效 / gsap 缺失时，版面与改动前**逐像素一致**
    （`--rail` 取 `var()` 的兜底值 0，与改动前 `scaleX(0)` 同值，hover 行为不变）。 */
 html.js-motion #ch-3 .entries.flow .entry,
 html.js-motion #ch-3 .more-list .entry{opacity:0;transform:translateY(42px)}
