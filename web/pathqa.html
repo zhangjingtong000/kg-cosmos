@@ -59,6 +59,18 @@
                 border-radius: 999px; padding: 2px 9px; }
   #cam button:hover { background: rgba(224,164,105,.18); border-color: rgba(224,164,105,.5);
                       color: #fff; }
+  /* ★ 2026-09-20 加：悬停节点的名称提示。
+     用户原话："它只显示一些节点的名称，当我鼠标放到某个节点上面的时候，它不显示名称。"
+     实测根因：可见标签被**硬上限卡在 9 个**（70 个节点只有 9 个渲染了 <text>），
+     其余节点只有浏览器原生的 <title>（延迟约 1 秒、样式不可控、截图都测不到）。
+     这里复刻页面既有提示条（`#cam .tip`）的语言，做成跟随指针的小条。 */
+  #nodetip { position: absolute; left: 0; top: 0; z-index: 6; pointer-events: none;
+             padding: 3px 9px; border-radius: 7px; white-space: nowrap;
+             background: rgba(13,14,19,.94); border: 1px solid rgba(174,178,194,.24);
+             color: #dfe8ff; font-size: 11.5px; letter-spacing: .02em;
+             transform: translate(-50%, calc(-100% - 10px));
+             opacity: 0; transition: opacity .12s ease; }
+  #nodetip.on { opacity: 1; }
   #side { flex: 0 0 306px; display: flex; flex-direction: column; gap: 10px;
           min-height: 0; overflow-y: auto; }
   #side .box { background: rgba(13,14,19,.78); border: 1px solid rgba(174,178,194,.13);
@@ -789,19 +801,61 @@ function bindGraph() {
   };
   const unproject = (p) => ({ x: (p.x - VIEW.tx) / VIEW.k, y: (p.y - VIEW.ty) / VIEW.k });
 
+  /* ★ 2026-09-20：悬停节点显示名称（见上面 `#nodetip` 那段 CSS 的说明）。
+     为什么不在 SVG 里再画标签：可见标签的 9 个上限是**故意**的
+     （`542-548` 的注释：再多中心区就糊成一团），所以这里走"跟随指针的提示条"，
+     与页面既有的 `#cam .tip` 同一套语言，不新增 SVG 节点。 */
+  const tip = document.createElement('div');
+  tip.id = 'nodetip';
+  box.appendChild(tip);
+  const nameOf = (c) => {
+    if (!c) return '';
+    const t = c.querySelector('title');
+    return (c.dataset && c.dataset.id) || (t && t.textContent) || '';
+  };
+  box.addEventListener('pointerover', (e) => {
+    const c = e.target.closest && e.target.closest('circle.n');
+    if (!c) return;
+    const n = nameOf(c);
+    if (!n) return;
+    tip.textContent = n;
+    tip.classList.add('on');
+  });
+  box.addEventListener('pointerout', (e) => {
+    if (e.target.closest && e.target.closest('circle.n')) tip.classList.remove('on');
+  });
+  box.addEventListener('pointermove', (e) => {
+    if (!tip.classList.contains('on')) return;
+    const r = box.getBoundingClientRect();
+    tip.style.left = (e.clientX - r.left) + 'px';
+    tip.style.top = (e.clientY - r.top) + 'px';
+  });
+
   box.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return;
+    /* ★ 2026-09-20 修：**点右下角「复位」时必须直接返回**。
+       根因（打桩实测确认）：下面那行 `box.setPointerCapture(e.pointerId)` 会把指针
+       捕获到 `#graph` 上，而 `#reset` 是 `#graph` 的**子元素** ⇒ Chrome 把随后的
+       `click` 派发给捕获元素 `#graph`，`#reset` 的 click 处理器**永不触发**。
+       实测：真实鼠标点复位只记录到 `click@graph`，没有 `click@reset`，视图不动；
+       把 `setPointerCapture` 换成 no-op 后同一操作立刻恢复正常（视图回到 0,0,1）。
+       用户原话："底下右下角这个复位是不生效的"。 */
+    if (e.target.closest && e.target.closest('#cam')) return;
     const p = local(e);
     if (!p) return;
     const t = e.target;
     const id = (t && t.dataset) ? t.dataset.id : null;
     if (id && POS.has(id)) {
       const w = unproject(p);
-      drag = { id: id, ox: w.x - POS.get(id).x, oy: w.y - POS.get(id).y };
+      const cur = POS.get(id);
+      /* ★ 弹簧回弹用：记下"拖走之前它本该在的位置"（布局给的 TARGET） */
+      drag = { id: id, ox: w.x - cur.x, oy: w.y - cur.y,
+               home: { x: (TARGET.get(id) || cur).x, y: (TARGET.get(id) || cur).y } };
     } else {
       drag = { pan: true, px: e.clientX, py: e.clientY, tx: VIEW.tx, ty: VIEW.ty,
                sx: p.sx, sy: p.sy };
     }
+    if (tip) tip.classList.remove('on');
     box.classList.add('dragging');
     try { box.setPointerCapture(e.pointerId); } catch (_) {}
     e.preventDefault();
@@ -828,6 +882,32 @@ function bindGraph() {
     if (!drag) return;
     box.classList.remove('dragging');
     try { box.releasePointerCapture(e.pointerId); } catch (_) {}
+    /* ★ 2026-09-20：**弹簧回弹** —— 用户原话：
+       "我当时让你做了一个拖动，我其实是有一个想法的，就是让它跟弹簧一样，
+        我拖开之后，它能自动回到原来的位置上。"
+       现状是拖走就 `PIN.set(...)` 永久钉住，永远不会回去。
+       这里：松手 → 解除钉住 → 用 GSAP 的 elastic 缓动把节点弹回原位，
+       并且**每帧同时写 TARGET**，免得 tick 里的阻尼跟弹簧互相拉扯。 */
+    if (drag.id && drag.home) {
+      PIN.delete(drag.id);
+      const id = drag.id, home = drag.home;
+      const p0 = POS.get(id) || { x: home.x, y: home.y };
+      const moved = Math.hypot(p0.x - home.x, p0.y - home.y);
+      if (window.gsap && moved > 2) {
+        gsap.to(p0, {
+          x: home.x, y: home.y, duration: 0.9, ease: 'elastic.out(1, 0.45)',
+          onUpdate: function () {
+            POS.set(id, { x: p0.x, y: p0.y });
+            TARGET.set(id, { x: p0.x, y: p0.y });
+            wake();
+          },
+          onComplete: function () { TARGET.set(id, { x: home.x, y: home.y }); }
+        });
+      } else {
+        TARGET.set(id, { x: home.x, y: home.y });
+        wake();
+      }
+    }
     drag = null;
   };
   box.addEventListener('pointerup', end);
@@ -969,6 +1049,9 @@ fetch('./kg-data/nebula.json')
     window.__ready = true;
   });
 </script>
+<!-- ★ 2026-09-20：GSAP 只为了"松手弹簧回弹"这一处（elastic 缓动）。
+     本地文件，不引 CDN；缺它也不影响其它功能（回弹会退化成阻尼滑回）。 -->
+<script src="./lib/gsap/gsap.min.js"></script>
 <script src="./lib/a11y.js"></script>
 
 <!-- ==DESIGN_SYS== -->

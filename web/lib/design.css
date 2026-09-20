@@ -48,6 +48,16 @@
   /* 版式 */
   --maxw:1180px;
   --gutter:40px;
+  /* ★ 2026-09-20：「宽壳」—— 表格 / 图 / 多栏这类**该铺满**的内容用这个宽度。
+     `--maxw` 是"正文阅读宽度"，两者不是一回事：
+     正文超过 ~74ch 就不好读，而表格越宽越好读。
+     背景：papers / temporal / diff / stance 四页原先各自写死 `max-width:1240px`
+     且**漏写 `margin:0 auto`** ⇒ 内容贴左、右边空 338~398px（实测）。
+     这里只提供 token（本文件原先**根本没有 main 规则**，所以这不是"改一条现有规则"）；
+     ⚠️ 故意**不**在这里直接写 `main{...}`：那会命中 index.html 的
+     `<main id="reel">`（全屏卷筒）与 method-limits 的 `<main id="grid">`（在 .wrap 之内），
+     把两页都压窄。⇒ 由各页自己声明 `main{max-width:var(--shell-w);margin:0 auto}`。 */
+  --shell-w:1440px;
 
   /* 动效：全站同一条曲线，这是"看起来是一家的"的重要来源 */
   --ease:cubic-bezier(.19,1,.22,1);
@@ -141,6 +151,17 @@ h3{margin:22px 0 10px;font-size:14px;color:var(--ink)}
    ⇒ 给行内用法一个**显式开关**：`.note.inline`（不动默认行为，避免改坏
    那些真的靠"开头小标题"撑观感的结论块）。 */
 .note.inline b{display:inline;margin:0;font-size:inherit;color:var(--warm);font-weight:600}
+
+/* ★ 2026-09-20：**内部滚动条统一**。
+   起因：`diff.html` 的三栏实体列表用的是浏览器**原生**滚动条，而全站没有任何
+   `color-scheme` 声明 ⇒ 浏览器按浅色画 ⇒ 深色页面上一条刺眼的白条。
+   取值**照抄项目里既有的做法**（`kg-nebula.html:147/187` 的 `#list` / `#legend .lg-list`），
+   不自创色号：`scrollbar-width:thin` + `scrollbar-color:<中性灰蓝> transparent`。
+   ⚠️ 用标准属性而不是 `::-webkit-scrollbar`：前者 Chrome 121+ 与 Firefox 都支持，
+     一份写法覆盖两家（后者在 Firefox 无效，反而要写两遍）。
+   ⚠️ 放在本文件只对**引用了 design.css 的页面**生效；`temporal.html` 与 `diff.html`
+     两页**不引本文件**，需要各自加同样两行（已在各自页内注明）。 */
+*{scrollbar-width:thin;scrollbar-color:rgba(178,181,194,.3) transparent}
 
 /* 数字组：大号数字 + 说明 */
 .figs{display:flex;gap:38px;flex-wrap:wrap;margin:24px 0 0;padding:18px 0;

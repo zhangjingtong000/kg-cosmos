@@ -41,6 +41,11 @@
   header{padding:14px 20px 10px}
   h1{margin:0;font-size:17px;font-weight:600;letter-spacing:.02em}
   .sub{color:var(--dim);font-size:12.5px;margin-top:4px}
+  /* ★ 2026-09-20：标题下的人话引导（见上方 HTML 注释）。宽度收在阅读宽度内、
+     颜色比副标题略亮，保证"第一眼就能读到"，但不抢标题。 */
+  .howto{max-width:74ch;margin:10px 0 0;font-size:12.5px;line-height:1.75;
+         color:var(--ink-2,rgba(203,218,241,.76))}
+  .howto b{color:var(--warm);font-weight:600;display:inline}
   .sub b{color:var(--warn)}
   #wrap{position:absolute;inset:96px 0 52px 0;overflow:auto}
   svg{display:block;margin:0 auto}
@@ -71,6 +76,16 @@
 <header>
   <h1>使用关系二部图</h1>
   <div class="sub" id="sub">载入中…</div>
+  <!-- ★ 2026-09-20 加（用户原话："哇，这是啥呀？看不懂"）。
+       原来"左右两侧是什么"这句话只在**页脚**，第一眼看不到 ⇒ 进来就是一堆点。
+       这里在标题下补一句人话引导：这张图回答什么问题、两侧各是什么、能怎么用。
+       ⚠️ 文案必须与页面真实能力一致：交互实测是「悬停出提示条 + 点击聚焦/取消」
+          （下方脚本 146/164/165 三处），没有别的隐藏操作，所以只写这两件事。 -->
+  <p class="howto">这张图只回答一件事：<b>谁在用什么东西</b>。
+    左边是<b>施动者</b>（用了别人的那一方，如某篇论文或某个方法），
+    右边是<b>被用物</b>（被用的东西，如数据集或基础模型），
+    两点之间一条线就是<b>一次使用关系</b>。
+    鼠标停在任一节点上会显示它的名字与次数；<b>点一下</b>可以把它聚焦（只留它相关的连线），再点一次取消。</p>
 </header>
 <div id="wrap" class="mo-enter"><svg id="svg"></svg></div>
 <div id="tip"></div>

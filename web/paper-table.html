@@ -91,7 +91,19 @@
   table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:14px}
   th,td{border:1px solid var(--line);padding:7px 9px;vertical-align:top;
         text-align:left}
-  th{background:rgba(255,255,255,.04);position:sticky;top:62px;z-index:4;
+  /* ★ 2026-09-20 修（用户原话："它依旧贴在最上面，就导致它和底下的列表中的内容有一个重合。
+     做成和上面的那个黑色条纹做成一致的"）。原来这里是
+        background:rgba(255,255,255,.04); position:sticky; top:62px; z-index:4
+     两个毛病，实测都量化过：
+       ① 背景只有 **4% 白**（等于看穿）⇒ 滚动的 tbody 行直接从表头后面透出来，这才是"重合"的主因
+          （**不是 z-index**：th 的 4 < 顶部条 `.ctl` 的 5，层级本来就是对的）；
+       ② `top:62px` 是**硬编码**，而 `.ctl` 实测高 55px ⇒ 宽屏漏 7px 缝；
+          更糟的是 `.ctl` 是 `flex-wrap:wrap`，窄屏换行后高 95px / 154px
+          ⇒ 表头被顶部条盖住 33px / 92px（实测 978px 与 678px 视口）。
+     修法：背景取"顶部条那层半透明黑叠在页面底色上"的**合成实色**，两者视觉一致；
+          `top` 改用 JS 同步的 `--ctl-h`（见脚本里那几行），宽窄屏自动对齐；
+          z-index 保持 4 < 5，表头不会盖住顶部条。 */
+  th{background:#0a0c12;position:sticky;top:var(--ctl-h,55px);z-index:4;
      font-weight:600;font-size:12px}
   th .n{color:var(--dim);font-weight:400}
   td.pid{white-space:nowrap;font-family:ui-monospace,Consolas,monospace;
@@ -261,6 +273,21 @@ function download(text, name, mime) {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   window.__lastExport = { name: name, bytes: text.length };
 }
+
+/* ★ 2026-09-20：把顶部条 `.ctl` 的**实际高度**同步成 CSS 变量 `--ctl-h`，
+   供 sticky 表头的 `top` 使用（见上面 th 的注释）。
+   为什么不能写死：`.ctl` 是 `flex-wrap:wrap`，窄屏换行后高度从 55px 变到 95px / 154px
+   —— 写死一个数必然在某个宽度上错位。 */
+(function syncCtlHeight() {
+  var ctl = document.querySelector('.ctl');
+  if (!ctl) return;
+  var sync = function () {
+    document.documentElement.style.setProperty('--ctl-h', ctl.offsetHeight + 'px');
+  };
+  sync();
+  addEventListener('resize', sync);
+  if (window.ResizeObserver) new ResizeObserver(sync).observe(ctl);
+})();
 
 fetch('./kg-data/paper-table.json').then(r => r.ok ? r.json() : null).then(d => {
   if (!d) { $('#sub').textContent = '读不到 kg-data/paper-table.json'; return; }

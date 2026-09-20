@@ -167,7 +167,13 @@
      引擎把着色拆成两个正交维度：Partition（离散分区→基色）×
      Ranking（连续排序→基色向白的插值量）。图例必须同时显示这两件事，
      否则用户看不出"这个颜色现在代表什么"。 */
-  #legend { position: fixed; right: 22px; bottom: 18px; width: 236px; z-index: 4;
+  /* ★ 2026-09-20 修：`bottom` 补上底部演示条的偏移。
+     原先写死 18px，而 `#demoRail` 是 `bottom:0;height:43px`（`lib/demo-rail.js:75`）
+     ⇒ **legend 最底下 24px 被那条演示条盖住**（实测 `elementFromPoint(legend 底部)`
+     返回的是演示条上的链接）。`#kgExport` 早就加了 `var(--demo-rail-h)`，legend 漏了。 */
+  #legend { position: fixed; right: 22px;
+            bottom: calc(18px + var(--demo-rail-h, 0px));
+            width: 236px; z-index: 4;
             max-height: 62vh; overflow: hidden; opacity: 0; pointer-events: none;
             transition: opacity .3s ease;
             background: rgba(8, 13, 30, .84); border: 1px solid rgba(178,181,194, .18);
@@ -269,9 +275,23 @@
    `<nav id="demoRail"> intercepts pointer events`）。
    `--demo-rail-h` 由 `web/lib/demo-rail.js` 注入条子时设成真实高度；
    不在演示动线上的页面没有这个变量 ⇒ 回落到原来的 18px，行为不变。 */
-#kgExport{position:fixed;right:18px;
+#kgExport{position:fixed;right:22px;
   bottom:calc(18px + var(--demo-rail-h,0px));z-index:40;display:flex;gap:6px;
   align-items:center;font:11.5px/1 "Inter",system-ui,sans-serif}
+/* ★ 2026-09-20 修（用户原话："导出 PNG、JSON、GEXF 和分享……在内部显示的时候，
+   就与这个着色引擎这一块儿重叠了"）：两者都钉在右下角，纵向只差 18px 与
+   `--demo-rail-h`(43px) ⇒ legend 高 176px，实测重叠 236×27 px²。
+   用户选的做法是**合并成一个右下角面板** ⇒ 这里在**内部态**把导出条抬到 legend 正上方：
+     底部偏移 = 18 + 演示条 + legend 实测高 + 8px 间隙，
+   并把宽度/右边距与 legend 对齐（236px / 22px），看起来就是同一个面板的上下两段。
+   `--legend-h` 由脚本用 ResizeObserver 同步（legend 内容会随着色维度变化）。
+   ⚠️ 只在 `body.inside` 下生效 —— 概览态 legend 是隐藏的，导出条要保持原位。 */
+body.inside #kgExport{
+  width:236px;justify-content:space-between;box-sizing:border-box;
+  padding:7px 9px;border-radius:10px;
+  background:rgba(8,13,30,.84);border:1px solid rgba(178,181,194,.18);
+  backdrop-filter:blur(8px);
+  bottom:calc(18px + var(--demo-rail-h,0px) + var(--legend-h,0px) + 8px)}
 #kgExport .lbl{color:rgba(193,195,201,.46);letter-spacing:.18em;text-transform:uppercase;
   margin-right:4px;font-size:9.5px}
 #kgExport button{
@@ -2876,6 +2896,20 @@ addEventListener('resize', () => {
 
   const bar = document.getElementById('kgExport');
   if (!bar) return;
+
+  /* ★ 2026-09-20：把 `#legend` 的**实测高度**同步成 `--legend-h`，
+     供上面 `body.inside #kgExport` 的 `bottom` 使用（把导出条抬到图例正上方，
+     两者合成一个右下角面板）。用 ResizeObserver 而不是只在加载时算一次：
+     图例的内容会随着色维度的切换而变化（`renderLegend()` 会重写）。 */
+  (function syncLegendHeight() {
+    const lg = document.getElementById('legend');
+    if (!lg) return;
+    const sync = () => document.documentElement.style
+      .setProperty('--legend-h', (lg.offsetHeight || 0) + 'px');
+    sync();
+    if (window.ResizeObserver) new ResizeObserver(sync).observe(lg);
+    addEventListener('resize', sync);
+  })();
 
   // ── C4（2026-09-16）：分享链接 ──────────────────────────────────────
   //
