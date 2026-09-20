@@ -2431,7 +2431,23 @@ function animate() {
   labelRenderer.render(scene, camera);
   // L0 概览首帧渲染完成即就绪。直入模式（?c=N）不在这里置位，
   // 否则 CDP 会在概览层就截图，拿到的不是内部视图。
-  if (!_firstFrame) { _firstFrame = true; if (!PRE_C) window.__ready = true; }
+  if (!_firstFrame) {
+    _firstFrame = true;
+    if (!PRE_C) window.__ready = true;
+    // ── 概览层的社区标签**依次淡入**（2026-09-20）──────────────────────────
+    // 原来 18 个标签是"一齐冒出来"的。这里让它们乱序淡入，成本几乎为零。
+    // ⚠️ **只 tween `opacity`**：CSS2DRenderer 每一帧都会重写标签的
+    //    `style.transform`（它靠 transform 摆位置），所以**绝不能**在这里
+    //    tween transform / scale / x / y —— 那会和渲染器每帧打架，
+    //    表现为标签抖动或位置漂移。
+    // ⚠️ 直入模式（?c=N）不触发：那时 `_firstFrame` 用在内部视图，标签池还没分配。
+    if (window.gsap && !PRE_C) {
+      gsap.from('.label', {
+        opacity: 0, duration: 0.7, ease: 'power2.out',
+        stagger: { each: 0.045, from: 'random' }
+      });
+    }
+  }
 }
 // ── 启动渲染循环（2026-09-20 改）───────────────────────────────────────────
 // 驱动源二选一：GSAP ticker 优先；取不到就退回裸 rAF。
