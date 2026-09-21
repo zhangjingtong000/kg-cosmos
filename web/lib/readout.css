@@ -1,0 +1,80 @@
+/* readout.css —— readout.js 的样式 + 「算式块」
+ * ============================================================================
+ * 只用设计令牌里的颜色（--ink / --ink-2 / --ink-3 / --cyan / --clay-2 / --line），
+ * 不写死色值 —— `tools/check_design_system.py` 会扫这个文件，写死就过不了。
+ * 也**不用左边强调竖线**：那条规则同属设计系统闸门。
+ * ========================================================================== */
+
+/* ── 图的容器与文字 ───────────────────────────────────────────────────── */
+.ro-host { margin: 14px 0 4px; }
+.ro-svg { display: block; width: 100%; }
+/* SVG 里的文字用 --ink 系，字号跟着页面的小字走，不抢正文 */
+.ro-t { font-size: 11.5px; font-variant-numeric: lining-nums tabular-nums; }
+.ro-t1 { fill: var(--ink); font-size: 13px; font-weight: 600; }
+.ro-t2 { fill: var(--ink-2); }
+.ro-t3 { fill: var(--ink-3); }
+
+/* ── 阈值滑块：只在实测档位之间走 ─────────────────────────────────────── */
+.ro-slide { margin: 10px 0 0; }
+.ro-range { width: 100%; max-width: 620px; accent-color: var(--accent); }
+.ro-slide-out {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px;
+  margin-top: 8px; font-size: 12.5px; line-height: 1.7; color: var(--ink-2);
+}
+.ro-k { white-space: nowrap; }
+.ro-k b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ro-k b.c-clay, .c-clay { color: var(--clay-2); }
+.ro-k b.c-cyan, .c-cyan { color: var(--cyan); }
+.ro-hint { flex-basis: 100%; color: var(--ink-3); font-size: 11.5px; }
+
+/* ── 推导链：每个数字「从哪来」，紧贴数字展开（原生 <details>，零 JS）─────────
+   为什么紧贴数字而不是放在页尾：Ragan et al. TVCG 2016 与 VisProm TVCG 2023
+   都指出「把溯源与主视图分开」会让它被当成次要任务、读者根本不看。
+   用原生 <details> 而不是自己写折叠：省掉一段交互 JS、键盘与屏读器天然可用。 */
+.ro-prov { margin-top: 12px; border-top: 1px solid var(--line); }
+.ro-prov > summary {
+  cursor: pointer; padding: 8px 0; color: var(--ink-2); font-size: 12.5px;
+  list-style: none; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline;
+}
+.ro-prov > summary::-webkit-details-marker { display: none; }
+.ro-prov > summary::before { content: "▸"; color: var(--ink-3); font-size: 11px; }
+.ro-prov[open] > summary::before { content: "▾"; }
+.ro-prov > summary:hover { color: var(--ink); }
+.ro-prov > summary b { color: var(--ink); font-weight: 600;
+                       font-variant-numeric: lining-nums tabular-nums; }
+.ro-prov > summary .ro-prov-no { color: var(--ink-3); font-size: 11.5px; }
+.ro-prov-body { padding: 0 0 12px 16px; font-size: 12.5px; line-height: 1.95;
+                color: var(--ink-2); }
+.ro-prov-row { display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.ro-prov-k { flex: 0 0 88px; color: var(--ink-3); }
+.ro-prov-body code { color: var(--warm); font-size: 12px; word-break: break-all; }
+.ro-prov-fp { color: var(--ink-3); font-size: 11.5px; }
+
+/* ── 算式块：把"这个百分数是怎么算出来的"摊开 ────────────────────────────
+   目的是让每一个百分数都带上自己的分子与分母，
+   而不是让读者相信一个孤零零的 49.7%。 */
+.fx-box {
+  margin: 14px 0 6px; padding: 14px 16px; border: 1px solid var(--line);
+  border-radius: 8px; background: var(--surface);
+  font-size: 13px; line-height: 2.1; color: var(--ink-2);
+}
+.fx-box .fx-title { display: block; margin-bottom: 6px; color: var(--ink); font-weight: 600; }
+.fx { display: flex; flex-wrap: wrap; align-items: center; gap: 7px;
+      font-variant-numeric: lining-nums tabular-nums; }
+/* 分式：上下两行 + 一条横线。不用 MathML/KaTeX —— 只为了几个比值，
+   引一个排版引擎（含字体）不划算。 */
+.fx-frac { display: inline-flex; flex-direction: column; align-items: center;
+           vertical-align: middle; margin: 0 2px; }
+.fx-frac > span:first-child { border-bottom: 1px solid currentColor; padding: 0 5px; }
+.fx-frac > span:last-child { padding: 2px 5px 0; }
+.fx-tp { color: var(--cyan); }
+.fx-fp { color: var(--clay-2); }
+.fx-res { color: var(--ink); font-weight: 600; }
+.fx-note { display: block; margin-top: 6px; color: var(--ink-3); font-size: 11.5px; line-height: 1.75; }
+/* 符号↔数字联动：悬停算式里的数，把对应项点亮 */
+.fx [data-sym] { border-bottom: 1px dotted var(--ink-3); cursor: help; }
+.fx [data-sym]:hover { color: var(--warm); border-bottom-color: var(--warm); }
+
+@media (max-width: 900px) {
+  .fx-box { font-size: 12.5px; line-height: 2; }
+}

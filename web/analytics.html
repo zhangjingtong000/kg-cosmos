@@ -438,7 +438,7 @@ h3 { font-weight: 600; }
 <link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/fonts/fonts.css">
 <link rel="stylesheet" href="./lib/motion.css">
-<link rel="stylesheet" href="./lib/guide.css">
+<link rel="stylesheet" href="./lib/readout.css">
 <style>
 /* ==DESIGN_SYS== */
 /* 让各页既有内容浮在光场之上。这样不必给它们逐个包一层容器 ——
@@ -545,6 +545,7 @@ body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
     </div>
     <div class="sub" id="l9rSub"></div>
     <div id="l9r"></div>
+    <div id="l9Range" class="ro-host"></div>
     <div id="l9rTiers"></div>
     <div id="l9rMiss"></div>
   </section>
@@ -558,7 +559,14 @@ body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
     </div>
     <div class="sub" id="l5vSub"></div>
     <div id="l5v"></div>
+    <!-- 只加不替换：下面这张阈值表 `#l5vSens` 是闸门要读的，原样保留。
+         新加的三块分别是「点估计的置信区间」「把表画成两条斜率不同的线」
+         「把百分数摊开成分子分母」。 -->
+    <div id="l5vCi" class="ro-host"></div>
+    <div id="provBox"></div>
+    <div id="l5vTrade"></div>
     <div id="l5vSens"></div>
+    <div id="fxBox"></div>
   </section>
 
   <!-- L7 的 role_violation 到底在说什么：58 条独立判读的归因。
@@ -1232,7 +1240,7 @@ KGData.kg('analytics.json')
       + '<b>' + st.passed + ' / ' + st.total + '</b>'
       + '<i>' + esc(String(st.finished || '')) + '</i></div>'
       + '<ul class="vlist">' + rows + '</ul>'
-      + '<p class="vnote">这是**数据侧**检查（不依赖浏览器）。'
+      + '<p class="vnote">这是<b>数据侧</b>检查（不依赖浏览器）。'
       + '完整回归（含前端 CDP 项）在命令行跑：'
       + '<code>python tools/verify_all.py --fast</code></p>';
     window.__verifyState = { passed: st.passed, total: st.total, all_ok: ok };
@@ -1290,7 +1298,171 @@ KGData.kg('analytics.json')
 </script>
 <script src="./lib/demo-rail.js"></script>
 <script src="./lib/motion.js"></script>
+<script src="./lib/readout.js"></script>
 <script src="./lib/live-numbers.js"></script>
-<script src="./lib/guide.js"></script>
+<script>
+/* ── 读数解剖：把这一页最重要的三个数从"写在那里"改成"看得出来" ─────────────
+   为什么单独一段、而不是塞进上面那个大渲染函数：
+   上面那段已经很长且被闸门逐字读，动它的风险大于收益。
+   这一段只**新增**视图（三张图 + 一个算式块），不碰任何既有元素；
+   数据自己再取一次（浏览器缓存命中，代价可忽略），
+   所以即使这一段整体失败，页面其余部分与闸门都不受影响。 */
+(function () {
+  if (!window.KGData || !window.Readout) return;
+  var $ = function (id) { return document.getElementById(id); };
+  KGData.kg('analytics.json').then(function (D) {
+    var v = D.l5_validity || {}, r9 = D.l9_relation_recall || {}, m = D.meta || {};
+    var cal = (m.calibers || {}), sen = v.threshold_sensitivity || [];
+
+    /* ① 40.0% 带 95% 置信区间 —— 只报点估计会让人以为它是精确值 */
+    var ciTS = (v.ci || {}).true_support_rate;
+    if (ciTS && $('l5vCi')) {
+      var box = $('l5vCi');
+      var h = document.createElement('div');
+      h.className = 'calnote';
+      h.innerHTML = '<b>真实支持率的 95% 置信区间</b>'
+        + '（分层加权估计；点估计是一个数，但它不是一个精确值）';
+      box.appendChild(h);
+      Readout.ci(box, { point: v.true_support_rate, lo: ciTS[0], hi: ciTS[1], label: '真实支持率' });
+    }
+
+    /* ② 阈值表旁边把两条线的斜率差画出来 —— 论据是"张开的角度"，不是两列数字 */
+    if (sen.length && $('l5vTrade')) {
+      var tb = $('l5vTrade');
+      var t = document.createElement('div');
+      t.className = 'calnote';
+      t.innerHTML = '<b>通过率 vs PPV 随阈值怎么走</b>'
+        + '（表里那两列数字的斜率差才是论据：通过率掉 27.8pp，PPV 只升 8.8pp）<br>'
+        + '<b>0.67 这个阈值是怎么定的</b>：模型卡写 0.75、原论文写 0.1，'
+        + '<b>两者互相矛盾</b>，本仓库不采信任何一方，改在官方校准集上'
+        + '本地标定（4000 样本，ROC-AUC 0.9851）得到 0.67；'
+        + '图上另标了模型卡的 0.75 供对照 —— 换成 0.75 时通过率降到 55.5%、'
+        + 'PPV 升到 53.3%，即"更严一点、质量略好一点、数量少一成"。'
+        + '<span class="fx-note">出处：<code>tools/calibrate_verifier.py</code>'
+        + ' 的阈值裁定记录、<code>tools/l5_calibrate.py</code> 的本地标定。</span>';
+      tb.appendChild(t);
+      Readout.tradeoff(tb, {
+        rows: sen, current: m.threshold,
+        marks: [{ t: 0.75, label: '模型卡 0.75' }]
+      });
+    }
+
+    /* ③ 召回是区间不是数：四个档位 18/21/20/24 除以 42 */
+    var rg = r9.recall_range || [], tiers = r9.recall_tiers || {}, nG = r9.n_gold_entity_only;
+    if (rg.length === 2 && nG && $('l9Range')) {
+      var rb = $('l9Range');
+      var rn = document.createElement('div');
+      rn.className = 'calnote';
+      rn.innerHTML = '<b>召回是一个区间，不是一个数</b>'
+        + '（"算不算同一个关系"本身有歧义，所以四档判据各算一遍）';
+      rb.appendChild(rn);
+      Readout.range(rb, {
+        lo: rg[0], hi: rg[1], label: '关系召回',
+        ticks: [
+          ['端点精确 + 谓词一致（最严）', tiers.L1_strict_triple],
+          ['端点按别名 + 只看端点对', tiers.L2b_exact_pair],
+          ['端点按别名 + 谓词一致', tiers.L2_alias_triple],
+          ['端点按别名 + 只看端点对（最松）', tiers.L3_alias_pair]
+        ].filter(function (x) { return x[1] != null; })
+         .map(function (x) { return { name: x[0], v: x[1] / nG }; })
+      });
+    }
+
+    /* ④ 算式块：每个百分数都带上自己的分子与分母 */
+    var fx = $('fxBox'), six = D.six_layer || [];
+    var L1 = null, L5 = null;
+    six.forEach(function (r) { if (r.id === 'L1') L1 = r; if (r.id === 'L5') L5 = r; });
+    var c = v.confusion || {}, one = sen.filter(function (r) { return +r.threshold === +m.threshold; })[0];
+    var evalEdges = cal.eval_full ? cal.eval_full.edges : null;
+    if (fx && c.tp != null) {
+      var frac = function (a, b, cls) {
+        return '<span class="fx-frac"><span class="' + (cls || '') + '">' + Readout.num(a)
+          + '</span><span class="' + (cls || '') + '">' + Readout.num(b) + '</span></span>';
+      };
+      var rows = [];
+      /* L1 的分子分母从 detail 里解析（"19463/20785 个实体名…"），
+         不在页面里手写数字 —— 手写的数字过一段时间就会和数据对不上，
+         而这个项目里"数字必须可追溯"是硬纪律。解析不出来就整行不显示。 */
+      if (L1) {
+        var mm = /(\d[\d,]*)\s*\/\s*(\d[\d,]*)/.exec(L1.detail || '');
+        if (mm) {
+          rows.push('<div class="fx"><span>L1 实体存在</span><span>=</span>'
+            + frac(+mm[1].replace(/,/g, ''), +mm[2].replace(/,/g, ''), 'fx-tp')
+            + '<span>=</span><span class="fx-res">' + L1.value + '%</span>'
+            + '<span class="fx-note" style="display:inline">实体名出现在自己的证据引文里</span></div>');
+        }
+      }
+      if (one && evalEdges) {
+        rows.push('<div class="fx"><span>L5 通过率</span><span>=</span>'
+          + frac(one.population_pass, evalEdges, 'fx-tp')
+          + '<span>=</span><span class="fx-res">' + (one.pass_rate * 100).toFixed(1) + '%</span>'
+          + '<span class="fx-note" style="display:inline">判别器判通过的边 / 评测全集</span></div>');
+      }
+      rows.push('<div class="fx"><span>PPV（判通过的边里真的成立的比例）</span><span>=</span>'
+        + '<span>TP / (TP + FP)</span><span>=</span>'
+        + '<span class="fx-frac"><span class="fx-tp">' + Readout.num(c.tp) + '</span>'
+        + '<span><span class="fx-tp">' + Readout.num(c.tp) + '</span> + '
+        + '<span class="fx-fp">' + Readout.num(c.fp) + '</span></span></span>'
+        + '<span>=</span><span class="fx-res">' + Readout.pct(v.ppv) + '</span></div>');
+      fx.innerHTML = '<div class="fx-box"><span class="fx-title">'
+        + '这些百分数是怎么算出来的</span>' + rows.join('')
+        + '<span class="fx-note">分子分母都写出来了，可以自己按一遍计算器。'
+        + '<b>注意第三个式子的假阳性（FP ' + Readout.num(c.fp) + '）比真阳性（TP '
+        + Readout.num(c.tp) + '）还多</b> —— 这正是"通过率 63.6% 不等于质量"的算术原因。<br>'
+        + '口径提醒：这个混淆矩阵是分层盲判样本的（n = '
+        + Readout.num(c.tp + c.fp + c.tn + c.fn) + '），与评测全集 '
+        + (evalEdges ? Readout.num(evalEdges) : '—') + ' 条不是一个口径，'
+        + '不要跨着比；真实支持率是分层加权估计，所以只给区间不给简单比值。</span></div>';
+    }
+  }).catch(function () { /* 数据缺失时这一整段不出现，页面其余部分照旧 */ });
+
+  /* ── ⑤ 推导链：每个数字从哪来 ──────────────────────────────────────────────
+     数据来自 `web/kg-data/provenance.json`（由 tools/build_provenance_data.py
+     从 data/quality/metric-provenance.json 裁剪而来，前端不许直接读 data/）。
+     用原生 <details> ⇒ 这段一行交互 JS 都没有，键盘与屏读器天然可用。 */
+  KGData.kg('provenance.json').then(function (P) {
+    var box = $('provBox');
+    if (!box || !(P.metrics || []).length) return;
+    function fmt(v) {
+      if (typeof v !== 'number') return String(v == null ? '—' : v);
+      return v <= 1 ? Readout.pct(v) : Readout.num(v);
+    }
+    var rows = P.metrics.map(function (m) {
+      return '<details class="ro-prov"><summary>'
+        + '<b>' + Readout.esc(m.label) + '</b>'
+        + '<b>' + fmt(m.value) + '</b>'
+        + '<span class="ro-prov-no">展开看它从哪来</span></summary>'
+        + '<div class="ro-prov-body">'
+        + '<div class="ro-prov-row"><span class="ro-prov-k">生成脚本</span>'
+        + '<code>' + Readout.esc(m.produced_by || '—') + '</code></div>'
+        + '<div class="ro-prov-row"><span class="ro-prov-k">产物文件</span>'
+        + '<code>data/quality/' + Readout.esc(m.artifact || '—') + '</code>'
+        + '<span>· 取值路径 <code>' + Readout.esc(m.path || '—') + '</code></span></div>'
+        + '<div class="ro-prov-row"><span class="ro-prov-k">产物时间</span>'
+        + '<span>' + Readout.esc(m.artifact_mtime || '—') + '</span></div>'
+        + '<div class="ro-prov-row"><span class="ro-prov-k">复算入口</span>'
+        + '<code>python ' + Readout.esc(m.produced_by || '') + '</code>'
+        + '<span class="ro-prov-fp">（能从该产物复算出这个数；要重跑上游才等于重跑全流程）</span></div>'
+        + '</div></details>';
+    }).join('');
+    var srcs = (P.sources || []).map(function (s) {
+      return '<div class="ro-prov-row"><span class="ro-prov-k">' + Readout.esc(s.name) + '</span>'
+        + '<span>' + s.files + ' 个文件 · ' + (s.bytes / 1048576).toFixed(1) + ' MB · '
+        + Readout.esc(s.mtime || '—') + '</span>'
+        + '<span class="ro-prov-fp">sha1 ' + Readout.esc(s.sha1_16 || '—') + '</span></div>';
+    }).join('');
+    box.innerHTML = '<div class="fx-box"><span class="fx-title">'
+      + '这些数字是从哪来的（点开任一展开）</span>'
+      + rows
+      + '<span class="fx-note">上面每个数字都是「脚本 → 产物文件 → 取值路径」三段可查的；'
+      + '产物时间用来判断它是不是同一次跑出来的。<br>'
+      + '下面是<b>这一页所有数字共用的上游输入</b>（指纹 = 内容的 sha1 前 16 位，'
+      + '换一次数据就会变，因此它能回答"这两页说的是不是同一份图"）：</span>'
+      + '<div class="ro-prov-body">' + srcs + '</div>'
+      + '<span class="fx-note">口径：' + Readout.esc(P.caveat || '') + '</span>'
+      + '</div>';
+  }).catch(function () { /* 没有溯源数据就不显示，不假装有 */ });
+})();
+</script>
 </body>
 </html>

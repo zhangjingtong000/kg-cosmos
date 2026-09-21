@@ -89,7 +89,6 @@
   code{color:var(--warn)}
 </style>
 <link rel="stylesheet" href="./lib/motion.css">
-<link rel="stylesheet" href="./lib/guide.css">
 </head>
 <body>
 <header>
@@ -294,6 +293,5 @@ fetch('./kg-data/temporal.json').then(r => r.ok ? r.json() : null).then(d => {
 }).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
 </script>
 <script src="./lib/motion.js"></script>
-<script src="./lib/guide.js"></script>
 </body>
 </html>

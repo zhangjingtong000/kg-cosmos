@@ -211,6 +211,119 @@ h3 { font-weight: 600; }
   .more-list .entry:nth-child(2n)::after{right:0}
 }
 
+/* ══ 03 · 入口：十二项**一条滚轴**（2026-09-20 重做）══════════════════════
+   上面那两组 `.entries.flow` / `.more-list` 的网格规则**原位留档、没有删除**，
+   它们现在打不到任何元素（容器已换成 `.reel`）⇒ 天然惰性，不会与下面打架。
+   【用户要求】「做成滚轴的形式」「十二项全部滚动」「字可以变大一点，方便它滚动」
+   「这个滚动的背景要融入我们的背景，不要显得很突兀，也不要显得很独立」。
+   【怎么满足"融入背景"】三件事：① 容器**没有任何背景/边框/阴影**，它只是
+   页面背景上的一条轨道；② 两端用 `mask` 渐隐 —— mask 的透明端会让**页面自己的
+   背景**（含 atmosphere 那层）透出来，所以在任何底色上都融得进去，比"用某个
+   深色去盖"稳；③ 不新增任何独立的分区标题，分界只用一条竖线 + 小字。
+   【为什么覆盖要写在 `.reel .entry` 上】`voyage.css` 给 `.entry` 的基样式是
+   `display:grid;grid-template-columns:60px 1fr auto`（三列）—— 在横向轨道里
+   那会把每张卡压成三列并排。所以这里必须显式改回 `display:block`。 */
+/* ★ 2026-09-20 第二版：改成**粘住 + 滚动驱动横向**（用户原话：「从这个页面开始往下滑，
+   滑到六步动向的时候，滑动滚轮它也会滚动，滚到最后的时候它才可以继续往下滚动」
+   「滚轮是连续的，并不需要额外的按键去控制」）。
+   做法：把这一屏撑高（高度由 JS 按需要的横向距离算），里面那层 `.in` 用
+   `position:sticky` 钉在视口里，滚轮推进的是**页面纵向进度**，
+   再由进度换算出这条轴的 `scrollLeft` —— 所以滚轮就是它的滚动条，一格不用多按。
+   走满之后 sticky 自然解除，页面继续往下。
+   ⚠️ **不用 ScrollTrigger 的 pin**：pin 会在运行时给元素加 `position:fixed`，
+      而 `tools/浮层守门` 会检查"声明 fixed 的元素计算值必须也是 fixed"；
+      `position:sticky` 是纯 CSS、不产生固定层，稳得多。 */
+#ch-3{position:relative}
+/* ★★ 这一条是「从 01 开始滚」的关键（实测出来的，不是想出来的）：
+   `voyage.css` 给 `.ch` 的是 `display:flex;align-items:center;padding:12svh 0`。
+   把这一屏撑高到 3568px 之后，`.in` 会被**垂直居中**到离章节顶 1383px 处 ⇒
+   「章节顶对齐视口」的那一刻轴还在屏幕外；等它居中露出来时，进度已经走到 0.5，
+   屏幕上正好是卡片 05 —— 用户看到的就是「从 05、06 才开始滚」。
+   所以这一屏必须**顶对齐**、并去掉上下 12svh 内边距，
+   让「章节顶对齐视口」与「轴刚进视野、进度为 0」落在同一刻。
+   实测对照：改前 k=0 时 `轴可见=N`，k=0.5 才可见且首卡已是 05；
+   改后 k=0 即 `轴可见=Y` 且首卡=01。 */
+#ch-3{align-items:flex-start;padding-top:0;padding-bottom:0}
+#ch-3 > .in{
+  position:sticky;top:0;min-height:100vh;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.reel{
+  margin-top:20px;position:relative;
+  /* `hidden` 而不是 `auto`：**这条轴只由页面纵向滚动驱动**，不接横向手势，
+     否则触控板的横向滑动会和"进度换算出来的位置"互相打架。
+     `overflow:hidden` 依然可以用 `scrollLeft` 编程滚动，所以键盘 Tab 到
+     视野外的卡片时，浏览器照样能把它带进来（无障碍没有损失）。 */
+  overflow-x:hidden;overflow-y:hidden;
+  /* 隐藏横向滚动条：这条轴靠滚轮/方向键走，多一条滚动条反而是"独立控件"感 */
+  scrollbar-width:none;-ms-overflow-style:none;
+  /* ★ 两端渐隐用**固定像素**，不能用百分比：百分比在 1100px 宽下左端要吃掉 38px，
+     而第一张卡的序号「01」紧贴容器左边缘 ⇒ 「0」的左半边正好被淡掉
+     （用户实测反馈：「01 的 0 有一半没显示出来」）。
+     现在左端只渐隐 20px，并由轨道留出 24px 内边距，序号完整落在不透明区里。 */
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 20px,#000 calc(100% - 30px),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 20px,#000 calc(100% - 30px),transparent 100%);
+  padding-bottom:6px;
+}
+.reel::-webkit-scrollbar{display:none}
+/* 轨道本身不换行：十二项一条线走完。
+   左侧 24px 内边距是给"序号不被左端渐隐吃掉"用的（见上面的遮罩注释）；
+   右侧 6px 保证走到底时第 12 张卡的右边缘不会贴死容器边。 */
+.reel-track{display:flex;align-items:flex-start;gap:0;padding-left:24px;padding-right:6px}
+/* 卡片：**字比原来大**（h3 16→21px、正文 12.5→14px、序号 22→26px），
+   因为它是横向滚过去的，字小了根本来不及读。 */
+.reel .entry{
+  position:relative;display:block;flex:0 0 auto;
+  width:clamp(250px,25vw,340px);
+  padding:26px 30px 20px 0;margin-right:30px;
+  opacity:1;transform:none;
+  scroll-snap-align:start;border-bottom:0;
+}
+.reel .entry > *{position:relative}
+.reel .entry .ix{
+  display:block;margin:0 0 12px;line-height:1;
+  font-size:26px;font-weight:200;letter-spacing:-.02em;color:var(--accent);
+}
+.reel .entry h3{font-size:21px;line-height:1.3;color:#fff}
+.reel .entry p{margin:10px 0 0;font-size:14px;line-height:1.78;color:var(--ink-3);max-width:none}
+.reel .entry .mt{
+  display:block;margin-top:14px;text-align:left;
+  font-size:10.5px;letter-spacing:.16em;
+}
+/* 轴：前 6 步 2px 暖金（演示动线），后 6 项 1px 更暗（支线功能）。
+   仍然由 `--rail`（GSAP 随滚动补间）驱动，所以"轴在生长"这件事没有丢。 */
+.reel-track > .entry:nth-child(-n+6)::after{
+  content:"";position:absolute;left:0;right:-30px;top:-1px;height:2px;
+  background:linear-gradient(90deg,var(--accent),rgba(224,164,105,.08));
+  transform:scaleX(var(--rail,0));transform-origin:left;
+  transition:transform .65s cubic-bezier(.19,1,.22,1);
+}
+.reel-track > .entry:nth-child(n+8)::after{
+  content:"";position:absolute;left:0;right:-30px;top:-1px;height:1px;
+  background:linear-gradient(90deg,rgba(224,164,105,.55),rgba(224,164,105,.04));
+  transform:scaleX(var(--rail,0));transform-origin:left;
+  transition:transform .65s cubic-bezier(.19,1,.22,1);
+}
+.reel .entry:hover{padding-left:0}
+.reel .entry:hover::after{transform:scaleX(1)}
+/* 支线那 6 项常态权重压到 .7（与原来"上下两层"的层次关系一致） */
+.reel-track > .entry:nth-child(n+8){opacity:.7;
+  transition:opacity .45s cubic-bezier(.19,1,.22,1)}
+.reel-track > .entry:nth-child(n+8):hover{opacity:1}
+/* 分界：一条竖线 + 小字，**不另起一块** */
+.reel-seam{
+  flex:0 0 auto;align-self:stretch;display:flex;flex-direction:column;gap:7px;
+  justify-content:center;width:118px;margin:6px 30px 6px 0;padding-left:18px;
+  border-left:1px solid var(--line);
+  font-size:10.5px;letter-spacing:.16em;color:var(--ink-3);line-height:1.7;
+}
+.reel-seam b{display:block;color:var(--accent);font-weight:600;letter-spacing:.16em}
+.reel-hint{
+  margin:16px 0 0;font-size:11.5px;letter-spacing:.06em;color:var(--ink-3);
+  opacity:0;transition:opacity .8s ease .3s;
+}
+.ch.seen .reel-hint{opacity:1}
+
 /* ── 页脚脚注：解释 `*`（= 这一页需要联网）─────────────────────────────
    2026-09-19 加。**起因**：`README.md §8` 写着「导航页已用 `*` 标注」，
    而本页当时**一个 `*` 都没有** —— 承诺只活在文档里，页面上找不到，
@@ -399,132 +512,111 @@ document.documentElement.classList.add('js-motion');
     <div class="in">
       <p class="kick">03 — 入口</p>
       <h2>六步演示动线<em> · 另有 6 项功能</em></h2>
-      <div class="entries flow">
-        <!-- 上层 = `lib/demo-rail.js` 的 FLOW 那条演示动线：序号与顺序都跟它一致
-             （01 上传 → 02 星云 → 03 提问 → 04 分析 → 05 PathQA → 06 局限）。
-             ⚠️ 改这里就必须同步改 `lib/demo-rail.js` —— 顺序的真值只有那一个。
-             为什么横向排成一行：这一层表达的是"一条路径"，不是"一堆链接"；
-             序号 01–06 与 hover 时展开的暖金短线（同 voyage.css 的 .fig::before）
-             是这层唯一的装饰，权重全靠它们与下面那层拉开。 -->
-        <a class="entry" href="upload.html">
-          <span class="ix">01</span>
-          <h3>上传一篇论文</h3>
-          <p>给它一个 PDF：本地解析全文，逐段抽取实体与关系，去重归一聚类，
-             最后落成一张可以走进去的图。走本机模型，全程零 API 成本。</p>
-          <span class="mt"><b>起点</b><span class="go">→</span></span>
-        </a>
-        <a class="entry" href="kg-nebula.html">
-          <span class="ix">02</span>
-          <h3>社区星云 · 主视图</h3>
-          <p>近两万个实体按社区与类型分区排布的三维视图，支持度数 / PageRank 排序、
-             标签按深度遮挡、点选看证据并深链回原文 PDF 的高亮位置。</p>
-          <span class="mt"><b>核心</b><span class="go">→</span></span>
-        </a>
-        <a class="entry" href="ask.html">
-          <span class="ix">03</span>
-          <h3>提问 · 支持与反方</h3>
-          <p>问一个问题，系统在图上检索子图，让支持和反方各自出示可回溯到原文的
-             证据，再给出结论——分歧消解不掉就如实说，不替你裁决。</p>
-          <span class="mt">证据链<span class="go">→</span></span>
-        </a>
-        <a class="entry" href="analytics.html">
-          <span class="ix">04</span>
-          <h3>图谱分析面板</h3>
-          <p>六层评测、四套口径对照、L5 域内效度与阈值灵敏度、过滤策略对比、
-             L7 角色违规归因、L9 端点与关系召回。每个数字都可追溯到产物文件。</p>
-          <span class="mt">结论集中在此<span class="go">→</span></span>
-        </a>
-        <a class="entry" href="pathqa.html">
-          <span class="ix">05</span>
-          <h3>问题子图 PathQA</h3>
-          <p>给一个孤立的实体，从图里找出它与核心社区之间的通路并渲染成子图——
-             回答"这个节点是怎么被连进来的"。</p>
-          <span class="mt">字面匹配 → BFS 2 跳 → 力导向<span class="go">→</span></span>
-        </a>
-        <a class="entry" href="method-limits.html">
-          <span class="ix">06</span>
-          <h3>方法能力与局限</h3>
-          <p>243 条方法 × 178 个方法本体 × 194 个能力维度，逐条标注
-             "这张图能做什么、不能做什么"，避免把结构推断说成事实。</p>
-          <span class="mt">边界声明<span class="go">→</span></span>
-        </a>
-      </div>
+      <!-- ★ 2026-09-20：十二项改成**一条滚轴**（用户要求：「底下这个六步演示动线
+           和六项功能，我还是想做成滚轴的形式」「十二项全部滚动」「字可以变大一点，
+           方便它滚动」「这个滚动的背景要融入我们的背景，不要显得很突兀，
+           也不要显得很独立」）。
 
-      <!-- 下层：另有 6 项功能。**刻意不在动线上** —— `lib/demo-rail.js` 的 FLOW
-           只走上面 6 步，这 6 项按需进入即可。
-           说明在这里被**缩短**（原句 60–110 字，六列并排会变成文字柱），
-           但每句都保留了原句里的关键数字与限定语 —— 不删到看不懂。
-           为什么不再分「看数据 / 看结构 / 看观点」三组：见任务报告 ——
-           这 6 项用途彼此交叉（paper-table 既是看数据也含看观点），
-           强行切三组要为边界辩护，还会多出 3 个小标题把这一层的权重抬回去。 -->
-      <div class="more">
-        <p class="kick">支线功能 · 6 项<span>不在演示动线上，按需进入</span></p>
-        <div class="more-list">
-          <!-- K2（2026-09-15）：论文管理。此前"一篇论文"这个概念在界面上不存在 ——
-             而它在数据里有明确定义（_manifest.json 的 id），且与图快照、证据链
-             完美对应。这一页把它显式化，并如实标出"只下载未入库"的那批。
-             2026-09-19（合并 corpus.html）：这里**原来指向 `corpus.html`**（旧版语料清单）。
-             旧页此前是老式表结构（表头写死"arXiv id"、无语言列），而 `papers.html`
-             已有按语言分组 + 搜索 + 关系/社区列 ⇒ 入口改指新页；
-             旧页按 `ARCHIVE_POLICY` **方式 A 原地留档**（加"这是历史版本"横幅，不删）。 -->
-          <a class="entry" href="papers.html">
-            <span class="ix">07</span>
-            <h3>论文管理 · 语料清单</h3>
-            <p>33 篇论文清单（另有 1 条中文期刊记录登记但 PDF 未落盘）：标题、年份、检索式、是否入库、抽出多少实体与关系。含 13 篇只下载、尚未入库的。</p>
-            <span class="mt">语料边界<span class="go">→</span></span>
+           做法：把原来「6 项一行 + 另外 6 项一网格」两层，压成**一条横向轨道**，
+           十二项在同一条轴上依次排开，用滚轮 / 左右方向键横向走完。
+             · 不加背景、不加边框、不加外框 ⇒ 它就是页面背景上的一条轨道；
+             · 两端用 mask 渐隐（mask 的透明端会让**页面自己的背景**透出来）⇒
+               卡片在边缘化进背景，而不是被硬边裁断；
+             · 中段一条竖线 + 小字做分界，说明后 6 项不在演示动线上 ——
+               分界而不是另起一块，正是为了「不要显得很独立」。
+           【归档】被这一版替换掉的写法（`.entries.flow` 6 列网格 +
+           `.more-list` 6 列网格）没有删除，保留在下方 CSS 的注释块里。
+
+           序号与顺序的真值仍在 `lib/demo-rail.js` 的 FLOW（01 上传 → 02 星云 →
+           03 提问 → 04 分析 → 05 PathQA → 06 局限）；改顺序必须同步改那边。
+           ★ 前 6 张与后 6 张**靠 `:nth-child` 区分，不另加类名** ——
+             轨道里第 7 个孩子是那条分界线，所以后 6 张是 `nth-child(n+8)`。 -->
+      <div class="reel" id="entryAxis" tabindex="0" role="group"
+           aria-label="十二个入口：前六步是演示动线，后六项是支线功能，可用左右方向键横向浏览">
+        <div class="reel-track">
+  <a class="entry" href="upload.html">
+            <span class="ix">01</span>
+            <h3>上传一篇论文</h3>
+            <p>给它一个 PDF：本地解析全文，逐段抽取实体与关系，去重归一聚类，
+               最后落成一张可以走进去的图。走本机模型，全程零 API 成本。</p>
+            <span class="mt"><b>起点</b><span class="go">→</span></span>
           </a>
-          <!-- F4（2026-09-16）：USES 的施动者 × 被用物二部图。
-             **刻意不叫"方法-数据集二部图"** —— USES 的 target 语义是混的
-             （工具/方法/数据都可能），要真分侧需要实体类型，而类型有 Unknown。
-             页面上把这句话写明了 —— 名字对不上内容是这类页面最容易骗人的地方。 -->
-          <a class="entry" href="bipartite.html">
-            <span class="ix">08</span>
-            <h3>使用关系二部图</h3>
-            <p>全库 7381 条 USES 的施动者 × 被用物；两侧是「施动 / 被用」，不是「方法 / 数据集」。</p>
-            <span class="mt">关系结构<span class="go">→</span></span>
+  <a class="entry" href="kg-nebula.html">
+            <span class="ix">02</span>
+            <h3>社区星云 · 主视图</h3>
+            <p>近两万个实体按社区与类型分区排布的三维视图，支持度数 / PageRank 排序、
+               标签按深度遮挡、点选看证据并深链回原文 PDF 的高亮位置。</p>
+            <span class="mt"><b>核心</b><span class="go">→</span></span>
           </a>
-          <!-- F1（2026-09-16）：按论文年份逐年累积，看"什么什么时候出现"。
-             **刻意不做社区** —— 逐年重跑 Louvain 的社区编号会漂，
-             画成同色会让人以为"这个社区一直在"，而那是假的。页面里写明了。 -->
-          <a class="entry" href="temporal.html">
-            <span class="ix">09</span>
-            <h3>时间演化</h3>
-            <p>20 篇论文按年份逐年累积成 8 帧（2017–2026），看「当年首次出现了什么」——新增实体与新增关系类型。</p>
-            <span class="mt">时间维度<span class="go">→</span></span>
+  <a class="entry" href="ask.html">
+            <span class="ix">03</span>
+            <h3>提问 · 支持与反方</h3>
+            <p>问一个问题，系统在图上检索子图，让支持和反方各自出示可回溯到原文的
+               证据，再给出结论——分歧消解不掉就如实说，不替你裁决。</p>
+            <span class="mt">证据链<span class="go">→</span></span>
           </a>
-          <!-- F2（2026-09-16）：任选两篇，看共有 / 各自独有。
-             数字一律取自 web/kg-data/diff.json 的 design.measured
-             （由 tools/build_diff_data.py 现算），本文件不自己算、也不许写死：
-             此前这里写 28 对 —— 那是 17 篇 / 136 对 时代的旧值，
-             语料涨到 21 篇 / 210 对后实测已是 87 对，页面却还在说 28。
-             旧值已留档在 diff.json 的 design.superseded_measurements。
-             「类型分歧」不等于「矛盾」，页面上写明了。 -->
-          <a class="entry" href="diff.html">
-            <span class="ix">10</span>
-            <h3>多图对比</h3>
-            <p>任选两篇看共有 / 各自独有；节点重叠最高只有 0.089，87 对是「共享实体、零共享关系」。</p>
-            <span class="mt">跨篇对比<span class="go">→</span></span>
+  <a class="entry" href="analytics.html">
+            <span class="ix">04</span>
+            <h3>图谱分析面板</h3>
+            <p>六层评测、四套口径对照、L5 域内效度与阈值灵敏度、过滤策略对比、
+               L7 角色违规归因、L9 端点与关系召回。每个数字都可追溯到产物文件。</p>
+            <span class="mt">结论集中在此<span class="go">→</span></span>
           </a>
-          <!-- L17（2026-09-16）：把图谱里的关系按论文**摊平成一张可导出的表**。
-             对标 Elicit 的 `Extract Data`（自定义列 → 导出）。
-             ⚠️ 字段**不是照抄** Consensus 的 Study Snapshot（那是医学/社科的），
-             而是本领域真实存在、且从图里真的能取到的关系类型。 -->
-          <a class="entry" href="paper-table.html">
-            <span class="ix">11</span>
-            <h3>论文对比表</h3>
-            <p>行 = 论文，列 = 关系类型字段，每格带页码，可导出 CSV / Markdown。</p>
-            <span class="mt">结构化导出<span class="go">→</span></span>
+  <a class="entry" href="pathqa.html">
+            <span class="ix">05</span>
+            <h3>问题子图 PathQA</h3>
+            <p>给一个孤立的实体，从图里找出它与核心社区之间的通路并渲染成子图——
+               回答"这个节点是怎么被连进来的"。</p>
+            <span class="mt">字面匹配 → BFS 2 跳 → 力导向<span class="go">→</span></span>
           </a>
-          <!-- L16（2026-09-17）：把支持/反对聚合成一个立场标签（对标 Consensus Meter）。
-             ★ 立场是**数出来的**，不是问模型问出来的 ——
-             本项目有一条纪律：不用 LLM 当裁判（四模型标注者的 α 是负的）。 -->
-          <a class="entry" href="stance.html">
-            <span class="ix">12</span>
-            <h3>立场聚合</h3>
-            <p>671 个主张聚成 Yes / No / Mixed / Possibly；立场由计数得出，不调模型。</p>
-            <span class="mt">立场归纳<span class="go">→</span></span>
+  <a class="entry" href="method-limits.html">
+            <span class="ix">06</span>
+            <h3>方法能力与局限</h3>
+            <p>243 条方法 × 178 个方法本体 × 194 个能力维度，逐条标注
+               "这张图能做什么、不能做什么"，避免把结构推断说成事实。</p>
+            <span class="mt">边界声明<span class="go">→</span></span>
           </a>
+          <!-- 滚轴上的分界：把「不在动线上的 6 项」与上面 6 步分开，
+               但**仍在同一条轴**上。一条竖线 + 小字，不另起一块。 -->
+          <span class="reel-seam" aria-hidden="true"><b>支线功能</b>6 项 · 不在演示动线上</span>
+  <a class="entry" href="papers.html">
+              <span class="ix">07</span>
+              <h3>论文管理 · 语料清单</h3>
+              <p>33 篇论文清单（另有 1 条中文期刊记录登记但 PDF 未落盘）：标题、年份、检索式、是否入库、抽出多少实体与关系。含 13 篇只下载、尚未入库的。</p>
+              <span class="mt">语料边界<span class="go">→</span></span>
+            </a>
+  <a class="entry" href="bipartite.html">
+              <span class="ix">08</span>
+              <h3>使用关系二部图</h3>
+              <p>全库 7381 条 USES 的施动者 × 被用物；两侧是「施动 / 被用」，不是「方法 / 数据集」。</p>
+              <span class="mt">关系结构<span class="go">→</span></span>
+            </a>
+  <a class="entry" href="temporal.html">
+              <span class="ix">09</span>
+              <h3>时间演化</h3>
+              <p>20 篇论文按年份逐年累积成 8 帧（2017–2026），看「当年首次出现了什么」——新增实体与新增关系类型。</p>
+              <span class="mt">时间维度<span class="go">→</span></span>
+            </a>
+  <a class="entry" href="diff.html">
+              <span class="ix">10</span>
+              <h3>多图对比</h3>
+              <p>任选两篇看共有 / 各自独有；节点重叠最高只有 0.089，87 对是「共享实体、零共享关系」。</p>
+              <span class="mt">跨篇对比<span class="go">→</span></span>
+            </a>
+  <a class="entry" href="paper-table.html">
+              <span class="ix">11</span>
+              <h3>论文对比表</h3>
+              <p>行 = 论文，列 = 关系类型字段，每格带页码，可导出 CSV / Markdown。</p>
+              <span class="mt">结构化导出<span class="go">→</span></span>
+            </a>
+  <a class="entry" href="stance.html">
+              <span class="ix">12</span>
+              <h3>立场聚合</h3>
+              <p>671 个主张聚成 Yes / No / Mixed / Possibly；立场由计数得出，不调模型。</p>
+              <span class="mt">立场归纳<span class="go">→</span></span>
+            </a>
         </div>
+        <p class="reel-hint">继续往下滚 —— 这条轴会跟着横向走完十二项，走完之后页面才继续往下</p>
       </div>
     </div>
   </section>
@@ -713,9 +805,15 @@ document.documentElement.classList.add('js-motion');
     //    是在 once 版下测的；scrub 版由滚动位置直接决定，天然同步）。
     if (window.ScrollTrigger) {
       gsap.registerPlugin(window.ScrollTrigger);
+      // 【2026-09-20 滚轴版】原来这里是两条轴、分别打 `.entries.flow .entry` 与
+      // `.more-list .entry`。容器换成 `.reel` 之后这两个选择器**一个都打不到**，
+      // 而下面 `if (!els.length) return;` 会静默跳过 ⇒ 轨道线再也不会生长。
+      // 所以选择器必须跟着改（用 `:nth-child` 而不是给卡片加类名：
+      // 轨道里第 7 个孩子是那条分界线，故后 6 张是 `nth-child(n+8)`）。
+      // 语义不变：前 6 步停在 1，后 6 项停在 0.7（它的常态权重）。
       [
-        { sel: '#ch-3 .entries.flow .entry', to: 1, start: 'top 88%', end: 'bottom 62%' },
-        { sel: '#ch-3 .more-list .entry', to: 0.7, start: 'top 80%', end: 'bottom 62%' }
+        { sel: '#ch-3 .reel-track > .entry:nth-child(-n+6)', to: 1, start: 'top 88%', end: 'bottom 62%' },
+        { sel: '#ch-3 .reel-track > .entry:nth-child(n+8)', to: 0.7, start: 'top 80%', end: 'bottom 62%' }
       ].forEach(function (ax) {
         var els = document.querySelectorAll(ax.sel);
         if (!els.length) return;
@@ -731,6 +829,80 @@ document.documentElement.classList.add('js-motion');
       });
     }
   } catch (e) { bail('抛错 ' + e); }
+})();
+</script>
+<script>
+/* ── 03 · 入口那条滚轴：**由页面纵向滚动驱动横向** ────────────────────────────
+   2026-09-20 第二版。用户原话：「滑到六步动向的时候，滑动滚轮它也会滚动，
+   滚到最后的时候它才可以继续往下滚动」「滚轮是连续的，并不需要额外的按键去控制」。
+
+   形态：这一屏被撑高（高度 = 视口高 + 为横向预留的纵向距离），里面的 `.in`
+   用 `position:sticky` 钉在视口里 ⇒ 页面往下滚时这一屏看起来没动，
+   但纵向进度在涨；进度换算成 `.reel` 的 `scrollLeft` ⇒ 轴横向走完十二项。
+   进度到 1 之后 sticky 自然解除，页面恢复往下滚。
+
+   ★ 三个坑都写在代码里（都是这一版实测出来的）：
+     ① 不用 ScrollTrigger 的 pin：它运行时加 `position:fixed`，撞浮层守门；
+     ② 滚动回调里**不要**用 `scroll-behavior:smooth`：sticky 下每帧都追不上目标，
+        会明显发飘；直接写 `scrollLeft` 才跟手；
+     ③ `overflow-x:hidden` 也能编程滚动，所以键盘 Tab 到视野外的卡片时
+        浏览器照样能把它带进来 —— 无障碍没有因为"只让滚轮驱动"而损失。 */
+(function () {
+  var sec = document.getElementById('ch-3');
+  var reel = document.getElementById('entryAxis');
+  if (!sec || !reel) return;
+
+  var REDUCED = false;
+  try {
+    REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              && !/[?&]motion=force\b/.test(location.search);
+  } catch (e) {}
+
+  /* 降级：不做粘住、不做联动，退回"横向可滚"的原生容器 ——
+     内容仍然全部够得着，只是不再有滚动驱动的效果。 */
+  if (REDUCED) {
+    reel.style.overflowX = 'auto';
+    var h0 = document.querySelector('.reel-hint');
+    if (h0) h0.textContent = '横向滚动查看全部十二项';
+    return;
+  }
+
+  var travel = 0;   /* 这条轴一共要横向走多远 */
+  var budget = 0;   /* 为它准备多少纵向滚动距离 */
+
+  function measure() {
+    travel = Math.max(0, reel.scrollWidth - reel.clientWidth);
+    /* 纵向预算 = 横向距离 × 0.8。一比一会让这一段滑得没完没了；
+       0.8 既连续、又不至于太赶（这个系数就是"手感"，改它只影响快慢）。 */
+    budget = Math.round(travel * 0.8);
+    sec.style.height = (window.innerHeight + budget) + 'px';
+  }
+
+  function paint() {
+    if (budget <= 0) return;
+    var p = (-sec.getBoundingClientRect().top) / budget;   /* 0 → 1 */
+    if (p < 0) p = 0;
+    if (p > 1) p = 1;
+    reel.scrollLeft = p * travel;
+  }
+
+  /* 每帧最多画一次：scroll 事件比屏幕刷新密得多，不节流会白做很多次布局 */
+  var queued = false;
+  function onScroll() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; paint(); });
+  }
+
+  measure();
+  paint();
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', function () { measure(); paint(); });
+  /* 字体与布局稳定后 `scrollWidth` 会变（换行、字号回退），必须重量一次 */
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { measure(); paint(); });
+  }
+  window.addEventListener('load', function () { measure(); paint(); });
 })();
 </script>
 </body>
