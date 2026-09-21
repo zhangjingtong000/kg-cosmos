@@ -23,7 +23,7 @@ Run:
 """
 
 import asyncio
-import json, os, uuid, shutil, sys, time
+import json, os, re, uuid, shutil, sys, time
 from collections import Counter
 from pathlib import Path
 from datetime import datetime
@@ -73,7 +73,18 @@ KG_DATA = WEB_DIR / "kg-data"
 QUALITY = ROOT / "data" / "quality"
 
 app = FastAPI(title="KG Extraction API", version="1.1.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+# ★ 2026-09-21 安全加固：此前是 `allow_origins=["*"]`。
+# 后果不是理论问题：本服务只监听 127.0.0.1，但**浏览器里的任意网页**都能跨源
+# 读走 /api/kg/*、/api/quality/*、/api/manifest 的全部内容，并 POST 到
+# /api/papers/trash（移文件）、/api/kg/edit-plan（改图计划）、/api/flag（写标记）。
+# 实测响应头就是 `access-control-allow-origin: *`。
+# 本服务只可能被本机页面调用 ⇒ 白名单足够，不需要通配。
+_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000", "http://localhost:8000",
+    "http://127.0.0.1:8098", "http://localhost:8098",
+]
+app.add_middleware(CORSMiddleware, allow_origins=_ALLOWED_ORIGINS,
+                   allow_methods=["*"], allow_headers=["*"])
 
 
 @app.middleware("http")
@@ -106,6 +117,32 @@ async def _access_log(request, call_next):
 # Store graphs in memory + on disk
 DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
+# `graph_id` 会被拼进文件路径（见 `_ensure_graph`），所以先卡一道白名单：
+# 只允许字母/数字/点/下划线/连字符，首字符不能是点。配合 `..` 检查挡住穿越。
+_GRAPH_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+# 上传上限。演示用的论文 PDF 都在几十 MB 以内，200 MB 足够宽松，
+# 而它挡掉的是"一个请求把磁盘写满"这种最低成本的破坏。
+MAX_UPLOAD_BYTES = 200 * (1 << 20)
+
+
+def _safe_pdf_name(name: str | None) -> str:
+    """把**客户端给的文件名**变成一个只能落在目标目录里的纯文件名。
+
+    为什么不能直接用 `Path(name).name`：Windows 上反斜杠也是分隔符，
+    而 `PurePosixPath` 只按正斜杠切分，会原样保留反斜杠。
+    所以先把反斜杠归一成正斜杠，再取最后一段，最后再剥一次 `..`。
+
+    返回空串或剥完仍可疑时，退回一个固定名 —— **宁可覆盖成固定名，
+    也不能让路径由客户端决定**。
+    """
+    raw = (name or "").replace("\\", "/")
+    base = raw.rsplit("/", 1)[-1].strip()
+    if not base or base in (".", "..") or ".." in base:
+        return "upload.pdf"
+    return base
+
+
 graphs: dict[str, dict] = {}  # id → graph data
 
 
@@ -248,7 +285,9 @@ async def health():
     return {
         "ok": True,
         "time": datetime.now().isoformat(),
-        "web_dir": str(WEB_DIR),
+        # 不回显仓库绝对路径（`D:\kg-demo\web` 这类信息对访问者没有用，
+        # 却把"这个仓库在哪、目录结构长什么样"直接送出去）
+        "web_dir": "web",
         "kg_data_files": sorted(p.name for p in KG_DATA.glob("*.json"))[:20] if KG_DATA.exists() else [],
         "quality_files": len(list(QUALITY.glob("*.json"))) if QUALITY.exists() else 0,
         "graphs_in_memory": len(graphs),
@@ -410,7 +449,10 @@ async def verify_status():
 
 class TrashRequest(BaseModel):
     kind: str                    # upload | corpus_graph | corpus_pdf
-    id: str
+    # ★ 2026-09-21：`id` 会被 `tools/papers_admin.py` 直接拼进路径
+    # （`DATA / pid`、`TRASH / f'{stamp}-{kind}-{id}'`），而它此前**完全没有校验** ——
+    # 这是本项目唯一一处"写操作可穿越"的入口。规则与 `_GRAPH_ID_RE` 一致。
+    id: str = Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
     why: str                     # **必填**（见上面的理由）
 
 
@@ -517,16 +559,31 @@ async def upload_pdf(
     语义上等于"上传一篇论文，返回全部论文的图"，而且会在 15k 节点上
     触发 spring_layout 而极慢。现在只返回本次的 nodes/edges。
     """
-    if not file.filename.endswith(".pdf"):
+    if not (file.filename or "").lower().endswith(".pdf"):
         raise HTTPException(400, "Only PDF files supported")
 
     # Save uploaded file
     gid = uuid.uuid4().hex[:8]
     upload_dir = DATA_DIR / gid
     upload_dir.mkdir(parents=True, exist_ok=True)
-    pdf_path = upload_dir / file.filename
+    # ★ 2026-09-21：**文件名必须净化**。`file.filename` 是客户端给的字符串，
+    # 而 Starlette 0.52.1 的 `formparsers.py` 只做 `_user_safe_decode`、
+    # **不剥离 `..` 与 `\`**（实测包内 0 处 `basename`/`PurePath`）。
+    # 原样拼路径时，一个 `filename="..\..\..\evil.pdf"` 就能写到 `data/` 之外。
+    pdf_path = upload_dir / _safe_pdf_name(file.filename)
+    # 顺手加大小上限：此前没有任何限制，一个超大文件就能把磁盘写满
+    # （上传是演示主线，这条一定会被走到）。
+    written = 0
     with open(pdf_path, "wb") as f:
-        shutil.copyfileobj(file.file, f)
+        while True:
+            chunk = file.file.read(1 << 20)
+            if not chunk:
+                break
+            written += len(chunk)
+            if written > MAX_UPLOAD_BYTES:
+                raise HTTPException(
+                    413, f"PDF 超过上限 {MAX_UPLOAD_BYTES // (1 << 20)} MB")
+            f.write(chunk)
 
     try:
         # 抽取是同步且耗时的（一次上传可能几分钟），放到线程里跑，
@@ -773,7 +830,8 @@ async def upload_start(
     gid = uuid.uuid4().hex[:8]
     work_dir = DATA_DIR / gid
     work_dir.mkdir(parents=True, exist_ok=True)
-    pdf_path = work_dir / file.filename
+    # 同 `/upload`：客户端给的文件名必须净化后再拼路径（见那边的注释）
+    pdf_path = work_dir / _safe_pdf_name(file.filename)
     digest = _save_with_sha1(file, pdf_path)
 
     # 查重：已经抽完的同一篇 ⇒ 复用，并把刚写下的临时目录清掉
@@ -984,17 +1042,44 @@ async def submit_edit_plan(req: EditPlanRequest):
 
 
 def _ensure_graph(graph_id: str):
-    """取图：内存优先，没有就回落到 `data/<id>/graph.json`。
+    """取图：内存优先，没有就回落到磁盘上的图产物。
 
     抽成函数是因为 `/graph/{id}` 与 `/api/qa` **都需要**这个回退 ——
     后端一重启内存就空了，而磁盘上的图还在。`/api/qa` 第一版只查内存，
     重启后直接 404，**而同一时刻 `/graph/ad690dfb` 却能正常返回** ——
     这种"同一个东西，两个端点一个能用一个不能用"最容易骗过测试。
+
+    ★ 2026-09-21 修：**磁盘上有两种产物路径约定，此前只认了第一种**，
+    于是"上传后能问、直接问就 404"：
+
+        ① `data/<id>/graph.json`              —— 上传流程写的（实测 3 张）
+        ② `data/corpus/graphs/<id>.json`      —— 语料预置的（实测 21 张）
+
+    只认 ① 的后果是：**语料里已入库的 21 篇一篇都问不了**，`/api/qa` 一律回
+    `{"detail":"Graph 'xxx' not found"}`，而同一时刻 `/api/kg/...` 明明能读到
+    这篇图的数据 —— 与上面那句 docstring 里记的老坑是同一类病（两条约定打架）。
+    现在两种都认，并把"找过哪些路径"写进 404 的响应里，下次再出这种事不用猜。
+
+    ⚠️ `graph_id` 是**客户端给的字符串**，要拼进文件路径，所以先做白名单校验：
+    只允许字母/数字/点/下划线/连字符，且不含 `..`。否则 `/api/qa` 的 `graph_id`
+    就成了一个可以往上跳目录的入口。
     """
+    if not _GRAPH_ID_RE.match(graph_id or "") or ".." in graph_id:
+        raise HTTPException(400, f"非法的 graph_id：{graph_id!r}")
     if graph_id not in graphs:
-        disk_path = DATA_DIR / graph_id / "graph.json"
-        if not disk_path.exists():
-            raise HTTPException(404, f"Graph '{graph_id}' not found")
+        candidates = [
+            DATA_DIR / graph_id / "graph.json",
+            DATA_DIR / "corpus" / "graphs" / f"{graph_id}.json",
+        ]
+        disk_path = next((p for p in candidates if p.exists()), None)
+        if disk_path is None:
+            raise HTTPException(
+                404,
+                f"Graph '{graph_id}' not found"
+                # 只回显相对路径（`_rel` 是本文件已有的工具）：绝对路径会把
+                # 仓库位置与目录结构写进错误响应里，而这对排查没有任何必要。
+                f"（找过：{'、'.join(_rel(p) for p in candidates)}）",
+            )
         try:
             # utf-8-sig 会吃掉 BOM（PowerShell 的 Out-File -Encoding utf8 会写 BOM）
             graphs[graph_id] = json.loads(disk_path.read_text(encoding="utf-8-sig"))

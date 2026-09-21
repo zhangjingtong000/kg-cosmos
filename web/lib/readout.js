@@ -122,6 +122,24 @@
   /* ── ② 阈值权衡：两条斜率不同的曲线 + 只能落在实测档位上的滑块 ──────────────
      "通过率随阈值下降是恒等式，PPV 才是质量" —— 这句话要靠**两条线张开的角度**
      来说，而不是靠表里两列数字。 */
+  /* 当前档位的标记：一条竖线 + 两条曲线上的空心描边圈 + 右上角读数。
+     抽成函数是因为**resize 重画**与**滑块更新**两条路径都要用它 ——
+     重画时生成新的标记串，拖动时只改已有节点的属性（不重画整张图，避免闪）。 */
+  function curMark(rows, i, X, Y, padT, ih, W) {
+    var r = rows[i];
+    if (!r) return '';
+    var t = +r.threshold, lx = X(t);
+    var v = r.pass_rate > 1 ? r.pass_rate / 100 : r.pass_rate;
+    return '<line class="ro-cur-line" x1="' + lx + '" y1="' + padT + '" x2="' + lx
+        + '" y2="' + (padT + ih) + '" stroke="var(--warm)" stroke-width="2"/>'
+      + '<circle class="ro-cur-pass" cx="' + lx + '" cy="' + Y(v) + '" r="5.5" fill="none"'
+        + ' stroke="var(--clay-2)" stroke-width="2.5"/>'
+      + '<circle class="ro-cur-ppv" cx="' + lx + '" cy="' + Y(+r.ppv) + '" r="5.5" fill="none"'
+        + ' stroke="var(--cyan)" stroke-width="2.5"/>'
+      + '<text class="ro-t ro-t1 ro-cur-t" x="' + (W - 8) + '" y="' + (padT + 12)
+        + '" text-anchor="end">当前 ' + t.toFixed(2) + '</text>';
+  }
+
   function tradeoff(host, o) {
     var rows = o.rows || [];
     if (!rows.length) return null;
@@ -131,6 +149,10 @@
     var curI = 0;
     var best = 1e9;
     TH.forEach(function (t, i) { var d = Math.abs(t - cur); if (d < best) { best = d; curI = i; } });
+    /* 滑块当前档位。**resize 重画时要读"当前值"而不是初始值**，
+       否则窗口一变，图上的标记会跳回最初那一档。 */
+    var state = { i: curI };
+    var coords = null;   /* 重画回调里填上 X/Y/padT/ih，供 refresh 更新标记用 */
 
     function rate(r) { var v = r.pass_rate; return v > 1 ? v / 100 : v; }
 
@@ -194,6 +216,10 @@
         out += '<text x="' + mx + '" y="' + (padT + 18) + '" text-anchor="middle"'
           + ' class="ro-t ro-t3">' + esc(mk.label) + '</text>';
       });
+      /* ★ 动态标记放最后画 ⇒ 在最上层。
+         用户反馈「拖动进度条，上面图没有变化」—— 原先图上没有跟随元素。 */
+      coords = { X: X, Y: Y, padT: padT, ih: ih, W: W };
+      out += '<g class="ro-cur">' + curMark(rows, state.i, X, Y, padT, ih, W) + '</g>';
       return out;
     });
     if (!svg) return null;
@@ -210,6 +236,23 @@
 
     function refresh(i) {
       var r = rows[i];
+      state.i = i;
+      /* 图上的标记跟着走。只改属性、不重画 SVG：拖动是连续事件，
+         每次重画整张图既闪又慢。 */
+      if (coords && svg.querySelector) {
+        var g = svg.querySelector('.ro-cur');
+        if (g) {
+          var lx = coords.X(+r.threshold);
+          var ln = g.querySelector('.ro-cur-line');
+          if (ln) { ln.setAttribute('x1', lx); ln.setAttribute('x2', lx); }
+          var cp = g.querySelector('.ro-cur-pass');
+          if (cp) { cp.setAttribute('cx', lx); cp.setAttribute('cy', coords.Y(rate(r))); }
+          var cq = g.querySelector('.ro-cur-ppv');
+          if (cq) { cq.setAttribute('cx', lx); cq.setAttribute('cy', coords.Y(+r.ppv)); }
+          var ct = g.querySelector('.ro-cur-t');
+          if (ct) ct.textContent = '当前 ' + (+r.threshold).toFixed(2);
+        }
+      }
       inp.setAttribute('aria-valuetext',
         '阈值 ' + (+r.threshold).toFixed(2) + '，全图通过 ' + num(r.population_pass)
         + ' 条，通过率 ' + pct(rate(r)) + '，PPV ' + pct(+r.ppv));

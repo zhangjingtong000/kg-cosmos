@@ -186,6 +186,7 @@ def main():
     if args.static:
         import http.server
         import os
+        import posixpath
         from urllib.parse import unquote
 
         # ⚠️ **2026-09-15 修一个破盲漏洞**：此前根目录就是仓库根，
@@ -209,7 +210,14 @@ def main():
             '/requirements.txt', '/pyproject.toml', '/.gitignore',
             '/.env', '/.env.example',
         )
+        # Windows 上路径不区分大小写（`/DATA/…` 能取到 `/data/…` 的文件），
+        # 所以归一化之后要跟一份小写副本比。启动时算一次，不必每次请求都算。
+        BLOCKED_PREFIX_LOWER = tuple(p.lower() for p in BLOCKED_PREFIX)
+        BLOCKED_EXACT_LOWER = tuple(p.lower() for p in BLOCKED_EXACT)
         _real_translate = http.server.SimpleHTTPRequestHandler.translate_path
+        # Windows 的路径比较不区分大小写，而 `SimpleHTTPRequestHandler` 在
+        # Windows 上照样按不区分大小写打开文件 ⇒ 守卫也必须按不区分大小写比。
+        _CI = (os.name == 'nt')
 
         class GuardedHandler(http.server.SimpleHTTPRequestHandler):
             """静态站处理器：挡掉仓库里的敏感路径，其余照旧。
@@ -218,12 +226,42 @@ def main():
             随后自然返回 404，不必自己拼响应。
             **注意**：判定要用**原始请求路径**，不能用 `translate_path` 的结果
             （后者已经过规范化，且会受 `directory` 影响）。
+
+            ★★ 2026-09-21 修：上面那句"原始请求路径"的取舍**本身是个洞**。
+            此前只做**字面前缀**比较，于是下面四种写法全部绕过（实测）：
+                /./data/quality/l5-validity-key.json          → 200 / 27300 B
+                /DATA/quality/metric-provenance.json          → 200 / 8405 B
+                /web/../data/quality/metric-provenance.json   → 200 / 8405 B
+                /web/%2e%2e/data/quality/…                    → 200 / 8405 B
+            其中第一个正是本文件上面那段注释**声称已经堵住**的文件 ——
+            破盲的后果是 L5 人工盲判当场作废，而那是本项目唯一可信的效度来源。
+            修法：比较**规范化之后**的路径（`/./`、`/../`、多余的 `/`
+            全部折叠掉），并在 Windows 上做大小写归一。
+            教训：黑名单判定必须建立在"规范形式"上，否则等于没判。
             """
             def translate_path(self, path):
                 raw = unquote(path.split('?', 1)[0].split('#', 1)[0])
-                if raw.startswith(BLOCKED_PREFIX) or raw in BLOCKED_EXACT:
+                norm = posixpath.normpath(raw)
+                while norm.startswith('//'):        # normpath 保留开头的双斜杠
+                    norm = norm[1:]
+                if not norm.startswith('/'):
+                    norm = '/' + norm
+                key = norm.lower() if _CI else norm
+                blocked = BLOCKED_PREFIX_LOWER if _CI else BLOCKED_PREFIX
+                exact = BLOCKED_EXACT_LOWER if _CI else BLOCKED_EXACT
+                if key.startswith(blocked) or key in exact:
                     return os.path.join(self.directory, '__blocked_by_serve__')
                 return _real_translate(self, path)
+
+            def list_directory(self, path):
+                """**不列目录**。
+
+                此前 `http://127.0.0.1:8098/` 返回的是仓库根的完整索引
+                （明文列出 `.git/`、`.env.example`、`.worktrees/` …），
+                等于把"该往哪打"直接告诉访问者。静态站只需要能取到文件，
+                不需要能枚举文件。"""
+                self.send_error(404, 'No permission to list directory')
+                return None
 
         handler = GuardedHandler
         os.chdir(ROOT)

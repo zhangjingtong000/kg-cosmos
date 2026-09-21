@@ -286,6 +286,48 @@
    并把宽度/右边距与 legend 对齐（236px / 22px），看起来就是同一个面板的上下两段。
    `--legend-h` 由脚本用 ResizeObserver 同步（legend 内容会随着色维度变化）。
    ⚠️ 只在 `body.inside` 下生效 —— 概览态 legend 是隐藏的，导出条要保持原位。 */
+/* ★ 2026-09-21：**右下角三块东西抢同一个位置**（用户截图 + 只读审查都报了这个）。
+   实测（内部态、详情面板打开时）：
+     `#detail`   [1250, 22, 306, 758] z=6
+     `#kgExport` [1320, 502, 236,  55] z=40  ⇒ 与面板重叠 236×55
+     `#legend`   [1320, 565, 236, 176] z=4   ⇒ 与面板重叠 236×176（= 图例 100%）
+   而 `elementFromPoint(图例中心)` 命中的是详情面板里的 `span.nm` ——
+   **图例那 5 个按钮（社区/类型/度数/PR/无）全部点不到**，偏偏它半透明
+   （`#detail` 背景 rgba(8,13,30,.90)）所以"看得见、点不动"，最难排查的那种。
+   ⚠️ 注意 `#kgExport` 的 z-index(40) 比面板高，所以那一处是导出条**盖住面板文字**；
+      而图例 z-index(4) 比面板低，是面板盖住图例 —— 两处症状相反、根因同一个：
+      **三块都固定在右下角，而面板在打开时几乎占满整屏。**
+
+   修法（按屏幕分两种）：
+     · 宽屏：把图例与导出条**一起**横让到面板左侧（两者共用同一个 right ⇒
+       保持它们原本"上下两段、右边缘对齐"的关系）
+     · 窄屏：横向没有空间可让 ⇒ 图例收起（它是"换着色维度"的辅助控件，
+       而详情面板是主任务），导出条回原位，面板缩高，两者上下错开。
+   用 `:has()` 读"面板是否打开"这个子元素状态；`:has()` 自 Chrome 105 起可用，
+   本项目只在现代 Chrome 上演示。`transition` 只加在 `right` 上（让位动作动一下
+   比硬跳好看），**不加在 max-height 上**（免得窄屏展开时面板高度跟着动画）。 */
+body:has(#detail.open) #kgExport,
+body:has(#detail.open) #legend{
+  right:calc(22px + 306px + 14px);
+  transition:right .25s ease;
+}
+@media (max-width:900px){
+  body:has(#detail.open) #legend{display:none}
+  body:has(#detail.open) #kgExport{right:22px}
+  /* ⚠️ 这里**不能用固定预留值**（第一版写 `- 56px`，实测窄屏仍重叠 226×28px），
+     但也不能假装能精确算出来 —— 关键是**导出条的高度会变**：
+     按钮换行时实测 55px，不换行时 28px。所以下面这个常量取**保守值**，
+     并按"两处同向变化"化简掉了两个运行时变量：
+         面板 bottom   = 22 + (100vh − C − rail − legend) = 824 − C − rail − legend
+         导出条 top    = 100vh − (18 + rail + legend + 8) − 55 = 721 − rail − legend
+         不重叠 ⟺ 824 − C ≤ 721 ⟺ **C ≥ 103**（与 rail / legend 无关）
+     取 C = 110 ⇒ 恒留 7px 间隙，无论 rail / legend 怎么变都成立。
+     C 的构成：22(面板上边距) + 55(导出条高，按较高的那种) + 26(它的底部偏移 18+8)
+     + 7(间隙) = 110。 */
+  body:has(#detail.open) #detail{
+    max-height:calc(100vh - 110px - var(--demo-rail-h, 0px) - var(--legend-h, 0px))
+  }
+}
 body.inside #kgExport{
   width:236px;justify-content:space-between;box-sizing:border-box;
   padding:7px 9px;border-radius:10px;
@@ -361,6 +403,7 @@ body.inside #kgExport{
 #paperFilter[hidden]{display:none}
 /* ==KG_FLAG_V1_END== */
 </style>
+<link rel="stylesheet" href="./lib/theme.css">
 <link rel="stylesheet" href="./lib/design.css">
 <link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/fonts/fonts.css">
@@ -1268,9 +1311,19 @@ async function openPdf(src, page, snippet) {
 }
 
 async function pdfStep(delta) {
-  if (!pdfDoc) return;
+  if (!pdfDoc) {
+    /* ★ 2026-09-21：这里原先是一句裸 `return;` —— 原文没加载成功时
+       点 ‹ › **完全没反应、控制台也没有一行输出**，用户只能得出
+       "这个按钮坏了"。改成给出原因，并留一条 console 记录便于排查。 */
+    if (pdfPageInfo) pdfPageInfo.textContent = '原文未加载，无法翻页（见上方提示）';
+    console.warn('[pdf] 翻页被忽略：pdfDoc 为空（原文未加载成功）');
+    return;
+  }
   const next = pdfPageNum + delta;
-  if (next < 1 || next > pdfDoc.numPages) return;
+  if (next < 1 || next > pdfDoc.numPages) {
+    if (pdfPageInfo) pdfPageInfo.textContent = '已经是' + (next < 1 ? '第一页' : '最后一页');
+    return;
+  }
   pdfPageNum = next;
   await renderPdfPage();
   if (window.__pdfState) {
