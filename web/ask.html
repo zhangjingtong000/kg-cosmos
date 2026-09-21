@@ -1809,21 +1809,30 @@ async function askReal(question){
     const vy = $('verdict').getBoundingClientRect().top + scrollY - 24;
     scrollTo({ top: vy, behavior: REDUCED ? 'auto' : 'smooth' });
     /* 列出已入库的图（不默认指派：让用户自己点）。 */
-    if (window.KGData && KGData.kg) {
-      KGData.kg('corpus-index.json').then(function (D) {
+    /* ⚠️ 不能用 `KGData`：**ask.html 没有引 `lib/kg-api.js`**（它的 script 只有
+       a11y / demo-rail / motion）⇒ 第一版写成 `if (window.KGData && KGData.kg)`
+       整段被静默跳过、占位文字永远停在"正在读论文清单…"。
+       这里用本页自己已经在用的 fetch 写法：先后端 API，再回退静态 `./kg-data/`
+       （与 `kg-api.js` 的内部策略一致，也是 `check_frontend_data.py` 允许的回退链）。 */
+    (function loadPickList() {
+      const urls = ['./api/kg/corpus-index.json', './kg-data/corpus-index.json'];
+      (function tryNext(i) {
         const box = $('pickList');
         if (!box) return;
-        const list = (D.papers || []).filter(p => p.in_graph).slice(0, 10);
-        box.innerHTML = list.length
-          ? list.map(p => '<a class="pick" href="./ask.html?src='
-              + encodeURIComponent(p.id) + '">' + esc(p.id)
-              + '<i>' + (p.nodes || 0) + ' 节点 · ' + (p.edges || 0) + ' 边</i></a>').join('')
-          : '（没有已入库的图，请先上传一篇）';
-      }).catch(function () {
-        const box = $('pickList');
-        if (box) box.textContent = '（读不到论文清单，请先上传一篇）';
-      });
-    }
+        if (i >= urls.length) { box.textContent = '（读不到论文清单，请先上传一篇）'; return; }
+        fetch(urls[i], { cache: 'no-store' })
+          .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(D => {
+            const list = (D.papers || []).filter(p => p.in_graph).slice(0, 10);
+            box.innerHTML = list.length
+              ? list.map(p => '<a class="pick" href="./ask.html?src='
+                  + encodeURIComponent(p.id) + '">' + esc(p.id)
+                  + '<i>' + (p.nodes || 0) + ' 节点 · ' + (p.edges || 0) + ' 边</i></a>').join('')
+              : '（没有已入库的图，请先上传一篇）';
+          })
+          .catch(function () { tryNext(i + 1); });
+      })(0);
+    })();
     return;
   }
   if ($('agentsec')) $('agentsec').hidden = false;
