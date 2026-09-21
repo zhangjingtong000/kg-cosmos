@@ -1217,6 +1217,7 @@ KGData.kg('analytics.json')
   const out = document.getElementById('verifyOut');
   if (!btn || !out) return;
   let timer = null;
+  const fmtSec = s => s < 60 ? s + ' 秒' : Math.floor(s / 60) + ' 分 ' + (s % 60) + ' 秒';
 
   function render(st) {
     if (st.error) {
@@ -1224,8 +1225,22 @@ KGData.kg('analytics.json')
       return;
     }
     if (st.running) {
-      out.innerHTML = '<div class="vrun">⏳ 正在跑…（'
-        + esc(String(st.started || '')) + ' 起的，约 1–2 分钟）</div>';
+      /* ★ 2026-09-21：这里原来写「约 1–2 分钟」，而**实测整套是 9–11 分钟**
+         （`output/verify_last_run.txt`：DOM 文案守门 186.7s、浮层守门 111.4s，
+         其余几十项各几秒到几十秒）—— 低估了 5 倍，用户跑到第 3 分钟就会以为
+         "卡死了"，而它其实一直在正常推进。
+         现在做三件事：① 给出真实量级并点名最慢的两项；
+         ② **显示已用时**（`poll` 每 3 秒一次，所以这个数字会一直涨，
+         这就是"它在动"的证据）；③ `aria-live="polite"` 让屏读器也知道状态在变。 */
+      const t0 = st.started ? Date.parse(String(st.started).replace(' ', 'T')) : NaN;
+      const sec = isNaN(t0) ? null : Math.max(0, Math.round((Date.now() - t0) / 1000));
+      out.innerHTML = '<div class="vrun" aria-live="polite">⏳ 正在跑…'
+        + (sec === null ? '' : '已用时 <b>' + fmtSec(sec) + '</b>')
+        + '（' + esc(String(st.started || '')) + ' 起）<br>'
+        + '<span class="vnote">这一步是<b>真的在跑</b>整套检查（数据侧 + 前端 CDP 项），'
+        + '不是占位动画。实测约 <b>9–11 分钟</b>：最慢的是「DOM 文案守门」'
+        + '（要扫 39 个页面，约 3 分钟）与「浮层守门」（约 2 分钟）。'
+        + '这一行每 3 秒更新一次 —— <b>数字在涨就说明它在正常跑</b>。</span></div>';
       return;
     }
     const ok = st.passed === st.total;
