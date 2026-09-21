@@ -38,12 +38,21 @@
   body{background:radial-gradient(1200px 600px at 50% -10%,#141826 0%,var(--bg) 60%);
        color:var(--fg);font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
        overflow:hidden}
-  header{padding:14px 20px 10px}
+  /* ★ 2026-09-21：header 改**两列** —— 左列标题、右列人话引导。
+   此前标题 / 副标题 / `.howto` 三段**竖着堆**，头部实测 193px 高；
+   而本页是 `position:absolute` 的定高布局（`#wrap{top:var(--head-h)}`），
+   那 193px 全被头部吃掉 —— 用户的原话是「上面这片黑的太大了」。
+   同时 `.howto` 又被 `max-width:74ch` 限住，右边留着大片空白没人用
+   （用户：「右边剩这么大空的地方你都不用」）。
+   两列之后头部降到 ~100px，图区多出近百像素。 */
+header{padding:14px 20px 10px;display:flex;align-items:flex-start;
+       justify-content:space-between;gap:26px}
+.hleft{flex:0 0 auto;min-width:0}
   h1{margin:0;font-size:17px;font-weight:600;letter-spacing:.02em}
   .sub{color:var(--dim);font-size:12.5px;margin-top:4px}
   /* ★ 2026-09-20：标题下的人话引导（见上方 HTML 注释）。宽度收在阅读宽度内、
      颜色比副标题略亮，保证"第一眼就能读到"，但不抢标题。 */
-  .howto{max-width:74ch;margin:10px 0 0;font-size:12.5px;line-height:1.75;
+  .howto{flex:1 1 auto;max-width:74ch;margin:0;font-size:12.5px;line-height:1.75;
          color:var(--ink-2,rgba(203,218,241,.76))}
   .howto b{color:var(--warm);font-weight:600;display:inline}
   .sub b{color:var(--warn)}
@@ -79,8 +88,10 @@
 </head>
 <body>
 <header>
-  <h1>使用关系二部图</h1>
-  <div class="sub" id="sub">载入中…</div>
+  <div class="hleft">
+    <h1>使用关系二部图</h1>
+    <div class="sub" id="sub">载入中…</div>
+  </div>
   <!-- ★ 2026-09-20 加（用户原话："哇，这是啥呀？看不懂"）。
        原来"左右两侧是什么"这句话只在**页脚**，第一眼看不到 ⇒ 进来就是一堆点。
        这里在标题下补一句人话引导：这张图回答什么问题、两侧各是什么、能怎么用。
@@ -106,7 +117,10 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c =>
   ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-const ROW = 26, PAD_T = 44, L_X = 250, R_X = 900, W = 1180;
+/* 列位置与宽度**不再写死**：原先 `L_X=250 / R_X=900 / W=1180`，
+   而容器实测 1578 宽 ⇒ 左右各空 199 / 306px（用户抱怨的那片空白）。
+   现在宽度按容器实测、列位置取宽度的百分比，见 `draw()`。 */
+const ROW = 26, PAD_T = 44;
 let DATA = null, FOCUS = null;
 
 function draw() {
@@ -114,6 +128,11 @@ function draw() {
   const n = Math.max(d.left.length, d.right.length);
   const H = PAD_T + n * ROW + 40;
   const svg = $('#svg');
+  /* ★ 2026-09-21：宽度**按容器实测**，不写死 1180。
+     两列放在宽度的 20% / 80% 处 ⇒ 宽度一变，节点标签与连线自动跟着舒展。 */
+  const wrapEl = $('#wrap');
+  const W = Math.max(760, Math.round((wrapEl ? wrapEl.clientWidth : 1180) - 2));
+  const L_X = Math.round(W * 0.20), R_X = Math.round(W * 0.80);
   svg.setAttribute('width', W);
   svg.setAttribute('height', H);
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -234,6 +253,17 @@ function applyFocus() {
   sync();
   addEventListener('resize', sync);
   if (window.ResizeObserver) new ResizeObserver(sync).observe(h);
+})();
+
+/* ★ 2026-09-21：宽度改成自适应之后，**必须跟着窗口重画** ——
+   否则缩放窗口时两列位置与连线停在旧宽度上（svg 会被拉伸或截断）。
+   加 160ms 防抖：拖动窗口时不必每帧重绘 40 行 × 2 列。 */
+(function redrawOnResize() {
+  let t = 0;
+  addEventListener('resize', () => {
+    clearTimeout(t);
+    t = setTimeout(() => { if (DATA) draw(); }, 160);
+  });
 })();
 
 fetch('./kg-data/bipartite.json').then(r => r.ok ? r.json() : null).then(d => {

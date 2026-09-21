@@ -194,8 +194,16 @@ function render() {
       if (!cell.n) return '<td class="empty">（这一篇没有）</td>';
       const line = it =>
         `<div class="it">${esc(it.s)} → ${esc(it.t)}`
-        + (it.page ? `<a class="pg" href="./kg-nebula.html?src=${encodeURIComponent(p.id)}"`
-                     + ` title="去主视图看这篇">第 ${esc(it.page)} 页</a>` : '')
+        /* ★ 2026-09-21：这里原来发的是 `?src=<论文id>`，而**主视图从不读 `src`**
+           （实测：带 `?src=` 与不带参数时，`__viewState` / `body.inside` / 列表条数
+           逐字段完全相同）⇒ 全站 1016 个"第 N 页"都是空跳。
+           主视图真正支持的只有 `c`（直入社区）/ `n`（定位节点）/ `hl`（高亮）。
+           所以改发 `hl=<这条关系的施动者>`：点进去会**真的**把那个实体高亮出来。
+           文案里的"第 N 页"保留 —— 它是**页码信息**（这条关系在原文第几页），
+           不是"点了会跳到第 N 页"；原来的写法正是把信息当成了动作才导致空跳。
+           动作说明放在 `title` 里，并且说准。 */
+        + (it.page ? `<a class="pg" href="./kg-nebula.html?hl=${encodeURIComponent(it.s)}"`
+                     + ` title="去主视图看「${esc(it.s)}」这个实体">第 ${esc(it.page)} 页</a>` : '')
         + '</div>';
       /* ══ 每格默认只显示前 N 条（2026-09-18）══════════════════════════════
        *
