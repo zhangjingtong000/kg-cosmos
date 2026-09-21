@@ -1078,7 +1078,7 @@ def _ensure_graph(graph_id: str):
                 f"Graph '{graph_id}' not found"
                 # 只回显相对路径（`_rel` 是本文件已有的工具）：绝对路径会把
                 # 仓库位置与目录结构写进错误响应里，而这对排查没有任何必要。
-                f"（找过：{'、'.join(_rel(p) for p in candidates)}）",
+                f"（找过：{'、'.join(str(_rel(p)) for p in candidates)}）",
             )
         try:
             # utf-8-sig 会吃掉 BOM（PowerShell 的 Out-File -Encoding utf8 会写 BOM）
