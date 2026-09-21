@@ -131,9 +131,13 @@ h3 { font-weight: 600; }
   margin-top:18px;padding-top:4px;
   display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0 26px;
 }
-/* 标题要同时说清两层，比其它几屏长（12 字）；`voyage.css` 给 h2 的
-   `max-width:20ch` 是给 4–6 字短标题定的 ⇒ 这一屏会折成两行、末行只剩一个
-   "能"字（孤字）。放开该限制，让它在 60px 下仍是一行。 */
+/* ★ 2026-09-21：标题改成「十二个入口 · 六步演示动线 + 六项支线功能」——
+   原文是「六步演示动线 · 另有 6 项功能」，那是**两层网格**时代的说法
+   （那时上面 6 张一行、下面 6 张一网格）。现在十二项在同一条横向滚轴上，
+   滚轴中段还有一条竖线标着"支线功能 6 项 · 不在演示动线上"，
+   "另有"这个词已经没有对应的视觉结构了。
+   标题比其它几屏长；`voyage.css` 给 h2 的 `max-width:20ch` 是给 4–6 字短标题
+   定的 ⇒ 这一屏会折行。放开该限制，让它在 60px 下仍能排好。 */
 #ch-3 h2{max-width:none}
 .entries.flow .entry{display:block;padding:22px 0 20px;border-bottom:0}
 /* ★ 卡片顶部那 2px 暖金线 = **"轴"的可见载体**（2026-09-20 补做）。
@@ -514,7 +518,7 @@ document.documentElement.classList.add('js-motion');
   <section class="ch" id="ch-3">
     <div class="in">
       <p class="kick">03 — 入口</p>
-      <h2>六步演示动线<em> · 另有 6 项功能</em></h2>
+      <h2>十二个入口<em> · 六步演示动线 + 六项支线功能</em></h2>
       <!-- ★ 2026-09-20：十二项改成**一条滚轴**（用户要求：「底下这个六步演示动线
            和六项功能，我还是想做成滚轴的形式」「十二项全部滚动」「字可以变大一点，
            方便它滚动」「这个滚动的背景要融入我们的背景，不要显得很突兀，
