@@ -130,6 +130,22 @@ RETRACTED = [
 ]
 
 
+def _relation_types():
+    """从 `src/ontology.py` 读出关系类型名集合；拿不到返回空集合。
+
+    **为什么动态读**：与 `_pytest_count()` 同一个道理 —— 2026-09-21 的核对发现
+    `README.md` 与 `docs/已移除的旧版手册` 都写着"15 关系类型"，
+    而 `src/ontology.py` 的 `RELATION_TYPES` 实测是 **16** 类（多了 `PUBLISHED_IN`）。
+    写死 16 也会在下次本体扩展时立刻过时，所以直接读源码。
+    """
+    try:
+        sys.path.insert(0, str(ROOT / 'src'))
+        import ontology  # noqa: E402  （刻意延迟 import：只在需要时加载）
+        return set(ontology.RELATION_TYPES)
+    except Exception:
+        return set()
+
+
 def _pytest_count():
     """跑一次 `pytest --collect-only` 拿**实时**测试数；拿不到返回 None。
 
@@ -225,6 +241,8 @@ def main():
     _N_TESTS = _pytest_count()
     print(f'  （实时测试数：{_N_TESTS if _N_TESTS else "未取到"}）')
     n_checks = _verify_all_count()
+    # 本体里的关系类型名（① 组禁值表要用它的**类数**断言，见 _relation_types）
+    _RELATION_TYPES = _relation_types()
     STALE = {
         '15116': f"节点数应为 {cur['nodes']}",
         '20869': f"概览层边数应为 {cur['edges_overview']}",
@@ -290,6 +308,28 @@ def main():
         '28 / 136': '零共享边对数旧值（17 篇规模时）',
         '0/136': '节点交集为空的对数旧值（17 篇规模时）',
         '0 / 136': '节点交集为空的对数旧值（17 篇规模时）',
+        # ── 2026-09-21 新增：第二轮文档核对抓到的**四类"非指标"旧说法** ──
+        #
+        # **为什么这些必须进禁值表**：它们此前一律漏网，原因各不相同 ——
+        #   · `15 关系类型` / `JSON Schema 约束解码`：**类型数与说法**，不在
+        #     "指标数字"的任何一个分组里（⑥ 只守 10 项规模数）；
+        #   · `五张主卡片` / `5 个历史原型`：**结构描述**，完全没有判据；
+        #   · `93.1%`：**一个没有任何产物支撑的百分数**（全仓遍历字段名找不到
+        #     对应项，`docs/DOC_AUDIT_NUMBERS.md` 早已记为"判不了"）。
+        # ⇒ 教训与 ① 组的注释同一句：**白名单只禁自己见过的旧值就永远慢一步**。
+        #   每轮核对都要把新抓到的"说法型"旧值整批登记，否则下一轮它照样在。
+        #
+        # ⚠️ 两条 `JSON Schema` 用的是**带后续文字的整串**：`README.md` 与
+        #    `docs/已移除的旧版手册` 现在都写成
+        #    「…（schema 约束解码**已实现但未接入生产路径**）」，那种写法是
+        #    **正确的**，不能连它一起禁掉（这正是"不裸禁关键词"的老坑）。
+        '15 关系类型': f'关系类型应为 {len(_RELATION_TYPES)} 类（src/ontology.py 的 RELATION_TYPES）',
+        '15 实体类型+15 关系类型': f'关系类型应为 {len(_RELATION_TYPES)} 类',
+        'JSON Schema 约束解码，15': 'schema 约束解码未接入生产路径，不要说成生产用法',
+        'JSON Schema 约束解码 + 截断修复': 'schema 约束解码未接入生产路径，不要说成生产用法',
+        '五张主卡片': '演示主线是**六张**主卡片（web/lib/demo-rail.js 的 FLOW 6 项）',
+        '5 个历史原型': '依赖 esm.sh 的是历史原型页 4 个 + 正式页 1 个（community-atlas）',
+        '93.1%': '该"逐字命中率"没有产物支撑（DOC_AUDIT_NUMBERS.md 已记"判不了"），不许引用',
     }
     #   · **`MARKERS` 必须逐次收紧**：写宽了会把真旧值一起放过（`已改` 一度让
     #     `README` 里的 `338` 行漏网）。所以下面每加一个词都要问一句
@@ -404,24 +444,61 @@ def main():
         # ⚠️ **必须带上下文**：光看 `\d+/\d+` 会误报 ——
         #    `DEMO_SCRIPT.md` 里有一句"命中 70 个实体，**类型全对（70/70）**"，
         #    那是**实体类型的通过率**，不是回归项数。
-        #    ⇒ 只在**同行含 `verify_all` 或"回归"**时才认。
+        #    ⇒ 只在**同行含 `verify_all` / "回归" / `pytest`**时才认。
+        #
+        # **2026-09-21 修两处漏守**（`docs/DOC_AUDIT_NUMBERS.md` 的第二轮核对发现）：
+        #   ① `RUNBOOK.md` 在**仓库根**，而这里写的是 `docs/RUNBOOK.md` ——
+        #      那个路径不存在，`continue` 又静默跳过 ⇒ **根目录那份从未被扫过**，
+        #      于是它长期写着"单元测试（74 项）/ 全量回归（13 项）"而闸门全绿。
+        #      教训与"静默跳过"本身有关：**跳过要出声**，否则等于没写这条检查。
+        #   ② 旧正则只认 `NN/NN`，认不出"（74 项）"这种**括号项数**写法。
+        #      ⇒ 再加两条形态：`[（(]N 项` 与 `回归 N 项`。
+        #      实测「加进来立刻抓到 `早先的内部记录:440` 的『回归 42 项』」——
+        #      这正是"扩判据"该有的效果：**新判据必须当场抓到至少一处真错**，
+        #      否则无法证明它有效。
+        #
+        # ③ **必须按"标签"分流**（同一步实测出来的坑）：`RUNBOOK.md:88` 写的是
+        #    `python -m pytest tests -q  # 单元测试（420 项）` —— 那个 420 是
+        #    **pytest 用例数**（对的），不是回归项数。第一版把"含 pytest 的行"
+        #    一律按 n_checks 比，立刻把 420 报成错 ⇒ 加了判据反而制造假警报。
+        #    ⇒ 改看**紧邻括号的那个词**：写"单元测试/测试/pytest"的比 `_N_TESTS`，
+        #      写"回归/verify_all"的比 `n_checks`；两者都不近的括号（如
+        #      `DEMO_SCRIPT.md` 里描述 `check.ps1` 的"（5 项）"）**不认**。
         stale = []
-        for rel in ('README.md', 'docs/DEMO_SCRIPT.md', 'docs/RUNBOOK.md',
+        pat_lab = re.compile(r'(单元测试|测试|pytest|回归|verify_all)[^（(]{0,14}[（(]\s*(\d{2,3})\s*项')
+        pat_bare = re.compile(r'(回归|verify_all)\s*(\d{2,3})\s*项')
+        for rel in ('README.md', 'RUNBOOK.md', 'docs/DEMO_SCRIPT.md',
                     '早先的内部记录'):
             p = ROOT / rel
             if not p.exists():
+                # ⚠️ 不许再静默跳过：路径写错要当场报红。
+                fails.append(f'④ 要扫的 `{rel}` 不存在 —— 判据漏扫（路径写错了？）')
+                print(f'  ❌ ④ 要扫的 `{rel}` 不存在，判据漏扫')
                 continue
             for i, line in enumerate(p.read_text(encoding='utf-8').split('\n'), 1):
-                if 'verify_all' not in line and '回归' not in line:
-                    continue
-                for m in re.finditer(r'(\d{2})\s*/\s*\1', line):
-                    if int(m.group(1)) != n_checks:
-                        stale.append((rel, m.group(0), i))
+                found = []          # (显示用的原文, 数值, 应有值, 口径名)
+                seen = set()        # 去重：同一段文字可能被多条形态各匹配一次
+                for m in pat_lab.finditer(line):
+                    lab, num = m.group(1), int(m.group(2))
+                    if lab in ('回归', 'verify_all'):
+                        found.append((m.group(0), num, n_checks, '回归项数'))
+                    elif _N_TESTS:
+                        found.append((m.group(0), num, _N_TESTS, 'pytest 用例数'))
+                    seen.add((num, m.end()))
+                for m in pat_bare.finditer(line):
+                    if (int(m.group(2)), m.end()) not in seen:
+                        found.append((m.group(0), int(m.group(2)), n_checks, '回归项数'))
+                if '回归' in line or 'verify_all' in line:
+                    for m in re.finditer(r'(\d{2})\s*/\s*\1', line):
+                        found.append((m.group(0), int(m.group(1)), n_checks, '回归项数'))
+                for raw, num, want, kind in found:
+                    if num != want:
+                        stale.append((rel, raw, i, num, want, kind))
         if stale:
-            for rel, tok, ln in stale:
-                fails.append(f'{rel}:{ln} 写着回归「{tok}」，实际是 {n_checks}/{n_checks}'
+            for rel, raw, ln, num, want, kind in stale:
+                fails.append(f'{rel}:{ln} 的「{raw}」是 {num}，{kind}实际是 {want}'
                              f' —— 过期数字')
-                print(f'  ❌ {rel}:{ln} 写着 {tok}（实际 {n_checks}）')
+                print(f'  ❌ {rel}:{ln} 写着 {raw}（{kind}实际 {want}）')
         else:
             print(f'  ✅ 文档里的回归项数与实际一致（{n_checks}/{n_checks}）')
 
@@ -451,9 +528,16 @@ def main():
         (r'含\s*\*{0,2}(\d+)\*{0,2}\s*篇只下载', 'corpus_downloaded_only', '只下载篇数'),
         # ⚠️ 语料总条数的写法有两种：README 用「语料登记 **34 条**」，
         # `web/index.html` 用「33 篇论文清单：…含 12 篇只下载」。
-        # 后者刻意**不在这条规则里**：那句话里的 `33 篇` 指的是"清单里能点开的
-        # PDF 数"，而 `stats.total` 是"登记条数"（34 = 33 PDF + 1 条缺 PDF 的记录）
+        # 后者刻意**不在这条规则里**：那句话里的 `33 篇` 指的是"`data/corpus/` 根下
+        # 能点开的 PDF 数"，而 `stats.total` 是"登记条数"（34 条 = 33 个在主目录
+        # + 1 条已归档，见 `data/corpus/_archive-military/`）
         # ⇒ 两个数都对，只是口径不同。**宁可少报，也不要把对的判成错的。**
+        #
+        # ⚠️ **2026-09-21 更正本注释**：这里原来写"34 = 33 PDF + 1 条缺 PDF 的记录"
+        # —— **错的**。`jsjkx2025-kg-rag-qa` 的 PDF（2.3 MB）就在
+        # `data/corpus/_archive-military/` 里，是**按 ARCHIVE_POLICY 主动移走留档**，
+        # 不是"没下载"。当时那条注释被 `README.md` 的同一句错话带偏了
+        # ⇒ **注释里的"事实"也要核实**，否则它会一直给下一个人错误的前提。
         (r'语料登记\s*\*{0,2}(\d+)\*{0,2}\s*条', 'corpus_total', '语料登记条数'),
     )
     for rel in corpus_docs:

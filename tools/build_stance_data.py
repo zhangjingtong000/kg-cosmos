@@ -11,11 +11,16 @@ r"""L16 · **立场聚合视图**（把支持/反对聚合成一个立场标签�
 
 ## 数据从哪来（**不调模型**）
 
-图里**本来就有**这两类关系：
+图里**本来就有**这两类关系（2026-09-21 实测；括号内是**计入本页之前的口径**）：
 ```
-SUPPORTS     797 条    [Survey] → [Knowledge Graph Completion]
+SUPPORTS     793 条    [Survey] → [Knowledge Graph Completion]
 CONTRADICTS  243 条    [TransE]  → [Many-to-1 Relationships]
 ```
+⚠️ **两个口径别混**：`data/corpus/graphs/*.json` 里 `type` 为 `SUPPORTS` 的边
+原始是 **825** 条、`CONTRADICTS` 是 **251** 条；本脚本会**跳过 `source`/`target`
+为空的边**（下面对应的 `if not claim or not who: continue`），于是得到
+上面的 793 / 243。**页面上的数就是 793 / 243，要说清它已经过一次过滤**
+（旧文档里写的 797 是更早一版的读数，已作废）。
 ⇒ **`source` 是"谁支持/反对"，`target` 是"被支持/反对的那个主张"**（实测确认）。
 ⇒ 所以"立场"可以**直接从图上数出来**，不需要再调一次模型。
 

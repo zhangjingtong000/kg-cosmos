@@ -73,11 +73,14 @@ L5 全量会从 ~280 秒变成约 1 小时。
 演示现场假定无外网。已处理：
 
 - three.js / pdf.js 全部**本地化**到 `web/lib/`，不走 CDN
-- 演示主线（导航页 + 五张主卡片）**断网可用**，有回归守门：
+- 演示主线（导航页 + **六张**主卡片）**断网可用**，有回归守门：
   ```bash
   python tools/cdp_verify_offline.py web/kg-nebula.html
   ```
-- 5 个历史原型仍依赖 esm.sh，**导航页已用 `*` 标注**，
+- 5 个页面仍依赖 esm.sh（**历史原型页 4 个**：`force-explorer` / `force-graph` /
+  `graph-2d` / `official-3-text`；**正式页 1 个**：`community-atlas` —— 按页名单
+  `tools/add_legacy_banners.py` 的 `OFFICIAL` / `is_legacy` 分类，不要笼统写成
+  "5 个历史原型"），**导航页已用 `*` 标注**，
   断网时它们会显示「本页需要联网」的提示而不是白屏（`web/lib/net-guard.js`）
 
 ---
@@ -85,8 +88,8 @@ L5 全量会从 ~280 秒变成约 1 小时。
 ## 5. 验证（改完东西该跑什么）
 
 ```bash
-python -m pytest tests -q          # 单元测试（74 项）
-python tools/verify_all.py --fast  # 全量回归（13 项，跳过慢的 PDF 检查）
+python -m pytest tests -q          # 单元测试（420 项）
+python tools/verify_all.py --fast  # 全量回归（66 项，跳过慢的 PDF 检查）
 python tools/verify_all.py         # 含 PDF 高亮检查
 ```
 

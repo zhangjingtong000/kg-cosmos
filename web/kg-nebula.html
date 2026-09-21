@@ -1488,11 +1488,11 @@ const _labelVec = new THREE.Vector3();
 
 // 节点级标签门槛（像素）：屏幕半径小于它就不给标签。
 //
-// 取值依据是**实测**而不是估计：进入社区 0（1023 个节点、半径约 177 世界单位、
+// 取值依据是**实测**而不是估计：进入社区 0（1841 个节点、半径约 177 世界单位、
 // 相机距离约 R*1.9）后，着色器算出的 gl_PointSize 换回半径大致落在 6~17px，
 // 其中度数中位数为 1 的节点约 6px、枢纽节点约 16px。
 // 所以门槛取 **8px**：正好把"度数低、在屏幕上只是个小点"的那批筛掉，
-// 又不会误伤枢纽。最初按直觉写了 2.6px，实测 1023/1023 全部通过门槛，
+// 又不会误伤枢纽。最初按直觉写了 2.6px，实测 1841/1841 全部通过门槛，
 // 等于没设——这类"看起来合理"的常量必须用实测数据校准。
 const LABEL_MIN_SCREEN_R = 8.0;
 
@@ -1620,7 +1620,7 @@ function innerListHtml(filter) {
   const data = ud && ud.data;
   if (!data) return '';
   const q = (filter || '').trim().toLowerCase();
-  // 不再截断。原来卡在 400 项，最大的社区（1104 个实体）里后 700 个除非
+  // 不再截断。原来卡在 400 项，最大的社区（1841 个实体）里后 700 个除非
   // 搜索命中就永远点不到；而且要让"在三维画面里点节点"也能滚到列表对应项，
   // 必须保证每一项都在列表里。
   const items = data.nodes
@@ -1722,7 +1722,11 @@ document.getElementById('searchClear').addEventListener('click', () => {
 //   这样引擎是纯增量，不会让已验收的视觉效果发生位移。
 //
 // 【为什么 Partition 必须提供"类型"】
-//   数据里每个节点都带 `t`（15 类实体类型），但改造前**完全没有用到**——
+//   数据里每个节点都带 `t`。取值有 **16 个**：本体定义的 **15 类**实体类型
+//   （`src/ontology.py` 的 `ENTITY_TYPES`）+ 反建节点的 **`Unknown`**
+//   （4304 个，等于 `analytics.json` 的 `l3_extracted_caliber.backfilled_nodes`；
+//    见 `data/quality/l8-structure-audit.json` 的 `entity_types`：
+//    `ontology_types: 15, distinct_types: 16`），但改造前**完全没有用到**——
 //   整个社区内部是一色渐变，分不出方法/人物/数据集。
 //   类型是这张图里信息量最大的离散维度，理应可见。
 //
@@ -2099,7 +2103,7 @@ async function enterCommunity(ci, preloaded) {
   // `edges` 的每一项是 `[source, target, type]` 三元组，所有读它的地方都按这个
   // 取值；加一个并行数组则**老代码一行不改**。
   //
-  // ⚠️ **一条边可能由多篇贡献**（实测全库 461 条是跨篇共享的）⇒
+  // ⚠️ **一条边可能由多篇贡献**（实测全库 771 条是跨篇共享的）⇒
   //    判据是 **`includes(pidx)`**，不是"等于"。
   //
   // ⚠️ **`ecPaper` 不能预计算** —— 论文有十几篇，预计算要为每篇存一份缓冲。

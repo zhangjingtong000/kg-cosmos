@@ -674,6 +674,8 @@ web-search-deepseek:
 **理由与效果完全相反**：为了"本地离线场景可靠"而改成 esm.sh，
 而 esm.sh 是一个**必须联网**的 CDN —— 这一步把该页唯一的离线可能性去掉了。
 
+> ⚠️ 2026-09-21 更正：上面引述的那段注释**已不是当前注释** —— `web/official-1-blocks.html:15-17` 已改写为「此前这里曾改用 esm.sh 的 ESM import…那个判断是反的…现已改回本地 UMD」，`official-1/2` 已改回**本地 UMD**；全站只剩 `official-3-text` 保留联网（它自己写明「本页需要联网」）。留档与实施见 `docs/FIX_ESM_SH_PAGES.md`。
+
 **修了什么**：
 
 1. 把 three.js（`three.module.js` + `OrbitControls.js` + `CSS2DRenderer.js`，
@@ -704,6 +706,8 @@ web-search-deepseek:
 **残留（如实记录）**：`community-atlas.html`、`graph-2d.html`、
 `force-explorer.html`、`force-graph.html`、`official-3-text.html`
 这 5 个历史原型仍需联网。演示主线（导航页 + 五张主卡片）已全部离线可用。
+
+> ⚠️ 2026-09-21 更正：上面这句话有两处失真，已作废 —— ①「5 个**历史原型**」是**分类错**：按权威页名单（`tools/add_legacy_banners.py`），依赖 esm.sh 的是**历史原型页 4 个**（`force-explorer` / `force-graph` / `graph-2d` / `official-3-text`）+ **正式页 1 个**（`community-atlas`）；② 演示主线是**六张**主卡片，不是五张（`web/lib/demo-rail.js` 的 `FLOW` 6 项，01–06）。口径见 `README.md:368-391`（该处 2026-09-19 已修）。
 
 ---
 

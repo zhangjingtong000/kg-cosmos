@@ -44,7 +44,7 @@ python tools/serve.py            # 前置检查 + 起服务
 | **L4b 谓词一致率** | **25.73%** | 15 类模板 argmax 与抽取器标注的**一致率**（平凡基线 22.00%） |
 | L5 三元组验证 | 63.6% 通过率（**PPV 仅 49.7%**） | 本地 NLI 判别器判定能否被原文支持 |
 | L6 证据 | 100% | 每条边是否带页面级引文 |
-| **L7 方向校验** | 3 类可判（`CREATED_BY` 98.0%） | 端点类型约束；15 类中**只有 3 类**有方向指纹 |
+| **L7 方向校验** | 3 类可判（`CREATED_BY` 92.4%） | 端点类型约束；15 类中**只有 3 类**有方向指纹 |
 | **L9 端点召回** | **86.2%**（**分母仅 29 实体 / 7 段**） | 从原文段落出发的操作性金标（**第一个非自洽型指标**） |
 | **L9 关系召回** | **47.6%**（端点对）/ **42.9%**（含谓词） | 同上，但问的是**关系**抽到没有 |
 
@@ -75,7 +75,7 @@ python tools/serve.py            # 前置检查 + 起服务
 详见 [`docs/L5_VALIDITY_REPORT.md`](docs/L5_VALIDITY_REPORT.md)。
 
 **L7 只在 `CREATED_BY` 上可用，而且那里有循环论证**：T3.1 已用**与 L7 同一套**
-规则改过 2348 条边（占合规数的 40.3%）（口径说明见 docs/METRIC_CALIBERS.md：40.3% 的分子是 T3.1 改动总数 2348，含改错的 120 条；若只算「改动且现在合规」则为 43.3%，分母亦不同。），所以 98.0% 里很大一部分是
+规则改过 2348 条边（占合规数的 40.3%）（口径说明见 docs/METRIC_CALIBERS.md：40.3% 的分子是 T3.1 改动总数 2348，含改错的 120 条；若只算「改动且现在合规」则为 43.3%，分母亦不同。），所以 92.4% 里很大一部分是
 "用同一套规则改完再检查"的必然结果。详见
 [`docs/L7_ENDPOINT_CONSTRAINTS.md`](docs/L7_ENDPOINT_CONSTRAINTS.md) 顶部的声明。
 
@@ -186,7 +186,7 @@ python tools/re_extract_recent.py --apply  # 真跑（需本机 Ollama，约 4.6
 | 层 | 选型 | 说明 |
 |---|---|---|
 | PDF 解析 | PyMuPDF | 表格感知分块、页级图片提取 |
-| LLM 抽取 | 云端 DeepSeek / 本地 Ollama | 15 实体类型 × 15 关系类型，JSON Schema 约束解码 + 截断修复 |
+| LLM 抽取 | 云端 DeepSeek / 本地 Ollama | 15 实体类型 × 16 关系类型，提示词约束 JSON + 截断修复（⚠️ JSON Schema 约束解码**已实现但未接入生产路径**，不要说成生产用法 —— 见 `docs/已移除的旧版手册` 的演示口径警告） |
 | 实体归一 | 自写规则 + rapidfuzz | 三层：规则归一 / 形态分层模糊匹配 / 缩写抽取 |
 | 证据判别 | 本地 mdeberta triplet-critic | 零 API 成本，GPU 全量约 5 分钟 |
 | 图存储 | Neo4j 5 + NetworkX 兜底 | 双后端同接口，Neo4j 不可达时自动回退 |
@@ -259,7 +259,10 @@ Louvain 在**当前 20785 节点口径**下检出 **60** 个社区（`nebula.jso
 > **口径变更记录（2026-09-15）**：概览层原为 `18780 / 29120 / 18 社区`（Neo4j 治理后口径）。 <!-- 数字守门:忽略 -->
 > 因那个 Neo4j 实例已不存在、而 P7（争议视图）需要 `CONTRADICTS` 进概览
 > （旧概览里是 **0** —— 被 `build_nebula_data.py` 的去重键不含 `type` 的 bug 吃掉了），
-> 改为从 JSON 快照重建。**新口径含 221 条 `CONTRADICTS`。**
+> 改为从 JSON 快照重建。**数据侧含 221 条 `CONTRADICTS`**；概览层导出后是
+> **179 条**（`web/kg-data/nebula.json` 的 `edges` 实测，总数正好 30000 ⇒
+> 被 `build_nebula_data.py` 的 `--max-edges 30000` 上限截断）。两个数口径不同，
+> 不要混用。
 > 重建前的旧概览已按 `docs/ARCHIVE_POLICY.md` 留档：
 > `data/quality/backup/nebula-pre-fromjson-20260915-183032.json`。
 
@@ -330,14 +333,15 @@ powershell -File tools/check.ps1   # 一次跑完：语法 + 本体一致性 + �
 - **测试方法本身也要验证**：离线测试第一版把本地服务一起断了；
   Escape 双重触发的测试第一版自己派发了两次事件。
 - **反建/补数据要与指标口径分开**：从边反建端点是定义恒等，
-  它改善的是图连通性（最大连通分量 70.1% → 77.9%），不是抽取质量。
+  它改善的是图连通性（当前最大连通分量 **62.04%**，12896/20785，见 `data/quality/l8-structure-audit.json → connectivity.largest_component_pct`），不是抽取质量。
 
 ---
 
 ## 8. 已知边界（如实声明）
 
 - **L3 = 70.1%** 是最大短板：29.9% 的边至少有一个端点不是独立抽取出来的节点。
-  这些端点在原文里出现过（93.1% 能在证据句中逐字找到），但没有被抽成节点。
+  这些端点在原文里出现过，但没有被抽成节点。⚠️ 「逐字命中率」**未落盘任何产物**
+  （`docs/DOC_AUDIT_NUMBERS.md` 已记；此前这里写过一个百分数，无法对账，已删）。
 - **L9 的召回覆盖是不对称的**：端点召回 **86.2%** 相对可靠
   ⚠️ **但它的分母只有 29 个实体 / 7 个段落**（Wilson 95% 区间宽达 25.1pp），
   **只能作方向性参考，不能当精确值用**；
@@ -348,13 +352,20 @@ powershell -File tools/check.ps1   # 一次跑完：语法 + 本体一致性 + �
 - **L4 只判"谓词在不在本体内"**，不判"谓词选对了没有"——选错谓词照样通过。
 - **六层没有任何一层能可靠发现关系方向错误**：L5 用 NLI 比较正/反向
   hypothesis，实测只能拦住 23.9% 的方向反转。当前 L7 方向校验只覆盖
-  `CREATED_BY` 一类（合规率 92.4%，可判定 6309 条），其余 14 类需要人工定义
-  端点类型约束——那是本体设计决策，未做。
+  `CREATED_BY` 一类（合规率 92.4%，可判定 6309 条）。其余类的端点约束**已逐类给出**
+  （`data/quality/l7-relation-constraints.json → by_type` 覆盖 16 类，定义在
+  `src/ontology.py` 的 `RELATION_ENDPOINT_CONSTRAINTS`）；差别在于**只有 `CREATED_BY`
+  有可自动判定的方向指纹**，其余类给的是端点类型约束，能拦住类型错误、拦不住方向反转。
 - **语料裁剪未在界面披露**：语料登记 **34 条**（`data/corpus/_manifest.json` /
-  `web/kg-data/corpus-index.json` 的 `stats.total`），其中 `data/corpus/` 实有
-  **33 个 PDF**——有一条中文期刊记录（`jsjkx2025-kg-rag-qa`）**登记了但 PDF 不在盘上**，
-  两个口径都要写明。按成本约束入库 **21 篇**（`stats.in_graph`），
-  另有 **13 篇**只下载未入库（`stats.downloaded_only`）。
+  `web/kg-data/corpus-index.json` 的 `stats.total`）。其中 `data/corpus/` 根下实有
+  **33 个 PDF**，另 1 条中文期刊记录（`jsjkx2025-kg-rag-qa`）**按 `docs/ARCHIVE_POLICY.md`
+  归档**到 `data/corpus/_archive-military/`。
+  ⚠️ **2026-09-21 更正**：这里此前写"登记了但 PDF 不在盘上" —— **是错的**，
+  该 PDF（2.3 MB）就在归档目录里，**下载过、只是被移出主目录留档**。所以
+  "下载到的 PDF"总数是 **34 篇**（33 主目录 + 1 归档），不存在"缺 PDF 的记录"。
+  按成本约束入库 **21 篇**（`stats.in_graph`），其余 **13 篇**只下载未入库
+  （`stats.downloaded_only`）；这 13 条的构成是 **12 条「已下载未抽取」+ 1 条「已归档」**
+  （逐条见 `web/kg-data/prisma.json` 的 `excluded[0].items`）。
   已经入库的里面，中文语料有 **4 篇**出了图（`data/corpus/graphs/jsjkx*.json` 4 个），
   是**探索性首抽、质量待修**：
   40% chunk 超时导致残图、13% 假边；逐篇备注见 `web/kg-data/paper-registry.json`

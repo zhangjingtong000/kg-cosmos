@@ -284,7 +284,8 @@ fetch('./kg-data/bipartite.json').then(r => r.ok ? r.json() : null).then(d => {
   DATA = d;
   const t = d.totals || {};
   $('#sub').innerHTML = `关系 <b>${esc(d.relation)}</b> · 全库 ${t.rel_edges} 条`
-    + `（施动者 ${t.left_entities} 个 · 被用物 ${t.right_entities} 个）`
+    + `（治理前全量口径：节点 ${t.nodes} · 边 ${t.edges}；`
+    + `施动者 ${t.left_entities} 个 · 被用物 ${t.right_entities} 个）`
     + ` ⇒ 这里取两侧各 top ${d.top}：<b>${d.left.length} × ${d.right.length}</b>`
     + `，两端都在 top 里的边 <b>${d.links.length}</b> 对`
     + `<br>点一个节点可只看它连的；再点取消`;

@@ -497,7 +497,7 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
       <div class="r"><span class="ix">01</span><span class="nm">字面命中种子</span>
         <span class="ds">长名字优先，被更长命中包含的短名字直接丢掉，否则「TransE 的局限」会同时命中 Tran</span></div>
       <div class="r"><span class="ix">02</span><span class="nm">两跳扩展子图</span>
-        <span class="ds">BFS 两跳，封顶 70 个节点；命中的实体与路径在图上高亮</span></div>
+        <span class="ds">BFS 两跳，封顶 60 个节点；命中的实体与路径在图上高亮</span></div>
       <div class="r"><span class="ix">03</span><span class="nm">多 Agent 各自站队</span>
         <span class="ds">支持方与反方分开取证，每条证据附原文摘录与出处，最后给一句综合判断</span></div>
     </div>
@@ -589,7 +589,7 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
               <div class="li"><span class="sw dot plain"></span>扩展到的邻居</div>
               <div class="li"><span class="sw"></span>证据路径</div>
               <div class="li"><span class="sw plain"></span>普通关系</div>
-              <div class="li"><span class="sw contra"></span>CONTRADICTS（判别器通过率 6.6%，待复核）</div>
+              <div class="li"><span class="sw contra"></span>CONTRADICTS（判别器通过率 6.0%，待复核）</div>
             </div>
           </div>
 </div>
@@ -1033,11 +1033,11 @@ const QA = {
     seeds: ['TransE', 'Scoring Function'],
     trace: '字面命中 2 个种子：「TransE」与「Scoring Function」。扩展 2 跳，' +
            '封顶 70 节点，实际取到 70 个（截断 43 个）。命中的关系类型 6 种，' +
-           '其中 1 条是 CONTRADICTS —— 判别器对它只给 0.235 的中位通过概率。',
+           '其中 1 条是 CONTRADICTS —— 判别器对它只给 0.231 的中位通过概率。',
     stats: [
       ['种子实体', '2'],
       ['扩展跳数', '2'],
-      ['节点 / 封顶', '70 / 70'],
+      ['节点 / 封顶', '60 / 60'],
       ['子图边', '118'],
       ['关系类型', '6'],
       ['命中论文段', '41']
@@ -1069,7 +1069,8 @@ const QA = {
       ev: [
         {rel:'SUPPORTS', tier:'s',
          qt:'样本印证：TransE -> Many-to-1 Relationships（TransE 处理多对一的能力，不是矛盾）',
-         src:'docs/DATA_SNAPSHOT_2026-09-11.md', sec:'§4.1',
+         src:'data/corpus/graphs/1703.08098v9.json',
+         sec:'TransE → Many-to-1 Relationships（CONTRADICTS，原文 "TransE is not well-suited for Many-to-1 relationships"）',
          why:'这是本条立场最硬的一条：抽取器在「TransE 处理多对一关系」这句话上真的产出了一条边。' +
              '它说明该短板在原文层面被反复讨论，已经沉降到实体层，而不是停留在二手转述里。'},
         {rel:'EVALUATES', tier:'n',
@@ -1090,15 +1091,17 @@ const QA = {
       claim: '能被追溯到的所谓矛盾，绝大多数是对比、评测与继承；真正指向模型缺陷的，一条都没有被确认。',
       ev: [
         {rel:'CONTRADICTS', tier:'c',
-         qt:'CONTRADICTS 的中位通过概率只有 0.235，通过率 6.6% —— ' +
+         qt:'CONTRADICTS 的中位通过概率只有 0.231，通过率 6.0% —— ' +
             '比次低类型低一个数量级，机器可验证地确认这些边基本不是真矛盾。',
-         src:'docs/DATA_SNAPSHOT_2026-09-11.md', sec:'§4.1 · L5 证据支持度实测（阈值 0.67）',
-         why:'全图谱里被标成「矛盾」的边，中位通过概率只有 0.235，是通过率最低的关系类型。' +
+         src:'web/kg-data/analytics.json',
+         sec:'by_type · CONTRADICTS（n=251，median 0.2312，pass_rate 0.0598）',
+         why:'全图谱里被标成「矛盾」的边，中位通过概率只有 0.231，是通过率最低的关系类型。' +
              '所以「TransE 有局限」这类问句命中的矛盾边，<b>先验地不该被采信</b>。'},
         {rel:'COMPARES_WITH', tier:'n',
-         qt:'社区 3（规模 728）的核心实体：Scoring Function(51)、TransE(49)、FB15k(47)、' +
-            'WN18(45)、ComplEx(40)；主题是 KG 嵌入模型，模块度 0.6824。',
-         src:'docs/DATA_SNAPSHOT_2026-09-11.md', sec:'§5 · 社区结构（重算）',
+         qt:'社区 0（规模 1841）的核心实体：Triple(197)、Entity(177)、Embeddings(171)、' +
+            'Scoring Function(133)、TransE(131)、FB15k(79)；主题是 KG 嵌入与链接预测，模块度 0.6824。',
+         src:'web/kg-data/community-summaries.json',
+         sec:'社区 0（规模 1841，模块度 0.6824 —— 见 web/kg-data/analytics.json 的 scale）',
          why:'在图上 TransE 是<b>基准坐标</b>，不是被否定的方法：它和 FB15k、WN18、ComplEx ' +
              '共处同一个高模块度社区。它被频繁提及，是因为大家都在拿它当基线对比。'},
         {rel:'APPLIES_TO', tier:'n',
@@ -1119,12 +1122,12 @@ const QA = {
   llm: {
     q: '大模型能不能直接用来做知识图谱抽取？',
     seeds: ['LLM', 'Relation Extraction'],
-    trace: '字面命中 2 个种子：「LLM」与「Relation Extraction」。扩展 2 跳，取到 70 个节点。' +
+    trace: '字面命中 2 个种子：「LLM」与「Relation Extraction」。扩展 2 跳，取到 60 个节点。' +
            '子图里方向约束（CREATED_BY）与抽取层直接相邻——这正是两边立场分叉的地方。',
     stats: [
       ['种子实体', '2'],
       ['扩展跳数', '2'],
-      ['节点 / 封顶', '70 / 70'],
+      ['节点 / 封顶', '60 / 60'],
       ['子图边', '96'],
       ['关系类型', '7'],
       ['命中论文段', '58']
@@ -1207,12 +1210,12 @@ const QA = {
   quality: {
     q: '知识图谱的质量怎么评估？',
     seeds: ['L5', 'Triplet Critic'],
-    trace: '字面命中 2 个种子：「L5」与「Triplet Critic」。扩展 2 跳，取到 70 个节点。' +
+    trace: '字面命中 2 个种子：「L5」与「Triplet Critic」。扩展 2 跳，取到 60 个节点。' +
            '六层评测与它自己的短板 L3、以及 CONTRADICTS 通过率同时出现在子图里。',
     stats: [
       ['种子实体', '2'],
       ['扩展跳数', '2'],
-      ['节点 / 封顶', '70 / 70'],
+      ['节点 / 封顶', '60 / 60'],
       ['子图边', '104'],
       ['关系类型', '6'],
       ['命中论文段', '49']
@@ -1240,17 +1243,17 @@ const QA = {
     ],
     pro: {
       stake: '支持 · 分层评测可跑、可复现',
-      claim: '六层评测在阈值 0.67 下把 43867 条边打了一遍分，逐层产出可查的数字，而且不需要金标。',
+      claim: '六层评测在阈值 0.67 下把 45708 条边打了一遍分，逐层产出可查的数字，而且不需要金标。',
       ev: [
         {rel:'SUPPORTS', tier:'s',
-         qt:'threshold 0.67，edges_total 43867 —— L1 实体存在 0.9438、' +
-            'L3 端点 0.9617、L4 谓词 0.9946、L6 引文 1.0。',
+         qt:'threshold 0.67，edges_total 45708 —— L1 实体存在 0.9364、' +
+            'L3 端点 0.9649、L4 谓词 0.9948、L6 引文 1.0。',
          src:'data/quality/l5-six-layer.json', sec:'全量输出（本地模型，约 5 分钟，¥0）',
          why:'这是整页里唯一一条「点开就能看到全部原始数字」的证据。' +
              'L1/L3/L4/L6 <b>完全不用人工金标</b>，改用证据引文、已知实体集、本体与引文存在性，' +
              '所以它可以无标注地反复重跑。'},
         {rel:'SUPPORTS', tier:'s',
-         qt:'被原文支持的关系子图：27954 条边保留，15913 条丢弃。',
+         qt:'被原文支持的关系子图：29071 条边保留，16637 条丢弃。',
          src:'docs/L5_SIX_LAYER_REPORT.md', sec:'§3.2 · 产物：被原文支持的关系子图',
          why:'分层评测的产出不是一组分数，而是<b>一张被筛过的图</b>。' +
              '一个端点不存在、或原文里找不到依据的边，在可视化与问答里本来也不可用。'},
@@ -1267,7 +1270,7 @@ const QA = {
       claim: '同一份结果换一个口径就从 0.64 变成 1.00，而且这套指标不产召回、也测不出方向——它回答不了「漏了多少」。',
       ev: [
         {rel:'CONTRADICTS', tier:'c',
-         qt:'L5_triplet 的 all 口径是 0.6372，supported 口径是 1.0 —— ' +
+         qt:'L5_triplet 的 all 口径是 0.6360，supported 口径是 1.0 —— ' +
             '两个数出自同一份结果文件。',
          src:'data/quality/l5-six-layer.json', sec:'同一文件内的两个口径',
          why:'<b>两个数字都真实，但读者会记住 1.0。</b>' +
@@ -1280,17 +1283,17 @@ const QA = {
          why:'报告版分层以人工金标为参照、能产召回；本项目六层是<b>精度型 / 自洽型校验</b>。' +
              '两套东西同名，引用时必须说清是哪一套——否则「六层」这个词本身就会造成误读。'},
         {rel:'EVALUATES', tier:'n',
-         qt:'但 L3 端点完备性只有 68.5% —— 31.5% 的边至少有一端不是已抽取的节点，' +
-            '这是当前最大短板，且 L5 过滤对它毫无改善（68.5% → 68.6%），两者是正交维度。',
+         qt:'但 L3 端点完备性只有 70.1% —— 29.9% 的边至少有一端不是已抽取的节点，' +
+            '这是当前最大短板，且 L5 过滤对它毫无改善（70.07% → 70.14%），两者是正交维度。',
          src:'docs/MAINSTREAM_SOLUTIONS_SURVEY.md', sec:'§2.3 · 实测结果与最大短板',
-         why:'分层评测的六层之间并不互相覆盖。把 L4 的 0.9946 和 L3 的 68.5% 并排放，' +
+         why:'分层评测的六层之间并不互相覆盖。把 L4 的 0.9948 和 L3 的 70.1% 并排放，' +
              '才看得出<b>分数最高的一层和最短的一块板没有任何关系</b>。'}
       ]
     },
     verdict: '六层能回答的是「这条边有没有原文支持」，回答不了「漏掉了多少」和「方向对不对」。' +
              '它是一套<b>精度型 / 自洽型校验</b>，不是一个质量总分——' +
              '把 L6 的 1.0 当成「图谱质量满分」是这一页最需要防住的误读。',
-    caveat: '<b>分歧未消解。</b>全集 0.6372 与支持子集 1.0000 都是真数字，' +
+    caveat: '<b>分歧未消解。</b>全集 0.6360 与支持子集 1.0000 都是真数字，' +
             '取哪个并不取决于事实，而取决于你想让读者得到什么印象。' +
             '项目自己的处理是<b>两个数并列写进同一份报告</b>，并单独声明口径差异。'
   }
