@@ -48,7 +48,10 @@
    固定在左下会压住列表项——实测截图看到「← 导航页」与「KRL」叠在一起。
    所以给星云页单独改到**右上角**（那里是空的）。 */
 #a11y-home {
-  position: fixed; left: 14px; bottom: 14px; z-index: 60;
+  /* ★ 2026-09-21：`bottom` 要跟着演示导轨让位 —— 窄屏下 `#demoRail` 会变高，
+     420 宽时实测「← 导航页」被它的 `a.next` 盖住（`elementFromPoint` 命中对方）。
+     项目里 `#kgExport` 早就是这么做的（`--demo-rail-h`），这里没跟上。 */
+  position: fixed; left: 14px; bottom: calc(14px + var(--demo-rail-h, 0px)); z-index: 60;
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 12px; border-radius: 9px;
   font: 500 12px/1 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;

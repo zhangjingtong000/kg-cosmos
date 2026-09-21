@@ -3159,5 +3159,47 @@ addEventListener('resize', () => {
   /* 不设 window.__ready：各页可能自带更严格的就绪条件（kg-nebula 要等 3D 首帧），抢跑会让 CDP 回归在场景就绪前截图。 */
 </script>
 <script src="./lib/demo-rail.js"></script>
+
+<script>
+/* ★ 2026-09-21（a11y 实测）：**关闭态的 PDF 抽屉里 4 个控件仍停在 Tab 序**。
+   真实 Tab step 4~7 依次命中 ‹ / › / "新标签打开 ↗" / ×，而它们的 x = 1783 / 1879 /
+   1913 / 2016，视口只有 1280 ⇒ 焦点落在**屏幕外**，键盘用户会"按了 Tab 却什么都没发生"。
+   `#pdfPane` 只靠 transform 位移隐藏，没有 inert。
+   用 MutationObserver 跟着 `.open` 类同步 —— 不必改页面原有的显隐逻辑。 */
+(function () {
+  var pane = document.getElementById('pdfPane');
+  if (!pane || !('inert' in pane)) return;
+  var sync = function () { pane.inert = !pane.classList.contains('open'); };
+  sync();
+  new MutationObserver(sync).observe(pane, { attributes: true, attributeFilter: ['class'] });
+})();
+
+/* ★ 2026-09-21（a11y 实测）：**详情抽屉打开后焦点没进去、真实 Esc 也关不掉**。
+   实测：`detail.classList.add('open')` 后 `activeElement` 仍是 BODY；
+   派发真实 Esc 后 `class` 仍是 `open`，焦点停在屏幕外的 `#pdfOpen`。
+   这里补两件事：打开时聚焦面板本身、Esc 关闭并把焦点还给打开前的元素。
+   `keydown` 用**捕获阶段**：抢在页面既有的 Esc 处理（`closePdf` / `exitCommunity`）之前，
+   免得按一次 Esc 把整个社区一起退掉。 */
+(function () {
+  var d = document.getElementById('detail');
+  if (!d) return;
+  d.setAttribute('tabindex', '-1');
+  var last = null;
+  new MutationObserver(function () {
+    if (d.classList.contains('open')) {
+      last = document.activeElement;
+      try { d.focus({ preventScroll: true }); } catch (e) { try { d.focus(); } catch (e2) {} }
+    } else if (last && last.focus) {
+      try { last.focus({ preventScroll: true }); } catch (e) {}
+      last = null;
+    }
+  }).observe(d, { attributes: true, attributeFilter: ['class'] });
+  addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || !d.classList.contains('open')) return;
+    e.stopPropagation();
+    d.classList.remove('open');
+  }, true);
+})();
+</script>
 </body>
 </html>

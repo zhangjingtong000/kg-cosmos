@@ -51,7 +51,11 @@
     // （选择器以实际 DOM 为准：是 `#list .item`，不是 `.row`）
     { sel: '#list .item', role: 'option' },
     // 方法能力页的胶囊（示例问句、维度筛选）
-    { sel: '.chip, .capsule, .pill', role: 'button' },
+    // ⚠️ 2026-09-21：原选择器含 `.pill`，而 analytics 的 `.pill` 是**纯展示状态标签**
+  //   （"有向 / 对称 / 无约束"）—— 盲扫把它们全变成 `role=button` + `tabindex=0`，
+  //   实测一次 Tab 序列 55 步里有 **16 步**停在这些按不动的标签上（占 29%）。
+  //   键盘用户要按十几次 Tab 才能越过一排装饰。**能点的才给 role**，所以删掉 `.pill`。
+  { sel: '.chip, .capsule', role: 'button' },
     // 分析面板的类型行（可悬浮查看）
     { sel: '.type-row, .typebar', role: null }
   ];

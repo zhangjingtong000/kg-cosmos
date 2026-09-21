@@ -521,7 +521,11 @@ footer a:hover{color:var(--ink-2);border-bottom-color:var(--line)}
   <p class="hint">存在这台机器的浏览器里，不上传。点一条可以重新看那一轮。</p>
 </section>
 
-<section id="result" hidden>
+<!-- ★ 2026-09-21（a11y）：`role="status"` 让屏读器知道"结果来了"；
+     `tabindex="-1"` 配合下面的脚本把焦点移进来（原先 run() 只 scrollTo，
+     键盘用户与屏读器都不知道结果已经渲染）。
+     ⚠️ 故意**不用** `aria-atomic="true"` —— 结果区内容很长，整块重播很吵。 -->
+<section id="result" hidden role="status" tabindex="-1">
       <!-- ⑨（2026-09-19）：**降级横幅必须待在滚动锚点之内**。
            此前「不是本次提问的结果」只写进 `#caveat`，而它在本 section 的
            **底部**；`run()` 只滚到本 section 的**顶部** ⇒ 实测警告 top=1893px、
@@ -2406,5 +2410,19 @@ window.__ready = true;
 </script>
 <script src="./lib/demo-rail.js"></script>
 <script src="./lib/motion.js"></script>
+
+<script>
+/* ★ 2026-09-21（a11y）：结果区由 `hidden` 变可见时把焦点移进去。
+   原先 `run()` 只 `scrollTo`，焦点还在输入框/芯片上 —— 屏读器不会知道结果来了，
+   键盘用户也得自己 Tab 几十次才能到结果。用 MutationObserver 跟着 `hidden` 走，
+   这样不必改页面原有的 `run()`。 */
+(function () {
+  var r = document.getElementById('result');
+  if (!r) return;
+  new MutationObserver(function () {
+    if (!r.hidden) { try { r.focus({ preventScroll: true }); } catch (e) { try { r.focus(); } catch (e2) {} } }
+  }).observe(r, { attributes: true, attributeFilter: ['hidden'] });
+})();
+</script>
 </body>
 </html>
