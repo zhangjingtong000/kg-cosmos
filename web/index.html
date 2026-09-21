@@ -251,11 +251,13 @@ h3 { font-weight: 600; }
 }
 .reel{
   margin-top:20px;position:relative;
-  /* `hidden` 而不是 `auto`：**这条轴只由页面纵向滚动驱动**，不接横向手势，
-     否则触控板的横向滑动会和"进度换算出来的位置"互相打架。
-     `overflow:hidden` 依然可以用 `scrollLeft` 编程滚动，所以键盘 Tab 到
-     视野外的卡片时，浏览器照样能把它带进来（无障碍没有损失）。 */
-  overflow-x:hidden;overflow-y:hidden;
+  /* ★ 2026-09-21 改回 `auto`（上一版写 `hidden`，是个**无障碍回归**）：
+     当时想的是"这条轴只由页面纵向滚动驱动，不接横向手势"，但代价实测是——
+     浏览器**不会**为焦点自动滚动 `overflow:hidden` 的容器，于是 Tab 到视野外的
+     卡片时焦点停在屏幕外（实测第 09 张只有 10px 可见），窄屏下后 11 张卡
+     更是完全够不着。滚动条照样隐藏（`scrollbar-width:none`），观感不变；
+     而"横向手势与进度换算打架"这件事改用下面 JS 里的**手动优先窗口**解决。 */
+  overflow-x:auto;overflow-y:hidden;
   /* 隐藏横向滚动条：这条轴靠滚轮/方向键走，多一条滚动条反而是"独立控件"感 */
   scrollbar-width:none;-ms-overflow-style:none;
   /* ★ 两端渐隐用**固定像素**，不能用百分比：百分比在 1100px 宽下左端要吃掉 38px，
@@ -879,13 +881,53 @@ document.documentElement.classList.add('js-motion');
     sec.style.height = (window.innerHeight + budget) + 'px';
   }
 
+  /* ★ 2026-09-21：**手动优先窗口**。
+     焦点进了这条轴、或用户按了方向键 / 横向滚轮之后的 1.2 秒内，
+     不让 `paint()` 覆盖 `scrollLeft` —— 否则键盘刚移一格就被下一帧写回去
+     （实测连按三次方向键 `scrollLeft` 恒为 114，就是这个原因）。
+     窗口过后自动回到"由页面纵向滚动驱动"，两种驱动方式不再互相打架。 */
+  var MANUAL_MS = 1200;
+  var manualUntil = 0;
+  function markManual() { manualUntil = Date.now() + MANUAL_MS; }
+
   function paint() {
     if (budget <= 0) return;
+    if (Date.now() < manualUntil) return;
     var p = (-sec.getBoundingClientRect().top) / budget;   /* 0 → 1 */
     if (p < 0) p = 0;
     if (p > 1) p = 1;
     reel.scrollLeft = p * travel;
   }
+
+  /* 一张卡的宽度 + 间距：方向键一次走一张 */
+  function cardStep() {
+    var first = reel.querySelector('.entry');
+    if (!first) return 300;
+    var gap = parseFloat(getComputedStyle(first).marginRight) || 30;
+    return first.getBoundingClientRect().width + gap;
+  }
+
+  function onAxisKey(e) {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    e.preventDefault();
+    markManual();
+    reel.scrollLeft += (e.key === 'ArrowRight' ? 1 : -1) * cardStep();
+  }
+
+  /* 焦点在轴内期间一律手动优先；焦点离开后立刻交还给滚动驱动 */
+  reel.addEventListener('focusin', markManual);
+  reel.addEventListener('focusout', function () {
+    setTimeout(function () {
+      if (!reel.contains(document.activeElement)) manualUntil = 0;
+    }, 0);
+  });
+  reel.addEventListener('keydown', onAxisKey);
+  /* 横向滚轮 / 触屏横滑也算手动 */
+  reel.addEventListener('wheel', function (e) {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) markManual();
+  }, { passive: true });
+  reel.addEventListener('touchstart', markManual, { passive: true });
 
   /* 每帧最多画一次：scroll 事件比屏幕刷新密得多，不节流会白做很多次布局 */
   var queued = false;

@@ -319,9 +319,9 @@ body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
 </header>
 
 <div class="bar">
-  <input id="q" type="search" placeholder="搜索方法 / 维度 / 描述…（按 / 聚焦）" autocomplete="off">
-  <select id="dimSel"><option value="">全部维度</option></select>
-  <select id="subjSel"><option value="">全部方法</option></select>
+  <input id="q" type="search" placeholder="搜索方法 / 维度 / 描述…（按 / 聚焦）" autocomplete="off" aria-label="搜索方法、维度或描述">
+  <select id="dimSel" aria-label="按能力维度筛选"><option value="">全部维度</option></select>
+  <select id="subjSel" aria-label="按方法筛选"><option value="">全部方法</option></select>
   <button id="reset" type="button">重置</button>
   <button id="density" type="button" aria-pressed="false" title="切换极简 / 详读">极简版式</button>
   <span class="hit" id="hit"></span>

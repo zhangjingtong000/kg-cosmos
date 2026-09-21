@@ -82,7 +82,17 @@ header{padding:14px 20px 10px;display:flex;align-items:flex-start;
        border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12px;
        max-width:380px;opacity:0;transition:opacity .12s;z-index:9}
   a{color:var(--cool)}
+
+/* ★ 2026-09-21（a11y 审查实测）：420 宽下这一页被裁 **362px**，而 `body{overflow:hidden}`
+   ⇒ **连滚动条都没有，内容永久不可达**。根因是刚改成两列的 header：
+   `.hleft{flex:0 0 auto}` 不收缩。窄屏下让它换行并允许收缩。 */
+@media (max-width:700px){
+  header{flex-wrap:wrap;gap:10px}
+  .hleft{flex:1 1 100%;max-width:100%}
+  .howto{flex:1 1 100%;max-width:100%}
+}
 </style>
+<link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/theme.css">
 <link rel="stylesheet" href="./lib/motion.css">
 </head>
@@ -103,7 +113,7 @@ header{padding:14px 20px 10px;display:flex;align-items:flex-start;
     两点之间一条线就是<b>一次使用关系</b>。
     鼠标停在任一节点上会显示它的名字与次数；<b>点一下</b>可以把它聚焦（只留它相关的连线），再点一次取消。</p>
 </header>
-<div id="wrap" class="mo-enter"><svg id="svg"></svg></div>
+<div id="wrap" class="mo-enter"><svg id="svg" role="img" aria-label="使用关系二部图：左列是施动者（谁在用），右列是被用物（被用的东西），中间每条线表示一次使用关系；越靠上的节点度数越高"></svg></div>
 <div id="tip"></div>
 <footer>
   <span>左侧 <b>施动者</b>（谁在用）· 右侧 <b>被用物</b>（被用的东西）</span>
@@ -287,5 +297,6 @@ fetch('./kg-data/bipartite.json').then(r => r.ok ? r.json() : null).then(d => {
 });
 </script>
 <script src="./lib/motion.js"></script>
+<script src="./lib/a11y.js"></script>
 </body>
 </html>

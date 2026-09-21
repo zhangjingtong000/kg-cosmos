@@ -334,7 +334,7 @@ body.inside #kgExport{
   background:rgba(8,13,30,.84);border:1px solid rgba(178,181,194,.18);
   backdrop-filter:blur(8px);
   bottom:calc(18px + var(--demo-rail-h,0px) + var(--legend-h,0px) + 8px)}
-#kgExport .lbl{color:rgba(193,195,201,.46);letter-spacing:.18em;text-transform:uppercase;
+#kgExport .lbl{color:rgba(193,195,201,.62);letter-spacing:.18em;text-transform:uppercase;
   margin-right:4px;font-size:9.5px}
 #kgExport button{
   appearance:none;cursor:pointer;padding:7px 11px;border-radius:8px;
@@ -350,7 +350,7 @@ body.inside #kgExport{
 
 /* ==KG_FLAG_V1== */
 #dbody .flagbar{margin:18px 0 4px;padding-top:14px;border-top:1px solid rgba(178,180,186,.16)}
-#dbody .flagbar .qh{display:block;font-size:11px;color:rgba(193,195,201,.46);
+#dbody .flagbar .qh{display:block;font-size:11px;color:rgba(193,195,201,.62);
   letter-spacing:.14em;text-transform:uppercase;margin-bottom:9px}
 #dbody .flagbar .btns{display:flex;gap:7px;flex-wrap:wrap}
 #dbody .flagbar button{
@@ -402,6 +402,14 @@ body.inside #kgExport{
 #paperFilter:focus-visible{outline:2px solid #7cc0b6;outline-offset:2px}
 #paperFilter[hidden]{display:none}
 /* ==KG_FLAG_V1_END== */
+
+/* ★ 2026-09-21（a11y 审查实测）：**搜索框鼠标完全点不进**。
+   真实鼠标点击 (140,91) 命中的是 `CANVAS#scene-canvas` —— 它 `position:fixed;inset:0`
+   且没有 z-index，而 three 的画布是**运行时**创建后挂到 body 末尾的，于是压在 `#side`
+   之上。三种宽度（420/900/1280）都复现，点击后 `activeElement` 停在 BODY。
+   修法：抬 `#side` 的层级。**不能**给画布 `pointer-events:none` —— 它要接拖拽与旋转。 */
+#side{z-index:5}
+#scene-canvas{z-index:0}
 </style>
 <link rel="stylesheet" href="./lib/theme.css">
 <link rel="stylesheet" href="./lib/design.css">
@@ -452,7 +460,7 @@ body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
 <aside id="detail"><div id="dbody"></div></aside>
 <aside id="side">
   <div id="searchWrap">
-    <input id="search" type="search" placeholder="搜索实体…" autocomplete="off" spellcheck="false">
+    <input id="search" type="search" placeholder="搜索实体…" autocomplete="off" spellcheck="false" aria-label="搜索实体：输入名字在下方列表里筛选">
     <button id="searchClear" type="button" title="清除" aria-label="清除搜索">×</button>
   </div>
   <div id="list"></div>

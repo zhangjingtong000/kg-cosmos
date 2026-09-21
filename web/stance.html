@@ -29,6 +29,7 @@
      （与 F3 里 `CITES` 的 target 混进 `Figure 2` 同类）。
      **本页不做过滤** —— 过滤需要判据，而本项目的判据被量出过 27.4% 的假阳性（B4）。
 -->
+<link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/theme.css">
 <link rel="stylesheet" href="./lib/design.css">
 <link rel="stylesheet" href="./lib/motion.css">
@@ -43,7 +44,7 @@
    *     --bg   #0b0d12   →   --bg  **#02040a**
    *                          （#0b0d12 其实是系统的 `--surface #0b0e16` —— 把 surface 当 bg 用了）
    *     --fg   #dfe2e8   →   --ink **#eef3fd**
-   *     --dim  #8b95a8   →   --ink-3 rgba(193,195,201,.46)
+   *     --dim  #8b95a8   →   --ink-3 rgba(193,195,201,.62)
    *     --line rgba(193,195,201,.18) → --line rgba(178,180,186,.13)
    *     --warn #e8c9a4   →   --warm **#ffcfa8**
    *     --bad  #e07575   →   系统里没有"红" ⇒ 用 --clay-2
@@ -307,5 +308,6 @@ fetch('./kg-data/stance.json').then(r => r.ok ? r.json() : null).then(d => {
 }).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
 </script>
 <script src="./lib/motion.js"></script>
+<script src="./lib/a11y.js"></script>
 </body>
 </html>

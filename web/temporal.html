@@ -88,6 +88,7 @@
   a{color:var(--cool)}
   code{color:var(--warn)}
 </style>
+<link rel="stylesheet" href="./lib/a11y.css">
 <link rel="stylesheet" href="./lib/theme.css">
 <link rel="stylesheet" href="./lib/motion.css">
 </head>
@@ -128,7 +129,7 @@
          重写为 `0 0 <clientWidth> 180`，使坐标比例恒为 1:1 —— 这是"图能变宽、
          而年份文字不被横向拉伸"的关键。preserveAspectRatio="none" 保留，
          用于兜住 resize 到重绘之间的极短窗口（不让图被留白缩小）。 -->
-    <svg id="chart" viewBox="0 0 1000 180" preserveAspectRatio="none"></svg>
+    <svg id="chart" viewBox="0 0 1000 180" preserveAspectRatio="none" role="img" aria-label="按年份逐年累积的曲线：横轴是年份，纵轴是实体数与关系数，每帧显示到该年为止的累计规模"></svg>
     <div class="note">
       <span style="color:var(--hot)">■</span> 实体 ·
       <span style="color:var(--cool)">■</span> 关系
@@ -294,5 +295,6 @@ fetch('./kg-data/temporal.json').then(r => r.ok ? r.json() : null).then(d => {
 }).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
 </script>
 <script src="./lib/motion.js"></script>
+<script src="./lib/a11y.js"></script>
 </body>
 </html>
