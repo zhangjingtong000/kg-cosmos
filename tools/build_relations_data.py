@@ -94,7 +94,17 @@ def main():
                            'data/corpus/graphs/*.json（实测条数）'],
         'caliber': ('条数是**治理前全量**口径（与 data/corpus/graphs 一致）；'
                     '已按同期修正规则把"字段错位"的边归位到正确类型。'
-                    '"papers" = 该类型出现在几篇论文里。'),
+                    '"papers" = 该类型出现在几篇论文里。'
+                    # ⚠️ 2026-09-26 补：**这条说明此前只讲了"经过什么处理"，
+                    #    没讲"这个数字的定义"** —— 于是 `total_edges` 被当成
+                    #    "图的全部边数"引用过（45708），而它其实是
+                    #    `sum(cnt[t] for t in RELATION_TYPES)`。
+                    #    定义不同的两个数放在一起当同一件事，就是口径事故的起点。
+                    '`stats.total_edges` 的定义是 **本体 16 类各自的条数之和**'
+                    '（= sum over `RELATION_TYPES`），**不等于图的全部边数**：'
+                    '还有 48 条边修正后 type 仍越界（`CONTAINS` / `friend` / `HAS` …），'
+                    '它们不计入本汇总。要"图的全部边数"请用 45708'
+                    '（`tools/graph_source.load_graph()` 的 `len(edges)`）。'),
         'stats': {
             'types': len(rels),
             'total_edges': total,
