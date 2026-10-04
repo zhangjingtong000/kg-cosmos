@@ -21,9 +21,28 @@
 | # | 参考 | 我提的用法 | 你的裁决 | 落地状态 |
 |---|---|---|---|---|
 | ① | Codrops《GSAP + Three.js》合用一条时钟（`gsap.ticker` 驱动 three 的 `requestAnimationFrame`） | 把主视图的渲染心跳换成 GSAP ticker，让时间轴与 three 共用一个时钟 | 「**不适合，否掉**」（指整篇的炫技画廊） | ✅ **但底层手法落了地** —— 见 `2d90701`：主视图心跳已换成 `gsap.ticker` |
-| ② | Cinematic 3D Scroll（滚动驱动的电影式推进） | 首页第 4 屏 12 个入口做成"跟轴似的滚动" | 「**有用**」；但要 **"跟轴似的滚动"**，**不要**"推进/放大"那一半 | ✅ `53dc2c9`：上下两层各一条轴依次滑入（**没有**做 zoom 推进） |
-| ③ | Telescope Zoom（滚轮拉近镜头） | 主视图滚轮推拉 | 「**不要**」 | ✅ 未做；且 `kg-nebula.html:2384` 原有注释记着「相机补间已移除：进入/退出都直接落位」 |
-| ④ | 《WebGL Shaders with GSAP》（把 GSAP 的缓动喂给 shader 参数） | 用 GSAP 缓动替换首页光场的**点击涟漪** | 「**用**」 | ✅ `a0364ae`：涟漪改由 GSAP 时间轴驱动 `age`/`amp`，**shader 一行未动** |
+| ② | **Cinematic 3D Scroll**（滚动驱动的电影式推进）<br>`https://tympanus.net/Tutorials/Cinematic3DScroll/` | 首页第 4 屏 12 个入口做成"跟轴似的滚动" | 「**有用**」；但要 **"跟轴似的滚动"**，**不要**"推进/放大"那一半 | ✅ `53dc2c9`：上下两层各一条轴依次滑入（**没有**做 zoom 推进） |
+| ③ | **Telescope Zoom**（滚轮拉近镜头） | 主视图滚轮推拉 | 「**不要**」 | ✅ 未做；且 `kg-nebula.html:2384` 原有注释记着「相机补间已移除：进入/退出都直接落位」 |
+| ④ | 《**WebGL Shaders with GSAP**》（把 GSAP 的缓动喂给 shader 参数）<br>`https://tympanus.net/Tutorials/ShaderAnimationGSAP/` | 用 GSAP 缓动替换首页光场的**点击涟漪** | 「**用**」 | ✅ `a0364ae`：涟漪改由 GSAP 时间轴驱动 `age`/`amp`，**shader 一行未动** |
+
+> ⚠️ **2026-09-26 补上两条 URL**：这张表原来**只有名字、没有地址** ——
+> 于是"想回头再看一眼那个站"时**翻这张表是找不到的**（`②` 的地址此前只出现在
+> `docs/MOTION_REFS_STUDY.md:17`）。补上后两处一致。
+>
+> **⚠️ 站点可达性（2026-09-26 实测）**：`tympanus.net/Tutorials/…` 两个 demo 页
+> 现在都返回 **HTTP 403**（Cloudflare 人机验证，`Just a moment...`）——
+> **用真实浏览器打开通常仍可过验证**，但脚本/无头浏览器会被挡住。
+> 更可靠的替代入口：
+> - **本地已有源码**：`%TEMP%\cinematic.js`（**1.38 MB**，2026-09-20 抓的构建产物；
+>   实测含 `CylinderGeometry` / `ScrollTrigger` / `CustomEase` ⇒ 就是"圆柱贴图集 + 自转"那套）
+>   与 `%TEMP%\demo1-Clt9E7K4.js`（参考二，5.4 KB，可整读）
+> - **GitHub 源码**：[codrops-cinematic-scroll-animations](https://github.com/JosephASG/codrops-cinematic-scroll-animations)
+> - **教程正文**：[How to Build Cinematic 3D Scroll Experiences with GSAP](https://tympanus.net/codrops/2025/11/19/how-to-build-cinematic-3d-scroll-experiences-with-gsap/)
+>
+> ⚠️ 另注：本地那份构建产物里 `OGL` **出现 0 次**、`three` 的 `CylinderGeometry`
+> 出现 3 次 —— 与 `docs/MOTION_REFS_STUDY.md §1.1` 记录的"meta 自称 OGL"**不一致**
+> （实际打包进去的是 three.js）。该节结论（"画面全在画布、需真 GPU"）不受影响，
+> 但"用哪个库"这一句按本地产物为准。
 
 **从裁决里读出来的口径**（决定了后面所有取舍）：
 
