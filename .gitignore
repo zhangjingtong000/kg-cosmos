@@ -49,9 +49,6 @@ venv/
 /tmp/
 /test-results/
 
-# local scratch
-/tmp/
-
 # External reference checkouts (each has its own .git)
 /graphrag-workbench/
 
@@ -63,3 +60,13 @@ venv/
 /Project_Golem/
 /3d-force-graph/
 /Cognitive-Cartographer/
+
+# ── 动效参考素材（2026-10-04 留档）──
+# 两个第三方 demo 的构建产物，只作**实现拆解**的参考，不是项目产出
+# ⇒ 不入库（体积 1.38 MB + 版权）。与上面"外部参考仓库"同一条纪律。
+#   · cinematic-3d-scroll.build.js   —— Codrops《Cinematic 3D Scroll》的构建产物
+#     （就是"圆柱贴图集 + 滚动自转"那套；含 CylinderGeometry / ScrollTrigger / CustomEase）
+#   · shader-animation-gsap.demo1.js —— Codrops《WebGL Shaders with GSAP》的 demo 源码
+# 出处、可达性与用途见 `docs/MOTION_GSAP.md` 的参考裁决表；
+# 原件原在 `%TEMP%`（会被系统清理），故复制到此处留档。
+/docs/refs/
