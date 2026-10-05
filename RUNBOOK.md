@@ -173,6 +173,13 @@ python tools/check_doc_numbers.py    # 文档与页面里写的数还对吗？
 **证据面板点「在原文中查看」没有内容**
 `data/corpus/*.pdf` 不在版本控制里（体积原因）。克隆后需要自行放入 PDF。
 
+**⚠️ 克隆下来跑 `verify_all`，数据侧一片红**
+**`data/` 整个目录都不在版本控制里**（`git ls-files data` = 0，不只是 PDF）。
+而 `DATA_CHECKS` 与六层评测的证据全指向 `data/` ⇒ 全新克隆后它们**必然全红**；
+**但界面照常**（前端读的 `web/kg-data/*.json` 是入库的）⇒ 别以为"页面正常 = 数据正常"。
+要跑数据侧，先按 `docs/IMPLEMENTATION_PLAN.md` 的重算链路把 `data/` 生成出来
+（`RUNBOOK.md` 上一节列了 15 个脚本）。这是 `docs/TODO.md` 的 `N2`，本阶段不修。
+
 **L5 判别器报显存不足**
 `tools/relation_verifier.py` 的 batch 默认 32，可调小；
 或设 `CUDA_VISIBLE_DEVICES=""` 走 CPU（慢很多）。

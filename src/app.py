@@ -72,7 +72,25 @@ WEB_DIR = ROOT / "web"
 KG_DATA = WEB_DIR / "kg-data"
 QUALITY = ROOT / "data" / "quality"
 
-app = FastAPI(title="KG Extraction API", version="1.1.0")
+# ★ 2026-10-04 收尾时实测发现：**中文响应在 PowerShell 里是乱码**。
+#
+# 现象：`Invoke-RestMethod http://127.0.0.1:8000/api/qa/step` 拿到的 `agent`
+# 字段显示成 `æ£ç´¢ Agent`（"检索 Agent" 的 UTF-8 字节被按 Latin-1 解码）。
+# **服务端没错** —— 抓原始字节验过：`e6 a3 80` 就是标准 UTF-8 的"检"。
+# 根因是 `Content-Type: application/json` **没带 `charset`**，
+# 而 JSON 的 UTF-8 是规范默认、HTTP 的默认却是 ISO-8859-1 ⇒
+# 客户端（PowerShell 尤其明显）有权按 Latin-1 解，于是乱码。
+#
+# **为什么值得在收尾时修**：演示现场如果当场用命令行调一次 API，
+# 屏幕上是乱码，会显得整个后端"中文都支持不好" —— 而它其实是好的。
+# 显式声明 charset 是零风险的标准做法（浏览器 `fetch`、Python `urllib`
+# 都能正确处理带 charset 的 JSON）。
+class UTF8JSONResponse(JSONResponse):
+    media_type = "application/json; charset=utf-8"
+
+
+app = FastAPI(title="KG Extraction API", version="1.1.0",
+              default_response_class=UTF8JSONResponse)
 # ★ 2026-09-21 安全加固：此前是 `allow_origins=["*"]`。
 # 后果不是理论问题：本服务只监听 127.0.0.1，但**浏览器里的任意网页**都能跨源
 # 读走 /api/kg/*、/api/quality/*、/api/manifest 的全部内容，并 POST 到
