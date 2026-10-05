@@ -173,12 +173,16 @@ python tools/check_doc_numbers.py    # 文档与页面里写的数还对吗？
 **证据面板点「在原文中查看」没有内容**
 `data/corpus/*.pdf` 不在版本控制里（体积原因）。克隆后需要自行放入 PDF。
 
-**⚠️ 克隆下来跑 `verify_all`，数据侧一片红**
-**`data/` 整个目录都不在版本控制里**（`git ls-files data` = 0，不只是 PDF）。
-而 `DATA_CHECKS` 与六层评测的证据全指向 `data/` ⇒ 全新克隆后它们**必然全红**；
-**但界面照常**（前端读的 `web/kg-data/*.json` 是入库的）⇒ 别以为"页面正常 = 数据正常"。
-要跑数据侧，先按 `docs/IMPLEMENTATION_PLAN.md` 的重算链路把 `data/` 生成出来
-（`RUNBOOK.md` 上一节列了 15 个脚本）。这是 `docs/TODO.md` 的 `N2`，本阶段不修。
+**⚠️ 克隆下来跑 `verify_all`，有一批会红**
+`data/` **只入库了一部分**：`.gitignore` 默认忽略 `/data/*`、**白名单放行
+`data/quality/*.json`** ⇒ **89 个质量报告是入库的**（指标类检查照常能跑），
+未入库的是大文件：图快照（`data/corpus/graphs/*.json`，**21 → 1**）、
+PDF（**33 → 1**）、`data/models/`（7.7 GB）、adapter 权重。
+**2026-10-04 真的 `git clone` 到临时目录实测**：`--data-only` = **30 / 37**，
+红的 7 项全部因为缺这些大文件（如「论文注册表」报幽灵条目、
+「蒸馏微调」缺 `adapter_model.safetensors`）。
+要跑全绿，先按下面「数据重算链路」把 `data/corpus/graphs/` 生成出来。
+这是 `docs/TODO.md` 的 `N2`（该条目原文说"20 项回归全红"，与实测不符，已更正）。
 
 **L5 判别器报显存不足**
 `tools/relation_verifier.py` 的 batch 默认 32，可调小；
