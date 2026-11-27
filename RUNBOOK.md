@@ -171,13 +171,14 @@ python tools/check_doc_numbers.py    # 文档与页面里写的数还对吗？
 且页面是从 8000 打开的（不是 8098）。
 
 **证据面板点「在原文中查看」没有内容**
-`data/corpus/*.pdf` 不在版本控制里（体积原因）。克隆后需要自行放入 PDF。
+`data/corpus/*.pdf` 大部分不在版本控制里（体积原因）。仓库只带一份 1.93 MB 的
+`jsjkx2025-kg-kbqa.pdf` 作为测试锚点；演示用的其余 PDF 克隆后需自行放入。
 
 **⚠️ 克隆下来跑 `verify_all`，有一批会红**
 `data/` **只入库了一部分**：`.gitignore` 默认忽略 `/data/*`、**白名单放行
 `data/quality/*.json`** ⇒ **89 个质量报告是入库的**（指标类检查照常能跑），
 未入库的是大文件：图快照（`data/corpus/graphs/*.json`，**21 → 1**）、
-PDF（**33 → 1**）、`data/models/`（7.7 GB）、adapter 权重。
+PDF（**33 → 2**：`2506.09566v1.pdf` 与 `jsjkx2025-kg-kbqa.pdf`）、`data/models/`（7.7 GB）、adapter 权重。
 **2026-10-04 真的 `git clone` 到临时目录实测**：`--data-only` = **30 / 37**，
 红的 7 项全部因为缺这些大文件（如「论文注册表」报幽灵条目、
 「蒸馏微调」缺 `adapter_model.safetensors`）。

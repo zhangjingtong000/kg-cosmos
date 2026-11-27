@@ -57,20 +57,19 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 
 ## 测试与数据
 
-2026-11-27 在本精简树实测（`python -m pytest -q`，Python 3.13.0 / pytest 9.0.2，Windows，设 `PYTHONUTF8=1`）：
+2026-11-27 在**干净 clone** 上实测（`git clone` 到临时目录，`python -m pytest -q`，Python 3.13.0 / pytest 9.0.2，Windows，设 `PYTHONUTF8=1`）：
 
 ```text
-404 passed, 16 skipped, 27 subtests passed in 13.70s
+413 passed, 7 skipped, 27 subtests passed in 12.59s
 ```
 
-**16 条 skip 分四类，没有一条是测试坏了。** 看到 `16 skipped` 时请对照这张表：
+**7 条 skip 全部是「仓库确实不带的大数据/服务」，没有一条是测试坏了。** 看到 `7 skipped` 时请对照这张表：
 
 | 条数 | 用例 | 缺什么 | 怎么恢复 |
 |---|---|---|---|
-| 6 | `tests/test_nebula_papers.py`（6 个用例共用 fixture） | `web/kg-data/nebula.json`：源项目里 3.4 MB，超出本仓库「单个数据文件 < 2 MB」的收录上限 | `python tools/build_nebula_data.py`（RUNBOOK §6） |
-| 5 | `tests/test_front_matter_strip.py` | 三份语料 PDF：`jsjkx2025-kg-kbqa.pdf` 1.9 MB、`jsjkx2025-kg-completion-llm.pdf` 2.4 MB、`jsjkx2025-kg-plm-survey.pdf` 4.3 MB —— 都超 2 MB | 取回 `data/corpus/*.pdf`（RUNBOOK §3） |
-| 4 | `tests/test_graph_store.py` | 可连的 Neo4j（`127.0.0.1:7687`） | 起 Neo4j 后重跑；只看界面演示不需要 |
-| 1 | `tests/test_entity_absorb.py::test_absorb_plan_on_full_graph` | **不是数据**：慢测试，约 125 秒，默认不跑 | `KG_SLOW_TESTS=1 python -m pytest tests/test_entity_absorb.py` |
+| 4 | `tests/test_graph_store.py` | 可连的 Neo4j（`bolt://localhost:7687`） | 起 Neo4j 后重跑；只看界面演示不需要 |
+| 2 | `tests/test_front_matter_strip.py`（plm-survey / completion-llm 两条） | 两份语料 PDF：`jsjkx2025-kg-completion-llm.pdf` 2.4 MB、`jsjkx2025-kg-plm-survey.pdf` 4.3 MB（均超「单个数据文件 < 2 MB」的收录线） | 按 RUNBOOK §3 取回 `data/corpus/*.pdf` |
+| 1 | `tests/test_entity_absorb.py::test_full_corpus_absorptions_are_now_tiny` | 全量图快照（源项目 21 篇 / 88.8 MB；本仓库只带 1 份 `jsjkx2025-kg-completion-llm.json`） | 取回 `data/corpus/graphs/*.json` 后 `KG_SLOW_TESTS=1 python -m pytest tests/test_entity_absorb.py`（全量下约 125 秒） |
 
 原先还有第 17 条 skip（`test_l4_templates.py` 的方向模板字面量比对），它自称"用例失效、无需恢复"，
 实际是 skip 条件写成了「文件里出现 `REL_HYPOTHESIS_TEMPLATE` 这个词」——`tools/verify_direction.py`
@@ -78,14 +77,21 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 现条件改为「真的从 `src/ontology.py` 导入该常量才跳过」，两份副本（`relation_verifier.py`、
 `verify_direction.py`）重新做实比对，当前 16 键 0 差异。
 
-本轮已补进 3 份小数据（各自 < 2 MB），因此有 8 条用例由 skip 转 pass：
+上一轮已补进 3 份小数据（各自 < 2 MB），因此有 8 条用例由 skip 转 pass：
 
 - `data/corpus/graphs/jsjkx2025-kg-completion-llm.json`（1.1 MB）→ `tests/test_edit_plan.py` 5 条
 - `data/ad690dfb/2506.09566v1.pdf`（434 KB）→ `tests/test_upload_dedup.py` 2 条
 - `data/quality/archive/metric-provenance/20260919-194048.json`（8 KB）→ `tests/test_metric_archive.py` 1 条
 
-再往上就只剩「塞大数据」这一条路，所以 `test_front_matter_strip`（PDF 2 MB 起）与
-`test_nebula_papers`（`nebula.json` 3.4 MB）保持 skip，**要跑请按 RUNBOOK 重建数据**。
+本轮再把两份小数据**真正入库**（不再依赖「本地先跑一遍脚本」），9 条用例在干净 clone 上也是 pass：
+
+- `data/corpus/jsjkx2025-kg-kbqa.pdf`（1.93 MB）→ `test_front_matter_strip` 3 条真实首页裁剪用例
+- `web/kg-data/nebula.json`（40 KB）→ `test_nebula_papers` 6 条 K5 结构断言。它是
+  `tools/build_nebula_data.py` 用仓库内唯一图快照重建的**最小可跑样本**
+  （179 节点 / 163 边 / 1 篇论文），**不是** 3.4 MB 全量产物；全量要按 RUNBOOK §6 重建。
+
+再往上就只剩「塞大数据」这一条路，所以另两份 PDF（2.4 / 4.3 MB）与全量图快照保持 skip，
+**要跑请按 RUNBOOK 取回数据**。
 
 **不设 PYTHONUTF8 时唯一的失败**是 `test_metric_archive.py::test_write_archives_exactly_one_new_copy`：
 `tools/metric_provenance.py` 打印 `📦`(U+1F4E6)，cp936 控制台下 `UnicodeEncodeError`
@@ -96,9 +102,14 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 
 ## 示例数据（`web/kg-data/demo/`）
 
-`web/kg-data/` 只带 3 个开箱可用的产物（`filaments.json` / `community-summaries.json` /
-`analytics.json`）。其余十几个页面读的 `nebula.json`、`atlas.json`、`prisma.json` 等
-依赖全量图谱，精简版不带 —— 于是这些页面原本只剩一句「数据加载失败」。
+`web/kg-data/` 只带 4 个开箱可用的产物（`filaments.json` / `community-summaries.json` /
+`analytics.json`，以及测试锚点 `nebula.json`）。其余十几个页面读的 `atlas.json`、
+`prisma.json` 等依赖全量图谱，精简版不带 —— 于是这些页面原本只剩一句「数据加载失败」。
+
+> ⚠️ 入库的 `web/kg-data/nebula.json` 是 **179 节点 / 163 边 / 1 篇论文** 的最小可跑样本
+> （由 `tools/build_nebula_data.py` 用仓库内唯一图快照重建，40 KB），**不是** 3.4 MB 全量。
+> 因此 `kg-nebula` 页面开箱显示的是小样本；要看全量需按 RUNBOOK §6 重建覆盖。
+> 样例数据的数字一律**不是**评测结果。
 
 `web/kg-data/demo/` 补了 **16 个文件 / 254 KB** 的最小示例，让页面先有东西可渲染：
 
@@ -126,17 +137,18 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 
 ## 已知限制
 
-- **不附带完整图谱数据与语料。** `nebula.json`（3.4 MB）、22 篇论文的 `evidence-*.json`、
-  `data/corpus/*.pdf` 都不在仓库里。页面用 `web/kg-data/demo/` 的 20 节点示例兜底，
+- **不附带完整图谱数据与语料。** 全量 `nebula.json`（3.4 MB）、22 篇论文的
+  `evidence-*.json`、大部分 `data/corpus/*.pdf` 都不在仓库里；仓库只带
+  `web/kg-data/nebula.json`（179 节点最小样本）与 1 份 1.93 MB 的中文期刊 PDF
+  （测试锚点）。页面用 `web/kg-data/demo/` 的 20 节点示例兜底，
   **示例里的数字不代表真实规模**。
 - **部分页面需先重建数据才有真实内容。** 开箱即用的只有导航页、3D 主视图
   （`kg-nebula.html` 读 `filaments.json`）和分析面板；社区概览、PRISMA、立场、时间演化、
   论文对比表等页面在没有全量数据时展示的是示例数据。
-- **16 条测试依赖外部数据或服务**（明细见上表）：`nebula.json` 缺失 6 条、语料 PDF 缺失 5 条、
-  Neo4j 未启动 4 条；另有 1 条慢测试默认不跑。**它们不是坏测试，
-  是缺依赖。**
-- **刻意只附带小样本。** 本轮补了 3 份数据（合计约 1.5 MB，单个最大 1.1 MB），
-  再往上就违反「不把大数据塞回仓库」，所以剩下 11 条依赖数据的用例保持 skip。
+- **7 条测试依赖外部数据或服务**（明细见上表）：Neo4j 未启动 4 条、两份大 PDF 2 条、
+  全量图快照 1 条。**它们不是坏测试，是缺依赖。**
+- **刻意只附带小样本。** 已入库 5 份小数据（合计约 3.5 MB，单个最大 1.93 MB），
+  再往上就违反「不把大数据塞回仓库」，所以剩下 7 条依赖数据的用例保持 skip。
 - **Windows 控制台下需设 `PYTHONUTF8=1`**，否则 1 条测试会因 emoji 打印触发
   `UnicodeEncodeError`。
 - **Neo4j 写入路径未在精简树验证**：`src/graph_store.py` 只有单元测试覆盖，
