@@ -167,7 +167,7 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 
 精简版：移出 `data/quality/baseline/`、`data/quality/graphs-published-in/`、
 `data/quality/relation-verify-all.json` 等评测全量快照与语料 PDF。干净树实测
-**约 1044 个文件 / 26.2 MB**（含本轮补的 3 份小数据与 `web/kg-data/demo/` 的 254 KB 示例），
+**1045 个文件 / 26.4 MB**（含本轮补的 3 份小数据与 `web/kg-data/demo/` 的 254 KB 示例），
 全量数据重建步骤见 [RUNBOOK.md](RUNBOOK.md) 的 §5–§6。
 
 **`data/` 106 个文件 / 8.7 MB**：`data/quality/` 94 个（六层指标、金标、L5 人工复核样本、
