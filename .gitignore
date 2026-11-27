@@ -1,72 +1,103 @@
-# Python bytecode and local virtual environments
+# ── Python ────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+.Python
+/build/
+/dist/
+*.egg-info/
+.eggs/
 .venv/
 venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.ipynb_checkpoints/
 
-# JavaScript build/install artifacts
+# ── 前端 ──────────────────────────────────────────────────────────────────
+node_modules/
 **/node_modules/
+.next/
 **/.next/
+.vite/
+.parcel-cache/
+*.tsbuildinfo
+.playwright-cli/
+playwright-report/
+test-results/
 
-# Local runtime, browser and brainstorming artifacts
-# ── /data/ ────────────────────────────────────────────────────────────────
-# **默认忽略整个 data/**：里面 7.7 GB 是 Qwen3-4B 的模型权重（`data/models/`），
-# 语料 PDF（`data/corpus/` 697 MB）也在这里 —— 都不该进 Git
-# （GitHub 单文件 100 MB 硬上限，超了直接拒收）。
-#
-# ★ **2026-09-20 开白名单**：但「证据类报告」必须进来 ——
-#   文档里的每个数字、回归的二十多项检查**全都指向 `data/quality/`**，
-#   别人 clone 之后要能自己核对。在这之前靠的是**手工 `git add -f`**
-#   （已手工加 122 个文件 / 213.8 MB），代价是**新产物不会自动入库，
-#   得靠人记得** —— 2026-09-20 当天就因为这个暴露过一次。
-#
-#   白名单**只放 `data/quality/` 顶层的 `*.json`**（89 个报告 / 79.2 MB）；
-#   子目录一律排除，因为它们是快照或中间产物、不是「结论的出处」：
-#   `backup/` 552 MB · `baseline/` 106 MB · `graphs-published-in/` 70 MB ·
-#   `_archive/` 72 MB · `_prompt-ab-runs/` 32 MB。
-#
-#   ⚠️ 已有 122 个手工 `-f` 加进来的文件**不受影响**（gitignore 只管未跟踪文件）。
-/data/*
-!/data/quality/
-/data/quality/*
-!/data/quality/*.json
-/output/
-/.playwright-cli/
-/.superpowers/
-/.worktrees/
+# ── 大体积评测快照与语料（本仓库刻意不打包，见 REBUILD.md）────────────────
+data/quality/baseline/
+data/quality/graphs-published-in/
+data/quality/archive/
+data/quality/backup/
+data/quality/_prompt-ab-runs/
+data/quality/relation-verify-all.json
+data/quality/relation-verify-rel-CREATED_BY.json
+data/quality/subgraph-supported.json
+data/quality/filtered-edges.json
+data/quality/created-by-patch.json
+data/quality/venue-rewrite-plan.json
+data/distill/
+data/corpus/
+# data/ad690dfb/ 有意**保留**：graph.json（2.0 MB）是 /api/qa 端点测试
+# （test_qa_history / test_qa_limits，GID=ad690dfb）与 web/ask.html 演示的默认图。
+# 同目录的 PDF 仍由下面 `data/**/*.pdf` 排除，需自行回填。
+data/models/
+data/**/*.pdf
+data/**/*.jsonl.gz
 
-# 本地环境变量（含 API 密钥）—— 模板是 .env.example，那个要进版本控制。
-# 2026-09-15 补：此前没有这条规则，而项目新加了 .env 加载机制（tools/serve.py），
-# 一旦有人真的建了 .env 并 git add -A，密钥就会进仓库。
+# 结果大文件（导出产物，可重建）
+web/kg-data/*.json
+!web/kg-data/filaments.json
+!web/kg-data/community-summaries.json
+!web/kg-data/analytics.json
+web/l5-data/
+output/
+_review/
+toolruns/
+tmp/
+scratch/
+
+# 模型权重与二进制中间产物
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.bin
+*.h5
+*.pkl
+*.joblib
+*.npy
+*.npz
+*.parquet
+
+# 媒体/字体大件（需要时按 REBUILD.md 手动回填）
+web/assets/refs/
+web/assets/*.mp4
+web/lib/fonts/
+
+# ── 本地配置与密钥（模板 .env.example 要进版本控制）──────────────────────
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+secrets.json
+credentials.json
 
-# Standalone visual reference project; maintained in its own Git repository.
-/isgalaxias/
-
-# Local scratch and test artifacts
-/tmp/
-/test-results/
-
-# External reference checkouts (each has its own .git)
-/graphrag-workbench/
-
-# ── 外部参考仓库（2026-09-12 从版本控制移除）──
-# 这三个目录是从 GitHub 克隆的第三方仓库，曾被误加为 gitlink（mode 160000），
-# 但仓库里**没有 .gitmodules**，所以别人克隆后既拿不到内容、也无法初始化，
-# 是一个坏引用。它们只作本地参考，不该进主仓库。
-# 相关的数据文件已复制进 web/data/ 使页面自包含。
-/Project_Golem/
-/3d-force-graph/
-/Cognitive-Cartographer/
-
-# ── 动效参考素材（2026-10-04 留档）──
-# 两个第三方 demo 的构建产物，只作**实现拆解**的参考，不是项目产出
-# ⇒ 不入库（体积 1.38 MB + 版权）。与上面"外部参考仓库"同一条纪律。
-#   · cinematic-3d-scroll.build.js   —— Codrops《Cinematic 3D Scroll》的构建产物
-#     （就是"圆柱贴图集 + 滚动自转"那套；含 CylinderGeometry / ScrollTrigger / CustomEase）
-#   · shader-animation-gsap.demo1.js —— Codrops《WebGL Shaders with GSAP》的 demo 源码
-# 出处、可达性与用途见 `docs/MOTION_GSAP.md` 的参考裁决表；
-# 原件原在 `%TEMP%`（会被系统清理），故复制到此处留档。
-/docs/refs/
+# ── 编辑器 / 操作系统 ────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp

@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 KG Cosmos contributors
+Copyright (c) 2026 zhangjingtong000
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,21 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-────────────────────────────────────────────────────────────────────────────
-注（不是许可证正文，只是本项目自己的说明）：
-
-本仓库是一个项目作品。选 MIT 的理由是**简单且与本项目的技术来源相容** ——
-代码依赖的第三方库（FastAPI / Neo4j Driver / PyMuPDF / networkx / three.js 等）
-均为宽松许可。
-
-⚠️ **两处需要单独注意的第三方数据**（它们**不适用** MIT）：
-  · `data/external/release_data/` 下的 **SciREX** 数据集 ——
-    来自 `allenai/SciREX`，请遵循其原始许可；
-  · `data/quality/` 里由 **Semantic Scholar / OpenAlex** 派生出的任何字段 ——
-    OpenAlex 是 **CC0**（可自由使用），而 Semantic Scholar 的数据是
-    **CC BY-NC / ODC-BY**（**须署名、禁止商用与再分发**）。
-    本项目**当前没有把 S2 数据落盘**（M1 尚未实施），所以暂不涉及；
-    将来若接 S2，必须先处理这一条。
-
-如需改为其它许可，替换本文件正文即可。
