@@ -60,10 +60,10 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 2026-11-27 在本精简树实测（`python -m pytest -q`，Python 3.13.0 / pytest 9.0.2，Windows，设 `PYTHONUTF8=1`）：
 
 ```text
-403 passed, 17 skipped, 27 subtests passed in 16.25s
+404 passed, 16 skipped, 27 subtests passed in 13.70s
 ```
 
-**17 条 skip 分五类，没有一条是测试坏了。** 看到 `17 skipped` 时请对照这张表：
+**16 条 skip 分四类，没有一条是测试坏了。** 看到 `16 skipped` 时请对照这张表：
 
 | 条数 | 用例 | 缺什么 | 怎么恢复 |
 |---|---|---|---|
@@ -71,7 +71,12 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 | 5 | `tests/test_front_matter_strip.py` | 三份语料 PDF：`jsjkx2025-kg-kbqa.pdf` 1.9 MB、`jsjkx2025-kg-completion-llm.pdf` 2.4 MB、`jsjkx2025-kg-plm-survey.pdf` 4.3 MB —— 都超 2 MB | 取回 `data/corpus/*.pdf`（RUNBOOK §3） |
 | 4 | `tests/test_graph_store.py` | 可连的 Neo4j（`127.0.0.1:7687`） | 起 Neo4j 后重跑；只看界面演示不需要 |
 | 1 | `tests/test_entity_absorb.py::test_absorb_plan_on_full_graph` | **不是数据**：慢测试，约 125 秒，默认不跑 | `KG_SLOW_TESTS=1 python -m pytest tests/test_entity_absorb.py` |
-| 1 | `tests/test_l4_templates.py::test_direction_literals_unchanged` | **不是数据**：方向字面量比对已废弃（`tools/verify_direction.py` 改读 `src/ontology.py`），用例本身失效 | 无需恢复 |
+
+原先还有第 17 条 skip（`test_l4_templates.py` 的方向模板字面量比对），它自称"用例失效、无需恢复"，
+实际是 skip 条件写成了「文件里出现 `REL_HYPOTHESIS_TEMPLATE` 这个词」——`tools/verify_direction.py`
+的注释提到该名字，触发 skip，而字面量副本仍在文件里，于是这份防漂移比对一直空转。
+现条件改为「真的从 `src/ontology.py` 导入该常量才跳过」，两份副本（`relation_verifier.py`、
+`verify_direction.py`）重新做实比对，当前 16 键 0 差异。
 
 本轮已补进 3 份小数据（各自 < 2 MB），因此有 8 条用例由 skip 转 pass：
 
@@ -127,8 +132,8 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 - **部分页面需先重建数据才有真实内容。** 开箱即用的只有导航页、3D 主视图
   （`kg-nebula.html` 读 `filaments.json`）和分析面板；社区概览、PRISMA、立场、时间演化、
   论文对比表等页面在没有全量数据时展示的是示例数据。
-- **17 条测试依赖外部数据或服务**（明细见上表）：`nebula.json` 缺失 6 条、语料 PDF 缺失 5 条、
-  Neo4j 未启动 4 条；另有 1 条慢测试默认不跑、1 条断言已废弃。**它们不是坏测试，
+- **16 条测试依赖外部数据或服务**（明细见上表）：`nebula.json` 缺失 6 条、语料 PDF 缺失 5 条、
+  Neo4j 未启动 4 条；另有 1 条慢测试默认不跑。**它们不是坏测试，
   是缺依赖。**
 - **刻意只附带小样本。** 本轮补了 3 份数据（合计约 1.5 MB，单个最大 1.1 MB），
   再往上就违反「不把大数据塞回仓库」，所以剩下 11 条依赖数据的用例保持 skip。

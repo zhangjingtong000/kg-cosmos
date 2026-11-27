@@ -32,6 +32,16 @@ ROOT = Path(__file__).resolve().parent.parent
 # 两份**独立维护**的字面量副本（唯一来源是 src/ontology.py）
 COPIES = ['tools/relation_verifier.py', 'tools/verify_direction.py']
 
+# 只有「真的从 ontology 导入」才算放弃副本。
+# 旧条件写成 `'REL_HYPOTHESIS_TEMPLATE' in text`，会被注释里的这个词误触发——
+# verify_direction.py 的注释提到 REL_HYPOTHESIS_TEMPLATE，字面量却仍在，
+# 于是这份漂移检查一直在空转（案例 12 正是"同一规则写两处"）。
+_COPY_REF = re.compile(
+    r'^\s*(?:from\s+ontology\s+import\s+[^\n]*\bREL_HYPOTHESIS_TEMPLATE\b'
+    r'|import\s+ontology\b)',
+    re.M,
+)
+
 
 def _placeholders(tpl: str) -> list:
     return re.findall(r'\{[^}]*\}', tpl)
@@ -112,8 +122,8 @@ def test_validate_constraints_is_clean():
 @pytest.mark.parametrize('rel', COPIES)
 def test_template_copy_matches_ontology(rel):
     text = (ROOT / rel).read_text(encoding='utf-8')
-    if 'REL_HYPOTHESIS_TEMPLATE' in text:
-        pytest.skip(f'{rel} 已改为引用 src/ontology.py，无需比对字面量')
+    if _COPY_REF.search(text):
+        pytest.skip(f'{rel} 已改为从 src/ontology.py 导入，字面量副本不再存在')
     got = _parse_str_dict(text, 'REL_TEMPLATE')
     assert got is not None, f'{rel} 里未解析到 REL_TEMPLATE，定义方式可能变了'
     diff = {k: (got.get(k), REL_HYPOTHESIS_TEMPLATE.get(k))
