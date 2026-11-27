@@ -38,7 +38,10 @@ sys.path.insert(0, os.path.join(ROOT, 'tools'))
 from _paths import rel as _shared_rel  # noqa: E402
 
 Q = os.path.join(ROOT, 'data', 'quality')
-OUT = os.path.join(Q, 'metric-provenance.json')
+# 当前文件路径可用 `KG_CURRENT_FILE` 重定向（测试用），否则写仓库里的真实文件。
+# 不加这个的话，`--write` 的回归测试每跑一次都会改写被 git 跟踪的
+# `data/quality/metric-provenance.json`（时间戳变），跑完就必须手动还原。
+OUT = os.environ.get('KG_CURRENT_FILE') or os.path.join(Q, 'metric-provenance.json')
 
 # ── 档案目录（2026-09-16 加，N1）──────────────────────────────────────────
 #

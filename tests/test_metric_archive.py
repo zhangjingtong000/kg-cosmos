@@ -38,13 +38,19 @@ pytestmark = pytest.mark.skipif(
     reason='还没有 metric-provenance.json —— 先跑一次 --write')
 
 
-def run(*args, archive_dir=None):
-    """跑脚本。`archive_dir` 非空时把归档重定向到它（测试用）。"""
-    env = None
+def run(*args, archive_dir=None, current_file=None):
+    """跑脚本。
+
+    - `archive_dir` 非空时把归档重定向到它（`KG_ARCHIVE_DIR`）
+    - `current_file` 非空时把"当前记录"重定向到它（`KG_CURRENT_FILE`），
+      这样 `--write` 不会改写仓库里被 git 跟踪的 `metric-provenance.json`
+    """
+    import os
+    env = dict(os.environ)
     if archive_dir is not None:
-        import os
-        env = dict(os.environ)
         env['KG_ARCHIVE_DIR'] = str(archive_dir)
+    if current_file is not None:
+        env['KG_CURRENT_FILE'] = str(current_file)
     return subprocess.run([sys.executable, str(TOOL), *args],
                           cwd=str(ROOT), capture_output=True, text=True, env=env)
 
@@ -71,14 +77,19 @@ def test_diff_current_against_itself_is_empty():
 def test_write_archives_exactly_one_new_copy(tmp_path):
     """`--write` 必须**先归档旧记录**，且只新增一份。
 
-    **归档目录重定向到 `tmp_path`** —— 真实的归档只该由人手动产生。
+    **归档目录与当前文件都重定向到 `tmp_path`** —— 真实的归档与真实的
+    `metric-provenance.json` 只该由人手动产生。只重定向归档、不重定向当前文件的话，
+    这个测试每跑一次就会改写被 git 跟踪的 `data/quality/metric-provenance.json`。
     """
     adir = tmp_path / 'archive'
+    cur = tmp_path / 'metric-provenance.json'
+    old_text = CUR.read_text(encoding='utf-8')
+    cur.write_text(old_text, encoding='utf-8')
     before = set(ARCHIVE.glob('*.json')) if ARCHIVE.exists() else set()
-    old = json.loads(CUR.read_text(encoding='utf-8'))
+    old = json.loads(cur.read_text(encoding='utf-8'))
     old_gen = old.get('generated')
 
-    r = run('--write', archive_dir=adir)
+    r = run('--write', archive_dir=adir, current_file=cur)
     assert r.returncode == 0, f'--write 失败：{r.stdout[-300:]} {r.stderr[-300:]}'
     assert '归档' in r.stdout, f'--write 没有报告归档行为：{r.stdout[:300]}'
 
@@ -99,8 +110,12 @@ def test_write_archives_exactly_one_new_copy(tmp_path):
     assert after == before, (
         f'测试污染了真实归档目录：新增 {[p.name for p in after - before]}')
 
-    # ③ 当前那份已被更新（新的写进了原位）
-    now = json.loads(CUR.read_text(encoding='utf-8'))
+    # ③ 真实的 metric-provenance.json 一个字节都没动
+    assert CUR.read_text(encoding='utf-8') == old_text, \
+        '测试改写了仓库里被跟踪的 metric-provenance.json'
+
+    # ④ 临时那份已被更新（新的写进了它）
+    now = json.loads(cur.read_text(encoding='utf-8'))
     assert now.get('metrics'), '当前记录没有被更新'
 
 
