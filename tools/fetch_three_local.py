@@ -1,7 +1,7 @@
 """把 three.js 及其用到的 addons 下载到 web/lib/three/，供离线演示使用。
 
 背景：`docs/早先的内部记录` §1 第 6 条是「**离线演示铁律**」——
-演示现场要有"预构建缓存图谱 + 本地 Ollama"双保险。
+现场演示要有"预构建缓存图谱 + 本地 Ollama"双保险。
 但 `web/kg-nebula.html` 的 three.js 走 unpkg CDN，
 `tools/cdp_verify_offline.py` 已实测断网后该页完全无法启动。
 

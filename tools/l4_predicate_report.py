@@ -76,7 +76,7 @@ from ontology import (  # noqa: E402
 VERIFY = ROOT / "data" / "quality" / "relation-verify-all.json"
 OUT = ROOT / "data" / "quality" / "l4-predicate.json"
 
-# 离线：模型只从本地 HF 缓存读，删掉代理，保证"演示现场无外网"也跑得通
+# 离线：模型只从本地 HF 缓存读，删掉代理，保证"现场演示无外网"也跑得通
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 for _k in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"):

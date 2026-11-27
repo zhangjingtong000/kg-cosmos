@@ -30,7 +30,7 @@
 来源：`data/quality/l7-direction-verification.json`。
 原说明见 `docs/L7_ENDPOINT_CONSTRAINTS.md:196-200`（那里的 5819/98.0% 为旧读数）。
 
-**演示口径**：引用 **92.4%**（`compliance_rate`，即可判边口径）；
+**对外说明**：引用 **92.4%**（`compliance_rate`，即可判边口径）；
 若只问「方向有没有反」则用 **97.5%**（合规 / (合规 + 反转)）。**引用哪个都要报分母。**
 
 ---

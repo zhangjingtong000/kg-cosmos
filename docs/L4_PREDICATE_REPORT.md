@@ -505,7 +505,7 @@ python tools/l4_second_judge.py --n 200         # 见 §5.3，尚未实施
 ```
 
 **离线可跑**：脚本启动即设 `HF_HUB_OFFLINE=1` / `TRANSFORMERS_OFFLINE=1` 并清除代理
-环境变量，模型只从 `~/.cache/huggingface/hub` 读。演示现场断网不影响。
+环境变量，模型只从 `~/.cache/huggingface/hub` 读。现场演示断网不影响。
 
 ---
 

@@ -133,7 +133,7 @@ def main():
         print("     object 多为能力维度（Scalability 7 / Interpretability 6 /")
         print("     Computational Complexity 4），而非被反驳的论断。")
         print("\n  ⇒ **T6.6「矛盾/争议视图」在该数据上不应实施**——")
-        print("     做出来会是 243 条伪矛盾，反而削弱演示说服力。")
+        print("     做出来会是 243 条伪矛盾，反而削弱对外说服力。")
         print("     应改做**「方法能力与局限」视图**：数据现成、语义正确、且同样需要")
         print("     claim + 引用 + 页码的展示形态。")
         verdict = "NO_CONTRADICTION_DATA"

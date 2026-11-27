@@ -2,7 +2,7 @@
 """离线可用性验证：断网后页面还能不能跑起来。
 
 背景：`docs/早先的内部记录` §1 第 6 条写着「**离线演示铁律**：
-演示现场要有预构建缓存图谱 + 本地 Ollama 双保险」。
+现场演示要有预构建缓存图谱 + 本地 Ollama 双保险」。
 但 `web/kg-nebula.html` 的 three.js 是通过 importmap 从 unpkg CDN 加载的
 （`https://unpkg.com/three@0.160.0/...`）。若现场没有网络，整个 3D 视图会直接白屏。
 
@@ -99,7 +99,7 @@ def main():
         # 第一版用的是 `Network.emulateNetworkConditions({offline: true})`，
         # 那会把本地服务一起断掉——于是页面连自己的 html/js/data 都取不到，
         # 测试必然失败，但失败原因与"是否依赖 CDN"无关。
-        # 演示现场的真实场景是「本地服务可用 + 无外网」，所以要按域名屏蔽。
+        # 现场演示的真实场景是「本地服务可用 + 无外网」，所以要按域名屏蔽。
         EXTERNAL = ['*unpkg.com*', '*esm.sh*', '*jsdelivr.net*', '*cdnjs.cloudflare.com*',
                     '*fonts.googleapis.com*', '*fonts.gstatic.com*', '*cdnjs*']
         cdp(ws, 'Network.setBlockedURLs', {'urls': EXTERNAL})
