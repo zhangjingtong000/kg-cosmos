@@ -37,6 +37,22 @@ RAG demo 的验收标准通常是「问几个问题、回答看着像」。这�
 > L3 必须报两个口径：闭合口径含 4304 个「从边反建」的节点，等于用边的产物去证明边的端点齐全，
 > 拿它当质量分是粉饰。L1 同理 —— 那段 `evidence` 就是该实体被抽出时的 chunk 原文，
 > 对独立抽取的节点是定义恒等，它实际度量的是词形归一一致性，**不是「实体存在性」**。
+> 面板与 `web/kg-data/analytics.json` 的 L1 / L3 主值已按上面两条改成词形归一与**抽取口径**
+> （闭合口径降为 `detail` 里的副注，并带 `caliber` 字段）。
+
+### 当前实现范围（设计目标 ≠ 已有能力）
+
+上表每一层都有产物支撑，但下面这些能力只出现在设计与历史报告里，**当前没有实现或没有验证**，
+不要读成已有能力：
+
+| 能力 | 状态 |
+|---|---|
+| L4 第二判定者（`tools/l4_second_judge.py`） | **未实现**：该脚本不在仓库里。`docs/L4_PREDICATE_REPORT.md` 里「用独立第二判定者判定 25.73% 是判别器弱还是本体边界不可复现」仍是计划，**决定性对照实验没做** |
+| L2 独立评测层 | **未建**：只有合并组数，没有逐组「对不对」的判据与金标；`docs/NUMBERS_CARD.md` 记的是同一结论 |
+| PR / AP 曲线、金标规模敏感性 | **未做**：六层没有覆盖这两个评测维度（见 `docs/L5_SIX_LAYER_REPORT.md` 的待补清单） |
+| H5 LoRA 蒸馏的完整训练 | **未跑**：只做过 5 步冒烟（`train_loss` 1.5165，实测外推 1722 步约 40 小时），**完整训练从未执行**（见 `docs/NUMBERS_CARD.md`） |
+
+这些缺口不改变上表的分数：分数是「已经测过的那几件事」的结果，缺口是「还没测的那几件事」。
 
 ## 前置要求
 
@@ -199,20 +215,24 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
   与 L9（端点召回 86.2% / 关系召回 42.9%，**分母仅 29 实体 / 7 段 / 42 条三元组**）。
   两层都不在六层内，不要当成六层的补充分数。
 - 本文所有数字都能在 `docs/` 或 `data/quality/` 找到出处；找不到出处的数字（例如外部资料里的
-  「634 节点」）一律不写。
+  「634 节点」）一律不写。唯一的例外是「仓库说明」里的文件数与体积 —— 那是 `git ls-files`
+  的现场统计（口径已写在该节），不是历史运行产物。
 
 ## 仓库说明
 
 精简版：移出 `data/quality/baseline/`、`data/quality/graphs-published-in/`、
-`data/quality/relation-verify-all.json` 等评测全量快照与语料 PDF。干净树实测
-**1045 个文件 / 26.4 MB**（含本轮补的 3 份小数据与 `web/kg-data/demo/` 的 254 KB 示例），
-全量数据重建步骤见 [RUNBOOK.md](RUNBOOK.md) 的 §5–§6。
+`data/quality/relation-verify-all.json` 等评测全量快照与语料 PDF。干净 clone 实测
+**595 个文件 / 26.3 MB**（`git ls-files` 口径，只数受版本控制的文件；含本轮补的 3 份小数据与
+`web/kg-data/demo/` 的 254 KB 示例）。口径说明：`Get-ChildItem -Recurse -File` 会把工作区里
+未跟踪的 `HIST-REPORT*.md`、`output/` 日志与 `__pycache__` 一并数进去（那样会到 673 个，
+且随本地缓存变化），那不是在数仓库内容。全量数据重建步骤见 [RUNBOOK.md](RUNBOOK.md) 的 §5–§6。
 
-**`data/` 106 个文件 / 8.7 MB**：`data/quality/` 94 个（六层指标、金标、L5 人工复核样本、
+**`data/` 107 个文件 / 11.15 MB**：`data/quality/` 94 个（六层指标、金标、L5 人工复核样本、
 `edit-plans/` 5 个编辑计划、`archive/metric-provenance/` 1 份归档）、`data/gold/` 7 个金标准、
-`data/external/` 2 个外部对照、`data/ad690dfb/graph.json`（演示图，`/api/qa` 端点测试与
-`web/ask.html` 的默认图）与 `data/ad690dfb/2506.09566v1.pdf`（434 KB，`test_upload_dedup`
-的去重用例）、`data/corpus/graphs/` 1 份论文图快照（1.1 MB，`test_edit_plan` 沙箱用）。
+`data/external/` 2 个外部对照、`data/ad690dfb/` 2 个（`graph.json` 演示图，`/api/qa` 端点测试与
+`web/ask.html` 的默认图；`2506.09566v1.pdf` 434 KB，`test_upload_dedup` 的去重用例）、
+`data/corpus/` 2 个（`jsjkx2025-kg-kbqa.pdf` 1.93 MB，`test_front_matter_strip` 的首页裁剪锚点；
+`graphs/` 1 份论文图快照 1.1 MB，`test_edit_plan` 沙箱用）。
 全量评测数据、语料 PDF 与 LoRA 蒸馏中间产物不在本仓库，**需自行生成，见 [RUNBOOK.md](RUNBOOK.md)**。
 
 `docs/` 是按日期存档的历史文档，里面的数字反映的是当时那次运行，过时属正常；

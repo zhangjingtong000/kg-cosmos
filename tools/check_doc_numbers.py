@@ -1087,11 +1087,15 @@ def main():
     print('\n=== ⑩ 「领先 N 个提交」必须带日期 + 台账给得出复算命令 ===')
     _SELF_BR = 'feat/2d-explorer'
     _AHEAD_PAT = re.compile(r'领先[^。\n|]{0,40}?(\d+)[\s*]{0,4}个提交')
-    _LEDGER = ROOT / 'docs' / 'TODO.md'
+    _LEDGER_REMOVED = 'docs/TODO.md'
+    # ⚠️ 2026-11-27：`docs/TODO.md` 已随开发过程文档一并**移除**（仓库里没有这个文件）。
+    # 保留这个常量只是为了把「原来扫的是哪个台账」记在代码里，**不是**可读路径；
+    # 下面的分支也只是一种防御：万一将来有人把台账放回来，这套检查还能生效。
+    _LEDGER = ROOT / _LEDGER_REMOVED
     if not _LEDGER.exists():
-        # 台账文档已随开发过程文档一并移除 ⇒ 本项没有扫描目标。
+        # 台账已移除 ⇒ 本项没有扫描目标。
         # 明确跳过并出声，既不静默冒充"已检查"，也不把它判成红。
-        print('  ⏭️ 台账文档已移除，本项跳过')
+        print(f'  ⏭️ 台账 {_LEDGER_REMOVED} 已移除，本项跳过')
     else:
         _lt = _LEDGER.read_text(encoding='utf-8', errors='replace')
         _n_bare = 0

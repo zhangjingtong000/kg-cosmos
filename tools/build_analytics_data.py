@@ -129,9 +129,18 @@ def main():
         return round(v * 100, 1) if isinstance(v, (int, float)) else None
 
     L2 = six.get("L2_entity_clustering") or {}
+    L1 = six["L1_entity_presence"]
     six_layer = [
-        {"id": "L1", "name": "实体存在层", "value": pct(six["L1_entity_presence"]["rate"]),
-         "detail": f"{six['L1_entity_presence']['hit']}/{six['L1_entity_presence']['total']} 个实体名字面出现在自己的证据引文中",
+        # 2026-11-27：原名「实体存在层」是误称 —— 判据是「实体名的归一化形式出现在自己的
+        # 证据引文里」，而那段引文就是该实体被抽出的 chunk 原文，对独立抽取的节点是定义恒等。
+        # 按 README 与 docs/L5_SIX_LAYER_REPORT.md 的立场改名为「词形归一」，并补抽取口径。
+        {"id": "L1", "name": "词形归一", "value": pct(L1["rate"]),
+         "caliber": "全口径",
+         "detail": f"全口径 {pct(L1['rate'])}%（{L1['hit']}/{L1['total']}）："
+                   f"实体名的归一化形式出现在自己的证据引文中"
+                   f" · 抽取口径 {pct(L1.get('rate_extracted', 0))}%"
+                   f"（{L1.get('extracted', {}).get('hit', '?')}/{L1.get('extracted', {}).get('total', '?')}，"
+                   f"只算独立抽取的节点）",
          "basis": "节点级"},
         # L2 是节点级、没有百分比，用 figure 承载"585 组"这个数
         # （前端原先把它写成硬编码的 `384 组`，改数据后就成了 stale 数字）。
@@ -142,13 +151,16 @@ def main():
                    f"减少 {L2.get('cumulative_reduction_pct', '?')}%）；"
                    f"本轮重跑合并 {L2.get('merged_groups', {}).get('total_this_run', '?')} 组",
          "basis": "节点级"},
-        # L3 必须并列两个口径：闭合口径含人工反建的节点（定义恒等），
-        # 抽取口径才是"只算独立抽取出来的节点"。
+        # L3 主值用**抽取口径**：闭合口径含 4304 个从边反建的节点（定义恒等），
+        # README 明说「拿它当质量分是粉饰」，所以闭合口径只能当副注，不能当主值。
         {"id": "L3", "name": "关系端点层",
-         "value": pct(six["L3_endpoints"]["all"]),
-         "detail": f"闭合口径 {pct(six['L3_endpoints']['all'])}%（含从边反建的节点，属人工构造）"
-                   f" · 抽取口径 {pct(six.get('L3_endpoints_extracted_caliber', {}).get('all', 0))}%"
-                   f"（只算独立抽取的节点）",
+         "value": pct(six.get("L3_endpoints_extracted_caliber", {}).get("all", 0)),
+         "caliber": "抽取口径",
+         "detail": f"抽取口径 {pct(six.get('L3_endpoints_extracted_caliber', {}).get('all', 0))}%"
+                   f"（只算独立抽取的节点）"
+                   f" · 闭合口径 {pct(six['L3_endpoints']['all'])}%"
+                   f"（含 {six.get('L3_endpoints_extracted_caliber', {}).get('backfilled_nodes', '?')} "
+                   f"个从边反建的节点，属人工构造，不能当质量分）",
          "basis": f"{cur['count']} 条边"},
         {"id": "L4", "name": "关系谓词层", "value": pct(six["L4_predicate"]["all"]),
          "detail": "谓词落在本体 15 类内",
