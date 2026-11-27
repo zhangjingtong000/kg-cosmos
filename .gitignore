@@ -62,6 +62,8 @@ data/models/
 data/**/*.pdf
 # 例外：test_upload_dedup 去重用例需要一份真实 PDF（434 KB）
 !data/ad690dfb/2506.09566v1.pdf
+# 例外：test_front_matter_strip 的真实首页裁剪用例要一份中文期刊 PDF（1.93 MB）
+!data/corpus/jsjkx2025-kg-kbqa.pdf
 data/**/*.jsonl.gz
 
 # 结果大文件（导出产物，可重建）
@@ -71,6 +73,9 @@ web/kg-data/*.json
 !web/kg-data/filaments.json
 !web/kg-data/community-summaries.json
 !web/kg-data/analytics.json
+# 例外：test_nebula_papers 要它。入库的是 `build_nebula_data.py` 用仓库内
+# 唯一图快照重建的最小可跑样本（40 KB / 179 节点），不是 3.4 MB 全量产物。
+!web/kg-data/nebula.json
 web/l5-data/
 output/
 _review/
