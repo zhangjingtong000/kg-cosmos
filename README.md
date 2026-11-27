@@ -38,22 +38,63 @@ RAG demo 的验收标准通常是「问几个问题、回答看着像」。这�
 > 拿它当质量分是粉饰。L1 同理 —— 那段 `evidence` 就是该实体被抽出时的 chunk 原文，
 > 对独立抽取的节点是定义恒等，它实际度量的是词形归一一致性，**不是「实体存在性」**。
 
-## 快速开始
+## 前置要求
 
-依赖：Python 3.10+；前端无构建链（Three.js / pdf.js 已本地化，断网可用）。
+**Python 3.10+**，依赖用精确版本锁安装（`requirements.txt` 只有下界，缺 pytest / transformers 等）：
 
 ```bash
+pip install -r requirements.lock
+```
+
+**Windows 控制台需设 `PYTHONUTF8=1`**（或 `chcp 65001`）。`tools/metric_provenance.py` 会打印 `📦`
+等 emoji，cp936 编码下 `UnicodeEncodeError` 让子进程退出码变 1，1 条测试因此变红。Linux / macOS 无需设置。
+
+**LLM 抽取**需要 `DEEPSEEK_API_KEY`（云端）或本机 Ollama。界面演示与测试都不需要它；只有走抽取链路
+（页面上传 PDF、`tools/ingest_corpus.py`）才需要，缺 key 时那一步会直接报错，不会假装跑过。
+
+**Neo4j 可选**：`bolt://localhost:7687`，默认账号 `neo4j` / 密码 `kgdemo2026`（见 `src/graph_store.py`）。
+不启动不影响界面演示（图数据已导出成 JSON），只有重跑管线、重导图库、或跑 `tests/test_graph_store.py`
+那 4 条联库用例时才需要。
+
+### 完整数据要自己补齐
+
+仓库刻意只带「能跑起来的最小样本」。不带全量是**体积 + 许可**的取舍：全量评测快照 287 MB、
+22 篇论文的边级证据单份到 4 MB、`data/models/` 7.7 GB、33 份语料 PDF 受期刊再分发限制 ——
+塞回来会同时撞破「单文件 < 2 MB」的收录线和仓库体量预算。所以自带的是：
+
+| 自带文件 | 规模 | 撑起什么 |
+|---|---|---|
+| `web/kg-data/filaments.json` / `community-summaries.json` / `analytics.json` | 12090 节点 | 导航页、3D 主视图、分析面板，开箱即用 |
+| `web/kg-data/nebula.json` | 179 节点 / 163 边 / 1 篇论文（40 KB） | `test_nebula_papers` 的测试锚点 |
+| `data/corpus/jsjkx2025-kg-kbqa.pdf` | 1.93 MB | `test_front_matter_strip` 的首页裁剪锚点 |
+| `web/kg-data/demo/` | 16 文件 / 254 KB，裁到 20 节点 | 其余页面的兜底示例（带 `_demo: true`） |
+
+**跑完整功能需要哪些文件、从哪来、用哪个脚本重建**：
+
+| 缺什么 | 从哪获取 | 用哪个脚本重建 |
+|---|---|---|
+| `data/corpus/*.pdf`（33 份语料） | `python tools/fetch_corpus.py` 拉开放获取的 arXiv 综述；或自备 PDF 走页面上传流程 | 无需重建，放进目录即可 |
+| `data/corpus/graphs/*.json`（21 篇论文的图快照，88.8 MB，仓库只带 1 份） | 由上一步的 PDF 抽取 | `python tools/ingest_corpus.py`（需要 LLM key 或本机 Ollama） |
+| 全量 `web/kg-data/nebula.json`（3.4 MB） | 由上式快照重建 | `python tools/build_nebula_data.py && python tools/add_pagerank.py`（RUNBOOK §6 ④） |
+| `web/kg-data/evidence-*.json`（边级证据，数百 KB–4 MB 每份） | 由快照 + PDF 生成 | `python tools/build_evidence_index.py`（RUNBOOK §6 ⑤） |
+| 社区概览 / PRISMA / 立场 / 时间演化 / 对比表读的产物 | 由快照重建 | `tools/build_community_details.py`、`build_prisma_data.py` 等（RUNBOOK §6 ⑤） |
+| L5 判别器权重（约 1090 MB） | 首次使用自动从 HuggingFace 下载并缓存 | 无需手动处理 |
+
+补齐之前，社区概览、PRISMA、立场、时间演化、论文对比表等页面读的是 `web/kg-data/demo/` 的
+20 节点示例，**示例里的数字不代表真实规模，也不是评测结果**。完整重算顺序（顺序不能乱）见
+[RUNBOOK.md](RUNBOOK.md) §5–§6。
+
+## 快速开始
+
+前端无构建链（Three.js / pdf.js 已本地化，断网可用）。
+
+```bash
+$env:PYTHONUTF8 = '1'            # Windows 必设（见上）；Linux/macOS 跳过此行
 pip install -r requirements.lock
 python tools/serve.py            # 前置检查（数据/端口/依赖/Neo4j）后起服务
 # 打开 http://127.0.0.1:8000/
 python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 ```
-
-数据准备（本仓库是精简版，**不含**源项目 `data/` 那 287 MB 的全量评测快照与语料 PDF）：
-
-- 3D 主视图开箱可用：`web/kg-data/filaments.json`、`community-summaries.json`、`analytics.json`
-- 要做 60 社区概览层，需自备 PDF 走上传流程，或按 `tools/build_nebula_data.py` 重建 `nebula.json`
-- LLM 抽取需 `DEEPSEEK_API_KEY`（云端）或本机 Ollama；缺了 `serve.py` 会明说，不会假装跑过
 
 ## 测试与数据
 
@@ -67,9 +108,12 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 
 | 条数 | 用例 | 缺什么 | 怎么恢复 |
 |---|---|---|---|
-| 4 | `tests/test_graph_store.py` | 可连的 Neo4j（`bolt://localhost:7687`） | 起 Neo4j 后重跑；只看界面演示不需要 |
+| 4 | `tests/test_graph_store.py` | 可达的 Neo4j 实例：`bolt://localhost:7687`，账号默认 `neo4j` / `kgdemo2026`（见 `src/graph_store.py`） | 起 Neo4j 后重跑，4 条由 skip 转 pass；只看界面演示不需要。**写入路径已在本机 Neo4j 5.26.12 Community 上实测通过**（4 条全绿），不是未验证代码 |
 | 2 | `tests/test_front_matter_strip.py`（plm-survey / completion-llm 两条） | 两份语料 PDF：`jsjkx2025-kg-completion-llm.pdf` 2.4 MB、`jsjkx2025-kg-plm-survey.pdf` 4.3 MB（均超「单个数据文件 < 2 MB」的收录线） | 按 RUNBOOK §3 取回 `data/corpus/*.pdf` |
 | 1 | `tests/test_entity_absorb.py::test_full_corpus_absorptions_are_now_tiny` | 全量图快照（源项目 21 篇 / 88.8 MB；本仓库只带 1 份 `jsjkx2025-kg-completion-llm.json`） | 取回 `data/corpus/graphs/*.json` 后 `KG_SLOW_TESTS=1 python -m pytest tests/test_entity_absorb.py`（全量下约 125 秒） |
+
+**反向对照**：本机起一个 Neo4j 5.26.12 Community（`neo4j-admin dbms set-initial-password` 后 `neo4j console`）
+再跑全量，结果是 **417 passed, 3 skipped**——4 条联库用例全绿。所以表里的 skip 确系缺环境，不是坏测试。
 
 原先还有第 17 条 skip（`test_l4_templates.py` 的方向模板字面量比对），它自称"用例失效、无需恢复"，
 实际是 skip 条件写成了「文件里出现 `REL_HYPOTHESIS_TEMPLATE` 这个词」——`tools/verify_direction.py`
@@ -95,10 +139,10 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 
 **不设 PYTHONUTF8 时唯一的失败**是 `test_metric_archive.py::test_write_archives_exactly_one_new_copy`：
 `tools/metric_provenance.py` 打印 `📦`(U+1F4E6)，cp936 控制台下 `UnicodeEncodeError`
-让子进程退出码变 1，而断言的是 `returncode == 0`。**修法：`chcp 65001`，或设
-`PYTHONUTF8=1` 后重跑**。源项目完整树里是 4 条同类失败（另有 `tools/apply_edit_plan.py`
-打印 `⚠️`/`✅`/`❌` 的 3 条），精简树把这几条用例变成 skip 后只剩 1 条。
-更完整的定位记录见 [docs/AUDIT_KNOWN_LIMITS.md](docs/AUDIT_KNOWN_LIMITS.md)。
+让子进程退出码变 1，而断言的是 `returncode == 0`。设置方式见上面「前置要求」那一行。
+源项目完整树里是 4 条同类失败（另有 `tools/apply_edit_plan.py` 打印 `⚠️`/`✅`/`❌` 的 3 条），
+精简树把这几条用例变成 skip 后只剩 1 条。更完整的定位记录见
+[docs/AUDIT_KNOWN_LIMITS.md](docs/AUDIT_KNOWN_LIMITS.md)。
 
 ## 示例数据（`web/kg-data/demo/`）
 
@@ -134,28 +178,6 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 
 仍然缺的部分（示例数据兜不住）：边级证据 `kg-data/evidence-*.json`（每份数百 KB 到 4 MB）、
 `diff.html` 点开单篇论文时请求的单图数据、以及 `/api/*` 的写接口。
-
-## 已知限制
-
-- **不附带完整图谱数据与语料。** 全量 `nebula.json`（3.4 MB）、22 篇论文的
-  `evidence-*.json`、大部分 `data/corpus/*.pdf` 都不在仓库里；仓库只带
-  `web/kg-data/nebula.json`（179 节点最小样本）与 1 份 1.93 MB 的中文期刊 PDF
-  （测试锚点）。页面用 `web/kg-data/demo/` 的 20 节点示例兜底，
-  **示例里的数字不代表真实规模**。
-- **部分页面需先重建数据才有真实内容。** 开箱即用的只有导航页、3D 主视图
-  （`kg-nebula.html` 读 `filaments.json`）和分析面板；社区概览、PRISMA、立场、时间演化、
-  论文对比表等页面在没有全量数据时展示的是示例数据。
-- **7 条测试依赖外部数据或服务**（明细见上表）：Neo4j 未启动 4 条、两份大 PDF 2 条、
-  全量图快照 1 条。**它们不是坏测试，是缺依赖。**
-- **刻意只附带小样本。** 已入库 5 份小数据（合计约 3.5 MB，单个最大 1.93 MB），
-  再往上就违反「不把大数据塞回仓库」，所以剩下 7 条依赖数据的用例保持 skip。
-- **Windows 控制台下需设 `PYTHONUTF8=1`**，否则 1 条测试会因 emoji 打印触发
-  `UnicodeEncodeError`。
-- **Neo4j 写入路径未在精简树验证**：`src/graph_store.py` 只有单元测试覆盖，
-  没有对真实 Neo4j 实例跑过（本机没有 Neo4j）。
-- **`docs/` 是按日期存档的历史文档**，其中数字过时属正常；以本 README 与
-  `data/quality/metric-provenance.json` 为准。
-
 
 ## 评测结果与局限
 
@@ -193,6 +215,9 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 `web/ask.html` 的默认图）与 `data/ad690dfb/2506.09566v1.pdf`（434 KB，`test_upload_dedup`
 的去重用例）、`data/corpus/graphs/` 1 份论文图快照（1.1 MB，`test_edit_plan` 沙箱用）。
 全量评测数据、语料 PDF 与 LoRA 蒸馏中间产物不在本仓库，**需自行生成，见 [RUNBOOK.md](RUNBOOK.md)**。
+
+`docs/` 是按日期存档的历史文档，里面的数字反映的是当时那次运行，过时属正常；
+要引用数字请以本 README 与 `data/quality/metric-provenance.json` 为准。
 
 ## 许可
 
