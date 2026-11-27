@@ -1081,7 +1081,7 @@ const QA = {
              '按这条教训，这属于约束驱动的妥协——「TransE 够用」这个判断从未被真正验证过。'},
         {rel:'APPLIES_TO', tier:'n',
          qt:'KGE 链接预测（可选，1-2 天）：PyKeen TransE/RotatE 做图谱补全候选。',
-         src:'docs/EXECUTION_READINESS.md', sec:'§3 · 里程碑与可选项',
+         src:'docs/H6_H7_KGE_AND_GNN_DECISION.md', sec:'H6 · KGE 链接预测结果',
          why:'TransE 在全部里程碑里始终停在「可选」一栏，从未进入主流水线。' +
              '它的输出没有被当作可验证的结论使用——这本身就是对其局限的一次默许。'}
       ]
@@ -1106,7 +1106,7 @@ const QA = {
              '共处同一个高模块度社区。它被频繁提及，是因为大家都在拿它当基线对比。'},
         {rel:'APPLIES_TO', tier:'n',
          qt:'「TransE 的局限」会额外命中无意义子串 Tran（两者都实测过）。',
-         src:'docs/早先的阶段计划.md', sec:'T6.3 · 问题子图',
+         src:'docs/L5_SIX_LAYER_REPORT.md', sec:'§3.2 · 产物：被原文支持的关系子图',
          why:'问句本身就带字面噪声。检索层丢掉了被更长命中包含的短名字，' +
              '但单字符级别的碎片仍需在证据侧过滤——这一部分「局限」是检索造的，不是模型有的。'}
       ]

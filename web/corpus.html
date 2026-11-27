@@ -80,7 +80,7 @@
   **归档判据**：它不是"坏掉"、更不是"数字错" ——
   三个统计块（清单论文 / 已入库 / 只下载未入库）是**运行时读**
   `web/kg-data/corpus-index.json` 的 `stats` 渲染的，**没有硬编码错值**。
-  真正过时的是**结构与措辞**（`docs/DOC_AUDIT_FRONTEND_COMMENTS.md` 记的实测）：
+  真正过时的是**结构与措辞**（前端文案审计记录里的实测）：
     ① 表头写死「**arXiv id**」—— 对中文期刊论文（id 形如 `jsjkx2025-kg-kbqa`）不适用；
     ② **没有语言列 / 语言分组** —— 而 `papers.html` 已有中文/英文分组；
     ③ 搜索框 placeholder 只提 arXiv；页脚也少一层（缺"我传过哪些 / 传过但没成的"）。
@@ -94,7 +94,7 @@
   ⇒ 文件保留，靠 `tools/add_legacy_banners.py` 的横幅说明"这不是正式入口"。
   ⇒ **`OFFICIAL` 名单里已不含本页**（那名单是唯一权威）。
 
-  ⚠️ 顺手修掉一处**死引用**（`docs/NEXT_STEPS.md` 第 4 条）：
+  ⚠️ 顺手修掉一处**死引用**（早前记录的待修项）：
   本页原引 `<script src="./lib/demo-rail.js">`，但本页**不在 `demo-rail.js` 的 `FLOW` 里**
   ⇒ 脚本走到 `if (idx < 0) return;`，**这一行从来没有生效过**。原行留档如下：
       <script src="./lib/demo-rail.js"></script>
@@ -161,7 +161,7 @@
 <script src="./lib/a11y.js"></script>
 <!-- ⚠️ 2026-09-19：这里**原来还有** `<script src="./lib/demo-rail.js"></script>`，
      但本页不在 `demo-rail.js` 的 `FLOW` 里 ⇒ `idx < 0` 直接 return，**死引用**。
-     原行已在 `<head>` 的归档注释里留档；详细根因见 `docs/NEXT_STEPS.md` 第 4 条。
+     原行已在 `<head>` 的归档注释里留档；详细根因见当时的修复记录。
      ⚠️ 若将来演示轨道改为覆盖全部正式页（含本页与 `papers.html`），需恢复该行引用。 -->
 <script>
 (function () {

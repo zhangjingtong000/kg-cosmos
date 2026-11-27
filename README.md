@@ -141,8 +141,7 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 `tools/metric_provenance.py` 打印 `📦`(U+1F4E6)，cp936 控制台下 `UnicodeEncodeError`
 让子进程退出码变 1，而断言的是 `returncode == 0`。设置方式见上面「前置要求」那一行。
 源项目完整树里是 4 条同类失败（另有 `tools/apply_edit_plan.py` 打印 `⚠️`/`✅`/`❌` 的 3 条），
-精简树把这几条用例变成 skip 后只剩 1 条。更完整的定位记录见
-[docs/AUDIT_KNOWN_LIMITS.md](docs/AUDIT_KNOWN_LIMITS.md)。
+精简树把这几条用例变成 skip 后只剩 1 条。
 
 ## 示例数据（`web/kg-data/demo/`）
 

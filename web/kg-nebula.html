@@ -440,7 +440,7 @@ body.inside #kgExport{
    一改同时修好 5 个页面（同一条规则被复制到 analytics / method-limits /
    l5-review / pathqa；那 4 页 `position:fixed` 出现 0 次，所以没暴露）。
 
-   取证方式与完整现场见 `docs/UI_FIXED_POSITION_ROOT_CAUSE.md`。 */
+   取证方式与完整现场见 `样式定位约束说明`。 */
 body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
 /* 光场与遮罩必须在最底 */
 #atmo{z-index:0}

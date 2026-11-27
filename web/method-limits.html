@@ -297,7 +297,7 @@
 /* 2026-09-18 修：原写法 `body > *:not(#atmo):not(#veil)` 特异性 (0,2,0,0)，
    会压倒本页所有单 ID 的 `position: fixed` 浮层（本页为 0 处，故未暴露；
    星云页 17 处全被打回文档流）。`:where()` 特异性恒为 0 ⇒ 只当未定位元素的兜底。
-   详见 docs/UI_FIXED_POSITION_ROOT_CAUSE.md */
+   详见 样式定位约束说明 */
 body > *:where(:not(#atmo)):where(:not(#veil)){position:relative;z-index:1}
 /* 光场与遮罩必须在最底 */
 #atmo{z-index:0}
