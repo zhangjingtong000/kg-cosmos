@@ -59,7 +59,7 @@ CHAIN = [
     ('data/quality/l9-recall.json', [
         ('data/corpus/graphs', 'L9 召回依赖快照'),
         # ⚠️⚠️ 原来这里是 `None`，注释写着「**需要人工标注，不能自动重建**」——
-        #   **那是错的**（2026-09-18 逐条核验，见 `docs/早先的审计记录.md`）。
+        #   **那是错的**（2026-09-18 逐条核验）。
         #
         #   依据：`data/quality/l9-gold-spans.json` 的 `annotator` 字段自己写着
         #     「独立于抽取管线的逐段人工标注」，而 `note` 说的是

@@ -1,7 +1,6 @@
 # F3 · 为什么「CITES 拓扑排序」在这份数据上做不了（2026-09-16）
 
-> **配套**：`tools/_probe/_probe_cites_shape.py`（只读，可复跑）·
-> `data/quality/cites-shape.json`（产物）
+> **配套**：`data/quality/cites-shape.json`（产物）
 >
 > **一句话**：**F3 的原始设想（`CITES` 拓扑排序 = 概念/论文的先后依赖）
 > 在这份数据上做不了，而且原因是三重的。**
@@ -112,7 +111,7 @@ Bordes     -> KG Completion              ← **人 → 概念**
 ## 六、复现
 
 ```powershell
-python tools/_probe/_probe_cites_shape.py
+# 探针脚本未随仓库保留；产物：data/quality/cites-shape.json
 ```
 
 产物：`data/quality/cites-shape.json`（形态分布 / 解析率 / DAG 判定 / 结论）

@@ -64,7 +64,7 @@
 
 | 项 | 结论 | 怎么复核 |
 |---|---|---|
-| 版本 | **3.15.0** | 页面里读 `gsap.version`（探针 `tools/_probe/_eval_on_page.py`） |
+| 版本 | **3.15.0** | 页面里读 `gsap.version`（浏览器控制台直接取） |
 | 授权 | **Standard "no charge" license**（Webflow，2025-04-30 起）| 包内 `LICENSE.md` / 官网授权页 |
 | 原"会员专属"插件 | **现已全部免费**（含 `SplitText` / `MorphSVG` / `DrawSVG` / `ScrambleText`） | 同上；这也是本项目敢用 `SplitText` 做标题字母拆分的前提 |
 | **是不是 trial 版** | **不是**。12 个文件全部 `trial=False` | 下载 npm 包后 `grep -i 'trial\|_gsapTrial'` 逐个文件看；trial 版会带 `_gsapTrial` 标记与"水印/限时"逻辑 |
@@ -89,7 +89,7 @@
 | `CustomWiggle.min.js` | 2.2 KB | 备用 |
 
 **为什么必须本地化（不是偏好，是硬约束）**：
-项目有「**离线演示铁律**」（`docs/早先的内部记录` §1 第 6 条）
+项目有「**离线演示铁律**」（早先的评审记录 §1 第 6 条）
 与「不跑云端模型」。CDN 引 GSAP ⇒ 现场演示断网时动效全灭。
 ⇒ 这条已由守门固定下来：`tools/check_local_assets.py` 的 ② 组
 「**GSAP 只许本地引**」，任何页面出现含 `gsap` 的外部 URL 即失败。
@@ -130,7 +130,7 @@ CSS 过渡（`design.css` 的 `--ease` / `--dur`）、three.js 场景自身的�
 | 1 | `be1ed71` | GSAP 3.15.0 本地化到 `web/lib/gsap/`（7 个插件 / 177 KB，纯准备） |
 | 2 | `d01f78a` | `web/_lab_gsap.html`：在真实浏览器里验证 9 项（版本/注册/tween/SplitText/ScrollTrigger/timeline…） |
 | 3 | `c6bbab4` | 首屏入场编排（第一版，后被 4 取代） |
-| 4 | `d319b0c` | 首屏升级为**标题字母 3D 飞入**；新增只读探针 `tools/_probe/_eval_on_page.py` |
+| 4 | `d319b0c` | 首屏升级为**标题字母 3D 飞入**；新增只读探针（一次性脚本，未随仓库保留） |
 | 5 | `2d90701` | **主视图心跳换成 `gsap.ticker`**（落点 A） |
 | 6 | `6b0a27a` | 主视图 18 个社区标签依次淡入 |
 | 7 | `9ab40be` | 首页开场**揭幕**（遮罩按 `circle()` 收缩成一点） |
@@ -214,7 +214,7 @@ core tween · `SplitText` 拆分 · `ScrollTrigger.create` · `gsap.timeline`，
 
 ### 6.4 其余 11 页的滚入淡入
 
-探针 `tools/_probe/_js_motion_check.js`（先读初态 → 滚到底 → 再读末态）：
+一次性 Node 探针（先读初态 → 滚到底 → 再读末态）：
 
 | 页面 | 初始 `.mo`（已隐藏） | 滚到底后 `.mo` | 隐形残留 | 非 1 的 `opacity` |
 |---|---|---|---|---|
@@ -274,7 +274,7 @@ python tools/cdp_verify_offline.py web/kg-nebula.html web/index.html
    （**在提交 `06275f0` 上实测 360**；本文件自身那次提交会让它再加 1）。
    ⚠️ 这个数**不是**"领先多少个提交"的成果断言 —— `origin/main` 停在 09-11，
    中间隔着一整条 2D 探索线，把 360 当成"我做了 360 个提交"是错的。
-5. **`tools/_probe/_verify_nav_layers.py` 带 UTF-8 BOM**（既有的，非本次引入）：
+5. **早期的导航层核对脚本带 UTF-8 BOM**（既有的，非本次引入）：
    Python 能跑，但 `ast.parse(open(...,encoding='utf-8'))` 会报
    `invalid non-printable character U+FEFF`。本次未动，仅记录。
 6. **涟漪的"快速荡开 + 亮得久"做不到**（除非动 shader）：见 §八.2，
@@ -340,7 +340,7 @@ python tools/cdp_verify_offline.py web/kg-nebula.html web/index.html
 **这个 age 上不许用前段压缩型缓动**（`expo.out` / `power4.out` / `back.out`），
 它们每一个都会原样重现同一个 bug。
 
-**实测（`tools/_probe/_js_ripple_check.js`，点一下再逐档读 `r.age`）**：
+**实测（在页面里点一下再逐档读 `r.age`）**：
 期望速率 `2.2/3.6 = 0.611/s`，实测 `0.649 / 0.627 / 0.600 / 0.611 / 0.615 / 0.613 / 0.612`，
 年龄单调递增、强度全程 1.00。
 ⇒ 环在屏幕内的可见行程从约 **0.20 秒**变成约 **1.49 秒**（7.5 倍），

@@ -1,7 +1,6 @@
 # C3 · 那项间歇性 `HTTP 500` 的根因排查（2026-09-16）
 
-> **配套**：`tools/_probe/_probe_ollama_500.py`（复现，只读）·
-> `tools/local_reextract_feasibility.py`（已加**重试 + 错误分类**）
+> **配套**：`tools/local_reextract_feasibility.py`（已加**重试 + 错误分类**）
 >
 > **一句话**：**500 的来源定位到了代码行**（`kg_extractor.py:739` 的
 > `raise_for_status()`），**但没能在今天复现**（连打 3 次全 200）。
@@ -75,7 +74,7 @@ src/kg_extractor.py
 
 ### ★★ 实验结果：**显存压到只剩 511 MiB，Ollama 仍然返回 200**
 
-**做法**（`tools/_probe/_c3_oom_hold.py`，2026-09-18）：
+**做法**（一次性探针，2026-09-18）：
 
 ```
 ① 让 qwen3.5:9b 驻留                        ⇒ GPU 6555 / 8188 MiB
@@ -149,8 +148,7 @@ curl http://127.0.0.1:11434/api/generate -d '{\"model\":\"bge-m3\",\"prompt\":\"
 # ② 看余量（应该明显小于 1692 MiB）
 nvidia-smi --query-gpu=memory.used,memory.total --format=csv
 
-# ③ 打同一个长 prompt，看会不会 500
-python tools/_probe/_probe_ollama_500.py --n 2 --long
+# ③ 打同一个长 prompt（文本与上文一致），看会不会 500
 
 # ④ 清理
 curl http://127.0.0.1:11434/api/generate -d '{\"model\":\"bge-m3\",\"keep_alive\":0}'
@@ -220,7 +218,6 @@ if res is None:
 ## 八、复现
 
 ```powershell
-python tools/_probe/_probe_ollama_500.py --n 3          # 复现尝试
-python tools/_probe/_probe_ollama_500.py --n 2 --long   # 更长 prompt
+# 复现脚本未随仓库保留：直接重复请求 Ollama 的 /api/generate 即可（短/长 prompt 各打 3 次）
 python tools/local_reextract_feasibility.py --n 1       # 改动后的那个检查
 ```

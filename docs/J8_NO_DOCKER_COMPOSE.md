@@ -82,7 +82,7 @@ if os.environ.get("KG_BACKEND", "neo4j") == "neo4j":
 
 **⇒ 而"可复现"这件事本项目的答卷不是 compose，是**：
 - `REPRODUCE.md`（重建步骤）· `tools/verify_all.py`（**50 项可重跑的检查**）·
-  `METRIC_CALIBERS.md`（口径册）· `内部记录`（交接）。
+  `METRIC_CALIBERS.md`（口径册）。
 
 **⇒ 用"能重跑"回答"怎么部署"，比用一份没人验证过的 compose 文件诚实。**
 

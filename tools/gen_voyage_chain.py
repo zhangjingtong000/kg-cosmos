@@ -10,7 +10,7 @@
   按「提高 steps + 提高 denoise」的思路跑了一轮（steps=10，
   denoise 0.70/0.78/0.85/0.88/0.80），结果 YAVG 仍是
     19.50 / 19.78 / 20.29 / 22.14 / 23.97 / 25.89（跨度 6.4）。
-  于是做了几组探针（tools/_probe/voyage/_probe_bright.py、_probe_h.py），
+  于是做了几组一次性探针，
   得到两条决定性结论：
 
   (1) **ComfyUI 的 denoise 不是「采样步数折扣」。**
@@ -74,7 +74,7 @@
 
 【产出】
   web/assets/voyage-chain/frame-00..05.png   关键帧
-  tools/_probe/voyage/contact-sheet.png      横向拼接总览（肉眼验收用）
+  <chain-dir>/contact-sheet.png              横向拼接总览（肉眼验收用）
   web/assets/voyage.mp4 / voyage-poster.webp 仅在**不加** --gen-only 时写
 
 【用法】
@@ -82,7 +82,7 @@
   python tools/gen_voyage_chain.py --gen-only --force   # 只重做关键帧 + 亮度报表
   python tools/gen_voyage_chain.py                      # 全流程（含视频合成）
   python tools/gen_voyage_chain.py --only 3 --force     # 只重做第 3 帧
-  python tools/gen_voyage_chain.py --chain-dir tools/_probe/voyage/explore1
+  python tools/gen_voyage_chain.py --chain-dir .\voyage-explore1
                                                         # 试参数，不覆盖正式帧
   python tools/gen_voyage_chain.py --contact-sheet-only # 只重拼 contact sheet
 """
@@ -238,7 +238,7 @@ FRAMES_6 = [
 DENOISE_6 = [None, 0.90, 0.88, 0.89, 0.92, 0.93]
 
 # ── 目标亮度曲线 ──────────────────────────────────────────────────────────
-# ★ 这里必须先用 tools/_probe/voyage/_cal_scale.py 钉死刻度 ★
+# ★ 这里必须先用 signalstats 在三张基准图上钉死刻度 ★
 #   用户给的验收命令走 signalstats，它工作在 YUV 上，RGB 输入会被按
 #   **limited range（16-235）** 转过去，实测三张基准图：
 #       纯黑 → YAVG 16.00   中灰 → 126.00   纯白 → 235.00
@@ -945,7 +945,7 @@ def main():
                          '不合成 voyage.mp4、不写 poster（改帧时的推荐用法）')
     ap.add_argument('--chain-dir', default=None,
                     help='关键帧输出目录（默认 web/assets/voyage-chain）。'
-                         '试参数时指向 tools/_probe/... 就不会动正式帧')
+                         '试参数时指向临时目录就不会动正式帧')
     ap.add_argument('--init-calib', action=argparse.BooleanOptionalAction,
                     default=True,
                     help='img2img 前把上一帧的曝光标定到本帧目标亮度（默认开；'

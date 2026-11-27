@@ -1,7 +1,6 @@
 # B3 · SciREX 关系层对照结果（2026-09-16）
 
-> **配套**：`tools/_probe/_scirex_eval.py`（映射早已实现）·
-> `data/external/scirex-eval-6docs.json`（产物，2026-09-15 已跑）·
+> **配套**：`data/external/scirex-eval-6docs.json`（产物，2026-09-15 已跑）·
 > `data/external/scirex_samples.jsonl`（6 篇人工金标）
 >
 > **一句话**：**关系层 F1 = 0，且 6 篇里每一篇的 `rtp` 都是 0。**
@@ -145,7 +144,7 @@ TODO 对 B3 的期望是（`_scirex_eval.py:65-70` 也写着）：
 ## 六、复现
 
 ```powershell
-python tools/_probe/_scirex_eval.py --docs 6 --out data/external/scirex-eval-6docs.json
+# 评测脚本未随仓库保留；已跑产物见 data/external/scirex-eval-6docs.json
 ```
 
 ⚠️ **约 30 分钟/篇**（`elapsed_s` 实测 1900 秒），6 篇约 1.8 小时。

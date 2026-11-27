@@ -1,8 +1,7 @@
 # A4 · 三个模块接入图这一层（2026-09-16）
 
 > **配套**：`src/graph_sanitize.py`（新增）·
-> `tools/_probe/_probe_sanitize_impact.py`（只读量化）·
-> `data/quality/sanitize-impact.json` · `tests/test_graph_sanitize.py`（12 例）
+> `data/quality/sanitize-impact.json`（只读量化的产物）· `tests/test_graph_sanitize.py`（12 例）
 >
 > **一句话**：三个「只报不改」的模块被接成**一处决定、全部记账**的图级净化；
 > 而**"级联硬删"这个第一版设计在量完全库之后被推翻** ——
@@ -12,7 +11,7 @@
 
 ## 一、A4 的原话与它的真实难点
 
-> 三个模块**都只在 `tools/_probe/` 里被引用**，没进 `pipeline.py`。不接就没有实际收益。
+> 三个模块**都只在一次性探针里被引用**，没进 `pipeline.py`。不接就没有实际收益。
 > 接之前**先设计"被过滤实体所连的边怎么办"**（悬空边）——这一层**现在没有设计**。
 
 **读过实现之后，问题的位置变了**：
@@ -49,7 +48,7 @@ direction_witness.witness(desc, s, t, type)  → 只返回判定
 
 ### 量完全库之后，这一刀太大
 
-`tools/_probe/_probe_sanitize_impact.py`（只读全库 17 篇图）实测：
+一次性只读探针在全库 17 篇图上实测：
 
 ```
 2012.00456v1    过滤 120 个实体  ⇒  **删掉 570 条边**
@@ -207,7 +206,7 @@ witness      → 判不出返回 **None**；否则 {'verdict': ...}
 
 ```powershell
 # 只读量化（三档在全库 17 篇图上的影响面）
-python tools/_probe/_probe_sanitize_impact.py
+# 探针脚本未随仓库保留；量法：对每篇图按三档分别统计被过滤实体数与被删边数
 
 # 端到端开启（注意：会改变抽取产物的口径）
 $env:KG_SANITIZE='2'                      # 吸收 + 过滤（软删）

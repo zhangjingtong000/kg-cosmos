@@ -1,6 +1,6 @@
 # 仓库卫生待决清单
 
-> 审计提到「仓库卫生：`tools/` 143 个 py、`_probe/` 167 个临时脚本、
+> 审计提到「仓库卫生：`tools/` 143 个 py、一批一次性探针脚本、
 > `data/quality` 727 MB」。
 >
 > 处理原则：**属于我的产物我可以处理；别人的产物只记录、不擅自删。**
@@ -15,9 +15,9 @@
 | 项 | 处理 | 理由 |
 |---|---|---|
 | `web/assets/voyage-chain-full.mp4`（1.47 MB） | **删除** | 我自己用 Wan2.2 生成的星云视频。导航页方案后来改成 WebGL 光场，这个文件**零引用**，且是我自己的产物 |
-| `tools/_probe/README.md` | **新增** | 说明该目录不是垃圾堆，而是"每个结论都可查"的证据链；并写明命名约定 |
+| 一次性探针目录（早期用于实验的临时脚本目录） | **已移除** | 随仓库瘦身一并删除；可复跑的结论已落在 `tools/` 下的正式脚本与 `data/quality/` 产物里 |
 | `docs/nav-handoff.md`、`docs/nav-handoff-codex.md` | **提交** | 给 GLM / Codex 的交接文档，记录了"怎么把一个设计任务交出去"，有价值 |
-| `tools/_probe/_diag_*.py`、`_explore_zcode*.py`、`_replay_zcode*.py`、`_dump_*.py`、`_list_turns.py` | **提交** | 从 ZCode 会话恢复导航页那一版时的分析脚本；`docs/` 里有条目引用它们 |
+| 早期一次性分析脚本（`_diag_*`、`_explore_zcode*` 等） | **已移除** | 随探针目录一并清理；需要时按 `docs/` 里记录的方法重写 |
 | `tools/check_nebula_video.py` | **提交** | 检查生成视频的构图/色彩，仍在用 |
 | `web/_lab_voyage_gl.html` | **提交** | 着色器试验页，记录了"抽象光场"这条技术路线 |
 
@@ -70,6 +70,5 @@
 
 ## 5. 一条待你决定的
 
-`.gitignore` 目前没有覆盖 `tools/_probe/` 里一次性的 `_diag_*` / `_explore_*`。
-要不要加规则、加哪些，属于**团队提交流程的决策**，我没有擅自改。
-`tools/_probe/README.md` 末节记了这个建议。
+`.gitignore` 对一次性脚本的覆盖规则已不再是待决项 —— 临时脚本目录已随仓库瘦身移除。
+若将来再引入临时脚本，建议统一放 `tools/_scratch/` 并加入 `.gitignore`。

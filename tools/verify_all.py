@@ -261,7 +261,7 @@ DATA_CHECKS = [
     # 为什么单独立这一项（2026-09-19）：`check_doc_numbers.py` 扫的是文件里的字，
     # 而首屏那两个大字是 `voyage.js` 运行时写进去的（动画 + `setFig` 覆盖），
     # 文案里还有一处手写的"评测全集 43867" —— **属性对不代表屏幕上对**。
-    # 内部记录 第 6 条记的"index.html 硬编码 18780/29120，守门不查 HTML"就是这块。
+    # 早先的评审记录第 6 条记的"index.html 硬编码 18780/29120，守门不查 HTML"就是这块。
     ("首屏数字（**渲染值** vs 权威产物 · Playwright）",
      ["tools/verify_firstscreen_numbers.py"]),
     ("指标与数据快照的版本绑定（stale 检测）", ["tools/metric_provenance.py"]),
@@ -308,7 +308,7 @@ DATA_CHECKS = [
     # 避免下一轮又去花几小时跑一个无效的重抽。
     ("本地重抽可行性（否决依据）",
      ["tools/local_reextract_feasibility.py", "--n", "1"]),
-    # 离线可用性是「离线演示铁律」（内部记录 §1 第 6 条）的守门检查：
+    # 离线可用性是「离线演示铁律」（早先的评审记录 §1 第 6 条）的守门检查：
     # 主视图曾因 three.js 走 unpkg CDN 而断网白屏，现已本地化。
     # ★ 2026-09-20 扩面：此前只测星云页一页，而 GSAP 动效编排的主战场是
     #   导航页 `web/index.html`（它引 gsap / SplitText / ScrollTrigger 三个本地插件）

@@ -43,7 +43,7 @@ CORPUS = ROOT / 'data' / 'corpus'
 GRAPHS = CORPUS / 'graphs'
 BACKUP = ROOT / 'data' / 'quality' / 'backup'
 
-# 实测：Ollama qwen3.5:9b 抽取约 20.9 秒/chunk（见 内部记录 §1）
+# 实测：Ollama qwen3.5:9b 抽取约 20.9 秒/chunk（见早先的评审记录 §1）
 SEC_PER_CHUNK = 20.9
 
 

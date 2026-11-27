@@ -51,12 +51,7 @@
 ## 二、被纳入版本控制的 53 个（6.13 MB）
 
 它们**不需要重建** —— 直接 clone 就有。
-清单可由脚本随时重算：
-
-```powershell
-python tools/_probe/_probe_archive_artifacts.py          # 打印清单
-python tools/_probe/_probe_archive_artifacts.py --apply  # 真的 git add -f
-```
+清单由一次性脚本生成（未随仓库保留）；判据见下。
 
 **判据**：**被 `docs/` / `README.md` / `RUNBOOK.md` / `tools/*.py` / `src/*.py` /
 `web/` 实际引用过** ⇒ 它不只是"运行时产物"，而是"证据"。

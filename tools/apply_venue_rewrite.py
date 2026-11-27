@@ -123,7 +123,7 @@ def main():
     print('=' * 92)
 
     if not PLAN.exists():
-        print(f'  ❌ 缺 {PLAN}（先跑 tools/_probe/_venue_rewrite_plan.py）')
+        print(f'  ❌ 缺 {PLAN}（先生成改写计划 JSON）')
         return 1
     plan = json.loads(PLAN.read_text(encoding='utf-8'))
     rw = plan.get('rewrite') or []

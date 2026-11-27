@@ -1,5 +1,5 @@
 {
-  "generated_by": "tools/_probe/_venue_rewrite_plan.py",
+  "generated_by": "一次性计划生成脚本",
   "problem": "本体缺 PUBLISHED_IN，导致「论文/作者 → 发表场所」被硬套成 PART_OF / LOCATED_AT / CREATED_BY",
   "method": "改写而非删除 —— 这些边携带真实信息，只是类型标错",
   "ontology_change": {

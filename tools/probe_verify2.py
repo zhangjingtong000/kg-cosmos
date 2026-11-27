@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-定位 relation-verify-all.json 与 早先的阶段计划.md 表格之间的数字矛盾。
+定位 relation-verify-all.json 与早先阶段计划表格之间的数字矛盾。
 
 早先的阶段计划 §T2 写：RELATED_TO median 0.098、<0.1 占 50.1%；
 而本文件 by_type 写：RELATED_TO median 0.6899。

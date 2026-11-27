@@ -1,6 +1,6 @@
 """扫描 web/ 下所有页面的**外部**依赖（CDN 等），为离线化做准备。
 
-背景：`docs/早先的内部记录` §1 第 6 条是「离线演示铁律」，
+背景：早先的评审记录 §1 第 6 条是「离线演示铁律」，
 但主视图 `kg-nebula.html` 的 three.js 走 unpkg CDN。
 `tools/cdp_verify_offline.py` 已实测断网后该页完全无法启动。
 """

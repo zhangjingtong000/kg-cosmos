@@ -172,7 +172,7 @@ def call_ollama(prompt, seed, timeout=900):
     ## ⚠️ 刻意**不传** `format='json'`（2026-09-15 实测踩到的坑）
 
     第一版传了 `format: 'json'`，结果**四档全部返回 0 条**。
-    诊断（`tools/_probe/_probe_ladder_fail.py`）三组对照：
+    诊断（一次性探针）三组对照：
 
         ① 短输入 · 无 format      440s · 输出 3440 字符 · **15 条关系**  ✅
         ② 短输入 · format=json     81s · 输出 **0 字符**（eval_count=1589）❌

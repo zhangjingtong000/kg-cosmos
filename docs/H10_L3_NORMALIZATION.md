@@ -1,7 +1,6 @@
 # H10 · 优化排序第 1 名：做了，但**它的收益已经过期**（2026-09-16）
 
-> **配套**：`tools/_probe/_probe_l3_normalize.py`（只读，可复跑）·
-> `data/quality/l3-normalization.json`
+> **配套**：`data/quality/l3-normalization.json`（产物）
 >
 > **一句话**：`OPTIMIZATION_RANKING.md` 排出的**第 1 名**（L3 判据归一化，
 > 预估 **+8.16pp / 零成本**）**从没做**；今天补做，实测 **只有 +0.23pp**。
@@ -146,7 +145,7 @@ OPTIMIZATION_RANKING 排第 1 名时（2026-09-14）：L3 = 68.44%
 ## 八、复现
 
 ```powershell
-python tools/_probe/_probe_l3_normalize.py
+# 探针脚本未随仓库保留；产物：data/quality/l3-normalization.json
 ```
 
 产物：`data/quality/l3-normalization.json`

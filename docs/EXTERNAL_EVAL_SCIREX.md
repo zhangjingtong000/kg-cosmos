@@ -87,10 +87,7 @@ curl -L -o data/external/scirex_release_data.tar.gz \
 tar -xzf data/external/scirex_release_data.tar.gz -C data/external/
 
 # 2. 选样板（1800-4500 词、关系≥2、NER≥60、类型≥3）
-python tools/_probe/_scirex_sample.py --n 6
-
-# 3. 跑抽取 + 对比人工标注
-python tools/_probe/_scirex_eval.py --docs 1 --out data/external/scirex-eval-1doc.json
+# 3. 跑抽取 + 对比人工标注（评测脚本未随仓库保留；已跑产物见 data/external/）
 ```
 
 为支持这条路径，`pipeline.extract_graph()` 新增了 `text=` 参数

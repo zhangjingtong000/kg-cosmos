@@ -1,7 +1,6 @@
 # B4 · SciREX 人工共指 vs 本项目消歧判据（2026-09-16）
 
-> **配套**：`tools/_probe/_scirex_coref_eval.py`（可复跑）·
-> `data/external/scirex-coref-eval.json`（产物）·
+> **配套**：`data/external/scirex-coref-eval.json`（产物）·
 > `data/external/scirex_samples.jsonl`（6 篇人工标注，ACL 2020）
 >
 > **一句话**：**召回率 100%，但精确率只有 64.6%（假阳性 27.4%）——
@@ -140,8 +139,8 @@ A5 在**人名**上已经做成了（`extra_is_person_form`），
 ## 六、复现
 
 ```powershell
-python tools/_probe/_scirex_coref_eval.py
-python tools/_probe/_scirex_coref_eval.py --seed 1     # 换采样种子
+# 评测脚本未随仓库保留；产物：data/external/scirex-coref-eval.json
+# 换采样种子重跑会得到另一组样本，结论需按同一判据复核
 ```
 
 产物：`data/external/scirex-coref-eval.json`

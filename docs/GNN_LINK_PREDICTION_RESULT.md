@@ -30,10 +30,10 @@
 
 | 轮 | 时间 | 配置 | 产物 | 留档 |
 |---|---|---|---|---|
-| 0 | 21:14:53 | smoke 40 ep | `tools/_probe/_gnn-smoke-40ep.json` | ✅ |
+| 0 | 21:14:53 | smoke 40 ep | smoke 产物（未随仓库保留） | — |
 | 1 | 21:54:19 | 150 ep（`elapsed_s` **2350.9**），**TransE 抛 `ValueError: Must specify either dataset or both training/testing triples factories`** | 曾写 `data/quality/_gnn-link-prediction.json` | ❌ **已被第 2 轮覆盖，未留档** |
 | 1′ | — | 修 mask 的一轮 | — | ❌ 被本地环境重启打断，未落盘 |
-| 2 | 22:22:52 | **80 ep（`elapsed_s` 940.0）**，TransE 改用底层 `SLCWATrainingLoop` 跑通、但未做未见实体 mask | `data/quality/_gnn-link-prediction.json` + 副本 `tools/_probe/_gnn-run1-80ep-transE-unmasked.json` | ✅ **本文表格即此轮** |
+| 2 | 22:22:52 | **80 ep（`elapsed_s` 940.0）**，TransE 改用底层 `SLCWATrainingLoop` 跑通、但未做未见实体 mask | `data/quality/_gnn-link-prediction.json` | ✅ **本文表格即此轮** |
 
 **第 1 轮已丢失的数字**（仅存于会话记录，**在此作为档案保留**）：
 
@@ -42,8 +42,8 @@
 - **B2**：GNN-ID **0.4688**（第 2 轮为 0.4780）
 
 ⇒ 两轮数字**同向且量级一致**（逐项差异 ≤ 0.009），本文结论不依赖于选中哪一轮。
-⇒ **教训：重跑实验前必须先备份旧产物。**本轮违反了这条纪律（旧产物被直接覆盖），已记入 `docs/NEXT_STEPS.md`。
+⇒ **教训：重跑实验前必须先备份旧产物。**本轮违反了这条纪律（旧产物被直接覆盖），已记入待办清单。
 
 ---
 
-**落盘**：`tools/_probe/_gnn_link_prediction.py`（实验脚本，未跟踪）· `data/quality/_gnn-link-prediction.json`（主产物）· `data/quality/_gnn-split-sensitivity.json` 与 `_gnn-split-sensitivity-all.json`（划分敏感性）· 本文件。
+**落盘**：一次性实验脚本（未随仓库保留）· `data/quality/_gnn-link-prediction.json`（主产物）· `data/quality/_gnn-split-sensitivity.json` 与 `_gnn-split-sensitivity-all.json`（划分敏感性）· 本文件。

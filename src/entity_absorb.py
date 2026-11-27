@@ -122,7 +122,7 @@ def extra_is_person_form(short: str, long_: str) -> bool:
 
     ## 为什么必须加这一条：实测那 1404 对里抽样看**几乎全是错的**
 
-    `tools/_probe/_probe_absorb_1c.py` + `_probe_absorb_1c_step2.py`（只读）量出：
+    一次性只读探针量出：
 
         1404 对：③ 人名成分 32（2.3%）· ④ 限定词 121 · ⑤ 其它 1251（89%）
 
@@ -269,7 +269,7 @@ def find_absorptions(nodes):
                     continue
                 # 条件 5（A5，2026-09-16）：**只有"人名补齐"才吸收**。
                 #
-                # 实测（`tools/_probe/_probe_absorb_1c*.py`）：全库 1404 对里
+                # 实测（一次性只读探针）：全库 1404 对里
                 # 人名仅 32 对（2.3%），其余抽样看**几乎全错** ——
                 # `Structured Data`→`Semi-Structured Data`（`Semi-` 改了含义）、
                 # `Question Answering`→`KG Question Answering`（上义词）、

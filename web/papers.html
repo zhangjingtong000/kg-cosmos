@@ -410,7 +410,7 @@ function sortRows(rows) {
 }
 function renderInventory() {
   const s = langStat(LANG);
-  /* Tab 的文案与 `data-*` 是**同一份数字** —— 探针（`tools/_probe/`）会
+  /* Tab 的文案与 `data-*` 是**同一份数字** —— 一次性探针脚本会
      两处都比对一遍，避免"标签写 20、data 写 21"这种静默不一致。 */
   $('#ltabs').innerHTML = ['all', 'zh', 'en'].map(lg => {
     const t = langStat(lg);
