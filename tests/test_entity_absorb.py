@@ -103,12 +103,12 @@ def test_qualifier_or_hyponym_must_be_rejected(short, long_):
 
 
 # ── ④ 全库影响面：从 1404 收紧到 23 ──────────────────────────────────
-# ⚠️ **这条实测要 125 秒**（`find_absorptions` 在全库 23716 个节点上按实词数分桶比较）。
-# 放进默认 pytest 会把总时长从 12 秒拉到 140 秒 ⇒ 用环境变量控制：
+# ⚠️ **这条需要全量图快照**（源仓库 21 篇、合计 88.8 MB）；本仓库刻意只打包
+# 1 份样本（见 .gitignore 的 `data/corpus/graphs/*`）⇒ 默认运行时它是
+# **因为缺全量快照**而 skip，**不是性能开关**。全量快照下实测 125 秒，
+# 故数据齐全时才用环境变量放行：
 #     $env:KG_SLOW_TESTS='1'; python -m pytest tests -q
 # **改动吸收判据时务必跑一次** —— 它是"判据有没有被放宽"的唯一直接度量。
-@pytest.mark.skipif(not os.environ.get('KG_SLOW_TESTS'),
-                    reason='慢测试（约 125 秒）；设 KG_SLOW_TESTS=1 才跑')
 def test_full_corpus_absorptions_are_now_tiny():
     """**全库影响面必须极小** —— 这是"收紧"是否生效的直接度量。
 
@@ -118,8 +118,15 @@ def test_full_corpus_absorptions_are_now_tiny():
     **但如果它回到几百对，说明判据被放宽了**。
     """
     import json
+    files = sorted((ROOT / 'data' / 'corpus' / 'graphs').glob('*.json'))
+    if len(files) < 5:
+        pytest.skip(
+            f'需要全量图快照（源仓库 21 篇 / 88.8 MB），'
+            f'本仓库只打包了 {len(files)} 份样本')
+    if not os.environ.get('KG_SLOW_TESTS'):
+        pytest.skip('慢测试（全量快照下约 125 秒）；设 KG_SLOW_TESTS=1 才跑')
     names = []
-    for f in sorted((ROOT / 'data' / 'corpus' / 'graphs').glob('*.json')):
+    for f in files:
         try:
             d = json.loads(f.read_text(encoding='utf-8-sig'))
         except Exception:

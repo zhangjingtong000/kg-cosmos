@@ -32,7 +32,9 @@ NEBULA = ROOT / 'web' / 'kg-data' / 'nebula.json'
 @pytest.fixture(scope='module')
 def nebula():
     if not NEBULA.exists():
-        pytest.skip(f'缺 {NEBULA}')
+        pytest.skip(
+            f'缺 {NEBULA}（构建产物，源仓库 3.4 MB；仓库不打包，'
+            f'重建：python tools/build_nebula_data.py）')
     return json.loads(NEBULA.read_text(encoding='utf-8'))
 
 
@@ -81,7 +83,7 @@ def test_paper_names_match_snapshots(nebula):
     """
     snap = {p.stem for p in (ROOT / 'data' / 'corpus' / 'graphs').glob('*.json')}
     if not snap:
-        pytest.skip('没有图快照可比对')
+        pytest.skip('缺少图快照可比对（data/corpus/graphs/*.json，仓库不打包）')
     papers = set(nebula['meta']['papers'])
     unknown = papers - snap
     assert not unknown, f'这些"论文名"在快照目录里找不到：{sorted(unknown)[:6]}'

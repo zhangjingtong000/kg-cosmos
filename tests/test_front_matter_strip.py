@@ -118,7 +118,9 @@ class LayoutNoiseStripTests(unittest.TestCase):
         text = "引用本文\n某某. 标题[J]. 期刊, 2025, 52(1): 87-93."
         self.assertIs(strip_layout_noise(text), text)
 
-    @unittest.skipUnless(JSJKX.exists(), "语料 PDF 不在本机")
+    @unittest.skipUnless(
+        JSJKX.exists(),
+        "缺 data/corpus/jsjkx2025-kg-kbqa.pdf（1.9 MB；仓库不打包语料）")
     def test_real_front_page_drops_other_papers(self):
         import fitz
         doc = fitz.open(str(JSJKX))
@@ -138,7 +140,9 @@ class LayoutNoiseStripTests(unittest.TestCase):
         ):
             self.assertNotIn(other_paper, out)
 
-    @unittest.skipUnless(JSJKX.exists(), "语料 PDF 不在本机")
+    @unittest.skipUnless(
+        JSJKX.exists(),
+        "缺 data/corpus/jsjkx2025-kg-kbqa.pdf（1.9 MB；仓库不打包语料）")
     def test_real_pipeline_strips_before_chunk_document(self):
         """清洗必须发生在 `chunk_document` **之前**（假边在抽取阶段才生成）。"""
         import pipeline
@@ -316,7 +320,9 @@ class RealChineseFrontPageTests(unittest.TestCase):
         finally:
             doc.close()
 
-    @unittest.skipUnless(JSJKX.exists(), "语料 PDF 不在本机")
+    @unittest.skipUnless(
+        JSJKX.exists(),
+        "缺 data/corpus/jsjkx2025-kg-kbqa.pdf（1.9 MB；仓库不打包语料）")
     def test_kbqa_front_page_keeps_abstract_drops_affiliation(self):
         out = strip_layout_noise(self._page(JSJKX, 2))
         self.assertIn("摘　要", out)
@@ -326,7 +332,9 @@ class RealChineseFrontPageTests(unittest.TestCase):
                       "河北师范大学", "中图分类号", "＠", "jsjkx"):
             self.assertNotIn(noise, out)
 
-    @unittest.skipUnless(PLM_SURVEY.exists(), "语料 PDF 不在本机")
+    @unittest.skipUnless(
+        PLM_SURVEY.exists(),
+        "缺 data/corpus/jsjkx2025-kg-plm-survey.pdf（4.1 MB；仓库不打包语料）")
     def test_plm_survey_front_page_drops_military_affiliation(self):
         """**本次升级的直接动因**：单位署名 `国防科技大学系统工程学院` 曾会进图。"""
         out = strip_layout_noise(self._page(PLM_SURVEY, 2))
@@ -337,7 +345,9 @@ class RealChineseFrontPageTests(unittest.TestCase):
                       "基金项目", "通信作者", "到稿日期"):
             self.assertNotIn(noise, out)
 
-    @unittest.skipUnless(COMPLETION_LLM.exists(), "语料 PDF 不在本机")
+    @unittest.skipUnless(
+        COMPLETION_LLM.exists(),
+        "缺 data/corpus/jsjkx2025-kg-completion-llm.pdf（2.3 MB；仓库不打包语料）")
     def test_completion_llm_keeps_body_after_english_keywords(self):
         """★ **不许裁过头**：英文 Keywords 之后紧跟「1 引言」，那是正文。"""
         out = strip_layout_noise(self._page(COMPLETION_LLM, 2))

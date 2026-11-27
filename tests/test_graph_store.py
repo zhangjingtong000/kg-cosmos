@@ -62,7 +62,8 @@ except Exception:
     NEO4J_AVAILABLE = False
 
 requires_neo4j = pytest.mark.skipif(
-    not NEO4J_AVAILABLE, reason="no reachable Neo4j server"
+    not NEO4J_AVAILABLE,
+    reason="需要可达的 Neo4j 服务（bolt://localhost:7687，本机未运行）",
 )
 
 
