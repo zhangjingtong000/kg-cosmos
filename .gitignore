@@ -32,10 +32,14 @@ node_modules/
 playwright-report/
 test-results/
 
-# ── 大体积评测快照与语料（本仓库刻意不打包，见 REBUILD.md）────────────────
+# ── 大体积评测快照与语料（本仓库刻意不打包，见 RUNBOOK.md）────────────────
 data/quality/baseline/
 data/quality/graphs-published-in/
-data/quality/archive/
+# 归档目录整体排除，但留一份 8 KB 的归档样本：test_metric_archive 要它才不 skip。
+data/quality/archive/*
+!data/quality/archive/metric-provenance/
+data/quality/archive/metric-provenance/*
+!data/quality/archive/metric-provenance/20260919-194048.json
 data/quality/backup/
 data/quality/_prompt-ab-runs/
 data/quality/relation-verify-all.json
@@ -45,15 +49,24 @@ data/quality/filtered-edges.json
 data/quality/created-by-patch.json
 data/quality/venue-rewrite-plan.json
 data/distill/
-data/corpus/
+# 语料目录（PDF + 全部论文图快照）整体排除，只留一份 1.1 MB 的图快照：
+# test_edit_plan 需要一个真实 graphs/*.json 建沙箱，并断言 --graphs-dir 不改真源。
+data/corpus/*
+!data/corpus/graphs/
+data/corpus/graphs/*
+!data/corpus/graphs/jsjkx2025-kg-completion-llm.json
 # data/ad690dfb/ 有意**保留**：graph.json（2.0 MB）是 /api/qa 端点测试
 # （test_qa_history / test_qa_limits，GID=ad690dfb）与 web/ask.html 演示的默认图。
-# 同目录的 PDF 仍由下面 `data/**/*.pdf` 排除，需自行回填。
+# 同目录的 PDF 由下面 `data/**/*.pdf` 排除，唯一的例外是 test_upload_dedup 要的那份。
 data/models/
 data/**/*.pdf
+# 例外：test_upload_dedup 去重用例需要一份真实 PDF（434 KB）
+!data/ad690dfb/2506.09566v1.pdf
 data/**/*.jsonl.gz
 
 # 结果大文件（导出产物，可重建）
+# web/kg-data/*.json 只白名单三份开箱产物；子目录 demo/ 刻意保留
+# —— 页面在缺全量数据时回退到它（见 README「示例数据」）。
 web/kg-data/*.json
 !web/kg-data/filaments.json
 !web/kg-data/community-summaries.json

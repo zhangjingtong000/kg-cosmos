@@ -1,0 +1,134 @@
+{
+ "meta": {
+  "nodes": 20,
+  "links": 0,
+  "source": "Neo4j 治理后图库",
+  "tag": "top3000",
+  "communities": 18
+ },
+ "nodes": [
+  {
+   "id": "Phar. B",
+   "type": "Organization",
+   "degree": 4,
+   "community": -1
+  },
+  {
+   "id": "Ayara, A.",
+   "type": "Person",
+   "degree": 5,
+   "community": -1
+  },
+  {
+   "id": "Feng et al. [157]",
+   "type": "Document",
+   "degree": 4,
+   "community": 8
+  },
+  {
+   "id": "IterE",
+   "type": "Method",
+   "degree": 7,
+   "community": 5
+  },
+  {
+   "id": "Generating Compact And Relaxable Answers To Keyword Queries Over Knowledge Graphs",
+   "type": "Document",
+   "degree": 5,
+   "community": -1
+  },
+  {
+   "id": "Out-Of-Context Loss Function",
+   "type": "Method",
+   "degree": 3,
+   "community": 4
+  },
+  {
+   "id": "KGEM Performance",
+   "type": "Metric",
+   "degree": 22,
+   "community": 0
+  },
+  {
+   "id": "Vector Space Similarity Heuristics",
+   "type": "Method",
+   "degree": 4,
+   "community": 0
+  },
+  {
+   "id": "Low-Resource Data",
+   "type": "Concept",
+   "degree": 4,
+   "community": 7
+  },
+  {
+   "id": "Instruction Tuning",
+   "type": "Method",
+   "degree": 6,
+   "community": 4
+  },
+  {
+   "id": "ConMask",
+   "type": "Method",
+   "degree": 9,
+   "community": 0
+  },
+  {
+   "id": "Decision Tree Classifier",
+   "type": "Method",
+   "degree": 3,
+   "community": 16
+  },
+  {
+   "id": "KG Refinement",
+   "type": "Concept",
+   "degree": 6,
+   "community": 17
+  },
+  {
+   "id": "Stacked Neural Architectures",
+   "type": "Method",
+   "degree": 8,
+   "community": 8
+  },
+  {
+   "id": "DisenKGAT",
+   "type": "System",
+   "degree": 4,
+   "community": 1
+  },
+  {
+   "id": "Knowledge Graph Network",
+   "type": "System",
+   "degree": 4,
+   "community": 3
+  },
+  {
+   "id": "UK",
+   "type": "Location",
+   "degree": 9,
+   "community": -1
+  },
+  {
+   "id": "B. Wang",
+   "type": "Person",
+   "degree": 6,
+   "community": 3
+  },
+  {
+   "id": "Query Vector",
+   "type": "Concept",
+   "degree": 4,
+   "community": 8
+  },
+  {
+   "id": "Jiaoyan Chen",
+   "type": "Person",
+   "degree": 4,
+   "community": 17
+  }
+ ],
+ "links": [],
+ "_demo": true,
+ "_demo_note": "示例数据（demo）：为在缺少全量图谱时让页面能渲染而做的裁剪版，节点数/边数被人为缩小，所有数字不代表真实评测结果。完整数据请按 RUNBOOK.md 重建（tools/build_nebula_data.py 等）。"
+}

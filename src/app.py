@@ -330,12 +330,27 @@ async def manifest():
     return {"kg_data": entries(KG_DATA), "quality": entries(QUALITY)}
 
 
+def _kg_file(name: str) -> Path:
+    """数据面的文件定位：web/kg-data/<name>，缺失时回退 web/kg-data/demo/<name>。
+
+    **为什么需要回退**：本仓库是精简版，不带全量图谱（nebula.json 约 3.4 MB、
+    每个社区的 evidence-*.json 等）。没有回退时，十几个页面只能显示「数据加载失败」。
+    示例数据放在 `web/kg-data/demo/`，规模被裁过，不代表真实评测结果 ——
+    每个文件带 `_demo: true` 与 `_demo_note`，该目录另有 README.md。
+    """
+    p = KG_DATA / name
+    if p.exists():
+        return p
+    demo = KG_DATA / "demo" / name
+    return demo if demo.exists() else p
+
+
 @app.get("/api/kg/{name}")
 async def api_kg(name: str):
-    """前端数据面（web/kg-data/<name>.json）。"""
+    """前端数据面（web/kg-data/<name>.json，缺失时用 demo/ 示例数据）。"""
     if "/" in name or "\\" in name or ".." in name:
         raise HTTPException(400, "非法文件名")
-    return _serve_json(KG_DATA / name)
+    return _serve_json(_kg_file(name))
 
 
 @app.get("/api/quality/{name}")
@@ -480,7 +495,7 @@ async def papers_registry():
 
     ⚠️ 与 `kg-api.js` 的静态回退一致：产物在 `web/kg-data/`，所以静态站也能取。
     """
-    return _serve_json(KG_DATA / 'paper-registry.json')
+    return _serve_json(_kg_file('paper-registry.json'))
 
 
 @app.get("/api/papers/trashcan")

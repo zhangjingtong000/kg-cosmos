@@ -1,0 +1,207 @@
+{
+ "meta": {
+  "total": 10,
+  "dimensions": 5,
+  "subjects": 178,
+  "papers": 17,
+  "paper_list": [
+   "1703.08098v9",
+   "2002.00388v4",
+   "2012.00456v1",
+   "2112.10006v6",
+   "2202.07412v1",
+   "2210.08119v1",
+   "2302.05019v1",
+   "2310.04835v3",
+   "2401.04507v1",
+   "2402.12001v1",
+   "2406.08223v2",
+   "2410.21237v1",
+   "2412.10092v1",
+   "2501.03566v1",
+   "2502.00681v2",
+   "2504.09823v1",
+   "2510.20345v1"
+  ],
+  "status_counts": {
+   "REJECTED": 190,
+   "SUSPECTED": 53
+  },
+  "note": "这 243 条原本被抽成 CONTRADICTS 边。诊断为误标：243 条对应 242 个不同的 (方法, 维度) 对，没有任何一对被两篇以上论文同时表态，即不存在构成矛盾所需的『两方』。它们的真实语义是「方法在某个能力维度上的表现或局限」。",
+  "source": "data/quality/claims.json → tools/build_method_limits_data.py",
+  "top_subjects": [
+   [
+    "Large Language Model",
+    13
+   ],
+   [
+    "Knowledge Graphs",
+    11
+   ],
+   [
+    "TransE",
+    6
+   ],
+   [
+    "reasoning",
+    4
+   ],
+   [
+    "Neural-Symbolic Methods",
+    4
+   ],
+   [
+    "Embedding-Based Reasoning",
+    3
+   ],
+   [
+    "Dynamic Knowledge Graph",
+    3
+   ],
+   [
+    "Schema-Free Extraction",
+    3
+   ],
+   [
+    "Triple-Based Models",
+    2
+   ],
+   [
+    "MuRP",
+    2
+   ],
+   [
+    "ProjE",
+    2
+   ],
+   [
+    "Embeddings",
+    2
+   ]
+  ]
+ },
+ "dimensions": [
+  {
+   "name": "Scalability",
+   "count": 2,
+   "items": [
+    {
+     "subject": "Fixed Schema Control",
+     "description": "Rigid templates restrict scalability",
+     "paper": "2510.20345v1",
+     "page": 6,
+     "evidence": "consistency, and interpretability. However,\nits dependence on rigid ontological templates restricts scalability and cross-domain generalization.\n\nThe progression from fixed schema control to selective, context-aware schema prompting marks the\nfield’s gradual shift toward more adaptive, data-responsive frameworks. 4. 1. 2\nDYNAMIC AND ADAPTIVE SCHEMA-BASED EXTRACTION\nRecent approaches reconceptualize the schema as a dynamic, evolving component of the extraction\nprocess rather than a fixed template—a shift from schema guiding extraction to schema co-evolving\nwith it. AutoSchemaKG (Bai et al.",
+     "status": "REJECTED",
+     "confidence": 0.2882
+    },
+    {
+     "subject": "Large Language Model",
+     "description": "Large language models may face challenges related to scalability.",
+     "paper": "2310.04835v3",
+     "page": 9,
+     "evidence": "during pre-training to better cap-\nture the relationships between entities. This enables ERNIE\nto perform well on knowledge graph reasoning tasks.\n\nIn conclusion, large language models incorporating\nknowledge graph information show promise for knowledge\ngraph reasoning tasks, capturing rich semantic information\nand leveraging pre-trained knowledge. However, they may\nface challenges related to scalability, memory limitations,\ncomputational complexity, and prompt design. 4. 1.",
+     "status": "REJECTED",
+     "confidence": 0.0
+    }
+   ]
+  },
+  {
+   "name": "Interpretability",
+   "count": 2,
+   "items": [
+    {
+     "subject": "Deep Models",
+     "description": "Deep models are not transparent and lack interpretability.",
+     "paper": "2002.00388v4",
+     "page": 18,
+     "evidence": "networks [18], graph\nconvolution networks [44], [60], [62], recurrent networks [45]\nand transformers [46], [59] to learn richer representation.\n\nThese deep models have achieved very competitive results,\nbut they are not transparent, and lack of interpretability. As\ndeep learning techniques are growing prosperity and gaining\nextensive superiority in many tasks, the recent trend is still\nlikely to focus on more powerful neural architectures or large-\nscale pre-training, while deep interpretable models remains a\nchallenge.",
+     "status": "REJECTED",
+     "confidence": 0.2763
+    },
+    {
+     "subject": "Dimension",
+     "description": "Unknowable dimension meaning leads to lack of interpretability",
+     "paper": "2502.00681v2",
+     "page": 1,
+     "evidence": "in a black-box fashion and the meaning of\nthe overall representation or any one dimension\nis unknowable, leading to a lack of interpretabil-\nity.\n\nMoreover, these continuous representations are\ntypically task-specific and show no significant ab-\nstraction at the representation level, making them\nnot robust enough to generalize to a variety of prac-\narXiv:2502. 00681v2  [cs. LG]  21 Jan 2026.",
+     "status": "REJECTED",
+     "confidence": 0.2932
+    }
+   ]
+  },
+  {
+   "name": "Computational Complexity",
+   "count": 2,
+   "items": [
+    {
+     "subject": "GNN-Based Methods",
+     "description": "GNN-based methods face challenges related to computational complexity.",
+     "paper": "2310.04835v3",
+     "page": 11,
+     "evidence": "to model the directed na-\nture of DKGs, making GNN-based methods explainability\nover DGKs, scalability and suitable for various applications.\n\nHowever, GNN-based methods may face challenges related\nto computational complexity and over-smoothing, and they\nare restricted by the original framework of GNN. 4. 2. 2\nLLM-Based Methods\nThe proposal of Large Language Models (LLMs) indicates\nthat general semantic knowledge which widely exists in\nopen source corpus can be encoded into the parameters of\nLLMs via pre-training and fine-tuning.",
+     "status": "REJECTED",
+     "confidence": 0.0749
+    },
+    {
+     "subject": "Large Language Model",
+     "description": "Large language models may face challenges related to computational complexity.",
+     "paper": "2310.04835v3",
+     "page": 9,
+     "evidence": "during pre-training to better cap-\nture the relationships between entities. This enables ERNIE\nto perform well on knowledge graph reasoning tasks.\n\nIn conclusion, large language models incorporating\nknowledge graph information show promise for knowledge\ngraph reasoning tasks, capturing rich semantic information\nand leveraging pre-trained knowledge. However, they may\nface challenges related to scalability, memory limitations,\ncomputational complexity, and prompt design. 4. 1.",
+     "status": "REJECTED",
+     "confidence": 0.0
+    }
+   ]
+  },
+  {
+   "name": "LLMs",
+   "count": 2,
+   "items": [
+    {
+     "subject": "Knowledge Induction",
+     "description": "Knowledge induction is a challenge that obstructs the direct application of LLMs.",
+     "paper": "2401.04507v1",
+     "page": 2,
+     "evidence": "has sparked significant interest in harnessing their potential across various natural and\nsocial science domains to address domain-specific tasks.\n\nHowever, some challenges, such as limited domain-specific\nexpertise, knowledge induction, and model complexity, represent pressing obstacles to the direct application of LLMs\nin these domains. 2.",
+     "status": "REJECTED",
+     "confidence": 0.1851
+    },
+    {
+     "subject": "Limited Domain-Specific Expertise",
+     "description": "Limited domain-specific expertise is a challenge that obstructs the direct application of LLMs.",
+     "paper": "2401.04507v1",
+     "page": 2,
+     "evidence": "has sparked significant interest in harnessing their potential across various natural and\nsocial science domains to address domain-specific tasks.\n\nHowever, some challenges, such as limited domain-specific\nexpertise, knowledge induction, and model complexity, represent pressing obstacles to the direct application of LLMs\nin these domains. 2.",
+     "status": "SUSPECTED",
+     "confidence": 0.4807
+    }
+   ]
+  },
+  {
+   "name": "Domain-Specific Tasks",
+   "count": 2,
+   "items": [
+    {
+     "subject": "Knowledge Induction",
+     "description": "Knowledge induction is an obstacle to addressing domain-specific tasks.",
+     "paper": "2401.04507v1",
+     "page": 2,
+     "evidence": "has sparked significant interest in harnessing their potential across various natural and\nsocial science domains to address domain-specific tasks.\n\nHowever, some challenges, such as limited domain-specific\nexpertise, knowledge induction, and model complexity, represent pressing obstacles to the direct application of LLMs\nin these domains. 2.",
+     "status": "REJECTED",
+     "confidence": 0.1664
+    },
+    {
+     "subject": "Limited Domain-Specific Expertise",
+     "description": "Limited domain-specific expertise is an obstacle to addressing domain-specific tasks.",
+     "paper": "2401.04507v1",
+     "page": 2,
+     "evidence": "has sparked significant interest in harnessing their potential across various natural and\nsocial science domains to address domain-specific tasks.\n\nHowever, some challenges, such as limited domain-specific\nexpertise, knowledge induction, and model complexity, represent pressing obstacles to the direct application of LLMs\nin these domains. 2.",
+     "status": "REJECTED",
+     "confidence": 0.3118
+    }
+   ]
+  }
+ ],
+ "_demo": true,
+ "_demo_note": "示例数据（demo）：为在缺少全量图谱时让页面能渲染而做的裁剪版，节点数/边数被人为缩小，所有数字不代表真实评测结果。完整数据请按 RUNBOOK.md 重建（tools/build_nebula_data.py 等）。"
+}

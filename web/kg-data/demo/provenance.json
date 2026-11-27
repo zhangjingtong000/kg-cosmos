@@ -1,0 +1,146 @@
+{
+ "generated_by": "tools/build_provenance_data.py",
+ "generated": "2026-09-21 11:04:57",
+ "note": "溯源数据来自 data/quality/metric-provenance.json；本文件只做裁剪，不含任何新算出来的数。",
+ "metrics": [
+  {
+   "key": "L1_entity_presence",
+   "label": "L1 实体存在",
+   "value": 0.9363964397401973,
+   "artifact": "l5-six-layer.json",
+   "path": "L1_entity_presence.rate",
+   "produced_by": "tools/l5_report.py",
+   "artifact_mtime": "2026-09-19 19:37:59"
+  },
+  {
+   "key": "L4_predicate_all",
+   "label": "L4 谓词落在本体",
+   "value": 0.994814912050407,
+   "artifact": "l5-six-layer.json",
+   "path": "L4_predicate.all",
+   "produced_by": "tools/l5_report.py",
+   "artifact_mtime": "2026-09-19 19:37:59"
+  },
+  {
+   "key": "L5_triplet_all",
+   "label": "L5 通过率",
+   "value": 0.636015577141857,
+   "artifact": "l5-six-layer.json",
+   "path": "L5_triplet.all",
+   "produced_by": "tools/l5_report.py",
+   "artifact_mtime": "2026-09-19 19:37:59"
+  },
+  {
+   "key": "L6_evidence_all",
+   "label": "L6 证据完整度",
+   "value": 1.0,
+   "artifact": "l5-six-layer.json",
+   "path": "L6_evidence.all",
+   "produced_by": "tools/l5_report.py",
+   "artifact_mtime": "2026-09-19 19:37:59"
+  },
+  {
+   "key": "L5_true_support_rate",
+   "label": "L5 真实支持率",
+   "value": 0.4003,
+   "artifact": "l5-validity-report.json",
+   "path": "true_support_rate",
+   "produced_by": "tools/l5_validity_report.py",
+   "artifact_mtime": "2026-09-19 19:38:08"
+  },
+  {
+   "key": "L5_ppv",
+   "label": "L5 PPV",
+   "value": 0.4967,
+   "artifact": "l5-validity-report.json",
+   "path": "ppv",
+   "produced_by": "tools/l5_validity_report.py",
+   "artifact_mtime": "2026-09-19 19:38:08"
+  },
+  {
+   "key": "L5_domain_auc",
+   "label": "L5 域内加权 AUC",
+   "value": 0.7074,
+   "artifact": "l5-validity-report.json",
+   "path": "in_domain_auc",
+   "produced_by": "tools/l5_validity_report.py",
+   "artifact_mtime": "2026-09-19 19:38:08"
+  },
+  {
+   "key": "L5_vs_human_kappa",
+   "label": "L5 与人工判定 κ",
+   "value": 0.2356,
+   "artifact": "l5-validity-report.json",
+   "path": "cohens_kappa",
+   "produced_by": "tools/l5_validity_report.py",
+   "artifact_mtime": "2026-09-19 19:38:08"
+  },
+  {
+   "key": "L5_annotator_kappa",
+   "label": "两个标注者之间 κ",
+   "value": 0.7222,
+   "artifact": "l5-annotator-agreement.json",
+   "path": "cohen_kappa",
+   "produced_by": "tools/check_l5_agreement.py",
+   "artifact_mtime": "2026-09-20 12:51:59"
+  },
+  {
+   "key": "L9_endpoint_recall",
+   "label": "L9 端点召回",
+   "value": 0.8621,
+   "artifact": "l9-recall.json",
+   "path": "endpoint_recall",
+   "produced_by": "tools/l9_recall.py",
+   "artifact_mtime": "2026-09-19 19:37:49"
+  },
+  {
+   "key": "L8_nodes",
+   "label": "图规模 · 节点",
+   "value": 20785,
+   "artifact": "l8-structure-audit.json",
+   "path": "scale.nodes",
+   "produced_by": "tools/l8_structure_audit.py",
+   "artifact_mtime": "2026-09-21 10:55:38"
+  },
+  {
+   "key": "edges_total",
+   "label": "评测全集 · 边",
+   "value": 45708,
+   "artifact": "l5-six-layer.json",
+   "path": "edges_total",
+   "produced_by": "tools/l5_report.py",
+   "artifact_mtime": "2026-09-19 19:37:59"
+  }
+ ],
+ "sources": [
+  {
+   "name": "graphs",
+   "files": 21,
+   "bytes": 93075291,
+   "mtime": "2026-09-19 19:30:26",
+   "sha1_16": "82a1c34731a6a3eb"
+  },
+  {
+   "name": "relation_verify_all",
+   "files": 1,
+   "bytes": 62216458,
+   "mtime": "2026-09-19 19:37:39",
+   "sha1_16": "dfaddccb5386dfc3"
+  },
+  {
+   "name": "force_full",
+   "files": 1,
+   "bytes": 3930637,
+   "mtime": "2026-09-19 19:38:16",
+   "sha1_16": "42a5430a4c4f2e22"
+  },
+  {
+   "name": "nebula",
+   "files": 1,
+   "bytes": 3609704,
+   "mtime": "2026-09-19 19:37:55",
+   "sha1_16": "b76e0e52b78b59e4"
+  }
+ ],
+ "caveat": "sources 是这一页所有数字共用的上游输入，不是逐指标的依赖边 —— 溯源产物里没有那层映射。"
+}

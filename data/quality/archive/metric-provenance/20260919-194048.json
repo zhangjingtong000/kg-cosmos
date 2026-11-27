@@ -1,0 +1,249 @@
+{
+  "generated": "2026-09-19 19:40:48",
+  "note": "数据源指纹 + 各指标读数。数据变了而指标没重跑时，python tools/metric_provenance.py 会把它们标为 stale。",
+  "sources": {
+    "graphs": {
+      "files": 21,
+      "bytes": 93075291,
+      "newest_mtime": "2026-09-19 19:30:26",
+      "sha1_16": "82a1c34731a6a3eb"
+    },
+    "relation_verify_all": {
+      "files": 1,
+      "bytes": 62216458,
+      "newest_mtime": "2026-09-19 19:37:39",
+      "sha1_16": "dfaddccb5386dfc3"
+    },
+    "nebula": {
+      "files": 1,
+      "bytes": 3609704,
+      "newest_mtime": "2026-09-19 19:37:55",
+      "sha1_16": "b76e0e52b78b59e4"
+    },
+    "force_full": {
+      "files": 1,
+      "bytes": 3930637,
+      "newest_mtime": "2026-09-19 19:38:16",
+      "sha1_16": "42a5430a4c4f2e22"
+    }
+  },
+  "metrics": {
+    "L1_entity_presence": {
+      "value": 0.9363964397401973,
+      "artifact": "l5-six-layer.json",
+      "path": "L1_entity_presence.rate",
+      "produced_by": "tools/l5_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "L2_merged_groups_cumulative": {
+      "value": 585,
+      "artifact": "l5-six-layer.json",
+      "path": "L2_entity_clustering.cumulative_merged_groups",
+      "produced_by": "tools/l2_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "L2_merged_groups_this_run": {
+      "value": 200,
+      "artifact": "l5-six-layer.json",
+      "path": "L2_entity_clustering.merged_groups.total_this_run",
+      "produced_by": "tools/l2_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "L2_names_after": {
+      "value": 15123,
+      "artifact": "l5-six-layer.json",
+      "path": "L2_entity_clustering.names_after",
+      "produced_by": "tools/l2_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "L3_endpoints_all": {
+      "value": 0.9648857967970595,
+      "artifact": "l5-six-layer.json",
+      "path": "L3_endpoints.all",
+      "produced_by": "tools/l5_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "L4_predicate_all": {
+      "value": 0.994814912050407,
+      "artifact": "l5-six-layer.json",
+      "path": "L4_predicate.all",
+      "produced_by": "tools/l5_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "L4_predicate_agreement": {
+      "value": 0.2573,
+      "artifact": "l4-predicate.json",
+      "path": "metrics.agreement_top1",
+      "produced_by": "tools/l4_predicate_report.py",
+      "artifact_mtime": "2026-09-12 20:23:46"
+    },
+    "L4_predicate_agreement_excl_ties": {
+      "value": 0.2577,
+      "artifact": "l4-predicate.json",
+      "path": "metrics.agreement_top1_excluding_ties",
+      "produced_by": "tools/l4_predicate_report.py",
+      "artifact_mtime": "2026-09-12 20:23:46"
+    },
+    "L4_predicate_macro_f1": {
+      "value": 0.1724,
+      "artifact": "l4-predicate.json",
+      "path": "metrics.macro_f1",
+      "produced_by": "tools/l4_predicate_report.py",
+      "artifact_mtime": "2026-09-12 20:23:46"
+    },
+    "L4_predicate_baseline_related_to": {
+      "value": 0.22,
+      "artifact": "l4-predicate.json",
+      "path": "metrics.baseline_related_to",
+      "produced_by": "tools/l4_predicate_report.py",
+      "artifact_mtime": "2026-09-12 20:23:46"
+    },
+    "L5_triplet_all": {
+      "value": 0.636015577141857,
+      "artifact": "l5-six-layer.json",
+      "path": "L5_triplet.all",
+      "produced_by": "tools/l5_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "L6_evidence_all": {
+      "value": 1.0,
+      "artifact": "l5-six-layer.json",
+      "path": "L6_evidence.all",
+      "produced_by": "tools/l5_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "hit_both_all": {
+      "value": 0.46582655115078325,
+      "artifact": "l5-six-layer.json",
+      "path": "hit_both.all",
+      "produced_by": "tools/l5_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "edges_total": {
+      "value": 45708,
+      "artifact": "l5-six-layer.json",
+      "path": "edges_total",
+      "produced_by": "tools/l5_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "edges_supported": {
+      "value": 29071,
+      "artifact": "l5-six-layer.json",
+      "path": "edges_supported",
+      "produced_by": "tools/l5_report.py",
+      "artifact_mtime": "2026-09-19 19:37:59"
+    },
+    "L7_created_by_direction": {
+      "value": 0.9244,
+      "artifact": "l7-direction-verification.json",
+      "path": "compliance_rate",
+      "produced_by": "tools/l7_direction_verify.py",
+      "artifact_mtime": "2026-09-19 19:37:45"
+    },
+    "L7_resolvable_edges": {
+      "value": 6309,
+      "artifact": "l7-direction-verification.json",
+      "path": "edges_resolvable",
+      "produced_by": "tools/l7_direction_verify.py",
+      "artifact_mtime": "2026-09-19 19:37:45"
+    },
+    "L8_clustering_vs_random": {
+      "value": 1150.05,
+      "artifact": "l8-structure-audit.json",
+      "path": "random_baseline.clustering_ratio_vs_random",
+      "produced_by": "tools/l8_structure_audit.py",
+      "artifact_mtime": "2026-09-19 19:38:07"
+    },
+    "L8_largest_component_pct": {
+      "value": 62.04,
+      "artifact": "l8-structure-audit.json",
+      "path": "connectivity.largest_component_pct",
+      "produced_by": "tools/l8_structure_audit.py",
+      "artifact_mtime": "2026-09-19 19:38:07"
+    },
+    "L8_isolated_nodes": {
+      "value": 7181,
+      "artifact": "l8-structure-audit.json",
+      "path": "connectivity.isolated_nodes",
+      "produced_by": "tools/l8_structure_audit.py",
+      "artifact_mtime": "2026-09-19 19:38:07"
+    },
+    "L8_nodes": {
+      "value": 20785,
+      "artifact": "l8-structure-audit.json",
+      "path": "scale.nodes",
+      "produced_by": "tools/l8_structure_audit.py",
+      "artifact_mtime": "2026-09-19 19:38:07"
+    },
+    "L9_endpoint_recall": {
+      "value": 0.8621,
+      "artifact": "l9-recall.json",
+      "path": "endpoint_recall",
+      "produced_by": "tools/l9_recall.py",
+      "artifact_mtime": "2026-09-19 19:37:49"
+    },
+    "L9_gold_entities": {
+      "value": 29,
+      "artifact": "l9-recall.json",
+      "path": "gold_entities",
+      "produced_by": "tools/l9_recall.py",
+      "artifact_mtime": "2026-09-19 19:37:49"
+    },
+    "l3_backfill_noise_share": {
+      "value": 0.0358,
+      "artifact": "l3-backfill-precision-sample.json",
+      "path": "heuristic_noise_share",
+      "produced_by": "tools/l3_backfill_precision.py",
+      "artifact_mtime": "2026-09-12 16:12:39"
+    },
+    "L5_true_support_rate": {
+      "value": 0.4003,
+      "artifact": "l5-validity-report.json",
+      "path": "true_support_rate",
+      "produced_by": "tools/l5_validity_report.py",
+      "artifact_mtime": "2026-09-19 19:38:08"
+    },
+    "L5_ppv": {
+      "value": 0.4967,
+      "artifact": "l5-validity-report.json",
+      "path": "ppv",
+      "produced_by": "tools/l5_validity_report.py",
+      "artifact_mtime": "2026-09-19 19:38:08"
+    },
+    "L5_domain_auc": {
+      "value": 0.7074,
+      "artifact": "l5-validity-report.json",
+      "path": "in_domain_auc",
+      "produced_by": "tools/l5_validity_report.py",
+      "artifact_mtime": "2026-09-19 19:38:08"
+    },
+    "L5_vs_human_kappa": {
+      "value": 0.2356,
+      "artifact": "l5-validity-report.json",
+      "path": "cohens_kappa",
+      "produced_by": "tools/l5_validity_report.py",
+      "artifact_mtime": "2026-09-19 19:38:08"
+    },
+    "L5_annotator_kappa": {
+      "value": 0.7222,
+      "artifact": "l5-annotator-agreement.json",
+      "path": "cohen_kappa",
+      "produced_by": "tools/check_l5_agreement.py",
+      "artifact_mtime": "2026-09-12 22:37:57"
+    },
+    "L7_role_false_positive_rate": {
+      "value": 0.0862,
+      "artifact": "l7-role-violation-audit.json",
+      "path": "false_positive_rate",
+      "produced_by": "tools/check_l7_role_violation.py",
+      "artifact_mtime": "2026-09-12 22:04:27"
+    },
+    "L7_role_predicate_wrong_rate": {
+      "value": 0.5862,
+      "artifact": "l7-role-violation-audit.json",
+      "path": "predicate_wrong_rate",
+      "produced_by": "tools/check_l7_role_violation.py",
+      "artifact_mtime": "2026-09-12 22:04:27"
+    }
+  }
+}

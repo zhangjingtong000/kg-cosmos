@@ -95,13 +95,21 @@ def check(port):
     print('=== 前置检查 ===\n')
 
     print('[文件]')
+    demo_used = []
     for d, name, why in REQUIRED:
         p = d / name
-        mark = '✅' if p.exists() else '❌'
-        size = f'{p.stat().st_size/1024:.0f} KB' if p.exists() else '缺失'
-        print(f'  {mark} {name:24s} {size:>10s}  （{why}）')
-        if not p.exists():
+        demo = d / 'demo' / name
+        if p.exists():
+            mark, size = '✅', f'{p.stat().st_size/1024:.0f} KB'
+        elif demo.exists():
+            # 精简版不带全量图谱：示例数据能顶上来，页面就不会白屏。
+            # 但必须显式标出来 —— 否则"18 个社区"这类数字会被当成真实结果。
+            mark, size = '⚠️', f'示例 {demo.stat().st_size/1024:.0f} KB'
+            demo_used.append(name)
+        else:
+            mark, size = '❌', '缺失'
             ok = False
+        print(f'  {mark} {name:24s} {size:>10s}  （{why}）')
 
     print('\n[可选]')
     n_q = len(list(QUALITY.glob('*.json'))) if QUALITY.exists() else 0
@@ -160,6 +168,9 @@ def check(port):
 
     print()
     print('结论：' + ('可以启动' if ok else '有阻塞项，见上面 ❌'))
+    if demo_used:
+        print(f'     （{len(demo_used)} 个文件走 web/kg-data/demo/ 示例数据：'
+              f'页面能渲染，但规模不是全量 —— 完整数据见 RUNBOOK.md）')
     if not ollama_up:
         print('      （Ollama 未起不算阻塞 —— 但演示上传/问答前请先起它）')
     return ok
@@ -251,7 +262,21 @@ def main():
                 exact = BLOCKED_EXACT_LOWER if _CI else BLOCKED_EXACT
                 if key.startswith(blocked) or key in exact:
                     return os.path.join(self.directory, '__blocked_by_serve__')
-                return _real_translate(self, path)
+                real = _real_translate(self, path)
+                # ── 精简版的数据缺口：kg-data/<name> 缺失时回退示例数据 ──
+                # 缺了全量图谱，十几个页面本来只剩一句「数据加载失败」。
+                # 示例数据在 web/kg-data/demo/（规模被裁过，不代表真实结果），
+                # 只对 /web/kg-data/<裸文件名>.json 生效，不影响其它路径。
+                if not os.path.exists(real):
+                    prefix = '/web/kg-data/'
+                    if norm.startswith(prefix):
+                        rest = norm[len(prefix):]
+                        if rest and '/' not in rest and rest.endswith('.json'):
+                            cand = os.path.join(self.directory, 'web', 'kg-data',
+                                                'demo', rest)
+                            if os.path.exists(cand):
+                                return cand
+                return real
 
             def list_directory(self, path):
                 """**不列目录**。

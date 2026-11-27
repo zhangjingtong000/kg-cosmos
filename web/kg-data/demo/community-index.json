@@ -1,0 +1,148 @@
+{
+  "communities": [
+    {
+      "i": 0,
+      "id": "c0",
+      "name": "Triple",
+      "nodes": 1200,
+      "edges": 3200,
+      "radius": 189.3
+    },
+    {
+      "i": 1,
+      "id": "c1",
+      "name": "ACL",
+      "nodes": 1200,
+      "edges": 1804,
+      "radius": 189.3
+    },
+    {
+      "i": 2,
+      "id": "c2",
+      "name": "Knowledge Graphs",
+      "nodes": 950,
+      "edges": 1346,
+      "radius": 171.8
+    },
+    {
+      "i": 3,
+      "id": "c3",
+      "name": "Zero-Shot Learning",
+      "nodes": 800,
+      "edges": 1587,
+      "radius": 160.1
+    },
+    {
+      "i": 4,
+      "id": "c4",
+      "name": "Large Language Model",
+      "nodes": 787,
+      "edges": 1077,
+      "radius": 159.0
+    },
+    {
+      "i": 5,
+      "id": "c5",
+      "name": "Convolutional Neural Networks",
+      "nodes": 684,
+      "edges": 1058,
+      "radius": 150.3
+    },
+    {
+      "i": 6,
+      "id": "c6",
+      "name": "BERT",
+      "nodes": 658,
+      "edges": 927,
+      "radius": 148.0
+    },
+    {
+      "i": 7,
+      "id": "c7",
+      "name": "Models",
+      "nodes": 645,
+      "edges": 963,
+      "radius": 146.8
+    },
+    {
+      "i": 8,
+      "id": "c8",
+      "name": "Relation Extraction",
+      "nodes": 614,
+      "edges": 882,
+      "radius": 144.0
+    },
+    {
+      "i": 9,
+      "id": "c9",
+      "name": "Embeddings",
+      "nodes": 613,
+      "edges": 913,
+      "radius": 143.9
+    },
+    {
+      "i": 10,
+      "id": "c10",
+      "name": "Ontology",
+      "nodes": 562,
+      "edges": 859,
+      "radius": 139.1
+    },
+    {
+      "i": 11,
+      "id": "c11",
+      "name": "Entity",
+      "nodes": 512,
+      "edges": 681,
+      "radius": 134.1
+    },
+    {
+      "i": 12,
+      "id": "c12",
+      "name": "Temporal Knowledge Graph",
+      "nodes": 497,
+      "edges": 724,
+      "radius": 132.6
+    },
+    {
+      "i": 13,
+      "id": "c13",
+      "name": "Survey",
+      "nodes": 462,
+      "edges": 766,
+      "radius": 128.9
+    },
+    {
+      "i": 14,
+      "id": "c14",
+      "name": "ArXiv",
+      "nodes": 423,
+      "edges": 483,
+      "radius": 124.6
+    },
+    {
+      "i": 15,
+      "id": "c15",
+      "name": "Advances in Neural Information Processing Systems",
+      "nodes": 361,
+      "edges": 402,
+      "radius": 117.4
+    },
+    {
+      "i": 16,
+      "id": "c16",
+      "name": "TechGPT-2.0",
+      "nodes": 353,
+      "edges": 500,
+      "radius": 116.4
+    },
+    {
+      "i": 17,
+      "id": "c17",
+      "name": "Entities",
+      "nodes": 326,
+      "edges": 413,
+      "radius": 113.1
+    }
+  ]
+}

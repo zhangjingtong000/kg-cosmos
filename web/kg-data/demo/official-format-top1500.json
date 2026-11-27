@@ -1,0 +1,167 @@
+{
+ "nodes": [
+  {
+   "id": "FR",
+   "user": "community-6",
+   "description": "Metric · 连接度 12",
+   "type": "Metric",
+   "degree": 12,
+   "community": 6
+  },
+  {
+   "id": "Nucleic Acids Research",
+   "user": "community-13",
+   "description": "Document · 连接度 13",
+   "type": "Document",
+   "degree": 13,
+   "community": 13
+  },
+  {
+   "id": "Latent Structure Perceptron with Feature Induction for Unrestricted Coreference Resolution",
+   "user": "unclustered",
+   "description": "Document · 连接度 6",
+   "type": "Document",
+   "degree": 6,
+   "community": -1
+  },
+  {
+   "id": "Zero-Shot QA",
+   "user": "community-8",
+   "description": "Concept · 连接度 10",
+   "type": "Concept",
+   "degree": 10,
+   "community": 8
+  },
+  {
+   "id": "Table 2",
+   "user": "community-0",
+   "description": "Document · 连接度 14",
+   "type": "Document",
+   "degree": 14,
+   "community": 0
+  },
+  {
+   "id": "Codebrain",
+   "user": "unclustered",
+   "description": "System · 连接度 6",
+   "type": "System",
+   "degree": 6,
+   "community": -1
+  },
+  {
+   "id": "GPT-4",
+   "user": "community-2",
+   "description": "System · 连接度 10",
+   "type": "System",
+   "degree": 10,
+   "community": 2
+  },
+  {
+   "id": "Language Models Are Unsupervised Multitask Learners",
+   "user": "community-11",
+   "description": "Document · 连接度 16",
+   "type": "Document",
+   "degree": 16,
+   "community": 11
+  },
+  {
+   "id": "CommonsenseQA",
+   "user": "community-8",
+   "description": "Dataset · 连接度 8",
+   "type": "Dataset",
+   "degree": 8,
+   "community": 8
+  },
+  {
+   "id": "Kim Et Al.",
+   "user": "unclustered",
+   "description": "Person · 连接度 6",
+   "type": "Person",
+   "degree": 6,
+   "community": -1
+  },
+  {
+   "id": "Similarity Score",
+   "user": "unclustered",
+   "description": "Metric · 连接度 7",
+   "type": "Metric",
+   "degree": 7,
+   "community": -1
+  },
+  {
+   "id": "IEEE Trans. Knowl. Data Eng.",
+   "user": "community-3",
+   "description": "Document · 连接度 12",
+   "type": "Document",
+   "degree": 12,
+   "community": 3
+  },
+  {
+   "id": "Modeling Relational Data with Graph Convolutional Networks",
+   "user": "unclustered",
+   "description": "Document · 连接度 15",
+   "type": "Document",
+   "degree": 15,
+   "community": -1
+  },
+  {
+   "id": "Attention Mechanisms",
+   "user": "community-8",
+   "description": "Component · 连接度 8",
+   "type": "Component",
+   "degree": 8,
+   "community": 8
+  },
+  {
+   "id": "Input",
+   "user": "community-12",
+   "description": "Concept · 连接度 21",
+   "type": "Concept",
+   "degree": 21,
+   "community": 12
+  },
+  {
+   "id": "IEEE",
+   "user": "unclustered",
+   "description": "Organization · 连接度 22",
+   "type": "Organization",
+   "degree": 22,
+   "community": -1
+  },
+  {
+   "id": "LoRA",
+   "user": "community-6",
+   "description": "Method · 连接度 13",
+   "type": "Method",
+   "degree": 13,
+   "community": 6
+  },
+  {
+   "id": "FB13",
+   "user": "community-0",
+   "description": "Dataset · 连接度 10",
+   "type": "Dataset",
+   "degree": 10,
+   "community": 0
+  },
+  {
+   "id": "Commitment Loss",
+   "user": "community-6",
+   "description": "Metric · 连接度 6",
+   "type": "Metric",
+   "degree": 6,
+   "community": 6
+  },
+  {
+   "id": "Relation Paths",
+   "user": "community-0",
+   "description": "Artifact · 连接度 13",
+   "type": "Artifact",
+   "degree": 13,
+   "community": 0
+  }
+ ],
+ "links": [],
+ "_demo": true,
+ "_demo_note": "示例数据（demo）：为在缺少全量图谱时让页面能渲染而做的裁剪版，节点数/边数被人为缩小，所有数字不代表真实评测结果。完整数据请按 RUNBOOK.md 重建（tools/build_nebula_data.py 等）。"
+}

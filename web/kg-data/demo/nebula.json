@@ -1,0 +1,1071 @@
+{
+ "meta": {
+  "nodes": 20,
+  "edges": 32,
+  "communities": 9,
+  "dust": 1891,
+  "modularity": 0.6824,
+  "generated_by": "tools/build_nebula_data.py",
+  "papers": [
+   "1703.08098v9",
+   "2002.00388v4",
+   "2012.00456v1"
+  ],
+  "edges_multi_paper": 0
+ },
+ "type_colors": {
+  "Person": "#ff7f7f",
+  "Concept": "#7fb3ff",
+  "Method": "#7fffb3",
+  "Document": "#ffd97f",
+  "Process": "#c77fff",
+  "System": "#7fffff",
+  "Artifact": "#ff9f7f",
+  "Component": "#b3ff7f",
+  "Event": "#ff7fd9",
+  "Metric": "#7fd9ff",
+  "Dataset": "#d9ff7f",
+  "Organization": "#ffbf7f",
+  "Location": "#9f7fff",
+  "Tool": "#7fffd9",
+  "Material": "#d9d9d9"
+ },
+ "communities": [
+  {
+   "id": 0,
+   "size": 5,
+   "center": [
+    49.1,
+    0.0,
+    265.5
+   ],
+   "radius": 1133.6,
+   "types": {
+    "Dataset": 1,
+    "Process": 1,
+    "Concept": 1,
+    "Method": 2
+   },
+   "core": [
+    {
+     "id": "Triple",
+     "degree": 197
+    },
+    {
+     "id": "Entity",
+     "degree": 177
+    },
+    {
+     "id": "Embeddings",
+     "degree": 171
+    },
+    {
+     "id": "Link Prediction",
+     "degree": 145
+    },
+    {
+     "id": "Relation",
+     "degree": 145
+    },
+    {
+     "id": "Scoring Function",
+     "degree": 133
+    },
+    {
+     "id": "TransE",
+     "degree": 131
+    },
+    {
+     "id": "Entities",
+     "degree": 121
+    },
+    {
+     "id": "KG Completion",
+     "degree": 95
+    },
+    {
+     "id": "Neural Networks",
+     "degree": 84
+    },
+    {
+     "id": "FB15k",
+     "degree": 79
+    },
+    {
+     "id": "FB15k-237",
+     "degree": 78
+    }
+   ],
+   "label": "Triple / Entity / Embeddings"
+  },
+  {
+   "id": 2,
+   "size": 1,
+   "center": [
+    10.0,
+    114.2,
+    262.9
+   ],
+   "radius": 923.5,
+   "types": {
+    "Concept": 1
+   },
+   "core": [
+    {
+     "id": "Knowledge Graphs",
+     "degree": 1494
+    },
+    {
+     "id": "Reasoning",
+     "degree": 59
+    },
+    {
+     "id": "Concept",
+     "degree": 41
+    },
+    {
+     "id": "Ontologies",
+     "degree": 41
+    },
+    {
+     "id": "Knowledge Representation",
+     "degree": 40
+    },
+    {
+     "id": "Automated Driving",
+     "degree": 37
+    },
+    {
+     "id": "Property",
+     "degree": 36
+    },
+    {
+     "id": "Relational Facts",
+     "degree": 28
+    },
+    {
+     "id": "Multi-Task Learning",
+     "degree": 26
+    },
+    {
+     "id": "Semantics",
+     "degree": 24
+    },
+    {
+     "id": "AD",
+     "degree": 22
+    },
+    {
+     "id": "Knowledge-Aware Applications",
+     "degree": 22
+    }
+   ],
+   "label": "Knowledge Graphs / Reasoning / Concept"
+  },
+  {
+   "id": 3,
+   "size": 1,
+   "center": [
+    84.2,
+    -109.8,
+    260.7
+   ],
+   "radius": 856.9,
+   "types": {
+    "Concept": 1
+   },
+   "core": [
+    {
+     "id": "Zero-Shot Learning",
+     "degree": 174
+    },
+    {
+     "id": "WordNet",
+     "degree": 90
+    },
+    {
+     "id": "FSL",
+     "degree": 88
+    },
+    {
+     "id": "KGs",
+     "degree": 76
+    },
+    {
+     "id": "Knowledge Extraction",
+     "degree": 72
+    },
+    {
+     "id": "Machine Learning",
+     "degree": 64
+    },
+    {
+     "id": "Auxiliary Information",
+     "degree": 61
+    },
+    {
+     "id": "Few-Shot Learning",
+     "degree": 55
+    },
+    {
+     "id": "Class",
+     "degree": 54
+    },
+    {
+     "id": "Class Encodings",
+     "degree": 53
+    },
+    {
+     "id": "Natural Language Processing",
+     "degree": 53
+    },
+    {
+     "id": "Question Answering",
+     "degree": 48
+    }
+   ],
+   "label": "Zero-Shot Learning / WordNet / FSL"
+  },
+  {
+   "id": 9,
+   "size": 1,
+   "center": [
+    -233.2,
+    -96.3,
+    236.1
+   ],
+   "radius": 626.6,
+   "types": {
+    "Process": 1
+   },
+   "core": [
+    {
+     "id": "Relation Extraction",
+     "degree": 190
+    },
+    {
+     "id": "Knowledge Graph Completion",
+     "degree": 138
+    },
+    {
+     "id": "Knowledge Acquisition",
+     "degree": 64
+    },
+    {
+     "id": "Coreference Resolution",
+     "degree": 59
+    },
+    {
+     "id": "Text",
+     "degree": 43
+    },
+    {
+     "id": "Open Information Extraction",
+     "degree": 27
+    },
+    {
+     "id": "SimKGC",
+     "degree": 25
+    },
+    {
+     "id": "Knowitall",
+     "degree": 23
+    },
+    {
+     "id": "Embedding Learning",
+     "degree": 20
+    },
+    {
+     "id": "Neural Coreference Resolution",
+     "degree": 20
+    },
+    {
+     "id": "Knowledge Refinement",
+     "degree": 16
+    },
+    {
+     "id": "TextRunner",
+     "degree": 16
+    }
+   ],
+   "label": "Relation Extraction / Knowledge Graph Completion / Knowledge Acquisition"
+  },
+  {
+   "id": 11,
+   "size": 1,
+   "center": [
+    85.4,
+    -272.1,
+    223.4
+   ],
+   "radius": 572.6,
+   "types": {
+    "Document": 1
+   },
+   "core": [
+    {
+     "id": "Survey",
+     "degree": 213
+    },
+    {
+     "id": "Knowledge Graph Construction",
+     "degree": 130
+    },
+    {
+     "id": "Chen Et Al.",
+     "degree": 52
+    },
+    {
+     "id": "KG Construction",
+     "degree": 46
+    },
+    {
+     "id": "AutoSchemaKG",
+     "degree": 37
+    },
+    {
+     "id": "Pan Et Al. 2023",
+     "degree": 19
+    },
+    {
+     "id": "Wu et al.",
+     "degree": 19
+    },
+    {
+     "id": "Evaluation",
+     "degree": 18
+    },
+    {
+     "id": "Extractive KG Summarization",
+     "degree": 18
+    },
+    {
+     "id": "KG Application",
+     "degree": 18
+    },
+    {
+     "id": "Survey Paper",
+     "degree": 18
+    },
+    {
+     "id": "Large Language Models And Knowledge Graphs Opportunities And Challenges",
+     "degree": 16
+    }
+   ],
+   "label": "Survey / Knowledge Graph Construction / Chen Et Al."
+  },
+  {
+   "id": 12,
+   "size": 1,
+   "center": [
+    -260.5,
+    151.0,
+    216.2
+   ],
+   "radius": 570.2,
+   "types": {
+    "Concept": 1
+   },
+   "core": [
+    {
+     "id": "Relationship",
+     "degree": 63
+    },
+    {
+     "id": "Temporal Knowledge Graph",
+     "degree": 56
+    },
+    {
+     "id": "Facts",
+     "degree": 50
+    },
+    {
+     "id": "Dynamic Knowledge Graph",
+     "degree": 42
+    },
+    {
+     "id": "Temporal Knowledge Graph Completion",
+     "degree": 40
+    },
+    {
+     "id": "Temporal Knowledge Graphs",
+     "degree": 37
+    },
+    {
+     "id": "Event KG",
+     "degree": 30
+    },
+    {
+     "id": "Temporal Information",
+     "degree": 29
+    },
+    {
+     "id": "DKG",
+     "degree": 27
+    },
+    {
+     "id": "Events",
+     "degree": 27
+    },
+    {
+     "id": "Knowledge Reasoning",
+     "degree": 27
+    },
+    {
+     "id": "Event Knowledge Graph",
+     "degree": 26
+    }
+   ],
+   "label": "Relationship / Temporal Knowledge Graph / Facts"
+  },
+  {
+   "id": 17,
+   "size": 6,
+   "center": [
+    -374.8,
+    -15.5,
+    171.9
+   ],
+   "radius": 505.8,
+   "types": {
+    "Concept": 3,
+    "Unknown": 1,
+    "Tool": 1,
+    "Person": 1
+   },
+   "core": [
+    {
+     "id": "Named Entity Recognition",
+     "degree": 148
+    },
+    {
+     "id": "Entity Linking",
+     "degree": 55
+    },
+    {
+     "id": "Entity Typing",
+     "degree": 51
+    },
+    {
+     "id": "Pre-Trained Language Models",
+     "degree": 50
+    },
+    {
+     "id": "Unstructured Data",
+     "degree": 23
+    },
+    {
+     "id": "Semi-Structured Data",
+     "degree": 18
+    },
+    {
+     "id": "Person",
+     "degree": 17
+    },
+    {
+     "id": "Sentence",
+     "degree": 16
+    },
+    {
+     "id": "GloVe",
+     "degree": 15
+    },
+    {
+     "id": "Self-Attention Mechanism",
+     "degree": 15
+    },
+    {
+     "id": "Word2Vec",
+     "degree": 15
+    },
+    {
+     "id": "Content Extraction",
+     "degree": 13
+    }
+   ],
+   "label": "Named Entity Recognition / Entity Linking / Entity Typing"
+  },
+  {
+   "id": 29,
+   "size": 1,
+   "center": [
+    454.3,
+    -238.8,
+    8.6
+   ],
+   "radius": 391.2,
+   "types": {
+    "Artifact": 1
+   },
+   "core": [
+    {
+     "id": "RAKG",
+     "degree": 76
+    },
+    {
+     "id": "KGGen",
+     "degree": 46
+    },
+    {
+     "id": "GraphRAG",
+     "degree": 24
+    },
+    {
+     "id": "Relationship Networks",
+     "degree": 16
+    },
+    {
+     "id": "Aligning Vision to Language: Annotation-Free Multimodal Knowledge Graph Construction for Enhanced LLMs Reasoning",
+     "degree": 12
+    },
+    {
+     "id": "RAKG Framework",
+     "degree": 12
+    },
+    {
+     "id": "RAKG Model",
+     "degree": 12
+    },
+    {
+     "id": "Adult Butterfly",
+     "degree": 10
+    },
+    {
+     "id": "Corpus Retrospective Retrieval",
+     "degree": 10
+    },
+    {
+     "id": "OntoRAG",
+     "degree": 10
+    },
+    {
+     "id": "Structural Information",
+     "degree": 10
+    },
+    {
+     "id": "Entity Coverage",
+     "degree": 9
+    }
+   ],
+   "label": "RAKG / KGGen / GraphRAG"
+  },
+  {
+   "id": 33,
+   "size": 3,
+   "center": [
+    -429.4,
+    332.6,
+    -63.8
+   ],
+   "radius": 370.7,
+   "types": {
+    "Organization": 1,
+    "Person": 1,
+    "Location": 1
+   },
+   "core": [
+    {
+     "id": "User",
+     "degree": 25
+    },
+    {
+     "id": "Query",
+     "degree": 24
+    },
+    {
+     "id": "Weights",
+     "degree": 19
+    },
+    {
+     "id": "Search Personalization",
+     "degree": 18
+    },
+    {
+     "id": "Query Logs",
+     "degree": 13
+    },
+    {
+     "id": "A Capsule Network-based Embedding Model for Knowledge Graph Completion and Search Personalization",
+     "degree": 12
+    },
+    {
+     "id": "A Novel Embedding Model for Knowledge Base Completion Based on Convolutional Neural Network",
+     "degree": 12
+    },
+    {
+     "id": "Category",
+     "degree": 12
+    },
+    {
+     "id": "Ours",
+     "degree": 11
+    },
+    {
+     "id": "Outdegree",
+     "degree": 11
+    },
+    {
+     "id": "A convolutional neural network-based model for knowledge base completion and its application to search personalization",
+     "degree": 10
+    },
+    {
+     "id": "Dat Quoc Nguyen",
+     "degree": 9
+    }
+   ],
+   "label": "User / Query / Weights"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "Knowledge Graphs",
+   "t": "Concept",
+   "c": 2,
+   "d": 1494,
+   "x": -281.09,
+   "y": -25.44,
+   "z": 285.29
+  },
+  {
+   "id": "Knowledge Graph Completion",
+   "t": "Process",
+   "c": 9,
+   "d": 138,
+   "x": -96.8,
+   "y": 204.57,
+   "z": 273.09
+  },
+  {
+   "id": "Link Prediction",
+   "t": "Method",
+   "c": 0,
+   "d": 145,
+   "x": 628.47,
+   "y": -117.29,
+   "z": 323.58
+  },
+  {
+   "id": "Embedding Models",
+   "t": "Method",
+   "c": 0,
+   "d": 61,
+   "x": -579.37,
+   "y": -357.97,
+   "z": 812.11
+  },
+  {
+   "id": "Relationship",
+   "t": "Concept",
+   "c": 12,
+   "d": 63,
+   "x": -369.29,
+   "y": 319.31,
+   "z": 171.61
+  },
+  {
+   "id": "Natural Language Processing",
+   "t": "Concept",
+   "c": 3,
+   "d": 53,
+   "x": 228.61,
+   "y": 546.27,
+   "z": 111.33
+  },
+  {
+   "id": "Survey",
+   "t": "Document",
+   "c": 11,
+   "d": 213,
+   "x": 26.41,
+   "y": -432.25,
+   "z": 115.01
+  },
+  {
+   "id": "Dat Quoc Nguyen",
+   "t": "Person",
+   "c": 33,
+   "d": 9,
+   "x": -242.81,
+   "y": 234.49,
+   "z": 131.36
+  },
+  {
+   "id": "VinAI Research",
+   "t": "Organization",
+   "c": 33,
+   "d": 2,
+   "x": -501.01,
+   "y": 170.44,
+   "z": -368.1
+  },
+  {
+   "id": "Vietnam",
+   "t": "Location",
+   "c": 33,
+   "d": 1,
+   "x": -256.81,
+   "y": 408.26,
+   "z": -372.18
+  },
+  {
+   "id": "Experimental Results",
+   "t": "Artifact",
+   "c": 29,
+   "d": 5,
+   "x": 196.59,
+   "y": -451.71,
+   "z": 177.7
+  },
+  {
+   "id": "Benchmark Dataset",
+   "t": "Dataset",
+   "c": 0,
+   "d": 14,
+   "x": -420.94,
+   "y": 67.92,
+   "z": 1237.13
+  },
+  {
+   "id": "Entity",
+   "t": "Concept",
+   "c": 0,
+   "d": 177,
+   "x": -199.06,
+   "y": 301.91,
+   "z": 535.32
+  },
+  {
+   "id": "Entity Prediction",
+   "t": "Process",
+   "c": 0,
+   "d": 33,
+   "x": -279.8,
+   "y": -769.71,
+   "z": 832.1
+  },
+  {
+   "id": "Word2Vec",
+   "t": "Tool",
+   "c": 17,
+   "d": 15,
+   "x": -490.22,
+   "y": 184.89,
+   "z": -240.35
+  },
+  {
+   "id": "King",
+   "t": "Concept",
+   "c": 17,
+   "d": 3,
+   "x": -0.89,
+   "y": -343.3,
+   "z": 215.89
+  },
+  {
+   "id": "Man",
+   "t": "Concept",
+   "c": 17,
+   "d": 4,
+   "x": 101.05,
+   "y": 121.1,
+   "z": 128.16
+  },
+  {
+   "id": "Queen",
+   "t": "Concept",
+   "c": 17,
+   "d": 3,
+   "x": 70.72,
+   "y": 88.09,
+   "z": -28.03
+  },
+  {
+   "id": "Woman",
+   "t": "Unknown",
+   "c": 17,
+   "d": 4,
+   "x": -363.07,
+   "y": 250.99,
+   "z": -247.4
+  },
+  {
+   "id": "Mikolov et al.",
+   "t": "Person",
+   "c": 17,
+   "d": 2,
+   "x": -296.66,
+   "y": 474.41,
+   "z": 99.28
+  }
+ ],
+ "edges": [
+  [
+   "Knowledge Graphs",
+   "Knowledge Graph Completion",
+   "RELATED_TO"
+  ],
+  [
+   "Knowledge Graph Completion",
+   "Link Prediction",
+   "RELATED_TO"
+  ],
+  [
+   "Embedding Models",
+   "Knowledge Graph Completion",
+   "APPLIES_TO"
+  ],
+  [
+   "Embedding Models",
+   "Relationship",
+   "RELATED_TO"
+  ],
+  [
+   "Knowledge Graphs",
+   "Natural Language Processing",
+   "USES"
+  ],
+  [
+   "Survey",
+   "Embedding Models",
+   "RELATED_TO"
+  ],
+  [
+   "Survey",
+   "Knowledge Graph Completion",
+   "RELATED_TO"
+  ],
+  [
+   "Dat Quoc Nguyen",
+   "Survey",
+   "CREATED_BY"
+  ],
+  [
+   "Dat Quoc Nguyen",
+   "VinAI Research",
+   "PART_OF"
+  ],
+  [
+   "VinAI Research",
+   "Vietnam",
+   "LOCATED_AT"
+  ],
+  [
+   "Knowledge Graph Completion",
+   "Knowledge Graphs",
+   "PART_OF"
+  ],
+  [
+   "Embedding Models",
+   "Knowledge Graph Completion",
+   "USES"
+  ],
+  [
+   "Survey",
+   "Embedding Models",
+   "EVALUATES"
+  ],
+  [
+   "Survey",
+   "Experimental Results",
+   "PRODUCES"
+  ],
+  [
+   "Experimental Results",
+   "Benchmark Dataset",
+   "MEASURES"
+  ],
+  [
+   "Embedding Models",
+   "Entity",
+   "APPLIES_TO"
+  ],
+  [
+   "Embedding Models",
+   "Relationship",
+   "APPLIES_TO"
+  ],
+  [
+   "Entity Prediction",
+   "Knowledge Graph Completion",
+   "RELATED_TO"
+  ],
+  [
+   "Survey",
+   "Knowledge Graph Completion",
+   "SUPPORTS"
+  ],
+  [
+   "Link Prediction",
+   "Entity Prediction",
+   "RELATED_TO"
+  ],
+  [
+   "Embedding Models",
+   "Link Prediction",
+   "USES"
+  ],
+  [
+   "Embedding Models",
+   "Entity Prediction",
+   "USES"
+  ],
+  [
+   "Word2Vec",
+   "Embedding Models",
+   "PART_OF"
+  ],
+  [
+   "Word2Vec",
+   "King",
+   "PRODUCES"
+  ],
+  [
+   "Word2Vec",
+   "Man",
+   "PRODUCES"
+  ],
+  [
+   "Word2Vec",
+   "Queen",
+   "PRODUCES"
+  ],
+  [
+   "Word2Vec",
+   "Woman",
+   "PRODUCES"
+  ],
+  [
+   "King",
+   "Man",
+   "RELATED_TO"
+  ],
+  [
+   "Queen",
+   "Woman",
+   "RELATED_TO"
+  ],
+  [
+   "King",
+   "Queen",
+   "RELATED_TO"
+  ],
+  [
+   "Man",
+   "Woman",
+   "RELATED_TO"
+  ],
+  [
+   "Word2Vec",
+   "Mikolov et al.",
+   "CREATED_BY"
+  ]
+ ],
+ "edge_papers": [
+  [
+   0,
+   6
+  ],
+  [
+   0,
+   1,
+   3
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0,
+   7
+  ],
+  [
+   0
+  ],
+  [
+   0,
+   6
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0,
+   3
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0,
+   1
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0,
+   6
+  ],
+  [
+   0
+  ]
+ ],
+ "_demo": true,
+ "_demo_note": "示例数据（demo）：为在缺少全量图谱时让页面能渲染而做的裁剪版，节点数/边数被人为缩小，所有数字不代表真实评测结果。完整数据请按 RUNBOOK.md 重建（tools/build_nebula_data.py 等）。"
+}

@@ -1,0 +1,407 @@
+{
+ "id": "c0",
+ "name": "Triple",
+ "color": "#7ecbff",
+ "size": 3.4,
+ "entityCount": 20,
+ "typeCount": {
+  "Concept": 5,
+  "Person": 7,
+  "Unknown": 2,
+  "Method": 6
+ },
+ "core": [
+  {
+   "id": "Knowledge Graph Embeddings",
+   "degree": 167
+  },
+  {
+   "id": "Relation",
+   "degree": 139
+  },
+  {
+   "id": "Scoring Function",
+   "degree": 128
+  }
+ ],
+ "meta": {
+  "nodes": 20,
+  "edges": 22,
+  "radius": 189.3,
+  "shown": 20,
+  "total": 20,
+  "papers": [
+   "1703.08098v9",
+   "2002.00388v4",
+   "2202.07412v1"
+  ]
+ },
+ "nodes": [
+  {
+   "id": "Knowledge Graph Embeddings",
+   "t": "Method",
+   "d": 167,
+   "r": 0.00197518,
+   "x": 33.54,
+   "y": 0.0,
+   "z": 0.0
+  },
+  {
+   "id": "TorusE",
+   "t": "Method",
+   "d": 26,
+   "r": 0.00029017,
+   "x": 2.33,
+   "y": 58.73,
+   "z": 16.0
+  },
+  {
+   "id": "Jun Feng",
+   "t": "Unknown",
+   "d": 1,
+   "r": 1.841e-05,
+   "x": -98.65,
+   "y": 147.22,
+   "z": -0.68
+  },
+  {
+   "id": "Minlie Huang",
+   "t": "Person",
+   "d": 1,
+   "r": 1.841e-05,
+   "x": 187.94,
+   "y": 12.72,
+   "z": -12.23
+  },
+  {
+   "id": "Mingdong Wang",
+   "t": "Unknown",
+   "d": 1,
+   "r": 1.841e-05,
+   "x": -129.2,
+   "y": -126.13,
+   "z": -12.76
+  },
+  {
+   "id": "Mantong Zhou",
+   "t": "Person",
+   "d": 1,
+   "r": 1.841e-05,
+   "x": -187.21,
+   "y": 17.56,
+   "z": -17.78
+  },
+  {
+   "id": "Yu Hao",
+   "t": "Person",
+   "d": 1,
+   "r": 1.841e-05,
+   "x": 172.28,
+   "y": 71.47,
+   "z": 6.16
+  },
+  {
+   "id": "Xiaoyan Zhu",
+   "t": "Person",
+   "d": 1,
+   "r": 1.841e-05,
+   "x": -74.54,
+   "y": -159.7,
+   "z": -18.55
+  },
+  {
+   "id": "Flexible Translation",
+   "t": "Method",
+   "d": 2,
+   "r": 4e-05,
+   "x": -110.79,
+   "y": 79.69,
+   "z": 12.53
+  },
+  {
+   "id": "TransG",
+   "t": "Method",
+   "d": 27,
+   "r": 0.00026789,
+   "x": 61.57,
+   "y": 24.03,
+   "z": 5.34
+  },
+  {
+   "id": "SSP",
+   "t": "Method",
+   "d": 12,
+   "r": 0.00015128,
+   "x": -12.34,
+   "y": -70.14,
+   "z": 14.48
+  },
+  {
+   "id": "Zhao Zhang",
+   "t": "Person",
+   "d": 1,
+   "r": 1.841e-05,
+   "x": -179.57,
+   "y": 54.39,
+   "z": 16.96
+  },
+  {
+   "id": "Meng Qu",
+   "t": "Person",
+   "d": 1,
+   "r": 1.841e-05,
+   "x": 2.65,
+   "y": 173.24,
+   "z": 15.52
+  },
+  {
+   "id": "Fen Lin",
+   "t": "Person",
+   "d": 1,
+   "r": 1.841e-05,
+   "x": 179.76,
+   "y": 49.32,
+   "z": 13.73
+  },
+  {
+   "id": "Hierarchical Relation Structure",
+   "t": "Concept",
+   "d": 7,
+   "r": 7.806e-05,
+   "x": 102.78,
+   "y": 11.56,
+   "z": -18.67
+  },
+  {
+   "id": "Representation Space",
+   "t": "Concept",
+   "d": 38,
+   "r": 0.00039064,
+   "x": 57.07,
+   "y": -4.35,
+   "z": 17.98
+  },
+  {
+   "id": "Scoring Function",
+   "t": "Concept",
+   "d": 128,
+   "r": 0.00127258,
+   "x": 34.65,
+   "y": -20.28,
+   "z": 15.12
+  },
+  {
+   "id": "Encoding Model",
+   "t": "Concept",
+   "d": 19,
+   "r": 0.0001989,
+   "x": 62.37,
+   "y": 34.01,
+   "z": -18.74
+  },
+  {
+   "id": "Knowledge Representation Learning",
+   "t": "Method",
+   "d": 41,
+   "r": 0.00039948,
+   "x": -53.81,
+   "y": 13.05,
+   "z": 12.69
+  },
+  {
+   "id": "Relation",
+   "t": "Concept",
+   "d": 139,
+   "r": 0.00135537,
+   "x": 23.66,
+   "y": 28.39,
+   "z": -17.53
+  }
+ ],
+ "edges": [
+  [
+   "Knowledge Graph Embeddings",
+   "TorusE",
+   "APPLIES_TO"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "TorusE",
+   "USES"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Jun Feng",
+   "RELATED_TO"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Minlie Huang",
+   "RELATED_TO"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Mingdong Wang",
+   "RELATED_TO"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Mantong Zhou",
+   "RELATED_TO"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Yu Hao",
+   "RELATED_TO"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Xiaoyan Zhu",
+   "RELATED_TO"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Flexible Translation",
+   "USES"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "TransG",
+   "APPLIES_TO"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "SSP",
+   "APPLIES_TO"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Zhao Zhang",
+   "CREATED_BY"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Meng Qu",
+   "CREATED_BY"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Fen Lin",
+   "CREATED_BY"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Hierarchical Relation Structure",
+   "USES"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Representation Space",
+   "PART_OF"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Scoring Function",
+   "PART_OF"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Encoding Model",
+   "PART_OF"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Encoding Model",
+   "USES"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Knowledge Representation Learning",
+   "RELATED_TO"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Knowledge Representation Learning",
+   "PART_OF"
+  ],
+  [
+   "Knowledge Graph Embeddings",
+   "Relation",
+   "USES"
+  ]
+ ],
+ "edge_papers": [
+  [
+   0,
+   1
+  ],
+  [
+   0,
+   1
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0,
+   1
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   0
+  ],
+  [
+   1
+  ],
+  [
+   1
+  ],
+  [
+   1
+  ],
+  [
+   1
+  ],
+  [
+   1
+  ],
+  [
+   1
+  ],
+  [
+   1,
+   2
+  ]
+ ],
+ "_demo": true,
+ "_demo_note": "示例数据（demo）：为在缺少全量图谱时让页面能渲染而做的裁剪版，节点数/边数被人为缩小，所有数字不代表真实评测结果。完整数据请按 RUNBOOK.md 重建（tools/build_nebula_data.py 等）。"
+}

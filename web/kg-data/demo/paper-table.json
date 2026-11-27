@@ -1,0 +1,508 @@
+{
+ "generated": "2026-09-19 19:40:19",
+ "purpose": "L17：把图谱里的关系按论文摊平成一张可导出的表",
+ "design": {
+  "fields_are_not_copied": "Consensus 的 `Study Snapshot` 字段是 **Population / Sample size / Duration / Location / Methods** —— 那是**医学与社科**的字段。本项目是 NLP/ML，照抄会得到**一列全空**的表。⇒ 这里每一列都是**本领域真实存在、且从图里真的能取到**的关系类型。",
+  "not_a_summary": "这一页是**抽取结果的摊平**，不是\"论文事实的权威\"。抽取有漏有错（L3 端点完整性 96.17%），**页面上写明了这一条**。",
+  "every_cell_has_source": "每格都带页码 —— 这一页的价值一半在于**能点回去**，否则它与\"我手打一张表\"没有区别。",
+  "empty_columns_stay_empty": "空列照实留空，并统计\"有几篇填了这一列\" ⇒ **一列只填了 1–2 篇时，页面上直接标出\"只能当线索\"**。"
+ },
+ "columns": [
+  {
+   "key": "USES",
+   "label": "用了什么方法",
+   "papers": 17,
+   "coverage": 1.0
+  },
+  {
+   "key": "APPLIES_TO",
+   "label": "在什么上做",
+   "papers": 17,
+   "coverage": 1.0
+  },
+  {
+   "key": "MEASURES",
+   "label": "用什么指标",
+   "papers": 17,
+   "coverage": 1.0
+  },
+  {
+   "key": "PRODUCES",
+   "label": "提出了什么",
+   "papers": 17,
+   "coverage": 1.0
+  },
+  {
+   "key": "COMPARES_WITH",
+   "label": "和谁比",
+   "papers": 17,
+   "coverage": 1.0
+  },
+  {
+   "key": "CREATED_BY",
+   "label": "谁做的",
+   "papers": 17,
+   "coverage": 1.0
+  },
+  {
+   "key": "PUBLISHED_IN",
+   "label": "发表在哪",
+   "papers": 17,
+   "coverage": 1.0
+  }
+ ],
+ "papers": [
+  {
+   "id": "1703.08098v9",
+   "title": "A survey of embedding models of entities and relationships for knowledge graph completion",
+   "year": "2017",
+   "cells": {
+    "USES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Knowledge Graphs",
+       "t": "Natural Language Processing",
+       "page": 1
+      },
+      {
+       "s": "Embedding Models",
+       "t": "Knowledge Graph Completion",
+       "page": 1
+      }
+     ]
+    },
+    "APPLIES_TO": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Embedding Models",
+       "t": "Knowledge Graph Completion",
+       "page": 1
+      },
+      {
+       "s": "Embedding Models",
+       "t": "Entity",
+       "page": 1
+      }
+     ]
+    },
+    "MEASURES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Experimental Results",
+       "t": "Benchmark Dataset",
+       "page": 1
+      },
+      {
+       "s": "Word Pair",
+       "t": "Relational Similarity",
+       "page": 1
+      }
+     ]
+    },
+    "PRODUCES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Survey",
+       "t": "Experimental Results",
+       "page": 1
+      },
+      {
+       "s": "Word2Vec",
+       "t": "King",
+       "page": 1
+      }
+     ]
+    },
+    "COMPARES_WITH": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Score Function",
+       "t": "Correct Triple",
+       "page": 2
+      },
+      {
+       "s": "Correct Triple",
+       "t": "Incorrect Triple",
+       "page": 2
+      }
+     ]
+    },
+    "CREATED_BY": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Dat Quoc Nguyen",
+       "t": "Survey",
+       "page": 1
+      },
+      {
+       "s": "Word2Vec",
+       "t": "Mikolov et al.",
+       "page": 1
+      }
+     ]
+    },
+    "PUBLISHED_IN": {
+     "n": 2,
+     "items": [
+      {
+       "s": "TuckER",
+       "t": "EMNLP-IJCNLP",
+       "page": 10
+      },
+      {
+       "s": "Semantic Parsing",
+       "t": "EMNLP",
+       "page": 10
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "2002.00388v4",
+   "title": "A Survey on Knowledge Graphs: Representation, Acquisition and Applications",
+   "year": "2020",
+   "cells": {
+    "USES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Knowledge Graph Completion",
+       "t": "Embedding Methods",
+       "page": 1
+      },
+      {
+       "s": "Knowledge Graph Completion",
+       "t": "Path Inference",
+       "page": 1
+      }
+     ]
+    },
+    "APPLIES_TO": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Full-View Categorization",
+       "t": "Knowledge Graphs",
+       "page": 1
+      },
+      {
+       "s": "Taxonomies",
+       "t": "Knowledge Graphs",
+       "page": 1
+      }
+     ]
+    },
+    "MEASURES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Knowledge Graph Embeddings",
+       "t": "Semantic Meanings",
+       "page": 1
+      },
+      {
+       "s": "Scoring Function",
+       "t": "Factual Triples",
+       "page": 3
+      }
+     ]
+    },
+    "PRODUCES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Survey",
+       "t": "Full-View Categorization",
+       "page": 1
+      },
+      {
+       "s": "Survey",
+       "t": "Taxonomies",
+       "page": 1
+      }
+     ]
+    },
+    "COMPARES_WITH": {
+     "n": 2,
+     "items": [
+      {
+       "s": "QuatE",
+       "t": "RotatE",
+       "page": 4
+      },
+      {
+       "s": "Scoring Equations",
+       "t": "Entities",
+       "page": 4
+      }
+     ]
+    },
+    "CREATED_BY": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Shaoxiong Ji",
+       "t": "A Survey on Knowledge Graphs: Representation, Acquisition and Applicat",
+       "page": 1
+      },
+      {
+       "s": "Shirui Pan",
+       "t": "A Survey on Knowledge Graphs: Representation, Acquisition and Applicat",
+       "page": 1
+      }
+     ]
+    },
+    "PUBLISHED_IN": {
+     "n": 2,
+     "items": [
+      {
+       "s": "A Survey on Knowledge Graphs: Representation, Acquisition and Applicat",
+       "t": "IEEE Transactions on Neural Networks and Learning Systems",
+       "page": 1
+      },
+      {
+       "s": "Semantic Matching",
+       "t": "IEEE Transactions on Neural Networks and Learning Systems",
+       "page": 6
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "2012.00456v1",
+   "title": "Creating a Scholarly Knowledge Graph from Survey Article Tables",
+   "year": "2020",
+   "cells": {
+    "USES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Scholarly Knowledge Graph",
+       "t": "Domain Expert",
+       "page": 1
+      },
+      {
+       "s": "Human-in-the-Loop Methodology",
+       "t": "Literature Survey Article",
+       "page": 1
+      }
+     ]
+    },
+    "APPLIES_TO": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Methodology",
+       "t": "PDF Articles",
+       "page": 1
+      },
+      {
+       "s": "Tabular Data Extraction",
+       "t": "Tables",
+       "page": 1
+      }
+     ]
+    },
+    "MEASURES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Segmentation Techniques",
+       "t": "Rows",
+       "page": 3
+      },
+      {
+       "s": "Segmentation Techniques",
+       "t": "Columns",
+       "page": 3
+      }
+     ]
+    },
+    "PRODUCES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Scholarly Knowledge Graph",
+       "t": "Survey Article Tables",
+       "page": 1
+      },
+      {
+       "s": "Literature Survey Article",
+       "t": "Tabular Information",
+       "page": 1
+      }
+     ]
+    },
+    "COMPARES_WITH": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Review Article",
+       "t": "Research Article",
+       "page": 2
+      },
+      {
+       "s": "Crowdsourcing",
+       "t": "Supervised Approach",
+       "page": 2
+      }
+     ]
+    },
+    "CREATED_BY": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Allard Oelen",
+       "t": "Scholarly Knowledge Graph",
+       "page": 1
+      },
+      {
+       "s": "Markus Stocker",
+       "t": "Scholarly Knowledge Graph",
+       "page": 1
+      }
+     ]
+    },
+    "PUBLISHED_IN": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Schema Extraction",
+       "t": "Proceedings of the VLDB Endowment",
+       "page": 15
+      },
+      {
+       "s": "Transparency Portals",
+       "t": "ACM International Conference Proceeding Series",
+       "page": 15
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "2112.10006v6",
+   "title": "Zero-shot and Few-shot Learning with Knowledge Graphs: A Comprehensive Survey",
+   "year": "2021",
+   "cells": {
+    "USES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Few-Shot Learning",
+       "t": "Labeled Samples",
+       "page": 1
+      },
+      {
+       "s": "Machine Learning",
+       "t": "Labeled Samples",
+       "page": 1
+      }
+     ]
+    },
+    "APPLIES_TO": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Mapping-based",
+       "t": "Knowledge Graphs",
+       "page": 1
+      },
+      {
+       "s": "Data Augmentation",
+       "t": "Knowledge Graphs",
+       "page": 1
+      }
+     ]
+    },
+    "MEASURES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Knowledge Graphs",
+       "t": "Class Hierarchies",
+       "page": 2
+      },
+      {
+       "s": "Score",
+       "t": "Label",
+       "page": 3
+      }
+     ]
+    },
+    "PRODUCES": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Convolutional Neural Networks",
+       "t": "Image Feature",
+       "page": 1
+      },
+      {
+       "s": "ResNet",
+       "t": "Image Feature",
+       "page": 1
+      }
+     ]
+    },
+    "COMPARES_WITH": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Zero-Shot Learning",
+       "t": "Few-Shot Learning",
+       "page": 1
+      },
+      {
+       "s": "Unseen Classes",
+       "t": "Seen Classes",
+       "page": 1
+      }
+     ]
+    },
+    "CREATED_BY": {
+     "n": 2,
+     "items": [
+      {
+       "s": "Jiaoyan Chen",
+       "t": "Zero-shot and Few-shot Learning with Knowledge Graphs: A Comprehensive",
+       "page": 1
+      },
+      {
+       "s": "Yuxia Geng",
+       "t": "Zero-shot and Few-shot Learning with Knowledge Graphs: A Comprehensive",
+       "page": 1
+      }
+     ]
+    },
+    "PUBLISHED_IN": {
+     "n": 2,
+     "items": [
+      {
+       "s": "BBN",
+       "t": "Wall Street Journal",
+       "page": 22
+      },
+      {
+       "s": "Learning to Detect Unseen Object Classes by Between-Class Attribute Tr",
+       "t": "2009 IEEE Conference on Computer Vision and Pattern Recognition",
+       "page": 27
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "coverage_note": "共 17 篇；覆盖率见 columns。",
+ "elapsed_s": 0.8,
+ "_demo": true,
+ "_demo_note": "示例数据（demo）：为在缺少全量图谱时让页面能渲染而做的裁剪版，节点数/边数被人为缩小，所有数字不代表真实评测结果。完整数据请按 RUNBOOK.md 重建（tools/build_nebula_data.py 等）。"
+}
