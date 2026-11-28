@@ -64,9 +64,19 @@
   #bar { width:300px; height:3px; background:rgba(178,181,194,.18); border-radius:2px; overflow:hidden; }
   #bar > i { display:block; height:100%; width:0; background:#e0a469; transition:width .2s; }
 </style>
-<link rel="stylesheet" href="./lib/theme.css">
+<link rel="stylesheet" href="../lib/theme.css">
 </head>
 <body>
+<div data-legacy-banner
+     style="position:sticky;top:0;z-index:9999;background:#2a1d12;
+            border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
+            padding:9px 16px;font:13px/1.6 -apple-system,'Segoe UI','Microsoft YaHei',sans-serif">
+  <b>⚠️ 这是历史版本，不是正式入口。</b>
+  正式入口是 <a href="./index.html" style="color:#7cc0b6">index.html（导航页）</a>；
+  本页已从 <code>web/</code> 移到 <code>web/legacy/</code> 备查，其中的数据与结论可能已经过期。
+  全部历史页面见 <a href="./index.html" style="color:#7cc0b6">web/legacy/index.html</a>。
+</div>
+
 <div data-legacy-banner
      style="position:sticky;top:0;z-index:9999;background:#2a1d12;
             border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
@@ -144,7 +154,7 @@
 //   三者共同保证"该显示的显示、不重叠"。
 // ══════════════════════════════════════════════════════════════
 const ESM = 'https://esm.sh';
-const DATA_URL = new URL('./kg-data/force-top3000.json', location.href).href;
+const DATA_URL = new URL('../kg-data/force-top3000.json', location.href).href;
 
 const msgEl = document.getElementById('msg');
 const barEl = document.querySelector('#bar > i');
@@ -439,6 +449,6 @@ document.getElementById('lVal').textContent = LABEL_NAMES[labelDensity];
 await build(150);
 </script>
 <!-- 离线守卫：本页依赖 esm.sh，断网时给出明确提示而不是白屏。见 web/lib/net-guard.js -->
-<script src="./lib/net-guard.js"></script>
+<script src="../lib/net-guard.js"></script>
 </body>
 </html>

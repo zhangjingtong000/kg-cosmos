@@ -26,7 +26,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = os.environ.get('KG_STATIC', 'http://127.0.0.1:8098/web')
-PAGE = BASE + '/temporal.html'
+PAGE = BASE + '/legacy/temporal.html'
 DATA = ROOT + '/web/kg-data/temporal.json'
 
 

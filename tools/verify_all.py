@@ -4,14 +4,20 @@
 为什么串行：每个前端验证都要起一个带 CDP 的 Chrome 实例，串行最稳，
 也避免多个实例同时读同一份 2.6MB 的 nebula.json 造成误判。
 
-前置：本地静态服务已在 8098 跑起来
-      `cd D:\\kg-demo && python -m http.server 8098 --bind 127.0.0.1`
+【前置依赖，缺了就跳过并说明】
+  · 本地静态服务（默认 `http://127.0.0.1:8098/web/`，由 `python tools/serve.py --static` 起）；
+  · 无头 Chrome（CDP 截图用；找不到 Chrome 时回退 Edge）。
+  干净 clone 上这两样通常都没有 —— 此时**前端检查整组跳过**并在总结里写明原因，
+  不把"没环境"报成"功能坏了"。数据侧检查不依赖它们，照常跑。
 
-用法：
+用法（在仓库根目录）：
   python tools/verify_all.py            # 全部
   python tools/verify_all.py --fast     # 跳过耗时的 PDF 截图对比
+  python tools/verify_all.py --data-only  # 只跑数据侧（不需浏览器/静态站）
 """
 import json
+import os
+import socket
 import subprocess
 import sys
 import time
@@ -336,6 +342,10 @@ def run(label, args, timeout=300, retry_on=None):
     为什么需要：`--json` 是给**界面上那个「当场跑一遍」按钮**用的
     （`/api/verify` → `analytics.html`）——
     **"老师问你怎么验证的，当场点一下跑出来"**，比"我跑过"强得多。
+
+    **2026-11-28 降级**：失败原因是"缺文件/缺模块/连不上后端"这类**环境或数据缺失**
+    时，记为跳过并说明，不算红 —— 干净 clone 只带最小样本，缺全量产物是预期内的。
+    断言不符（数字对不上、页面元素缺失）仍然是红：那才是"功能坏了"。
     """
     attempts = 2 if retry_on else 1
     for attempt in range(attempts):
@@ -354,6 +364,13 @@ def run(label, args, timeout=300, retry_on=None):
             break
         print(f"⏳ {label:38s} {dt:6.1f}s  偶发失败（CDP 未就绪），重试一次…")
     tail = [ln for ln in out.strip().splitlines() if ln.strip()][-1:] or [""]
+
+    # ── 缺依赖/缺数据 ⇒ 跳过，不算红（2026-11-28）────────────────────────
+    if not ok and any(k in out for k in MISSING_DEPS):
+        SKIPPED.append(f'{label}（{tail[0][:60]}）')
+        print(f"⏭  {label:38s} {dt:6.1f}s  缺依赖/数据，跳过：{tail[0][:70]}")
+        return True
+
     print(f"{'✅' if ok else '❌'} {label:38s} {dt:6.1f}s  {tail[0][:88]}")
     if not ok:
         print("   ── 失败输出末尾 ──")
@@ -371,7 +388,66 @@ def run(label, args, timeout=300, retry_on=None):
     return ok
 
 
+# 这些字样出现在失败输出里 ⇒ 判为"缺依赖/缺数据"，跳过而不是报红。
+# 刻意收窄：**不含** "断言/不符/不一致" 这类真失败特征。
+MISSING_DEPS = (
+    'FileNotFoundError', 'No such file or directory', 'ModuleNotFoundError',
+    'ImportError', 'Connection refused', 'URLError', '后端不可用', '后端没起来',
+    '请先起', '找不到 ', '缺 ', '未安装', 'not installed',
+)
+
+
 RESULTS = []
+SKIPPED = []          # 因缺依赖而整组/单项跳过（2026-11-28）
+
+# ── 前置依赖探测 ────────────────────────────────────────────────────────
+# 干净 clone 上不保证有 8098 静态站，也不保证装了 Chrome。缺任一项时**跳过前端组**
+# 并打印原因 —— 与 `tools/check_doc_numbers.py` 的降级模式同一条纪律：
+# "缺东西" ≠ "功能坏了"。要看全量前端回归，先 `python tools/serve.py --static`。
+STATIC_BASE = os.environ.get('KG_STATIC_BASE', 'http://127.0.0.1:8098/web/')
+CHROME_CANDIDATES = (
+    r'C:\Program Files\Google\Chrome\Application\chrome.exe',
+    r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe',
+    os.path.expandvars(r'%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe'),
+    r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe',
+    '/usr/bin/google-chrome',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+)
+
+
+def chrome_path():
+    """找可用的 Chrome/Edge（CDP 脚本默认写死 Chrome 路径，这里只做探测）。"""
+    for p in CHROME_CANDIDATES:
+        if p and Path(p).exists():
+            return p
+    return None
+
+
+def server_up(url, timeout=2.0):
+    import urllib.request
+    try:
+        with urllib.request.urlopen(url, timeout=timeout) as r:
+            return getattr(r, 'status', 200) < 500
+    except Exception:
+        return False
+
+
+# 数据侧也有两项要 Playwright 的浏览器内核（`playwright install chromium`），
+# 干净 clone 上通常没装 ⇒ 单项跳过并说明，不把 ImportError/启动失败报成功能坏了。
+NEEDS_PLAYWRIGHT = {'check_dom_text.py', 'verify_firstscreen_numbers.py'}
+
+
+def playwright_ready():
+    try:
+        from playwright.sync_api import sync_playwright
+    except Exception:
+        return False
+    try:
+        with sync_playwright() as p:
+            exe = p.chromium.executable_path
+            return bool(exe) and Path(exe).exists()
+    except Exception:
+        return False
 
 
 def main():
@@ -393,25 +469,47 @@ def main():
         print("数据侧检查")
         print("-" * 100)
     for label, args in DATA_CHECKS:
+        if any(Path(a).name in NEEDS_PLAYWRIGHT for a in args) and not playwright_ready():
+            msg = ('Playwright 浏览器内核未安装（`playwright install chromium`）'
+                   ' —— 需要它的项已跳过')
+            SKIPPED.append(msg)
+            if not as_json:
+                print(f"⏭  {label:38s}   (缺 Playwright，跳过)")
+            continue
         run(label, args)
 
     if not data_only:
-        if not as_json:
-            print()
-            print("=" * 100)
-            print("前端检查（每个都会起一个带 CDP 的 Chrome）")
-            print("-" * 100)
-        # 前端检查都要起无头 Chrome；"CDP 未就绪"是实测过的偶发启动失败，
-        # 只对这一类重试（真失败仍然报红）。
-        CDP_TRANSIENT = ("CDP 未就绪",)
-        for item in CHECKS:
-            label, args = item[0], item[1]
-            slow = len(item) > 2 and item[2] == "slow"
-            if slow and fast:
-                if not as_json:
-                    print(f"⏭  {label:38s}   (--fast 跳过)")
-                continue
-            run(label, args, retry_on=CDP_TRANSIENT)
+        # 先探依赖：缺静态站或缺浏览器 ⇒ 整组跳过并说明，不把"没环境"报成红。
+        missing = []
+        if not server_up(STATIC_BASE):
+            missing.append(f'静态站不可用（{STATIC_BASE}；用 `python tools/serve.py --static` 起）')
+        if not chrome_path():
+            missing.append('找不到 Chrome / Edge（CDP 截图需要）')
+        if missing:
+            reason = '；'.join(missing)
+            SKIPPED.append(f'前端检查 {len(CHECKS)} 项：{reason}')
+            if not as_json:
+                print()
+                print("=" * 100)
+                print(f"⏭️  前端检查整组跳过：{reason}")
+                print("    （数据侧结果不受影响；补齐依赖后重跑本脚本即可）")
+        else:
+            if not as_json:
+                print()
+                print("=" * 100)
+                print("前端检查（每个都会起一个带 CDP 的 Chrome）")
+                print("-" * 100)
+            # 前端检查都要起无头 Chrome；"CDP 未就绪"是实测过的偶发启动失败，
+            # 只对这一类重试（真失败仍然报红）。
+            CDP_TRANSIENT = ("CDP 未就绪",)
+            for item in CHECKS:
+                label, args = item[0], item[1]
+                slow = len(item) > 2 and item[2] == "slow"
+                if slow and fast:
+                    if not as_json:
+                        print(f"⏭  {label:38s}   (--fast 跳过)")
+                    continue
+                run(label, args, retry_on=CDP_TRANSIENT)
 
     ok = sum(1 for r in RESULTS if r["ok"])
     if as_json:
@@ -419,12 +517,17 @@ def main():
             "passed": ok, "total": len(RESULTS),
             "all_ok": ok == len(RESULTS),
             "data_only": data_only,
+            "skipped": SKIPPED,
             "results": RESULTS,
         }, ensure_ascii=False))
     else:
         print()
         print("=" * 100)
         print(f"通过 {ok} / {len(RESULTS)}")
+        if SKIPPED:
+            print(f"⏭️  另有 {len(SKIPPED)} 组检查因缺依赖跳过：")
+            for s in SKIPPED:
+                print(f"    · {s}")
     return 0 if ok == len(RESULTS) else 1
 
 

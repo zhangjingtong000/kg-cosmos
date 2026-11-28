@@ -17,8 +17,8 @@ import websocket
 CHROME = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
 BASE = 'http://127.0.0.1:8098'
 PAGES = [
-    'community-atlas.html', 'graph-2d.html', 'force-explorer.html',
-    'force-graph.html', 'official-3-text.html',
+    'legacy/community-atlas.html', 'legacy/graph-2d.html', 'legacy/force-explorer.html',
+    'legacy/force-graph.html', 'legacy/official-3-text.html',
 ]
 EXTERNAL = ['*esm.sh*', '*unpkg.com*', '*jsdelivr.net*', '*cdnjs*']
 

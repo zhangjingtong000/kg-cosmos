@@ -25,7 +25,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = os.environ.get('KG_STATIC', 'http://127.0.0.1:8098/web')
-PAGE = BASE + '/bipartite.html'
+PAGE = BASE + '/legacy/bipartite.html'
 
 
 def main():

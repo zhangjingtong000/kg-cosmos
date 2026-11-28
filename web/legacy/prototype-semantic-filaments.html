@@ -19,9 +19,19 @@
   .status { position: fixed; left: 50%; top: 28px; transform: translate(-50%, -12px); color: rgba(236,245,255,.94); font-size: 13px; opacity: 0; transition: opacity .35s ease, transform .35s ease; pointer-events: none; text-shadow: 0 0 16px rgba(181,183,189,.65); }
   .status.visible { opacity: 1; transform: translate(-50%, 0); }
 </style>
-<link rel="stylesheet" href="./lib/theme.css">
+<link rel="stylesheet" href="../lib/theme.css">
 </head>
 <body>
+<div data-legacy-banner
+     style="position:sticky;top:0;z-index:9999;background:#2a1d12;
+            border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
+            padding:9px 16px;font:13px/1.6 -apple-system,'Segoe UI','Microsoft YaHei',sans-serif">
+  <b>⚠️ 这是历史版本，不是正式入口。</b>
+  正式入口是 <a href="./index.html" style="color:#7cc0b6">index.html（导航页）</a>；
+  本页已从 <code>web/</code> 移到 <code>web/legacy/</code> 备查，其中的数据与结论可能已经过期。
+  全部历史页面见 <a href="./index.html" style="color:#7cc0b6">web/legacy/index.html</a>。
+</div>
+
 <div data-legacy-banner
      style="position:sticky;top:0;z-index:9999;background:#2a1d12;
             border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
@@ -37,7 +47,7 @@
 <div class="hint">拖拽旋转 · 滚轮缩放 · 悬浮星云查看关联</div>
 
 <script type="importmap">
-{ "imports": { "three": "./lib/three/build/three.module.js", "three/addons/": "./lib/three/examples/jsm/" } }
+{ "imports": { "three": "../lib/three/build/three.module.js", "three/addons/": "../lib/three/examples/jsm/" } }
 </script>
 <script type="module">
 import * as THREE from 'three';

@@ -27,10 +27,10 @@
   3. **用的是哪一份图要写明** —— 默认读 A8 **改写后**的那份
      （因为 `PUBLISHED_IN` 只在它里面），而它与原图**只差 1019 条边的 type**。
 -->
-<link rel="stylesheet" href="./lib/a11y.css">
-<link rel="stylesheet" href="./lib/theme.css">
-<link rel="stylesheet" href="./lib/design.css">
-<link rel="stylesheet" href="./lib/motion.css">
+<link rel="stylesheet" href="../lib/a11y.css">
+<link rel="stylesheet" href="../lib/theme.css">
+<link rel="stylesheet" href="../lib/design.css">
+<link rel="stylesheet" href="../lib/motion.css">
 <style>
   /* ══ 接入设计系统（2026-09-18）═════════════════════════════════════════
    *
@@ -143,6 +143,16 @@
 </style>
 </head>
 <body>
+<div data-legacy-banner
+     style="position:sticky;top:0;z-index:9999;background:#2a1d12;
+            border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
+            padding:9px 16px;font:13px/1.6 -apple-system,'Segoe UI','Microsoft YaHei',sans-serif">
+  <b>⚠️ 这是历史版本，不是正式入口。</b>
+  正式入口是 <a href="./index.html" style="color:#7cc0b6">index.html（导航页）</a>；
+  本页已从 <code>web/</code> 移到 <code>web/legacy/</code> 备查，其中的数据与结论可能已经过期。
+  全部历史页面见 <a href="./index.html" style="color:#7cc0b6">web/legacy/index.html</a>。
+</div>
+
 <header>
   <h1>论文对比表</h1>
   <div class="sub" id="sub">载入中…</div>
@@ -178,7 +188,7 @@
          `ARCHIVE_POLICY` 方式 A 原地留档（挂"这是历史版本"横幅），
          正式入口改指 `papers.html` —— 别把用户从正式页送回旧页。 -->
     <a href="./papers.html">论文管理</a> ·
-    <a href="./analytics.html">评测结论</a>
+    <a href="../analytics.html">评测结论</a>
   </p>
 </main>
 
@@ -209,7 +219,7 @@ function render() {
            文案里的"第 N 页"保留 —— 它是**页码信息**（这条关系在原文第几页），
            不是"点了会跳到第 N 页"；原来的写法正是把信息当成了动作才导致空跳。
            动作说明放在 `title` 里，并且说准。 */
-        + (it.page ? `<a class="pg" href="./kg-nebula.html?hl=${encodeURIComponent(it.s)}"`
+        + (it.page ? `<a class="pg" href="../kg-nebula.html?hl=${encodeURIComponent(it.s)}"`
                      + ` title="去主视图看「${esc(it.s)}」这个实体">第 ${esc(it.page)} 页</a>` : '')
         + '</div>';
       /* ══ 每格默认只显示前 N 条（2026-09-18）══════════════════════════════
@@ -307,7 +317,7 @@ function download(text, name, mime) {
   if (window.ResizeObserver) new ResizeObserver(sync).observe(ctl);
 })();
 
-fetch('./kg-data/paper-table.json').then(r => r.ok ? r.json() : null).then(d => {
+fetch('../kg-data/paper-table.json').then(r => r.ok ? r.json() : null).then(d => {
   if (!d) { $('#sub').textContent = '读不到 kg-data/paper-table.json'; return; }
   DATA = d;
   // 默认**只开前 4 列**：一次摊开 7 列会让人看不出重点
@@ -335,7 +345,7 @@ fetch('./kg-data/paper-table.json').then(r => r.ok ? r.json() : null).then(d => 
   window.__tableReady = true;
 }).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
 </script>
-<script src="./lib/motion.js"></script>
-<script src="./lib/a11y.js"></script>
+<script src="../lib/motion.js"></script>
+<script src="../lib/a11y.js"></script>
 </body>
 </html>

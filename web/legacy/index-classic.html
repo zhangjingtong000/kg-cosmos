@@ -102,10 +102,20 @@
            font-size: 11px; line-height: 1.9; color: rgba(195,197,203,.42); }
   footer code { color: rgba(222,224,230,.7); }
 </style>
-<link rel="stylesheet" href="./lib/theme.css">
-<link rel="stylesheet" href="./lib/a11y.css">
+<link rel="stylesheet" href="../lib/theme.css">
+<link rel="stylesheet" href="../lib/a11y.css">
 </head>
 <body>
+<div data-legacy-banner
+     style="position:sticky;top:0;z-index:9999;background:#2a1d12;
+            border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
+            padding:9px 16px;font:13px/1.6 -apple-system,'Segoe UI','Microsoft YaHei',sans-serif">
+  <b>⚠️ 这是历史版本，不是正式入口。</b>
+  正式入口是 <a href="./index.html" style="color:#7cc0b6">index.html（导航页）</a>；
+  本页已从 <code>web/</code> 移到 <code>web/legacy/</code> 备查，其中的数据与结论可能已经过期。
+  全部历史页面见 <a href="./index.html" style="color:#7cc0b6">web/legacy/index.html</a>。
+</div>
+
 <div data-legacy-banner
      style="position:sticky;top:0;z-index:9999;background:#2a1d12;
             border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
@@ -143,7 +153,7 @@
       <span class="c2">评测全集</span> <b>43867</b> 条边
       （含方向与重复，六层指标在此口径上计算）；
       <span class="c3">L5 判通过子集</span> <b>27954</b> 条边（通过率 63.7%）。
-      三者的换算与完整口径见 <a href="analytics.html">图谱分析面板</a>。
+      三者的换算与完整口径见 <a href="../analytics.html">图谱分析面板</a>。
       <br><b>另一个必须说清的口径</b>：<b>63.7% 是判别器判通过的比例，不是"被原文支持的比例"</b>。
       200 条分层抽样的独立盲判实测：判通过的边里只有 <b>49.7%</b> 真被支持（PPV），
       全图真实支持率约 <b>40.0%</b>。详见分析面板的「L5 域内效度」区。
@@ -151,7 +161,7 @@
   </header>
 
   <div class="grid">
-    <a class="card primary" href="kg-nebula.html">
+    <a class="card primary" href="../kg-nebula.html">
       <div class="art"><div class="dots">
         <span class="ring" style="left:6px;top:6px;width:50px;height:50px;border-color:rgba(224,164,105,.5)"></span>
         <i style="left:26px;top:24px;width:14px;height:14px;background:#e0a469;box-shadow:0 0 12px #e0a469"></i>
@@ -166,7 +176,7 @@
       <span class="go">→</span>
     </a>
 
-    <a class="card" href="pathqa.html">
+    <a class="card" href="../pathqa.html">
       <div class="art"><div class="rays">
         <span class="ring" style="left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-color:rgba(193,195,201,.45)"></span>
         <i style="width:70px;transform:rotate(-18deg)"></i>
@@ -182,7 +192,7 @@
       <span class="go">→</span>
     </a>
 
-    <a class="card" href="method-limits.html">
+    <a class="card" href="../method-limits.html">
       <div class="art"><div class="cells">
         <i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i class="on"></i>
         <i></i><i class="on"></i><i></i><i class="on"></i><i></i><i></i>
@@ -195,7 +205,7 @@
       <span class="go">→</span>
     </a>
 
-    <a class="card" href="analytics.html">
+    <a class="card" href="../analytics.html">
       <div class="art"><div class="bars">
         <i style="height:93%;background:linear-gradient(180deg,#8ce0a8,#4fbf82)"></i>
         <i style="height:69%;background:linear-gradient(180deg,#e0a469,#a9763f)"></i>
@@ -261,6 +271,6 @@
 <!-- 供 tools/cdp_shot.py 之类的自动化截图判断"可以抓帧了"。
      本页没有异步数据，直接置位即可。 -->
 <script>window.__ready = true;</script>
-<script src="./lib/a11y.js"></script>
+<script src="../lib/a11y.js"></script>
 </body>
 </html>

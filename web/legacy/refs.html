@@ -4,14 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>知识图谱可视化 · 标杆参考</title>
-<link rel="stylesheet" href="./lib/theme.css">
-<link rel="stylesheet" href="./lib/design.css">
-<link rel="stylesheet" href="./lib/a11y.css">
-<link rel="stylesheet" href="./lib/fonts/fonts.css">
-<link rel="stylesheet" href="./lib/refs.css">
+<link rel="stylesheet" href="../lib/theme.css">
+<link rel="stylesheet" href="../lib/design.css">
+<link rel="stylesheet" href="../lib/a11y.css">
+<link rel="stylesheet" href="../lib/fonts/fonts.css">
+<link rel="stylesheet" href="../lib/refs.css">
 <!-- ==DESIGN_SYS== -->
 </head>
 <body class="atmo-l2">
+<div data-legacy-banner
+     style="position:sticky;top:0;z-index:9999;background:#2a1d12;
+            border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
+            padding:9px 16px;font:13px/1.6 -apple-system,'Segoe UI','Microsoft YaHei',sans-serif">
+  <b>⚠️ 这是历史版本，不是正式入口。</b>
+  正式入口是 <a href="./index.html" style="color:#7cc0b6">index.html（导航页）</a>；
+  本页已从 <code>web/</code> 移到 <code>web/legacy/</code> 备查，其中的数据与结论可能已经过期。
+  全部历史页面见 <a href="./index.html" style="color:#7cc0b6">web/legacy/index.html</a>。
+</div>
+
 <canvas id="atmo" aria-hidden="true"></canvas>
 <div id="veil" aria-hidden="true"></div>
 <div class="atmo-content">
@@ -26,7 +36,7 @@
   <p class="note">先看两个最有冲击力的：业界标杆在几十个节点时就出现标签重叠；十万节点的作品只画十几个标签。</p>
 
   <figure>
-    <img src="./assets/refs/cp_science.png" alt="Connected Papers">
+    <img src="../assets/refs/cp_science.png" alt="Connected Papers">
     <figcaption>
       <span class="t">Connected Papers</span>
       <span class="d">官方示例图只有 35–40 个节点，标签已经肉眼可见地叠在一起（"Cobo, 2012" 与 "Cobo, 2011" 糊成一团）。产品分析 5 万篇文献，最终只显示几十篇。</span>
@@ -35,7 +45,7 @@
   </figure>
 
   <figure>
-    <img src="./assets/refs/arxiv.jpg" alt="Cosmograph arXiv">
+    <img src="../assets/refs/arxiv.jpg" alt="Cosmograph arXiv">
     <figcaption>
       <span class="t">Cosmograph · arXiv 十万论文图谱</span>
       <span class="d">十万节点的作品，实测只有约 15 个标签。默认标签上限是 30+30=60 个——<b>标签数和节点数是解耦的</b>。</span>
@@ -49,7 +59,7 @@
   <p class="note">统一规律：网格划分 + 重要性排序 + 贪心取舍。没有一家靠"全画出来"。</p>
 
   <figure>
-    <img src="./assets/refs/gephi_labels.webp" alt="Gephi 标签避让">
+    <img src="../assets/refs/gephi_labels.webp" alt="Gephi 标签避让">
     <figcaption>
       <span class="t">Gephi · 标签避让</span>
       <span class="d">用四叉树做避让（<code>LabelAdjust</code>），0.11 版新增 <code>NODE_LABEL_AVOID_OVERLAP</code>。这是桌面端离线处理标签的标杆做法。</span>
@@ -58,7 +68,7 @@
   </figure>
 
   <figure>
-    <img src="./assets/refs/obsidian_graph.png" alt="Obsidian Graph">
+    <img src="../assets/refs/obsidian_graph.png" alt="Obsidian Graph">
     <figcaption>
       <span class="t">Obsidian · 官方图谱</span>
       <span class="d">约 30 个节点已经开始拥挤。官方文档原话：超过 25,000 个文件"不实用"。</span>
@@ -72,7 +82,7 @@
   <p class="note">我们最终选的路线。上层概括下层，所以每一屏的节点数都是可控的。</p>
 
   <figure>
-    <img src="./assets/refs/gephi_clusters.webp" alt="Gephi 社区分离">
+    <img src="../assets/refs/gephi_clusters.webp" alt="Gephi 社区分离">
     <figcaption>
       <span class="t">Gephi · 社区分离</span>
       <span class="d">按社区把节点拉开成一个个"群岛"，簇内紧密、簇间留白。这正是我们 18 个社区分面的思路来源。</span>
@@ -81,7 +91,7 @@
   </figure>
 
   <figure>
-    <img src="./assets/refs/gephi_filters.webp" alt="Gephi 过滤">
+    <img src="../assets/refs/gephi_filters.webp" alt="Gephi 过滤">
     <figcaption>
       <span class="t">Gephi · 度数过滤</span>
       <span class="d">官方教程的常规动作：用 Degree Rank 直接隐藏度数 &lt; 2 的节点。先过滤，再渲染。</span>
@@ -94,7 +104,7 @@
   <h2>04 / 密度视图与群岛</h2>
 
   <figure>
-    <img src="./assets/refs/vos_dense1.png" alt="VOSviewer 密度视图">
+    <img src="../assets/refs/vos_dense1.png" alt="VOSviewer 密度视图">
     <figcaption>
       <span class="t">VOSviewer · 密度视图</span>
       <span class="d">极端规模下的降级方案：<b>没有节点、没有边、零标签</b>，纯蓝→绿→黄的热力图。VOSviewer 文档承认"超过 10,000 个节点的网络往往难以处理"。</span>
@@ -103,7 +113,7 @@
   </figure>
 
   <figure>
-    <img src="./assets/refs/gephi_visualizations.webp" alt="Gephi 精选">
+    <img src="../assets/refs/gephi_visualizations.webp" alt="Gephi 精选">
     <figcaption>
       <span class="t">Gephi · 可视化精选</span>
       <span class="d">同一个引擎，靠布局与配色做出完全不同的气质。这说明"好看"来自布局与配色的克制，而不是加特效。</span>
@@ -117,7 +127,7 @@
   <p class="note inline">这一组是给"层级星云"方向找的直接参考。共同点：<b>大量节点用点云和流线表现，而不是给每个点挂标签</b>。</p>
 
   <figure class="star">
-    <img src="./assets/refs/modelatlas.jpg" alt="Model Atlas">
+    <img src="../assets/refs/modelatlas.jpg" alt="Model Atlas">
     <figcaption>
       <span class="t">Model Atlas ★</span>
       <span class="d">深色空间里密集的彩色点云 + 流线状纤维，有体积、有深度。这就是"星云"该有的样子：靠粒子的密度和流向表达结构，而不是靠球体和标签。我们下一步的视觉基准。</span>
@@ -126,7 +136,7 @@
   </figure>
 
   <figure>
-    <img src="./assets/refs/grandjean_unesco.png" alt="Grandjean UNESCO">
+    <img src="../assets/refs/grandjean_unesco.png" alt="Grandjean UNESCO">
     <figcaption>
       <span class="t">Martin Grandjean · UNESCO 网络</span>
       <span class="d">人文领域的网络图代表作。用极少的颜色和精确的排版，让结构自己说话。</span>
@@ -135,7 +145,7 @@
   </figure>
 
   <figure>
-    <img src="./assets/refs/countryborders.png" alt="国界网络">
+    <img src="../assets/refs/countryborders.png" alt="国界网络">
     <figcaption>
       <span class="t">国界网络图</span>
       <span class="d">地理位置驱动的布局，天然带空间感。层级星云的社区排布可以借鉴这种"有依据的摆放"。</span>
@@ -144,7 +154,7 @@
   </figure>
 
   <figure>
-    <img src="./assets/refs/nyt.png" alt="NYT 图表">
+    <img src="../assets/refs/nyt.png" alt="NYT 图表">
     <figcaption>
       <span class="t">New York Times · 图表</span>
       <span class="d">编辑设计的基准：字号层级清楚、留白充足、颜色克制。</span>
@@ -158,10 +168,10 @@
 </p>
 
 </main>
-<script src="./lib/a11y.js"></script>
+<script src="../lib/a11y.js"></script>
 </div><!-- /.atmo-content -->
 <script type="module">
-  import { startAtmosphere } from './lib/atmosphere.js';
+  import { startAtmosphere } from '../lib/atmosphere.js';
   startAtmosphere();
   window.__ready = true;
 </script>

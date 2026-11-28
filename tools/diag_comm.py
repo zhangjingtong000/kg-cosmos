@@ -21,6 +21,12 @@ for p in sorted(glob.glob(os.path.join(D, 'comm-*.json'))):
     rows.append((os.path.basename(p), n, m, (m / n) if n else 0))
 
 print(f'{"file":<14} {"nodes":>6} {"links":>6} {"m/n":>6}')
+if not rows:
+    # 2026-11-28：干净 clone 不带 `web/kg-data/comm-*.json`（全量社区布局产物，
+    # 需要按 RUNBOOK §6 重建）⇒ 这里没有可诊断的对象，**跳过并说明**，
+    # 不是"布局坏了"。此前会走到下面的 tot_m/tot_n 上抛 ZeroDivisionError。
+    print(f'  ⏭️ 缺 {os.path.join(D, "comm-*.json")}（全量社区布局产物），跳过')
+    raise SystemExit(0)
 for f, n, m, r in rows:
     flag = '  毛线球' if r > 2.5 else ''
     print(f'{f:<14} {n:>6} {m:>6} {r:>6.2f}{flag}')

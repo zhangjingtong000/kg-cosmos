@@ -29,9 +29,12 @@ scikit-learn==1.8.0
 krippendorff==0.8.2             # 官方实现；自写实现已与之对齐验证
 
 # ── 判别（L5）──
-# torch 需要按机器选：本机用的是 CUDA 12.4 构建。
-# CPU-only 环境装 `torch==2.6.0` 亦可，L5 全量会从 ~280s 变成 ~1 小时。
-torch==2.6.0+cu124
+# `torch==2.6.0` 是 PyPI 上的默认构建（CPU 版），pip 直接装即可。
+# 要用 CUDA 12.4 构建请加官方索引（`+cu124` 本地版本标签只在 PyTorch 索引里有，
+# 默认 PyPI 上没有）：
+#   pip install -r requirements.lock --extra-index-url https://download.pytorch.org/whl/cu124
+# CPU 版跑 L5 全量约 1 小时，CUDA 版约 280s。
+torch==2.6.0
 transformers==4.57.6
 
 # ── 验证 ──

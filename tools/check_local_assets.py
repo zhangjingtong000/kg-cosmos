@@ -51,9 +51,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / 'web'
 
-# 只扫这两处：顶层页面与 benchmark；`web/_archive/` 是历史快照，
-# 里面的路径按当时的样子保留，不参与守门（与 check_js_syntax.py 一致）。
-PAGE_DIRS = [WEB, WEB / 'benchmark']
+# 只扫这三处：顶层页面、benchmark、以及 2026-11-28 收拢进来的 `web/legacy/`；
+# `web/_archive/` 是历史快照，里面的路径按当时的样子保留，不参与守门
+# （与 check_js_syntax.py 一致）。
+# ⚠️ `web/legacy/` **必须扫**：页面搬一层目录后相对路径（`./lib/…` → `../lib/…`）
+#    只要漏改一处，就是"页面看起来正常、资源请求 404" —— 那正是本脚本要抓的形态。
+PAGE_DIRS = [WEB, WEB / 'benchmark', WEB / 'legacy']
 
 ATTR_RE = re.compile(r'(?:\bsrc|\bhref)\s*=\s*["\']([^"\']+)["\']', re.I)
 SKIP_PREFIX = ('#', 'http:', 'https:', 'data:', 'mailto:', 'javascript:', 'tel:', '//')

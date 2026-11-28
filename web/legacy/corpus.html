@@ -72,8 +72,8 @@
      ⚠️ **新页面必须引它** —— a11y 检查里有一条专门盯这个
      （`cdp_verify_a11y.py` 的"每页都加载 a11y.css"），
      而这条检查只有在 `PAGES` 名单里加了这个页面时才会覆盖到它。 -->
-<link rel="stylesheet" href="./lib/theme.css">
-<link rel="stylesheet" href="./lib/a11y.css">
+<link rel="stylesheet" href="../lib/theme.css">
+<link rel="stylesheet" href="../lib/a11y.css">
 <!--
   ══ 2026-09-19：本页**已被 `web/papers.html` 替代，按 `ARCHIVE_POLICY` 方式 A 原地留档** ══
 
@@ -95,13 +95,23 @@
   ⇒ **`OFFICIAL` 名单里已不含本页**（那名单是唯一权威）。
 
   ⚠️ 顺手修掉一处**死引用**（早前记录的待修项）：
-  本页原引 `<script src="./lib/demo-rail.js">`，但本页**不在 `demo-rail.js` 的 `FLOW` 里**
+  本页原引 `<script src="../lib/demo-rail.js">`，但本页**不在 `demo-rail.js` 的 `FLOW` 里**
   ⇒ 脚本走到 `if (idx < 0) return;`，**这一行从来没有生效过**。原行留档如下：
-      <script src="./lib/demo-rail.js"></script>
+      <script src="../lib/demo-rail.js"></script>
   ⇒ 现已移除（旧页不需要演示轨道；`papers.html` 同样不在 FLOW 里）。
 -->
 </head>
 <body>
+<div data-legacy-banner
+     style="position:sticky;top:0;z-index:9999;background:#2a1d12;
+            border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
+            padding:9px 16px;font:13px/1.6 -apple-system,'Segoe UI','Microsoft YaHei',sans-serif">
+  <b>⚠️ 这是历史版本，不是正式入口。</b>
+  正式入口是 <a href="./index.html" style="color:#7cc0b6">index.html（导航页）</a>；
+  本页已从 <code>web/</code> 移到 <code>web/legacy/</code> 备查，其中的数据与结论可能已经过期。
+  全部历史页面见 <a href="./index.html" style="color:#7cc0b6">web/legacy/index.html</a>。
+</div>
+
 <div data-legacy-banner
      style="position:sticky;top:0;z-index:9999;background:#2a1d12;
             border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
@@ -158,8 +168,8 @@
 </div>
 
 <!-- a11y.js 会注入「← 导航页」（全站统一，键盘可达）与动效开关 -->
-<script src="./lib/a11y.js"></script>
-<!-- ⚠️ 2026-09-19：这里**原来还有** `<script src="./lib/demo-rail.js"></script>`，
+<script src="../lib/a11y.js"></script>
+<!-- ⚠️ 2026-09-19：这里**原来还有** `<script src="../lib/demo-rail.js"></script>`，
      但本页不在 `demo-rail.js` 的 `FLOW` 里 ⇒ `idx < 0` 直接 return，**死引用**。
      原行已在 `<head>` 的归档注释里留档；详细根因见当时的修复记录。
      ⚠️ 若将来演示轨道改为覆盖全部正式页（含本页与 `papers.html`），需恢复该行引用。 -->
@@ -187,7 +197,7 @@
 
     var html = rows.map(function (p) {
       var link = p.in_graph
-        ? '<a class="go" href="./kg-nebula.html" title="进入主视图（三维星云）">进入主视图 ↗</a>'
+        ? '<a class="go" href="../kg-nebula.html" title="进入主视图（三维星云）">进入主视图 ↗</a>'
         : '<span class="dim">未入库</span>';
       return '<tr>'
         + '<td class="id">' + esc(p.id) + '</td>'
@@ -206,7 +216,7 @@
     document.getElementById('empty').hidden = rows.length > 0;
   }
 
-  fetch('./kg-data/corpus-index.json')
+  fetch('../kg-data/corpus-index.json')
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
       if (!d) throw new Error('corpus-index.json 没取到');

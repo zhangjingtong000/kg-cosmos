@@ -36,10 +36,12 @@ def main():
         print(f'  ⚠️ {WEB} 不存在，跳过')
         return 0
 
-    pages = sorted(WEB.glob('*.html'))
+    # 2026-11-28：并行版本统一移进 `web/legacy/`，横幅纪律跟着扩到那个目录 ——
+    # 否则"搬走"就等于"免检"，而搬走恰恰是**历史页最集中的地方**。
+    pages = sorted(list(WEB.glob('*.html')) + list((WEB / 'legacy').glob('*.html')))
     legacy = [p for p in pages if is_legacy(p)]
     official = [p for p in pages if not is_legacy(p)]
-    print(f'  web/ 下 {len(pages)} 个页面 · 正式页 {len(official)} · '
+    print(f'  web/ 与 web/legacy/ 下 {len(pages)} 个页面 · 正式页 {len(official)} · '
           f'历史页 {len(legacy)}')
 
     missing = []

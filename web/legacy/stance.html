@@ -33,10 +33,10 @@
      （与 F3 里 `CITES` 的 target 混进 `Figure 2` 同类）。
      **本页不做过滤** —— 过滤需要判据，而本项目的判据被量出过 27.4% 的假阳性（B4）。
 -->
-<link rel="stylesheet" href="./lib/a11y.css">
-<link rel="stylesheet" href="./lib/theme.css">
-<link rel="stylesheet" href="./lib/design.css">
-<link rel="stylesheet" href="./lib/motion.css">
+<link rel="stylesheet" href="../lib/a11y.css">
+<link rel="stylesheet" href="../lib/theme.css">
+<link rel="stylesheet" href="../lib/design.css">
+<link rel="stylesheet" href="../lib/motion.css">
 <style>
   /* ══ 接入设计系统（2026-09-18）═════════════════════════════════════════
    *
@@ -222,6 +222,16 @@
 </style>
 </head>
 <body>
+<div data-legacy-banner
+     style="position:sticky;top:0;z-index:9999;background:#2a1d12;
+            border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
+            padding:9px 16px;font:13px/1.6 -apple-system,'Segoe UI','Microsoft YaHei',sans-serif">
+  <b>⚠️ 这是历史版本，不是正式入口。</b>
+  正式入口是 <a href="./index.html" style="color:#7cc0b6">index.html（导航页）</a>；
+  本页已从 <code>web/</code> 移到 <code>web/legacy/</code> 备查，其中的数据与结论可能已经过期。
+  全部历史页面见 <a href="./index.html" style="color:#7cc0b6">web/legacy/index.html</a>。
+</div>
+
 <header>
   <h1>立场聚合</h1>
   <div class="sub" id="sub">载入中…</div>
@@ -297,13 +307,13 @@ function render(d) {
     `<b>那是抽取噪声</b>；<b>本页刻意不过滤</b>（过滤需要判据，而本项目的判据被量出过 27.4% 的假阳性）。<br>` +
     `<a href="./index.html">← 回导航页</a> · ` +
     `<a href="./paper-table.html">论文对比表</a> · ` +
-    `<a href="./analytics.html">评测结论</a>`;
+    `<a href="../analytics.html">评测结论</a>`;
   window.__stanceState = { n_claims: (d.claims || []).length,
                            dist: d.distribution,
                            thresholds: d.thresholds };
 }
 
-fetch('./kg-data/stance.json').then(r => r.ok ? r.json() : null).then(d => {
+fetch('../kg-data/stance.json').then(r => r.ok ? r.json() : null).then(d => {
   if (!d) { $('#sub').textContent = '读不到 kg-data/stance.json'; return; }
   const c = d.counts || {};
   $('#sub').innerHTML = `<b>${c.claims_total}</b> 个主张，来自 `
@@ -314,7 +324,7 @@ fetch('./kg-data/stance.json').then(r => r.ok ? r.json() : null).then(d => {
   window.__stanceReady = true;
 }).catch(e => { $('#sub').textContent = '载入失败：' + e.message; });
 </script>
-<script src="./lib/motion.js"></script>
-<script src="./lib/a11y.js"></script>
+<script src="../lib/motion.js"></script>
+<script src="../lib/a11y.js"></script>
 </body>
 </html>

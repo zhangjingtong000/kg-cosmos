@@ -183,12 +183,12 @@
   }
 
   /* ── 上一站 / 下一站：把 12 页接成一条可走的动线 ──────────────────────
-     六步动线内部按 01→06；支线页则指回导航页（那里才是 12 个入口的家）。 */
+     六步动线内部按 01→06；支线页则指回导航页。 */
   var MAIN = ['upload.html', 'kg-nebula.html', 'ask.html',
               'analytics.html', 'pathqa.html', 'method-limits.html'];
   function flowNav() {
     if (cfg.flow !== 'main') {
-      return '<a href="./index.html">回导航页 · 12 个入口</a>';
+      return '<a href="./index.html">回导航页</a>';
     }
     var i = MAIN.indexOf(HERE);
     var prev = i > 0 ? PAGES[MAIN[i - 1]] : null;

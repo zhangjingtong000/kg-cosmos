@@ -1,10 +1,41 @@
 # 变更日志（CHANGELOG）
 
-> **怎么读这份文件**：它**不是 `git log` 的复制**（那有 281 条）。
+> **怎么读这份文件**：它**不是 `git log` 的复制**（那有 400+ 条）。
 > 它按**阶段**整理，每个阶段只写"做了什么、关键产物是什么、
 > 以及踩过什么坑"—— 因为**踩过的坑才是这个项目最值钱的部分**。
 >
 > 完整提交历史用 `git log` 看；`docs/ERROR_CASES.md` 收录了按主题整理的错误案例。
+
+---
+
+## v0.5 · 公开发布整理（2026-11-27 ~ 11-28）
+
+**做了什么**：
+- **安装链修好**：`requirements.lock` 里 `torch==2.6.0+cu124` 改成 `torch==2.6.0`
+  （`+cu124` 本地版本标签只在 PyTorch 官方索引有，默认 PyPI 没有 ⇒ 干净 clone 上
+  `pip install -r requirements.lock` 第一步就失败）。README 补上
+  `--extra-index-url https://download.pytorch.org/whl/cu124` 的写法，并在顶部给出
+  「只想看界面」的零依赖路径 `python tools/serve.py --static`。
+- **守门脚本降级**：`tools/check_doc_numbers.py` 不再硬依赖全量产物
+  （`web/kg-data/corpus-index.json` / `paper-registry.json` / `diff.json`、
+  `docs/已移除的旧版手册`）；缺了只跳过对应检查项并打印「缺 X 份全量产物，已跳过 Y 项」，
+  退出码仍为 0。`tools/verify_all.py` 缺 8098 静态站或无头 Chrome 时跳过前端检查并说明，
+  文件头不再留着 `cd D:\kg-demo`。
+- **首图重做**：社区星云的概览标签不再显示"社区内最多的类型"—— 那会把
+  会议/期刊社区标成 `Person`（「ACL 1329 实体 · Person」）。类型分布移到右侧详情面板并
+  标成"成员类型"，首图按 1600×1000 重新截图。
+- **页面收敛**：`web/` 顶层从 38 个 HTML 收到 8 个主页面（六步演示动线 + 导航 + 单图查看器），
+  其余 26 个并行版本/旧入口移入 `web/legacy/`（带历史横幅，索引 `web/legacy/index.html`），
+  5 个零引用 `_lab_*` 试验页删除。
+- **文档换气**：README 里约 40% 的测试 skip 来龙去脉移到 `docs/TESTING.md`，
+  README 只留「怎么跑 + 结果 + 已知边界」；`.env.example` 去掉"余额只剩 ¥3""本机 8GB 显存"
+  这类内部语境；仓库体量数字改为现场实测。
+
+**坑**：
+- 搬迁改相对路径时把 `./temporal.html` 这类**同类页链接**也改成了 `../`，
+  一搬就断；靠 `tools/check_local_assets.py` 扫 `web/legacy/` 抓回来（现已纳入扫描范围）。
+- 守门脚本"缺东西"与"数字错了"是两件事：前者该降级跳过，后者才该红。
+  混在一起的代价是干净 clone 上永远一片红，红久了就没人看。
 
 ---
 

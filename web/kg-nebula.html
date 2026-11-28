@@ -694,7 +694,13 @@ function createCloud(cloud, index) {
 
   const label = document.createElement('div');
   label.className = 'label';
-  label.innerHTML = `<b>${cloud.name}</b><small>${cloud.entityCount} 实体${cloud.topType ? ' · ' + cloud.topType : ''}</small>`;
+  // ⚠️ 概览标签**不再显示社区的 topType**（2026-11-28 改）。
+  // 原因：`topType` 是"社区内节点最多的类型"（tools/build_filament_data.py:188），
+  // 不是**社区名所指那个实体**的类型。会议 / 期刊类社区的成员以作者（Person）为主，
+  // 于是概览上出现「ACL 1329 实体 · Person」「arXiv 423 实体 · Person」——
+  // 读者只会读成"ACL 是一个 Person"，首图自损。类型分布挪到右侧详情面板，
+  // 并写明是"成员类型"，见 renderPreview()。
+  label.innerHTML = `<b>${cloud.name}</b><small>${cloud.entityCount} 实体</small>`;
   const labelObject = new CSS2DObject(label);
   labelObject.position.set(0, cloud.size * .92, 0);
   labelObject.userData.mobileX = cloud.position[0] < 0 ? cloud.size * .72 : cloud.position[0] > 0 ? -cloud.size * .72 : 0;
@@ -1032,7 +1038,7 @@ function renderPreview(cloudId) {
   const maxCnt = nbrs.length ? nbrs[0].count : 1;   // nbrs 已按关系数降序
   dbody.innerHTML =
     `<h2 style="color:${c.color}">${c.name}</h2>
-     <div class="sub">${c.entityCount} 个实体 · ${typeLine || '—'}<br>
+     <div class="sub">${c.entityCount} 个实体${typeLine ? ' · 成员类型 ' + typeLine : ''}<br>
        对外 ${nbrs.length} 个社区 · 共 ${total} 条关系</div>
      ${sumBlock(cloudId)}
      <div class="sec">核心实体</div>

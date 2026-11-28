@@ -9,7 +9,7 @@
 ## 1. 最短路径
 
 ```bash
-cd D:\kg-demo
+cd <仓库根目录>          # 本文所有命令都从仓库根目录跑
 python tools/serve.py
 ```
 
@@ -77,11 +77,11 @@ L5 全量会从 ~280 秒变成约 1 小时。
   ```bash
   python tools/cdp_verify_offline.py web/kg-nebula.html
   ```
-- 5 个页面仍依赖 esm.sh（**历史原型页 4 个**：`force-explorer` / `force-graph` /
-  `graph-2d` / `official-3-text`；**正式页 1 个**：`community-atlas` —— 按页名单
+- 5 个页面仍依赖 esm.sh（**都在 `web/legacy/`**：`community-atlas` / `force-explorer` /
+  `force-graph` / `graph-2d` / `official-3-text` —— 按页名单
   `tools/add_legacy_banners.py` 的 `OFFICIAL` / `is_legacy` 分类，不要笼统写成
-  "5 个历史原型"），**导航页已用 `*` 标注**，
-  断网时它们会显示「本页需要联网」的提示而不是白屏（`web/lib/net-guard.js`）
+  "5 个历史原型"），断网时它们会显示「本页需要联网」的提示而不是白屏
+  （`web/lib/net-guard.js`）
 
 ---
 

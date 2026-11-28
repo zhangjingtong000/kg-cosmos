@@ -25,10 +25,10 @@
   **而这一页必须把这件事说清楚，否则用户不敢点、或者以为真删了。**
   ⇒ 按钮文案是「移入回收站」，并且**必须填原因**（后端会拒空的 why）。
 -->
-<link rel="stylesheet" href="./lib/a11y.css">
-<link rel="stylesheet" href="./lib/theme.css">
-<link rel="stylesheet" href="./lib/design.css">
-<link rel="stylesheet" href="./lib/motion.css">
+<link rel="stylesheet" href="../lib/a11y.css">
+<link rel="stylesheet" href="../lib/theme.css">
+<link rel="stylesheet" href="../lib/design.css">
+<link rel="stylesheet" href="../lib/motion.css">
 <style>
   /* ══ 接入设计系统（2026-09-18）═════════════════════════════════════════
    *
@@ -259,6 +259,16 @@
 </style>
 </head>
 <body>
+<div data-legacy-banner
+     style="position:sticky;top:0;z-index:9999;background:#2a1d12;
+            border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
+            padding:9px 16px;font:13px/1.6 -apple-system,'Segoe UI','Microsoft YaHei',sans-serif">
+  <b>⚠️ 这是历史版本，不是正式入口。</b>
+  正式入口是 <a href="./index.html" style="color:#7cc0b6">index.html（导航页）</a>；
+  本页已从 <code>web/</code> 移到 <code>web/legacy/</code> 备查，其中的数据与结论可能已经过期。
+  全部历史页面见 <a href="./index.html" style="color:#7cc0b6">web/legacy/index.html</a>。
+</div>
+
 <header>
   <h1>论文管理</h1>
   <div class="sub" id="sub">载入中…</div>
@@ -447,7 +457,7 @@ function renderInventory() {
                                : '（这篇没有关系类型统计）';
       /* 只有**在用且有图**的条目才有主视图可进（归档的按政策不引导过去）。 */
       const go = (p.in_graph && !p.archived)
-        ? '<a href="./kg-nebula.html" title="进入主视图（三维星云）">进入主视图 ↗</a>' : '';
+        ? '<a href="../kg-nebula.html" title="进入主视图（三维星云）">进入主视图 ↗</a>' : '';
       return `<tr data-id="${esc(p.arxiv_id)}" data-lang="${esc(p.lang || '')}"
           data-state="${stateOf(p)}">
         <td class="nowrap"><span class="pill ${st.cls}">${st.label}</span></td>
@@ -483,7 +493,7 @@ $('#lonly').addEventListener('change', ev => { ONLY = ev.target.checked; renderI
 let CAN_WRITE = false;
 
 function api(p, opt) {
-  return fetch('./api/papers/' + p, opt).then(r => {
+  return fetch('../api/papers/' + p, opt).then(r => {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.json();
   });
@@ -587,7 +597,7 @@ function render() {
           + '要删请用 8000（<code>python src/app.py</code>），'
           + '或用命令行：<code>python tools/papers_admin.py trash &lt;kind&gt; &lt;id&gt; --why "…"</code>')
     + '<br><a href="./index.html">← 回导航页</a> · '
-    + '<a href="./upload.html">上传</a> · <a href="./paper-table.html">论文对比表</a>';
+    + '<a href="../upload.html">上传</a> · <a href="./paper-table.html">论文对比表</a>';
   /* ⚠️ 这里**不再链 `corpus.html`**（2026-09-19 合并后）：
    *   它的能力（搜索 / 只看已入库 / 关系·社区列 / 进主视图）已经在这一页，
    *   而它按 `ARCHIVE_POLICY` **方式 A 原地留档**（挂着"这是历史版本"的横幅）。
@@ -655,12 +665,12 @@ document.addEventListener('click', ev => {
 
 function boot() {
   // 先探一下后端在不在（**静态站下没有删除能力，要说清而不是点了报错**）
-  fetch('./api/papers/trashcan', {cache: 'no-store'})
+  fetch('../api/papers/trashcan', {cache: 'no-store'})
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(j => { CAN_WRITE = true; TRASH = j.items || []; })
     .catch(() => { CAN_WRITE = false; TRASH = []; })
     .then(() => {
-      const src = CAN_WRITE ? './api/papers/registry' : './kg-data/paper-registry.json';
+      const src = CAN_WRITE ? '../api/papers/registry' : '../kg-data/paper-registry.json';
       return fetch(src, {cache: 'no-store'}).then(r => {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
@@ -678,7 +688,7 @@ function boot() {
       /* ★ 合并 `corpus.html`（2026-09-19）：再取一份 `corpus-index.json`，
        *   只为拿「关系 / 社区」两列。**取不到不算失败** —— 那两列退回「—」，
        *   页面照旧可用（旧页把整页挂在它上面，反而更脆）。 */
-      return fetch('./kg-data/corpus-index.json', {cache: 'no-store'})
+      return fetch('../kg-data/corpus-index.json', {cache: 'no-store'})
         .then(r => (r.ok ? r.json() : null))
         .catch(() => null);
     })
@@ -691,8 +701,8 @@ function boot() {
 }
 boot();
 </script>
-<script src="./lib/motion.js"></script>
-<script src="./lib/live-numbers.js"></script>
-<script src="./lib/a11y.js"></script>
+<script src="../lib/motion.js"></script>
+<script src="../lib/live-numbers.js"></script>
+<script src="../lib/a11y.js"></script>
 </body>
 </html>

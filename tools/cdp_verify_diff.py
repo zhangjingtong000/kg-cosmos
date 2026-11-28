@@ -42,7 +42,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BASE = os.environ.get('KG_STATIC', 'http://127.0.0.1:8098/web')
-PAGE = BASE + '/diff.html'
+PAGE = BASE + '/legacy/diff.html'
 DATA = ROOT / 'web' / 'kg-data' / 'diff.json'
 DIFF_DIR = ROOT / 'web' / 'kg-data' / 'diff'
 

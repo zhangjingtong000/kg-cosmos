@@ -30,7 +30,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = os.environ.get('KG_STATIC', 'http://127.0.0.1:8000')
-PAGE = BASE + '/paper-table.html'
+PAGE = BASE + '/legacy/paper-table.html'
 DATA = os.path.join(ROOT, 'web', 'kg-data', 'paper-table.json')
 
 

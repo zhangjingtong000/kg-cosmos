@@ -3,21 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KG × Galaxy</title>
+<title>3D Knowledge Graph — Three.js</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #000; overflow: hidden; height: 100vh; font-family: "Inter","PingFang SC",system-ui,sans-serif; }
+  body { background: #080c12; overflow: hidden; height: 100vh; font-family: "Inter","PingFang SC",system-ui,sans-serif; }
   canvas { display: block; }
   .node-label { color: rgba(255,255,255,0.85); font-size: 11px; letter-spacing: 0.03em; pointer-events: none; text-shadow: 0 0 8px rgba(0,0,0,0.8); white-space: nowrap; transition: all 0.3s ease; }
   .node-label.focused { color: #fff; font-size: 13px; text-shadow: 0 0 14px rgba(188,190,196,0.9); }
-  .hint { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.25); font-size: 11px; letter-spacing: 0.04em; pointer-events: none; }
+  .hint { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.3); font-size: 11px; letter-spacing: 0.04em; pointer-events: none; }
   .focus-indicator { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 13px; letter-spacing: 0.05em; pointer-events: none; opacity: 0; transition: opacity 0.4s; }
   .focus-indicator.visible { opacity: 1; }
   .focus-indicator span { color: #cfd1d7; }
 </style>
-<link rel="stylesheet" href="./lib/theme.css">
+<link rel="stylesheet" href="../lib/theme.css">
 </head>
 <body>
+<div data-legacy-banner
+     style="position:sticky;top:0;z-index:9999;background:#2a1d12;
+            border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
+            padding:9px 16px;font:13px/1.6 -apple-system,'Segoe UI','Microsoft YaHei',sans-serif">
+  <b>⚠️ 这是历史版本，不是正式入口。</b>
+  正式入口是 <a href="./index.html" style="color:#7cc0b6">index.html（导航页）</a>；
+  本页已从 <code>web/</code> 移到 <code>web/legacy/</code> 备查，其中的数据与结论可能已经过期。
+  全部历史页面见 <a href="./index.html" style="color:#7cc0b6">web/legacy/index.html</a>。
+</div>
+
 <div data-legacy-banner
      style="position:sticky;top:0;z-index:9999;background:#2a1d12;
             border-bottom:1px solid rgba(224,164,105,.55);color:#e8c9a4;
@@ -30,7 +40,7 @@
 <div class="hint">drag to rotate | scroll to zoom | click node to focus | drag node to move</div>
 <div class="focus-indicator" id="focusLabel">focused on <span></span> &mdash; click empty space to unfocus</div>
 <script type="importmap">
-{ "imports": { "three": "./lib/three/build/three.module.js", "three/addons/": "./lib/three/examples/jsm/" } }
+{ "imports": { "three": "../lib/three/build/three.module.js", "three/addons/": "../lib/three/examples/jsm/" } }
 </script>
 <script type="module">
 import * as THREE from 'three';
@@ -38,21 +48,17 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 const scene = new THREE.Scene();
-// Milky Way background (flat on scene, same as isgalaxias)
-const bgTexture = new THREE.TextureLoader().load('milky_way.jpg');
-bgTexture.colorSpace = THREE.SRGBColorSpace;
-scene.background = bgTexture;
-scene.backgroundIntensity = 0.5;
-scene.fog = new THREE.FogExp2('#000012', 0.000015);
+scene.background = new THREE.Color('#080c12');
+scene.fog = new THREE.FogExp2('#080c12', 0.00006);
 
 const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.5, 200);
-camera.position.set(0, 10, 20);
+camera.position.set(18, 10, 22);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
+renderer.toneMappingExposure = 1.15;
 document.body.appendChild(renderer.domElement);
 
 const labelRenderer = new CSS2DRenderer();
@@ -66,77 +72,21 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; controls.dampingFactor = 0.08;
 controls.minDistance = 4; controls.maxDistance = 60;
 controls.target.set(0, 0, 0);
-controls.autoRotate = true; controls.autoRotateSpeed = 0.25;
+controls.autoRotate = true; controls.autoRotateSpeed = 0.3;
 
-// === PARTICLE CLOUD (copied from isgalaxias, spherical distribution) ===
-const cloudCount = 80000;
-const cPos = new Float32Array(cloudCount * 3);
-const cCol = new Float32Array(cloudCount * 3);
-const cScl = new Float32Array(cloudCount);
-const cRnd = new Float32Array(cloudCount * 3);
+scene.add(new THREE.AmbientLight('#46484e', 1.2));
+const key = new THREE.DirectionalLight('#ffffff', 2.5); key.position.set(20, 30, 15); scene.add(key);
+const rim = new THREE.DirectionalLight('#a1a3a9', 1.5); rim.position.set(-15, -5, -10); scene.add(rim);
+const fill = new THREE.DirectionalLight('#585a60', 0.8); fill.position.set(0, -5, 15); scene.add(fill);
 
-const insideColor = new THREE.Color('#ea7914');
-const outsideColor = new THREE.Color('#72747a');
-const innerR = 10, outerR = 22;
-const maxRadius = outerR;
+const starsGeo = new THREE.BufferGeometry();
+const N_STARS = 600, starPos = new Float32Array(N_STARS*3);
+for (let i=0;i<N_STARS;i++) { starPos[i*3]=(Math.random()-0.5)*60; starPos[i*3+1]=(Math.random()-0.5)*40; starPos[i*3+2]=(Math.random()-0.5)*50; }
+starsGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ color:'#7c7e84', size:0.04, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, opacity:0.7 }));
+scene.add(stars);
 
-for (let i = 0; i < cloudCount; i++) {
-  const theta = Math.random() * Math.PI * 2;
-  const phi = Math.acos(2 * Math.random() - 1);
-  const radius = innerR + Math.random() * (outerR - innerR);
-
-  // Flatten Y like isgalaxias (mostly in XZ plane)
-  cPos[i*3] = Math.cos(theta) * Math.sin(phi) * radius;
-  cPos[i*3+1] = Math.sin(theta) * Math.sin(phi) * radius * 0.15;
-  cPos[i*3+2] = Math.cos(phi) * radius;
-
-  const col = insideColor.clone().lerp(outsideColor, radius / maxRadius);
-  cCol[i*3]=col.r; cCol[i*3+1]=col.g; cCol[i*3+2]=col.b;
-
-  cScl[i] = Math.random();
-  cRnd[i*3]=(Math.random()-0.5)*2; cRnd[i*3+1]=(Math.random()-0.5)*2; cRnd[i*3+2]=(Math.random()-0.5)*2;
-}
-
-const cloudGeo = new THREE.BufferGeometry();
-cloudGeo.setAttribute('position', new THREE.BufferAttribute(cPos, 3));
-cloudGeo.setAttribute('color', new THREE.BufferAttribute(cCol, 3));
-cloudGeo.setAttribute('aScale', new THREE.BufferAttribute(cScl, 1));
-cloudGeo.setAttribute('aRandom', new THREE.BufferAttribute(cRnd, 3));
-
-const cloudMat = new THREE.ShaderMaterial({
-  uniforms: {
-    uSize: { value: 45 * Math.min(devicePixelRatio, 2) },
-    uTime: { value: 0 },
-  },
-  vertexShader: `attribute float aScale; attribute vec3 aRandom; attribute vec3 color;
-    varying vec3 vColor; uniform float uSize; uniform float uTime;
-    void main() {
-      vec4 mp = modelMatrix * vec4(position, 1.0);
-      float angle = atan(mp.x, mp.z);
-      float dist = length(mp.xy);
-      float offset = (1.0 / (dist + 0.01)) * uTime * 0.15;
-      angle += offset;
-      mp.x = cos(angle) * length(mp.xz);
-      mp.z = sin(angle) * length(mp.xz);
-      vec4 vp = viewMatrix * mp;
-      gl_Position = projectionMatrix * vp;
-      gl_PointSize = uSize * aScale * (1.0 / -vp.z);
-      vColor = color;
-    }`,
-  fragmentShader: `varying vec3 vColor;
-    void main() {
-      float strength = distance(gl_PointCoord, vec2(0.5));
-      strength = 1.0 - strength;
-      strength = pow(strength, 10.0);
-      vec3 col = mix(vec3(0.0), vColor, strength);
-      gl_FragColor = vec4(col * 0.6, 0.22);
-    }`,
-  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-});
-const particleCloud = new THREE.Points(cloudGeo, cloudMat);
-scene.add(particleCloud);
-
-// === OUR KNOWLEDGE GRAPH (from index3d-bounce) ===
+// --- Graph ---
 const graphData = [
   { pos:[-8,6,-3],   r:0.60, color:'#e8c170', label:'Deadlift' },
   { pos:[-5,9,2],    r:0.55, color:'#b6b8be', label:'Hip Flexor' },
@@ -180,6 +130,7 @@ const edges = [
 const adjMap = new Map();
 edges.forEach(([a,b]) => { if(!adjMap.has(a))adjMap.set(a,[]); if(!adjMap.has(b))adjMap.set(b,[]); adjMap.get(a).push(b); adjMap.get(b).push(a); });
 
+// --- Geometry helpers ---
 function createGlowBeam(p1, p2, c1, c2, radiusMid, segments) {
   const dir = new THREE.Vector3().subVectors(p2, p1); const len = dir.length(); dir.normalize();
   const up = new THREE.Vector3(0,1,0); if (Math.abs(dir.dot(up))>0.999) up.set(1,0,0);
@@ -206,14 +157,9 @@ function createGlowBeam(p1, p2, c1, c2, radiusMid, segments) {
   return g;
 }
 
-// Node meshes
+// --- Node meshes + labels ---
 const nodeMeshes = [], nodeLabels = [];
 const nodeGroup = new THREE.Group(), labelGroup = new THREE.Group();
-
-// Lights
-scene.add(new THREE.AmbientLight('#222244', 0.6));
-const key = new THREE.DirectionalLight('#ffffff', 1.5); key.position.set(15, 20, 10); scene.add(key);
-scene.add(new THREE.DirectionalLight('#7c7e84', 0.6));
 
 graphData.forEach((data, idx) => {
   const { pos, r, color } = data;
@@ -221,7 +167,7 @@ graphData.forEach((data, idx) => {
   const hsl = {}; col.getHSL(hsl);
   const glassColor = new THREE.Color().setHSL(hsl.h, hsl.s*0.6, Math.min(1, hsl.l*1.35));
 
-  const geo = new THREE.SphereGeometry(r, 48, 48);
+  const geo = new THREE.SphereGeometry(r, 64, 64);
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       uColor: { value: glassColor },
@@ -238,21 +184,23 @@ float d=max(dot(N,uLightDir),0.0)*0.25+0.1,hb=1.0+uHover*0.5;
 vec3 body=uColor*(d+0.35)*hb;float ba=0.12*hb;
 vec3 edge=uColor*2.2*f*hb;float ea=f*0.40*hb;
 float sp=s1*0.85+s2*0.45;
-gl_FragColor=vec4(body+edge+sp*vec3(1.0),clamp(ba+ea+sp*0.85,0.0,1.0));}`,
+vec3 col=body+edge+sp*vec3(1.0);float alpha=clamp(ba+ea+sp*0.85,0.0,1.0);
+gl_FragColor=vec4(col,alpha);}`,
     transparent: true, depthWrite: true,
   });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.position.set(pos[0], pos[1], pos[2]);
 
-  const glowGeo = new THREE.SphereGeometry(r*1.9, 16, 16);
+  const glowGeo = new THREE.SphereGeometry(r*1.9, 32, 32);
   const glowMat = new THREE.ShaderMaterial({
-    uniforms: { uColor: { value: col.clone() }, uGlowOpacity: { value: 1.0 } },
+    uniforms: { uColor: { value: col.clone() } },
     vertexShader: `varying vec3 vN,vP;void main(){vec4 wp=modelMatrix*vec4(position,1.0);vP=wp.xyz;vN=normalize(mat3(modelMatrix)*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
-    fragmentShader: `varying vec3 vN,vP;uniform vec3 uColor;uniform float uGlowOpacity;void main(){vec3 V=normalize(cameraPosition-vP);float f=1.0-abs(dot(V,vN));gl_FragColor=vec4(uColor,f*f*0.22*uGlowOpacity);}`,
+    fragmentShader: `varying vec3 vN,vP;uniform vec3 uColor;void main(){vec3 V=normalize(cameraPosition-vP);float f=1.0-abs(dot(V,vN));gl_FragColor=vec4(uColor,f*f*0.22);}`,
     transparent: true, depthWrite: false,
   });
   mesh.add(new THREE.Mesh(glowGeo, glowMat));
   mesh.userData = { idx };
+
   nodeGroup.add(mesh);
   nodeMeshes.push({ mesh, data, idx });
 
@@ -265,24 +213,24 @@ gl_FragColor=vec4(body+edge+sp*vec3(1.0),clamp(ba+ea+sp*0.85,0.0,1.0));}`,
 });
 scene.add(nodeGroup); scene.add(labelGroup);
 
-// Connection objects
+// --- Connections: pre-built, updated in-place (no per-frame rebuild) ---
 const connectionsGroup = new THREE.Group();
-const edgeObjects = [];
+const edgeObjects = []; // { main, core, from, to }
 
 function createEdgeMeshes(p1, p2, c1, c2) {
   const mg = createGlowBeam(p1,p2,c1,c2,0.022,40);
-  const main = new THREE.Mesh(mg, new THREE.MeshBasicMaterial({ vertexColors:true, transparent:true, opacity:0.35, blending:THREE.AdditiveBlending, depthWrite:false }));
+  const main = new THREE.Mesh(mg, new THREE.MeshBasicMaterial({ vertexColors:true, transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false }));
   const cg = createGlowBeam(p1,p2,c1,c2,0.032,30);
-  const core = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ vertexColors:true, transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false }));
+  const core = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ vertexColors:true, transparent:true, opacity:0.3, blending:THREE.AdditiveBlending, depthWrite:false }));
   return { main, core };
 }
 
-function updateEdgeGeometry(mesh, p1, p2, c1, c2, radiusMid) {
+function updateEdgeGeometry(mesh, p1, p2, c1, c2, radiusMid, segments) {
   const dir = new THREE.Vector3().subVectors(p2, p1); const len = dir.length(); dir.normalize();
   const up = new THREE.Vector3(0,1,0); if (Math.abs(dir.dot(up))>0.999) up.set(1,0,0);
   const right = new THREE.Vector3().crossVectors(dir, up).normalize();
   const forward = new THREE.Vector3().crossVectors(right, dir).normalize();
-  const rings = 6, segments = radiusMid > 0.03 ? 30 : 40;
+  const rings = 6;
   const posArr = mesh.geometry.attributes.position.array;
   const colArr = mesh.geometry.attributes.color.array;
   for (let i=0;i<=segments;i++) {
@@ -290,7 +238,8 @@ function updateEdgeGeometry(mesh, p1, p2, c1, c2, radiusMid) {
     const r=radiusMid*(0.78+0.22*Math.sin(t*Math.PI));
     const mc=c1.clone().lerp(c2,t), b=Math.sin(t*Math.PI);
     for (let j=0;j<rings;j++) {
-      const a=(j/rings)*Math.PI*2, vi=(i*rings+j)*3;
+      const a=(j/rings)*Math.PI*2;
+      const vi = (i*rings+j)*3;
       posArr[vi]=center.x+right.x*Math.cos(a)*r+forward.x*Math.sin(a)*r;
       posArr[vi+1]=center.y+right.y*Math.cos(a)*r+forward.y*Math.sin(a)*r;
       posArr[vi+2]=center.z+right.z*Math.cos(a)*r+forward.z*Math.sin(a)*r;
@@ -301,25 +250,9 @@ function updateEdgeGeometry(mesh, p1, p2, c1, c2, radiusMid) {
   mesh.geometry.attributes.color.needsUpdate = true;
 }
 
-function refreshEdgePositions() {
-  edgeObjects.forEach(eo => {
-    const p1 = nodeMeshes[eo.from].mesh.position, p2 = nodeMeshes[eo.to].mesh.position;
-    const c1 = new THREE.Color(graphData[eo.from].color), c2 = new THREE.Color(graphData[eo.to].color);
-    updateEdgeGeometry(eo.main, p1, p2, c1, c2, 0.022);
-    updateEdgeGeometry(eo.core, p1, p2, c1, c2, 0.032);
-  });
-}
-
-function setEdgeHighlight(hoveredIdx) {
-  edgeObjects.forEach(eo => {
-    const on = hoveredIdx===null || eo.from===hoveredIdx || eo.to===hoveredIdx;
-    eo.main.material.opacity = on ? 0.45 : 0.04;
-    eo.core.material.opacity = on ? 0.25 : 0.02;
-  });
-}
-
+// Build once
 edges.forEach(([from, to]) => {
-  const p1 = nodeMeshes[from].mesh.position, p2 = nodeMeshes[to].mesh.position;
+  const p1 = nodeMeshes[from].mesh.position.clone(), p2 = nodeMeshes[to].mesh.position.clone();
   const c1 = new THREE.Color(graphData[from].color), c2 = new THREE.Color(graphData[to].color);
   const objs = createEdgeMeshes(p1, p2, c1, c2);
   connectionsGroup.add(objs.main); connectionsGroup.add(objs.core);
@@ -327,22 +260,36 @@ edges.forEach(([from, to]) => {
 });
 scene.add(connectionsGroup);
 
-// === STATE (from bounce version) ===
-let focusedIdx = null, hoveredIdx = null;
-const origPos = graphData.map(d => new THREE.Vector3(...d.pos));
+function refreshEdgePositions() {
+  edgeObjects.forEach(eo => {
+    const p1 = nodeMeshes[eo.from].mesh.position, p2 = nodeMeshes[eo.to].mesh.position;
+    const c1 = new THREE.Color(graphData[eo.from].color), c2 = new THREE.Color(graphData[eo.to].color);
+    updateEdgeGeometry(eo.main, p1, p2, c1, c2, 0.022, 40);
+    updateEdgeGeometry(eo.core, p1, p2, c1, c2, 0.032, 30);
+  });
+}
+
+function setEdgeHighlight(hoveredIdx) {
+  edgeObjects.forEach(eo => {
+    const on = hoveredIdx===null || eo.from===hoveredIdx || eo.to===hoveredIdx;
+    eo.main.material.opacity = on ? 0.5 : 0.06;
+    eo.core.material.opacity = on ? 0.3 : 0.03;
+  });
+}
+
+const ring = new THREE.Mesh(new THREE.TorusGeometry(7,0.015,16,100), new THREE.MeshBasicMaterial({ color:'#334455', transparent:true, opacity:0.2, depthWrite:false }));
+ring.rotation.x = Math.PI/2; scene.add(ring);
+
+// --- State ---
+let focusedIdx = null;
+let hoveredIdx = null;
+const origPos = graphData.map(d => new THREE.Vector3(...d.pos)); // immutable original positions
 let targets = origPos.map(p => p.clone());
-let dirty = false, didDrag = false;
-let curGlowAlpha = graphData.map(() => 1.0);
-let tgtGlowAlpha = graphData.map(() => 1.0);
-let curEdgeAlpha = edges.map(() => 1.0);
-let tgtEdgeAlpha = edges.map(() => 1.0);
-const DIFF_LERP = 2.5;
-let focusRing = null;
-let restPositions = origPos.map(p => p.clone());
-let springVels = graphData.map(() => new THREE.Vector3());
-let springActive = false;
-const SPRING_K = 8, SPRING_DAMP = 0.7;
-const focusCam = new THREE.Vector3(0, 10, 14);
+let dirty = false;
+let didDrag = false; // true if mousemove happened during drag → suppresses click
+const cameraTarget = new THREE.Vector3(18, 10, 22);
+const defaultCam = new THREE.Vector3(18, 10, 22);
+const focusCam = new THREE.Vector3(0, 14, 16);
 
 function bfs(startIdx) {
   const dist = new Map(), q = [startIdx]; dist.set(startIdx, 0);
@@ -362,24 +309,6 @@ function radialLayout(focusIdx) {
   return t;
 }
 
-function setFocusDiffusion(fi) {
-  if (fi === null) { tgtGlowAlpha.forEach((_,i)=>tgtGlowAlpha[i]=1.0); tgtEdgeAlpha.forEach((_,i)=>tgtEdgeAlpha[i]=1.0); return; }
-  const dist = bfs(fi);
-  for (let i=0;i<graphData.length;i++) { const d=dist.has(i)?dist.get(i):999; tgtGlowAlpha[i]=d===0?1.0:d===1?0.7:d===2?0.4:d===3?0.18:0.06; }
-  edges.forEach(([f,t],k)=>{ const df=dist.has(f)?dist.get(f):999,dt=dist.has(t)?dist.get(t):999; const d=Math.min(df,dt); tgtEdgeAlpha[k]=d===0?1.0:d===1?0.55:d===2?0.25:d===3?0.1:0.04; });
-}
-
-function showFocusRing(nodeMesh, colorHex, nodeR) {
-  if (focusRing) { focusRing.geometry.dispose(); focusRing.material.dispose(); scene.remove(focusRing); }
-  const col = new THREE.Color(colorHex).multiplyScalar(1.8);
-  const geo = new THREE.TorusGeometry(nodeR*1.15, 0.06, 6, 16);
-  const mat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending });
-  focusRing = new THREE.Mesh(geo, mat);
-  focusRing.position.copy(nodeMesh.position);
-  scene.add(focusRing);
-}
-function hideFocusRing() { if (focusRing) { focusRing.geometry.dispose(); focusRing.material.dispose(); scene.remove(focusRing); focusRing = null; } }
-
 function updateLabels() {
   nodeLabels.forEach((lbl,i) => {
     const m=nodeMeshes[i].mesh, r=graphData[i].r;
@@ -388,21 +317,124 @@ function updateLabels() {
   });
 }
 
-// === INTERACTION ===
+// --- Interaction ---
 const raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
 let dragNode = null, dragPlane = new THREE.Plane(), dragOffset = new THREE.Vector3();
-let hoverTimeout = null, mouseDownPos = new THREE.Vector2();
-
+let hoverTimeout = null;
 function getMeshes(){ return nodeMeshes.map(n=>n.mesh); }
-function findHitNode(e){ mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1; raycaster.setFromCamera(mouse, camera); const hits=raycaster.intersectObjects(getMeshes(),false); return(hits.length>0&&hits[0].object.userData.idx!==undefined)?hits[0]:null; }
+
+function findHitNode(e) {
+  mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(getMeshes(), false);
+  return (hits.length>0 && hits[0].object.userData.idx!==undefined) ? hits[0] : null;
+}
+
+renderer.domElement.addEventListener('mousemove', (e) => {
+  if (dragNode) {
+    // --- Drag: move node + nudge connected nodes with decay ---
+    mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
+    raycaster.setFromCamera(mouse, camera);
+    const pt = new THREE.Vector3(); raycaster.ray.intersectPlane(dragPlane, pt);
+    if (pt) {
+      const newPos = pt.clone().sub(dragOffset);
+      const idx = dragNode.userData.idx;
+      const delta = newPos.clone().sub(dragNode.position);
+      dragNode.position.copy(newPos);
+      targets[idx].copy(newPos);
+      didDrag = true; // actual movement → suppress click
+
+      // Nudge connected nodes (only targets, not origPos)
+      const dist = bfs(idx);
+      nodeMeshes.forEach(({ mesh }, i) => {
+        if (i === idx) return;
+        const d = dist.has(i) ? dist.get(i) : 999;
+        if (d > 3) return;
+        const decay = Math.pow(0.35, d);
+        mesh.position.x += delta.x * decay;
+        mesh.position.y += delta.y * decay;
+        mesh.position.z += delta.z * decay;
+        targets[i].copy(mesh.position);
+      });
+      dirty = true;
+    }
+  } else {
+    // --- Hover highlight (debounced) ---
+    const hit = findHitNode(e);
+    const targetIdx = hit ? hit.object.userData.idx : null;
+    if (targetIdx !== hoveredIdx) {
+      clearTimeout(hoverTimeout);
+      if (targetIdx === null) {
+        // Leaving immediately clears highlight
+        hoveredIdx = null;
+        setEdgeHighlight(null);
+        nodeMeshes.forEach(({ mesh }) => {
+          if (mesh.children.length>0) mesh.children[0].visible = true;
+          if (mesh.material.uniforms) mesh.material.uniforms.uHover.value = 0;
+        });
+      } else {
+        // Entering: delay 150ms before showing highlight
+        hoverTimeout = setTimeout(() => {
+          hoveredIdx = targetIdx;
+          setEdgeHighlight(hoveredIdx);
+          const neighborSet = new Set([hoveredIdx, ...(adjMap.get(hoveredIdx)||[])]);
+          nodeMeshes.forEach(({ mesh }, i) => {
+            const on = neighborSet.has(i);
+            if (mesh.children.length>0) mesh.children[0].visible = on;
+            if (mesh.material.uniforms) mesh.material.uniforms.uHover.value = (i===hoveredIdx) ? 1 : 0;
+          });
+        }, 150);
+      }
+    }
+  }
+});
+
+renderer.domElement.addEventListener('mouseup', () => {
+  if (dragNode) { dragNode = null; controls.enabled = true; }
+});
+
+renderer.domElement.addEventListener('mouseleave', () => {
+  if (dragNode) { dragNode = null; controls.enabled = true; }
+  clearTimeout(hoverTimeout);
+  if (hoveredIdx !== null) {
+    hoveredIdx = null;
+    setEdgeHighlight(null);
+    nodeMeshes.forEach(({ mesh }) => {
+      if (mesh.children.length>0) mesh.children[0].visible = true;
+      if (mesh.material.uniforms && mesh.material.uniforms.uHover) mesh.material.uniforms.uHover.value = 0;
+    });
+  }
+});
+
+// --- Click (separate from drag & orbit) ---
+let mouseDownPos = new THREE.Vector2();
+
+renderer.domElement.addEventListener('click', (e) => {
+  const mdx = e.clientX - mouseDownPos.x, mdy = e.clientY - mouseDownPos.y;
+  if (didDrag || Math.sqrt(mdx*mdx+mdy*mdy) > 3) return; // was a drag or orbit
+  const hit = findHitNode(e);
+  if (hit) {
+    focusedIdx = hit.object.userData.idx;
+    targets = radialLayout(focusedIdx);
+    cameraTarget.copy(focusCam);
+  } else {
+    focusedIdx = null;
+    targets = origPos.map(p=>p.clone());
+    cameraTarget.copy(defaultCam);
+  }
+  dirty = true;
+  const el=document.getElementById('focusLabel'), sp=el.querySelector('span');
+  if (focusedIdx!==null){ sp.textContent=graphData[focusedIdx].label; el.classList.add('visible'); }
+  else el.classList.remove('visible');
+  updateLabels();
+});
 
 renderer.domElement.addEventListener('mousedown', (e) => {
   mouseDownPos.set(e.clientX, e.clientY);
-  clearTimeout(hoverTimeout);
   const hit = findHitNode(e);
   if (hit) {
-    dragNode = hit.object; didDrag = false; springActive = false;
-    nodeMeshes.forEach(({mesh},i) => restPositions[i].copy(mesh.position));
+    dragNode = hit.object;
+    didDrag = false;
     controls.enabled = false;
     const normal = camera.getWorldDirection(new THREE.Vector3()).clone();
     dragPlane.set(normal, -dragNode.position.dot(normal));
@@ -412,123 +444,44 @@ renderer.domElement.addEventListener('mousedown', (e) => {
   }
 });
 
-renderer.domElement.addEventListener('mousemove', (e) => {
-  if (dragNode) {
-    mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
-    raycaster.setFromCamera(mouse, camera);
-    const pt = new THREE.Vector3(); raycaster.ray.intersectPlane(dragPlane, pt);
-    if (pt) {
-      const newPos = pt.clone().sub(dragOffset);
-      const idx = dragNode.userData.idx, delta = newPos.clone().sub(dragNode.position);
-      dragNode.position.copy(newPos); targets[idx].copy(newPos); didDrag = true;
-      const dist = bfs(idx);
-      nodeMeshes.forEach(({mesh},i) => { if(i===idx)return; const d=dist.has(i)?dist.get(i):999; if(d>3)return; const decay=Math.pow(0.35,d); mesh.position.x+=delta.x*decay; mesh.position.y+=delta.y*decay; mesh.position.z+=delta.z*decay; targets[i].copy(mesh.position); });
-      dirty = true;
-    }
-  } else {
-    const hit = findHitNode(e);
-    const targetIdx = hit ? hit.object.userData.idx : null;
-    if (targetIdx !== hoveredIdx) {
-      clearTimeout(hoverTimeout);
-      if (targetIdx === null) {
-        hoveredIdx = null; setEdgeHighlight(null);
-        nodeMeshes.forEach(({mesh}) => { if(mesh.children.length>0)mesh.children[0].visible=true; if(mesh.material.uniforms)mesh.material.uniforms.uHover.value=0; });
-      } else {
-        hoverTimeout = setTimeout(() => {
-          hoveredIdx = targetIdx; setEdgeHighlight(hoveredIdx);
-          const neighborSet = new Set([hoveredIdx, ...(adjMap.get(hoveredIdx)||[])]);
-          nodeMeshes.forEach(({mesh},i) => { const on=neighborSet.has(i); if(mesh.children.length>0)mesh.children[0].visible=on; if(mesh.material.uniforms)mesh.material.uniforms.uHover.value=(i===hoveredIdx)?1:0; });
-        }, 150);
-      }
-    }
-  }
-});
-
-renderer.domElement.addEventListener('mouseup', () => {
-  if (dragNode) { dragNode = null; controls.enabled = true; springVels.forEach(v=>v.set(0,0,0)); springActive = true; }
-});
-renderer.domElement.addEventListener('mouseleave', () => {
-  if (dragNode) { dragNode = null; controls.enabled = true; }
-  clearTimeout(hoverTimeout); hoveredIdx = null; setEdgeHighlight(null);
-  nodeMeshes.forEach(({mesh}) => { if(mesh.children.length>0)mesh.children[0].visible=true; if(mesh.material.uniforms)mesh.material.uniforms.uHover.value=0; });
-});
-renderer.domElement.addEventListener('click', (e) => {
-  const mdx=e.clientX-mouseDownPos.x, mdy=e.clientY-mouseDownPos.y;
-  if (didDrag || Math.sqrt(mdx*mdx+mdy*mdy)>3) return;
-  const hit = findHitNode(e);
-  if (hit) {
-    springActive = false; focusedIdx = hit.object.userData.idx;
-    targets = radialLayout(focusedIdx); setFocusDiffusion(focusedIdx);
-    camera.position.copy(focusCam); controls.target.set(0,0,0);
-    showFocusRing(nodeMeshes[focusedIdx].mesh, graphData[focusedIdx].color, graphData[focusedIdx].r);
-  } else {
-    springActive = false; focusedIdx = null; hideFocusRing();
-    targets = origPos.map(p=>p.clone()); setFocusDiffusion(null);
-  }
-  dirty = true;
-  const el=document.getElementById('focusLabel'), sp=el.querySelector('span');
-  if (focusedIdx!==null){ sp.textContent=graphData[focusedIdx].label; el.classList.add('visible'); }
-  else el.classList.remove('visible');
-  updateLabels();
-});
-
-// === RENDER ===
+// --- Render ---
 const clock = new THREE.Clock();
+
 function animate() {
   requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(),0.1), elapsed = performance.now()*0.001;
   controls.update();
 
-  // Spring-back
   let moving = false;
-  if (springActive && !dragNode) {
-    let settled = true;
-    nodeMeshes.forEach(({mesh},i) => {
-      const dx=restPositions[i].x-mesh.position.x, dy=restPositions[i].y-mesh.position.y, dz=restPositions[i].z-mesh.position.z;
-      if (Math.sqrt(dx*dx+dy*dy+dz*dz)>0.005||springVels[i].length()>0.005) settled=false;
-      springVels[i].x+=dx*SPRING_K*dt; springVels[i].y+=dy*SPRING_K*dt; springVels[i].z+=dz*SPRING_K*dt;
-      springVels[i].multiplyScalar(SPRING_DAMP);
-      mesh.position.x+=springVels[i].x*dt; mesh.position.y+=springVels[i].y*dt; mesh.position.z+=springVels[i].z*dt;
-      targets[i].copy(mesh.position);
-    });
-    if (settled) { springActive=false; springVels.forEach(v=>v.set(0,0,0)); }
-    moving = true;
-  }
-  // Focus animation
-  else if (focusedIdx !== null) {
-    nodeMeshes.forEach(({mesh},i) => {
-      if (dragNode && mesh===dragNode) { moving=true; return; }
-      const t=targets[i], dx=t.x-mesh.position.x, dy=t.y-mesh.position.y, dz=t.z-mesh.position.z;
-      if (Math.sqrt(dx*dx+dy*dy+dz*dz)>0.01) { moving=true; mesh.position.x+=dx*3.0*dt; mesh.position.y+=dy*3.0*dt; mesh.position.z+=dz*3.0*dt; }
-    });
-  }
-
+  nodeMeshes.forEach(({ mesh }, i) => {
+    if (dragNode && mesh === dragNode) { moving = true; return; }
+    const t=targets[i], dx=t.x-mesh.position.x, dy=t.y-mesh.position.y, dz=t.z-mesh.position.z;
+    const dist=Math.sqrt(dx*dx+dy*dy+dz*dz);
+    if (dist>0.01) { moving=true; mesh.position.x+=dx*3.0*dt; mesh.position.y+=dy*3.0*dt; mesh.position.z+=dz*3.0*dt; }
+  });
   if (moving||dirty) { refreshEdgePositions(); updateLabels(); dirty=false; }
 
-  // Diffusion alpha
-  if (hoveredIdx === null) {
-    for (let i=0;i<graphData.length;i++) { curGlowAlpha[i]+=(tgtGlowAlpha[i]-curGlowAlpha[i])*DIFF_LERP*dt; const m=nodeMeshes[i].mesh; if(m.children.length>0)m.children[0].material.uniforms.uGlowOpacity.value=curGlowAlpha[i]; }
-  }
-  if (hoveredIdx===null && focusedIdx!==null) {
-    for (let k=0;k<edges.length;k++) { curEdgeAlpha[k]+=(tgtEdgeAlpha[k]-curEdgeAlpha[k])*DIFF_LERP*dt; const eo=edgeObjects[k]; if(eo){eo.main.material.opacity=0.45*curEdgeAlpha[k];eo.core.material.opacity=0.25*curEdgeAlpha[k];} }
-  }
+  camera.position.lerp(cameraTarget, 1.5*dt);
+  controls.target.lerp(focusedIdx!==null ? nodeMeshes[focusedIdx].mesh.position : new THREE.Vector3(0,0,0), 2.5*dt);
 
-  // Particle cloud: update time for rotation shader
-  cloudMat.uniforms.uTime.value = elapsed;
-  particleCloud.rotation.y += dt * 0.02;
+  nodeMeshes.forEach(({ mesh }) => { if(mesh.material.uniforms) mesh.material.uniforms.uCameraPos.value.copy(camera.position); });
+  stars.rotation.y += dt*0.015; stars.rotation.x += dt*0.008;
 
-  nodeMeshes.forEach(({mesh}) => { if(mesh.material.uniforms)mesh.material.uniforms.uCameraPos.value.copy(camera.position); });
-
-
-  nodeMeshes.forEach(({mesh},i) => { const tgt=(i===focusedIdx)?1.45:1.0, cur=mesh.scale.x; mesh.scale.setScalar(cur+(tgt-cur)*4.0*dt); });
+  nodeMeshes.forEach(({ mesh }, i) => {
+    const tgt=(i===focusedIdx)?1.45:1.0, cur=mesh.scale.x;
+    mesh.scale.setScalar(cur+(tgt-cur)*4.0*dt);
+  });
   if (focusedIdx!==null) { const fm=nodeMeshes[focusedIdx].mesh, p=1+Math.sin(elapsed*4.0)*0.04; fm.scale.setScalar(fm.scale.x+(p-fm.scale.x)*0.3); }
-  if (focusRing) { const fm=nodeMeshes[focusedIdx].mesh; focusRing.position.copy(fm.position); focusRing.lookAt(camera.position); focusRing.scale.setScalar(fm.scale.x); }
 
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 }
 animate();
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);labelRenderer.setSize(innerWidth,innerHeight);});
+
+addEventListener('resize', () => {
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight); labelRenderer.setSize(innerWidth,innerHeight);
+});
 </script>
 </body>
 </html>

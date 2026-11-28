@@ -2,6 +2,14 @@
 
 **一句话**：把一篇综述 PDF 拆成实体与关系，建成可三维探索的知识图谱，并给每层抽取打一个可复核的质量分。
 
+**只想看界面**：不用装任何依赖，仓库根目录跑
+
+```bash
+python tools/serve.py --static      # 只起静态站（纯标准库），http://127.0.0.1:8098/web/
+```
+
+界面读的是仓库自带的产物与 `web/kg-data/demo/` 示例，开箱即可浏览。
+
 ![社区星云主视图](assets/screenshot-3d.jpg)
 
 > 主视图 `web/kg-nebula.html`：18 个 Louvain 社区、120 条跨社区纤维（`web/kg-data/filaments.json`
@@ -62,6 +70,13 @@ RAG demo 的验收标准通常是「问几个问题、回答看着像」。这�
 pip install -r requirements.lock
 ```
 
+`requirements.lock` 里的 `torch==2.6.0` 是 PyPI 默认的 CPU 构建。**要用 CUDA 12.4 构建需要加
+PyTorch 官方索引**（`+cu124` 这个本地版本标签只在官方索引里，默认 PyPI 没有）：
+
+```bash
+pip install -r requirements.lock --extra-index-url https://download.pytorch.org/whl/cu124
+```
+
 **Windows 控制台需设 `PYTHONUTF8=1`**（或 `chcp 65001`）。`tools/metric_provenance.py` 会打印 `📦`
 等 emoji，cp936 编码下 `UnicodeEncodeError` 让子进程退出码变 1，1 条测试因此变红。Linux / macOS 无需设置。
 
@@ -112,58 +127,57 @@ python tools/serve.py            # 前置检查（数据/端口/依赖/Neo4j）�
 python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 ```
 
-## 测试与数据
+## 界面：8 个主页面
 
-2026-11-27 在**干净 clone** 上实测（`git clone` 到临时目录，`python -m pytest -q`，Python 3.13.0 / pytest 9.0.2，Windows，设 `PYTHONUTF8=1`）：
+`web/` 顶层只保留 8 个主页面（2026-11-28 从 38 个收敛而来）：
+
+| 页面 | 作用 |
+|---|---|
+| `index.html` | 导航页 · 六步演示动线 |
+| `upload.html` | 01 上传一篇论文 |
+| `kg-nebula.html` | 02 社区星云 · 三维主视图 |
+| `ask.html` | 03 提问 · 支持与反方 |
+| `analytics.html` | 04 图谱分析面板 |
+| `pathqa.html` | 05 问题子图 PathQA |
+| `method-limits.html` | 06 方法能力与局限 |
+| `new-graph.html` | 上传后的单图查看器 |
+
+其余 26 个页面是同一功能的多套并行版本（`index3d*` / `kg_galaxy` / `kg_space` /
+`index-classic` …）与已并入其他页面的旧入口，一律移到 `web/legacy/`，带「这是历史版本」
+横幅，索引见 `web/legacy/index.html`；5 个零引用的 `_lab_*` 试验页已删除。
+`web/legacy/` 里仍有 **5 个页面仍依赖 esm.sh**（`community-atlas` / `graph-2d` /
+`force-explorer` / `force-graph` / `official-3-text`）：断网时由 `web/lib/net-guard.js`
+拦成明确提示，不会白屏。
+
+<!-- esm-sh-pages: runtime=community-atlas,force-explorer,force-graph,graph-2d,official-3-text mention_only=index,index-classic,official-1-blocks -->
+
+## 测试
+
+```bash
+python -m pytest -q        # Windows 先设 PYTHONUTF8=1，见上
+```
+
+干净 clone 实测（2026-11-27，Python 3.13.0 / pytest 9.0.2，Windows）：
 
 ```text
 413 passed, 7 skipped, 27 subtests passed in 12.59s
 ```
 
-**7 条 skip 全部是「仓库确实不带的大数据/服务」，没有一条是测试坏了。** 看到 `7 skipped` 时请对照这张表：
+`--collect-only` 收集 420 条（413 passed + 7 skipped）。
 
-| 条数 | 用例 | 缺什么 | 怎么恢复 |
-|---|---|---|---|
-| 4 | `tests/test_graph_store.py` | 可达的 Neo4j 实例：`bolt://localhost:7687`，账号默认 `neo4j` / `kgdemo2026`（见 `src/graph_store.py`） | 起 Neo4j 后重跑，4 条由 skip 转 pass；只看界面演示不需要。**写入路径已在本机 Neo4j 5.26.12 Community 上实测通过**（4 条全绿），不是未验证代码 |
-| 2 | `tests/test_front_matter_strip.py`（plm-survey / completion-llm 两条） | 两份语料 PDF：`jsjkx2025-kg-completion-llm.pdf` 2.4 MB、`jsjkx2025-kg-plm-survey.pdf` 4.3 MB（均超「单个数据文件 < 2 MB」的收录线） | 按 RUNBOOK §3 取回 `data/corpus/*.pdf` |
-| 1 | `tests/test_entity_absorb.py::test_full_corpus_absorptions_are_now_tiny` | 全量图快照（源项目 21 篇 / 88.8 MB；本仓库只带 1 份 `jsjkx2025-kg-completion-llm.json`） | 取回 `data/corpus/graphs/*.json` 后 `KG_SLOW_TESTS=1 python -m pytest tests/test_entity_absorb.py`（全量下约 125 秒） |
+**已知边界**：7 条 skip 全部是「仓库确实不带的大数据/服务」——4 条要可达的 Neo4j
+（`tests/test_graph_store.py`），2 条要两份超 2 MB 的语料 PDF，1 条要全量图快照（88.8 MB）。
+没有一条是测试坏了；补上环境后 4 条联库用例在本机 Neo4j 5.26.12 上转 pass
+（全量 417 passed / 3 skipped）。逐条原因、反向对照与 `PYTHONUTF8` 的细节见
+[docs/TESTING.md](docs/TESTING.md)。
 
-**反向对照**：本机起一个 Neo4j 5.26.12 Community（`neo4j-admin dbms set-initial-password` 后 `neo4j console`）
-再跑全量，结果是 **417 passed, 3 skipped**——4 条联库用例全绿。所以表里的 skip 确系缺环境，不是坏测试。
-
-原先还有第 17 条 skip（`test_l4_templates.py` 的方向模板字面量比对），它自称"用例失效、无需恢复"，
-实际是 skip 条件写成了「文件里出现 `REL_HYPOTHESIS_TEMPLATE` 这个词」——`tools/verify_direction.py`
-的注释提到该名字，触发 skip，而字面量副本仍在文件里，于是这份防漂移比对一直空转。
-现条件改为「真的从 `src/ontology.py` 导入该常量才跳过」，两份副本（`relation_verifier.py`、
-`verify_direction.py`）重新做实比对，当前 16 键 0 差异。
-
-上一轮已补进 3 份小数据（各自 < 2 MB），因此有 8 条用例由 skip 转 pass：
-
-- `data/corpus/graphs/jsjkx2025-kg-completion-llm.json`（1.1 MB）→ `tests/test_edit_plan.py` 5 条
-- `data/ad690dfb/2506.09566v1.pdf`（434 KB）→ `tests/test_upload_dedup.py` 2 条
-- `data/quality/archive/metric-provenance/20260919-194048.json`（8 KB）→ `tests/test_metric_archive.py` 1 条
-
-本轮再把两份小数据**真正入库**（不再依赖「本地先跑一遍脚本」），9 条用例在干净 clone 上也是 pass：
-
-- `data/corpus/jsjkx2025-kg-kbqa.pdf`（1.93 MB）→ `test_front_matter_strip` 3 条真实首页裁剪用例
-- `web/kg-data/nebula.json`（40 KB）→ `test_nebula_papers` 6 条 K5 结构断言。它是
-  `tools/build_nebula_data.py` 用仓库内唯一图快照重建的**最小可跑样本**
-  （179 节点 / 163 边 / 1 篇论文），**不是** 3.4 MB 全量产物；全量要按 RUNBOOK §6 重建。
-
-再往上就只剩「塞大数据」这一条路，所以另两份 PDF（2.4 / 4.3 MB）与全量图快照保持 skip，
-**要跑请按 RUNBOOK 取回数据**。
-
-**不设 PYTHONUTF8 时唯一的失败**是 `test_metric_archive.py::test_write_archives_exactly_one_new_copy`：
-`tools/metric_provenance.py` 打印 `📦`(U+1F4E6)，cp936 控制台下 `UnicodeEncodeError`
-让子进程退出码变 1，而断言的是 `returncode == 0`。设置方式见上面「前置要求」那一行。
-源项目完整树里是 4 条同类失败（另有 `tools/apply_edit_plan.py` 打印 `⚠️`/`✅`/`❌` 的 3 条），
-精简树把这几条用例变成 skip 后只剩 1 条。
+前端回归另有 `tools/verify_all.py`（依赖 8098 静态站 + 无头 Chrome；缺依赖时跳过并说明）。
 
 ## 示例数据（`web/kg-data/demo/`）
 
 `web/kg-data/` 只带 4 个开箱可用的产物（`filaments.json` / `community-summaries.json` /
-`analytics.json`，以及测试锚点 `nebula.json`）。其余十几个页面读的 `atlas.json`、
-`prisma.json` 等依赖全量图谱，精简版不带 —— 于是这些页面原本只剩一句「数据加载失败」。
+`analytics.json`，以及测试锚点 `nebula.json`）。`web/legacy/` 里那些页面读的 `atlas.json`、
+`prisma.json` 等依赖全量图谱，精简版不带 —— 于是它们原本只剩一句「数据加载失败」。
 
 > ⚠️ 入库的 `web/kg-data/nebula.json` 是 **179 节点 / 163 边 / 1 篇论文** 的最小可跑样本
 > （由 `tools/build_nebula_data.py` 用仓库内唯一图快照重建，40 KB），**不是** 3.4 MB 全量。
@@ -186,15 +200,15 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 `serve.py --check` 也会把这三项标成 `⚠️ 示例` 而不是阻塞启动。
 
 实测（2026-11-27，Chrome 1440×900，`python tools/serve.py --static` → `http://127.0.0.1:8098/web/`）：
-18 个页面全部渲染出内容，无一显示「数据加载失败」——
-`index` / `kg-nebula` / `community-atlas` / `prisma` / `stance` / `temporal` / `diff` /
-`method-limits` / `papers` / `paper-table` / `bipartite` / `analytics` / `force-explorer` /
-`graph-2d` / `corpus` / `official-2-kg` / `official-3-text` / `ask`。
+8 个主页面全部渲染出内容，无一显示「数据加载失败」；
+`web/legacy/` 里那 26 个历史页同样能打开（它们读同一套 `kg-data/` 与 `demo/` 回退链）。
 
 仍然缺的部分（示例数据兜不住）：边级证据 `kg-data/evidence-*.json`（每份数百 KB 到 4 MB）、
 `diff.html` 点开单篇论文时请求的单图数据、以及 `/api/*` 的写接口。
 
 ## 评测结果与局限
+
+六层在各自的评测全集（45708 条边）上测，下面是最该先看到的那几个数：
 
 | 数字 | 值 | 这意味着什么 |
 |---|---|---|
@@ -217,17 +231,20 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 - 本文所有数字都能在 `docs/` 或 `data/quality/` 找到出处；找不到出处的数字（例如外部资料里的
   「634 节点」）一律不写。唯一的例外是「仓库说明」里的文件数与体积 —— 那是 `git ls-files`
   的现场统计（口径已写在该节），不是历史运行产物。
+- 这句话有守门：`python tools/check_doc_numbers.py` 会拿 `data/quality/` 的权威值核
+  README / RUNBOOK / 页面里的数。干净 clone 缺全量产物时它**降级跳过**对应项，
+  末尾打印「缺 X 份全量产物，已跳过 Y 项」且退出码仍为 0；数字真的对不上才报红。
 
 ## 仓库说明
 
 精简版：移出 `data/quality/baseline/`、`data/quality/graphs-published-in/`、
 `data/quality/relation-verify-all.json` 等评测全量快照与语料 PDF。干净 clone 实测
-**595 个文件 / 26.3 MB**（`git ls-files` 口径，只数受版本控制的文件；含本轮补的 3 份小数据与
+**592 个文件 / 25.1 MB**（`git ls-files` 口径，只数受版本控制的文件；含 3 份小数据与
 `web/kg-data/demo/` 的 254 KB 示例）。口径说明：`Get-ChildItem -Recurse -File` 会把工作区里
 未跟踪的 `HIST-REPORT*.md`、`output/` 日志与 `__pycache__` 一并数进去（那样会到 673 个，
 且随本地缓存变化），那不是在数仓库内容。全量数据重建步骤见 [RUNBOOK.md](RUNBOOK.md) 的 §5–§6。
 
-**`data/` 107 个文件 / 11.15 MB**：`data/quality/` 94 个（六层指标、金标、L5 人工复核样本、
+**`data/` 107 个文件 / 10.6 MB**：`data/quality/` 94 个（六层指标、金标、L5 人工复核样本、
 `edit-plans/` 5 个编辑计划、`archive/metric-provenance/` 1 份归档）、`data/gold/` 7 个金标准、
 `data/external/` 2 个外部对照、`data/ad690dfb/` 2 个（`graph.json` 演示图，`/api/qa` 端点测试与
 `web/ask.html` 的默认图；`2506.09566v1.pdf` 434 KB，`test_upload_dedup` 的去重用例）、

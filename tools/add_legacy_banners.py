@@ -107,47 +107,22 @@ WEB = ROOT / 'web'
 #   与这里漂开：`force-explorer` / `force-graph` / `graph-2d` / `new-graph`
 #   四个页面**实际都带 `data-legacy-banner` 横幅**，却被那份副本当正式页。
 OFFICIAL = {
+    # ── 2026-11-28：web/ 顶层收敛为 8 个主页面 ──────────────────────────
+    # 起因：顶层层长期并行着 38 个 HTML、其中同一主视图有 9 套变体
+    # （index3d / index3d-force / index3d-bounce / kg_galaxy / kg_space …），
+    # 陌生人第一眼无法判断哪个是正式入口。现在只留下面 8 个，
+    # 其余一律移到 `web/legacy/`（带历史横幅，索引见 `web/legacy/index.html`）。
     'index.html',            # 导航页 —— 唯一正式入口
     'kg-nebula.html',        # 主视图
-    'ask.html',              # 多 Agent 问答（主看点）
-    'upload.html',
-    'analytics.html',
-    # ⚠️ 2026-09-19：**`corpus.html` 从这份名单移出**（它现在是历史页、要加横幅）——
-    #   "语料清单"的能力并入了 `papers.html`（搜索 / 只看已出图 / 关系·社区列 /
-    #   进主视图），`web/index.html` 的入口 07 改指 `papers.html`。
-    #   **这不是删除**：文件在原地，由本脚本加"这是历史版本"的横幅（方式 A）。
-    #   ⇒ 原行留档（按 `ARCHIVE_POLICY`：改的是归类，不是文件）：
-    #       'corpus.html',        # 语料清单 —— 已并入 papers.html
-    'method-limits.html',
-    'refs.html',
-    'l5-review.html',
-    'pathqa.html',
-    'temporal.html',
-    'diff.html',
-    'bipartite.html',
-    'community-atlas.html',  # 社区图鉴
-    # 'exploration.html',    # 实验索引 —— ⚠️ 2026-09-19 **移出正式页**：
-    #                        #   三条事实（不引任何 CSS / 不在 `index.html` 的任何入口里 /
-    #                        #   不在 `demo-rail.js` 的 `FLOW` 里）⇒ 它是**内部实验/基准页**，
-    #                        #   见下面的 `EXPERIMENTAL`。**不是废弃** —— 它仍被
-    #                        #   `web/kg-data/test/fusion-contract.test.mjs` 的两个测试与
-    #                        #   `docs/` 里早期的分层先例记录引用。
-    #                        #   按 ARCHIVE_POLICY：**原行留档，不删**（改的是归类，不是文件）。
-    # L17（2026-09-16）：论文对比表 —— 它是**功能页**（可导出），不是迭代残留。
-    # ⚠️ **这一行是守门逼出来的**：`check_legacy_banners.py` 报
-    #   "1 个历史页没有横幅" ⇒ 提醒我"新页面默认是历史页，
-    #   要成为正式页必须**显式**加进这份名单"。**这正是那个设计想达到的效果。**
-    'paper-table.html',
-    # L16（2026-09-17）：立场聚合 —— 同样是**功能页**（可展开看谁支持谁反对）。
-    'stance.html',
-    # L18（2026-09-17）：PRISMA 流程 —— 功能页（可打印）。
-    # ⚠️ **这条守门已经拦下四次新增页面了**（`paper-table` / `stance` / `prisma` / `papers`）。
-    #    四次都是"新页面默认算历史页，要成为正式页必须显式加进来"——
-    #    **正是那个设计想达到的效果**：漏掉的代价是"多一条横幅"，一眼能看见；
-    #    反过来（默认正式页）漏掉的代价是"用户误入原型页"，**看不出来**。
-    'prisma.html',
-    # K2（2026-09-17）：论文管理（已入库列表 / 删除 / 元数据）—— 功能页。
-    'papers.html',
+    'upload.html',           # 演示动线 01
+    'ask.html',              # 多 Agent 问答
+    'analytics.html',        # 图谱分析面板
+    'pathqa.html',           # 问题子图
+    'method-limits.html',    # 方法能力与局限
+    'new-graph.html',        # 上传后的单图查看器（后端的 redirect 指向它）
+    # 其余旧正式页（papers / paper-table / diff / temporal / stance / prisma /
+    # bipartite / corpus / refs / l5-review / community-atlas …）已移入
+    # `web/legacy/`；它们不再是正式入口，所以不在这份名单里。
 }
 
 # ── 内部实验/基准页（**不是正式展示页，也不加横幅**）──────────────────────
@@ -159,10 +134,12 @@ OFFICIAL = {
 #    所以不需要那条"别误入"的横幅；但它也**不是**给人看的正式页。
 # ⚠️ 与 `_lab_*` 前缀的区别：那些是**临时试验**（命名即标记）；
 #    这里的页面是**长期在用的工具/基准**（有测试盯着），只是不在交付面上。
-EXPERIMENTAL = {
-    'exploration.html',      # 深空背景 + `index3d-bounce.html` 的 iframe 组合 +
-                             # `benchmark`/`seed`/`graph` 参数；见模块 docstring。
-}
+EXPERIMENTAL = set()
+# ── 2026-11-28：`EXPERIMENTAL` 目前为空 ────────────────────────────────
+# 原成员 `exploration.html`（深空背景 + `index3d-bounce.html` 的 iframe 组合）
+# 已随并行版本一并移入 `web/legacy/`，在那里它与其它历史页一样带横幅。
+# 判据不变（三条全中才该进这里）：① 不引任何样式表；② 不在 `index.html` 的入口里；
+# ③ 不在 `web/lib/demo-rail.js` 的 `FLOW` 演示动线上。
 
 MARK = 'data-legacy-banner'      # 幂等标记：有它就不重复加
 BANNER = '''<div data-legacy-banner
@@ -188,7 +165,12 @@ def is_legacy(p):
     ⚠️ `EXPERIMENTAL` 与 `OFFICIAL` 一起被排除，是**行为不变**的：
     `exploration.html` 在这之前就因为没有横幅需求而留在白名单里 ——
     这次只是把它从"正式页"挪到"实验页"，**它照旧不加横幅**。
+
+    ★ 2026-11-28：**在 `web/legacy/` 目录下的一律算历史页**（包括那里的
+    `index.html` 索引页）—— 搬迁本身就是"归入历史"这个决定，不需要再逐页登记。
     """
+    if p.parent.name == 'legacy':
+        return True
     return (p.name not in OFFICIAL and p.name not in EXPERIMENTAL
             and not p.name.startswith('_lab_'))
 

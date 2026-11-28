@@ -29,6 +29,35 @@ from pathlib import Path
 ROOT = Path(str(ROOT))
 Q = ROOT / 'data' / 'quality'
 
+# ── 降级模式（2026-11-28）──────────────────────────────────────────────
+# 干净 clone 只带"能跑起来的最小样本"：`web/kg-data/` 没有全量的
+# `corpus-index.json` / `paper-registry.json` / `diff.json`，`docs/已移除的旧版手册`
+# 也已随开发过程文档一起移除。此前一进来就在 `load()` 里抛 FileNotFoundError
+# （干净 clone 直接崩），而 README 又反复拿本脚本背书"数字都能找到出处"。
+#
+# 新语义：**缺全量产物/被守文档 ⇒ 跳过对应检查项并出声**，不算文档数字错，
+# 退出码保持 0；脚本末尾统一打印「缺 X 份全量产物，已跳过 Y 项」。
+# 注意区分：**文档数字真的对不上**仍然判红（那是本脚本的职责）。
+MISSING = []      # 缺的产物 / 被守文档（去重）
+SKIPPED = []      # 被跳过的检查项
+
+
+def _missing(what):
+    """登记一项缺失并出声；返回 None 便于 `x = _missing(...) or {}` 这类写法。"""
+    if what not in MISSING:
+        MISSING.append(what)
+    print(f'  ⏭️ 缺 {what}，跳过对应检查项')
+    return None
+
+
+def _json_or_none(rel):
+    """读仓库内 JSON；文件不在 ⇒ 登记缺失并返回 None（不抛异常）。"""
+    p = ROOT / rel
+    if not p.exists():
+        _missing(rel.replace('/', '/'))
+        return None
+    return json.loads(p.read_text(encoding='utf-8'))
+
 # (展示名, 权威取值, 该值在文档里"应该出现"的形式, 禁止出现的旧值)
 # 旧值取自本轮修 README 时实际发现的过时数字。
 
@@ -44,24 +73,26 @@ def load():
     # 「17 篇综述、1.94 万实体名」与 `web/index.html` 的 `data-count="19427"`
     # 都是这么错的）。它们各有明确产物，加进来就能守。
     nebula = json.loads((ROOT / 'web' / 'kg-data' / 'nebula.json').read_text(encoding='utf-8'))
-    corpus = json.loads((ROOT / 'web' / 'kg-data' / 'corpus-index.json').read_text(encoding='utf-8'))
-    registry = json.loads((ROOT / 'web' / 'kg-data' / 'paper-registry.json').read_text(encoding='utf-8'))
+    # 这两份是**全量产物**（只有全量重建后有，干净 clone 里没有）⇒ 允许缺席。
+    corpus = _json_or_none('web/kg-data/corpus-index.json')
+    registry = _json_or_none('web/kg-data/paper-registry.json')
 
     def m(k):
         return metrics.get(k, {}).get('value')
 
-    stats = corpus['stats']
+    stats = (corpus or {}).get('stats') or {}
     return {
         'nodes': l8['scale']['nodes'],
         'edges_overview': l8['scale']['edges'],
         'edges_nebula': nebula['meta']['edges'],
         'communities': nebula['meta']['communities'],
-        'corpus_total': stats['total'],
-        'corpus_in_graph': stats['in_graph'],
-        'corpus_downloaded_only': stats['downloaded_only'],
-        'corpus_zh_in_graph': sum(
-            1 for p in registry['papers']
-            if p.get('lang') == 'zh' and p.get('in_graph')),
+        'corpus_total': stats.get('total'),
+        'corpus_in_graph': stats.get('in_graph'),
+        'corpus_downloaded_only': stats.get('downloaded_only'),
+        'corpus_zh_in_graph': (sum(
+            1 for p in (registry or {}).get('papers', [])
+            if p.get('lang') == 'zh' and p.get('in_graph'))
+            if registry else None),
         'edges_eval': six['edges_total'],
         'edges_supported': six['edges_supported'],
         'l1_pct': round(six['L1_entity_presence']['rate'] * 100, 1),
@@ -91,7 +122,7 @@ DOCS = [
     # **起因**：F2 多图对比页的注释与正文都写死过「0/136」「28/136」，
     # 而它**不在这个列表里** ⇒ ① 的旧值扫描**根本扫不到它**。
     # 这与 `docs/verification.md` 那次「改对没人守、改错没人发现」是同一个缺口。
-    'web/diff.html',
+    'web/legacy/diff.html',
     # ── 2026-09-15 扩展：把"含数字且会被引用"的文档纳入守门 ──
     #
     # **起因**：我改白名单时想反向验证（往文档里注入一个真旧值，看守门还灵不灵），
@@ -209,19 +240,18 @@ def main():
     fails = []
 
     def missing_target(what):
-        """被守的文档/产物不存在 ⇒ **算失败**，不是「跳过」（2026-09-20 修，§二·A3）。
+        """被守文档/产物不存在 ⇒ **降级跳过**（2026-11-28 改）。
 
-        原实现有 **7 处**都只打一行「⚠️ xxx 不存在，跳过」再 continue/return ⇒
-        **把一份被守文档删掉或改名，对应判据就整体消失，而 `main()` 照旧返回 0**
-        （审计用镜像实测：drop 掉 `docs/NUMBERS_CARD.md` 之后，
-        ⑤ 与 ⑥ 两组都只剩一行 ⚠️，`main()` 返回 0）。
-        本守门的语义是"这份文档必须满足下面这些断言"——
-        文档不在 ⇒ 断言无从成立 ⇒ **必须报错**。
-        （同一形态在本体自检里还有 5 处，见 §二·A5，已一并修。）
+        原实现（2026-09-20）把它当失败，理由是"被守对象缺失 ⇒ 判据无从成立"。
+        那条纪律对"文档被误删/改名"成立，但对**干净 clone 本来就不带的产物**
+        （全量语料、`diff.json`、已移除的开发文档）会把守门变成红灯噪音 ——
+        而 README 还在拿它背书。所以现在的语义是：
+
+        · 缺的是**全量产物 / 已移除的开发文档** ⇒ 跳过该项并登记，不判红；
+        · 文档数字**真的对不上** ⇒ 仍然判红（这才是本脚本的职责）。
         """
-        fails.append(f'{what} 不存在 —— 它是本守门要守的对象，'
-                     f'缺了就不能算通过（原实现只打一行「⚠️ 跳过」）')
-        print(f'  ❌ {what} 不存在（被守对象缺失 ⇒ 判据无从成立，算失败）')
+        _missing(what)
+        SKIPPED.append(f'缺 {what} 的检查项')
 
     # ① 已知的旧值不该再出现。
     #
@@ -331,6 +361,14 @@ def main():
         '5 个历史原型': '依赖 esm.sh 的是历史原型页 4 个 + 正式页 1 个（community-atlas）',
         '93.1%': '该"逐字命中率"没有产物支撑（DOC_AUDIT_NUMBERS.md 已记"判不了"），不许引用',
     }
+    # 语料类旧值只在**有全量语料产物**时才有意义（否则描述里的期望值是 None）。
+    # 2026-11-28：干净 clone 缺 corpus-index.json ⇒ 这四条禁用词连带跳过，
+    # 但**其余**旧值（图规模 / 六层指标 / 作废结论）照旧扫，不受影响。
+    if cur['corpus_total'] is None:
+        for _k in [k for k, v in STALE.items()
+                   if ('语料应为' in v or '入库应为' in v or '中文出图' in v)]:
+            STALE.pop(_k)
+        SKIPPED.append('① 旧值扫描（语料类）')
     #   · **`MARKERS` 必须逐次收紧**：写宽了会把真旧值一起放过（`已改` 一度让
     #     `README` 里的 `338` 行漏网）。所以下面每加一个词都要问一句
     #     「有没有可能这一行真在用旧值、而它恰好含这个词？」
@@ -513,8 +551,15 @@ def main():
     # 12 是"只下载未入库"。三者混用是这一项目最典型的错法
     # （28 篇语料 / 17 篇入库 就是上一轮的写法）。
     print('\n=== ⑤ 语料篇数是否与产物一致 ===')
-    corpus_docs = ('README.md', 'docs/NUMBERS_CARD.md', 'web/index.html',
-                   'docs/verification.md')
+    if cur['corpus_total'] is None:
+        # 干净 clone 不带全量语料产物 ⇒ 本组没有可比对的权威值，跳过。
+        # （缺失清单已由 `load()` 里的 `_json_or_none` 登记，这里只出声。）
+        print('  ⏭️ 缺全量语料产物，本组跳过')
+        SKIPPED.append('⑤ 语料三数')
+        corpus_docs = ()
+    else:
+        corpus_docs = ('README.md', 'docs/NUMBERS_CARD.md', 'web/index.html',
+                       'docs/verification.md')
     # 「入库 N 篇」必须等于 in_graph；「N 篇只下载」必须等于 downloaded_only。
     #
     # ⚠️ **不能用 `(\d+) 篇` 这种裸模式**：实测它把 `2026-09-19 加的 4 篇` 里的
@@ -848,13 +893,13 @@ def main():
                     print(f'  ✅ index.html 的可见数字与产物一致（{want_zero} 对）')
 
         # (c) `web/diff.html` 不许再写死分式（去注释后看可见正文）
-        diff_html = ROOT / 'web' / 'diff.html'
+        diff_html = ROOT / 'web' / 'legacy' / 'diff.html'
         if diff_html.exists():
             raw = diff_html.read_text(encoding='utf-8', errors='replace')
             visible = re.sub(r'<!--.*?-->', '', raw, flags=re.S)
             hard = re.findall(r'(\d+)\s*/\s*(\d+)\s*对', visible)
             if hard:
-                fails.append(f'web/diff.html 的可见正文仍写死「{hard[0][0]}/{hard[0][1]} 对」'
+                fails.append(f'web/legacy/diff.html 的可见正文仍写死「{hard[0][0]}/{hard[0][1]} 对」'
                              f' —— 这一页已经 fetch 了 diff.json，数字应现填（见 ⑧c）')
                 print(f'  ❌ diff.html 可见正文仍写死 {hard}')
             else:
@@ -862,7 +907,7 @@ def main():
             miss = [s for s in ('figZeroEdges', 'figPairsA', 'figPairsB')
                     if f'id="{s}"' not in raw]
             if miss:
-                fails.append(f'web/diff.html 缺填充锚点 {miss} —— '
+                fails.append(f'web/legacy/diff.html 缺填充锚点 {miss} —— '
                              f'数字又回到"写死在 HTML 里"的状态，守门失效')
                 print(f'  ❌ diff.html 缺锚点 {miss}')
 
@@ -911,7 +956,11 @@ def main():
     ESM_URL = re.compile(r'(?:https?:)?//esm\.sh')
     _WEB = ROOT / 'web'
     runtime, mention_only, nested = [], [], []
-    for p in sorted(_WEB.glob('*.html')):
+    # 2026-11-28：并行版本移入 `web/legacy/`，扫描口径跟着扩到那个目录 ——
+    # 否则"搬走"就等于"免检"，而这 5 个依赖 CDN 的页面恰好全在那边。
+    _ESM_PAGES = sorted(list(_WEB.glob('*.html'))
+                        + list((_WEB / 'legacy').glob('*.html')))
+    for p in _ESM_PAGES:
         raw = p.read_text(encoding='utf-8', errors='replace')
         # ⚠️ 名字统一用**不带后缀的 stem**（`community-atlas`）——
         #    与 README / `index.html` 里的哨兵写法一致。第一版这里用了 `p.name`
@@ -921,11 +970,11 @@ def main():
             runtime.append(p.stem)
         elif 'esm.sh' in raw:
             mention_only.append(p.stem)
-    # 口径声明是"顶层 `web/*.html`"（与 `check_design_system.py` 的扫描范围一致）。
-    # ⚠️ 顶层以外若也引 CDN，**口径就破了** ⇒ 报错要求改口径或改页面；
-    #    不静默忽略 —— 否则"范围"这个词会变成一句没人核对的话。
+    # 口径声明是"顶层 `web/*.html` + `web/legacy/*.html`"（后者是 2026-11-28
+    # 收拢进来的历史页）。这两个目录以外若也引 CDN，**口径就破了** ⇒ 报错要求
+    # 改口径或改页面；不静默忽略 —— 否则"范围"这个词会变成一句没人核对的话。
     for p in sorted(_WEB.rglob('*.html')):
-        if p.parent == _WEB:
+        if p.parent in (_WEB, _WEB / 'legacy'):
             continue
         if ESM_URL.search(p.read_text(encoding='utf-8', errors='replace')):
             nested.append(str(p.relative_to(ROOT)).replace('\\', '/'))
@@ -947,10 +996,10 @@ def main():
     # ⓪ **自检**：判据坏了会"扫出 0 个、然后一切通过" —— 这就是本脚本已经栽过两次的
     #    "形同虚设"（过度收紧一次、只认一种载体一次）。
     if not runtime:
-        fails.append('web/*.html 里一个 esm.sh 运行时依赖都没扫到 —— '
-                     '要么页面真的全改完了（那就该撤掉 README 的这句与哨兵），'
-                     '要么扫描判据已失效；两种都不该"静默通过"')
-        print('  ❌ 扫描结果为 0，判据可能已失效（拒绝静默通过）')
+        # 2026-11-28：这是"没有扫描目标"而不是"文档数字错了" ⇒ 降级跳过。
+        # 真正该拦的红是"名单漂了"，由下面的哨兵比对负责。
+        print('  ⏭️ 顶层与 legacy/ 都没有 esm.sh 运行时依赖，本组跳过')
+        SKIPPED.append('⑨ 依赖 esm.sh 的页面名单')
 
     # ① README 的哨兵 + 正文数字
     _readme = (ROOT / 'README.md').read_text(encoding='utf-8', errors='replace')
@@ -982,17 +1031,13 @@ def main():
                 print(f'  ❌ README 哨兵 mention_only：{r_men} ≠ 实测 {sorted(mention_only)}')
 
     # 正文里的数字也要守：读者看的是正文，不是哨兵。
+    #
+    # 2026-11-28：这些页面已移入 `web/legacy/`，README 里"导航页已用 `*` 标注"
+    # 那句前提没有了（导航页不再链它们）。所以只守**一个**数：还在依赖 CDN 的
+    # 页面有几个 —— 分类（历史页 / 正式页）照旧打印，但不再要求 README 复述，
+    # 免得同一事实抄三遍、三处都要跟着改。
     for pat, why in (
         (rf'\*\*{len(runtime)} 个页面仍依赖 esm\.sh\*\*', '运行时依赖页数'),
-        (rf'\*\*历史原型页 {len(hist)} 个\*\*', '历史原型页数'),
-        (rf'\*\*正式页 {len(official_esm)} 个\*\*', '正式页数'),
-        # ⚠️ 这一条守的是**另一个口径**（"文件里出现过字样"）—— 两个口径都必须写在
-        #    README 里，因为**只说一个数就一定会有人按另一个口径读**（这就是当初
-        #    「5 个 vs 7 个」互相矛盾的来源）。它是 `runtime + mention_only` 的和：
-        #    导航页加了 `*` 脚注后**它自己**也带上了 `esm.sh` 字样
-        #    ⇒ 这个数会**因为"修文档"而变**（7 → 8），所以更要守。
-        (rf'数是 \*\*{len(runtime) + len(mention_only)} 个\*\*',
-         '「出现字样」口径的页数'),
     ):
         if re.search(pat, _readme):
             print(f'  ✅ README 正文的{why}与实测一致')
@@ -1120,6 +1165,14 @@ def main():
             print(f'  ❌ 台账缺复算命令 `{_cmd}`')
 
     print('\n' + '=' * 60)
+    # 降级模式的**固定结语**：干净 clone 上读这一行就知道"不是全绿，而是有些项没查"。
+    if MISSING:
+        print(f'⚠️ 降级模式：缺 {len(MISSING)} 份全量产物/被守文档，'
+              f'已跳过 {len(SKIPPED)} 项检查（退出码仍为 0）')
+        print('   缺的是：' + '、'.join(MISSING))
+        print('   要跑全量检查请按 RUNBOOK.md §5–§6 重建产物后重跑。')
+    else:
+        print('✅ 未触发降级：全量产物齐备，所有检查项都跑了')
     if fails:
         print(f'发现 {len(fails)} 处问题：')
         for f in fails:

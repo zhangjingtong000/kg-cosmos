@@ -53,7 +53,7 @@ def main():
         errs = []
         page.on('pageerror', lambda e: errs.append(str(e)))
 
-        page.goto(BASE + '/papers.html', wait_until='networkidle', timeout=60000)
+        page.goto(BASE + '/legacy/papers.html', wait_until='networkidle', timeout=60000)
         page.wait_for_timeout(1800)
 
         # ── ① 载入 + 三个区块都渲染 ──────────────────────────────────
@@ -177,7 +177,7 @@ def main():
         print()
 
         # ── ⑥ ★ 静态站：按钮禁用 + 说清为什么 ────────────────────────
-        page.goto(STATIC + '/papers.html', wait_until='networkidle', timeout=60000)
+        page.goto(STATIC + '/legacy/papers.html', wait_until='networkidle', timeout=60000)
         page.wait_for_timeout(2000)
         s6 = page.evaluate("""() => {
           const bs = [...document.querySelectorAll('button[data-kind]')];

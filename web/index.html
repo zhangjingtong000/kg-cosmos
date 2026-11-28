@@ -518,7 +518,7 @@ document.documentElement.classList.add('js-motion');
   <section class="ch" id="ch-3">
     <div class="in">
       <p class="kick">03 — 入口</p>
-      <h2>十二个入口<em> · 六步演示动线 + 六项支线功能</em></h2>
+      <h2>六个入口<em> · 六步演示动线</em></h2>
       <!-- ★ 2026-09-20：十二项改成**一条滚轴**（用户要求：「底下这个六步演示动线
            和六项功能，我还是想做成滚轴的形式」「十二项全部滚动」「字可以变大一点，
            方便它滚动」「这个滚动的背景要融入我们的背景，不要显得很突兀，
@@ -539,7 +539,7 @@ document.documentElement.classList.add('js-motion');
            ★ 前 6 张与后 6 张**靠 `:nth-child` 区分，不另加类名** ——
              轨道里第 7 个孩子是那条分界线，所以后 6 张是 `nth-child(n+8)`。 -->
       <div class="reel" id="entryAxis" tabindex="0" role="group"
-           aria-label="十二个入口：前六步是演示动线，后六项是支线功能，可用左右方向键横向浏览">
+           aria-label="六个入口：六步演示动线，可用左右方向键横向浏览">
         <div class="reel-track">
   <a class="entry" href="upload.html">
             <span class="ix">01</span>
@@ -585,46 +585,13 @@ document.documentElement.classList.add('js-motion');
           </a>
           <!-- 滚轴上的分界：把「不在动线上的 6 项」与上面 6 步分开，
                但**仍在同一条轴**上。一条竖线 + 小字，不另起一块。 -->
-          <span class="reel-seam" aria-hidden="true"><b>支线功能</b>6 项 · 不在演示动线上</span>
-  <a class="entry" href="papers.html">
-              <span class="ix">07</span>
-              <h3>论文管理 · 语料清单</h3>
-              <p>33 篇论文清单（另有 1 条中文期刊记录登记但 PDF 未落盘）：标题、年份、检索式、是否入库、抽出多少实体与关系。含 13 篇只下载、尚未入库的。</p>
-              <span class="mt">语料边界<span class="go">→</span></span>
-            </a>
-  <a class="entry" href="bipartite.html">
-              <span class="ix">08</span>
-              <h3>使用关系二部图</h3>
-              <p>全库 <b>7894</b> 条 USES 的施动者 × 被用物（治理前全量口径，与该页数据
-                <code>bipartite.json</code> 同源）；两侧是「施动 / 被用」，不是「方法 / 数据集」。</p>
-              <span class="mt">关系结构<span class="go">→</span></span>
-            </a>
-  <a class="entry" href="temporal.html">
-              <span class="ix">09</span>
-              <h3>时间演化</h3>
-              <p>21 篇论文按年份逐年累积成 8 帧（2017–2026），看「当年首次出现了什么」——新增实体与新增关系类型。</p>
-              <span class="mt">时间维度<span class="go">→</span></span>
-            </a>
-  <a class="entry" href="diff.html">
-              <span class="ix">10</span>
-              <h3>多图对比</h3>
-              <p>任选两篇看共有 / 各自独有；节点重叠最高只有 0.089，87 对是「共享实体、零共享关系」。</p>
-              <span class="mt">跨篇对比<span class="go">→</span></span>
-            </a>
-  <a class="entry" href="paper-table.html">
-              <span class="ix">11</span>
-              <h3>论文对比表</h3>
-              <p>行 = 论文，列 = 关系类型字段，每格带页码，可导出 CSV / Markdown。</p>
-              <span class="mt">结构化导出<span class="go">→</span></span>
-            </a>
-  <a class="entry" href="stance.html">
-              <span class="ix">12</span>
-              <h3>立场聚合</h3>
-              <p>671 个主张聚成 Yes / No / Mixed / Possibly；立场由计数得出，不调模型。</p>
-              <span class="mt">立场归纳<span class="go">→</span></span>
-            </a>
+          
         </div>
-        <p class="reel-hint">继续往下滚 —— 这条轴会跟着横向走完十二项，走完之后页面才继续往下</p>
+        <p style="margin:10px 0 0;color:#9a948a;font-size:12.5px">
+          论文清单 / 多图对比 / 论文对比表 / 立场聚合 / 时间演化 / 社区图鉴等页面
+          已移到 <a href="legacy/index.html" style="color:#7cc0b6">web/legacy/</a> 备查（历史版本，不在演示动线上）。
+        </p>
+        <p class="reel-hint">继续往下滚 —— 这条轴会跟着横向走完六项，走完之后页面才继续往下</p>
       </div>
     </div>
   </section>
@@ -653,8 +620,8 @@ document.documentElement.classList.add('js-motion');
 <footer id="foot" data-esm-pages="community-atlas,force-explorer,force-graph,graph-2d,official-3-text">
   <div class="fin">
     <span>KG Cosmos · 知识图谱</span>
-    <a href="index-classic.html">旧版导航页（保留备查）</a>
-    <a href="refs.html">参考与出处</a>
+    <a href="legacy/index.html">历史页面（web/legacy/）</a>
+    <a href="legacy/refs.html">参考与出处</a>
     <a href="method-limits.html">方法边界</a>
     <span class="rt">本页与全部数据由本机 GPU 离线产出 · 无外部请求</span>
   </div>
@@ -674,9 +641,9 @@ document.documentElement.classList.add('js-motion');
     <sup aria-hidden="true">*</sup> <b>标记者需要联网</b>：这一页的图引擎从
     <code>esm.sh</code> 加载，断网时由 <code>lib/net-guard.js</code>
     给出明确提示而不是白屏 ——
-    <a href="community-atlas.html">社区图鉴<sup aria-hidden="true">*</sup></a>。
+    <a href="legacy/community-atlas.html">社区图鉴<sup aria-hidden="true">*</sup></a>。
     另有 <b>4 个历史原型页</b>同样依赖它、但<b>不在本页入口里</b>
-    （只有直接 URL 能到；<a href="index-classic.html">旧版导航页</a>
+    （只有直接 URL 能到；<a href="legacy/index-classic.html">旧版导航页</a>
     上有它们的入口与同样的 <sup aria-hidden="true">*</sup> 标注）：
     <code>force-explorer</code> · <code>force-graph</code> · <code>graph-2d</code> ·
     <code>official-3-text</code>。
@@ -871,7 +838,7 @@ document.documentElement.classList.add('js-motion');
   if (REDUCED) {
     reel.style.overflowX = 'auto';
     var h0 = document.querySelector('.reel-hint');
-    if (h0) h0.textContent = '横向滚动查看全部十二项';
+    if (h0) h0.textContent = '横向滚动查看全部六项';
     return;
   }
 

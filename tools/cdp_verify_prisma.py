@@ -23,7 +23,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE = os.environ.get('KG_STATIC', 'http://127.0.0.1:8000')
-PAGE = BASE + '/prisma.html'
+PAGE = BASE + '/legacy/prisma.html'
 DATA = os.path.join(ROOT, 'web', 'kg-data', 'prisma.json')
 
 
