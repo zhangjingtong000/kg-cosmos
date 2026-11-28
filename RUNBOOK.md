@@ -88,7 +88,7 @@ L5 全量会从 ~280 秒变成约 1 小时。
 ## 5. 验证（改完东西该跑什么）
 
 ```bash
-python -m pytest tests -q          # 单元测试（420 项）
+python -m pytest tests -q          # 单元测试（423 项）
 python tools/verify_all.py --fast  # 全量回归（67 项，跳过慢的 PDF 检查）
 python tools/verify_all.py         # 含 PDF 高亮检查
 ```

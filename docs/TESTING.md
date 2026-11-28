@@ -14,10 +14,10 @@ python -m pytest -q
 Python 3.13.0 / pytest 9.0.2，Windows，设 `PYTHONUTF8=1`）：
 
 ```text
-413 passed, 7 skipped, 27 subtests passed in 12.59s
+416 passed, 7 skipped, 27 subtests passed in 12.45s
 ```
 
-`pytest --collect-only` 收集到 420 条（= 413 passed + 7 skipped）。
+`pytest --collect-only` 收集到 423 条（= 416 passed + 7 skipped）。
 
 ## 7 条 skip 的原因（全部是"仓库确实不带的大数据/服务"，没有一条是测试坏了）
 
@@ -28,7 +28,7 @@ Python 3.13.0 / pytest 9.0.2，Windows，设 `PYTHONUTF8=1`）：
 | 1 | `tests/test_entity_absorb.py::test_full_corpus_absorptions_are_now_tiny` | 全量图快照（源项目 21 篇 / 88.8 MB；本仓库只带 1 份 `jsjkx2025-kg-completion-llm.json`） | 取回 `data/corpus/graphs/*.json` 后 `KG_SLOW_TESTS=1 python -m pytest tests/test_entity_absorb.py`（全量下约 125 秒） |
 
 **反向对照**：本机起一个 Neo4j 5.26.12 Community（`neo4j-admin dbms set-initial-password`
-后 `neo4j console`）再跑全量，结果是 **417 passed, 3 skipped** —— 4 条联库用例全绿。
+后 `neo4j console`）再跑全量，结果是 **420 passed, 3 skipped** —— 4 条联库用例全绿。
 所以表里的 skip 确系缺环境，不是坏测试。
 
 ## `PYTHONUTF8=1`

@@ -39,6 +39,40 @@
 
 ---
 
+## v0.5.1 · 三个 P0 修复（2026-11-28）
+
+**做了什么**：
+- **诚信口径**：README 与 `docs/L5_SIX_LAYER_REPORT.md` 把「200 条分层抽样的
+  **两人盲判**」「与**人判** κ」改成「**两次 LLM 盲判（不同会话）**」「与 **LLM 标签** κ」。
+  依据是 `data/quality/l5-annotator-agreement.json` 的 `note` 自己写着「两个标注者
+  都是 LLM（不同会话）」—— 此前 README 的措辞与自家数据直接矛盾。
+  README 顶部补一句「研究原型：评测标签由 LLM 生成，不是人工金标」。
+- **死代码**：`src/kg_extractor.py` 的 `_load_registry_env()` 定义完 `locations` 就结束，
+  扫注册表的 `for` 循环被缩进到了 `relation_types_block()` 的 `return` 之后 ——
+  既永远不执行（兜底静默失效），又引用未定义的 `locations`/`BLOCKED`/`winreg`。
+  循环移回本函数，新增 `tests/test_registry_env.py`（3 条：真补变量、不覆盖已有值、
+  结构上不许再回到 `return` 之后）。
+- **Windows 第一条命令**：`python tools/serve.py --static` 在 cp936 控制台打印 `✅` 时
+  `UnicodeEncodeError`（README 第 80 行才提 `PYTHONUTF8=1`，比命令晚 70 行）。
+  `serve.py` 现在探测 `sys.stdout.encoding`，非 UTF-8 时把 `✅/⚠️/❌/🔒` 换成
+  `[OK]/[!]/[X]/[锁]`——不改检查逻辑，也不要求用户改环境。
+- **`verify_all.py --fast`**：Playwright 的依赖探测从「手写 2 个脚本名」改成按源码扫描
+  （实测有 3 个脚本 `import playwright`，漏掉的那个必然报 ❌），并识别
+  「库装了、chromium 没下载」的报错特征，按**跳过**处理而不是报红。
+- **仓库卫生**：20 个「被 `.gitignore` 排除却已被跟踪」的文件 —— 逐个查证后都是
+  页面/文档/脚本的运行时依赖（11 个字体、`web/l5-data/` 4 个、3 份治理产物），
+  所以**改忽略规则而不是 `git rm --cached`**；`D:\kg-demo` 与 `E:\Python313\python.exe`
+  的硬编码清零（改成 `__file__` 锚点 / `python`），数据产物里的历史绝对路径改仓库相对路径。
+
+**坑**：
+- `git add -A` 把本地跑出来的 `verify_fast.log` 一起提交了 —— 已经移除并改为不跟踪。
+  仓库里"跑一遍就多一个被跟踪文件"的坑，与上面那 20 个忽略冲突是同一类问题。
+- 跑 `tools/verify_all.py` 会重写 `data/quality/l8-structure-audit.json` 等**被跟踪的产物**
+  （by design 的"报告读数"脚本），干净 clone 上会把全量读数覆盖成小样本读数；
+  验证完必须 `git checkout` 回去，否则提交里会混进假数字。
+
+---
+
 ## v0.4 · 多 Agent 问答与研究点（2026-09-15）
 
 **做了什么**：

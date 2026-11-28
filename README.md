@@ -167,18 +167,20 @@ python tools/serve.py --static   # 只起纯静态站，零 Python 依赖
 python -m pytest -q        # Windows 先设 PYTHONUTF8=1，见上
 ```
 
-干净 clone 实测（2026-11-27，Python 3.13.0 / pytest 9.0.2，Windows）：
+干净 clone 实测（2026-11-28，Python 3.13.0 / pytest 9.0.2，Windows）：
 
 ```text
-413 passed, 7 skipped, 27 subtests passed in 12.59s
+416 passed, 7 skipped, 27 subtests passed in 12.45s
 ```
 
-`--collect-only` 收集 420 条（413 passed + 7 skipped）。
+`--collect-only` 收集 423 条（416 passed + 7 skipped）。比上一版多出的 3 条是
+`tests/test_registry_env.py`：钉住「注册表兜底真的执行」与「循环不许再变成
+`relation_types_block()` 里 `return` 之后的死代码」（2026-11-28 的 P0）。
 
 **已知边界**：7 条 skip 全部是「仓库确实不带的大数据/服务」——4 条要可达的 Neo4j
 （`tests/test_graph_store.py`），2 条要两份超 2 MB 的语料 PDF，1 条要全量图快照（88.8 MB）。
 没有一条是测试坏了；补上环境后 4 条联库用例在本机 Neo4j 5.26.12 上转 pass
-（全量 417 passed / 3 skipped）。逐条原因、反向对照与 `PYTHONUTF8` 的细节见
+（全量 420 passed / 3 skipped）。逐条原因、反向对照与 `PYTHONUTF8` 的细节见
 [docs/TESTING.md](docs/TESTING.md)。
 
 前端回归另有 `tools/verify_all.py`（依赖 8098 静态站 + 无头 Chrome；缺依赖时跳过并说明）。
@@ -249,7 +251,7 @@ python -m pytest -q        # Windows 先设 PYTHONUTF8=1，见上
 
 精简版：移出 `data/quality/baseline/`、`data/quality/graphs-published-in/`、
 `data/quality/relation-verify-all.json` 等评测全量快照与语料 PDF。干净 clone 实测
-**592 个文件 / 25.1 MB**（`git ls-files` 口径，只数受版本控制的文件；含 3 份小数据与
+**593 个文件 / 25.2 MB**（`git ls-files` 口径，只数受版本控制的文件；含 3 份小数据与
 `web/kg-data/demo/` 的 254 KB 示例）。口径说明：`Get-ChildItem -Recurse -File` 会把工作区里
 未跟踪的 `HIST-REPORT*.md`、`output/` 日志与 `__pycache__` 一并数进去（那样会到 673 个，
 且随本地缓存变化），那不是在数仓库内容。全量数据重建步骤见 [RUNBOOK.md](RUNBOOK.md) 的 §5–§6。
