@@ -433,7 +433,7 @@ PPV(t)     = Σ w·1[p≥t]·y / Σ w·1[p≥t]      （判通过里真的被支
 ## 7. 执行清单
 
 ```powershell
-cd D:\kg-demo
+cd <仓库根>
 
 # 0) 无人工的模型侧探针（约 7 分钟，GPU）—— 已跑过一次，结果在
 #    data/quality/l5-validity-probe.json

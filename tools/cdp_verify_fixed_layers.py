@@ -38,8 +38,8 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
    修复后是 **1080px = 视口高**。这条**不会误报**，是最硬的指纹。
 
 用法：
-    E:\Python313\python.exe tools\cdp_verify_fixed_layers.py
-    E:\Python313\python.exe tools\cdp_verify_fixed_layers.py --json
+    python tools\cdp_verify_fixed_layers.py
+    python tools\cdp_verify_fixed_layers.py --json
 """
 import argparse
 import json

@@ -112,6 +112,6 @@
   "probe_selfloop": [],
   "expected_ci_halfwidth_srs": 0.0665,
   "est_annotation_minutes": 66.7,
-  "sheet": "D:\\kg-demo\\data\\quality\\l5-validity-sample.jsonl",
-  "key": "D:\\kg-demo\\data\\quality\\l5-validity-key.json"
+  "sheet": "data\\quality\\l5-validity-sample.jsonl",
+  "key": "data\\quality\\l5-validity-key.json"
 }

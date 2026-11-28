@@ -17,7 +17,9 @@ import json
 import re
 from pathlib import Path
 
-ROOT = Path(r'D:\kg-demo')
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+_HERE = Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 都在根目录下一层
 Q = ROOT / 'data' / 'quality'
 DIR = Q / '_l9rel'
 

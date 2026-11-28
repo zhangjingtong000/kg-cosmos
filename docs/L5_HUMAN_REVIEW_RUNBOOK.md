@@ -25,8 +25,8 @@
 **路径 B（要 append-only 落盘，需起服务）**
 
 ```
-E:\Python313\python.exe tools\l5_single_review.py --hash ad690dfb      # → http://127.0.0.1:8097/l5-review.html
-E:\Python313\python.exe tools\l5_single_review.py --validity
+python tools\l5_single_review.py --hash ad690dfb      # → http://127.0.0.1:8097/l5-review.html
+python tools\l5_single_review.py --validity
 ```
 
 ## 2 两问怎么判
@@ -52,8 +52,8 @@ E:\Python313\python.exe tools\l5_single_review.py --validity
 ## 4 判完怎么算回指标
 
 ```
-E:\Python313\python.exe tools\l5_single_report.py --hash ad690dfb --labels "<导出的 json 路径>"
-E:\Python313\python.exe tools\l5_single_report.py --validity --labels "<导出的 json 路径>"
+python tools\l5_single_report.py --hash ad690dfb --labels "<导出的 json 路径>"
+python tools\l5_single_report.py --validity --labels "<导出的 json 路径>"
 ```
 
 输出：加权真实支持率 + 层内 bootstrap 95%CI（「说不清」双口径）、分层明细、
@@ -64,8 +64,8 @@ Q2 与机器 `hit_evidence` 一致率（本轮标注质量）。`--validity` 另
 要 PPV 须跑一次 CPU 判别器（需放开「禁止加载模型」）：
 
 ```
-E:\Python313\python.exe tools\audit_single_l5.py data\ad690dfb\graph.json --dump tmp\l5-single\ad690dfb-dump.jsonl
-E:\Python313\python.exe tools\l5_single_report.py --hash ad690dfb --labels "..." --key tmp\l5-single\ad690dfb-dump.jsonl
+python tools\audit_single_l5.py data\ad690dfb\graph.json --dump tmp\l5-single\ad690dfb-dump.jsonl
+python tools\l5_single_report.py --hash ad690dfb --labels "..." --key tmp\l5-single\ad690dfb-dump.jsonl
 ```
 
 ## 5 盲态怎么保证

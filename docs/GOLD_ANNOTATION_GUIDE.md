@@ -18,7 +18,7 @@
 ## 2. 打开工作稿
 
 ```
-D:\kg-demo\data\gold\WORKSHEET-2012.00456v1.md
+`<仓库根>/data/gold/WORKSHEET-2012.00456v1.md`
 ```
 
 文件里包含：
@@ -28,7 +28,7 @@ D:\kg-demo\data\gold\WORKSHEET-2012.00456v1.md
 - **建议范围**：前 10 页（60% 处）信息密度最高，优先标这里
 
 同时打开 PDF 对照：
-`D:\kg-demo\data\corpus\2012.00456v1.pdf`
+`<仓库根>/data/corpus/2012.00456v1.pdf`
 
 > ⚠️ **标注时不要看系统的抽取结果**（`data/corpus/graphs/2012.00456v1.json`）。
 > 看了会被锚定，金标就失去独立性，实验结论也就不成立。

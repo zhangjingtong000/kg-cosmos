@@ -1,5 +1,5 @@
 {
-  "source": "D:\\kg-demo\\data\\quality\\relation-verify-all.json",
+  "source": "data\\quality\\relation-verify-all.json",
   "model": "Babelscape/mdeberta-v3-base-triplet-critic-xnli",
   "threshold": 0.67,
   "mode": "sample-150",

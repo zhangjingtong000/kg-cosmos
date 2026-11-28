@@ -5,7 +5,7 @@ r"""盲态保护的真实端点测试。
 
 此前这 13 个 case 住在 `tmp/_audit_check_protect.py`（**`tmp/` 被 `.gitignore` 排除**），
 所以它**不可交付、不可移植**，而且：
-  · 写死 `Path(r"D:\kg-demo")` —— 而 `tools/check_doc_numbers.py:18` 明确写过
+  · 写死一个本机绝对路径（某个盘符下的仓库副本，如 `D:\...`）—— 而 `tools/check_doc_numbers.py:18` 明确写过
     「不写死盘符，演示机不一定把仓库放在 D 盘」；
   · **它只是把 `src/app.py` 的 `_BLIND_PROTECTED` 读出来、自己再用
     `any(p in low for p in prot)` 算一遍** —— 从不打真实端点。

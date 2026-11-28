@@ -72,3 +72,29 @@
 
 `.gitignore` 对一次性脚本的覆盖规则已不再是待决项 —— 临时脚本目录已随仓库瘦身移除。
 若将来再引入临时脚本，建议统一放 `tools/_scratch/` 并加入 `.gitignore`。
+
+---
+
+## 6. 「被 gitignore 却仍被跟踪」的 20 个文件（2026-11-28 已处理）
+
+审计跑 `git ls-files -ci --exclude-standard` 列出 20 个文件，同时命中忽略规则和版本控制。
+逐个体检后结论是：**这 20 个都是页面/文档/脚本的运行时依赖，不该被忽略**，
+所以修的是 `.gitignore`，不是 `git rm --cached`：
+
+| 文件 | 数量 | 为什么必须入库 |
+|---|---|---|
+| `web/lib/fonts/*` | 11 | 所有页面都引 `lib/fonts/fonts.css`；子集字体 ≈ 1.6 MB，删了断网白屏（`check_local_assets.py` 逐个核对引用） |
+| `web/l5-data/*` | 4 | 静态站证据深链的 PDF 与盲判清单；`kg-nebula.html` 回退链第一站就是 `./l5-data/` |
+| `data/quality/{filtered-edges,created-by-patch,venue-rewrite-plan}.json` | 3 | `build_nebula_data.py` / `graph_source.py` / `l7_verify_t31_direction.py` 与 `ARCHIVE_POLICY.md` 都直接引用 |
+
+处理：删掉对应的 5 条忽略规则（保留注释说明原因），`git check-ignore` 对这三组路径
+现在返回「不忽略」，`git ls-files -ci --exclude-standard` 输出为空。
+**没有删除任何文件，也没有改历史提交** —— 这 20 个文件本来就在版本控制里，
+只是忽略清单写反了。
+
+同时清掉了代码与文档里写死的本机路径：`D:\kg-demo` 全部改成以 `__file__` 为锚点的
+相对解析（或 `<仓库根>`），`E:\Python313\python.exe` 改成 `python`
+（`tools/check.ps1` 的 `Test-Path` 回退保留，它本来就是跨机的）。
+数据产物里 `source` / `file` 字段记录的历史绝对路径也改成了仓库相对路径 ——
+只换路径写法，指标数值一个没动。
+

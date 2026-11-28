@@ -20,7 +20,7 @@
   （`web/kg-data/corpus-index.json` / `paper-registry.json` / `diff.json`、
   `docs/已移除的旧版手册`）；缺了只跳过对应检查项并打印「缺 X 份全量产物，已跳过 Y 项」，
   退出码仍为 0。`tools/verify_all.py` 缺 8098 静态站或无头 Chrome 时跳过前端检查并说明，
-  文件头不再留着 `cd D:\kg-demo`。
+  文件头不再留着写死盘符的 `cd` 路径。
 - **首图重做**：社区星云的概览标签不再显示"社区内最多的类型"—— 那会把
   会议/期刊社区标成 `Person`（「ACL 1329 实体 · Person」）。类型分布移到右侧详情面板并
   标成"成员类型"，首图按 1600×1000 重新截图。

@@ -51,6 +51,24 @@ def _load_registry_env() -> None:
          r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"),
         (winreg.HKEY_CURRENT_USER, r"Environment"),
     ]
+    # 机器级 + 用户级两处都扫；setdefault 保证已存在的进程内变量不被覆盖。
+    # ⚠️ 这段循环**必须留在本函数里**：2026-11-28 之前它被错误地粘在了
+    # `relation_types_block()` 的 `return` 之后 —— 既永远不执行（`_load_registry_env`
+    # 实际什么都没做），又在那里引用未定义的 `locations` / `BLOCKED` / `winreg`。
+    for hive, path in locations:
+        try:
+            with winreg.OpenKey(hive, path) as key:
+                index = 0
+                while True:
+                    try:
+                        name, value, _ = winreg.EnumValue(key, index)
+                    except OSError:
+                        break
+                    if name not in BLOCKED:
+                        os.environ.setdefault(name, str(value))
+                    index += 1
+        except OSError:
+            continue
 
 # ── 关系类型的语义定义（2026-09-14）─────────────────────────────────────
 #
@@ -100,21 +118,6 @@ def relation_types_block(bare: bool = False) -> str:
         sem = RELATION_SEMANTICS.get(t, "")
         lines.append(f"{t}: {sem}" if sem else t)
     return "\n".join(lines)
-
-    for hive, path in locations:
-        try:
-            with winreg.OpenKey(hive, path) as key:
-                index = 0
-                while True:
-                    try:
-                        name, value, _ = winreg.EnumValue(key, index)
-                    except OSError:
-                        break
-                    if name not in BLOCKED:
-                        os.environ.setdefault(name, str(value))
-                    index += 1
-        except OSError:
-            continue
 
 
 _load_registry_env()

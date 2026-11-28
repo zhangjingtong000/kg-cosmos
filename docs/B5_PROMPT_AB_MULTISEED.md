@@ -237,7 +237,7 @@ strict 口径 `0.0097 ~ 0.0184`，union 口径最高也只有 `0.0444`。
 ```
 被覆盖版本 → data/quality/_prompt-ab-runs/_applied-run2-new-s2-2026-09-19.json（sha256 前 8 = 6C5A8332）
 生产图恢复 → 取自 _before.json（sha256 前 8 = EEFF8FC3，681 节点 / 1391 边，已校验）
-下游重算 → E:\Python313\python.exe tools/freshness_report.py --fix
+下游重算 → python tools/freshness_report.py --fix
              ⚠️ **不是 `verify_all.py --fix`** —— 后者**不接受** `--fix`
              （只认 `--fast` / `--data-only` / `--json`），敲下去会静默无效。
 ```

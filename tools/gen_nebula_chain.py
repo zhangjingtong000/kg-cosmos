@@ -28,7 +28,10 @@ from pathlib import Path
 HOST = 'http://127.0.0.1:8189'
 COMFY_OUT = Path(r'D:\AI\ComfyUI\output')
 COMFY_IN = Path(r'D:\AI\ComfyUI\input')
-WORK = Path(r'D:\kg-demo\output\nebula-chain')
+# 路径以本文件为锚点解析，不写死盘符——演示机不一定把仓库放在 D 盘。
+_HERE = Path(__file__).resolve()
+ROOT = _HERE.parent.parent          # tools/*.py 都在根目录下一层
+WORK = ROOT / 'output' / 'nebula-chain'
 
 NEG = ('blurry, low quality, worst quality, jpeg artifacts, watermark, text, '
        'oversaturated, noise, grainy, deformed, cartoon, illustration, static, frozen')

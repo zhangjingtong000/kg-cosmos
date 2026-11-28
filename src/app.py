@@ -303,7 +303,7 @@ async def health():
     return {
         "ok": True,
         "time": datetime.now().isoformat(),
-        # 不回显仓库绝对路径（`D:\kg-demo\web` 这类信息对访问者没有用，
+        # 不回显仓库绝对路径（形如 `D:\...\web` 这类信息对访问者没有用，
         # 却把"这个仓库在哪、目录结构长什么样"直接送出去）
         "web_dir": "web",
         "kg_data_files": sorted(p.name for p in KG_DATA.glob("*.json"))[:20] if KG_DATA.exists() else [],

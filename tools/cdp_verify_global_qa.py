@@ -26,12 +26,12 @@ r"""全库问答（GraphRAG 式 Global Search）的浏览器实测。
 
 ## 用法
 
-    E:\Python313\python.exe tools\cdp_verify_global_qa.py
+    python tools\cdp_verify_global_qa.py
 
 默认打 `http://127.0.0.1:8000`（跑新代码的后端）。若 8000 被别的进程占着
 （实测遇到过：另一个 agent 的后端先起了），用环境变量换端口：
 
-    $env:KG_QA_BASE='http://127.0.0.1:8010'; E:\Python313\python.exe tools\cdp_verify_global_qa.py
+    $env:KG_QA_BASE='http://127.0.0.1:8010'; python tools\cdp_verify_global_qa.py
 
 ⚠️ 它会**真调本地 Ollama**（支持/反对/综合三步），两轮问答实测约 1~3 分钟。
 """

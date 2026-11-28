@@ -2,7 +2,7 @@
   "seed": 42,
   "n": 40,
   "threshold": 0.67,
-  "source": "D:\\kg-demo\\data\\quality\\relation-verify-all.json",
+  "source": "data\\quality\\relation-verify-all.json",
   "probes": {
     "P1_hypothesis_form": {
       "current": {

@@ -35,6 +35,36 @@ KG_DATA = WEB / 'kg-data'
 QUALITY = ROOT / 'data' / 'quality'
 
 
+# ── 控制台编码：非 UTF-8 时把 emoji 降级成 ASCII ────────────────────────
+#
+# **为什么必须自己判**：Windows 控制台默认 cp936（GBK），`✅` / `⚠️` / `❌` / `🔒`
+# 都不在 GBK 字符集里，`print()` 会直接抛
+# `UnicodeEncodeError: 'gbk' codec can't encode character '\u2705'`。
+# 而 README 的「只想看界面」第一条命令就是 `python tools/serve.py --static`，
+# 用户会在**看到任何提示之前**撞上一个 traceback —— 实测 2026-11-28。
+#
+# 之前的做法是要求「先设 PYTHONUTF8=1」，但那条提示在 README 第 80 行，
+# 比这条命令晚 70 行，等于没有。所以这里探测 `sys.stdout.encoding`：
+# UTF-8 照旧用 emoji（好看），否则换成 `[OK]` 这类纯 ASCII 标记，
+# **不改变任何检查逻辑，也不要求用户改环境**。
+def _stdout_unicode_ok() -> bool:
+    """stdout 能否安全输出 emoji。
+
+    只看编码名，不做 `encode()` 试写 —— 试写会往控制台吐半个字符。
+    `utf-8` / `utf8` / `cp65001`（Windows 的 UTF-8 代码页）都算可安全输出；
+    `gbk` / `cp936` / `ascii` 等一律降级。
+    """
+    enc = (getattr(sys.stdout, 'encoding', None) or '').lower()
+    return enc.replace('-', '').replace('_', '') in ('utf8', 'cp65001')
+
+
+UNICODE_OK = _stdout_unicode_ok()
+OK = '✅' if UNICODE_OK else '[OK]'
+WARN = '⚠️' if UNICODE_OK else '[!]'
+BAD = '❌' if UNICODE_OK else '[X]'
+LOCK = '🔒' if UNICODE_OK else '[锁]'
+
+
 def load_dotenv():
     """把仓库根下的 `.env` 读进 `os.environ`（**已存在的不覆盖**）。
 
@@ -59,8 +89,8 @@ def load_dotenv():
     try:
         from dotenv import load_dotenv as _ld
     except ImportError:
-        print(f'⚠️ 发现 {env_path.name}，但未安装 python-dotenv，已忽略它')
-        print('   （装：E:\\Python313\\python.exe -m pip install python-dotenv）')
+        print(f'{WARN} 发现 {env_path.name}，但未安装 python-dotenv，已忽略它')
+        print('   （装：python -m pip install python-dotenv）')
         return
     n_before = len(os.environ)
     _ld(env_path, override=False)          # override=False ⇒ 已存在的不覆盖
@@ -100,14 +130,14 @@ def check(port):
         p = d / name
         demo = d / 'demo' / name
         if p.exists():
-            mark, size = '✅', f'{p.stat().st_size/1024:.0f} KB'
+            mark, size = OK, f'{p.stat().st_size/1024:.0f} KB'
         elif demo.exists():
             # 精简版不带全量图谱：示例数据能顶上来，页面就不会白屏。
             # 但必须显式标出来 —— 否则"18 个社区"这类数字会被当成真实结果。
-            mark, size = '⚠️', f'示例 {demo.stat().st_size/1024:.0f} KB'
+            mark, size = WARN, f'示例 {demo.stat().st_size/1024:.0f} KB'
             demo_used.append(name)
         else:
-            mark, size = '❌', '缺失'
+            mark, size = BAD, '缺失'
             ok = False
         print(f'  {mark} {name:24s} {size:>10s}  （{why}）')
 
@@ -117,11 +147,11 @@ def check(port):
     pdfs = list((ROOT / 'data' / 'corpus').glob('*.pdf')) if (ROOT / 'data' / 'corpus').exists() else []
     print(f'  · 语料 PDF {len(pdfs)} 篇（证据深链需要它）')
     if not pdfs:
-        print('    ⚠️ 没有 PDF：证据面板的「在原文中查看」会失败')
+        print(f'    {WARN} 没有 PDF：证据面板的「在原文中查看」会失败')
 
     print('\n[端口]')
     free = port_free(port)
-    print(f'  {"✅" if free else "❌"} {port} {"可用" if free else "已被占用——换一个 --port，或先关掉占用进程"}')
+    print(f'  {OK if free else BAD} {port} {"可用" if free else "已被占用——换一个 --port，或先关掉占用进程"}')
     if not free:
         ok = False
 
@@ -130,7 +160,7 @@ def check(port):
                      ('networkx', '图存储'), ('fitz', 'PDF 解析 (pymupdf)')):
         try:
             __import__(mod)
-            print(f'  ✅ {mod:12s} （{why}）')
+            print(f'  {OK} {mod:12s} （{why}）')
         except ImportError:
             print(f'  ·  {mod:12s} 未安装（{why} 需要）')
 
@@ -138,7 +168,7 @@ def check(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(1.5)
         neo = s.connect_ex(('127.0.0.1', 7687)) == 0
-    print(f'  {"✅ Neo4j 在跑" if neo else "·  Neo4j 未运行（不影响界面演示）"}')
+    print(f'  {OK + " Neo4j 在跑" if neo else "·  Neo4j 未运行（不影响界面演示）"}')
 
     # ── 本地模型（Ollama）────────────────────────────────────────────────
     # **2026-09-15 补**：此前这个检查**完全没有** —— 而上传与问答都要用它。
@@ -158,16 +188,16 @@ def check(port):
         ollama_up = True
         want = os.environ.get('KG_QA_MODEL', 'qwen3.5:9b')
         has_qwen = any(str(m).startswith(want.split(':')[0]) for m in models)
-        print(f'  ✅ Ollama 在跑（{len(models)} 个模型）')
-        print(f'  {"✅" if has_qwen else "· "} 抽取/问答模型 {want}'
+        print(f'  {OK} Ollama 在跑（{len(models)} 个模型）')
+        print(f'  {OK if has_qwen else "· "} 抽取/问答模型 {want}'
               f'{" 已就绪" if has_qwen else " 未找到（抽取会失败，问答会降级为纯规则）"}')
     except Exception:
-        print(f'  ❌ Ollama 未运行（{ollama_host}）')
-        print('     ⚠️ **上传抽取与多 Agent 问答都要用它**；界面能开，但这两件会失败或降级')
+        print(f'  {BAD} Ollama 未运行（{ollama_host}）')
+        print(f'     {WARN} **上传抽取与多 Agent 问答都要用它**；界面能开，但这两件会失败或降级')
         print('     起法：另开一个终端执行 `ollama serve`（模型会自动加载）')
 
     print()
-    print('结论：' + ('可以启动' if ok else '有阻塞项，见上面 ❌'))
+    print('结论：' + ('可以启动' if ok else '有阻塞项，见上面 ' + BAD))
     if demo_used:
         print(f'     （{len(demo_used)} 个文件走 web/kg-data/demo/ 示例数据：'
               f'页面能渲染，但规模不是全量 —— 完整数据见 RUNBOOK.md）')
@@ -294,7 +324,7 @@ def main():
         GuardedHandler.directory = str(ROOT)
         print(f'静态模式（无 API，前端自动回退 kg-data/*.json）')
         print(f'  → http://127.0.0.1:{port}/web/')
-        print('  🔒 已拦截仓库敏感路径（/data/ /src/ /tools/ /docs/ …）')
+        print(f'  {LOCK} 已拦截仓库敏感路径（/data/ /src/ /tools/ /docs/ …）')
         print('     —— 此前 /data/quality/l5-validity-key.json 可被直接下载，'
               '会让 L5 人工盲判作废')
         print('  Ctrl+C 停止\n')

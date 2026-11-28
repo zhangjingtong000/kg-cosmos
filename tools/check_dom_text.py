@@ -23,8 +23,8 @@ r"""守门：**浏览器不认识 markdown** —— 会进 DOM 的文案里不�
 `**` 本来就是语法。它在 `<script>` 里，所以天然被跳过 ✓。
 
 用法：
-    E:\Python313\python.exe tools\check_dom_text.py
-    E:\Python313\python.exe tools\check_dom_text.py --pages ask,index
+    python tools\check_dom_text.py
+    python tools\check_dom_text.py --pages ask,index
 """
 import argparse
 import os

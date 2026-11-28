@@ -371,6 +371,20 @@ def run(label, args, timeout=300, retry_on=None):
         print(f"⏭  {label:38s} {dt:6.1f}s  缺依赖/数据，跳过：{tail[0][:70]}")
         return True
 
+    # ── Playwright「装了库但没装浏览器内核」⇒ 同样是环境缺失，跳过 ────────
+    #
+    # **2026-11-28 修**：`MISSING_DEPS` 只认 `ModuleNotFoundError` / `ImportError`，
+    # 而最常见的情况是 **`playwright` 装了、chromium 没下载** —— 脚本抛的是
+    # `Executable doesn't exist at ...\ms-playwright\chromium-…`，
+    # 一字不差地落到「❌ 功能坏了」。干净 clone 上 `--fast` 因此是 35/48、退出码 1，
+    # 3 项 Playwright 检查报红。
+    # 判据只认 Playwright 自己的报错特征，**不扩大到"任何启动失败"** ——
+    # 页面断言不符、数字对不上仍然是红。
+    if not ok and any(k in out for k in PLAYWRIGHT_MISSING):
+        SKIPPED.append(f'{label}（Playwright 浏览器内核未安装）')
+        print(f"⏭  {label:38s} {dt:6.1f}s  缺 Playwright 浏览器内核，跳过")
+        return True
+
     print(f"{'✅' if ok else '❌'} {label:38s} {dt:6.1f}s  {tail[0][:88]}")
     if not ok:
         print("   ── 失败输出末尾 ──")
@@ -394,6 +408,15 @@ MISSING_DEPS = (
     'FileNotFoundError', 'No such file or directory', 'ModuleNotFoundError',
     'ImportError', 'Connection refused', 'URLError', '后端不可用', '后端没起来',
     '请先起', '找不到 ', '缺 ', '未安装', 'not installed',
+)
+
+# Playwright **库装了但浏览器内核没下载**时的报错特征（2026-11-28）。
+# 这一条与 MISSING_DEPS 分开写：它不能命中断言失败，只命中"缺 chromium"。
+PLAYWRIGHT_MISSING = (
+    "Executable doesn't exist",          # playwright 的核心报错
+    'playwright install',               # 官方建议的命令，出现在失败输出里
+    'Chromium distribution',            # 部分版本的说法
+    'BrowserType.launch',               # 启动失败的总类
 )
 
 
@@ -432,12 +455,43 @@ def server_up(url, timeout=2.0):
         return False
 
 
-# 数据侧也有两项要 Playwright 的浏览器内核（`playwright install chromium`），
-# 干净 clone 上通常没装 ⇒ 单项跳过并说明，不把 ImportError/启动失败报成功能坏了。
-NEEDS_PLAYWRIGHT = {'check_dom_text.py', 'verify_firstscreen_numbers.py'}
+# 哪些检查要 Playwright 的浏览器内核（`playwright install chromium`）？
+# **按源码探测，不维护手写名单**（2026-11-28）。
+#
+# 之前是手写集合 `{'check_dom_text.py', 'verify_firstscreen_numbers.py'}`，
+# 而实测仓库里有 **3 个**脚本 `import playwright`（还有 `check_e2e_stack.py`）——
+# 漏掉的那个在干净 clone 上必然报 ❌ 而不是跳过，`--fast` 于是 35/48、退出码 1。
+# 名单会随脚本增减漂移，所以改成读源码里有没有 `playwright` 字样；
+# 只读列表里出现的那几个 `tools/*.py`，成本可以忽略。
+_REPO_ROOT = Path(__file__).parent.parent
+
+
+def _uses_playwright(script_arg):
+    p = _REPO_ROOT / script_arg
+    if p.suffix != '.py' or not p.exists():
+        return False
+    try:
+        return 'playwright' in p.read_text(encoding='utf-8', errors='replace')
+    except OSError:
+        return False
+
+
+def needs_playwright(args):
+    return any(_uses_playwright(a) for a in args)
+
+
+_PW_READY = None
 
 
 def playwright_ready():
+    """浏览器内核可用吗？**结果缓存** —— 每次探测都要起一个 playwright 进程。"""
+    global _PW_READY
+    if _PW_READY is None:
+        _PW_READY = _probe_playwright()
+    return _PW_READY
+
+
+def _probe_playwright():
     try:
         from playwright.sync_api import sync_playwright
     except Exception:
@@ -448,6 +502,21 @@ def playwright_ready():
             return bool(exe) and Path(exe).exists()
     except Exception:
         return False
+
+
+def run_or_skip(label, args, quiet=False, **kwargs):
+    """要 Playwright 但内核没装 ⇒ 记为**跳过**，不算红（2026-11-28）。
+
+    干净 clone 上没装 chromium 是预期内的：那是"没跑"，不是"功能坏了"。
+    跳过必须**进 `SKIPPED` 并在汇总里打印** —— 否则"没跑"会被读成"全过了"。
+    """
+    if needs_playwright(args) and not playwright_ready():
+        SKIPPED.append(
+            f'{label}（Playwright 浏览器内核未安装，`playwright install chromium`）')
+        if not quiet:
+            print(f"⏭  {label:38s}   (缺 Playwright 浏览器内核，跳过)")
+        return True
+    return run(label, args, **kwargs)
 
 
 def main():
@@ -469,14 +538,7 @@ def main():
         print("数据侧检查")
         print("-" * 100)
     for label, args in DATA_CHECKS:
-        if any(Path(a).name in NEEDS_PLAYWRIGHT for a in args) and not playwright_ready():
-            msg = ('Playwright 浏览器内核未安装（`playwright install chromium`）'
-                   ' —— 需要它的项已跳过')
-            SKIPPED.append(msg)
-            if not as_json:
-                print(f"⏭  {label:38s}   (缺 Playwright，跳过)")
-            continue
-        run(label, args)
+        run_or_skip(label, args, quiet=as_json)
 
     if not data_only:
         # 先探依赖：缺静态站或缺浏览器 ⇒ 整组跳过并说明，不把"没环境"报成红。
@@ -509,7 +571,7 @@ def main():
                     if not as_json:
                         print(f"⏭  {label:38s}   (--fast 跳过)")
                     continue
-                run(label, args, retry_on=CDP_TRANSIENT)
+                run_or_skip(label, args, quiet=as_json, retry_on=CDP_TRANSIENT)
 
     ok = sum(1 for r in RESULTS if r["ok"])
     if as_json:

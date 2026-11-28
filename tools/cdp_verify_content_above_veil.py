@@ -53,7 +53,7 @@ body > *:not(#atmo):not(#veil){position:relative;z-index:1}
 **⇒ 正确流程：看图起疑 → 断言核实 → 再下结论。**
 
 用法：
-    E:\Python313\python.exe tools\cdp_verify_content_above_veil.py
+    python tools\cdp_verify_content_above_veil.py
 """
 import os
 import re

@@ -3,7 +3,7 @@
   "n_labeled": 200,
   "n_unclear": 2,
   "population": 45708,
-  "source_labels": "D:\\kg-demo\\data\\quality\\l5-validity-labels.jsonl",
+  "source_labels": "data\\quality\\l5-validity-labels.jsonl",
   "true_support_rate": 0.4003,
   "ppv": 0.4967,
   "npv": 0.2298,

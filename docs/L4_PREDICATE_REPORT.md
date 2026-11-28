@@ -473,7 +473,7 @@ PROMPT = """你是知识图谱关系分类器。给定论文原文片段与两�
 
 
 ```powershell
-cd D:\kg-demo
+cd <仓库根>
 
 # 0) 只验证脚本能跑通（每类 30 条，约 1 分钟）—— 数字不可引用
 python tools/l4_predicate_report.py --smoke

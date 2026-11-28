@@ -42,12 +42,17 @@ data/quality/archive/metric-provenance/*
 !data/quality/archive/metric-provenance/20260919-194048.json
 data/quality/backup/
 data/quality/_prompt-ab-runs/
+# ── 治理产物：**虽然大，但被 docs / tools 直接引用，必须入库** ─────────────
+# 2026-11-28：这三份此前写在忽略清单里却早已被跟踪 —— `git ls-files -ci
+# --exclude-standard` 会把它们报成"被忽略却仍被跟踪"。
+# 处理方式是**改忽略规则**而不是 `git rm --cached`：
+#   · docs/ARCHIVE_POLICY.md 把 venue-rewrite-plan.json 当作"计划先行"的先例；
+#   · tools/build_nebula_data.py / graph_source.py 要读 filtered-edges.json 做治理；
+#   · tools/l7_verify_t31_direction.py / probe_t3_t4.py 要读 created-by-patch.json。
+# 移出版本控制会让干净 clone 上的说明与脚本同时指空。
 data/quality/relation-verify-all.json
 data/quality/relation-verify-rel-CREATED_BY.json
 data/quality/subgraph-supported.json
-data/quality/filtered-edges.json
-data/quality/created-by-patch.json
-data/quality/venue-rewrite-plan.json
 data/distill/
 # 语料目录（PDF + 全部论文图快照）整体排除，只留一份 1.1 MB 的图快照：
 # test_edit_plan 需要一个真实 graphs/*.json 建沙箱，并断言 --graphs-dir 不改真源。
@@ -76,7 +81,10 @@ web/kg-data/*.json
 # 例外：test_nebula_papers 要它。入库的是 `build_nebula_data.py` 用仓库内
 # 唯一图快照重建的最小可跑样本（40 KB / 179 节点），不是 3.4 MB 全量产物。
 !web/kg-data/nebula.json
-web/l5-data/
+# web/l5-data/ 有意**保留**：静态站（`tools/serve.py --static`）要从 web/ 里取
+# 两份语料 PDF 与盲判清单，`kg-nebula.html` 的证据深链回退链第一站就是 `./l5-data/`。
+# 2026-11-28：此前这里写着 `web/l5-data/` 却又跟踪了 4 个文件（20 个冲突文件的一部分），
+# 已把忽略规则删掉 —— 这 4 个文件是页面的运行时依赖，不是可重建的产物。
 output/
 _review/
 toolruns/
@@ -100,7 +108,10 @@ scratch/
 # 媒体/字体大件（需要时按 REBUILD.md 手动回填）
 web/assets/refs/
 web/assets/*.mp4
-web/lib/fonts/
+# web/lib/fonts/ 有意**保留**：所有页面都引 `lib/fonts/fonts.css`，字体是离线铁律的
+# 一部分（`tools/check_local_assets.py` 会逐个核对引用是否存在）。子集字体共 11 个
+# 文件 / 约 1.6 MB，删掉就断网白屏。
+# 2026-11-28：此前这里写着 `web/lib/fonts/` 却又跟踪了 11 个字体文件 —— 已删除该规则。
 
 # ── 本地配置与密钥（模板 .env.example 要进版本控制）──────────────────────
 .env

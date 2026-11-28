@@ -40,7 +40,7 @@ r"""首屏数字守门：**渲染出来的那个数字**必须等于权威产物
 不许再手搓 CDP）—— 所以本文件刻意**不叫** `cdp_verify_*.py`。
 
 用法（需要 8098 静态服务在跑，与 `verify_all.py` 同前置）：
-    cd D:\kg-demo && python -m http.server 8098 --bind 127.0.0.1
+    cd <仓库根> && python -m http.server 8098 --bind 127.0.0.1
     python tools/verify_firstscreen_numbers.py
 """
 import json

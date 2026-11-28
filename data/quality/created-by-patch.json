@@ -10,7 +10,7 @@
   },
   "files": [
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\1703.08098v9.json",
+      "file": "data\\corpus\\graphs\\1703.08098v9.json",
       "changes": [
         {
           "op": "reverse",
@@ -1569,7 +1569,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2002.00388v4.json",
+      "file": "data\\corpus\\graphs\\2002.00388v4.json",
       "changes": [
         {
           "op": "reverse",
@@ -4850,7 +4850,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2012.00456v1.json",
+      "file": "data\\corpus\\graphs\\2012.00456v1.json",
       "changes": [
         {
           "op": "reverse",
@@ -4987,7 +4987,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2112.10006v6.json",
+      "file": "data\\corpus\\graphs\\2112.10006v6.json",
       "changes": [
         {
           "op": "reverse",
@@ -7146,7 +7146,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2202.07412v1.json",
+      "file": "data\\corpus\\graphs\\2202.07412v1.json",
       "changes": [
         {
           "op": "merge",
@@ -7665,7 +7665,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2210.08119v1.json",
+      "file": "data\\corpus\\graphs\\2210.08119v1.json",
       "changes": [
         {
           "op": "reverse",
@@ -8119,7 +8119,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2302.05019v1.json",
+      "file": "data\\corpus\\graphs\\2302.05019v1.json",
       "changes": [
         {
           "op": "reverse",
@@ -11584,7 +11584,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2310.04835v3.json",
+      "file": "data\\corpus\\graphs\\2310.04835v3.json",
       "changes": [
         {
           "op": "reverse",
@@ -14107,7 +14107,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2401.04507v1.json",
+      "file": "data\\corpus\\graphs\\2401.04507v1.json",
       "changes": [
         {
           "op": "reverse",
@@ -15491,7 +15491,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2402.12001v1.json",
+      "file": "data\\corpus\\graphs\\2402.12001v1.json",
       "changes": [
         {
           "op": "merge",
@@ -16572,7 +16572,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2406.08223v2.json",
+      "file": "data\\corpus\\graphs\\2406.08223v2.json",
       "changes": [
         {
           "op": "reverse",
@@ -19655,7 +19655,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2410.21237v1.json",
+      "file": "data\\corpus\\graphs\\2410.21237v1.json",
       "changes": [
         {
           "op": "reverse",
@@ -21452,7 +21452,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2412.10092v1.json",
+      "file": "data\\corpus\\graphs\\2412.10092v1.json",
       "changes": [
         {
           "op": "merge",
@@ -21828,7 +21828,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2501.03566v1.json",
+      "file": "data\\corpus\\graphs\\2501.03566v1.json",
       "changes": [
         {
           "op": "reverse",
@@ -22833,7 +22833,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2502.00681v2.json",
+      "file": "data\\corpus\\graphs\\2502.00681v2.json",
       "changes": [
         {
           "op": "reverse",
@@ -24753,7 +24753,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2504.09823v1.json",
+      "file": "data\\corpus\\graphs\\2504.09823v1.json",
       "changes": [
         {
           "op": "reverse",
@@ -26300,7 +26300,7 @@
       ]
     },
     {
-      "file": "D:\\kg-demo\\data\\corpus\\graphs\\2510.20345v1.json",
+      "file": "data\\corpus\\graphs\\2510.20345v1.json",
       "changes": [
         {
           "op": "reverse",
