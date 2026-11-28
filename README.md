@@ -256,7 +256,7 @@ python -m pytest -q        # Windows 先设 PYTHONUTF8=1，见上
 未跟踪的 `HIST-REPORT*.md`、`output/` 日志与 `__pycache__` 一并数进去（那样会到 673 个，
 且随本地缓存变化），那不是在数仓库内容。全量数据重建步骤见 [RUNBOOK.md](RUNBOOK.md) 的 §5–§6。
 
-**`data/` 107 个文件 / 10.6 MB**：`data/quality/` 94 个（六层指标、金标、L5 人工复核样本、
+**`data/` 107 个文件 / 10.6 MB**：`data/quality/` 94 个（六层指标、金标、L5 盲判复核样本（LLM 标注）、
 `edit-plans/` 5 个编辑计划、`archive/metric-provenance/` 1 份归档）、`data/gold/` 7 个金标准、
 `data/external/` 2 个外部对照、`data/ad690dfb/` 2 个（`graph.json` 演示图，`/api/qa` 端点测试与
 `web/ask.html` 的默认图；`2506.09566v1.pdf` 434 KB，`test_upload_dedup` 的去重用例）、
