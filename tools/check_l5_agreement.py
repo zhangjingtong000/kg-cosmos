@@ -16,7 +16,7 @@ from pathlib import Path
 from idempotent_write import dumps, write_if_changed
 
 # ⚠️ **以本文件为锚点解析，不写死盘符**（2026-09-20 修）：
-# 原为 `Path(r'D:\kg-demo\data\quality')` —— 换机或换盘符即崩，
+# 原为写死盘符的绝对路径（`D:` 盘上的仓库副本）—— 换机或换盘符即崩，
 # 与 `check_doc_numbers.py:18` 早就写明的纪律（"演示机不一定把仓库放在 D 盘"）冲突。
 Q = Path(__file__).resolve().parent.parent / 'data' / 'quality'
 LABELS = Q / 'l5-validity-labels.jsonl'
