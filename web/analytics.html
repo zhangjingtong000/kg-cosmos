@@ -845,15 +845,15 @@ function boot(D) {
     };
     document.getElementById('l5vSub').innerHTML =
       `200 条分层抽样 + 独立盲判（判定者与判别器不同模型，盲态不泄漏）`
-      + ` · 两个标注者一致率 <b>${pc(ag.agreement)}</b>`
-      + `、Cohen's κ <b>${ag.cohen_kappa}</b>，两人独立得出相同的支持率`
+      + ` · 两次盲判一致率 <b>${pc(ag.agreement)}</b>`
+      + `、Cohen's κ <b>${ag.cohen_kappa}</b>，两次独立盲判（不同会话）得出相同的支持率`
       + ` <b>${pc(ag.rate_annotator1)}</b>`;
 
     const kpis = [
       [pc(v.true_support_rate), '全图真实支持率', ciTxt('true_support_rate') || '此前用 63.6% 通过率代替'],
       [pc(v.ppv), 'PPV（判通过里真的成立）', ciTxt('ppv') || '判通过的边约一半不被支持'],
       [v.domain_auc.toFixed(4), '域内加权 AUC', `官方校准集上是 ${v.calib_auc}`],
-      [v.kappa_vs_human.toFixed(3), "与人工判定 Cohen's κ", '轻微一致'],
+      [v.kappa_vs_human.toFixed(3), "与 LLM 盲判标签 Cohen's κ", '轻微一致'],
       [v.confusion.fp, '假阳性', `比真阳性（${v.confusion.tp}）还多`],
     ];
     document.getElementById('l5v').innerHTML = kpis.map(([a, b, c]) =>

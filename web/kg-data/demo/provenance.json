@@ -68,7 +68,7 @@
   },
   {
    "key": "L5_vs_human_kappa",
-   "label": "L5 与人工判定 κ",
+   "label": "L5 与 LLM 盲判标签 κ",
    "value": 0.2356,
    "artifact": "l5-validity-report.json",
    "path": "cohens_kappa",
@@ -77,7 +77,7 @@
   },
   {
    "key": "L5_annotator_kappa",
-   "label": "两个标注者之间 κ",
+   "label": "两次 LLM 盲判之间 κ",
    "value": 0.7222,
    "artifact": "l5-annotator-agreement.json",
    "path": "cohen_kappa",

@@ -228,7 +228,7 @@ def show(r, label=''):
     print(f"  {r['path']}   通道 {r['mode'] or '（未记录）'}")
     print(f"  待判边 {r['edges_total']} · 实判 {r['edges_scored']} · 跳过 {r['edges_skipped']}")
     # ⚠️ 措辞必须准确：这是「判别器给出 ≥阈值的分数」的比例。
-    # 全库实测（docs/L5_VALIDITY_REPORT.md，200 条人工式盲判）该口径的
+    # 全库实测（docs/L5_VALIDITY_REPORT.md，200 条 LLM 盲判）该口径的
     # **PPV 只有 49.7%**——把通过率写成"真实支持率"是口径错误，
     # 单篇同样成立，所以这里直接改掉旧文案。
     print(f"  **判别器通过率 {r['support_rate']}%**（阈值 {THRESHOLD}）"
